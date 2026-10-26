@@ -9,6 +9,7 @@
 // and this programme does not have any.
 
 import { BUILD } from './levels-build.js';
+import { GROW } from './levels-grow.js';
 
 export const DOMAINS = [
   { k: 'self', n: 'Self', full: 'Personal internal', line: 'How you notice, decide and follow through.' },
@@ -82,7 +83,7 @@ export function gateFor(level) {
 // is not yet written, the map still shows its title and its emphasis, and the
 // door says so plainly rather than opening onto nothing.
 
-export const LEVELS = { build: BUILD, grow: {}, scale: {} };
+export const LEVELS = { build: BUILD, grow: GROW, scale: {} };
 
 /** The title shown on the map: taken from the level itself wherever the level
  *  is written, so the map and the level can never drift apart. */
