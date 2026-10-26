@@ -7,8 +7,8 @@
 // Answers live on the device while this is in preview. Nothing is sent
 // anywhere and nothing is asserted about a payment or a subscription.
 
-import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, DIAGNOSTIC, SECTIONS,
-  gateFor, levelFor, isWritten, weekTitle, videoFor, nextGain, holds } from './content.js';
+import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, DIAGNOSTIC, SECTIONS, JOURNEY,
+  gateFor, levelFor, isWritten, weekTitle, videoFor, nextGain, holds, referee } from './content.js';
 import { FW_BUILD } from './fw-build.js';
 import { FW_GROW } from './fw-grow.js';
 import { FW_SCALE } from './fw-scale.js';
@@ -122,6 +122,16 @@ function startView() {
     </div>
   </div></section>
 
+  <section class="band jband"><div class="wrap">
+    <p class="eyebrow">${compass} How this goes</p>
+    <h2 class="sec">Four steps, and you are already on the first</h2>
+    <ol class="journey">${JOURNEY.map((j, i) => `<li class="jstep${i === 0 ? ' now' : ''}">
+      <span class="jn">${i + 1}</span>
+      <div><p class="jwhen">${esc(j.n)}</p><h3>${esc(j.t)}</h3><p class="jd">${esc(j.d)}</p></div>
+    </li>`).join('')}</ol>
+    <p class="jfoot">Nobody skips a level and nothing is graded. The questions below decide which twelve levels you walk and which of the four domains they lean on \u2014 not how much of it you do.</p>
+  </div></section>
+
   <section class="band"><div class="wrap">
     <p class="eyebrow">The entrance</p>
     <h2 class="sec">Nine questions, and we tell you the truth</h2>
@@ -137,27 +147,35 @@ function startView() {
 function resultBlock() {
   const need = DIAGNOSTIC.length;
   if (Object.keys(state.diag).length < need) return '';
-  const tot = { self: 0, people: 0, work: 0, market: 0 };
-  DIAGNOSTIC.forEach((q, i) => { if (q.d !== 'stage') tot[q.d] += Number(state.diag[i]) || 0; });
-  const pct = {}; DOMAINS.forEach((d) => pct[d.k] = Math.round(tot[d.k] / 4 * 100));
-  const st = state.diag[need - 1];
-  state.stage = st; state.scores = pct; save();
 
-  const thin = DOMAINS.slice().sort((a, b) => pct[a.k] - pct[b.k])[0];
-  const S = STAGES[st];
-  const wk = S.emphasis.findIndex((e) => e === thin.k);
-  const startLevel = wk < 0 ? 1 : wk + 1;
+  // Out of 4 per domain, from the eight domain questions.
+  const score = { self: 0, people: 0, work: 0, market: 0 };
+  DIAGNOSTIC.forEach((q, i) => { if (score[q.d] !== undefined) score[q.d] += Number(state.diag[i]) || 0; });
+  const said = state.diag[DIAGNOSTIC.findIndex((q) => q.d === 'stage')];
+  const want = state.diag[DIAGNOSTIC.findIndex((q) => q.d === 'want')];
+  if (!said || !want) return '';
 
-  return `<div class="result"><div class="rgrid">
-    <div><p class="eyebrow">Where you stand</p><div class="bars">${DOMAINS.map((d) => `<div class="bar" style="color:var(--${d.k})">
-      <span class="bn">${d.n}</span><span class="track"><i style="width:${pct[d.k]}%;background:var(--${d.k})"></i></span><span class="bv">${pct[d.k]}%</span></div>`).join('')}</div></div>
-    <div class="verdict">
-      <span class="stage-pill">${esc(S.n)}</span>
-      <h3>Thinnest right now: ${esc(thin.n.toLowerCase())} — ${esc(thin.full.toLowerCase())}</h3>
-      <p>${esc(S.lede)} Across the four, ${esc(thin.n.toLowerCase())} is where you have least to point at, and in a founder ${esc(S.n.toLowerCase())} that is the one that compounds fastest if it is left alone.</p>
-      <p class="first">Start here<b>Level ${startLevel} — ${esc(weekTitle(st, startLevel))}</b></p>
-      <button class="cta" data-go="work">Open your Blueprint →</button>
-    </div></div></div>`;
+  const r = referee({ said, want, score });
+  state.stage = r.assigned;
+  state.scores = {}; DOMAINS.forEach((d) => state.scores[d.k] = Math.round(score[d.k] / 4 * 100));
+  state.referee = { kind: r.kind, said, want, assigned: r.assigned, thin: r.thin };
+  save();
+
+  return `<div class="result">
+    <div class="rgrid">
+      <div><p class="eyebrow">What your answers show</p><div class="bars">${DOMAINS.map((d) => `<div class="bar" style="color:var(--${d.k})">
+        <span class="bn">${d.n}</span><span class="track"><i style="width:${state.scores[d.k]}%;background:var(--${d.k})"></i></span><span class="bv">${score[d.k]}/4</span></div>`).join('')}</div>
+        <p class="barnote">Four points a domain, from the eight questions. ${esc(r.thinD.n)} is thinnest, so this stage leans on it.</p></div>
+      <div class="verdict ${r.kind}">
+        <span class="stage-pill">${esc(STAGES[r.assigned].n)}</span>
+        <h3>${esc(r.head)}</h3>
+        <p>${esc(r.body)}</p>
+        <p class="amb">${esc(r.ambition)}</p>
+        ${r.kind === 'ahead' ? `<p class="sure"><b>Sure you are past this?</b> Then take it at speed. Levels 01 to 03 are free and the questions are short \u2014 answer them as precisely as you can, and the reading at the end will say plainly whether you were right. If it says you were, nothing is holding you.</p>` : ''}
+        <p class="first">Everybody starts here<b>Level 01 \u2014 ${esc(weekTitle(r.assigned, 1))}</b></p>
+        <button class="cta" data-go="work">Open your Blueprint \u2192</button>
+        <p class="savenote">Twelve levels, four domains each, in order. Nothing is skipped and nothing is graded.</p>
+      </div></div></div>`;
 }
 
 // ── The workspace ────────────────────────────────────────────────────────────

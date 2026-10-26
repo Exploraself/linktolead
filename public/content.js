@@ -124,6 +124,8 @@ export const DIAGNOSTIC = [
     o: [['I assume', 0], ['I have heard it once or twice', 1], ['I have asked, recently', 2]] },
   { d: 'stage', label: 'Where you are', q: 'Which is nearest the truth right now?',
     o: [['Finding the offer and the first clients', 'build'], ['Clients repeat, but everything runs through me', 'grow'], ['There is a team, and my job has changed', 'scale']] },
+  { d: 'want', label: 'Where you are going', q: 'And where do you want to be a year from now?',
+    o: [['An offer that works, and clients who come back', 'build'], ['A business that runs without me in every room', 'grow'], ['A team I trust with the decisions', 'scale']] },
 ];
 
 // ── The rail ─────────────────────────────────────────────────────────────────
@@ -169,3 +171,88 @@ export function holds(tier, needed) {
   const want = TIER_ORDER.indexOf(needed);
   return want <= have;
 }
+
+// ── The referee ──────────────────────────────────────────────────────────────
+// Three things are captured at the entrance and they are not the same thing:
+// where a founder says they are, where they want to be, and what their own
+// answers show. The programme compares them rather than taking a word for it.
+//
+// This is the whole service. Thirty-six levels exist; knowing which twelve a
+// founder actually needs is what they are paying for, and it is the one thing
+// they cannot work out from inside their own business.
+//
+// It is never an argument. Where the evidence disagrees, the founder is shown
+// the answer they themselves gave and handed the test rather than a verdict.
+// And nobody skips anything: the referee chooses which stage is walked and
+// which domain carries the emphasis, never how much of it gets done.
+
+/** What the eight domain answers show, as against what was claimed.
+ *  Market settles whether Building is finished — a founder without an offer
+ *  and named customers has not left it, whatever else is true. Work settles
+ *  whether Growing is finished, because Growing is the stage that builds the
+ *  systems. Each is scored out of 4. */
+export function stageFromEvidence(score) {
+  if (score.market < 3) return 'build';
+  if (score.work < 3) return 'grow';
+  return 'scale';
+}
+
+const RANK = { build: 0, grow: 1, scale: 2 };
+
+/** The reading at the entrance: generic, short, and honest about which of the
+ *  three inputs it is leaning on. Returns the stage actually assigned. */
+export function referee({ said, want, score }) {
+  const shown = stageFromEvidence(score);
+  const assigned = shown;                       // evidence decides, always
+  const gap = RANK[said] - RANK[shown];
+  const thin = ['self', 'people', 'work', 'market']
+    .map((k) => [k, score[k]]).sort((a, b) => a[1] - b[1])[0][0];
+  const thinD = DOMAINS.find((d) => d.k === thin);
+
+  // The sentence that carries the evidence. Always one of their own answers.
+  const because = shown === 'build'
+    ? 'you said you cannot yet name your next ten customers by name, or why the last ones chose you'
+    : shown === 'grow'
+      ? 'you said the business would stop or limp without you, and that little of it is written down'
+      : 'you said the work runs without you and that somebody tells you the truth about it';
+
+  let kind, head, body;
+  if (gap === 0) {
+    kind = 'agree';
+    head = `${STAGES[assigned].n} — and that matches what you said`;
+    body = `You put yourself in ${STAGES[assigned].n.toLowerCase()}, and your answers agree. That is worth something on its own: founders who read their own situation accurately tend to fix it faster. ${cap(thinD.n)} is where you have least to point at, so that is the domain this stage will lean on.`;
+  } else if (gap > 0) {
+    // They placed themselves ahead of where the evidence puts them.
+    kind = 'ahead';
+    head = `You said ${STAGES[said].n.toLowerCase()}. Start in ${STAGES[assigned].n.toLowerCase()}.`;
+    body = `Not a demotion, and not a disagreement — ${because}. ${cap(STAGES[said].n)} assumes that is already settled, so starting there is what makes it frustrating rather than useful. ${cap(STAGES[assigned].n)} settles it, and then ${STAGES[said].n.toLowerCase()} works.`;
+  } else {
+    // They are being harder on themselves than the evidence warrants.
+    kind = 'behind';
+    head = `You said ${STAGES[said].n.toLowerCase()}. You are further than that.`;
+    body = `By your own answers, ${because}. ${cap(STAGES[said].n)} is where founders go to rebuild something that already works, and rebuilding feels like progress while nothing moves. ${cap(STAGES[assigned].n)} is the stage you are actually in.`;
+  }
+
+  // Where they want to be, taken seriously and connected to the path.
+  const ambition = want === assigned
+    ? `You want to be where this stage ends, which is the shortest version of this: twelve levels, then look again.`
+    : RANK[want] > RANK[assigned]
+      ? `You want ${STAGES[want].n.toLowerCase()} within the year. That is reachable from here and it is the right thing to want — it is also why the order matters, because ${STAGES[want].n.toLowerCase()} rests on what ${STAGES[assigned].n.toLowerCase()} settles.`
+      : `You said you want ${STAGES[want].n.toLowerCase()}. Worth saying plainly: you do not have to grow a business you do not want to grow. The levels below still apply — they are how you make this size work properly rather than how you make it bigger.`;
+
+  return { assigned, shown, said, want, kind, head, body, ambition, thin, thinD, score };
+}
+
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/** The journey, in four steps, for the entrance. Short on purpose. */
+export const JOURNEY = [
+  { n: 'You are here', t: 'Nine questions',
+    d: 'Two minutes, no email, nothing unlocked. It works out which of the four domains is thinnest and which stage you are actually in.' },
+  { n: 'Next', t: 'The Incubator — levels 01 to 03',
+    d: 'Free, and free to stay. All four domains, twelve modules, every worksheet. You come out with an offer, a customer, a standard and a week you can see.' },
+  { n: 'Then', t: 'Your reading',
+    d: 'When level 03 closes, the Blueprint reads back what you actually wrote and tells you where you stand, what it is costing you, and what to do first.' },
+  { n: 'After that', t: 'The rest of the twelve',
+    d: 'Levels 04 onward, with Alexandru in them. Same four domains, going deeper, until the stage is finished and the next one opens.' },
+];
