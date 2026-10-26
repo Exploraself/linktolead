@@ -160,6 +160,14 @@ for (const [, set] of STAGES) {
   for (const f of teach) ok(f.teach.t.length > 120, `${f.k} teaches rather than asserts`);
 }
 
+// An untouched worksheet must produce nothing at all. A confident zero is
+// worse than silence: it reads as a finding the founder did not make.
+ok(r(FW_BUILD[1].self, {}) === null, 'an empty hours table says nothing');
+ok(r(FW_BUILD[1].self, { 'hrs:0': '', 'hrs:1': '  ' }) === null, 'blank cells are not zeros');
+ok(r(FW_BUILD[1].self, { 'hrs:0': '0' }).shown === '0', 'a zero the founder actually typed is shown');
+ok(r(FW_GROW[1].people, {}) === null, 'an empty days column says nothing');
+ok(r(FW_SCALE[10].people, {}) === null, 'an empty years column says nothing');
+
 // num()
 ok(num('') === 0 && num('abc') === 0 && num('-4') === -4 && num('1,250.50') === 1250.5, 'num reads what a founder types');
 

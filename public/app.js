@@ -7,11 +7,13 @@
 // Answers live on the device while this is in preview. Nothing is sent
 // anywhere and nothing is asserted about a payment or a subscription.
 
-import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, DIAGNOSTIC, gateFor, levelFor, isWritten, weekTitle } from './content.js';
+import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, DIAGNOSTIC, SECTIONS,
+  gateFor, levelFor, isWritten, weekTitle, videoFor, nextGain, holds } from './content.js';
 import { FW_BUILD } from './fw-build.js';
 import { FW_GROW } from './fw-grow.js';
 import { FW_SCALE } from './fw-scale.js';
 import { result as fwResult } from './frameworks.js';
+import { report } from './feedback.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -20,9 +22,9 @@ const KEY = 'ftb-v1';
 const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* private mode */ } };
 
-let state = Object.assign({ stage: '', scores: null, answers: {}, work: {}, diag: {}, unlocked: 3 }, load());
+let state = Object.assign({ stage: '', scores: null, answers: {}, work: {}, diag: {}, tier: 'free' }, load());
 if (!state.work) state.work = {};
-let view = state.stage ? 'map' : 'start';
+let view = state.stage ? 'work' : 'start';
 let level = 1, dom = 'self';
 
 const compass = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12 12 2.5Z"/><path d="m12 5.7 2 4.3 4.3 2-4.3 2-2 4.3-2-4.3-4.3-2 4.3-2 2-4.3Z" fill="currentColor" stroke="none"/></svg>';
@@ -104,7 +106,7 @@ function answered(st, lv, dk) {
 function levelDone(st, lv) {
   return DOMAINS.reduce((n, d) => n + answered(st, lv, d.k), 0);
 }
-const isOpen = (lv) => lv <= (state.unlocked || 3);
+// (level access now comes from levelState and the tier — see the workspace below)
 
 // ── The entrance ─────────────────────────────────────────────────────────────
 function startView() {
@@ -154,111 +156,204 @@ function resultBlock() {
       <h3>Thinnest right now: ${esc(thin.n.toLowerCase())} — ${esc(thin.full.toLowerCase())}</h3>
       <p>${esc(S.lede)} Across the four, ${esc(thin.n.toLowerCase())} is where you have least to point at, and in a founder ${esc(S.n.toLowerCase())} that is the one that compounds fastest if it is left alone.</p>
       <p class="first">Start here<b>Level ${startLevel} — ${esc(weekTitle(st, startLevel))}</b></p>
-      <button class="cta" data-go="map">Open your Blueprint →</button>
+      <button class="cta" data-go="work">Open your Blueprint →</button>
     </div></div></div>`;
 }
 
-// ── The map ──────────────────────────────────────────────────────────────────
-function mapView() {
-  const st = state.stage || 'build';
-  const S = STAGES[st];
-  return `<section class="band"><div class="wrap">
-    <p class="eyebrow">Your Blueprint</p>
-    <h2 class="sec">Every level touches all four. One of them leads.</h2>
-    <p class="sec-lede">Level one is level one of all four domains. Level two goes a layer deeper in all four. You never leave a domain behind — but each level has an emphasis, and the emphasis is decided by where you are.</p>
+// ── The workspace ────────────────────────────────────────────────────────────
+// Once a founder is in, the shape of the programme never leaves the screen.
+// The rail down the left holds all twelve levels, grouped the way the offer is
+// grouped, so what is open and what is not is a fact rather than a surprise.
+// Pick a level, and the four domains run across the top. Pick a domain, and
+// that module opens underneath. Nothing else moves.
 
-    <div class="switch">${Object.entries(STAGES).map(([k, v]) => `<button class="sbtn" type="button" data-stage="${k}" aria-pressed="${k === st}">
-      <strong>${esc(v.n)}</strong><small>${esc(v.blurb)}</small></button>`).join('')}</div>
-
-    <div class="levels">${WEEKS[st].map((_, i) => {
-      const lv = i + 1, title = weekTitle(st, lv), g = gateFor(lv), e = S.emphasis[i];
-      const d = DOMAINS.find((x) => x.k === e);
-      const done = levelDone(st, lv);
-      return `<button class="lrow" type="button" data-level="${lv}">
-        <span class="lno">${String(lv).padStart(2, '0')}</span>
-        <span class="ltitle">${esc(title)}</span>
-        <span class="lemph" style="color:${d ? `var(--${d.k})` : 'var(--gold-ink)'}">${d ? esc(d.n) : 'All four'}</span>
-        <span class="lgate g-${g}">${isOpen(lv) ? (isWritten(st, lv) ? (done ? `${done}/28` : 'Open') : 'In preparation') : gateLabel(g)}</span>
-      </button>`;
-    }).join('')}</div>
-
-    <p class="eyebrow" style="margin-top:40px">The ladder</p>
-    <h2 class="sec">Free where it proves itself. Paid where it needs him.</h2>
-    <div class="ladder">${LADDER.map((r) => `<article class="rung ${r.key}">
-      <span class="wk">${r.from ? `Levels ${r.from}–${r.to}` : 'Everything'}</span>
-      <div><h4>${esc(r.n)}</h4><p>${esc(r.what)}</p></div>
-      <span class="price">${esc(r.price)}</span></article>`).join('')}</div>
-  </div></section>`;
+function levelState(st, n) {
+  if (levelDone(st, n) === 28) return 'done';
+  if (n === 1) return 'open';
+  // A level opens when the one before it is finished. The gate is the work,
+  // not the clock — and the tier gate sits on top of it, further down.
+  return levelDone(st, n - 1) === 28 ? 'open' : 'waiting';
 }
-const gateLabel = (g) => ({ free: 'Free', session: '1:1 session', lab: 'LAB', hub: 'HUB' }[g] || '');
+function reachable(st, n) {
+  return holds(state.tier, gateFor(n)) && levelState(st, n) !== 'waiting';
+}
 
-// ── A level ──────────────────────────────────────────────────────────────────
-function levelView() {
-  const st = state.stage || 'build';
+function railHTML(st) {
+  const marks = { done: '✓', open: '', waiting: '·', locked: '🔒' };
+  return `<nav class="rail" id="rail" aria-label="The twelve levels">
+    <div class="railtop">
+      <p class="eyebrow">${esc(STAGES[st].n)}</p>
+      <h2>Your Blueprint</h2>
+      <p class="railsub">${esc(STAGES[st].blurb)}</p>
+    </div>
+    ${SECTIONS.map((sec) => {
+      const owned = holds(state.tier, sec.k);
+      const rung = LADDER.find((r) => r.key === sec.k);
+      return `<section class="rsec${owned ? '' : ' shut'}">
+        <header class="rsh">
+          <div><p class="rsn">${esc(sec.n)}</p><p class="rss">${esc(sec.sub)}</p></div>
+          ${owned ? '<span class="rtag open">Open</span>' : `<span class="rtag">${esc(rung ? rung.price : '')}</span>`}
+        </header>
+        <ul class="rlist">${Array.from({ length: sec.to - sec.from + 1 }, (_, i) => {
+          const n = sec.from + i;
+          const ok = reachable(st, n);
+          const stt = !owned ? 'locked' : levelState(st, n);
+          const done = levelDone(st, n);
+          return `<li><button type="button" class="rlev ${stt}${n === level && view === 'work' ? ' here' : ''}"
+            data-level="${n}" aria-current="${n === level && view === 'work' ? 'true' : 'false'}">
+            <span class="rnum">${String(n).padStart(2, '0')}</span>
+            <span class="rtxt"><b>${esc(weekTitle(st, n))}</b>${done ? `<em>${done} of 28</em>` : ''}</span>
+            <span class="rmark ${stt}" aria-hidden="true">${marks[stt] || ''}</span>
+            <span class="vh">${stt === 'done' ? 'finished' : stt === 'locked' ? 'not yet open' : stt === 'waiting' ? 'opens when the level before is finished' : 'open'}</span>
+          </button></li>`;
+        }).join('')}</ul>
+        <p class="rnote">${esc(sec.note)}</p>
+      </section>`;
+    }).join('')}
+    <div class="rprem">
+      <p class="eyebrow">Everything, with him in it</p>
+      <h4>Premium</h4>
+      <p>All twelve levels, the LAB, the HUB and every resource — and Alexandru mentoring you every week.</p>
+      <span class="price">$1,989</span>
+    </div>
+  </nav>`;
+}
+
+// ── A module ─────────────────────────────────────────────────────────────────
+function moduleHTML(st) {
   const L = levelFor(st, level);
   const title = weekTitle(st, level);
+  const g = gateFor(level);
+  const owned = holds(state.tier, g);
+  const tabs = DOMAINS.map((d) => `<button type="button" class="mtab" data-dom="${d.k}" data-k="${d.k}"
+      aria-pressed="${d.k === dom}"><b>${d.n}</b><em>${answered(st, level, d.k)}/7</em></button>`).join('');
 
-  if (!isOpen(level)) {
-    const g = gateFor(level);
+  if (!owned) {
     const rung = LADDER.find((r) => r.key === g);
-    return `<section class="band"><div class="wrap">
-      <button class="ghost" data-go="map" style="margin-top:0">← Back to your Blueprint</button>
-      <p class="eyebrow" style="margin-top:26px">Level ${level}</p>
-      <h2 class="sec">${esc(title)}</h2>
+    return `${levelHead(st, title)}
       <div class="gate">
         <p class="eyebrow">${compass} What opens this</p>
-        <h3>${esc(rung.n)}</h3>
-        <p>${esc(rung.what)}</p>
+        <h3>${esc(rung.n)}</h3><p>${esc(rung.what)}</p>
         <span class="price">${esc(rung.price)}</span>
-        ${rung.url ? `<a class="cta" href="${esc(rung.url)}" target="_blank" rel="noopener">See what it includes ↗</a>` : '<a class="cta" href="https://exploraself.com/unshakeable" target="_blank" rel="noopener">Start with the audit ↗</a>'}
-      </div>
-      <p class="savenote">Levels one to three stay free and open, whatever you decide here.</p>
-    </div></section>`;
+        ${rung.url ? `<a class="cta" href="${esc(rung.url)}" target="_blank" rel="noopener">See what it includes ↗</a>` : ''}
+      </div>`;
   }
-
+  if (levelState(st, level) === 'waiting') {
+    const prev = levelDone(st, level - 1);
+    return `${levelHead(st, title)}
+      <div class="wait">
+        <p class="eyebrow">Not yet</p>
+        <h3>Finish level ${String(level - 1).padStart(2, '0')} first</h3>
+        <p>${prev} of its 28 answers are written. This level opens when all twenty-eight are, because every question here assumes the ones before it have been answered honestly.</p>
+        <button class="cta" type="button" data-level="${level - 1}">Back to level ${String(level - 1).padStart(2, '0')}</button>
+      </div>`;
+  }
   if (!L) {
-    return `<section class="band"><div class="wrap">
-      <button class="ghost" data-go="map" style="margin-top:0">← Back to your Blueprint</button>
-      <p class="eyebrow" style="margin-top:26px">Level ${level}</p>
-      <h2 class="sec">${esc(title)}</h2>
-      <p class="sec-lede">This level is written and not yet published here. The three free levels are complete; the rest arrive level by level, and nothing is shown before it is finished.</p>
-      <button class="ghost" data-go="map">Back to your Blueprint</button>
-    </div></section>`;
+    return `${levelHead(st, title)}<div class="wait"><p class="eyebrow">In preparation</p>
+      <h3>This level is written and not yet published here</h3>
+      <p>Nothing is shown before it is finished.</p></div>`;
   }
 
-  const done = levelDone(st, level);
-  const D = L[dom];
-  const fw = fwFor(st, level, dom);
-  return `<section class="band"><div class="wrap">
-    <button class="ghost" data-go="map" style="margin-top:0">← Back to your Blueprint</button>
-    <p class="eyebrow" style="margin-top:26px">Level ${level} · ${esc(STAGES[st].n)}</p>
-    <h2 class="sec">${esc(title)}</h2>
+  const D = L[dom], fw = fwFor(st, level, dom), vid = videoFor(st, level, dom);
+  const gain = nextGain(st, level);
+  const full = answered(st, level, dom) === 7;
 
-    <div class="promise">
-      <p class="eyebrow">The promise of this level</p>
-      <p class="ptext">${esc(L.promise)}</p>
-      <div class="pmeta"><span>Emphasis: <b>${esc(emphasisName(st, level))}</b></span><span id="lvlCount">${done} of 28 answered</span></div>
-      <div class="ptrack"><i id="lvlFill" style="width:${done / 28 * 100}%"></i></div>
-    </div>
-
-    <div class="dtabs">${DOMAINS.map((d) => `<button class="dtab" type="button" data-dom="${d.k}" aria-pressed="${d.k === dom}">
-      <strong>${d.n}</strong><span>${esc(L[d.k].title)}</span><em>${answered(st, level, d.k)} of 7</em></button>`).join('')}</div>
-
-    <div class="steps">${D.steps.map((q, i) => {
-      const v = state.answers[aKey(st, level, dom, i)] || '';
-      return `<div class="step${v.trim() ? ' done' : ''}">
-        <span class="snum">${i + 1}</span>
-        <div>
-          <p class="sname">${SEVEN[i].n}</p>
-          <p class="swhy">${esc(SEVEN[i].why)}</p>
-          <p class="sask">${esc(q)}</p>
-          <textarea id="s-${st}-${level}-${dom}-${i}" data-k="${aKey(st, level, dom, i)}" rows="2" placeholder="Write it here" aria-label="${SEVEN[i].n}">${esc(v)}</textarea>
-          ${fw && fw.after === i + 1 ? worksheetHTML(fw, st, level, dom) : ''}
-        </div></div>`;
-    }).join('')}</div>
-    <p class="savenote">Saved on this device as you type. A level closes when all twenty-eight are answered — not before.</p>
-  </div></section>`;
+  return `${levelHead(st, title)}
+    <div class="mtabs" role="tablist">${tabs}</div>
+    <article class="mod">
+      <header class="modh">
+        <span class="dkey" style="background:var(--${dom})"></span>
+        <div><p class="eyebrow">${esc(DOMAINS.find((d) => d.k === dom).n)} · ${esc(DOMAINS.find((d) => d.k === dom).full)}</p>
+        ${D.title === weekTitle(st, level) ? '' : `<h3>${esc(D.title)}</h3>`}
+        <p class="modsub">${esc(D.sub)}</p></div>
+      </header>
+      ${vid ? `<div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${esc(vid)}" title="${esc(D.title)}"
+        loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : ''}
+      <div class="steps">${D.steps.map((q, i) => {
+        const v = state.answers[aKey(st, level, dom, i)] || '';
+        return `<div class="step${v.trim() ? ' done' : ''}">
+          <span class="snum">${i + 1}</span>
+          <div>
+            <p class="sname">${SEVEN[i].n}</p>
+            <p class="swhy">${esc(SEVEN[i].why)}</p>
+            <p class="sask">${esc(q)}</p>
+            <textarea data-k="${aKey(st, level, dom, i)}" rows="2" placeholder="Write it here" aria-label="${SEVEN[i].n}">${esc(v)}</textarea>
+            ${fw && fw.after === i + 1 ? worksheetHTML(fw, st, level, dom) : ''}
+          </div></div>`;
+      }).join('')}</div>
+      ${domFoot(st, full, gain)}
+    </article>`;
 }
+
+/** What comes after this domain: the next one, or — when all four are done —
+ *  what the next level gives you, stated as the things that will exist. */
+function domFoot(st, full, gain) {
+  const i = DOMAINS.findIndex((d) => d.k === dom);
+  const next = DOMAINS[i + 1];
+  const whole = levelDone(st, level) === 28;
+
+  if (whole && gain) {
+    return `${reportHTML(st)}<div class="gain">
+      <p class="eyebrow">${compass} Level ${String(level).padStart(2, '0')} is closed</p>
+      <h4>What level ${String(gain.level).padStart(2, '0')} gives you</h4>
+      <p class="gaint">${esc(gain.title)}</p>
+      <p class="gainp">${esc(gain.promise)}</p>
+      <button class="cta" type="button" data-level="${gain.level}">
+        ${holds(state.tier, gain.gate) ? `Open level ${String(gain.level).padStart(2, '0')}` : 'See what opens it'}</button>
+    </div>`;
+  }
+  if (whole) {
+    return `${reportHTML(st)}<div class="gain"><p class="eyebrow">${compass} The twelfth is closed</p>
+      <h4>You have finished ${esc(STAGES[st].n)}</h4>
+      <p class="gainp">Twelve levels, four domains, three hundred and thirty-six answers in your own hand. Read level one again and see what you would now write differently.</p>
+      <button class="cta" type="button" data-level="1">Back to level 01</button></div>`;
+  }
+  if (next) {
+    return `<div class="donext">
+      <p>${full ? `All seven written. ${DOMAINS.find((d) => d.k === dom).n} is done.` : `${answered(st, level, dom)} of 7 written in ${DOMAINS.find((d) => d.k === dom).n}.`}</p>
+      <button class="ghost" type="button" data-dom="${next.k}">Next: ${next.n} →</button></div>`;
+  }
+  return `<div class="donext"><p>${28 - levelDone(st, level)} answers left in this level. It closes when all twenty-eight are written.</p>
+    <button class="ghost" type="button" data-dom="self">Back to Self</button></div>`;
+}
+
+/** What the Blueprint says back. Levels one to three only — after that the
+ *  founder has the figures and does not need a reading of them. */
+function reportHTML(st) {
+  const r = report(state, st, level);
+  if (!r) return '';
+  return `<section class="rep">
+    <header class="reph">
+      <p class="eyebrow">${compass} Your reading after level ${String(r.level).padStart(2, '0')}</p>
+      <h4>${r.clear ? 'Nothing here is firing' : 'Where you are, from what you wrote'}</h4>
+      <p class="repstand">${esc(r.stand)}</p>
+      ${r.thin ? `<p class="repthin">${esc(r.thin)}</p>` : ''}
+    </header>
+    ${r.findings.length ? `<ol class="reps">${r.findings.map((f, i) => `<li class="rfind sev${f.sev}">
+      <span class="rfn">${i + 1}</span>
+      <div>
+        ${f.domain ? `<p class="rfd"><span class="dkey sm" style="background:var(--${f.domain.k})"></span>${esc(f.domain.n)}</p>` : '<p class="rfd">Across all four</p>'}
+        <h5>${esc(f.title)}</h5>
+        <p class="rfb">${esc(f.body)}</p>
+        <p class="rfs"><b>Your next step.</b> ${esc(f.step)}</p>
+        ${f.where ? `<button class="rfw" type="button" data-level="${f.where.lv}">
+          Where this is worked: level ${String(f.where.lv).padStart(2, '0')} · ${esc(f.where.title)} →</button>` : ''}
+      </div></li>`).join('')}</ol>` : ''}
+    <p class="repfine">Everything above is read from your own entries. Nothing is assumed about you, and no part of it is compared with anybody else.</p>
+  </section>`;
+}
+
+function levelHead(st, title) {
+  const done = levelDone(st, level);
+  return `<header class="lvh">
+    <button class="backrail" type="button" data-go="rail">☰ Levels</button>
+    <p class="eyebrow">Level ${String(level).padStart(2, '0')} · ${esc(STAGES[st].n)} · emphasis ${esc(emphasisName(st, level).toLowerCase())}</p>
+    <h2>${esc(title)}</h2>
+    <div class="lvtrack"><i style="width:${done / 28 * 100}%"></i></div>
+    <p class="lvcount" id="lvcount">${done} of 28 answered</p>
+  </header>`;
+}
+
 function emphasisName(st, lv) {
   const e = STAGES[st].emphasis[lv - 1];
   const d = DOMAINS.find((x) => x.k === e);
@@ -267,16 +362,39 @@ function emphasisName(st, lv) {
 
 // ── Render ───────────────────────────────────────────────────────────────────
 function render() {
-  $('#tnav').innerHTML = [['start', 'The entrance'], ['map', 'Your Blueprint']]
-    .map(([v, n]) => `<button type="button" data-go="${v}" ${view === v ? 'aria-current="page"' : ''}>${n}</button>`).join('');
-  $('#main').innerHTML = view === 'level' ? levelView() : view === 'map' ? mapView() : startView();
+  const st = state.stage || 'build';
+  document.body.classList.toggle('inwork', view === 'work');
+  $('#tnav').innerHTML = state.stage
+    ? `<button type="button" data-go="start">The entrance</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button>`
+    : '';
+  $('#main').innerHTML = view === 'work'
+    ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work">${moduleHTML(st)}</div></div>`
+    : startView();
   if (view === 'start') { const h = $('#resultHost'); if (h) h.innerHTML = resultBlock(); }
 }
 
+/** Redraw only the module, so the rail does not flicker and its scroll holds. */
+function redrawModule() {
+  const w = $('#work');
+  if (!w) return render();
+  w.innerHTML = moduleHTML(state.stage || 'build');
+  w.scrollTo ? w.scrollTo({ top: 0, behavior: 'instant' }) : null;
+  const r = $('#rail'); if (r) refreshRail();
+}
+function refreshRail() {
+  const st = state.stage || 'build';
+  const wrap = $('#railwrap');
+  if (wrap) wrap.innerHTML = railHTML(st);
+}
+
 document.addEventListener('click', (e) => {
-  const b = e.target.closest('button');
+  const b = e.target.closest('button, a.cta');
   if (!b) return;
-  if (b.dataset.go) { view = b.dataset.go; render(); window.scrollTo({ top: 0, behavior: 'instant' }); return; }
+  if (b.dataset.go === 'rail') { document.body.classList.toggle('railopen'); return; }
+  if (b.dataset.go) {
+    view = b.dataset.go; document.body.classList.remove('railopen'); render();
+    window.scrollTo({ top: 0, behavior: 'instant' }); return;
+  }
   if (b.dataset.diag !== undefined) {
     const i = +b.dataset.diag, raw = b.dataset.val;
     state.diag[i] = /^\d+$/.test(raw) ? +raw : raw;
@@ -286,9 +404,13 @@ document.addEventListener('click', (e) => {
     const h = $('#resultHost'); if (h) h.innerHTML = resultBlock();
     return;
   }
-  if (b.dataset.stage) { state.stage = b.dataset.stage; save(); render(); return; }
-  if (b.dataset.level) { level = +b.dataset.level; dom = 'self'; view = 'level'; render(); window.scrollTo({ top: 0, behavior: 'instant' }); return; }
-  if (b.dataset.dom) { dom = b.dataset.dom; render(); return; }
+  if (b.dataset.stage) { state.stage = b.dataset.stage; save(); view = 'work'; render(); window.scrollTo({ top: 0, behavior: 'instant' }); return; }
+  if (b.dataset.level) {
+    level = +b.dataset.level; dom = 'self'; view = 'work';
+    document.body.classList.remove('railopen');
+    render(); window.scrollTo({ top: 0, behavior: 'instant' }); return;
+  }
+  if (b.dataset.dom) { dom = b.dataset.dom; redrawModule(); return; }
 });
 
 document.addEventListener('input', (e) => {
@@ -303,15 +425,29 @@ document.addEventListener('input', (e) => {
   }
   const a = e.target.closest('textarea[data-k]');
   if (!a) return;
+  const st = state.stage || 'build';
+  const was = levelDone(st, level);
   state.answers[a.dataset.k] = a.value;
   save();
   a.closest('.step').classList.toggle('done', !!a.value.trim());
-  const st = state.stage || 'build', n = levelDone(st, level);
-  const c = $('#lvlCount'), f = $('#lvlFill');
+
+  const n = levelDone(st, level);
+  const c = $('#lvcount'), f = document.querySelector('.lvtrack i');
   if (c) c.textContent = `${n} of 28 answered`;
   if (f) f.style.width = (n / 28 * 100) + '%';
-  const tab = document.querySelector(`.dtab[data-dom="${dom}"] em`);
-  if (tab) tab.textContent = `${answered(st, level, dom)} of 7`;
+  const tab = document.querySelector(`.mtab[data-k="${dom}"] em`);
+  if (tab) tab.textContent = `${answered(st, level, dom)}/7`;
+
+  // Crossing a boundary changes what the page should say, so redraw then —
+  // and only then, so typing never costs a re-render.
+  if ((was === 28) !== (n === 28) || (was === 27 && n === 28)) { redrawModule(); return; }
+  if (answered(st, level, dom) === 7 || answered(st, level, dom) === 6) {
+    const foot = document.querySelector('.donext p');
+    if (foot) foot.textContent = answered(st, level, dom) === 7
+      ? `All seven written. ${DOMAINS.find((d) => d.k === dom).n} is done.`
+      : `${answered(st, level, dom)} of 7 written in ${DOMAINS.find((d) => d.k === dom).n}.`;
+  }
+  refreshRail();
 });
 
 render();

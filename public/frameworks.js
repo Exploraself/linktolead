@@ -22,8 +22,14 @@
 // margin, and harder to fake.
 
 export const OPS = {
-  sum: (v, f) => (f.of || []).reduce((n, k) => n + num(v[k]), 0),
-  sumcol: (v, f) => Object.keys(v).filter((k) => k.startsWith(f.col + ':')).reduce((n, k) => n + num(v[k]), 0),
+  sum: (v, f) => {
+    const ks = (f.of || []).filter((k) => String(v[k] || '').trim());
+    return ks.length ? ks.reduce((n, k) => n + num(v[k]), 0) : null;
+  },
+  sumcol: (v, f) => {
+    const ks = Object.keys(v).filter((k) => k.startsWith(f.col + ':') && String(v[k]).trim());
+    return ks.length ? ks.reduce((n, k) => n + num(v[k]), 0) : null;
+  },
   div: (v, f) => num(v[f.b]) ? num(v[f.a]) / num(v[f.b]) : null,
   mul: (v, f) => num(v[f.a]) * num(v[f.b]),
   sub: (v, f) => num(v[f.a]) - num(v[f.b]),
