@@ -2,12 +2,13 @@
 // answer it promises from entries typed the way a founder would type them.
 import { FW_BUILD } from '../public/fw-build.js';
 import { FW_GROW } from '../public/fw-grow.js';
+import { FW_SCALE } from '../public/fw-scale.js';
 import { result, num, OPS, TEXT_OPS } from '../public/frameworks.js';
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { c ? pass++ : (fail++, console.log('FAIL ' + m)); };
 const D = ['self', 'people', 'work', 'market'];
-const STAGES = [['b', FW_BUILD], ['g', FW_GROW]];
+const STAGES = [['b', FW_BUILD], ['g', FW_GROW], ['s', FW_SCALE]];
 const all = [];
 for (const [pre, set] of STAGES) for (let l = 1; l <= 12; l++) for (const d of D) all.push([l, d, set[l][d], pre]);
 
@@ -123,6 +124,34 @@ ok(r(FW_GROW[8].self, { meant: '10', got: '2' }).shown === '8', 'eight hours los
 const claim = r(FW_GROW[12].market, { who: 'mid-sized practices', promise: 'a named lead on every job', time: 'ten working days', volume: 'twelve jobs' });
 ok(/at twelve jobs a month\.$/.test(claim.shown), 'the claim carries its own ceiling');
 ok(r(FW_GROW[12].market, { who: 'x', promise: 'y', time: 'z' }) === null, 'a claim without a volume does not compose');
+
+// ── Scaling: the arithmetic of judgement, trust and attention ──────────────
+// Decision-days queued
+const q = r(FW_SCALE[1].work, { n: '11', days: '6' });
+ok(q.shown === '66' && /constraint|standing still/i.test(q.read), 'sixty-six decision-days queued');
+
+// Revenue that depends on the founder by name
+ok(r(FW_SCALE[2].market, { mine: '210000', all: '300000' }).shown === '70', 'seventy per cent arrives through one person');
+
+// Speed beyond your own standard
+ok(r(FW_SCALE[1].market, { real: '30', ok: '6' }).shown === '24', 'a day beyond the founder\u2019s own standard');
+
+// The workaround
+ok(r(FW_SCALE[5].work, { n: '5', hrs: '9' }).shown === '45', 'forty-five hours a month spent working around a silence');
+
+// Years of capability, and the segment rate
+ok(r(FW_SCALE[10].people, { 'yrs:0': '6', 'yrs:1': '9', 'yrs:2': '4' }).shown === '19', 'nineteen years of capability in the building');
+ok(r(FW_SCALE[9].market, { rev: '\u20ac60,000', hrs: '2,400' }).shown === '25', 'the segment pays twenty-five an hour');
+
+// The only test that counts
+const abs = r(FW_SCALE[12].work, { ran: '2', all: '7' });
+ok(abs.shown === '28.6' && /still needs you/i.test(abs.read), 'the absence test reports honestly, to one decimal');
+
+// Attention, which may exceed a hundred
+ok(r(FW_SCALE[4].self, { 'pct:0': '40', 'pct:1': '35', 'pct:2': '50' }).shown === '125', 'attention over a hundred is reported rather than clamped');
+
+// The bet must carry its own date
+ok(r(FW_SCALE[7].market, { bet: 'mid-market will pay for speed', date: 'March', wrong: 'fewer than four say yes', then: 'return to the core offer' }).shown.includes('We will know by March'), 'the bet carries its date');
 
 // Every stage must teach something, and the teaching must be substantial
 for (const [, set] of STAGES) {
