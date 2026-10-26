@@ -27,8 +27,8 @@ import { FW_GROW } from './fw-grow.js';
 import { FW_SCALE } from './fw-scale.js';
 import { result } from './frameworks.js';
 
-const SHEETS = { build: FW_BUILD, grow: FW_GROW, scale: FW_SCALE };
-const DK = ['self', 'people', 'work', 'market'];
+const FW_SETS = { build: FW_BUILD, grow: FW_GROW, scale: FW_SCALE };
+const DOMK = ['self', 'people', 'work', 'market'];
 
 // ── Reading what they entered ────────────────────────────────────────────────
 /** Everything the rules are allowed to look at. Nothing else is available to
@@ -39,13 +39,13 @@ export function signals(state, stage, upto) {
   // The entrance diagnostic: 0 to 4 per domain, or absent if not taken.
   const d = state.diag || {};
   const pairs = { self: [0, 1], people: [2, 3], work: [4, 5], market: [6, 7] };
-  for (const k of DK) {
+  for (const k of DOMK) {
     const [a, b] = pairs[k];
     s.diag[k] = (typeof d[a] === 'number' && typeof d[b] === 'number') ? d[a] + d[b] : null;
   }
 
   for (let lv = 1; lv <= upto; lv++) {
-    for (const k of DK) {
+    for (const k of DOMK) {
       // How much they wrote, and how much of it is substantial.
       const vals = Array.from({ length: 7 }, (_, i) => String(state.answers[`${stage}.${lv}.${k}.${i}`] || '').trim());
       const written = vals.filter(Boolean);
@@ -53,7 +53,7 @@ export function signals(state, stage, upto) {
       s.thin[`${lv}.${k}`] = written.length ? written.join(' ').length / written.length : 0;
 
       // The worksheet's own result, if they filled it in.
-      const fw = ((SHEETS[stage] || {})[lv] || {})[k];
+      const fw = ((FW_SETS[stage] || {})[lv] || {})[k];
       if (!fw) continue;
       const pre = `w.${stage}.${lv}.${k}.`;
       const v = {};
@@ -66,7 +66,7 @@ export function signals(state, stage, upto) {
   return s;
 }
 
-const n = (s, key) => (s.w[key] && typeof s.w[key].raw === 'number' ? s.w[key].raw : null);
+const fig = (s, key) => (s.w[key] && typeof s.w[key].raw === 'number' ? s.w[key].raw : null);
 const got = (s, key) => !!s.w[key];
 /** How many entries a counting worksheet actually has, from "3 of 5". */
 function count(s, key) {
@@ -83,7 +83,7 @@ function count(s, key) {
 export const RULES = [
   // ---- Level 1 ------------------------------------------------------------
   { k: 'l1-week-invisible', lv: 1, dk: 'self', sev: 3,
-    when: (s) => n(s, 'b1-self') !== null && n(s, 'b1-self') < 15,
+    when: (s) => fig(s, 'b1-self') !== null && fig(s, 'b1-self') < 15,
     title: 'Most of your week is unaccounted for',
     say: (s) => `You could account for ${s.w['b1-self'].shown} hours of last week. Everything you decide from here — what to charge, who to hire, what to stop — rests on hours you cannot currently see. This is not a discipline problem. It is simply the first thing that has to become visible.`,
     step: 'Before anything else: one block in next week’s calendar, defended, with a name on it.',
@@ -97,7 +97,7 @@ export const RULES = [
     where: { lv: 1, dk: 'self' } },
 
   { k: 'l1-two-businesses', lv: 1, dk: 'market', sev: 3,
-    when: (s) => n(s, 'b1-market') !== null && n(s, 'b1-market') < 40,
+    when: (s) => fig(s, 'b1-market') !== null && fig(s, 'b1-market') < 40,
     title: 'You are describing one business and running another',
     say: (s) => `Of the last ten people who paid you, ${s.w['b1-market'].shown}% match the customer you say you serve. Your money and your sentence disagree, and the money is the one with evidence behind it. Either the sentence changes or who you chase does — but carrying both is what makes marketing feel like shouting.`,
     step: 'Choose one kind of customer for twelve weeks. Write the three you will contact first.',
@@ -126,7 +126,7 @@ export const RULES = [
     where: { lv: 2, dk: 'self' } },
 
   { k: 'l2-cheap-problem', lv: 2, dk: 'market', sev: 3,
-    when: (s) => n(s, 'b2-market') !== null && n(s, 'b2-market') < 2000,
+    when: (s) => fig(s, 'b2-market') !== null && fig(s, 'b2-market') < 2000,
     title: 'You have found the cheap version of the problem',
     say: (s) => `By your own figures the problem costs your customer about ${s.w['b2-market'].shown} a year. At that size it is an irritation, and nobody reorganises their year over an irritation. The expensive version of this problem almost certainly exists — it is usually one layer up, owned by somebody more senior than whoever you have been talking to.`,
     step: 'One conversation with somebody who lives the larger version. Ask what it costs them a week.',
@@ -155,7 +155,7 @@ export const RULES = [
     where: { lv: 6, dk: 'people' } },
 
   { k: 'l3-low-ceiling', lv: 3, dk: 'work', sev: 2,
-    when: (s) => n(s, 'b3-work') !== null && n(s, 'b3-work') < 2,
+    when: (s) => fig(s, 'b3-work') !== null && fig(s, 'b3-work') < 2,
     title: 'Your ceiling is lower than your plans',
     say: (s) => `At the step where work waits, you can deliver about ${s.w['b3-work'].shown} a week. Every promise made above that line does not increase delivery; it increases apology. Knowing the number is not a limitation — said out loud in a sale it becomes a reason to choose you.`,
     step: 'Decide one of three: raise the ceiling, protect it, or stop selling past it.',
