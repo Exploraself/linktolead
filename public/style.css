@@ -383,7 +383,8 @@ body.inwork .foot{display:none}
 .joinbox h4{font-family:var(--display);font-weight:500;font-size:20px;margin-top:6px}
 .joinwhy{font-size:13.5px;line-height:1.65;color:var(--muted);margin-top:9px;max-width:56ch}
 .joinrow{display:grid;gap:12px;margin-top:16px}
-@media(min-width:620px){.joinrow{grid-template-columns:1fr 1fr 1fr}}
+@media(min-width:560px){.joinrow{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.joinrow{grid-template-columns:repeat(3,1fr)}}
 .joinrow label{display:block}
 .joinrow span{display:block;font:600 10px/1.4 var(--body);letter-spacing:1.1px;text-transform:uppercase;
   color:var(--gold-ink);margin-bottom:5px}

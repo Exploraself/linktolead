@@ -182,9 +182,11 @@ function resultBlock() {
               <h4>Where should we keep your answers?</h4>
               <p class="joinwhy">Your work saves to this device either way. An account means it follows you to your phone \u2014 and means Alexandru can read what you wrote before you ever speak to him.</p>
               <div class="joinrow">
-                <label><span>Your name</span><input id="jn" name="name" autocomplete="name" required></label>
+                <label><span>First name</span><input id="jf" name="fname" autocomplete="given-name" required></label>
+                <label><span>Last name</span><input id="jl" name="lname" autocomplete="family-name" required></label>
                 <label><span>Email</span><input id="je" name="email" type="email" autocomplete="email" required></label>
-                <label><span>Phone <em>optional</em></span><input id="jp" name="phone" type="tel" autocomplete="tel"></label>
+                <label><span>Your business</span><input id="jc" name="company" autocomplete="organization" required></label>
+                <label><span>Phone</span><input id="jp" name="phone" type="tel" autocomplete="tel" required></label>
               </div>
               <button class="cta" type="submit" id="jgo">Start week one</button>
               <p class="joinerr" id="jerr" hidden></p>
@@ -463,15 +465,18 @@ document.addEventListener('submit', async (e) => {
   if (!f) return;
   e.preventDefault();
   const err = $('#jerr'), go = $('#jgo');
-  const name = $('#jn').value.trim(), email = $('#je').value.trim(), phone = $('#jp').value.trim();
+  const first = $('#jf').value.trim(), last = $('#jl').value.trim();
+  const email = $('#je').value.trim(), company = $('#jc').value.trim(), phone = $('#jp').value.trim();
   const show = (m) => { if (err) { err.textContent = m; err.hidden = false; } };
-  if (!name) return show('Your name, so he knows who he is reading.');
+  if (!first || !last) return show('First and last name, so he knows who he is reading.');
   if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return show('That does not look like an email address.');
+  if (!company) return show('What the business is called.');
+  if (!phone) return show('A phone number, so he can reach you about the session.');
   if (err) err.hidden = true;
   if (go) { go.disabled = true; go.textContent = 'One moment…'; }
   try {
-    await account.join({ name, email, phone, stage: state.stage, thin: state.referee && state.referee.thin, diag: state.diag });
-    state.me = { name, email }; save();
+    await account.join({ first, last, email, phone, company, stage: state.stage, thin: state.referee && state.referee.thin, diag: state.diag });
+    state.me = { name: `${first} ${last}`, email }; save();
     // Everything already written on this device goes up with the first sync.
     for (const [k, v] of Object.entries(state.answers)) account.touch('answers', k, v);
     for (const [k, v] of Object.entries(state.work)) account.touch('work', k, v);
