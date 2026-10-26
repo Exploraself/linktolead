@@ -125,3 +125,47 @@ export const DIAGNOSTIC = [
   { d: 'stage', label: 'Where you are', q: 'Which is nearest the truth right now?',
     o: [['Finding the offer and the first clients', 'build'], ['Clients repeat, but everything runs through me', 'grow'], ['There is a team, and my job has changed', 'scale']] },
 ];
+
+// ── The rail ─────────────────────────────────────────────────────────────────
+// How the twelve levels are grouped down the side. The grouping is the offer,
+// made visible: a founder can see the whole programme from the first screen
+// and see exactly where it stops being free. Nothing is hidden, which is why
+// nothing has to be sold twice.
+export const SECTIONS = [
+  { k: 'free', n: 'The Incubator', sub: 'Where everything begins', from: 1, to: 3,
+    note: 'Three levels, all four domains, free and free to stay.' },
+  { k: 'session', n: 'With Alexandru', sub: 'Two levels, walked through', from: 4, to: 5,
+    note: 'He reads your first three before you speak. You leave knowing which domain is costing you most.' },
+  { k: 'lab', n: 'The LAB', sub: 'Personal Leadership LAB', from: 6, to: 9,
+    note: 'Four more levels in your own time, with the whole library behind them.' },
+  { k: 'hub', n: 'The HUB', sub: 'Business Growth HUB', from: 10, to: 12,
+    note: 'The last three, and the full Blueprint open from the day you start.' },
+];
+
+// ── Videos ───────────────────────────────────────────────────────────────────
+// A domain may carry one short video. Key is `stage.level.domain`, value is a
+// YouTube id. A domain with no entry simply shows no video — the programme
+// never waits on film to be useful.
+//
+// To add one: 'build.1.self': 'dQw4w9WgXcQ'
+export const VIDEOS = {};
+export const videoFor = (stage, level, dk) => VIDEOS[`${stage}.${level}.${dk}`] || null;
+
+// ── What the next level gives ────────────────────────────────────────────────
+/** The honest reason to keep going: the next level's own promise, which was
+ *  written as things that exist by Sunday rather than things you will feel. */
+export function nextGain(stage, n) {
+  const L = (LEVELS[stage] || {})[n + 1];
+  if (n >= 12 || !L) return null;
+  return { level: n + 1, title: weekTitle(stage, n + 1), promise: L.promise, gate: gateFor(n + 1) };
+}
+
+// ── Tiers ────────────────────────────────────────────────────────────────────
+/** Which tiers a person holds, from the one they bought. Buying the HUB opens
+ *  everything below it, because the ladder is access and not content. */
+export const TIER_ORDER = ['free', 'session', 'lab', 'hub'];
+export function holds(tier, needed) {
+  const have = TIER_ORDER.indexOf(tier || 'free');
+  const want = TIER_ORDER.indexOf(needed);
+  return want <= have;
+}

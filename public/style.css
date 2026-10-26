@@ -214,3 +214,133 @@ h2.sec{font-size:clamp(25px,3.8vw,34px);letter-spacing:-.6px;margin-top:9px}
 
 .sdecide{margin-top:13px;font-size:13.5px;line-height:1.6;border-top:1px solid var(--line);padding-top:11px}
 .sdecide b{font-family:var(--display);font-weight:500}
+
+/* ── The workspace ───────────────────────────────────────────────────────────
+   A rail of twelve levels that never leaves the screen, and one module open
+   beside it. On a phone the rail becomes a drawer, because a founder working
+   on a train should see the work, not the menu. */
+body.inwork{background:var(--paper)}
+body.inwork .foot{display:none}
+.shell{display:block}
+@media(min-width:1000px){
+  .shell{display:grid;grid-template-columns:302px minmax(0,1fr);align-items:start;
+    max-width:1320px;margin:0 auto;padding:0 max(18px,env(safe-area-inset-left,0px)) 0 max(18px,env(safe-area-inset-right,0px));gap:30px}
+  .railwrap{position:sticky;top:0;max-height:100vh;overflow-y:auto;overscroll-behavior:contain;
+    padding:22px 0 40px;scrollbar-width:thin}
+}
+
+/* The rail */
+.rail{border-right:1px solid var(--line)}
+@media(max-width:999px){.rail{border-right:0}}
+.railtop{padding:0 20px 18px 2px;border-bottom:2px solid var(--ink);margin-bottom:4px}
+.railtop h2{font-size:23px;margin-top:3px}
+.railsub{font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.5}
+
+.rsec{padding:16px 20px 15px 2px;border-bottom:1px solid var(--line)}
+.rsh{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.rsn{font-family:var(--display);font-size:15.5px;line-height:1.2}
+.rss{font:600 9.5px/1.4 var(--body);letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.rtag{flex:0 0 auto;font:600 9.5px/1 var(--body);letter-spacing:.9px;text-transform:uppercase;
+  color:var(--gold-ink);border:1px solid var(--line);padding:5px 7px;white-space:nowrap}
+.rtag.open{color:var(--ok);border-color:currentColor}
+.rlist{list-style:none;margin:11px 0 0;padding:0}
+.rlev{width:100%;display:grid;grid-template-columns:26px minmax(0,1fr) 18px;gap:9px;align-items:center;
+  text-align:left;padding:8px 8px 8px 4px;border-left:2px solid transparent}
+.rlev:hover{background:var(--panel)}
+.rnum{font-family:var(--display);font-size:15px;color:var(--gold)}
+.rtxt{min-width:0}
+.rtxt b{display:block;font-weight:500;font-size:13.5px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rtxt em{display:block;font-style:normal;font-size:10.5px;color:var(--muted);margin-top:1px;font-variant-numeric:tabular-nums}
+.rmark{font-size:11px;text-align:right;color:var(--muted)}
+.rmark.done{color:var(--ok);font-weight:700}
+.rlev.done .rnum{color:var(--ok)}
+.rlev.waiting .rtxt b,.rlev.locked .rtxt b{color:var(--muted)}
+.rlev.locked .rnum{color:var(--line)}
+.rlev.here{background:var(--cream);border-left-color:var(--gold)}
+.rlev.here .rtxt b{font-weight:600}
+.rsec.shut .rlist{opacity:.72}
+.rnote{font-size:11.5px;line-height:1.55;color:var(--muted);margin-top:9px;padding-left:4px}
+.rprem{margin:16px 20px 0 2px;background:var(--navy);color:#F6F1E6;padding:16px 17px}
+.rprem .eyebrow{color:var(--gold)}
+.rprem h4{font-size:18px;margin-top:3px}
+.rprem p{font-size:12px;line-height:1.6;margin-top:7px;color:#D9D2C5}
+.rprem .price{display:inline-block;margin-top:10px;font:600 13px var(--body);color:var(--gold)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* The work column */
+.work{padding:22px 0 60px;min-width:0}
+@media(max-width:999px){.work{padding:16px 18px 60px}}
+.lvh{border-top:2px solid var(--ink);padding-top:14px}
+.lvh h2{font-size:clamp(24px,4.4vw,33px);margin-top:4px}
+.lvtrack{height:3px;background:var(--line);margin-top:14px}
+.lvtrack i{display:block;height:100%;background:var(--gold);transition:width .2s}
+.lvcount{font:600 10.5px/1 var(--body);letter-spacing:1.1px;text-transform:uppercase;color:var(--gold-ink);margin-top:7px}
+.backrail{display:none}
+@media(max-width:999px){
+  .backrail{display:inline-block;font:600 11px/1 var(--body);letter-spacing:1.1px;text-transform:uppercase;
+    color:var(--gold-ink);border:1px solid var(--line);padding:8px 11px;margin-bottom:14px}
+  .railwrap{display:none}
+  body.railopen .railwrap{display:block;padding:18px 18px 40px;border-bottom:2px solid var(--ink)}
+  body.railopen .work{display:none}
+}
+
+/* Domain tabs */
+.mtabs{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:22px;border:1px solid var(--line);border-bottom:2px solid var(--ink)}
+.mtab{padding:11px 6px 10px;text-align:center;border-right:1px solid var(--line);background:var(--panel);min-width:0}
+.mtab:last-child{border-right:0}
+.mtab b{display:block;font-family:var(--display);font-weight:500;font-size:15px}
+.mtab em{display:block;font-style:normal;font-size:10px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+.mtab[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.mtab[aria-pressed="true"] em{color:var(--gold)}
+.mtab:hover[aria-pressed="false"]{background:var(--cream)}
+
+.mod{margin-top:24px}
+.modh{display:flex;gap:13px;align-items:flex-start}
+.dkey{flex:0 0 auto;width:10px;height:10px;border-radius:50%;margin-top:7px}
+.modh h3{font-size:clamp(20px,3.4vw,26px);margin-top:3px}
+.modsub{font-size:13.5px;color:var(--muted);margin-top:5px}
+.vid{margin-top:18px;aspect-ratio:16/9;background:var(--ink);border:1px solid var(--line)}
+.vid iframe{width:100%;height:100%;border:0;display:block}
+
+/* Footers of a module */
+.donext{margin-top:22px;border-top:1px solid var(--line);padding-top:16px;display:flex;
+  flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.donext p{font-size:13.5px;color:var(--muted)}
+.gain{margin-top:26px;background:var(--cream);border:1px solid var(--line);border-top:3px solid var(--gold);padding:22px 24px}
+.gain h4{font-size:21px;margin-top:5px}
+.gaint{font-family:var(--display);font-size:15px;color:var(--gold-ink);margin-top:5px}
+.gainp{font-size:14.5px;line-height:1.7;margin-top:11px;max-width:64ch}
+.gain .cta{margin-top:16px}
+.wait{margin-top:26px;background:var(--panel);border:1px solid var(--line);padding:24px 26px}
+.wait h3{font-size:21px;margin-top:4px}
+.wait p{font-size:14.5px;line-height:1.7;margin-top:10px;max-width:62ch;color:var(--muted)}
+.wait .cta{margin-top:16px}
+
+/* ── The reading ─────────────────────────────────────────────────────────────
+   What the Blueprint says back after levels one to three. It sits above the
+   invitation to the next level on purpose: the finding comes first, the door
+   second. */
+.rep{margin-top:28px;border:1px solid var(--line);border-top:3px solid var(--ink);background:var(--panel);padding:24px 26px}
+.reph h4{font-size:clamp(21px,3.4vw,26px);margin-top:5px}
+.repstand{font-size:15px;line-height:1.75;margin-top:12px;max-width:64ch}
+.repthin{font-size:12.5px;line-height:1.65;color:var(--muted);margin-top:11px;max-width:64ch;
+  border-left:2px solid var(--line);padding-left:12px}
+.reps{list-style:none;margin:22px 0 0;padding:0;border-top:1px solid var(--line)}
+.rfind{display:grid;grid-template-columns:30px minmax(0,1fr);gap:13px;padding:19px 0;border-bottom:1px solid var(--line)}
+.rfn{font-family:var(--display);font-size:21px;color:var(--gold);line-height:1.1}
+.rfind.sev3 .rfn{color:var(--self)}
+.rfd{font:600 9.5px/1.4 var(--body);letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:7px}
+.dkey.sm{width:7px;height:7px;margin:0}
+.rfind h5{font-family:var(--display);font-weight:500;font-size:18.5px;line-height:1.25;margin-top:5px}
+.rfb{font-size:14.5px;line-height:1.75;margin-top:9px;max-width:64ch}
+.rfs{font-size:14px;line-height:1.7;margin-top:11px;max-width:64ch;background:var(--cream);padding:10px 13px;border-left:2px solid var(--gold)}
+.rfs b{font-family:var(--display);font-weight:500}
+.rfw{margin-top:11px;font:600 11.5px/1.4 var(--body);letter-spacing:.4px;color:var(--gold-ink);
+  border-bottom:1px solid var(--line);padding-bottom:3px;text-align:left}
+.rfw:hover{border-bottom-color:var(--gold)}
+.repfine{font-size:11.5px;line-height:1.6;color:var(--muted);margin-top:16px}
+
+/* The compass mark is inline in eyebrows; without a size it inherits the
+   block's width. One rule, everywhere it appears. */
+.eyebrow svg{width:1.05em;height:1.05em;display:inline-block;vertical-align:-0.16em;margin-right:.45em;flex:0 0 auto}
