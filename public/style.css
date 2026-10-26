@@ -344,3 +344,33 @@ body.inwork .foot{display:none}
 /* The compass mark is inline in eyebrows; without a size it inherits the
    block's width. One rule, everywhere it appears. */
 .eyebrow svg{width:1.05em;height:1.05em;display:inline-block;vertical-align:-0.16em;margin-right:.45em;flex:0 0 auto}
+
+/* ── The journey ─────────────────────────────────────────────────────────────
+   Four steps at the entrance, so a founder knows where they are standing
+   before they answer anything. The first is marked because they are on it. */
+.jband{border-top:1px solid var(--line)}
+.journey{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:0;border-top:2px solid var(--ink)}
+.jstep{display:grid;grid-template-columns:40px minmax(0,1fr);gap:16px;padding:20px 0;border-bottom:1px solid var(--line)}
+.jn{font-family:var(--display);font-size:25px;color:var(--line);line-height:1}
+.jstep.now{background:var(--cream);padding-left:16px;padding-right:16px;margin-left:-16px;margin-right:-16px;border-left:3px solid var(--gold)}
+.jstep.now .jn{color:var(--gold)}
+.jwhen{font:600 9.5px/1.4 var(--body);letter-spacing:1.3px;text-transform:uppercase;color:var(--gold-ink)}
+.jstep h3{font-size:19px;margin-top:4px}
+.jd{font-size:14px;line-height:1.7;color:var(--muted);margin-top:7px;max-width:68ch}
+.jstep.now .jd{color:var(--ink)}
+.jfoot{font-size:13px;line-height:1.7;color:var(--muted);margin-top:18px;max-width:70ch}
+@media(min-width:760px){.journey{grid-template-columns:1fr 1fr}
+  .jstep{border-bottom:1px solid var(--line)}
+  .jstep:nth-child(odd){border-right:1px solid var(--line);padding-right:22px}
+  .jstep:nth-child(even){padding-left:22px}
+  .jstep.now{margin-left:0;padding-left:16px}}
+
+/* The referee's reading */
+.barnote{font-size:12px;line-height:1.6;color:var(--muted);margin-top:12px;max-width:44ch}
+.verdict.ahead{border-left:3px solid var(--self)}
+.verdict.behind{border-left:3px solid var(--work)}
+.verdict.agree{border-left:3px solid var(--ok)}
+.amb{font-size:14px;line-height:1.75;color:var(--muted);margin-top:13px;max-width:62ch}
+.sure{font-size:13.5px;line-height:1.7;margin-top:15px;max-width:62ch;background:var(--panel);
+  border:1px solid var(--line);padding:13px 15px}
+.sure b{font-family:var(--display);font-weight:500}
