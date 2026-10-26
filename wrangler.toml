@@ -8,3 +8,11 @@ compatibility_date = "2026-10-26"
 directory = "./public"
 # One page, with the views handled in the browser, so any path serves it.
 not_found_handling = "single-page-application"
+
+# The student record: programme answers, worksheet figures, Compass reports and
+# notes to the mentor. Free tier; see functions/_shared.js for how routes behave
+# when this binding is absent (they refuse politely, the site keeps serving).
+[[d1_databases]]
+binding = "DB"
+database_name = "exploraself-blueprint"
+database_id = "615c8759-d290-4ff2-86a9-3f977d80f2b5"

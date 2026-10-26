@@ -374,3 +374,21 @@ body.inwork .foot{display:none}
 .sure{font-size:13.5px;line-height:1.7;margin-top:15px;max-width:62ch;background:var(--panel);
   border:1px solid var(--line);padding:13px 15px}
 .sure b{font-family:var(--display);font-weight:500}
+
+/* ── Joining ─────────────────────────────────────────────────────────────────
+   Asked after the reading, never before it. A founder who has just been told
+   something true about their week is being offered somewhere to keep it, not
+   charged a toll to see it. */
+.joinbox{margin-top:20px;border-top:2px solid var(--ink);padding-top:20px}
+.joinbox h4{font-family:var(--display);font-weight:500;font-size:20px;margin-top:6px}
+.joinwhy{font-size:13.5px;line-height:1.65;color:var(--muted);margin-top:9px;max-width:56ch}
+.joinrow{display:grid;gap:12px;margin-top:16px}
+@media(min-width:620px){.joinrow{grid-template-columns:1fr 1fr 1fr}}
+.joinrow label{display:block}
+.joinrow span{display:block;font:600 10px/1.4 var(--body);letter-spacing:1.1px;text-transform:uppercase;
+  color:var(--gold-ink);margin-bottom:5px}
+.joinrow span em{font-style:normal;text-transform:none;letter-spacing:0;color:var(--muted);font-weight:400}
+.joinrow input{width:100%;background:var(--panel);border:1px solid var(--line);padding:11px 12px;
+  font:15px/1.4 var(--body);color:var(--ink)}
+.joinrow input:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.joinerr{font-size:13.5px;color:var(--self);margin-top:11px}
