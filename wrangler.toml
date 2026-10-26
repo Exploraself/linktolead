@@ -1,0 +1,10 @@
+# Static site on Workers. No build step and no Worker script: Cloudflare serves
+# everything in public/ directly. Deployed with `npx wrangler deploy`, which is
+# what the dashboard's own deploy command does by default.
+name = "linktolead"
+compatibility_date = "2026-10-26"
+
+[assets]
+directory = "./public"
+# One page, with the views handled in the browser, so any path serves it.
+not_found_handling = "single-page-application"

@@ -47,3 +47,13 @@ Cloudflare Pages, connected to this repo.
 
 See `AGENTS.md` before changing anything. Most of what makes this programme
 work is easy to remove by accident.
+
+### Cloudflare settings
+
+The dashboard's defaults are correct as they stand:
+
+- Build command: **empty**
+- Deploy command: **`npx wrangler deploy`**
+
+`wrangler.toml` points at `public/` and declares no Worker script, so Cloudflare
+serves the files directly.
