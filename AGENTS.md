@@ -56,3 +56,27 @@ horizontal scroll, and respect `prefers-reduced-motion`.
 They are the most valuable thing in the product. While this is in preview they
 live in `localStorage`, wrapped in try/catch, and nothing is sent anywhere.
 When accounts arrive, migrate them — never silently discard them.
+
+## 9. Numbers serve judgement. They are not the subject.
+
+A founder can get a spreadsheet anywhere, and a machine can now do the
+arithmetic, the forecast and the tidy chart in seconds. None of that decides
+what matters, holds a standard, or has the conversation nobody wants.
+
+So a number earns its place in this programme only when it forces a decision a
+human has to own.
+
+- **Teach the principle, not the technique.** Why a thin margin quietly
+  removes your choices. Why an hour given to the wrong customer is an hour
+  taken from the right one. Not how to build the model.
+- **Every result points at a decision**, never at a benchmark. "Your rate here
+  is lower than your other work — is this customer buying you something else?"
+  Not "industry average is X."
+- **Say plainly when a machine could do the step.** It costs nothing to admit
+  it and it sharpens the point: the calculation is cheap, the choice is not.
+  Then move the founder to the part only they can do.
+- **Never let a worksheet become an accounting lesson.** If a framework needs
+  a glossary, it is the wrong framework.
+- The hard parts of this programme are the human ones: saying no, naming the
+  cost, having the conversation, holding the standard on a bad week. The
+  numbers exist to make those unavoidable, and for nothing else.
