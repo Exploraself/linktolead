@@ -10,6 +10,7 @@
 import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, DIAGNOSTIC, gateFor, levelFor, isWritten, weekTitle } from './content.js';
 import { FW_BUILD } from './fw-build.js';
 import { FW_GROW } from './fw-grow.js';
+import { FW_SCALE } from './fw-scale.js';
 import { result as fwResult } from './frameworks.js';
 
 const $ = (s) => document.querySelector(s);
@@ -33,7 +34,7 @@ const aKey = (st, lv, dk, i) => `${st}.${lv}.${dk}.${i}`;
 // A worksheet belongs to one domain of one level and sits under the clarity
 // point it serves. Entries are kept apart from the written answers, so a level
 // still closes on the twenty-eight and never on arithmetic.
-const SHEETS = { build: FW_BUILD, grow: FW_GROW };
+const SHEETS = { build: FW_BUILD, grow: FW_GROW, scale: FW_SCALE };
 const wKey = (st, lv, dk, fk) => `w.${st}.${lv}.${dk}.${fk}`;
 function fwFor(st, lv, dk) {
   const stage = SHEETS[st];
