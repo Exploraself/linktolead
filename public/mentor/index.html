@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mentor · The Founder's Blueprint</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Libre+Franklin:wght@400;500;600;700&display=swap">
+<style>
+:root{--paper:#F7F2E7;--panel:#FFFCF4;--ink:#1C1309;--gold:#C9A24A;--gold-ink:#6E5213;--cream:#EFE4CC;
+  --line:#D6C9AC;--muted:#6A6052;--ok:#2C6B43;--warn:#A8623A;
+  --self:#A8623A;--people:#4C7355;--work:#36607F;--market:#9A7418;
+  --display:'Fraunces',Georgia,serif;--body:'Libre Franklin',system-ui,Arial,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 var(--body)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 18px}
+h1,h2,h3{font-family:var(--display);font-weight:500;margin:0;line-height:1.15}
+p{margin:0}
+header{background:var(--ink);color:#F4ECDA;border-bottom:3px solid var(--gold)}
+header .wrap{padding:22px 18px}
+header h1{font-size:26px}
+header p{font-size:12.5px;color:#9D917E;margin-top:5px}
+.gate{max-width:420px;margin:70px auto;background:var(--panel);border:1px solid var(--line);
+  border-top:3px solid var(--gold);padding:28px}
+.gate h2{font-size:21px}
+.gate p{font-size:13.5px;color:var(--muted);margin-top:9px}
+input,textarea,select{font:inherit;width:100%;background:#fff;border:1px solid var(--line);padding:11px 12px;color:var(--ink)}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
+button{font:600 14px/1 var(--body);background:var(--gold);color:#1C1309;border:0;padding:13px 18px;cursor:pointer}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--gold-ink);font-weight:600}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:18px 0}
+.count{font:600 11px/1 var(--body);letter-spacing:1.1px;text-transform:uppercase;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:14px;background:var(--panel)}
+th{text-align:left;font:600 10px/1.4 var(--body);letter-spacing:1.2px;text-transform:uppercase;color:var(--gold-ink);
+  padding:11px 12px;border-bottom:2px solid var(--ink);white-space:nowrap}
+td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:hover td{background:var(--cream)}
+.nm{font-weight:600;cursor:pointer}
+.nm:hover{text-decoration:underline}
+.em{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.pill{display:inline-block;font:600 9.5px/1 var(--body);letter-spacing:.9px;text-transform:uppercase;
+  padding:6px 8px;border:1px solid var(--line);color:var(--muted)}
+.pill.free{color:var(--ok);border-color:var(--ok)}
+.pill.lab{color:var(--work);border-color:var(--work)}
+.pill.hub,.pill.premium{color:var(--gold-ink);border-color:var(--gold);background:var(--cream)}
+.pill.session{color:var(--gold-ink);border-color:var(--gold)}
+.prog{display:block;height:7px;background:var(--line);border-radius:4px;overflow:hidden;min-width:100px}
+.prog i{display:block;height:100%;background:var(--gold)}
+.tiny{font-size:11.5px;color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--warn);margin-right:6px}
+.panel{background:var(--panel);border:1px solid var(--line);padding:22px;margin-top:18px}
+.panel h2{font-size:22px}
+.kv{display:grid;gap:3px;margin-top:14px}
+@media(min-width:720px){.kv{grid-template-columns:repeat(4,1fr)}}
+.k{background:var(--cream);padding:12px 13px}
+.k b{display:block;font:600 9.5px/1.3 var(--body);letter-spacing:1.1px;text-transform:uppercase;color:var(--gold-ink)}
+.k span{display:block;font-family:var(--display);font-size:19px;margin-top:4px}
+.dom{margin-top:20px;border-top:2px solid var(--ink);padding-top:16px}
+.dom h3{font-size:17px}
+.dom.self h3{color:var(--self)} .dom.people h3{color:var(--people)}
+.dom.work h3{color:var(--work)} .dom.market h3{color:var(--market)}
+.ans{margin-top:10px;border-left:3px solid var(--line);padding:3px 0 3px 13px}
+.ans em{display:block;font-style:normal;font:600 9.5px/1.3 var(--body);letter-spacing:1.1px;text-transform:uppercase;color:var(--muted)}
+.ans p{font-size:14px;line-height:1.6;margin-top:3px;white-space:pre-wrap}
+.note{background:var(--cream);border-left:3px solid var(--warn);padding:14px 15px;margin-top:12px}
+.note .meta{font:600 10px/1.3 var(--body);letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.note p{margin-top:7px;white-space:pre-wrap}
+.note textarea{margin-top:10px;min-height:70px}
+.err{color:var(--warn);font-size:13.5px;margin-top:11px}
+.empty{padding:50px 20px;text-align:center;color:var(--muted)}
+footer{padding:30px 18px 50px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>Mentor</h1><p>The Founder&rsquo;s Blueprint · student roster</p></div></header>
+<main class="wrap" id="main"></main>
+<footer class="wrap">Private. Nothing here is shared with anyone else.</footer>
+
+<script>
+const $=s=>document.querySelector(s);
+const KEY='ftb-mentor-key';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let key='';try{key=localStorage.getItem(KEY)||''}catch{}
+
+const api=async(q,opts)=>{
+  const r=await fetch('/api/mentor'+(q||''),Object.assign({headers:{'x-mentor-key':key,'content-type':'application/json'}},opts||{}));
+  return {ok:r.ok,status:r.status,data:await r.json().catch(()=>({}))};
+};
+const when=s=>{if(!s)return '—';const d=new Date(s),n=new Date(),h=(n-d)/36e5;
+  if(h<1)return 'just now'; if(h<24)return Math.round(h)+'h ago';
+  const dd=Math.round(h/24); return dd+(dd===1?' day ago':' days ago');};
+
+function gate(msg){
+  $('#main').innerHTML=`<div class="gate"><h2>Sign in</h2>
+    <p>Enter the mentor key. It is set on the Cloudflare Pages project as <b>MENTOR_KEY</b>.</p>
+    <p style="margin-top:14px"><input id="k" type="password" placeholder="Mentor key" autocomplete="current-password"></p>
+    <p style="margin-top:12px"><button id="go">Open the roster</button></p>
+    ${msg?`<p class="err">${esc(msg)}</p>`:''}</div>`;
+  $('#go').onclick=()=>{key=$('#k').value.trim();try{localStorage.setItem(KEY,key)}catch{};roster();};
+  $('#k').onkeydown=e=>{if(e.key==='Enter')$('#go').click()};
+}
+
+async function roster(){
+  if(!key)return gate('');
+  const r=await api('');
+  if(r.status===401)return gate('That key was not accepted.');
+  if(r.status===503)return gate('The database is not attached to this site yet.');
+  if(!r.ok)return gate('Could not reach the roster.');
+  const list=r.data.students||[];
+  $('#main').innerHTML=`<div class="bar"><span class="count">${list.length} student${list.length===1?'':'s'}</span>
+      <button class="ghost" id="refresh">Refresh</button></div>
+    ${list.length?`<table><thead><tr><th>Who</th><th>Stage</th><th>Access</th><th>Progress</th><th>Report</th><th>Last seen</th><th>Notes</th></tr></thead>
+    <tbody>${list.map(s=>`<tr>
+      <td><span class="nm" data-id="${esc(s.id)}">${esc(s.name||'—')}</span><span class="em">${esc(s.email)}</span>
+        ${s.phone?`<span class="em">${esc(s.phone)}</span>`:''}</td>
+      <td>${esc(s.stage||'—')}${s.thin_domain?`<span class="em">thinnest: ${esc(s.thin_domain)}</span>`:''}</td>
+      <td><span class="pill ${esc(s.tier||'free')}">${esc(s.tier||'free')}</span></td>
+      <td><span class="prog"><i style="width:${Math.min(100,Math.round((s.written||0)/336*100))}%"></i></span>
+        <span class="tiny">${s.written||0} answers</span></td>
+      <td>${s.compass_at?when(s.compass_at):'<span class="tiny">not yet</span>'}</td>
+      <td class="tiny">${when(s.last_seen_at||s.joined_at)}</td>
+      <td>${s.open_notes?`<span class="dot"></span>${s.open_notes}`:'<span class="tiny">—</span>'}</td>
+    </tr>`).join('')}</tbody></table>`:'<div class="empty">Nobody has joined yet. The roster fills as founders sign up.</div>'}`;
+  $('#refresh').onclick=roster;
+  document.querySelectorAll('.nm').forEach(n=>n.onclick=()=>one(n.dataset.id));
+}
+
+async function one(id){
+  const r=await api('?student='+encodeURIComponent(id));
+  if(!r.ok)return roster();
+  const d=r.data, s=d.student, A=d.answers||[], C=d.compass, N=d.notes||[];
+  const DOMS=[['self','Lead yourself'],['people','Lead your people'],['work','Lead your business'],['market','Lead the market']];
+  const byLevel={};
+  for(const a of A){ if(!a.body)continue; (byLevel[a.level]=byLevel[a.level]||[]).push(a); }
+  const levels=Object.keys(byLevel).map(Number).sort((x,y)=>x-y);
+
+  $('#main').innerHTML=`<div class="bar"><button class="ghost" id="back">← All students</button></div>
+    <div class="panel">
+      <h2>${esc(s.name||s.email)}</h2>
+      <p class="tiny">${esc(s.email)}${s.phone?' · '+esc(s.phone):''} · joined ${when(s.joined_at)}</p>
+      <div class="kv">
+        <div class="k"><b>Stage</b><span>${esc(s.stage||'—')}</span></div>
+        <div class="k"><b>Thinnest</b><span>${esc(s.thin_domain||'—')}</span></div>
+        <div class="k"><b>Access</b><span>${esc(s.tier||'free')}</span></div>
+        <div class="k"><b>Answers written</b><span>${A.filter(a=>a.body).length}</span></div>
+      </div>
+      <p style="margin-top:16px"><label class="tiny">Change access&nbsp;</label>
+        <select id="tier" style="max-width:220px;display:inline-block;width:auto">
+          ${['free','session','lab','hub','premium'].map(t=>`<option value="${t}"${t===(s.tier||'free')?' selected':''}>${t}</option>`).join('')}
+        </select> <button id="setTier">Save</button></p>
+    </div>
+
+    ${C?`<div class="panel"><h2>The Founder&rsquo;s Intelligence Report</h2>
+      <p class="tiny">Completed ${when(C.updated_at)}${C.stage?' · stage '+esc(C.stage):''}</p>
+      <pre style="white-space:pre-wrap;font:12.5px/1.6 ui-monospace,Menlo,monospace;background:var(--cream);padding:14px;margin-top:12px;overflow-x:auto">${esc(JSON.stringify(JSON.parse(C.results_json||'{}'),null,2))}</pre>
+      ${C.flags_json&&C.flags_json!=='null'?`<p class="tiny" style="margin-top:10px"><b>Flags:</b> ${esc(C.flags_json)}</p>`:''}
+    </div>`:'<div class="panel"><h2>Intelligence Report</h2><p class="tiny" style="margin-top:8px">Not completed yet.</p></div>'}
+
+    ${N.length?`<div class="panel"><h2>Notes</h2>${N.map(n=>`<div class="note">
+      <p class="meta">${n.level?'Level '+n.level:''}${n.domain?' · '+esc(n.domain):''} · ${when(n.created_at)} · ${esc(n.status)}</p>
+      <p>${esc(n.body)}</p>
+      ${n.reply?`<p class="tiny" style="margin-top:9px"><b>You replied:</b> ${esc(n.reply)}</p>`
+        :`<textarea data-note="${esc(n.id)}" placeholder="Reply…"></textarea>
+          <p style="margin-top:8px"><button class="ghost reply" data-note="${esc(n.id)}">Send reply</button></p>`}
+    </div>`).join('')}</div>`:''}
+
+    <div class="panel"><h2>Their work</h2>
+      ${levels.length?levels.map(l=>`<div class="dom"><h3>Level ${l}</h3>
+        ${DOMS.map(([k,label])=>{const rows=byLevel[l].filter(a=>a.domain===k);
+          return rows.length?`<div class="dom ${k}" style="border-top:0;padding-top:10px"><h3>${label}</h3>
+            ${rows.sort((a,b)=>a.step-b.step).map(a=>`<div class="ans"><em>Step ${a.step+1}</em><p>${esc(a.body)}</p></div>`).join('')}
+          </div>`:'';}).join('')}
+      </div>`).join(''):'<p class="tiny" style="margin-top:8px">Nothing written yet.</p>'}
+    </div>`;
+
+  $('#back').onclick=roster;
+  $('#setTier').onclick=async()=>{await api('',{method:'POST',body:JSON.stringify({action:'tier',student:id,tier:$('#tier').value})});one(id);};
+  document.querySelectorAll('.reply').forEach(b=>b.onclick=async()=>{
+    const t=document.querySelector(`textarea[data-note="${b.dataset.note}"]`);
+    if(!t||!t.value.trim())return;
+    await api('',{method:'POST',body:JSON.stringify({action:'reply',note:b.dataset.note,reply:t.value})});
+    one(id);
+  });
+}
+
+key?roster():gate('');
+</script>
+</body>
+</html>

@@ -14,6 +14,7 @@ import { FW_GROW } from './fw-grow.js';
 import { FW_SCALE } from './fw-scale.js';
 import { result as fwResult } from './frameworks.js';
 import { report } from './feedback.js';
+import * as account from './account.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -22,7 +23,7 @@ const KEY = 'ftb-v1';
 const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* private mode */ } };
 
-let state = Object.assign({ stage: '', scores: null, answers: {}, work: {}, diag: {}, tier: 'free' }, load());
+let state = Object.assign({ stage: '', scores: null, answers: {}, work: {}, diag: {}, tier: 'free', me: null }, load());
 if (!state.work) state.work = {};
 let view = state.stage ? 'work' : 'start';
 let level = 1, dom = 'self';
@@ -173,8 +174,22 @@ function resultBlock() {
         <p class="amb">${esc(r.ambition)}</p>
         ${r.kind === 'ahead' ? `<p class="sure"><b>Sure you are past this?</b> Then take it at speed. Levels 01 to 03 are free and the questions are short \u2014 answer them as precisely as you can, and the reading at the end will say plainly whether you were right. If it says you were, nothing is holding you.</p>` : ''}
         <p class="first">Everybody starts here<b>Level 01 \u2014 ${esc(weekTitle(r.assigned, 1))}</b></p>
-        <button class="cta" data-go="work">Open your Blueprint \u2192</button>
-        <p class="savenote">Twelve levels, four domains each, in order. Nothing is skipped and nothing is graded.</p>
+        ${account.joined() || state.me
+          ? `<button class="cta" data-go="work">Open your Blueprint \u2192</button>
+             <p class="savenote">Your work is saved to your account and follows you between devices.</p>`
+          : `<form class="joinbox" id="joinbox" novalidate>
+              <p class="eyebrow">${compass} Keep this, and walk in</p>
+              <h4>Where should we keep your answers?</h4>
+              <p class="joinwhy">Your work saves to this device either way. An account means it follows you to your phone \u2014 and means Alexandru can read what you wrote before you ever speak to him.</p>
+              <div class="joinrow">
+                <label><span>Your name</span><input id="jn" name="name" autocomplete="name" required></label>
+                <label><span>Email</span><input id="je" name="email" type="email" autocomplete="email" required></label>
+                <label><span>Phone <em>optional</em></span><input id="jp" name="phone" type="tel" autocomplete="tel"></label>
+              </div>
+              <button class="cta" type="submit" id="jgo">Start week one</button>
+              <p class="joinerr" id="jerr" hidden></p>
+              <p class="savenote">Free, and the first three weeks stay free. No card, now or later.</p>
+            </form>`}
       </div></div></div>`;
 }
 
@@ -395,6 +410,18 @@ function render() {
 function redrawModule() {
   const w = $('#work');
   if (!w) return render();
+
+// If this founder has an account, their work follows them here.
+(async () => {
+  if (!account.joined()) return;
+  const r = await account.pull();
+  if (!r || !r.ok) return;
+  let changed = false;
+  for (const [k, v] of Object.entries(r.answers || {})) if (v && !state.answers[k]) { state.answers[k] = v; changed = true; }
+  for (const [k, v] of Object.entries(r.work || {})) if (v && !state.work[k]) { state.work[k] = v; changed = true; }
+  if (r.me) { state.me = { name: r.me.name, email: r.me.email }; if (r.me.stage) state.stage = r.me.stage; if (r.me.tier) state.tier = r.me.tier; changed = true; }
+  if (changed) { save(); render(); }
+})();
   w.innerHTML = moduleHTML(state.stage || 'build');
   w.scrollTo ? w.scrollTo({ top: 0, behavior: 'instant' }) : null;
   const r = $('#rail'); if (r) refreshRail();
@@ -431,11 +458,41 @@ document.addEventListener('click', (e) => {
   if (b.dataset.dom) { dom = b.dataset.dom; redrawModule(); return; }
 });
 
+document.addEventListener('submit', async (e) => {
+  const f = e.target.closest('#joinbox');
+  if (!f) return;
+  e.preventDefault();
+  const err = $('#jerr'), go = $('#jgo');
+  const name = $('#jn').value.trim(), email = $('#je').value.trim(), phone = $('#jp').value.trim();
+  const show = (m) => { if (err) { err.textContent = m; err.hidden = false; } };
+  if (!name) return show('Your name, so he knows who he is reading.');
+  if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return show('That does not look like an email address.');
+  if (err) err.hidden = true;
+  if (go) { go.disabled = true; go.textContent = 'One moment…'; }
+  try {
+    await account.join({ name, email, phone, stage: state.stage, thin: state.referee && state.referee.thin, diag: state.diag });
+    state.me = { name, email }; save();
+    // Everything already written on this device goes up with the first sync.
+    for (const [k, v] of Object.entries(state.answers)) account.touch('answers', k, v);
+    for (const [k, v] of Object.entries(state.work)) account.touch('work', k, v);
+    account.flush();
+    view = 'work'; render(); window.scrollTo({ top: 0, behavior: 'instant' });
+  } catch (ex) {
+    // The account is a convenience, never a gate. Let them in regardless.
+    const why = ex && ex.message && !/fetch|network|load failed/i.test(ex.message)
+      ? ex.message
+      : 'We could not reach the account service just now.';
+    show(why + ' Your work is saved on this device — carry on, and it will sync when we can reach it.');
+    if (go) { go.disabled = false; go.textContent = 'Start week one anyway'; go.dataset.go = 'work'; }
+  }
+});
+
 document.addEventListener('input', (e) => {
   const w = e.target.closest('input[data-w]');
   if (w) {
     state.work[w.dataset.w] = w.value;
     save();
+    account.touch('work', w.dataset.w, w.value);
     const st = state.stage || 'build', fw = fwFor(st, level, dom);
     const host = fw && document.querySelector(`[data-rhost="${fw.k}"]`);
     if (host) host.innerHTML = windowHTML(fw, st, level, dom);
@@ -447,6 +504,7 @@ document.addEventListener('input', (e) => {
   const was = levelDone(st, level);
   state.answers[a.dataset.k] = a.value;
   save();
+  account.touch('answers', a.dataset.k, a.value);
   a.closest('.step').classList.toggle('done', !!a.value.trim());
 
   const n = levelDone(st, level);
@@ -469,3 +527,21 @@ document.addEventListener('input', (e) => {
 });
 
 render();
+
+// If this founder has an account, their work follows them here. The device
+// copy wins on conflict — it is the one they were just typing into.
+(async () => {
+  if (!account.joined()) return;
+  const r = await account.pull();
+  if (!r || !r.ok) return;
+  let changed = false;
+  for (const [k, v] of Object.entries(r.answers || {})) if (v && !state.answers[k]) { state.answers[k] = v; changed = true; }
+  for (const [k, v] of Object.entries(r.work || {})) if (v && !state.work[k]) { state.work[k] = v; changed = true; }
+  if (r.me) {
+    state.me = { name: r.me.name, email: r.me.email };
+    if (r.me.stage) state.stage = r.me.stage;
+    if (r.me.tier) state.tier = r.me.tier;
+    changed = true;
+  }
+  if (changed) { save(); render(); }
+})();
