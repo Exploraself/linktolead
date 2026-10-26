@@ -1,19 +1,21 @@
 // Every Building worksheet must be structurally sound and must produce the
 // answer it promises from entries typed the way a founder would type them.
 import { FW_BUILD } from '../public/fw-build.js';
+import { FW_GROW } from '../public/fw-grow.js';
 import { result, num, OPS, TEXT_OPS } from '../public/frameworks.js';
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { c ? pass++ : (fail++, console.log('FAIL ' + m)); };
 const D = ['self', 'people', 'work', 'market'];
+const STAGES = [['b', FW_BUILD], ['g', FW_GROW]];
 const all = [];
-for (let l = 1; l <= 12; l++) for (const d of D) all.push([l, d, FW_BUILD[l][d]]);
+for (const [pre, set] of STAGES) for (let l = 1; l <= 12; l++) for (const d of D) all.push([l, d, set[l][d], pre]);
 
 // ── Structure ───────────────────────────────────────────────────────────────
-ok(all.length === 48, 'forty-eight worksheets');
-ok(new Set(all.map(([, , f]) => f.k)).size === 48, 'keys are unique');
-for (const [l, d, f] of all) {
-  ok(f.k === `b${l}-${d}`, `${f.k} key matches its level and domain`);
+ok(all.length === 48 * STAGES.length, 'forty-eight worksheets per written stage');
+ok(new Set(all.map(([, , f]) => f.k)).size === all.length, 'keys are unique across stages');
+for (const [l, d, f, pre] of all) {
+  ok(f.k === `${pre}${l}-${d}`, `${f.k} key matches its stage, level and domain`);
   ok(f.after >= 1 && f.after <= 7, `${f.k} sits under a real clarity point`);
   ok(!!f.decides && /[a-z]/.test(f.decides), `${f.k} names the decision it forces`);
   ok(OPS[f.out.op] || TEXT_OPS[f.out.op], `${f.k} uses a declared operation`);
@@ -92,6 +94,42 @@ ok(r(FW_BUILD[12].market, { p1: 'Win three retained clients', p2: 'x', p3: 'y' }
 ok(r(FW_BUILD[5].work, { give: 'a', assume: 'b', lost: 'c', add: 'd' }).shown === '4 of 4', 'a full grid counts four of four');
 ok(r(FW_BUILD[5].work, { give: 'a' }).shown === '1 of 4', 'a part-filled grid says so');
 ok(r(FW_BUILD[5].work, {}) === null, 'an empty grid returns nothing rather than zero');
+
+// ── Growing: the arithmetic of a business that runs through one head ───────
+// Repeat revenue as a share
+ok(r(FW_GROW[1].market, { rep: '84,000', all: '140,000' }).shown === '60', 'repeat revenue is 60% of the total');
+
+// What a hire has to earn
+const hire = r(FW_GROW[2].market, { cost: '\u20ac48,000', cust: '6,000' });
+ok(hire.shown === '8' && /commitment|decide/i.test(hire.read), 'a hire must add or keep eight customers');
+
+// Rework, priced
+ok(r(FW_GROW[4].market, { hrs: '22', rate: '65' }).shown === '1430', 'rework cost computes');
+
+// Meetings, annualised in people-hours
+ok(r(FW_GROW[8].people, { hrs: '14', rate: '45' }).shown === '728', 'fourteen people-hours a week is 728 a year');
+
+// Demand turned away
+ok(r(FW_GROW[9].market, { n: '9', worth: '4,500' }).shown === '40500', 'lost demand is counted, not estimated');
+
+// Lead time gap, including the case where delivery beats its own intention
+ok(r(FW_GROW[10].market, { should: '3', real: '11' }).shown === '8', 'the customer waits eight days beyond intention');
+ok(r(FW_GROW[10].market, { should: '5', real: '4' }).shown === '-1', 'a negative gap is reported rather than hidden');
+
+// Intention against calendar
+ok(r(FW_GROW[8].self, { meant: '10', got: '2' }).shown === '8', 'eight hours lost between intention and week');
+
+// Growing sentences
+const claim = r(FW_GROW[12].market, { who: 'mid-sized practices', promise: 'a named lead on every job', time: 'ten working days', volume: 'twelve jobs' });
+ok(/at twelve jobs a month\.$/.test(claim.shown), 'the claim carries its own ceiling');
+ok(r(FW_GROW[12].market, { who: 'x', promise: 'y', time: 'z' }) === null, 'a claim without a volume does not compose');
+
+// Every stage must teach something, and the teaching must be substantial
+for (const [, set] of STAGES) {
+  const teach = Object.values(set).flatMap((l) => D.map((d) => l[d])).filter((f) => f.teach);
+  ok(teach.length >= 10, 'the stage carries at least ten teach blocks');
+  for (const f of teach) ok(f.teach.t.length > 120, `${f.k} teaches rather than asserts`);
+}
 
 // num()
 ok(num('') === 0 && num('abc') === 0 && num('-4') === -4 && num('1,250.50') === 1250.5, 'num reads what a founder types');

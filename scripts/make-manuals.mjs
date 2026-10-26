@@ -11,11 +11,12 @@ import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url.replace('/scripts/', '/'))('playwright');
 import { DOMAINS, SEVEN, STAGES, LEVELS, gateFor, weekTitle } from '../public/content.js';
 import { FW_BUILD } from '../public/fw-build.js';
+import { FW_GROW } from '../public/fw-grow.js';
 
 // The worksheets, as paper. The same definitions the app uses, drawn as ruled
 // boxes to fill by hand — so a founder working from the book and a founder
 // working on the screen are doing the identical exercise.
-const SHEETS = { build: FW_BUILD };
+const SHEETS = { build: FW_BUILD, grow: FW_GROW };
 const fwFor = (stage, n, dk) => ((SHEETS[stage] || {})[n] || {})[dk] || null;
 
 function sheetHTML(fw) {
