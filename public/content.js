@@ -10,6 +10,7 @@
 
 import { BUILD } from './levels-build.js';
 import { GROW } from './levels-grow.js';
+import { SCALE } from './levels-scale.js';
 
 export const DOMAINS = [
   { k: 'self', n: 'Self', full: 'Personal internal', line: 'How you notice, decide and follow through.' },
@@ -83,17 +84,16 @@ export function gateFor(level) {
 // is not yet written, the map still shows its title and its emphasis, and the
 // door says so plainly rather than opening onto nothing.
 
-export const LEVELS = { build: BUILD, grow: GROW, scale: {} };
+export const LEVELS = { build: BUILD, grow: GROW, scale: SCALE };
 
 /** The title shown on the map: taken from the level itself wherever the level
  *  is written, so the map and the level can never drift apart. */
 export function weekTitle(stage, n) {
   const L = (LEVELS[stage] || {})[n];
-  if (L) {
-    const e = STAGES[stage].emphasis[n - 1];
-    if (e !== 'all' && L[e]) return L[e].title;
-    if (L.market) return L.market.title;
-  }
+  const e = STAGES[stage].emphasis[n - 1];
+  // A closing level leads on all four, so it keeps its own planned title
+  // rather than borrowing one domain's.
+  if (L && e !== 'all' && L[e]) return L[e].title;
   return (WEEKS[stage] || [])[n - 1] || `Level ${n}`;
 }
 
