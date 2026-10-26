@@ -158,3 +158,59 @@ h2.sec{font-size:clamp(25px,3.8vw,34px);letter-spacing:-.6px;margin-top:9px}
   .bname{font-size:19px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ── Worksheets ──────────────────────────────────────────────────────────────
+   A worksheet sits inside the step it serves, and reads as a sheet of paper
+   laid on the page: panel ground, ruled cells, one framed result window. The
+   gold is kept for the window and the decision line — the two things the
+   founder is meant to walk away holding. */
+.sheet{margin-top:16px;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);padding:18px 18px 16px}
+.shead h4{font-size:19px;margin-top:4px}
+.slead{font-size:13.5px;color:var(--muted);margin-top:7px;max-width:62ch}
+
+.wcell{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);padding:8px 2px;font:14px/1.5 var(--body);color:var(--ink);min-width:0}
+.wcell:focus{outline:none;border-bottom:2px solid var(--gold);background:#FFF}
+.wnum{text-align:right;font-variant-numeric:tabular-nums}
+
+.wtable{margin-top:14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.wtable table{width:100%;min-width:420px;border-collapse:collapse}
+.wtable th{text-align:left;font:600 10px/1.4 var(--body);letter-spacing:1.1px;text-transform:uppercase;color:var(--gold-ink);padding:0 6px 7px;border-bottom:1.5px solid var(--ink);white-space:nowrap}
+.wtable td{padding:1px 6px;vertical-align:bottom}
+.wtable th:last-child,.wtable td:last-child{width:1%}
+
+.wfields,.wfill{margin-top:14px;display:grid;gap:12px}
+@media(min-width:620px){.wfields{grid-template-columns:1fr 1fr}}
+.wfield{display:block}
+.wfield>span{display:block;font:600 10px/1.4 var(--body);letter-spacing:1.1px;text-transform:uppercase;color:var(--gold-ink);margin-bottom:3px}
+.wfield>span em{font-style:normal;text-transform:none;letter-spacing:0;color:var(--muted);font-weight:400}
+
+.wgrid{margin-top:14px;display:grid;gap:12px}
+@media(min-width:620px){.wgrid{grid-template-columns:1fr 1fr}}
+.wbox{display:block;background:var(--paper);border:1px solid var(--line);padding:11px 13px}
+.wbox>span{display:block;font:600 10px/1.4 var(--body);letter-spacing:1.1px;text-transform:uppercase;color:var(--gold-ink);margin-bottom:2px}
+
+.wrank{margin-top:14px;display:grid;gap:10px}
+.wslot{display:grid;grid-template-columns:26px 74px minmax(0,1fr);gap:10px;align-items:baseline}
+.wsn{font-family:var(--display);font-size:20px;color:var(--gold)}
+.wsl{font:600 10px/1.4 var(--body);letter-spacing:1.1px;text-transform:uppercase;color:var(--gold-ink)}
+@media(max-width:519px){.wslot{grid-template-columns:26px minmax(0,1fr)}.wsl{display:none}}
+
+/* The result window */
+.rwin{margin-top:16px;background:var(--cream);border:1px solid var(--line);border-top:3px solid var(--gold);padding:14px 16px}
+.rwin.empty{background:transparent;border-top-color:var(--line)}
+.rlabel{font:600 10px/1.4 var(--body);letter-spacing:1.3px;text-transform:uppercase;color:var(--gold-ink)}
+.rwait{font-size:13px;color:var(--muted);margin-top:5px}
+.rval{font-family:var(--display);font-size:38px;line-height:1.05;margin-top:5px;font-variant-numeric:tabular-nums}
+.rval small{font-family:var(--body);font-size:14px;font-weight:600;color:var(--muted);margin-left:5px;letter-spacing:.2px}
+.rval.rtext{font-size:19px;line-height:1.4;font-variant-numeric:normal}
+.rread{font-size:13.5px;line-height:1.6;color:var(--ink);margin-top:9px;max-width:62ch;border-top:1px solid var(--line);padding-top:9px}
+
+.teach{margin-top:13px;border-top:1px solid var(--line);padding-top:11px}
+.teach summary{font:600 12px/1.5 var(--body);letter-spacing:.3px;color:var(--gold-ink);cursor:pointer;list-style:none}
+.teach summary::-webkit-details-marker{display:none}
+.teach summary::before{content:'›';display:inline-block;margin-right:8px;transition:transform .15s}
+.teach[open] summary::before{transform:rotate(90deg)}
+.teach p{font-size:13.5px;line-height:1.7;color:var(--muted);margin-top:9px;max-width:66ch}
+
+.sdecide{margin-top:13px;font-size:13.5px;line-height:1.6;border-top:1px solid var(--line);padding-top:11px}
+.sdecide b{font-family:var(--display);font-weight:500}

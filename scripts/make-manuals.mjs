@@ -10,6 +10,40 @@ import { createRequire } from 'node:module';
 // CommonJS but not through a bare ESM specifier from this directory.
 const { chromium } = createRequire(import.meta.url.replace('/scripts/', '/'))('playwright');
 import { DOMAINS, SEVEN, STAGES, LEVELS, gateFor, weekTitle } from '../public/content.js';
+import { FW_BUILD } from '../public/fw-build.js';
+
+// The worksheets, as paper. The same definitions the app uses, drawn as ruled
+// boxes to fill by hand — so a founder working from the book and a founder
+// working on the screen are doing the identical exercise.
+const SHEETS = { build: FW_BUILD };
+const fwFor = (stage, n, dk) => ((SHEETS[stage] || {})[n] || {})[dk] || null;
+
+function sheetHTML(fw) {
+  if (!fw) return '';
+  let body = '';
+  if (fw.shape === 'table') {
+    const cls = (c) => (c.t === 'num' ? ' class="wnum"' : '');
+    body = `<table class="wt"><thead><tr>${fw.cols.map((c) => `<th${cls(c)}>${esc(c.n)}</th>`).join('')}</tr></thead>
+      <tbody>${Array.from({ length: fw.rows }, () => `<tr>${fw.cols.map((c) => `<td${cls(c)}></td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  } else if (fw.shape === 'calc') {
+    body = `<div class="wf">${fw.fields.map((f) => `<div class="wfi"><span>${esc(f.n)}${f.hint ? ` (${esc(f.hint)})` : ''}</span><i></i></div>`).join('')}</div>`;
+  } else if (fw.shape === 'fill') {
+    body = `<p class="wsent">${esc(fw.line).replace(/\{(\w+)\}/g, '<u>&nbsp;</u>')}</p>
+      <div class="wf">${fw.blanks.map((b) => `<div class="wfi"><span>${esc(b.n)}</span><i></i></div>`).join('')}</div>`;
+  } else if (fw.shape === 'grid') {
+    body = `<div class="wg">${fw.boxes.map((b) => `<div class="wgb"><span>${esc(b.n)}</span></div>`).join('')}</div>`;
+  } else if (fw.shape === 'rank') {
+    body = `<div class="wf">${fw.slots.map((sl, i) => `<div class="wfi"><span>${i + 1}. ${esc(sl.n)}</span><i></i></div>`).join('')}</div>`;
+  }
+  return `<div class="sheet">
+    <p class="eyebrow">Worksheet · after clarity point ${fw.after}</p>
+    <h4>${esc(fw.n)}</h4><p class="slead">${esc(fw.lead)}</p>
+    ${body}
+    <div class="rwin"><span class="rlab">${esc(fw.out.label)}</span><i></i></div>
+    ${fw.teach ? `<div class="teach"><b>${esc(fw.teach.n)}.</b> ${esc(fw.teach.t)}</div>` : ''}
+    <p class="sdec"><b>What this decides.</b> ${esc(fw.decides)}</p>
+  </div>`;
+}
 
 const esc = (s) => String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 const GATE = { free: 'Free', session: 'Opens with one session', lab: 'Personal Leadership LAB', hub: 'Business Growth HUB' };
@@ -42,7 +76,8 @@ function manual(stage) {
         const lead = dom.k === e;
         return `<div class="domain${lead ? ' lead' : ''}">
           <h3><span class="dk" style="background:${dom.hex}"></span>${dom.n}<small>${esc(D.title)} — ${esc(D.sub)}</small></h3>
-          <ol class="steps">${D.steps.map((q, si) => `<li><span class="sn">${SEVEN[si].n}</span><span class="sq">${esc(q)}</span><span class="rule"></span><span class="rule"></span></li>`).join('')}</ol>
+          <ol class="steps">${D.steps.map((q, si) => `<li><span class="sn">${SEVEN[si].n}</span><span class="sq">${esc(q)}</span><span class="rule"></span><span class="rule"></span>${
+            fwFor(stage, n, dom.k) && fwFor(stage, n, dom.k).after === si + 1 ? sheetHTML(fwFor(stage, n, dom.k)) : ''}</li>`).join('')}</ol>
         </div>`;
       }).join('')}
       <p class="closer">This level closes when all twenty-eight are answered. Not before.</p>
@@ -103,6 +138,32 @@ td.g{width:48mm;font:600 7.5pt 'Libre Franklin';letter-spacing:.6px;text-transfo
 .sq{display:block;font-family:'Fraunces',Georgia,serif;font-size:11pt;line-height:1.4;margin-top:1mm}
 .rule{display:block;border-bottom:0.25mm solid #D8CDB4;height:6.5mm}
 .closer{margin-top:4mm;font-size:8.5pt;color:#6B6153;border-top:0.4mm solid #DFD3B8;padding-top:3mm}
+
+.sheet{margin:3mm 0 2mm;border:0.3mm solid #DFD3B8;border-left:0.9mm solid #C9A24A;padding:4mm 5mm;background:#FFFDF7}
+.sheet .eyebrow,.sheet h4,.slead{page-break-after:avoid}
+table.wt tr,.wfi,.wgb{page-break-inside:avoid}
+.sheet h4{font-family:'Fraunces',Georgia,serif;font-size:12pt;font-weight:500;margin:1mm 0 0}
+.slead{font-size:8.5pt;color:#6B6153;margin-top:1.5mm;line-height:1.5}
+table.wt{width:100%;border-collapse:collapse;margin-top:3mm}
+table.wt th{font:600 6.5pt 'Libre Franklin';letter-spacing:1px;text-transform:uppercase;color:#7A5C16;text-align:left;padding:0 1.5mm 1.5mm;border-bottom:0.5mm solid #2B1B12}
+table.wt td{border-bottom:0.25mm solid #D8CDB4;height:7mm;padding:0 1.5mm}
+table.wt .wnum{width:24mm;text-align:right}
+.wf{margin-top:3mm}
+.wfi{display:flex;align-items:baseline;gap:3mm;margin-bottom:2.5mm}
+.wfi span{font:600 6.5pt 'Libre Franklin';letter-spacing:.9px;text-transform:uppercase;color:#7A5C16;flex:0 0 58mm}
+.wfi i{flex:1;border-bottom:0.25mm solid #D8CDB4;height:6.5mm}
+.wsent{margin-top:3mm;font-family:'Fraunces',Georgia,serif;font-size:10.5pt;line-height:2}
+.wsent u{display:inline-block;min-width:24mm;border-bottom:0.3mm solid #C9A24A;text-decoration:none}
+.wg{margin-top:3mm;display:grid;grid-template-columns:1fr 1fr;gap:2.5mm}
+.wgb{border:0.25mm solid #D8CDB4;height:22mm;padding:2mm}
+.wgb span{font:600 6.5pt 'Libre Franklin';letter-spacing:.9px;text-transform:uppercase;color:#7A5C16}
+.rwin{page-break-inside:avoid;margin-top:3.5mm;background:#F3E9D4;border-top:0.8mm solid #C9A24A;padding:3mm 4mm;display:flex;align-items:baseline;gap:4mm}
+.rlab{font:600 6.5pt 'Libre Franklin';letter-spacing:1.1px;text-transform:uppercase;color:#7A5C16;flex:0 0 52mm}
+.rwin i{flex:1;border-bottom:0.3mm solid #C9A24A;height:8mm}
+.teach{margin-top:3mm;font-size:8pt;line-height:1.65;color:#4A433A;border-top:0.25mm solid #DFD3B8;padding-top:2.5mm}
+.teach b{font-weight:600;color:#7A5C16}
+.sdec{margin-top:2.5mm;font-size:8.5pt;line-height:1.55;border-top:0.25mm solid #DFD3B8;padding-top:2.5mm}
+.sdec b{font-family:'Fraunces',Georgia,serif;font-weight:500}
 </style></head><body>
 
 <section class="cover">
@@ -115,6 +176,7 @@ td.g{width:48mm;font:600 7.5pt 'Libre Franklin';letter-spacing:.6px;text-transfo
     <div class="facts">
       <span class="fact">12 levels</span><span class="fact">4 domains every level</span>
       <span class="fact">7 clarity points each</span><span class="fact">336 steps</span>
+      ${SHEETS[stage] ? '<span class="fact">48 worksheets</span>' : ''}
     </div>
   </div>
   <p class="foot">ExploraSelf · A Good People Company · Lead yourself. Grow your business.<br>

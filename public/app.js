@@ -8,6 +8,8 @@
 // anywhere and nothing is asserted about a payment or a subscription.
 
 import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, DIAGNOSTIC, gateFor, levelFor, isWritten, weekTitle } from './content.js';
+import { FW_BUILD } from './fw-build.js';
+import { result as fwResult } from './frameworks.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -16,7 +18,8 @@ const KEY = 'ftb-v1';
 const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* private mode */ } };
 
-let state = Object.assign({ stage: '', scores: null, answers: {}, diag: {}, unlocked: 3 }, load());
+let state = Object.assign({ stage: '', scores: null, answers: {}, work: {}, diag: {}, unlocked: 3 }, load());
+if (!state.work) state.work = {};
 let view = state.stage ? 'map' : 'start';
 let level = 1, dom = 'self';
 
@@ -24,6 +27,75 @@ const compass = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 
 // ── Progress ─────────────────────────────────────────────────────────────────
 const aKey = (st, lv, dk, i) => `${st}.${lv}.${dk}.${i}`;
+
+// ── Worksheets ───────────────────────────────────────────────────────────────
+// A worksheet belongs to one domain of one level and sits under the clarity
+// point it serves. Entries are kept apart from the written answers, so a level
+// still closes on the twenty-eight and never on arithmetic.
+const SHEETS = { build: FW_BUILD };
+const wKey = (st, lv, dk, fk) => `w.${st}.${lv}.${dk}.${fk}`;
+function fwFor(st, lv, dk) {
+  const stage = SHEETS[st];
+  return (stage && stage[lv] && stage[lv][dk]) || null;
+}
+/** The founder's entries for one worksheet, keyed the way the engine wants. */
+function wValues(fw, st, lv, dk) {
+  const out = {};
+  for (const k of Object.keys(state.work)) {
+    const p = `w.${st}.${lv}.${dk}.`;
+    if (k.startsWith(p)) out[k.slice(p.length)] = state.work[k];
+  }
+  return out;
+}
+const wv = (st, lv, dk, fk) => state.work[wKey(st, lv, dk, fk)] || '';
+
+function cell(st, lv, dk, fk, label, type) {
+  const v = wv(st, lv, dk, fk);
+  return `<input class="wcell${type === 'num' ? ' wnum' : ''}" type="text" inputmode="${type === 'num' ? 'decimal' : 'text'}"
+    data-w="${wKey(st, lv, dk, fk)}" value="${esc(v)}" aria-label="${esc(label)}">`;
+}
+
+function worksheetBody(fw, st, lv, dk) {
+  const c = (fk, label, type) => cell(st, lv, dk, fk, label, type);
+  if (fw.shape === 'table') {
+    return `<div class="wtable"><table><thead><tr>${fw.cols.map((col) => `<th>${esc(col.n)}</th>`).join('')}</tr></thead>
+      <tbody>${Array.from({ length: fw.rows }, (_, r) => `<tr>${fw.cols
+        .map((col) => `<td>${c(`${col.k}:${r}`, `${col.n}, row ${r + 1}`, col.t)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  }
+  if (fw.shape === 'calc') {
+    return `<div class="wfields">${fw.fields.map((f) => `<label class="wfield"><span>${esc(f.n)}${f.hint ? ` <em>${esc(f.hint)}</em>` : ''}</span>${c(f.k, f.n, f.t || 'num')}</label>`).join('')}</div>`;
+  }
+  if (fw.shape === 'fill') {
+    return `<div class="wfill">${fw.blanks.map((b) => `<label class="wfield"><span>${esc(b.n)}${b.hint ? ` <em>${esc(b.hint)}</em>` : ''}</span>${c(b.k, b.n, 'text')}</label>`).join('')}</div>`;
+  }
+  if (fw.shape === 'grid') {
+    return `<div class="wgrid">${fw.boxes.map((b) => `<label class="wbox"><span>${esc(b.n)}</span>${c(b.k, b.n, 'text')}</label>`).join('')}</div>`;
+  }
+  if (fw.shape === 'rank') {
+    return `<div class="wrank">${fw.slots.map((sl, i) => `<label class="wslot"><span class="wsn">${i + 1}</span><span class="wsl">${esc(sl.n)}</span>${c(sl.k, sl.n, 'text')}</label>`).join('')}</div>`;
+  }
+  return '';
+}
+
+/** The result window. Shows nothing rather than a misleading zero. */
+function windowHTML(fw, st, lv, dk) {
+  const r = fwResult(fw, wValues(fw, st, lv, dk));
+  if (!r) return `<div class="rwin empty"><p class="rlabel">${esc(fw.out.label)}</p>
+    <p class="rwait">Fill the blanks above and the answer appears here.</p></div>`;
+  return `<div class="rwin"><p class="rlabel">${esc(fw.out.label)}</p>
+    <p class="rval${r.text ? ' rtext' : ''}">${esc(r.shown)}${r.unit ? `<small>${esc(r.unit)}</small>` : ''}</p>
+    ${r.read ? `<p class="rread">${esc(r.read)}</p>` : ''}</div>`;
+}
+
+function worksheetHTML(fw, st, lv, dk) {
+  return `<div class="sheet" id="sheet-${fw.k}">
+    <div class="shead"><p class="eyebrow">Worksheet</p><h4>${esc(fw.n)}</h4><p class="slead">${esc(fw.lead)}</p></div>
+    ${worksheetBody(fw, st, lv, dk)}
+    <div class="rhost" data-rhost="${fw.k}">${windowHTML(fw, st, lv, dk)}</div>
+    ${fw.teach ? `<details class="teach"><summary>${esc(fw.teach.n)}</summary><p>${esc(fw.teach.t)}</p></details>` : ''}
+    <p class="sdecide"><b>What this decides.</b> ${esc(fw.decides)}</p>
+  </div>`;
+}
 function answered(st, lv, dk) {
   return SEVEN.filter((_, i) => (state.answers[aKey(st, lv, dk, i)] || '').trim()).length;
 }
@@ -154,6 +226,7 @@ function levelView() {
 
   const done = levelDone(st, level);
   const D = L[dom];
+  const fw = fwFor(st, level, dom);
   return `<section class="band"><div class="wrap">
     <button class="ghost" data-go="map" style="margin-top:0">← Back to your Blueprint</button>
     <p class="eyebrow" style="margin-top:26px">Level ${level} · ${esc(STAGES[st].n)}</p>
@@ -178,6 +251,7 @@ function levelView() {
           <p class="swhy">${esc(SEVEN[i].why)}</p>
           <p class="sask">${esc(q)}</p>
           <textarea id="s-${st}-${level}-${dom}-${i}" data-k="${aKey(st, level, dom, i)}" rows="2" placeholder="Write it here" aria-label="${SEVEN[i].n}">${esc(v)}</textarea>
+          ${fw && fw.after === i + 1 ? worksheetHTML(fw, st, level, dom) : ''}
         </div></div>`;
     }).join('')}</div>
     <p class="savenote">Saved on this device as you type. A level closes when all twenty-eight are answered — not before.</p>
@@ -216,6 +290,15 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener('input', (e) => {
+  const w = e.target.closest('input[data-w]');
+  if (w) {
+    state.work[w.dataset.w] = w.value;
+    save();
+    const st = state.stage || 'build', fw = fwFor(st, level, dom);
+    const host = fw && document.querySelector(`[data-rhost="${fw.k}"]`);
+    if (host) host.innerHTML = windowHTML(fw, st, level, dom);
+    return;
+  }
   const a = e.target.closest('textarea[data-k]');
   if (!a) return;
   state.answers[a.dataset.k] = a.value;
