@@ -7,7 +7,7 @@
 // Answers live on the device while this is in preview. Nothing is sent
 // anywhere and nothing is asserted about a payment or a subscription.
 
-import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, DIAGNOSTIC, gateFor, levelFor, isWritten } from './content.js';
+import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, DIAGNOSTIC, gateFor, levelFor, isWritten, weekTitle } from './content.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -79,7 +79,7 @@ function resultBlock() {
       <span class="stage-pill">${esc(S.n)}</span>
       <h3>Thinnest right now: ${esc(thin.n.toLowerCase())} — ${esc(thin.full.toLowerCase())}</h3>
       <p>${esc(S.lede)} Across the four, ${esc(thin.n.toLowerCase())} is where you have least to point at, and in a founder ${esc(S.n.toLowerCase())} that is the one that compounds fastest if it is left alone.</p>
-      <p class="first">Start here<b>Level ${startLevel} — ${esc(WEEKS[st][startLevel - 1])}</b></p>
+      <p class="first">Start here<b>Level ${startLevel} — ${esc(weekTitle(st, startLevel))}</b></p>
       <button class="cta" data-go="map">Open your Blueprint →</button>
     </div></div></div>`;
 }
@@ -96,8 +96,8 @@ function mapView() {
     <div class="switch">${Object.entries(STAGES).map(([k, v]) => `<button class="sbtn" type="button" data-stage="${k}" aria-pressed="${k === st}">
       <strong>${esc(v.n)}</strong><small>${esc(v.blurb)}</small></button>`).join('')}</div>
 
-    <div class="levels">${WEEKS[st].map((title, i) => {
-      const lv = i + 1, g = gateFor(lv), e = S.emphasis[i];
+    <div class="levels">${WEEKS[st].map((_, i) => {
+      const lv = i + 1, title = weekTitle(st, lv), g = gateFor(lv), e = S.emphasis[i];
       const d = DOMAINS.find((x) => x.k === e);
       const done = levelDone(st, lv);
       return `<button class="lrow" type="button" data-level="${lv}">
@@ -122,7 +122,7 @@ const gateLabel = (g) => ({ free: 'Free', session: '1:1 session', lab: 'LAB', hu
 function levelView() {
   const st = state.stage || 'build';
   const L = levelFor(st, level);
-  const title = WEEKS[st][level - 1];
+  const title = weekTitle(st, level);
 
   if (!isOpen(level)) {
     const g = gateFor(level);
