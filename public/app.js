@@ -362,7 +362,7 @@ function moduleHTML(st) {
   const g = gateFor(level);
   const owned = holds(state.tier, g);
   const tabs = DOMAINS.map((d) => `<button type="button" class="mtab" data-dom="${d.k}" data-k="${d.k}"
-      aria-pressed="${d.k === dom}"><b>${d.n}</b><em>${answered(st, level, d.k)}/7</em></button>`).join('');
+      aria-pressed="${d.k === dom}"><b>${esc(LEAD[d.k])}</b><em>${answered(st, level, d.k)}/7</em></button>`).join('');
 
   if (!owned) {
     const rung = LADDER.find((r) => r.key === g);
@@ -399,7 +399,7 @@ function moduleHTML(st) {
     <article class="mod">
       <header class="modh">
         <span class="dkey" style="background:var(--${dom})"></span>
-        <div><p class="eyebrow">${esc(DOMAINS.find((d) => d.k === dom).n)} · ${esc(DOMAINS.find((d) => d.k === dom).full)}</p>
+        <div><p class="eyebrow">${esc(LEAD[dom])} · ${esc(DOMAINS.find((d) => d.k === dom).full)}</p>
         ${D.title === weekTitle(st, level) ? '' : `<h3>${esc(D.title)}</h3>`}
         <p class="modsub">${esc(D.sub)}</p></div>
       </header>
@@ -483,7 +483,7 @@ function levelHead(st, title) {
   const done = levelDone(st, level);
   return `<header class="lvh">
     <button class="backrail" type="button" data-go="rail">☰ Levels</button>
-    <p class="eyebrow">Level ${String(level).padStart(2, '0')} · ${esc(STAGES[st].n)} · emphasis ${esc(emphasisName(st, level).toLowerCase())}</p>
+    <p class="eyebrow">Level ${String(level).padStart(2, '0')} · ${esc(STAGES[st].n)} · leans on ${esc(emphasisName(st, level).toLowerCase())}</p>
     <h2>${esc(title)}</h2>
     <div class="lvtrack"><i style="width:${done / 28 * 100}%"></i></div>
     <p class="lvcount" id="lvcount">${done} of 28 answered</p>
@@ -493,7 +493,7 @@ function levelHead(st, title) {
 function emphasisName(st, lv) {
   const e = STAGES[st].emphasis[lv - 1];
   const d = DOMAINS.find((x) => x.k === e);
-  return d ? d.n : 'All four';
+  return d ? LEAD[d.k] : 'All four';
 }
 
 // ── Render ───────────────────────────────────────────────────────────────────
