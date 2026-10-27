@@ -156,10 +156,6 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offse
 .bk3-blank{align-items:center;justify-content:center;text-align:center;background:#EFE6D3;border:1.5px dashed #C8B993;font:700 9.5px/1.3 var(--body);letter-spacing:1.2px;text-transform:uppercase;color:var(--gold-ink)}
 .lead-why{font-family:var(--display);font-size:clamp(17px,2.2vw,20px);line-height:1.5;max-width:56ch;margin-top:18px}
 .lead-why b{font-weight:600;color:var(--gold-ink)}
-.names{margin-top:28px;padding:18px 20px;border:1px solid var(--line);background:rgba(255,253,247,.6)}
-.names dl{margin:10px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:14px 22px}
-.names dt{font-family:var(--display);font-weight:600;font-size:16px}
-.names dd{margin:3px 0 0;font-size:13.5px;line-height:1.5;color:var(--muted)}
 /* One warm line that hands the reader from one section to the next. */
 .turn{font-family:var(--display);font-style:italic;font-size:clamp(17px,2.4vw,21px);line-height:1.45;color:var(--muted);max-width:52ch;margin:0 0 20px}
 .band.dark .turn{color:#B9AC94}
@@ -464,6 +460,36 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offse
 .close .under{color:#9D917E}
 footer{background:var(--dark)}
 footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
+
+/* ═══ The Incubator banner: a dark book-plate on paper, framed like a certificate ═══ */
+.incu{background:#EFE6D3;border-top:1px solid #D9CBAE;border-bottom:1px solid #D9CBAE}
+.incu .wrap{padding-block:clamp(48px,8vw,88px)}
+.incu-plate{position:relative;max-width:820px;margin:0 auto;text-align:center;color:#F4ECDA;padding:clamp(40px,6vw,64px) clamp(22px,5vw,64px);
+  background:radial-gradient(90% 120% at 50% 0%,#2C2215 0%,#16110B 62%);border:1px solid #16110B;
+  box-shadow:inset 0 0 0 8px #16110B,inset 0 0 0 9px rgba(201,162,74,.75),inset 0 0 0 13px #16110B,inset 0 0 0 14px rgba(201,162,74,.35),0 30px 60px -30px rgba(28,19,9,.55)}
+.incu-mark{color:var(--gold);display:block;margin:0 auto 18px}
+.incu-kick{font:600 11px/1 var(--body);letter-spacing:5px;text-transform:uppercase;color:var(--gold)}
+.incu h2{font-family:var(--display);font-weight:600;font-size:clamp(44px,8vw,78px);line-height:1;letter-spacing:-1.2px;margin:14px 0 0;color:#F8F1E2}
+.incu-sub{font:italic 500 clamp(19px,2.6vw,24px)/1.3 var(--display);color:var(--gold-hi);margin-top:10px}
+.incu-rule{height:1px;width:140px;margin:28px auto;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.incu-facts{list-style:none;padding:0;margin:0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));max-width:640px}
+.incu-facts li{padding:4px 14px;border-left:1px solid rgba(201,162,74,.35)}
+.incu-facts li:first-child{border-left:0}
+.incu-facts b{display:block;font:600 clamp(17px,2.2vw,20px)/1.2 var(--display);color:#F8F1E2}
+.incu-facts span{display:block;font-size:13px;line-height:1.4;color:#B8AB92;margin-top:5px}
+.incu-then{margin:26px auto 22px;max-width:44ch;color:#D8CBB2;font-size:15.5px}
+.incu .cta{display:inline-flex}
+@media(max-width:560px){.incu-facts{grid-template-columns:1fr;gap:14px}.incu-facts li{border-left:0;border-top:1px solid rgba(201,162,74,.3);padding-top:14px}.incu-facts li:first-child{border-top:0;padding-top:0}}
+/* "You are here" at the very start of the twelve-week rail */
+.here{position:absolute;top:0;left:0;z-index:3;display:flex;flex-direction:column;align-items:flex-start}
+.here p{font:700 10.5px/1 var(--body);letter-spacing:1.6px;text-transform:uppercase;color:var(--ok);order:-1;margin-bottom:8px;white-space:nowrap}
+.here .dot{display:block;width:12px;height:12px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 5px rgba(87,138,96,.25);margin-left:2px}
+.joins{transform:none;text-align:left}
+.joins p{text-align:left}
+.joins .dot,.joins .stalk{margin-left:-7px}
+.joins .stalk{margin-left:-1px}
+.here{top:3px}
+@media(max-width:720px){.here p{font-size:9.5px}}
 </style>
 </head>
 <body>
@@ -533,67 +559,9 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
   </div>
 </div></section>
 
-<!-- ═══ how it works, in three ═══ -->
-<section class="band"><div class="wrap">
-  <p class="turn">So, how do you find out which one? Gently, and in order.</p>
-  <p class="eyebrow">How it works</p>
-  <h2 class="sectitle">Three things happen, in this order</h2>
-  <div class="steps">
-    <div class="stp"><span class="circ">1</span><h3>We find where you are</h3>
-      <p>Ten questions, then your Ground Plan: which stage you are in, and which of the four is costing you most.</p></div>
-    <div class="stp"><span class="circ">2</span><h3>You work one week at a time</h3>
-      <p>Open something real, count it, write it down. Twenty-eight answers closes a week.</p></div>
-    <div class="stp"><span class="circ">3</span><h3>You get an answer, in your own numbers</h3>
-      <p>After week three the Blueprint reads your own figures back and names the one thing to fix first.</p></div>
-  </div>
-  <p class="small">Every week asks you to open something real — your calendar, your invoices, your delivery — and write down what is actually there. That is the method, and it is why it works.</p>
-  <p class="lead-why">The numbers are never the point. Each one is there to help you <b>make a decision</b>, <b>lead a person</b> or <b>hand something over</b> — the leadership work only you can do.</p>
-  <div class="names"><p class="eyebrow">How the names fit</p>
-    <dl>
-      <div><dt>Link to Lead</dt><dd>The programme: twelve levels, at your stage.</dd></div>
-      <div><dt>The Founder’s Blueprint</dt><dd>The working manual — the worksheets you fill in, level by level.</dd></div>
-      <div><dt>Your Ground Plan</dt><dd>Your result after the ten questions: your stage and your first three moves.</dd></div>
-      <div><dt>The Incubator · LAB · HUB · The Cornerstone</dt><dd>The same programme, opened further, with more support at each step.</dd></div>
-    </dl></div>
-  <div class="ctarow"><a class="cta" href="/start">See where I stand</a>
-    <p class="under">Ten questions. Two minutes. Nothing to pay.</p></div>
-</div></section>
-
-<!-- ═══ stages + emphasis ═══ -->
-<section class="band dark"><div class="wrap">
-  <p class="turn">Let’s find where you actually are — not where the last podcast said you should be.</p>
-  <p class="eyebrow">Where you are</p>
-  <h2 class="sectitle">Your stage decides what comes first</h2>
-  <p class="lede" style="color:#DDD3BD">A founder chasing first clients and a founder with a team describe their problem with the same words and do not have the same problem.</p>
-
-  <div class="stages">
-    <div class="stage s1"><span class="sn">1</span><p class="num">Stage one</p><h3>Building</h3>
-      <p>Finding the offer and the first clients. Everything depends on you.</p>
-      <div class="wt"><p class="wl">These two carry it</p>
-        <div class="chips"><span class="ch" style="background:var(--self)">Yourself</span>
-        <span class="ch" style="background:var(--market)">The market</span>
-        <span class="ch off">People</span><span class="ch off">Business</span></div></div></div>
-    <div class="stage s2"><span class="sn">2</span><p class="num">Stage two</p><h3>Growing</h3>
-      <p>Clients repeat, but the business still runs through one head.</p>
-      <div class="wt"><p class="wl">These two carry it</p>
-        <div class="chips"><span class="ch" style="background:var(--people)">Your people</span>
-        <span class="ch" style="background:var(--work)">Your business</span>
-        <span class="ch off">Yourself</span><span class="ch off">Market</span></div></div></div>
-    <div class="stage s3"><span class="sn">3</span><p class="num">Stage three</p><h3>Scaling</h3>
-      <p>There is a team, and the constraint is judgement, not work.</p>
-      <div class="wt"><p class="wl">All four, evenly</p>
-        <div class="chips"><span class="ch" style="background:var(--self)">Yourself</span>
-        <span class="ch" style="background:var(--people)">People</span>
-        <span class="ch" style="background:var(--work)">Business</span>
-        <span class="ch" style="background:var(--market)">Market</span></div></div></div>
-  </div>
-
-  <p class="small" style="color:var(--muted-dark)">You work all four either way. Only the weight changes — and the ten questions set it, not you.</p>
-</div></section>
-
 <!-- ═══ the twelve ═══ -->
 <section class="band"><div class="wrap">
-  <p class="turn">Then let’s lay the weeks out flat, where you can see them.</p>
+  <p class="turn">And you never drop the other three. Let’s lay the twelve weeks out flat.</p>
   <p class="eyebrow">How twelve weeks run</p>
   <h2 class="sectitle">All four, every week</h2>
   <p class="lede">Not a module on mindset then a module on sales. Every week works all four and leans on the one you are thinnest in. They rise together, because in a real business they do.</p>
@@ -629,6 +597,38 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
   </div>
 
   <p class="small">Seven questions in each, every week — <strong>name it · evidence · gap · cost · decision · move · review</strong>. Twenty-eight answers close a week. None can be answered by thinking hard; each names what to open, what to count and what to write.</p>
+</div></section>
+
+<!-- ═══ stages + emphasis ═══ -->
+<section class="band dark"><div class="wrap">
+  <p class="turn">All four, every week — but not with the same weight. That depends on where you actually are, not where the last podcast said you should be.</p>
+  <p class="eyebrow">Where you are</p>
+  <h2 class="sectitle">Your stage decides what comes first</h2>
+  <p class="lede" style="color:#DDD3BD">A founder chasing first clients and a founder with a team describe their problem with the same words and do not have the same problem.</p>
+
+  <div class="stages">
+    <div class="stage s1"><span class="sn">1</span><p class="num">Stage one</p><h3>Building</h3>
+      <p>Finding the offer and the first clients. Everything depends on you.</p>
+      <div class="wt"><p class="wl">These two carry it</p>
+        <div class="chips"><span class="ch" style="background:var(--self)">Yourself</span>
+        <span class="ch" style="background:var(--market)">The market</span>
+        <span class="ch off">People</span><span class="ch off">Business</span></div></div></div>
+    <div class="stage s2"><span class="sn">2</span><p class="num">Stage two</p><h3>Growing</h3>
+      <p>Clients repeat, but the business still runs through one head.</p>
+      <div class="wt"><p class="wl">These two carry it</p>
+        <div class="chips"><span class="ch" style="background:var(--people)">Your people</span>
+        <span class="ch" style="background:var(--work)">Your business</span>
+        <span class="ch off">Yourself</span><span class="ch off">Market</span></div></div></div>
+    <div class="stage s3"><span class="sn">3</span><p class="num">Stage three</p><h3>Scaling</h3>
+      <p>There is a team, and the constraint is judgement, not work.</p>
+      <div class="wt"><p class="wl">All four, evenly</p>
+        <div class="chips"><span class="ch" style="background:var(--self)">Yourself</span>
+        <span class="ch" style="background:var(--people)">People</span>
+        <span class="ch" style="background:var(--work)">Business</span>
+        <span class="ch" style="background:var(--market)">Market</span></div></div></div>
+  </div>
+
+  <p class="small" style="color:var(--muted-dark)">You work all four either way. Only the weight changes — and the ten questions set it, not you.</p>
 </div></section>
 
 <!-- ═══ what changes ═══ -->
@@ -679,32 +679,23 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
   </div>
 </div></section>
 
-<!-- ═══ what you get ═══ -->
-<section class="band dark"><div class="wrap">
-  <p class="turn">And so nothing gets lost: everything you write stays yours.</p>
-  <p class="eyebrow">What lands on your desk</p>
-  <h2 class="sectitle">You keep everything you fill in</h2>
-  <p class="lede" style="color:#DDD3BD">Not a course you watch. A workbook for your stage, and a worksheet every week that does the arithmetic while you fill it in.</p>
-
-  <div class="shelf">
-    <div class="bk b1"><i class="spine"></i><p class="bb">ExploraSelf</p><h4>Building</h4>
-      <p class="bm">The Founder’s Blueprint</p><p class="bp">79 pages · A4</p></div>
-    <div class="bk b2"><i class="spine"></i><p class="bb">ExploraSelf</p><h4>Growing</h4>
-      <p class="bm">The Founder’s Blueprint</p><p class="bp">77 pages · A4</p></div>
-    <div class="bk b3"><i class="spine"></i><p class="bb">ExploraSelf</p><h4>Scaling</h4>
-      <p class="bm">The Founder’s Blueprint</p><p class="bp">80 pages · A4</p></div>
-
+<!-- ═══ how it works, in three ═══ -->
+<section class="band"><div class="wrap">
+  <p class="turn">So how do you get there? Gently, and in order.</p>
+  <p class="eyebrow">How it works</p>
+  <h2 class="sectitle">Three things happen, in this order</h2>
+  <div class="steps">
+    <div class="stp"><span class="circ">1</span><h3>We find where you are</h3>
+      <p>Ten questions, then your Ground Plan: which stage you are in, and which of the four is costing you most.</p></div>
+    <div class="stp"><span class="circ">2</span><h3>You work one week at a time</h3>
+      <p>Open something real, count it, write it down. Twenty-eight answers closes a week.</p></div>
+    <div class="stp"><span class="circ">3</span><h3>You get an answer, in your own numbers</h3>
+      <p>After week three the Blueprint reads your own figures back and names the one thing to fix first.</p></div>
   </div>
-
-  <p class="small" style="color:var(--muted-dark)">Your answers save as you type and follow you between laptop and phone. Print them, export them, or hand them to whoever runs that part of the business next.</p>
-  <div class="ctarow"><a class="cta" href="/start">Start week one tonight</a>
-    <p class="under">Free, and the first three weeks stay free.</p></div>
-</div></section>
-
-<!-- ═══ bridge → business ═══ -->
-<section class="bridge"><div class="wrap">
-  <p style="margin-top:0">You can start tonight, on your own, for nothing.</p>
-  <p class="sub">Here is how far that takes you, and where it is worth bringing someone in.</p>
+  <p class="small">Every week asks you to open something real — your calendar, your invoices, your delivery — and write down what is actually there. That is the method, and it is why it works.</p>
+  <p class="lead-why">The numbers are never the point. Each one is there to help you <b>make a decision</b>, <b>lead a person</b> or <b>hand something over</b> — the leadership work only you can do.</p>
+  <div class="ctarow"><a class="cta" href="/start">See where I stand</a>
+    <p class="under">Ten questions. Two minutes. Nothing to pay.</p></div>
 </div></section>
 
 <!-- ═══ door 1 ═══ -->
@@ -729,16 +720,64 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
     <p class="under">Two minutes to find your starting point.</p></div>
 </div></section>
 
+<!-- ═══ bridge → business ═══ -->
+<section class="bridge"><div class="wrap">
+  <p style="margin-top:0">You can start tonight, on your own, for nothing.</p>
+  <p class="sub">And whatever you write, you keep.</p>
+</div></section>
+
+<!-- ═══ what you get ═══ -->
+<section class="band dark"><div class="wrap">
+  <p class="turn">On paper, in your hands, and yours to hand on.</p>
+  <p class="eyebrow">What lands on your desk</p>
+  <h2 class="sectitle">You keep everything you fill in</h2>
+  <p class="lede" style="color:#DDD3BD">Not a course you watch. A workbook for your stage, and a worksheet every week that does the arithmetic while you fill it in.</p>
+
+  <div class="shelf">
+    <div class="bk b1"><i class="spine"></i><p class="bb">ExploraSelf</p><h4>Building</h4>
+      <p class="bm">The Founder’s Blueprint</p><p class="bp">79 pages · A4</p></div>
+    <div class="bk b2"><i class="spine"></i><p class="bb">ExploraSelf</p><h4>Growing</h4>
+      <p class="bm">The Founder’s Blueprint</p><p class="bp">77 pages · A4</p></div>
+    <div class="bk b3"><i class="spine"></i><p class="bb">ExploraSelf</p><h4>Scaling</h4>
+      <p class="bm">The Founder’s Blueprint</p><p class="bp">80 pages · A4</p></div>
+
+  </div>
+
+  <p class="small" style="color:var(--muted-dark)">Your answers save as you type and follow you between laptop and phone. Print them, export them, or hand them to whoever runs that part of the business next.</p>
+  <div class="ctarow"><a class="cta" href="/start">Start week one tonight</a>
+    <p class="under">Free, and the first three weeks stay free.</p></div>
+</div></section>
+
+<!-- ═══ incubator banner ═══ -->
+<section class="incu"><div class="wrap">
+  <div class="incu-plate">
+    <svg class="incu-mark" width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="none" stroke="currentColor" stroke-width=".8" opacity=".5"/><circle cx="32" cy="32" r="25" fill="none" stroke="currentColor" stroke-width=".6" opacity=".35"/><rect x="18" y="18" width="28" height="28" transform="rotate(45 32 32)" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="26.5" y="26.5" width="11" height="11" transform="rotate(45 32 32)" fill="currentColor"/></svg>
+    <p class="incu-kick">Link to Lead</p>
+    <h2>The Incubator</h2>
+    <p class="incu-sub">Where every founder begins.</p>
+    <div class="incu-rule" aria-hidden="true"></div>
+    <ul class="incu-facts">
+      <li><b>Levels 01–03</b><span>Twelve modules, every worksheet</span></li>
+      <li><b>All four domains</b><span>Yourself, people, business, market</span></li>
+      <li><b>No cost</b><span>No card. Free to stay.</span></li>
+    </ul>
+    <p class="incu-then">Then an hour with Alexandru, and two more levels open.</p>
+    <a class="cta" href="/start">Enter the Incubator →</a>
+  </div>
+</div></section>
+
 <!-- ═══ door 2 ═══ -->
 <section class="band dark"><div class="wrap">
   <p class="turn">Three weeks in, let’s bring in a second pair of eyes.</p>
+  <p class="eyebrow" style="color:var(--gold-hi)">The Incubator · what comes next</p>
   <div class="doorhead"><span class="weeks">Weeks <b>4–5</b></span><h2 class="sectitle" style="margin-top:0">Alexandru joins you</h2></div>
   <p class="lede" style="color:#DDD3BD">Finish week three and you can book an hour with Alexandru <strong style="color:var(--gold-hi)">at no cost</strong>. Alexandru and the team read everything you wrote beforehand, so the hour is spent deciding rather than explaining.</p>
   <p class="lede" style="color:#DDD3BD">That hour opens weeks four and five.</p>
 
   <div class="rail">
-    <div class="railin" role="img" aria-label="Twelve weeks in order. Weeks one to three free, Alexandru joins between three and four, the LAB covers six to nine, the HUB ten to twelve, Premium runs across all of it.">
-      <div class="joins"><p>Alexandru joins you here — two more weeks open, free</p><span class="dot"></span><span class="stalk"></span></div>
+    <div class="railin" role="img" aria-label="Twelve weeks in order. You start here. The Incubator, weeks one to three, free. Alexandru joins between three and four, the LAB covers six to nine, the HUB ten to twelve, Premium runs across all of it.">
+      <div class="here"><span class="dot"></span><p>You are here</p></div>
+      <div class="joins"><p>An hour with Alexandru, at no cost — two more weeks open</p><span class="dot"></span><span class="stalk"></span></div>
       <div class="railline"></div><div class="railfill"></div>
       <div class="railwks">
         <span class="rw free"><i></i><b>1</b></span><span class="rw free"><i></i><b>2</b></span><span class="rw free"><i></i><b>3</b></span>
@@ -747,7 +786,7 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
         <span class="rw hub"><i></i><b>10</b></span><span class="rw hub"><i></i><b>11</b></span><span class="rw hub"><i></i><b>12</b></span>
       </div>
       <div class="railpins">
-        <span class="pin a">On your own<em>Free</em></span>
+        <span class="pin a">The Incubator<em>Levels 01–03 · Free</em></span>
         <span class="pin b">Two more weeks, unlocked<em>No cost</em></span>
         <span class="pin c">The LAB<em>$97</em></span>
         <span class="pin d">The HUB<em>$399</em></span>
