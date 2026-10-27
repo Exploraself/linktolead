@@ -127,9 +127,7 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offse
 .libx{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:28px 48px;margin-top:28px;align-items:start}
 .libx-k{font:700 12px/1.5 var(--body);letter-spacing:2.4px;text-transform:uppercase;color:var(--gold-ink)}
 .libx-mans{list-style:none;padding:0;margin:12px 0 0}
-.libx-mans li{display:grid;grid-template-columns:52px minmax(0,1fr);gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
-.libx-m{width:52px;height:66px;display:flex;align-items:flex-end;padding:5px;box-sizing:border-box;background:#1C1309;border-bottom:4px solid var(--gold);font:600 8.5px/1.2 var(--body);letter-spacing:.8px;text-transform:uppercase;color:#EBD49A}
-.libx-g{border-color:#4C6B55}.libx-s{border-color:#3E5C78}
+.libx-mans li{display:grid;grid-template-columns:70px minmax(0,1fr);gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .libx b{display:block;font-family:var(--display);font-size:18px;font-weight:600;line-height:1.25}
 .libx small{display:block;font-size:13.5px;line-height:1.45;color:var(--muted);margin-top:3px}
 .libx-btn{display:inline-flex;align-items:center;min-height:48px;margin-top:18px;padding:0 22px;background:var(--gold);color:#1C1309;font:700 15px/1 var(--body);text-decoration:none}
@@ -138,12 +136,24 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offse
 .libx-lab a,.libx-books a{display:inline-block;margin-top:8px;margin-right:14px;font:600 13.5px/1.4 var(--body);color:var(--gold-ink);text-decoration:none}
 .libx-lab a:hover,.libx-books a:hover{text-decoration:underline}
 .libx-books{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:14px}
-.libx-books li{display:grid;grid-template-columns:104px minmax(0,1fr);gap:16px;padding:14px;border:1px solid var(--line);background:rgba(255,253,247,.6)}
+.libx-books li{display:grid;grid-template-columns:122px minmax(0,1fr);gap:16px;padding:14px;border:1px solid var(--line);background:rgba(255,253,247,.6)}
 .libx-books img{width:104px;height:104px;object-fit:cover;display:block}
 .libx-books em{display:block;font:700 10.5px/1.4 var(--body);letter-spacing:1.8px;text-transform:uppercase;font-style:normal;color:var(--gold-ink);margin-bottom:3px}
 .libx-books i{display:block;margin-top:6px;font-style:normal;font-size:12.5px;color:var(--muted)}
-.libx-blank{width:104px;height:104px;display:flex;align-items:center;justify-content:center;text-align:center;border:1.5px dashed #C8B993;font:600 10px/1.3 var(--body);letter-spacing:1.3px;text-transform:uppercase;color:var(--gold-ink)}
-@media(max-width:760px){.libx{grid-template-columns:1fr}.libx-books li{grid-template-columns:84px minmax(0,1fr)}.libx-books img,.libx-blank{width:84px;height:84px}.libx-btn{width:100%;justify-content:center}}
+@media(max-width:760px){.libx{grid-template-columns:1fr}.libx-books li{grid-template-columns:100px minmax(0,1fr)}.libx-books .bk3{--w:84px;--h:84px}.libx-btn{width:100%;justify-content:center}}
+/* book mockups: a front cover with spine shading, page edges and a soft shadow */
+.bk3{--w:104px;--h:104px;position:relative;display:block;width:var(--w);height:var(--h);flex:none;margin:2px 14px 14px 2px;transform:perspective(700px) rotateY(-22deg);transform-style:preserve-3d}
+.bk3>img,.bk3>.bk3-cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:1px 3px 3px 1px;box-sizing:border-box}
+.bk3-spine{position:absolute;left:0;top:0;bottom:0;width:7%;background:linear-gradient(90deg,rgba(255,255,255,.18),rgba(0,0,0,.28) 60%,rgba(255,255,255,.06));border-radius:1px 0 0 1px}
+.bk3::before{content:"";position:absolute;top:2px;bottom:2px;right:-9px;width:10px;transform:rotateY(70deg);transform-origin:left;background:repeating-linear-gradient(90deg,#FBF7EE 0 1px,#E2D7BF 1px 2px);border-radius:0 2px 2px 0}
+.bk3::after{content:"";position:absolute;left:6%;right:-6%;bottom:-13px;height:13px;background:radial-gradient(50% 60% at 50% 30%,rgba(28,19,9,.36),transparent 75%)}
+.bk3-cover{display:flex;flex-direction:column;padding:7px 5px 7px 10px}
+.bk3-cover small{font:700 5.5px/1 var(--body);letter-spacing:1.2px;text-transform:uppercase;color:rgba(227,196,126,.9)}
+.bk3-cover b{font-family:var(--display);font-size:11px;font-weight:600;color:#F6EEDC;margin-top:auto;line-height:1.1}
+.bk3-man{--w:54px;--h:72px}
+.bk3-man .bk3-cover small{display:none}
+.bk3-b .bk3-cover{background:linear-gradient(160deg,#6E3C21,#3A1E10)}.bk3-g .bk3-cover{background:linear-gradient(160deg,#2F4D38,#16261B)}.bk3-s .bk3-cover{background:linear-gradient(160deg,#23455C,#0F2230)}
+.bk3-blank{align-items:center;justify-content:center;text-align:center;background:#EFE6D3;border:1.5px dashed #C8B993;font:700 9.5px/1.3 var(--body);letter-spacing:1.2px;text-transform:uppercase;color:var(--gold-ink)}
 /* One warm line that hands the reader from one section to the next. */
 .turn{font-family:var(--display);font-style:italic;font-size:clamp(17px,2.4vw,21px);line-height:1.45;color:var(--muted);max-width:52ch;margin:0 0 20px}
 .band.dark .turn{color:#B9AC94}
@@ -271,6 +281,11 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offse
 .ki p{font-size:13.2px;line-height:1.6;color:var(--muted-dark);margin-top:11px}
 .shelf{display:grid;gap:14px;margin-top:30px}
 @media(min-width:720px){.shelf{grid-template-columns:repeat(3,1fr);align-items:end;max-width:760px}}
+@media(max-width:719px){.shelf{display:block;position:relative;height:250px;max-width:340px;margin-inline:auto}
+  .shelf .bk{position:absolute;width:44%;top:28px;padding:14px 10px 12px 18px}
+  .shelf .b1{left:3%;transform:rotate(-9deg)}.shelf .b3{right:3%;transform:rotate(9deg)}
+  .shelf .b2{left:28%;top:6px;z-index:2;box-shadow:0 22px 40px -18px rgba(0,0,0,.95)}
+  .shelf .bk h4{font-size:20px}.shelf .bk .bm{font-size:10px}}
 .bk{position:relative;aspect-ratio:3/4;padding:20px 18px 18px 26px;display:flex;flex-direction:column;
   border:1px solid rgba(227,196,126,.3);box-shadow:0 18px 36px -22px rgba(0,0,0,.9);overflow:hidden}
 .bk .spine{position:absolute;left:0;top:0;bottom:0;width:9px;background:rgba(0,0,0,.3);
@@ -928,17 +943,17 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
     <div class="libx-col">
       <p class="libx-k">The Founder’s Blueprint · three manuals</p>
       <ul class="libx-mans">
-        <li><span class="libx-m" aria-hidden="true">Building</span><span><b>Building</b><small>Finding the offer and the first clients · 79 pages</small></span></li>
-        <li><span class="libx-m libx-g" aria-hidden="true">Growing</span><span><b>Growing</b><small>Clients repeat, everything runs through you · 77 pages</small></span></li>
-        <li><span class="libx-m libx-s" aria-hidden="true">Scaling</span><span><b>Scaling</b><small>There is a team, and your job has changed · 80 pages</small></span></li>
+        <li><span class="bk3 bk3-man bk3-b" aria-hidden="true"><span class="bk3-cover"><small>ExploraSelf</small><b>Building</b></span><i class="bk3-spine"></i></span><span><b>Building</b><small>Finding the offer and the first clients · 79 pages</small></span></li>
+        <li><span class="bk3 bk3-man bk3-g" aria-hidden="true"><span class="bk3-cover"><small>ExploraSelf</small><b>Growing</b></span><i class="bk3-spine"></i></span><span><b>Growing</b><small>Clients repeat, everything runs through you · 77 pages</small></span></li>
+        <li><span class="bk3 bk3-man bk3-s" aria-hidden="true"><span class="bk3-cover"><small>ExploraSelf</small><b>Scaling</b></span><i class="bk3-spine"></i></span><span><b>Scaling</b><small>There is a team, and your job has changed · 80 pages</small></span></li>
       </ul>
       <a class="libx-btn" href="/start">Join to download all three →</a>
       <div class="libx-lab"><b>Personal Leadership LAB · The Workbook</b><small>93 pages · opens with the LAB</small><a href="https://exploraself.com/lab" target="_blank" rel="noopener">See the LAB ↗</a></div>
     </div>
     <ul class="libx-books">
-      <li><img src="/library/cover-built-to-lead.jpg" alt="Built to Lead cover" width="104" height="104" loading="lazy"><span><em>99 practical tools</em><b>Built to Lead</b><small>One leader in the making. A personal leadership field guide.</small><a href="/library/built-to-lead-preview.pdf" target="_blank" rel="noopener">Preview the first pages →</a><a href="/start">Join for the free digital copy →</a><i>Print edition coming</i></span></li>
-      <li><img src="/library/cover-worth-building.jpg" alt="Worth Building cover" width="104" height="104" loading="lazy"><span><em>32 leadership frameworks</em><b>Worth Building</b><small>The Founder’s Playbook. Turn grit into growth and build a business that lasts.</small><a href="/library/worth-building-preview.pdf" target="_blank" rel="noopener">Preview the first pages →</a><a href="/start">Join for the free digital copy →</a><i>Print edition coming</i></span></li>
-      <li class="libx-soon"><span class="libx-blank" aria-hidden="true">In preparation</span><span><em>For scaling founders</em><b>A New Way of Winning</b><small>The third book: all twelve levels, written for the founder whose job has changed.</small><i>In preparation</i></span></li>
+      <li><span class="bk3"><img src="/library/cover-built-to-lead.jpg" alt="Built to Lead cover" width="104" height="104" loading="lazy"><i class="bk3-spine"></i></span><span><em>99 practical tools</em><b>Built to Lead</b><small>One leader in the making. A personal leadership field guide.</small><a href="/library/built-to-lead-preview.pdf" target="_blank" rel="noopener">Preview the first pages →</a><a href="/start">Join for the free digital copy →</a><i>Print edition coming</i></span></li>
+      <li><span class="bk3"><img src="/library/cover-worth-building.jpg" alt="Worth Building cover" width="104" height="104" loading="lazy"><i class="bk3-spine"></i></span><span><em>32 leadership frameworks</em><b>Worth Building</b><small>The Founder’s Playbook. Turn grit into growth and build a business that lasts.</small><a href="/library/worth-building-preview.pdf" target="_blank" rel="noopener">Preview the first pages →</a><a href="/start">Join for the free digital copy →</a><i>Print edition coming</i></span></li>
+      <li class="libx-soon"><span class="bk3" aria-hidden="true"><span class="bk3-cover bk3-blank">In preparation</span></span><span><em>For scaling founders</em><b>A New Way of Winning</b><small>The third book: all twelve levels, written for the founder whose job has changed.</small><i>In preparation</i></span></li>
     </ul>
   </div>
 </div></section>

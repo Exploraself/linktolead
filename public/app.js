@@ -512,14 +512,14 @@ function libraryView() {
   const hasLab = holds(state.tier, 'lab');
   const dl = '<svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const manuals = LIBRARY.manuals.map((m) => `<li class="lib-man${m.k === state.stage ? ' lib-yours' : ''}">
-      <span class="lib-mcover lib-${m.k}" aria-hidden="true"><i>${esc(STAGES[m.k].n)}</i></span>
+      <span class="bk3 bk3-man bk3-${m.k}" aria-hidden="true"><span class="bk3-cover"><small>ExploraSelf</small><b>${esc(STAGES[m.k].n)}</b></span><i class="bk3-spine"></i></span>
       <span class="lib-mtext"><b>${esc(m.n)}</b><small>${esc(m.sub)} · ${m.pages} pages${m.k === state.stage ? ' · your stage' : ''}</small></span>
       ${joined ? `<a class="lib-btn" href="${esc(m.file)}" download>${dl}Download PDF</a>` : `<button type="button" class="lib-btn" data-go="${diagDone() ? 'join' : 'quiz'}">Join to download</button>`}
     </li>`).join('');
   const books = LIBRARY.books.map((b) => b.soon
-    ? `<li class="lib-book lib-soon"><span class="lib-bcover lib-blank" aria-hidden="true"><i>In preparation</i></span>
+    ? `<li class="lib-book lib-soon"><span class="bk3" aria-hidden="true"><span class="bk3-cover bk3-blank">In preparation</span></span>
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small><em>In preparation</em></span></li>`
-    : `<li class="lib-book"><img class="lib-bcover" src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy">
+    : `<li class="lib-book"><span class="bk3"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small>
         <span class="lib-acts"><a href="${esc(b.preview)}" target="_blank" rel="noopener">Preview the first pages →</a>
         ${joined ? `<a href="${esc(b.file)}" download>${dl}Free digital copy</a>` : `<button type="button" class="lib-link" data-go="${diagDone() ? 'join' : 'quiz'}">Join for the free digital copy</button>`}
