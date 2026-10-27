@@ -344,8 +344,8 @@ export const LIBRARY = {
       cover: '/library/cover-built-to-lead.jpg', preview: '/library/built-to-lead-preview.pdf', file: '/library/built-to-lead.pdf', print: null },
     { k: 'wb', kicker: '32 leadership frameworks', n: 'Worth Building', sub: 'The Founder’s Playbook. Turn grit into growth and build a business that lasts.',
       cover: '/library/cover-worth-building.jpg', preview: '/library/worth-building-preview.pdf', file: '/library/worth-building.pdf', print: null },
-    { k: 'nww', kicker: 'For scaling founders', n: 'A New Way of Winning', sub: 'The third book: all twelve levels, written for the founder whose job has changed.',
-      cover: null, preview: null, file: null, print: null, soon: true },
+    { k: 'nww', kicker: '12 principles', n: 'A New Way of Winning', sub: 'The Link to Lead Manual. Four stages. Four domains.',
+      cover: '/library/cover-a-new-way-of-winning.jpg', preview: null, file: null, print: null, soon: true },
   ],
   lab: { n: 'Personal Leadership LAB · The Workbook', sub: '13 steps, each one built on the last. One written answer at a time.', pages: 93, url: 'https://exploraself.com/lab' },
 };
