@@ -519,7 +519,7 @@ function libraryView() {
       ${joined ? `<a class="lib-btn" href="${esc(m.file)}" download>${dl}Download PDF</a>` : `<button type="button" class="lib-btn" data-go="${diagDone() ? 'join' : 'quiz'}">Join to download</button>`}
     </li>`).join('');
   const books = LIBRARY.books.map((b) => b.soon
-    ? `<li class="lib-book lib-soon"><span class="bk3" aria-hidden="true"><span class="bk3-cover bk3-blank">In preparation</span></span>
+    ? `<li class="lib-book lib-soon">${b.cover ? `<span class="bk3"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>` : '<span class="bk3" aria-hidden="true"><span class="bk3-cover bk3-blank">In preparation</span></span>'}
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small><em>In preparation</em></span></li>`
     : `<li class="lib-book"><span class="bk3"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small>
