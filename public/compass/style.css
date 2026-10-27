@@ -177,3 +177,33 @@ html{overflow-wrap:anywhere}body{font-size:16px}main{min-width:0}.shell,.hero-co
 @media(prefers-reduced-motion:reduce){.four-steps a{transition:none}.four-steps a:hover{transform:none}}
 .qnum{white-space:nowrap;min-width:32px}
 @media print{.skip{display:none!important}}
+
+/* ── Step 2: where do you want to get? ── */
+.goals{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:12px;margin-bottom:8px}
+.goals button{text-align:left;display:flex;flex-direction:column;gap:6px;padding:18px 18px 16px;border:1px solid var(--line);border-left:5px solid var(--tone);border-radius:7px;background:var(--panel);color:var(--ink);cursor:pointer;font:inherit;transition:background .2s}
+.goals button:hover{background:color-mix(in srgb,var(--tone) 7%,var(--paper))}
+.goals button.active{background:var(--tone);border-color:var(--tone);color:#F7F2E7}
+.goal-away{font:700 10.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold-ink)}
+.goals button.active .goal-away{color:#E3C47E}
+.goals b{font:600 24px/1.1 var(--serif)}
+.goals small{font-size:13px;color:var(--muted)}
+.goals button.active small{color:#E9DCC0}
+.goal-path{margin-top:6px;padding-top:8px;border-top:1px solid var(--line);font-size:12.5px;font-weight:600}
+.goals button.active .goal-path{border-color:#FFFFFF33;color:#FFFFFF}
+.locked{margin:14px 0 6px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;border-style:dashed}
+.locked p{font-size:14.5px;max-width:60ch}
+/* the path, from today to the destination */
+.path-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 18px}
+.path-line span{background:var(--tone);color:#F7F2E7;padding:7px 13px;border-radius:999px;font:600 13px var(--body)}
+.path-line span.from{background:transparent;color:var(--ink);border:1.5px solid var(--tone)}
+.path-line span.deeper{background:var(--deep);color:var(--gold-hi)}
+.path-line i{font-style:normal;color:var(--gold-ink)}
+.fb-path{list-style:none;padding:0;margin:0 0 16px}
+.fb-path>li{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.fb-path>li:last-child{border-bottom:0}
+.fb-n{flex:0 0 26px;height:26px;border-radius:50%;background:var(--domain);color:#FFFFFF;display:flex;align-items:center;justify-content:center;font:700 12px var(--body);margin-top:1px}
+.fb-path b{display:block;font-size:14.5px}
+.fb-path em{display:block;font-style:italic;font-size:13px;color:var(--muted);margin-top:2px}
+.fb-path ul{margin:6px 0 0;padding-left:18px}
+.fb-path ul li{font-size:14px;line-height:1.55;margin:4px 0}
+@media print{.goals,.locked{display:none}.path-line span{print-color-adjust:exact;-webkit-print-color-adjust:exact}}

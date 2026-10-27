@@ -25,14 +25,14 @@ function shape(p) {
   p = p && typeof p === 'object' ? p : {};
   const domains = (Array.isArray(p.domains) ? p.domains : []).slice(0, 4).map((d) => ({
     know: clean(d?.know, 40), lead: clean(d?.lead, 40), label: clean(d?.label, 40),
-    strengthen: list(d?.strengthen, 2, 200), steps: list(d?.steps, 3, 200), level: clean(d?.level, 80),
+    strengthen: list(d?.strengthen, 2, 200), steps: list(d?.steps, 9, 240), level: clean(d?.level, 80),
   }));
   const numbers = (Array.isArray(p.numbers) ? p.numbers : []).slice(0, 6).map((r) => [clean(r?.[0], 60), clean(r?.[1], 30)]);
   const next = (Array.isArray(p.next) ? p.next : []).slice(0, 3).map((a) => ({ title: clean(a?.title, 120), text: clean(a?.text, 300) }));
   const strategy = (Array.isArray(p.strategy) ? p.strategy : []).slice(0, 4).map((s) => ({
     lead: clean(s?.lead, 40), goal: clean(s?.goal, 600), week: clean(s?.week, 600), check: clean(s?.check, 600),
   }));
-  return { name: clean(p.name, 60), business: clean(p.business, 80), stage: clean(p.stage, 20), focus: clean(p.focus, 120), domains, numbers, next, strategy };
+  return { name: clean(p.name, 60), business: clean(p.business, 80), stage: clean(p.stage, 40), focus: clean(p.focus, 120), domains, numbers, next, strategy };
 }
 
 function render(p) {
