@@ -70,6 +70,7 @@ tr:hover td{background:var(--cream)}
 .err{color:var(--warn);font-size:13.5px;margin-top:11px}
 .empty{padding:50px 20px;text-align:center;color:var(--muted)}
 footer{padding:30px 18px 50px;font-size:12px;color:var(--muted)}
+.em.warn{color:#A8623A;font-weight:600}
 </style>
 </head>
 <body>
@@ -113,7 +114,9 @@ async function roster(){
     ${list.length?`<table><thead><tr><th>Who</th><th>Stage</th><th>Access</th><th>Progress</th><th>Report</th><th>Last seen</th><th>Notes</th></tr></thead>
     <tbody>${list.map(s=>`<tr>
       <td><span class="nm" data-id="${esc(s.id)}">${esc(s.name||'—')}</span><span class="em">${esc(s.email)}</span>
-        ${s.phone?`<span class="em">${esc(s.phone)}</span>`:''}</td>
+        ${s.company?`<span class="em">${esc(s.company)}</span>`:''}
+        ${s.phone?`<span class="em">${esc(s.phone)}</span>`:''}
+        ${s.mailchimp_sent?'':'<span class="em warn">not on the list</span>'}</td>
       <td>${esc(s.stage||'—')}${s.thin_domain?`<span class="em">thinnest: ${esc(s.thin_domain)}</span>`:''}</td>
       <td><span class="pill ${esc(s.tier||'free')}">${esc(s.tier||'free')}</span></td>
       <td><span class="prog"><i style="width:${Math.min(100,Math.round((s.written||0)/336*100))}%"></i></span>
@@ -138,7 +141,7 @@ async function one(id){
   $('#main').innerHTML=`<div class="bar"><button class="ghost" id="back">← All students</button></div>
     <div class="panel">
       <h2>${esc(s.name||s.email)}</h2>
-      <p class="tiny">${esc(s.email)}${s.phone?' · '+esc(s.phone):''} · joined ${when(s.joined_at)}</p>
+      <p class="tiny">${esc(s.email)}${s.phone?' · '+esc(s.phone):''}${s.company?' · '+esc(s.company):''} · joined ${when(s.joined_at)}</p>
       <div class="kv">
         <div class="k"><b>Stage</b><span>${esc(s.stage||'—')}</span></div>
         <div class="k"><b>Thinnest</b><span>${esc(s.thin_domain||'—')}</span></div>

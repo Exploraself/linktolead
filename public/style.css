@@ -367,9 +367,11 @@ body.inwork .foot{display:none}
 
 /* The referee's reading */
 .barnote{font-size:12px;line-height:1.6;color:var(--muted);margin-top:12px;max-width:44ch}
+.verdict{padding-left:22px}
 .verdict.ahead{border-left:3px solid var(--self)}
 .verdict.behind{border-left:3px solid var(--work)}
 .verdict.agree{border-left:3px solid var(--ok)}
+@media(max-width:620px){.verdict{padding-left:16px}}
 .amb{font-size:14px;line-height:1.75;color:var(--muted);margin-top:13px;max-width:62ch}
 .sure{font-size:13.5px;line-height:1.7;margin-top:15px;max-width:62ch;background:var(--panel);
   border:1px solid var(--line);padding:13px 15px}
@@ -379,16 +381,48 @@ body.inwork .foot{display:none}
    Asked after the reading, never before it. A founder who has just been told
    something true about their week is being offered somewhere to keep it, not
    charged a toll to see it. */
-.joinbox{margin-top:20px;border-top:2px solid var(--ink);padding-top:20px}
+.joinbox{margin-top:26px;border-top:2px solid var(--ink);padding-top:28px}
+.joinbox.bare{border-top:0;padding-top:0;margin-top:30px}
 .joinbox h4{font-family:var(--display);font-weight:500;font-size:20px;margin-top:6px}
 .joinwhy{font-size:13.5px;line-height:1.65;color:var(--muted);margin-top:9px;max-width:56ch}
-.joinrow{display:grid;gap:12px;margin-top:16px}
+.joinrow{display:grid;gap:20px 18px;margin-top:22px}
 @media(min-width:620px){.joinrow{grid-template-columns:1fr 1fr 1fr}}
 .joinrow label{display:block}
 .joinrow span{display:block;font:600 10px/1.4 var(--body);letter-spacing:1.1px;text-transform:uppercase;
-  color:var(--gold-ink);margin-bottom:5px}
+  color:var(--gold-ink);margin-bottom:8px}
 .joinrow span em{font-style:normal;text-transform:none;letter-spacing:0;color:var(--muted);font-weight:400}
-.joinrow input{width:100%;background:var(--panel);border:1px solid var(--line);padding:11px 12px;
+.joinrow input{width:100%;background:var(--panel);border:1px solid var(--line);padding:13px 14px;
   font:15px/1.4 var(--body);color:var(--ink)}
 .joinrow input:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
 .joinerr{font-size:13.5px;color:var(--self);margin-top:11px}
+
+
+/* ── The entrance screens ────────────────────────────────────────────────────
+   The questions, the form and the reading each get the page to themselves.
+   Narrow measure, one thing to do, and a way back that is visible but quiet. */
+.qband{padding-top:34px}
+.wrap.narrow{max-width:760px}
+.backlink{display:inline-block;background:none;border:0;padding:0;margin-bottom:22px;cursor:pointer;
+  font:600 12.5px/1 var(--body);letter-spacing:.3px;color:var(--muted);text-decoration:none}
+.backlink:hover{color:var(--ink)}
+.backlink:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.qh{font-family:var(--display);font-weight:500;font-size:clamp(27px,5vw,41px);line-height:1.1;
+  letter-spacing:-.01em;margin-top:7px}
+.qband .sec-lede{margin-top:14px}
+
+/* How far along, so nobody wonders how much is left. */
+.qcount{display:flex;align-items:center;gap:13px;margin-top:26px}
+.qbar{flex:1;height:3px;background:var(--line);position:relative;overflow:hidden}
+.qbar i{display:block;height:100%;background:var(--gold);transition:width .25s ease}
+.qnum{font:600 11px/1 var(--body);letter-spacing:1px;text-transform:uppercase;color:var(--muted);
+  white-space:nowrap}
+.q .qi{display:inline-block;min-width:1.6em;color:var(--gold);font-family:var(--display);font-weight:500}
+.q.got{border-left-color:var(--ok)}
+.qleft{margin-top:24px;font:600 13px/1.6 var(--body);color:var(--muted)}
+
+/* The way on, which appears only when all ten are in. */
+.qdone{margin-top:30px;background:var(--cream);border:1px solid var(--gold);padding:24px 26px}
+.qdone h3{font-family:var(--display);font-weight:500;font-size:24px;line-height:1.2;margin-top:6px}
+.qdone p{font-size:14.5px;line-height:1.75;margin-top:11px;max-width:58ch}
+.qdone .cta{margin-top:19px}
+@media(max-width:620px){.qband{padding-top:24px}.qdone{padding:20px 18px}}

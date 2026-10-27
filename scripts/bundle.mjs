@@ -79,7 +79,7 @@ for (const f of ORDER) {
   parts.push(`/* ── ${f} ───────────────────────────────── */\n` + src);
 }
 
-const html = (await readFile(here('index.html'), 'utf8'))
+const html = (await readFile(here('start/index.html'), 'utf8'))
   .replace('<link rel="stylesheet" href="/style.css">', `<style>\n${await readFile(here('style.css'), 'utf8')}\n</style>`)
   .replace('<script src="/app.js" type="module"></script>', `<script type="module">\n${parts.join('\n\n')}\n</script>`)
   .replace('<link rel="icon" href="/assets/icon.svg">', '');
