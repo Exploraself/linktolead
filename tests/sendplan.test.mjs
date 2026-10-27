@@ -70,5 +70,14 @@ await onRequestPost({ request: req({ email: 'ana@example.com', plan }), env });
 r = await onRequestPost({ request: req({ email: 'ana@example.com', plan }), env });
 ok(r.status === 429, 'a fourth send to one address in an hour is refused');
 
+// The key as a Secrets Store binding (an object with get()), as deployed.
+let auth = null;
+globalThis.fetch = async (url, opts) => { auth = opts.headers.authorization; return { ok: true }; };
+const env2 = { RESEND_API_KEY: { get: async () => 're_store' }, DB: fakeDB() };
+r = await onRequestGet({ env: env2 });
+ok((await r.json()).ready === true, 'ready with a Secrets Store binding');
+r = await onRequestPost({ request: req({ email: 'bo@example.com', plan }), env: env2 });
+ok(r.status === 200 && auth === 'Bearer re_store', 'reads the key from the Secrets Store binding');
+
 console.log(`${passed} passed, ${failed} failed`);
 if (failed) process.exit(1);

@@ -1,7 +1,8 @@
 // "Send it by email" on the Compass plan.
 //
-// Off until RESEND_API_KEY exists in the Cloudflare project (Settings →
-// Variables and Secrets), added by Alexandru himself — never committed here.
+// Off until RESEND_API_KEY is reachable. Alexandru keeps it in the account's
+// Secrets Store; wrangler.toml binds it to this Worker (a binding is read with
+// .get()). A plain project secret of the same name also works.
 // It sends from the same verified address as exploraself.com's results emails,
 // unless MAIL_FROM is set. Until the key exists, GET says { ready:false } and
 // the Compass hides the button.
@@ -13,6 +14,12 @@
 import { json, bad, db, clean, looksLikeEmail } from '../_shared.js';
 
 const ready = (env) => !!(env && env.RESEND_API_KEY);
+/** The key, whether it arrives as a Secrets Store binding or a plain secret. */
+async function key(env) {
+  const k = env.RESEND_API_KEY;
+  if (typeof k === 'string') return k;
+  try { return k && typeof k.get === 'function' ? await k.get() : ''; } catch { return ''; }
+}
 const FROM = 'Alexandru at ExploraSelf <support@exploraself.com>';
 
 export const onRequestGet = ({ env }) => json({ ready: ready(env) });
@@ -93,9 +100,11 @@ export async function onRequestPost({ request, env }) {
   if ((seen?.e || 0) >= 3 || (seen?.i || 0) >= 10) return bad('That is a few already. Try again in an hour.', 429);
 
   const plan = shape(body.plan);
+  const apiKey = await key(env);
+  if (!apiKey) return bad('Email is not available right now.', 503);
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
-    headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json' },
+    headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
     body: JSON.stringify({ from: env.MAIL_FROM || FROM, to: [email], subject: 'Your Leadership Compass plan', html: render(plan), text: text(plan) }),
   }).catch(() => null);
   if (!r || !r.ok) return bad('It did not send. Try again in a minute.', 502);
