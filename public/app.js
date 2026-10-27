@@ -28,7 +28,9 @@ let state = Object.assign({ stage: '', scores: null, answers: {}, work: {}, diag
 if (!state.work) state.work = {};
 // 'quiz' → 'join' → 'read' → 'work'. The landing page at / sells it; this
 // page starts at the questions and never shows the reading before the join.
-let view = !state.stage ? 'quiz' : (state.me || account.joined() ? 'work' : 'join');
+// A returning founder lands on their Ground Plan until they have started writing,
+// then back where the work is.
+let view = !state.stage ? 'quiz' : (state.me || account.joined() ? (Object.keys(state.answers || {}).length ? 'work' : 'read') : 'join');
 // /start#library opens the library for anyone who has joined.
 try { if (location.hash === '#library' && (state.me || account.joined())) view = 'library'; } catch { /* no location */ }
 let level = 1, dom = 'self';
