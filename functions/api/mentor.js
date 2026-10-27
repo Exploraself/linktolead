@@ -26,7 +26,8 @@ export async function onRequestGet({ request, env }) {
   }
 
   const students = await D.prepare(`
-    SELECT s.id, s.name, s.email, s.phone, s.stage, s.tier, s.thin_domain, s.joined_at, s.last_seen_at,
+    SELECT s.id, s.name, s.email, s.phone, s.company, s.stage, s.tier, s.thin_domain,
+      s.joined_at, s.last_seen_at, s.mailchimp_sent,
       (SELECT COUNT(*) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS written,
       (SELECT COUNT(*) FROM note n WHERE n.student_id = s.id AND n.status = 'new') AS open_notes,
       (SELECT updated_at FROM compass c WHERE c.student_id = s.id) AS compass_at

@@ -58,7 +58,7 @@ export const WEEKS = {
 // The ladder. What opens, and on what.
 export const LADDER = [
   { from: 1, to: 3, key: 'free', n: 'Free, and free to stay', price: 'Free',
-    what: 'All four domains at levels one to three. No payment, and no email to look — an account only to save your answers.' },
+    what: 'All four domains at levels one to three. No payment, now or later — an account, so your reading and your answers are kept and follow you.' },
   { from: 4, to: 5, key: 'session', n: 'One session with Alexandru', price: 'Book a 1:1',
     what: 'He reads your first three levels before you speak. You leave knowing which of the four domains is costing you most, why it is that one, and with levels four and five opened and walked through. These two are not handed over cold.' },
   { from: 6, to: 9, key: 'lab', n: 'Personal Leadership LAB', price: '$97',
@@ -247,8 +247,8 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** The journey, in four steps, for the entrance. Short on purpose. */
 export const JOURNEY = [
-  { n: 'You are here', t: 'Nine questions',
-    d: 'Two minutes, no email, nothing unlocked. It works out which of the four domains is thinnest and which stage you are actually in.' },
+  { n: 'You are here', t: 'Ten questions',
+    d: 'Two minutes. It works out which of the four domains is thinnest and which stage you are actually in. The reading opens once you say where to keep it.' },
   { n: 'Next', t: 'The Incubator — levels 01 to 03',
     d: 'Free, and free to stay. All four domains, twelve modules, every worksheet. You come out with an offer, a customer, a standard and a week you can see.' },
   { n: 'Then', t: 'Your reading',

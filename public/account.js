@@ -19,7 +19,7 @@ async function post(path, body) {
   return data;
 }
 
-/** Join: name, email, phone, plus what the nine questions worked out. */
+/** Join: name, email, phone, plus what the ten questions worked out. */
 export async function join({ name, email, phone, stage, thin, diag }) {
   const out = await post('/api/join', { name, email, phone, stage, thin, diag });
   if (out.token) keep(out.token);

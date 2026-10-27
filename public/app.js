@@ -25,7 +25,9 @@ const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } c
 
 let state = Object.assign({ stage: '', scores: null, answers: {}, work: {}, diag: {}, tier: 'free', me: null }, load());
 if (!state.work) state.work = {};
-let view = state.stage ? 'work' : 'start';
+// 'quiz' → 'join' → 'read' → 'work'. The landing page at / sells it; this
+// page starts at the questions and never shows the reading before the join.
+let view = !state.stage ? 'quiz' : (state.me || account.joined() ? 'work' : 'join');
 let level = 1, dom = 'self';
 
 const compass = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12 12 2.5Z"/><path d="m12 5.7 2 4.3 4.3 2-4.3 2-2 4.3-2-4.3-4.3-2 4.3-2 2-4.3Z" fill="currentColor" stroke="none"/></svg>';
@@ -110,87 +112,123 @@ function levelDone(st, lv) {
 // (level access now comes from levelState and the tier — see the workspace below)
 
 // ── The entrance ─────────────────────────────────────────────────────────────
-function startView() {
-  return `<section class="band hero"><div class="wrap">
-    <p class="eyebrow">${compass} ExploraSelf · Link to Lead</p>
-    <h1>The Founder&rsquo;s Blueprint</h1>
-    <p class="sub">Twelve weeks. Four domains. One founder.</p>
-    <p class="lede">A founder does not fail at one thing. They run out of clarity in one of four places: who they are, how they handle people, how the work actually runs, and what the market is telling them. This finds which one is costing you most right now, then takes you through all four, a level at a time.</p>
-    <div class="facts">
-      <span class="fact">12 levels</span><span class="fact">4 domains every level</span>
-      <span class="fact">7 clarity points each</span><span class="fact">First 3 levels free</span>
-      <span class="fact">No email to begin</span>
-    </div>
-  </div></section>
+// Three screens, in this order, and never out of it. The ten questions get a
+// screen to themselves, because a diagnostic finishes far more often when it
+// is the only thing on the page. Then we ask who they are. Then — and only
+// then — the reading. The landing page at / does the selling; by the time a
+// founder arrives here they have already decided to find out.
 
-  <section class="band jband"><div class="wrap">
-    <p class="eyebrow">${compass} How this goes</p>
-    <h2 class="sec">Four steps, and you are already on the first</h2>
-    <ol class="journey">${JOURNEY.map((j, i) => `<li class="jstep${i === 0 ? ' now' : ''}">
-      <span class="jn">${i + 1}</span>
-      <div><p class="jwhen">${esc(j.n)}</p><h3>${esc(j.t)}</h3><p class="jd">${esc(j.d)}</p></div>
-    </li>`).join('')}</ol>
-    <p class="jfoot">Nobody skips a level and nothing is graded. The questions below decide which twelve levels you walk and which of the four domains they lean on \u2014 not how much of it you do.</p>
-  </div></section>
+/** Have the nine been answered? */
+function diagDone() {
+  return Object.keys(state.diag).length >= DIAGNOSTIC.length;
+}
 
-  <section class="band"><div class="wrap">
-    <p class="eyebrow">The entrance</p>
-    <h2 class="sec">Nine questions, and we tell you the truth</h2>
-    <p class="sec-lede">Nothing is unlocked and no email is asked. Answer these and the Blueprint says where you stand across the four domains, which one is thinnest, and which level to start on.</p>
-    <div class="quiz">${DIAGNOSTIC.map((q, i) => `<div class="q">
-      <p class="dl">${esc(q.label)}</p><h4>${esc(q.q)}</h4>
+/** Work out the stage, the thin domain and the four scores, and keep them.
+ *  Runs the moment the ninth answer lands, so the join can carry the verdict
+ *  up with it even though the founder has not seen the reading yet. */
+function settle() {
+  const score = { self: 0, people: 0, work: 0, market: 0 };
+  DIAGNOSTIC.forEach((q, i) => { if (score[q.d] !== undefined) score[q.d] += Number(state.diag[i]) || 0; });
+  const said = state.diag[DIAGNOSTIC.findIndex((q) => q.d === 'stage')];
+  const want = state.diag[DIAGNOSTIC.findIndex((q) => q.d === 'want')];
+  if (!said || !want) return null;
+
+  const r = referee({ said, want, score });
+  state.stage = r.assigned;
+  state.scores = {}; DOMAINS.forEach((d) => state.scores[d.k] = Math.round(score[d.k] / 4 * 100));
+  state.referee = { kind: r.kind, said, want, assigned: r.assigned, thin: r.thin };
+  state.raw = score;
+  save();
+  return r;
+}
+
+/** Rebuild the reading from what was settled earlier, with no side effects. */
+function reading() {
+  if (!state.referee) return settle();
+  const { said, want } = state.referee;
+  const score = state.raw || { self: 0, people: 0, work: 0, market: 0 };
+  return referee({ said, want, score });
+}
+
+// ── Screen one: the ten questions, alone ────────────────────────────────────
+function quizView() {
+  const done = Object.keys(state.diag).length, need = DIAGNOSTIC.length;
+  return `<section class="band qband"><div class="wrap narrow">
+    <a class="backlink" href="/">← Back</a>
+    <p class="eyebrow">${compass} The entrance</p>
+    <h1 class="qh">Ten questions, and we tell you the truth</h1>
+    <p class="sec-lede">Answer as the week actually went, not as you meant it to go. This decides which stage you are in, which of the four domains is costing you most, and which level you start on. Two minutes.</p>
+    <div class="qcount" role="status"><span class="qbar"><i style="width:${Math.round(done / need * 100)}%"></i></span>
+      <span class="qnum">${done} of ${need} answered</span></div>
+    <div class="quiz">${DIAGNOSTIC.map((q, i) => `<div class="q${state.diag[i] !== undefined ? ' got' : ''}">
+      <p class="dl">${esc(q.label)}</p><h4><span class="qi">${i + 1}</span>${esc(q.q)}</h4>
       <div class="opts">${q.o.map((o) => `<button class="opt" type="button" aria-pressed="${state.diag[i] === o[1]}" data-diag="${i}" data-val="${esc(String(o[1]))}">${esc(o[0])}</button>`).join('')}</div>
     </div>`).join('')}</div>
     <div id="resultHost"></div>
   </div></section>`;
 }
 
-function resultBlock() {
-  const need = DIAGNOSTIC.length;
-  if (Object.keys(state.diag).length < need) return '';
+/** The foot of the quiz: nothing until all ten are in, then the way on. */
+function quizFoot() {
+  if (!diagDone()) {
+    const left = DIAGNOSTIC.length - Object.keys(state.diag).length;
+    return `<p class="qleft">${left} to go, and your reading is ready.</p>`;
+  }
+  return `<div class="qdone">
+    <p class="eyebrow">${compass} All ten answered</p>
+    <h3>Your reading is ready</h3>
+    <p>It names the stage you are actually in, which of the four domains is thinnest, and what level 01 asks of you. ${account.joined() || state.me ? '' : 'Tell us where to keep it and it opens.'}</p>
+    <button class="cta" data-go="${account.joined() || state.me ? 'read' : 'join'}">${account.joined() || state.me ? 'Read it →' : 'See where I stand →'}</button>
+  </div>`;
+}
 
-  // Out of 4 per domain, from the eight domain questions.
-  const score = { self: 0, people: 0, work: 0, market: 0 };
-  DIAGNOSTIC.forEach((q, i) => { if (score[q.d] !== undefined) score[q.d] += Number(state.diag[i]) || 0; });
-  const said = state.diag[DIAGNOSTIC.findIndex((q) => q.d === 'stage')];
-  const want = state.diag[DIAGNOSTIC.findIndex((q) => q.d === 'want')];
-  if (!said || !want) return '';
+// ── Screen two: who are you ──────────────────────────────────────────────────
+function joinView() {
+  return `<section class="band qband"><div class="wrap narrow">
+    <button class="backlink" type="button" data-go="quiz">← Back to the questions</button>
+    <p class="eyebrow">${compass} Ten of ten</p>
+    <h1 class="qh">Where should we send your reading?</h1>
+    <p class="sec-lede">Your reading is written and waiting on the other side of this. An account also means your work follows you from this device to your phone — and that Alexandru can read what you wrote before you ever speak to him.</p>
+    <form class="joinbox bare" id="joinbox" novalidate>
+      <div class="joinrow">
+        <label><span>First name</span><input id="jf" name="fname" autocomplete="given-name" required></label>
+        <label><span>Last name</span><input id="jl" name="lname" autocomplete="family-name" required></label>
+        <label><span>Email</span><input id="je" name="email" type="email" autocomplete="email" required></label>
+        <label><span>Your business</span><input id="jc" name="company" autocomplete="organization" required></label>
+        <label><span>Phone</span><input id="jp" name="phone" type="tel" autocomplete="tel" required></label>
+      </div>
+      <button class="cta" type="submit" id="jgo">Open my reading →</button>
+      <p class="joinerr" id="jerr" hidden></p>
+      <p class="savenote">Free, and the first three levels stay free. No card, now or later.</p>
+    </form>
+  </div></section>`;
+}
 
-  const r = referee({ said, want, score });
-  state.stage = r.assigned;
-  state.scores = {}; DOMAINS.forEach((d) => state.scores[d.k] = Math.round(score[d.k] / 4 * 100));
-  state.referee = { kind: r.kind, said, want, assigned: r.assigned, thin: r.thin };
-  save();
+// ── Screen three: the reading ────────────────────────────────────────────────
+function readView() {
+  const r = reading();
+  if (!r) return quizView();
+  const score = state.raw || { self: 0, people: 0, work: 0, market: 0 };
 
-  return `<div class="result">
+  return `<section class="band qband"><div class="wrap">
+    <p class="eyebrow">${compass} Your reading</p>
+    <h1 class="qh">${esc(state.me ? state.me.name.split(' ')[0] + ', here is where you stand' : 'Here is where you stand')}</h1>
+    <div class="result">
     <div class="rgrid">
       <div><p class="eyebrow">What your answers show</p><div class="bars">${DOMAINS.map((d) => `<div class="bar" style="color:var(--${d.k})">
-        <span class="bn">${d.n}</span><span class="track"><i style="width:${state.scores[d.k]}%;background:var(--${d.k})"></i></span><span class="bv">${score[d.k]}/4</span></div>`).join('')}</div>
+        <span class="bn">${d.n}</span><span class="track"><i style="width:${(state.scores || {})[d.k] || 0}%;background:var(--${d.k})"></i></span><span class="bv">${score[d.k]}/4</span></div>`).join('')}</div>
         <p class="barnote">Four points a domain, from the eight questions. ${esc(r.thinD.n)} is thinnest, so this stage leans on it.</p></div>
       <div class="verdict ${r.kind}">
         <span class="stage-pill">${esc(STAGES[r.assigned].n)}</span>
         <h3>${esc(r.head)}</h3>
         <p>${esc(r.body)}</p>
         <p class="amb">${esc(r.ambition)}</p>
-        ${r.kind === 'ahead' ? `<p class="sure"><b>Sure you are past this?</b> Then take it at speed. Levels 01 to 03 are free and the questions are short \u2014 answer them as precisely as you can, and the reading at the end will say plainly whether you were right. If it says you were, nothing is holding you.</p>` : ''}
-        <p class="first">Everybody starts here<b>Level 01 \u2014 ${esc(weekTitle(r.assigned, 1))}</b></p>
-        ${account.joined() || state.me
-          ? `<button class="cta" data-go="work">Open your Blueprint \u2192</button>
-             <p class="savenote">Your work is saved to your account and follows you between devices.</p>`
-          : `<form class="joinbox" id="joinbox" novalidate>
-              <p class="eyebrow">${compass} Keep this, and walk in</p>
-              <h4>Where should we keep your answers?</h4>
-              <p class="joinwhy">Your work saves to this device either way. An account means it follows you to your phone \u2014 and means Alexandru can read what you wrote before you ever speak to him.</p>
-              <div class="joinrow">
-                <label><span>Your name</span><input id="jn" name="name" autocomplete="name" required></label>
-                <label><span>Email</span><input id="je" name="email" type="email" autocomplete="email" required></label>
-                <label><span>Phone <em>optional</em></span><input id="jp" name="phone" type="tel" autocomplete="tel"></label>
-              </div>
-              <button class="cta" type="submit" id="jgo">Start week one</button>
-              <p class="joinerr" id="jerr" hidden></p>
-              <p class="savenote">Free, and the first three weeks stay free. No card, now or later.</p>
-            </form>`}
-      </div></div></div>`;
+        ${r.kind === 'ahead' ? `<p class="sure"><b>Sure you are past this?</b> Then take it at speed. Levels 01 to 03 are free and the questions are short — answer them as precisely as you can, and the reading at the end will say plainly whether you were right. If it says you were, nothing is holding you.</p>` : ''}
+        <p class="first">Everybody starts here<b>Level 01 — ${esc(weekTitle(r.assigned, 1))}</b></p>
+        <button class="cta" data-go="work">Open your Blueprint →</button>
+        <p class="savenote">Your work is saved to your account and follows you between devices.</p>
+      </div></div></div>
+  </div></section>`;
 }
 
 // ── The workspace ────────────────────────────────────────────────────────────
@@ -397,13 +435,15 @@ function emphasisName(st, lv) {
 function render() {
   const st = state.stage || 'build';
   document.body.classList.toggle('inwork', view === 'work');
-  $('#tnav').innerHTML = state.stage
-    ? `<button type="button" data-go="start">The entrance</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button>`
+  $('#tnav').innerHTML = state.stage && state.me
+    ? `<button type="button" data-go="read" ${view === 'read' ? 'aria-current="page"' : ''}>Your reading</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button>`
     : '';
   $('#main').innerHTML = view === 'work'
     ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work">${moduleHTML(st)}</div></div>`
-    : startView();
-  if (view === 'start') { const h = $('#resultHost'); if (h) h.innerHTML = resultBlock(); }
+    : view === 'join' ? joinView()
+    : view === 'read' ? readView()
+    : quizView();
+  if (view === 'quiz') { const h = $('#resultHost'); if (h) h.innerHTML = quizFoot(); }
 }
 
 /** Redraw only the module, so the rail does not flicker and its scroll holds. */
@@ -411,17 +451,6 @@ function redrawModule() {
   const w = $('#work');
   if (!w) return render();
 
-// If this founder has an account, their work follows them here.
-(async () => {
-  if (!account.joined()) return;
-  const r = await account.pull();
-  if (!r || !r.ok) return;
-  let changed = false;
-  for (const [k, v] of Object.entries(r.answers || {})) if (v && !state.answers[k]) { state.answers[k] = v; changed = true; }
-  for (const [k, v] of Object.entries(r.work || {})) if (v && !state.work[k]) { state.work[k] = v; changed = true; }
-  if (r.me) { state.me = { name: r.me.name, email: r.me.email }; if (r.me.stage) state.stage = r.me.stage; if (r.me.tier) state.tier = r.me.tier; changed = true; }
-  if (changed) { save(); render(); }
-})();
   w.innerHTML = moduleHTML(state.stage || 'build');
   w.scrollTo ? w.scrollTo({ top: 0, behavior: 'instant' }) : null;
   const r = $('#rail'); if (r) refreshRail();
@@ -446,7 +475,14 @@ document.addEventListener('click', (e) => {
     save();
     document.querySelectorAll(`[data-diag="${i}"]`).forEach((x) => x.setAttribute('aria-pressed', 'false'));
     b.setAttribute('aria-pressed', 'true');
-    const h = $('#resultHost'); if (h) h.innerHTML = resultBlock();
+    // The verdict is worked out and kept the moment the ninth answer lands, so
+    // the join can carry it. What it says stays behind the form until then.
+    if (diagDone()) settle();
+    const q = b.closest('.q'); if (q) q.classList.add('got');
+    const c = $('.qbar i'), n = $('.qnum'), done = Object.keys(state.diag).length;
+    if (c) c.style.width = Math.round(done / DIAGNOSTIC.length * 100) + '%';
+    if (n) n.textContent = `${done} of ${DIAGNOSTIC.length} answered`;
+    const h = $('#resultHost'); if (h) h.innerHTML = quizFoot();
     return;
   }
   if (b.dataset.stage) { state.stage = b.dataset.stage; save(); view = 'work'; render(); window.scrollTo({ top: 0, behavior: 'instant' }); return; }
@@ -463,27 +499,32 @@ document.addEventListener('submit', async (e) => {
   if (!f) return;
   e.preventDefault();
   const err = $('#jerr'), go = $('#jgo');
-  const name = $('#jn').value.trim(), email = $('#je').value.trim(), phone = $('#jp').value.trim();
+  const val = (id) => { const el = $(id); return el ? el.value.trim() : ''; };
+  const first = val('#jf'), last = val('#jl'), email = val('#je'),
+        company = val('#jc'), phone = val('#jp');
   const show = (m) => { if (err) { err.textContent = m; err.hidden = false; } };
-  if (!name) return show('Your name, so he knows who he is reading.');
+  if (!first || !last) return show('First and last name, so he knows who he is reading.');
   if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return show('That does not look like an email address.');
+  if (!company) return show('What the business is called.');
+  if (!phone) return show('A phone number, so he can reach you about the session.');
   if (err) err.hidden = true;
   if (go) { go.disabled = true; go.textContent = 'One moment…'; }
   try {
-    await account.join({ name, email, phone, stage: state.stage, thin: state.referee && state.referee.thin, diag: state.diag });
-    state.me = { name, email }; save();
+    await account.join({ first, last, email, phone, company,
+      stage: state.stage, thin: state.referee && state.referee.thin, diag: state.diag });
+    state.me = { name: `${first} ${last}`, email }; save();
     // Everything already written on this device goes up with the first sync.
     for (const [k, v] of Object.entries(state.answers)) account.touch('answers', k, v);
     for (const [k, v] of Object.entries(state.work)) account.touch('work', k, v);
     account.flush();
-    view = 'work'; render(); window.scrollTo({ top: 0, behavior: 'instant' });
+    view = 'read'; render(); window.scrollTo({ top: 0, behavior: 'instant' });
   } catch (ex) {
     // The account is a convenience, never a gate. Let them in regardless.
     const why = ex && ex.message && !/fetch|network|load failed/i.test(ex.message)
       ? ex.message
       : 'We could not reach the account service just now.';
     show(why + ' Your work is saved on this device — carry on, and it will sync when we can reach it.');
-    if (go) { go.disabled = false; go.textContent = 'Start week one anyway'; go.dataset.go = 'work'; }
+    if (go) { go.disabled = false; go.textContent = 'Open my reading anyway →'; go.dataset.go = 'read'; }
   }
 });
 
