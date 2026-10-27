@@ -52,3 +52,128 @@ html{overflow-wrap:anywhere}body{font-size:16px}main{min-width:0}.shell,.hero-co
 .journey button.active b{color:#E3C47E}
 .journey button.active small,.journey button.active .step{color:#D3C4A5}
 .journey button.active .stage-icon,:root[data-theme="dark"] .journey button.active .stage-icon{color:#E3C47E}
+
+/* ── Four steps, stage colours, feedback, Link to Lead (Oct 2026) ── */
+.sidebar nav a span{font-size:12px;font-weight:700;letter-spacing:.04em}
+.section-row h2 em,.pick h2 em,.feedback h2 em{font-style:italic;color:var(--gold-ink)}
+/* stage tiles: each carries its colour; the chosen one and its statement share it */
+.journey button{border-top:4px solid var(--tone)}
+.journey button:hover{background:color-mix(in srgb,var(--tone) 8%,var(--paper))}
+.journey button.active,.journey button.active:hover{background:var(--tone);color:#F7F2E7}
+.journey button.active b{color:#FFFFFF}
+.journey button.active small,.journey button.active .step{color:#E9DCC0}
+.journey button.active .stage-icon{color:#E3C47E}
+.journey button.active .stage-dot{background:#E3C47E}
+.stage-explainer.toned{background:var(--tone);border-color:var(--tone);color:#F7F2E7}
+.stage-explainer.toned .eyebrow{color:#E3C47E}
+.stage-explainer.toned h3{color:#FFFFFF}
+.stage-explainer.toned .stage-story>p,.stage-explainer.toned .stage-map li>b{color:#E9DCC0}
+.stage-explainer.toned .stage-promise{border-color:#FFFFFF33;color:#F7F2E7}
+.stage-explainer.toned .stage-map li>span{background:transparent;border-color:#FFFFFF66;color:#FFFFFF}
+.stage-explainer.toned .stage-map li>i,.stage-explainer.toned .stage-map>p{color:#E3C47E}
+/* "Step 1 / Step 2" call-outs */
+.pick{display:flex;gap:18px;align-items:center;margin:30px 0 16px}
+.pick-n{flex:0 0 auto;background:var(--deep);color:var(--gold-hi);font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;padding:10px 14px;border-radius:999px}
+.pick h2{font:600 27px/1.2 var(--serif);margin:0}
+.pick p{font-size:14px;color:var(--muted);margin-top:4px}
+/* the four-step bar on each step */
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:0 0 26px}
+.steps a{display:flex;gap:11px;align-items:center;padding:13px 14px;text-decoration:none;color:var(--ink);border-right:1px solid var(--line);background:var(--panel);min-width:0}
+.steps a:last-child{border-right:0}
+.steps a:hover{background:var(--cream)}
+.steps-n{flex:0 0 30px;height:30px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font:600 13px var(--body);color:var(--gold-ink)}
+.steps-t{min-width:0}
+.steps-t b{display:block;font:600 13.5px/1.3 var(--body)}
+.steps-t small{display:block;font:italic 500 13px/1.3 var(--serif);color:var(--gold-ink)}
+.steps a.active{background:var(--deep);color:#F7F2E7}
+.steps a.active .steps-n{background:var(--gold);border-color:var(--gold);color:var(--deep)}
+.steps a.active .steps-t small{color:var(--gold-hi)}
+.steps a.done .steps-n{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+/* the four steps, as a visual */
+.four-steps{list-style:none;padding:0;margin:0 0 8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.four-steps li{position:relative;display:flex}
+.four-steps a{flex:1;display:flex;flex-direction:column;gap:7px;padding:20px 18px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);text-decoration:none;transition:border-color .2s,transform .2s}
+.four-steps a:hover{border-color:var(--gold);transform:translateY(-2px)}
+.fs-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.fs-n{font:600 28px/1 var(--serif);color:var(--gold-ink)}
+.fs-art{width:46px;height:46px;color:var(--ink)}
+.fs-art svg{width:100%;height:100%}
+.four-steps b{font:600 20px/1.2 var(--serif)}
+.four-steps em{font:italic 500 15px var(--serif);color:var(--gold-ink)}
+.fs-do{font-size:13.5px;line-height:1.6;color:var(--muted)}
+.fs-get{margin-top:auto;padding-top:10px;border-top:1px solid var(--line);font-size:13px;font-weight:600}
+.fs-arrow{position:absolute;right:-14px;top:42px;z-index:2;font-style:normal;color:var(--gold-ink);background:var(--paper);font-size:15px;line-height:1;padding:2px}
+.four-steps li:last-child a{background:var(--deep);border-color:var(--deep);color:#F7F2E7}
+.four-steps li:last-child .fs-n,.four-steps li:last-child .fs-art,.four-steps li:last-child em{color:var(--gold-hi)}
+.four-steps li:last-child .fs-do{color:#D3C4A5}
+.four-steps li:last-child .fs-get{border-color:#8C795B;color:var(--gold-hi)}
+.method-journey{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:18px 0 10px}
+.method-journey span{border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12.5px;font-weight:600}
+.method-journey i{flex:1 1 16px;min-width:12px;height:1px;background:var(--gold)}
+.method-journey b{background:var(--deep);color:var(--gold-hi);border-radius:999px;padding:7px 15px;font-size:12.5px}
+/* step 02 and 03 */
+.number-inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+.number-inputs .input-section{margin:0}
+.picture-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:22px;align-items:start}
+.picture-side{position:sticky;top:18px}
+.picture-side .scenario{margin-top:0}
+.picture-side .sliders{grid-template-columns:minmax(0,1fr)!important}
+.picture-side .compare{grid-template-columns:minmax(0,1fr)!important}
+/* one box: a range, or the exact amount in the same place */
+.amount-box{display:flex;margin-top:6px;border:1px solid var(--gold);border-radius:4px;background:var(--panel);overflow:hidden}
+.amount-box:focus-within{outline:2px solid var(--gold);outline-offset:1px}
+.amount-box input{border:0;margin:0;border-radius:0;flex:1;min-height:42px;outline:none}
+.amount-back{flex:0 0 auto;border:0;border-left:1px solid var(--line);background:var(--cream);color:var(--gold-ink);font:600 12px var(--body);padding:0 12px;cursor:pointer}
+.amount-back:hover{background:var(--line)}
+/* step 04: feedback for all four domains */
+.feedback-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:22px}
+.fb{border-top:4px solid var(--domain);display:flex;flex-direction:column}
+.fb header{display:flex;gap:12px;align-items:center}
+.fb header .domain-icon{margin:0;flex:0 0 auto}
+.fb h3{font-size:24px;color:var(--domain);margin:0}
+.fb-lead{font-size:12.5px;color:var(--muted)}
+.fb-tag{margin-left:auto;flex:0 0 auto;font:700 10.5px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;padding:7px 10px;border-radius:999px;background:var(--neutral);color:var(--ink)}
+.fb-start .fb-tag{background:var(--domain);color:#FFFFFF}
+.fb-strong .fb-tag{background:var(--ok-soft);color:var(--ok)}
+.fb-open .fb-tag{background:transparent;border:1px dashed var(--line);color:var(--muted)}
+.fb-meter{height:6px;border-radius:6px;background:var(--neutral);margin:16px 0 12px;overflow:hidden}
+.fb-meter i{display:block;height:100%;background:var(--domain)}
+.fb-line{font-size:14.5px;line-height:1.6}
+.fb-h{font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold-ink);margin:16px 0 6px}
+.fb-weak{list-style:none;padding:0;margin:0}
+.fb-weak li{font-size:14px;line-height:1.5;padding:7px 0;border-bottom:1px solid var(--line)}
+.fb-weak li span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.fb-steps{margin:0;padding-left:20px}
+.fb-steps li{font-size:14.5px;line-height:1.55;margin:7px 0}
+.fb-steps li::marker{color:var(--domain);font-weight:700}
+.fb-ltl{margin-top:auto;padding-top:14px;border-top:1px dashed var(--line);font-size:13px;color:var(--muted)}
+.fb-ltl b{color:var(--ink)}
+.fb-steps{margin-bottom:16px}
+.wide-card{grid-column:1/-1}
+.strategy-thesis .secondary{margin-top:14px}
+.strategy-grid textarea{min-height:58px}
+/* the bridge into Link to Lead */
+.ltl{margin-top:28px;padding:36px 34px;border-radius:9px;border-top:3px solid var(--gold);background:radial-gradient(120% 140% at 85% 0%,#2A2014 0%,#14100B 60%);color:#F7F2E7}
+.ltl .eyebrow{color:var(--gold-hi)}
+.ltl h2{font:600 32px/1.15 var(--serif);max-width:26ch;color:#FFFFFF}
+.ltl h2 em{font-style:italic;color:var(--gold-hi)}
+.ltl-lede{font-size:15.5px;line-height:1.7;color:#D3C4A5;max-width:62ch;margin:14px 0 22px}
+.ltl-steps{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.ltl-steps li{border:1px solid #8C795B;border-radius:7px;padding:15px 16px}
+.ltl-steps span{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--gold);color:#14100B;align-items:center;justify-content:center;font:700 12px var(--body);margin-bottom:9px}
+.ltl-steps b{display:block;font-size:15px;color:#FFFFFF}
+.ltl-steps small{display:block;font-size:13px;color:#D3C4A5;margin-top:3px}
+.ltl .actions{margin-top:24px;display:flex;flex-wrap:wrap;gap:10px}
+.ltl .primary{background:var(--gold);border-color:var(--gold);color:#14100B}
+.ltl .secondary{color:#F7F2E7;border-color:#8C795B;background:transparent}
+.report-head .actions{display:flex;flex-wrap:wrap;gap:10px}
+@media(max-width:1100px){.picture-layout{grid-template-columns:minmax(0,1fr)}.picture-side{position:static}.four-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.fs-arrow{display:none}}
+@media(max-width:900px){.number-inputs,.feedback-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:640px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}.steps a:nth-child(2){border-right:0}.steps a:nth-child(-n+2){border-bottom:1px solid var(--line)}.steps a{padding:11px 10px;gap:8px}.steps-n{flex-basis:26px;height:26px}.steps-t b{font-size:12.5px}.steps-t small{font-size:12px}
+ .pick{flex-direction:column;align-items:flex-start;gap:10px}.pick h2{font-size:23px}
+ .four-steps{grid-template-columns:minmax(0,1fr)}.ltl{padding:26px 20px}.ltl h2{font-size:26px}.ltl-steps{grid-template-columns:minmax(0,1fr)}
+ .fb header{flex-wrap:wrap}.fb-tag{margin-left:0}}
+@media print{.steps,.pick,.four-steps,.method-journey,.journey{display:none}.stage-explainer.toned{display:none}.fb{break-inside:avoid}.ltl{background:none;color:var(--ink);border:1px solid var(--line);padding:16px}.ltl h2,.ltl-steps b{color:var(--ink)}.ltl-lede,.ltl-steps small{color:var(--muted)}.fb-start .fb-tag,.fb-meter i{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+@media(prefers-reduced-motion:reduce){.four-steps a{transition:none}.four-steps a:hover{transform:none}}
+.qnum{white-space:nowrap;min-width:32px}
+@media print{.skip{display:none!important}}
