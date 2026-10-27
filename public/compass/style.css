@@ -207,3 +207,30 @@ html{overflow-wrap:anywhere}body{font-size:16px}main{min-width:0}.shell,.hero-co
 .fb-path ul{margin:6px 0 0;padding-left:18px}
 .fb-path ul li{font-size:14px;line-height:1.55;margin:4px 0}
 @media print{.goals,.locked{display:none}.path-line span{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+
+/* ── Step 2 as one ladder: tap the stage you want to reach ── */
+.ladder{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:6px 0 4px}
+.ladder-track{position:absolute;left:12.5%;right:12.5%;top:17px;height:3px;background:var(--line);border-radius:3px}
+.ladder-track i{position:absolute;top:0;height:3px;background:var(--tone);border-radius:3px;margin-left:-12.5%;transition:width .3s ease}
+.rung{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:4px 6px 10px;border:0;background:none;color:var(--ink);font:inherit;cursor:pointer;text-align:center;border-radius:8px}
+.rung:hover:not(:disabled){background:color-mix(in srgb,var(--tone) 7%,transparent)}
+.rung:disabled{cursor:default}
+.rung-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--tone);background:var(--paper);box-sizing:border-box}
+.rung b{font:600 19px/1.15 var(--serif)}
+.rung small{font-size:12.5px;color:var(--muted);line-height:1.35}
+.rung.here .rung-dot{background:var(--paper);box-shadow:inset 0 0 0 5px var(--paper),inset 0 0 0 13px var(--tone)}
+.rung.here small{color:var(--gold-ink);font-weight:600}
+.rung.past{opacity:.45}
+.rung.through .rung-dot{background:var(--tone)}
+.rung.on .rung-dot{background:var(--tone);box-shadow:0 0 0 5px color-mix(in srgb,var(--tone) 25%,transparent)}
+.rung.on b{color:var(--tone)}
+.ladder-line{margin:4px 0 6px;text-align:center;font:italic 500 17px/1.4 var(--serif);color:var(--gold-ink)}
+@media(max-width:640px){.rung b{font-size:15.5px}.rung small{font-size:11px}.rung{padding:4px 2px 8px}.ladder-line{font-size:15px}}
+@media(prefers-reduced-motion:reduce){.ladder-track i{transition:none}}
+@media print{.ladder,.ladder-line{display:none}}
+.ladder-track{left:0;right:0;background:none}
+.ladder-track::before{content:'';position:absolute;left:12.5%;right:12.5%;top:0;height:3px;background:var(--line);border-radius:3px}
+.ladder-track i{margin-left:0;z-index:1}
+.rung:disabled{color:var(--ink);opacity:1}
+.rung.past{opacity:.4}
+.rung.here b{color:var(--ink)}
