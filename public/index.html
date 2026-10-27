@@ -154,6 +154,12 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offse
 .bk3-man .bk3-cover small{display:none}
 .bk3-b .bk3-cover{background:linear-gradient(160deg,#6E3C21,#3A1E10)}.bk3-g .bk3-cover{background:linear-gradient(160deg,#2F4D38,#16261B)}.bk3-s .bk3-cover{background:linear-gradient(160deg,#23455C,#0F2230)}
 .bk3-blank{align-items:center;justify-content:center;text-align:center;background:#EFE6D3;border:1.5px dashed #C8B993;font:700 9.5px/1.3 var(--body);letter-spacing:1.2px;text-transform:uppercase;color:var(--gold-ink)}
+.lead-why{font-family:var(--display);font-size:clamp(17px,2.2vw,20px);line-height:1.5;max-width:56ch;margin-top:18px}
+.lead-why b{font-weight:600;color:var(--gold-ink)}
+.names{margin-top:28px;padding:18px 20px;border:1px solid var(--line);background:rgba(255,253,247,.6)}
+.names dl{margin:10px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:14px 22px}
+.names dt{font-family:var(--display);font-weight:600;font-size:16px}
+.names dd{margin:3px 0 0;font-size:13.5px;line-height:1.5;color:var(--muted)}
 /* One warm line that hands the reader from one section to the next. */
 .turn{font-family:var(--display);font-style:italic;font-size:clamp(17px,2.4vw,21px);line-height:1.45;color:var(--muted);max-width:52ch;margin:0 0 20px}
 .band.dark .turn{color:#B9AC94}
@@ -534,13 +540,21 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
   <h2 class="sectitle">Three things happen, in this order</h2>
   <div class="steps">
     <div class="stp"><span class="circ">1</span><h3>We find where you are</h3>
-      <p>Ten questions. Which stage you are in, and which of the four is costing you most.</p></div>
+      <p>Ten questions, then your Ground Plan: which stage you are in, and which of the four is costing you most.</p></div>
     <div class="stp"><span class="circ">2</span><h3>You work one week at a time</h3>
       <p>Open something real, count it, write it down. Twenty-eight answers closes a week.</p></div>
     <div class="stp"><span class="circ">3</span><h3>You get an answer, in your own numbers</h3>
       <p>After week three the Blueprint reads your own figures back and names the one thing to fix first.</p></div>
   </div>
   <p class="small">Every week asks you to open something real — your calendar, your invoices, your delivery — and write down what is actually there. That is the method, and it is why it works.</p>
+  <p class="lead-why">The numbers are never the point. Each one is there to help you <b>make a decision</b>, <b>lead a person</b> or <b>hand something over</b> — the leadership work only you can do.</p>
+  <div class="names"><p class="eyebrow">How the names fit</p>
+    <dl>
+      <div><dt>Link to Lead</dt><dd>The programme: twelve levels, at your stage.</dd></div>
+      <div><dt>The Founder’s Blueprint</dt><dd>The working manual — the worksheets you fill in, level by level.</dd></div>
+      <div><dt>Your Ground Plan</dt><dd>Your result after the ten questions: your stage and your first three moves.</dd></div>
+      <div><dt>The Incubator · LAB · HUB · The Cornerstone</dt><dd>The same programme, opened further, with more support at each step.</dd></div>
+    </dl></div>
   <div class="ctarow"><a class="cta" href="/start">See where I stand</a>
     <p class="under">Ten questions. Two minutes. Nothing to pay.</p></div>
 </div></section>
@@ -823,7 +837,7 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
     <div class="yo"><b>The business runs without you</b>
       <ul><li>One job written down and handed over</li>
           <li>Somebody else does it properly, first time</li>
-          <li>You could take a week off and nothing stops</li></ul></div>
+          <li>A handover tested by someone else, so a week away becomes possible</li></ul></div>
     <div class="yo"><b>You know what you really earn</b>
       <ul><li>What a job pays once the chasing and fixing is counted</li>
           <li>Which customers make you money, and which cost you</li>
@@ -925,7 +939,7 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
   <p class="eyebrow">What it is worth</p>
   <h2 class="sectitle">Twelve weeks from now</h2>
   <div class="worth">
-    <div class="wo"><b>Hours back</b><p>You stop losing a day a week to work you never chose and cannot account for.</p></div>
+    <div class="wo"><b>Hours back</b><p>You can see where last week’s hours went — and one block each week is protected for the work that matters.</p></div>
     <div class="wo"><b>Better prices</b><p>You know what a job really earns, so you stop quoting from fear.</p></div>
     <div class="wo"><b>Work off your desk</b><p>At least one thing runs properly without you in the room.</p></div>
     <div class="wo"><b>A full pipeline</b><p>A hundred named people to approach, instead of waiting for referrals.</p></div>
@@ -976,6 +990,16 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
 <footer><div class="wrap"><strong style="color:#C9BCA4">ExploraSelf</strong> · A Good People Company · Lead yourself. Grow your business.<br>
 Mockup at real size. Nothing published to the live site yet.</div></footer>
 
+<script>
+// A founder who has already joined is not starting: the buttons say so.
+(function(){
+  var back=false;
+  try { var st=JSON.parse(localStorage.getItem('ftb-v1')||'{}'); back=!!(st.me||localStorage.getItem('ftb-token')); } catch(e) {}
+  if(!back) return;
+  [].forEach.call(document.querySelectorAll('a.cta[href="/start"]'),function(a){ a.textContent='Continue my Blueprint →'; });
+  [].forEach.call(document.querySelectorAll('#library a[href="/start"]'),function(a){ a.href='/start#library'; a.textContent=a.classList.contains('libx-btn')?'Open the library →':'Open in the library →'; });
+})();
+</script>
 <script>
 (function(){
   var host=document.getElementById('fours'); if(!host) return;
