@@ -9,7 +9,7 @@
 
 import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, DIAGNOSTIC, SECTIONS, JOURNEY,
   gateFor, levelFor, isWritten, weekTitle, videoFor, nextGain, holds, referee,
-  LEAD, BOOKING, groundPlan } from './content.js';
+  LEAD, BOOKING, groundPlan, LIBRARY } from './content.js';
 import { FW_BUILD } from './fw-build.js';
 import { FW_GROW } from './fw-grow.js';
 import { FW_SCALE } from './fw-scale.js';
@@ -29,6 +29,8 @@ if (!state.work) state.work = {};
 // 'quiz' → 'join' → 'read' → 'work'. The landing page at / sells it; this
 // page starts at the questions and never shows the reading before the join.
 let view = !state.stage ? 'quiz' : (state.me || account.joined() ? 'work' : 'join');
+// /start#library opens the library for anyone who has joined.
+try { if (location.hash === '#library' && (state.me || account.joined())) view = 'library'; } catch { /* no location */ }
 let level = 1, dom = 'self';
 
 const compass = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12 12 2.5Z"/><path d="m12 5.7 2 4.3 4.3 2-4.3 2-2 4.3-2-4.3-4.3-2 4.3-2 2-4.3Z" fill="currentColor" stroke="none"/></svg>';
@@ -502,6 +504,40 @@ function stageStrip(st) {
   }).join('')}</ol></section>`;
 }
 
+// ── The library ──────────────────────────────────────────────────────────────
+// Everything that goes with the programme, in one place. Joined founders
+// download; the LAB workbook opens on exploraself.com/lab for LAB members.
+function libraryView() {
+  const joined = account.joined() || !!state.me;
+  const hasLab = holds(state.tier, 'lab');
+  const dl = '<svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const manuals = LIBRARY.manuals.map((m) => `<li class="lib-man${m.k === state.stage ? ' lib-yours' : ''}">
+      <span class="lib-mcover lib-${m.k}" aria-hidden="true"><i>${esc(STAGES[m.k].n)}</i></span>
+      <span class="lib-mtext"><b>${esc(m.n)}</b><small>${esc(m.sub)} · ${m.pages} pages${m.k === state.stage ? ' · your stage' : ''}</small></span>
+      ${joined ? `<a class="lib-btn" href="${esc(m.file)}" download>${dl}Download PDF</a>` : `<button type="button" class="lib-btn" data-go="${diagDone() ? 'join' : 'quiz'}">Join to download</button>`}
+    </li>`).join('');
+  const books = LIBRARY.books.map((b) => b.soon
+    ? `<li class="lib-book lib-soon"><span class="lib-bcover lib-blank" aria-hidden="true"><i>In preparation</i></span>
+        <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small><em>In preparation</em></span></li>`
+    : `<li class="lib-book"><img class="lib-bcover" src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy">
+        <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small>
+        <span class="lib-acts"><a href="${esc(b.preview)}" target="_blank" rel="noopener">Preview the first pages →</a>
+        ${joined ? `<a href="${esc(b.file)}" download>${dl}Free digital copy</a>` : `<button type="button" class="lib-link" data-go="${diagDone() ? 'join' : 'quiz'}">Join for the free digital copy</button>`}
+        <span class="lib-print">${b.print ? `<a href="${esc(b.print)}" target="_blank" rel="noopener">Print edition ↗</a>` : 'Print edition coming'}</span></span></span></li>`).join('');
+  const L = LIBRARY.lab;
+  return `<section class="band qband lib"><div class="wrap">
+    <p class="eyebrow">${compass} Library &amp; working materials</p>
+    <h1 class="qh">Everything that goes with the work</h1>
+    <p class="sec-lede">The three manuals are the programme on paper, to print and fill by hand. The books sit alongside it — the thinking the levels are built from.${joined ? '' : ' One join opens every download.'}</p>
+    <h2 class="lib-h">The Founder’s Blueprint · the manuals</h2>
+    <ul class="lib-mans">${manuals}</ul>
+    <h2 class="lib-h">The books</h2>
+    <ul class="lib-books">${books}</ul>
+    <div class="lib-lab"><div><span class="lib-kick">With the LAB</span><b>${esc(L.n)}</b><small>${esc(L.sub)} · ${L.pages} pages</small></div>
+      <a class="lib-btn" href="${esc(L.url)}" target="_blank" rel="noopener">${hasLab ? 'Open in the LAB ↗' : 'See the LAB ↗'}</a></div>
+  </div></section>`;
+}
+
 function emphasisName(st, lv) {
   const e = STAGES[st].emphasis[lv - 1];
   const d = DOMAINS.find((x) => x.k === e);
@@ -513,12 +549,13 @@ function render() {
   const st = state.stage || 'build';
   document.body.classList.toggle('inwork', view === 'work');
   $('#tnav').innerHTML = state.stage && state.me
-    ? `<button type="button" data-go="read" ${view === 'read' ? 'aria-current="page"' : ''}>Your Ground Plan</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button>`
+    ? `<button type="button" data-go="read" ${view === 'read' ? 'aria-current="page"' : ''}>Your Ground Plan</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button>`
     : '';
   $('#main').innerHTML = view === 'work'
     ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work">${moduleHTML(st)}</div></div>`
     : view === 'join' ? joinView()
     : view === 'read' ? readView()
+    : view === 'library' ? libraryView()
     : quizView();
   if (view === 'quiz') { const h = $('#resultHost'); if (h) h.innerHTML = quizFoot(); }
 }

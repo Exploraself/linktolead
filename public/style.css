@@ -505,3 +505,32 @@ body.inwork .foot{display:none}
 @keyframes ssDrift{0%{background-position:0% 50%}100%{background-position:100% 50%}}
 @media(prefers-reduced-motion:reduce){.ss-now{animation:none;background-position:50% 50%}}
 @media(max-width:520px){.ss-line{display:none}.ss-here{font-size:8.5px;letter-spacing:.6px;white-space:nowrap;padding:3px 6px}.ss-step{padding:10px}.ss-1{min-height:70px}.ss-2{min-height:84px}.ss-3{min-height:98px}}
+
+/* ── Library & working materials ───────────────────────────────────────────── */
+.lib .wrap{max-width:1080px}
+.lib-h{font-family:var(--display);font-size:clamp(20px,2.6vw,26px);font-weight:600;margin-top:34px;padding-bottom:10px;border-bottom:2px solid var(--ink)}
+.lib-mans,.lib-books{list-style:none;padding:0;margin-top:16px}
+.lib-man{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.lib-man.lib-yours{background:linear-gradient(90deg,rgba(201,162,74,.12),transparent 70%)}
+.lib-mcover{width:64px;height:82px;display:flex;align-items:flex-end;padding:6px;box-sizing:border-box;background:var(--ink);border-bottom:4px solid var(--gold)}
+.lib-mcover i{font-style:normal;font:600 10px/1.2 var(--body);letter-spacing:1px;text-transform:uppercase;color:#EBD49A}
+.lib-mcover.lib-grow{border-color:#4C6B55}.lib-mcover.lib-scale{border-color:#3E5C78}
+.lib-mtext b,.lib-btext b{display:block;font-family:var(--display);font-size:18px;font-weight:600;line-height:1.25}
+.lib-mtext small,.lib-btext small{display:block;font-size:13.5px;line-height:1.45;color:var(--muted);margin-top:3px}
+.lib-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;background:var(--ink);color:#F3E9D4;font:600 14px/1 var(--body);text-decoration:none;border:0;cursor:pointer;white-space:nowrap}
+.lib-btn:hover{background:#4A3426}
+.lib-books{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:16px}
+.lib-book{display:grid;grid-template-columns:104px minmax(0,1fr);gap:16px;padding:14px;background:var(--panel);border:1px solid var(--line)}
+.lib-bcover{width:104px;height:104px;object-fit:cover;display:block}
+.lib-blank{display:flex;align-items:center;justify-content:center;text-align:center;border:1.5px dashed #C8B993;background:repeating-linear-gradient(135deg,transparent 0 8px,rgba(201,162,74,.08) 8px 9px)}
+.lib-blank i{font:600 10.5px/1.3 var(--body);letter-spacing:1.4px;text-transform:uppercase;font-style:normal;color:#7A5C16;padding:0 6px}
+.lib-kick{display:block;font:700 10.5px/1.4 var(--body);letter-spacing:1.8px;text-transform:uppercase;color:var(--gold-ink);margin-bottom:4px}
+.lib-acts{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:10px;font-size:13.5px}
+.lib-acts a,.lib-link{display:inline-flex;align-items:center;gap:6px;font:600 13.5px/1.3 var(--body);color:var(--gold-ink);text-decoration:none;background:none;border:0;padding:0;cursor:pointer}
+.lib-acts a:hover,.lib-link:hover{text-decoration:underline}
+.lib-print{color:var(--muted);font-size:12.5px}
+.lib-soon em{display:inline-block;margin-top:10px;font:600 11px/1 var(--body);letter-spacing:1.4px;text-transform:uppercase;font-style:normal;color:var(--muted)}
+.lib-lab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:14px 24px;margin-top:28px;padding:18px 20px;background:var(--cream);border:1px solid var(--line)}
+.lib-lab b{display:block;font-family:var(--display);font-size:18px;font-weight:600}
+.lib-lab small{display:block;font-size:13.5px;color:var(--muted);margin-top:3px}
+@media(max-width:560px){.lib-man{grid-template-columns:52px minmax(0,1fr)}.lib-mcover{width:52px;height:68px}.lib-man .lib-btn{grid-column:1/-1;justify-content:center}.lib-book{grid-template-columns:84px minmax(0,1fr)}.lib-bcover{width:84px;height:84px}}
