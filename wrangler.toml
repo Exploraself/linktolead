@@ -1,13 +1,18 @@
-# Static site on Workers. No build step and no Worker script: Cloudflare serves
-# everything in public/ directly. Deployed with `npx wrangler deploy`, which is
-# what the dashboard's own deploy command does by default.
+# Static site on Workers, plus a small front door for the API. No build step:
+# Cloudflare serves everything in public/ directly, and `npx wrangler deploy`
+# (the dashboard's own deploy command) bundles worker.js, which hands /api/*
+# to the files in functions/api/.
 name = "linktolead"
 compatibility_date = "2026-10-26"
+main = "worker.js"
 
 [assets]
 directory = "./public"
+binding = "ASSETS"
 # One page, with the views handled in the browser, so any path serves it.
 not_found_handling = "single-page-application"
+# Only the API reaches worker.js; every page and file is served as before.
+run_worker_first = ["/api/*"]
 
 # The student record: programme answers, worksheet figures, Compass reports and
 # notes to the mentor. Free tier; see functions/_shared.js for how routes behave
@@ -16,3 +21,10 @@ not_found_handling = "single-page-application"
 binding = "DB"
 database_name = "exploraself-blueprint"
 database_id = "615c8759-d290-4ff2-86a9-3f977d80f2b5"
+
+# The Resend key for the Compass "Send it by email" (functions/api/send-plan.js).
+# It lives in the account's Secrets Store, not in this file; this only binds it.
+[[secrets_store_secrets]]
+binding = "RESEND_API_KEY"
+store_id = "1278d7b13e164c4bbb2e42255f404648"
+secret_name = "RESEND_API_KEY"
