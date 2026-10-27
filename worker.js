@@ -16,6 +16,7 @@ import * as state from './functions/api/state.js';
 import * as compass from './functions/api/compass.js';
 import * as note from './functions/api/note.js';
 import * as mentor from './functions/api/mentor.js';
+import * as sendPlan from './functions/api/send-plan.js';
 
 /** One line per route. A new file in functions/api/ needs its line here. */
 export const ROUTES = {
@@ -24,6 +25,7 @@ export const ROUTES = {
   '/api/compass': compass,
   '/api/note': note,
   '/api/mentor': mentor,
+  '/api/send-plan': sendPlan,
 };
 
 export default {

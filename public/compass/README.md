@@ -16,19 +16,21 @@ Any contributor with access to **Exploraself/linktolead** can inspect these file
 
 The visitor chooses their stage, answers eight reflection questions for that stage (two per domain) and records dated examples. The numeric questions ask for the same month's sales, orders, delivery/selling/running costs, customers, founder hours, available cash, receipts, payments and visitor-selected limits. Unknowns stay blank.
 
-Money ranges are entry aids only. After a nonzero range is chosen, the visitor enters their own approximate amount. No midpoint or default is manufactured. Only an explicit zero choice supplies zero. Approximate entries are labelled. Range bounds validate the visitor's amount; they are not business benchmarks.
+Each money question is one box: choose a range, or choose “Type the exact amount” and the same box becomes a number field (with a “Ranges” button to go back). A chosen range is used at its middle (an open top range at its floor), and every result that leans on a range is marked ≈. Only the explicit zero choice supplies zero. Range bounds are entry aids, not business benchmarks.
 
 Calculations separate delivery/selling contribution, shared costs, the visitor's allowance for unpaid hours, and actual cash receipts/payments. Scenario sliders change only the assumptions the visitor moves. Results point to decisions and records to reopen. There are no comparisons with other founders, invented counts, general industry benchmarks, success claims, payment claims or automated readiness verdicts.
 
 By Alex's explicit instruction in the task, the 35% single-customer and 50% founder-dependence prompts are retained as **questions worth checking**, with their source and limits stated. They are product conversation prompts, not safety thresholds or industry averages. The next-stage panel says **Next stage to explore** and never blocks navigation.
 
-The strategy cards use the host's fixed seven-point order in every domain: **Name it · Evidence · Gap · Cost · Decision · Move · Review**. Prompts name the records to open, what to count/copy and what to write. No programme framework names are surfaced.
+The Compass runs in four steps: **01 Get clear · Know yourself** (stage + eight questions), **02 See your numbers · Know your people** (inputs), **03 Know your numbers** (the picture + what-if lab), **04 Choose your next steps · Know your market** (feedback for all four domains, three lines of strategy per domain, the practical next steps, and the bridge into Link to Lead). The per-domain feedback steps (`FEED`) and the matching Blueprint level (`BP_LEVEL`, mirroring `LEVEL_NAMES` in `/content.js`) live in `app.js`.
+
+The strategy asks three lines per domain (In 90 days I want · This week I will · I'll know it worked when), stored in the existing `goal`, `experiment` and `review` keys so older entries still show.
 
 ## Data and future changes
 
 Answers use the separate `exploraself-compass-v1` localStorage key. Every access is guarded by try/catch; restricted/private storage falls back to the current in-memory session with a download backup available. Nothing is submitted to a server. The tool starts blank; it does not generate fictional customer records or revenue. Imported legacy data and strategy fields are preserved. Older automatic range amounts are kept visibly for review, but are not used until the visitor enters an amount. Moving between origins requires an explicit JSON backup/restore.
 
-No analytics, CRM, account system, email collection, paid API or credentials are included. Adding one requires a separately scoped change. Keep the Founder's Blueprint's files, existing `public/assets/`, `AGENTS.md`, `wrangler.toml`, `scripts/` and `tests/` unchanged.
+“Send it by email” posts the plan to `/api/send-plan`, which sends it once through Resend and stores nothing but a one-day rate-limit row. It sends from `support@exploraself.com` (already verified in Resend) and stays hidden until `RESEND_API_KEY` is set in the Cloudflare project. No analytics, CRM or list sign-up is included. Keep the Founder's Blueprint's files, existing `public/assets/`, `AGENTS.md`, `wrangler.toml`, `scripts/` and `tests/` unchanged.
 
 ## Checks
 
