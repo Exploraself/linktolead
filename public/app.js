@@ -189,7 +189,7 @@ function joinView() {
     <button class="backlink" type="button" data-go="quiz">← Back to the questions</button>
     <p class="eyebrow">${compass} Ten of ten</p>
     <h1 class="qh">Where shall we send your Ground Plan?</h1>
-    <p class="sec-lede">It is drawn and waiting on the other side of this form. An account also lets your work follow you from this screen to your phone — and lets Alexandru read what you wrote before you ever speak to him.</p>
+    <p class="sec-lede">It is drawn and waiting on the other side of this form. An account also lets your work follow you from this screen to your phone — and lets Alexandru and the team read what you wrote before you ever speak to them.</p>
     <form class="joinbox bare" id="joinbox" novalidate>
       <div class="joinrow">
         <label><span>First name</span><input id="jf" name="fname" autocomplete="given-name" required></label>
@@ -278,7 +278,7 @@ function readView() {
     <p class="gp-lede">Each level is 28 short answers about things you can open and count — your calendar, your invoices, your customers. Nothing to prepare. It is all in front of you.</p>
     <ol class="gp-mlist">${moves}<li class="gp-move gp-then">
       <span class="gp-mt">Then</span><b>A session with Alexandru</b>
-      <p>He reads what you wrote before you speak. The session opens levels 04–05.</p></li></ol>
+      <p>Alexandru and the team read what you wrote before you speak. The session opens levels 04–05.</p></li></ol>
     <div class="gp-btns">
       <button class="cta" type="button" data-level="1">Start Level 01 →</button>
       <a class="gp-line" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my session with Alexandru</a>
@@ -347,7 +347,7 @@ function railHTML(st) {
       </section>`;
     }).join('')}
     <div class="rprem">
-      <p class="eyebrow">Everything, with him in it</p>
+      <p class="eyebrow">Everything, with Alexandru and the team</p>
       <h4>Premium</h4>
       <p>All twelve levels, the LAB, the HUB and every resource — and Alexandru mentoring you every week.</p>
       <span class="price">$1,989</span>
@@ -568,10 +568,10 @@ document.addEventListener('submit', async (e) => {
   const first = val('#jf'), last = val('#jl'), email = val('#je'),
         company = val('#jc'), phone = val('#jp');
   const show = (m) => { if (err) { err.textContent = m; err.hidden = false; } };
-  if (!first || !last) return show('First and last name, so he knows who he is reading.');
+  if (!first || !last) return show('First and last name, so Alexandru and the team know who they are reading.');
   if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return show('That does not look like an email address.');
   if (!company) return show('What the business is called.');
-  if (!phone) return show('A phone number, so he can reach you about the session.');
+  if (!phone) return show('A phone number, so the team can reach you about the session.');
   if (err) err.hidden = true;
   if (go) { go.disabled = true; go.textContent = 'One moment…'; }
   try {
