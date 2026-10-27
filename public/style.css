@@ -489,3 +489,19 @@ body.inwork .foot{display:none}
 .gp-ww{font-style:italic;color:#4A3F33;line-height:1.45}
 .gp-road .cta{margin-top:18px}
 .gp-later .gp-dot{width:auto;min-width:32px;padding:0 8px;border-radius:16px;white-space:nowrap}
+
+/* ── Your stage: three rising steps above the four Lead tabs ───────────────── */
+.stagestrip{margin-top:22px}
+.stagestrip ol{list-style:none;padding:0;margin-top:10px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:end}
+.ss-step{padding:12px 14px;border:1.5px solid var(--line);background:var(--panel);color:var(--muted);display:flex;flex-direction:column;justify-content:flex-end;gap:8px}
+.ss-1{min-height:96px}.ss-2{min-height:114px}.ss-3{min-height:132px}
+.ss-step b{display:block;font-family:var(--display);font-size:clamp(17px,2.2vw,21px);font-weight:600;line-height:1.1;color:#4A3F33}
+.ss-line{display:block;font-size:12.5px;line-height:1.35;margin-top:3px}
+.ss-now{border-color:transparent;color:#1C1309;justify-content:space-between;
+  background:linear-gradient(110deg,#B88F37 0%,#C9A24A 25%,#EBD49A 50%,#C9A24A 75%,#B88F37 100%);background-size:250% 100%;
+  animation:ssDrift 9s ease-in-out infinite alternate}
+.ss-now b{color:#1C1309}
+.ss-here{align-self:flex-start;padding:3px 8px;background:#1C1309;color:#EBD49A;font:700 10px/1.4 var(--body);letter-spacing:1.6px;text-transform:uppercase}
+@keyframes ssDrift{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+@media(prefers-reduced-motion:reduce){.ss-now{animation:none;background-position:50% 50%}}
+@media(max-width:520px){.ss-line{display:none}.ss-here{font-size:8.5px;letter-spacing:.6px;white-space:nowrap;padding:3px 6px}.ss-step{padding:10px}.ss-1{min-height:70px}.ss-2{min-height:84px}.ss-3{min-height:98px}}

@@ -395,6 +395,7 @@ function moduleHTML(st) {
   const full = answered(st, level, dom) === 7;
 
   return `${levelHead(st, title)}
+    ${stageStrip(st)}
     <div class="mtabs" role="tablist">${tabs}</div>
     <article class="mod">
       <header class="modh">
@@ -488,6 +489,17 @@ function levelHead(st, title) {
     <div class="lvtrack"><i style="width:${done / 28 * 100}%"></i></div>
     <p class="lvcount" id="lvcount">${done} of 28 answered</p>
   </header>`;
+}
+
+/** Where the founder is: the three stages as rising steps, theirs lit. */
+function stageStrip(st) {
+  const order = ['build', 'grow', 'scale'];
+  return `<section class="stagestrip" aria-label="Your stage"><p class="eyebrow">Your stage</p><ol>${order.map((k, i) => {
+    const now = k === st;
+    return `<li class="ss-step ss-${i + 1}${now ? ' ss-now' : ''}"${now ? ' aria-current="step"' : ''}>
+      ${now ? '<span class="ss-here">You are here</span>' : ''}
+      <span><b>${esc(STAGES[k].n)}</b><span class="ss-line">${esc(STAGES[k].blurb)}</span></span></li>`;
+  }).join('')}</ol></section>`;
 }
 
 function emphasisName(st, lv) {
