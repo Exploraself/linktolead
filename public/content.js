@@ -327,3 +327,25 @@ export function groundPlan(diag, r) {
   const wantI = DIAGNOSTIC.findIndex((q) => q.d === 'want');
   return { answers, costs, wantWords: answerText(wantI, diag[wantI]) };
 }
+
+// ── The library ──────────────────────────────────────────────────────────────
+// Working materials and companion books, shown on the entrance and inside the
+// programme. One join (the five fields) opens every download; previews need
+// nothing. Print editions are paid, through the shop and Amazon. The LAB
+// workbook is a paid product, so it opens on exploraself.com/lab, never here.
+export const LIBRARY = {
+  manuals: [
+    { k: 'build', n: 'The Founder’s Blueprint · Building', sub: 'Finding the offer and the first clients', pages: 79, file: '/library/blueprint-building.pdf' },
+    { k: 'grow', n: 'The Founder’s Blueprint · Growing', sub: 'Clients repeat, everything runs through you', pages: 77, file: '/library/blueprint-growing.pdf' },
+    { k: 'scale', n: 'The Founder’s Blueprint · Scaling', sub: 'There is a team, and your job has changed', pages: 80, file: '/library/blueprint-scaling.pdf' },
+  ],
+  books: [
+    { k: 'btl', kicker: '99 practical tools', n: 'Built to Lead', sub: 'One leader in the making. A personal leadership field guide.',
+      cover: '/library/cover-built-to-lead.jpg', preview: '/library/built-to-lead-preview.pdf', file: '/library/built-to-lead.pdf', print: null },
+    { k: 'wb', kicker: '32 leadership frameworks', n: 'Worth Building', sub: 'The Founder’s Playbook. Turn grit into growth and build a business that lasts.',
+      cover: '/library/cover-worth-building.jpg', preview: '/library/worth-building-preview.pdf', file: '/library/worth-building.pdf', print: null },
+    { k: 'nww', kicker: 'For scaling founders', n: 'A New Way of Winning', sub: 'The third book: all twelve levels, written for the founder whose job has changed.',
+      cover: null, preview: null, file: null, print: null, soon: true },
+  ],
+  lab: { n: 'Personal Leadership LAB · The Workbook', sub: '13 steps, each one built on the last. One written answer at a time.', pages: 93, url: 'https://exploraself.com/lab' },
+};

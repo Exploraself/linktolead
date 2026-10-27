@@ -123,6 +123,27 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offse
 .bridge p{font-family:var(--display);font-size:clamp(19px,3.2vw,27px);line-height:1.42;max-width:52ch}
 .bridge .proof{font-family:var(--display);font-size:clamp(20px,3vw,27px);line-height:1.45;color:var(--ink);max-width:44ch;margin-top:28px;padding-top:22px;border-top:3px solid var(--gold)}
 .bridge .proof b{font-weight:600;color:var(--gold-ink)}
+/* ── library ── */
+.libx{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:28px 48px;margin-top:28px;align-items:start}
+.libx-k{font:700 12px/1.5 var(--body);letter-spacing:2.4px;text-transform:uppercase;color:var(--gold-ink)}
+.libx-mans{list-style:none;padding:0;margin:12px 0 0}
+.libx-mans li{display:grid;grid-template-columns:52px minmax(0,1fr);gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.libx-m{width:52px;height:66px;display:flex;align-items:flex-end;padding:5px;box-sizing:border-box;background:#1C1309;border-bottom:4px solid var(--gold);font:600 8.5px/1.2 var(--body);letter-spacing:.8px;text-transform:uppercase;color:#EBD49A}
+.libx-g{border-color:#4C6B55}.libx-s{border-color:#3E5C78}
+.libx b{display:block;font-family:var(--display);font-size:18px;font-weight:600;line-height:1.25}
+.libx small{display:block;font-size:13.5px;line-height:1.45;color:var(--muted);margin-top:3px}
+.libx-btn{display:inline-flex;align-items:center;min-height:48px;margin-top:18px;padding:0 22px;background:var(--gold);color:#1C1309;font:700 15px/1 var(--body);text-decoration:none}
+.libx-btn:hover{background:var(--gold-hi)}
+.libx-lab{margin-top:22px;padding:14px 16px;border:1px solid var(--line);background:rgba(201,162,74,.06)}
+.libx-lab a,.libx-books a{display:inline-block;margin-top:8px;margin-right:14px;font:600 13.5px/1.4 var(--body);color:var(--gold-ink);text-decoration:none}
+.libx-lab a:hover,.libx-books a:hover{text-decoration:underline}
+.libx-books{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:14px}
+.libx-books li{display:grid;grid-template-columns:104px minmax(0,1fr);gap:16px;padding:14px;border:1px solid var(--line);background:rgba(255,253,247,.6)}
+.libx-books img{width:104px;height:104px;object-fit:cover;display:block}
+.libx-books em{display:block;font:700 10.5px/1.4 var(--body);letter-spacing:1.8px;text-transform:uppercase;font-style:normal;color:var(--gold-ink);margin-bottom:3px}
+.libx-books i{display:block;margin-top:6px;font-style:normal;font-size:12.5px;color:var(--muted)}
+.libx-blank{width:104px;height:104px;display:flex;align-items:center;justify-content:center;text-align:center;border:1.5px dashed #C8B993;font:600 10px/1.3 var(--body);letter-spacing:1.3px;text-transform:uppercase;color:var(--gold-ink)}
+@media(max-width:760px){.libx{grid-template-columns:1fr}.libx-books li{grid-template-columns:84px minmax(0,1fr)}.libx-books img,.libx-blank{width:84px;height:84px}.libx-btn{width:100%;justify-content:center}}
 /* One warm line that hands the reader from one section to the next. */
 .turn{font-family:var(--display);font-style:italic;font-size:clamp(17px,2.4vw,21px);line-height:1.45;color:var(--muted);max-width:52ch;margin:0 0 20px}
 .band.dark .turn{color:#B9AC94}
@@ -895,6 +916,30 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
     <div class="wo"><b>A full pipeline</b><p>A hundred named people to approach, instead of waiting for referrals.</p></div>
     <div class="wo"><b>Fewer bad customers</b><p>You can see which ones cost you, and what to do about them.</p></div>
     <div class="wo"><b>A business that holds</b><p>Decisions made on figures you wrote down, not on how the week felt.</p></div>
+  </div>
+</div></section>
+
+<!-- ═══ library ═══ -->
+<section class="band" id="library"><div class="wrap">
+  <p class="turn">And so you never work from memory: everything that goes with it, on paper.</p>
+  <p class="eyebrow">Library &amp; working materials</p>
+  <h2 class="sectitle">Everything that goes with the work</h2>
+  <div class="libx">
+    <div class="libx-col">
+      <p class="libx-k">The Founder’s Blueprint · three manuals</p>
+      <ul class="libx-mans">
+        <li><span class="libx-m" aria-hidden="true">Building</span><span><b>Building</b><small>Finding the offer and the first clients · 79 pages</small></span></li>
+        <li><span class="libx-m libx-g" aria-hidden="true">Growing</span><span><b>Growing</b><small>Clients repeat, everything runs through you · 77 pages</small></span></li>
+        <li><span class="libx-m libx-s" aria-hidden="true">Scaling</span><span><b>Scaling</b><small>There is a team, and your job has changed · 80 pages</small></span></li>
+      </ul>
+      <a class="libx-btn" href="/start">Join to download all three →</a>
+      <div class="libx-lab"><b>Personal Leadership LAB · The Workbook</b><small>93 pages · opens with the LAB</small><a href="https://exploraself.com/lab" target="_blank" rel="noopener">See the LAB ↗</a></div>
+    </div>
+    <ul class="libx-books">
+      <li><img src="/library/cover-built-to-lead.jpg" alt="Built to Lead cover" width="104" height="104" loading="lazy"><span><em>99 practical tools</em><b>Built to Lead</b><small>One leader in the making. A personal leadership field guide.</small><a href="/library/built-to-lead-preview.pdf" target="_blank" rel="noopener">Preview the first pages →</a><a href="/start">Join for the free digital copy →</a><i>Print edition coming</i></span></li>
+      <li><img src="/library/cover-worth-building.jpg" alt="Worth Building cover" width="104" height="104" loading="lazy"><span><em>32 leadership frameworks</em><b>Worth Building</b><small>The Founder’s Playbook. Turn grit into growth and build a business that lasts.</small><a href="/library/worth-building-preview.pdf" target="_blank" rel="noopener">Preview the first pages →</a><a href="/start">Join for the free digital copy →</a><i>Print edition coming</i></span></li>
+      <li class="libx-soon"><span class="libx-blank" aria-hidden="true">In preparation</span><span><em>For scaling founders</em><b>A New Way of Winning</b><small>The third book: all twelve levels, written for the founder whose job has changed.</small><i>In preparation</i></span></li>
+    </ul>
   </div>
 </div></section>
 
