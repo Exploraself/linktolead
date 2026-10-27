@@ -1,6 +1,6 @@
 
 :root{
- --paper:#F7F2E7; --panel:#FFFCF4; --ink:#1C1309;
+ --paper:#FFFFFF; --panel:#FFFDF8; --ink:#14100B;
  --gold:#C9A24A; --gold-hi:#E3C47E; --gold-ink:#6E5213;
  --cream:#EFE4CC; --line:#D6C9AC; --muted:#6A6052;
  --self:#A8623A; --people:#4C7355; --work:#36607F; --market:#9A7418; --ok:#2C6B43;
@@ -11,16 +11,6 @@
  --serif:'Fraunces',Georgia,serif; --body:'Libre Franklin',Arial,sans-serif;
  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
- --paper:#17130E; --panel:#231D15; --ink:#F7F2E7;
- --gold:#C9A24A; --gold-hi:#E3C47E; --gold-ink:#E3C47E;
- --cream:#332919; --line:#594A32; --muted:#C4B69D;
- --self:#E0A282; --people:#9BC0A1; --work:#91B8D5; --market:#DDBD69; --ok:#9BC99D;
- --deep:#100D09; --deep-2:#302316; --on-deep:#F7F2E7; --on-deep-muted:#D3C4A5;
- --on-deep-line:#8C795B; --danger:#F3AC94; --danger-soft:#3C251E; --ok-soft:#253328;
- --neutral:#332B20; --quiet:#FFFFFF12; --glow:#C9A24A15; --shadow:#00000066; --overlay:#100D09CC; --delivery:#6A8875;
- color-scheme:dark;
-}}
 :root[data-theme="dark"]{
  --paper:#17130E; --panel:#231D15; --ink:#F7F2E7;
  --gold:#C9A24A; --gold-hi:#E3C47E; --gold-ink:#E3C47E;
@@ -51,3 +41,14 @@ html{overflow-wrap:anywhere}body{font-size:16px}main{min-width:0}.shell,.hero-co
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @media print{.sidebar{display:none}.shell{margin:0}.strategy-grid,.report-grid{display:block}.metric-decision{display:none}.strategy-grid textarea{font-size:11px}.hero,.report-head{background:var(--paper);color:var(--ink)}}
 @media(max-width:800px){.sidebar nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible;gap:4px}.sidebar nav a{white-space:normal;line-height:1.45;justify-content:center;text-align:center;min-width:0;padding:8px 5px}.sidebar nav a span{display:none}}
+
+/* ── Clarity pass (27 Oct): the working area is black on white; whatever is
+   selected is dark with gold, so it can never disappear into its background. */
+.level-tabs{gap:6px}
+.level-tabs a{padding:11px 14px;border-radius:4px 4px 0 0;font-weight:600}
+.level-tabs a:hover{color:var(--ink);background:var(--cream)}
+.level-tabs a.active,:root[data-theme="dark"] .level-tabs a.active{background:#14100B;color:#E3C47E;border-color:#C9A24A}
+.journey button.active,:root[data-theme="dark"] .journey button.active{background:#14100B;color:#F7F2E7}
+.journey button.active b{color:#E3C47E}
+.journey button.active small,.journey button.active .step{color:#D3C4A5}
+.journey button.active .stage-icon,:root[data-theme="dark"] .journey button.active .stage-icon{color:#E3C47E}
