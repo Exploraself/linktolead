@@ -7,7 +7,7 @@
 <meta name="description" content="Twelve weeks that put your business on paper instead of in your head. Ten questions decide which twelve you walk and which of the four domains they lean on. First three levels free.">
 <meta name="theme-color" content="#14100B">
 <link rel="icon" href="/assets/icon.svg">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Libre+Franklin:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Libre+Franklin:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: alternating grounds — paper to read on, dark to look at — so every
    beat is visibly separate. Four numbered steps, one instrument panel reused
@@ -63,10 +63,19 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offse
 .hero::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(120% 80% at 18% 0%, rgba(201,162,74,.16), transparent 62%)}
 .hero .wrap{padding-block:clamp(56px,10vw,104px);position:relative;z-index:2}
-.kicker{font:700 10px/1.6 var(--body);letter-spacing:3.6px;text-transform:uppercase;color:var(--gold)}
-.wordmark{font-family:var(--display);font-weight:600;font-size:clamp(46px,11vw,96px);line-height:.92;letter-spacing:-2.6px;margin-top:10px}
-.tagline{font-family:var(--display);font-size:clamp(16px,2.6vw,22px);color:var(--gold-hi);margin-top:13px}
+/* The name is the first thing the eye stops on; the promise is the headline. */
+.lockup{display:flex;align-items:center;gap:14px;width:fit-content;max-width:100%;padding-bottom:18px;border-bottom:1px solid var(--line-dark)}
+.lockup svg{flex:none}
+.lockup .lw{font-family:var(--display);font-weight:600;font-size:clamp(26px,4vw,34px);line-height:1;letter-spacing:-.3px;color:var(--gold-hi)}
+.lockup .ls{font:600 10.5px/1.5 var(--body);letter-spacing:2.6px;text-transform:uppercase;color:var(--gold);margin-top:6px}
+.hero h1{font-family:var(--display);font-weight:600;font-size:clamp(38px,7vw,72px);line-height:1.03;letter-spacing:-1.4px;margin:26px 0 0;max-width:none;color:#F4ECDA}
+.hero h1 em{display:block;font-style:italic;font-weight:500;color:var(--gold)}
 .hero .lede{max-width:48ch;color:#E6DCC7}
+.go-row{display:flex;flex-wrap:wrap;align-items:center;gap:16px 22px;margin-top:28px}
+.go-row .cta{margin-top:0}
+.free{display:flex;align-items:center;gap:12px}
+.free b{display:inline-flex;align-items:center;height:28px;padding:0 11px;border:1px solid var(--gold);color:var(--gold-hi);font:700 12px/1 var(--body);letter-spacing:2.4px}
+.free span{font-size:13.5px;line-height:1.45;color:#B7AB93}
 .hero .under{color:#9D917E}
 
 /* ── numbered steps ── */
@@ -413,13 +422,20 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
 
 <!-- ═══ hero ═══ -->
 <section class="hero"><div class="wrap">
-  <p class="kicker">ExploraSelf · The Incubator</p>
-  <p class="wordmark">Link to Lead</p>
-  <p class="tagline">The Founder’s Blueprint · twelve weeks</p>
-  <p class="pace">Twelve if you are starting out. Faster if you are further along — the questions decide, not the calendar.</p>
-  <p class="lede">Twelve weeks that put your business on paper instead of in your head.</p>
-  <a class="cta" href="/start">Here’s where you start</a>
-  <p class="under">Ten questions, two minutes. Nothing to pay, now or later — the reading comes once you tell us where to send it.</p>
+  <div class="lockup">
+    <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="7" y="7" width="20" height="20" transform="rotate(45 17 17)" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--gold)"/><rect x="13" y="13" width="8" height="8" transform="rotate(45 17 17)" fill="var(--gold)"/></svg>
+    <div>
+      <p class="lw">Link to Lead</p>
+      <p class="ls">The Founder’s Blueprint · The Incubator</p>
+    </div>
+  </div>
+  <h1>Your business, on paper. <em>Not in your head.</em></h1>
+  <p class="lede">A twelve-week founder programme. Each week you open something real — your calendar, your invoices, your delivery — count it, and write down what is actually there.</p>
+  <div class="go-row">
+    <a class="cta" href="/start">See where I stand →</a>
+    <p class="free"><b>FREE</b><span>Levels 01–03<br>10 questions · 2 minutes</span></p>
+  </div>
+  <p class="under">Your reading comes once you tell us where to send it.</p>
 </div></section>
 
 <!-- ═══ welcome bridge ═══ -->
