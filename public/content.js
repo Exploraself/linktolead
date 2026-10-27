@@ -88,7 +88,24 @@ export const LEVELS = { build: BUILD, grow: GROW, scale: SCALE };
 
 /** The title shown on the map: taken from the level itself wherever the level
  *  is written, so the map and the level can never drift apart. */
+/** The level names a founder sees in the menu and level header — short and
+ *  practical, chosen by Alexandru (27 Oct). The worksheets inside keep their
+ *  own titles; only the name of the level changes. */
+export const LEVEL_NAMES = {
+  build: ['Count your week', 'Why it exists, in one line', 'Your client, by name', 'Price your hour',
+    'Their yes, in their words', 'The 3 talks you’re avoiding', 'A week you chose', 'Your offer, tested',
+    'Out of your head', 'Your first hundred', 'The truth you avoided', 'Your next 90 days, on one page'],
+  grow: ['Only you, on one list', 'Hire on paper first', 'Fix what breaks first', 'Say the hard thing',
+    'Define “finished”', 'Five customers, one phrase', 'Write the unwritten deal', 'Your week, on one page',
+    'Remove one brick', 'Fix the failing handoff', 'Trust, checked', 'Your business, on one page'],
+  scale: ['Two decisions given away', 'Who could do your job', 'A system with a new owner', 'Find the next demand',
+    'The talk your team avoids', 'One number, read weekly', 'Your bet, tested small', 'Grow one leader',
+    'Stop one thing', 'Your edge, proven', 'What success is for', 'Held together, handed on'],
+};
+
 export function weekTitle(stage, n) {
+  const named = (LEVEL_NAMES[stage] || [])[n - 1];
+  if (named) return named;
   const L = (LEVELS[stage] || {})[n];
   const e = STAGES[stage].emphasis[n - 1];
   // A closing level leads on all four, so it keeps its own planned title
