@@ -30,7 +30,7 @@ The strategy asks three lines per domain (In 90 days I want · This week I will 
 
 Answers use the separate `exploraself-compass-v1` localStorage key. Every access is guarded by try/catch; restricted/private storage falls back to the current in-memory session with a download backup available. Nothing is submitted to a server. The tool starts blank; it does not generate fictional customer records or revenue. Imported legacy data and strategy fields are preserved. Older automatic range amounts are kept visibly for review, but are not used until the visitor enters an amount. Moving between origins requires an explicit JSON backup/restore.
 
-“Send it by email” posts the plan to `/api/send-plan`, which sends it once through Resend and stores nothing but a one-day rate-limit row. It stays hidden until `RESEND_API_KEY` and `MAIL_FROM` are set in the Cloudflare project. No analytics, CRM or list sign-up is included. Keep the Founder's Blueprint's files, existing `public/assets/`, `AGENTS.md`, `wrangler.toml`, `scripts/` and `tests/` unchanged.
+“Send it by email” posts the plan to `/api/send-plan`, which sends it once through Resend and stores nothing but a one-day rate-limit row. It sends from `support@exploraself.com` (already verified in Resend) and stays hidden until `RESEND_API_KEY` is set in the Cloudflare project. No analytics, CRM or list sign-up is included. Keep the Founder's Blueprint's files, existing `public/assets/`, `AGENTS.md`, `wrangler.toml`, `scripts/` and `tests/` unchanged.
 
 ## Checks
 

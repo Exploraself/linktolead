@@ -1,11 +1,10 @@
 // "Send it by email" on the Compass plan.
 //
-// Off until two settings exist in the Cloudflare project (Settings → Variables
-// and Secrets), added by Alexandru himself — never committed here:
-//   RESEND_API_KEY  the key from resend.com (secret)
-//   MAIL_FROM       e.g. "ExploraSelf <compass@exploraself.com>" — the domain
-//                   must be verified in Resend first
-// Until both exist, GET says { ready:false } and the Compass hides the button.
+// Off until RESEND_API_KEY exists in the Cloudflare project (Settings →
+// Variables and Secrets), added by Alexandru himself — never committed here.
+// It sends from the same verified address as exploraself.com's results emails,
+// unless MAIL_FROM is set. Until the key exists, GET says { ready:false } and
+// the Compass hides the button.
 //
 // The plan is sent once, to the address typed, and nothing else happens: no
 // list, no tag, no stored copy. Everything visitor-written is escaped and
@@ -13,7 +12,8 @@
 
 import { json, bad, db, clean, looksLikeEmail } from '../_shared.js';
 
-const ready = (env) => !!(env && env.RESEND_API_KEY && env.MAIL_FROM);
+const ready = (env) => !!(env && env.RESEND_API_KEY);
+const FROM = 'Alexandru at ExploraSelf <support@exploraself.com>';
 
 export const onRequestGet = ({ env }) => json({ ready: ready(env) });
 
@@ -96,7 +96,7 @@ export async function onRequestPost({ request, env }) {
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json' },
-    body: JSON.stringify({ from: env.MAIL_FROM, to: [email], subject: 'Your Leadership Compass plan', html: render(plan), text: text(plan) }),
+    body: JSON.stringify({ from: env.MAIL_FROM || FROM, to: [email], subject: 'Your Leadership Compass plan', html: render(plan), text: text(plan) }),
   }).catch(() => null);
   if (!r || !r.ok) return bad('It did not send. Try again in a minute.', 502);
 

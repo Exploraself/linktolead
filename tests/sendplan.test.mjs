@@ -44,9 +44,9 @@ r = await onRequestPost({ request: req({ email: 'a@b.co' }), env: {} });
 ok(r.status === 503, 'refuses to send without a key');
 
 // On, with a stubbed email service.
-const env = { RESEND_API_KEY: 'test', MAIL_FROM: 'ExploraSelf <compass@example.com>', DB: fakeDB() };
+const env = { RESEND_API_KEY: 'test', DB: fakeDB() };
 r = await onRequestGet({ env });
-ok((await r.json()).ready === true, 'ready once both settings exist');
+ok((await r.json()).ready === true, 'ready once the key exists');
 
 let sent = null;
 globalThis.fetch = async (url, opts) => { sent = { url, body: JSON.parse(opts.body) }; return { ok: true }; };
@@ -59,6 +59,7 @@ r = await onRequestPost({ request: req({ email: 'Ana@Example.com', plan }), env 
 ok(r.status === 200, 'sends a valid plan');
 ok(sent && sent.url === 'https://api.resend.com/emails', 'uses the email service');
 ok(sent.body.to[0] === 'ana@example.com', 'sends only to the typed address');
+ok(sent.body.from === 'Alexandru at ExploraSelf <support@exploraself.com>', 'sends from the verified exploraself.com address');
 ok(!sent.body.html.includes('<script>') && sent.body.html.includes('&lt;script&gt;'), 'escapes visitor text');
 ok(!sent.body.html.includes('<b>Ana</b>'), 'escapes the name');
 ok(!JSON.stringify(sent.body).includes('dropped'), 'drops unknown fields');
