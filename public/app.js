@@ -8,7 +8,8 @@
 // anywhere and nothing is asserted about a payment or a subscription.
 
 import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, DIAGNOSTIC, SECTIONS, JOURNEY,
-  gateFor, levelFor, isWritten, weekTitle, videoFor, nextGain, holds, referee } from './content.js';
+  gateFor, levelFor, isWritten, weekTitle, videoFor, nextGain, holds, referee,
+  LEAD, BOOKING, groundPlan } from './content.js';
 import { FW_BUILD } from './fw-build.js';
 import { FW_GROW } from './fw-grow.js';
 import { FW_SCALE } from './fw-scale.js';
@@ -156,8 +157,8 @@ function quizView() {
   return `<section class="band qband"><div class="wrap narrow">
     <a class="backlink" href="/">← Back</a>
     <p class="eyebrow">${compass} The entrance</p>
-    <h1 class="qh">Ten questions, and we tell you the truth</h1>
-    <p class="sec-lede">Answer as the week actually went, not as you meant it to go. This decides which stage you are in, which of the four domains is costing you most, and which level you start on. Two minutes.</p>
+    <h1 class="qh">Let’s find where you actually stand</h1>
+    <p class="sec-lede">Answer as last week actually went, not as you meant it to go — nobody grades this. It decides which stage you are in, which of the four domains is costing you most, and which level you start on. Two minutes.</p>
     <div class="qcount" role="status"><span class="qbar"><i style="width:${Math.round(done / need * 100)}%"></i></span>
       <span class="qnum">${done} of ${need} answered</span></div>
     <div class="quiz">${DIAGNOSTIC.map((q, i) => `<div class="q${state.diag[i] !== undefined ? ' got' : ''}">
@@ -172,13 +173,13 @@ function quizView() {
 function quizFoot() {
   if (!diagDone()) {
     const left = DIAGNOSTIC.length - Object.keys(state.diag).length;
-    return `<p class="qleft">${left} to go, and your reading is ready.</p>`;
+    return `<p class="qleft">${left} to go, and your Ground Plan is drawn.</p>`;
   }
   return `<div class="qdone">
     <p class="eyebrow">${compass} All ten answered</p>
-    <h3>Your reading is ready</h3>
-    <p>It names the stage you are actually in, which of the four domains is thinnest, and what level 01 asks of you. ${account.joined() || state.me ? '' : 'Tell us where to keep it and it opens.'}</p>
-    <button class="cta" data-go="${account.joined() || state.me ? 'read' : 'join'}">${account.joined() || state.me ? 'Read it →' : 'See where I stand →'}</button>
+    <h3>Your Ground Plan is drawn</h3>
+    <p>It shows the stage you are actually in, which of the four is costing you most, and your first three moves. ${account.joined() || state.me ? '' : 'Tell us where to keep it and it opens.'}</p>
+    <button class="cta" data-go="${account.joined() || state.me ? 'read' : 'join'}">${account.joined() || state.me ? 'See my Ground Plan →' : 'See where I stand →'}</button>
   </div>`;
 }
 
@@ -187,8 +188,8 @@ function joinView() {
   return `<section class="band qband"><div class="wrap narrow">
     <button class="backlink" type="button" data-go="quiz">← Back to the questions</button>
     <p class="eyebrow">${compass} Ten of ten</p>
-    <h1 class="qh">Where should we send your reading?</h1>
-    <p class="sec-lede">Your reading is written and waiting on the other side of this. An account also means your work follows you from this device to your phone — and that Alexandru can read what you wrote before you ever speak to him.</p>
+    <h1 class="qh">Where shall we send your Ground Plan?</h1>
+    <p class="sec-lede">It is drawn and waiting on the other side of this form. An account also lets your work follow you from this screen to your phone — and lets Alexandru read what you wrote before you ever speak to him.</p>
     <form class="joinbox bare" id="joinbox" novalidate>
       <div class="joinrow">
         <label><span>First name</span><input id="jf" name="fname" autocomplete="given-name" required></label>
@@ -197,7 +198,7 @@ function joinView() {
         <label><span>Your business</span><input id="jc" name="company" autocomplete="organization" required></label>
         <label><span>Phone</span><input id="jp" name="phone" type="tel" autocomplete="tel" required></label>
       </div>
-      <button class="cta" type="submit" id="jgo">Open my reading →</button>
+      <button class="cta" type="submit" id="jgo">Open my Ground Plan →</button>
       <p class="joinerr" id="jerr" hidden></p>
       <p class="savenote">Free, and the first three levels stay free. No card, now or later.</p>
     </form>
@@ -208,27 +209,91 @@ function joinView() {
 function readView() {
   const r = reading();
   if (!r) return quizView();
-  const score = state.raw || { self: 0, people: 0, work: 0, market: 0 };
+  const gp = groundPlan(state.diag, r);
+  const first = state.me ? state.me.name.split(' ')[0] : '';
+  const st = r.assigned;
+  const N = ['None', 'One', 'Two', 'Three'];
+  const promise = (n) => {
+    const L = (LEVELS[st] || {})[n];
+    const p = L && L.promise ? L.promise.split(/(?<=\.)\s+(?=[A-Z])/)[0] : '';
+    return p;
+  };
 
-  return `<section class="band qband"><div class="wrap">
-    <p class="eyebrow">${compass} Your reading</p>
-    <h1 class="qh">${esc(state.me ? state.me.name.split(' ')[0] + ', here is where you stand' : 'Here is where you stand')}</h1>
-    <div class="result">
-    <div class="rgrid">
-      <div><p class="eyebrow">What your answers show</p><div class="bars">${DOMAINS.map((d) => `<div class="bar" style="color:var(--${d.k})">
-        <span class="bn">${d.n}</span><span class="track"><i style="width:${(state.scores || {})[d.k] || 0}%;background:var(--${d.k})"></i></span><span class="bv">${score[d.k]}/4</span></div>`).join('')}</div>
-        <p class="barnote">Four points a domain, from the eight questions. ${esc(r.thinD.n)} is thinnest, so this stage leans on it.</p></div>
-      <div class="verdict ${r.kind}">
-        <span class="stage-pill">${esc(STAGES[r.assigned].n)}</span>
-        <h3>${esc(r.head)}</h3>
-        <p>${esc(r.body)}</p>
-        <p class="amb">${esc(r.ambition)}</p>
-        ${r.kind === 'ahead' ? `<p class="sure"><b>Sure you are past this?</b> Then take it at speed. Levels 01 to 03 are free and the questions are short — answer them as precisely as you can, and the reading at the end will say plainly whether you were right. If it says you were, nothing is holding you.</p>` : ''}
-        <p class="first">Everybody starts here<b>Level 01 — ${esc(weekTitle(r.assigned, 1))}</b></p>
-        <button class="cta" data-go="work">Open your Blueprint →</button>
-        <p class="savenote">Your work is saved to your account and follows you between devices.</p>
-      </div></div></div>
-  </div></section>`;
+  const told = gp.answers.map((a) => `<div class="gp-dom">
+      <div class="gp-dl"><span style="color:var(--${a.k})">${esc(a.n)}</span><span>${a.score} / 4${a.k === r.thin ? ' · thinnest' : ''}</span></div>
+      <div class="gp-track"><i style="width:${a.score * 25}%;background:var(--${a.k})"></i></div>
+      <p class="gp-said">${a.said.map((t) => `“${esc(t)}”`).join(' · ')}</p>
+    </div>`).join('');
+
+  const costs = gp.costs.length
+    ? `<h2 class="gp-h">${N[gp.costs.length]} of your answers ${gp.costs.length === 1 ? 'has' : 'have'} a price. <em>You are paying it every week.</em></h2>
+      <div class="gp-costs">${gp.costs.map((c) => `<div class="gp-cost">
+        <span class="gp-ck gp-${c.k}">${esc(c.n)}</span>
+        <p class="gp-cs">You answered: <i>“${esc(c.said)}”</i></p>
+        <p class="gp-cc">${esc(c.cost)}</p></div>`).join('')}</div>
+      <p class="gp-close">None of this gets more expensive overnight. It gets more familiar — and familiar is harder to change than expensive.</p>`
+    : `<h2 class="gp-h">None of your answers carries an obvious price. <em>The work now is keeping it that way.</em></h2>`;
+
+  const moves = [1, 2, 3].map((n) => `<li class="gp-move">
+      <span class="gp-mn">${String(n).padStart(2, '0')}</span>
+      <b>${esc(weekTitle(st, n))}</b>
+      <p>${esc(promise(n))}</p></li>`).join('');
+
+  const node = (cls, mark, title, sub) => `<li class="gp-node ${cls}"><span class="gp-dot">${mark}</span><b>${title}</b>${sub}</li>`;
+  const flag = '<svg width="26" height="30" viewBox="0 0 26 30" aria-hidden="true"><path d="M4 2v27" stroke="currentColor" stroke-width="2"/><path d="M5 3h17l-4 6 4 6H5z" fill="var(--gold)" stroke="currentColor" stroke-width="1.5"/></svg>';
+  const road = [
+    node('gp-here', '', 'You, today', `<span>${esc(STAGES[st].n)}</span>`),
+    ...[1, 2, 3].map((n) => node('gp-free', String(n).padStart(2, '0'), esc(weekTitle(st, n)), '<span class="gp-fr">Free</span>')),
+    node('gp-next', '1:1', 'Session with Alexandru', '<span>Levels 04–05</span>'),
+    node('gp-later', '06–12', 'LAB, then HUB', '<span>Levels 06–12</span>'),
+    node('gp-goal', flag, esc(STAGES[r.want] ? STAGES[r.want].n : ''), `<span class="gp-ww">“${esc(gp.wantWords)}”</span><span>your words</span>`),
+  ].join('');
+
+  return `<div class="gp">
+  <section class="gp-wrap gp-top">
+    <p class="eyebrow">${compass} Your Ground Plan</p>
+    <h1 class="gp-title">${esc(first ? `${first}, here is your Ground Plan.` : 'Here is your Ground Plan.')}</h1>
+    <p class="gp-lede">Built from your ten answers. Nothing here is a guess about you — every line points back to something you chose.</p>
+  </section>
+
+  <section class="gp-wrap gp-two">
+    <div class="gp-card"><p class="gp-k">What you told us</p>${told}</div>
+    <div class="gp-card gp-verdict ${r.kind}">
+      <span class="gp-pill">Start in ${esc(STAGES[st].n)}</span>
+      <h2>${esc(r.head)}</h2>
+      <p>${esc(r.body)}</p>
+      <p>${esc(r.ambition)}</p>
+      ${r.kind === 'ahead' ? `<p class="sure"><b>Sure you are past this?</b> Then take it at speed. Levels 01 to 03 are free — answer them as precisely as you can, and the reading at the end of level 03 will say plainly whether you were right.</p>` : ''}
+    </div>
+  </section>
+
+  <section class="gp-dark"><div class="gp-wrap">
+    <p class="gp-k gp-gold">What waiting costs you</p>
+    ${costs}
+  </div></section>
+
+  <section class="gp-wrap gp-moves">
+    <p class="eyebrow">Your next three moves · free</p>
+    <h2 class="gp-h">Three levels, then a conversation with Alexandru.</h2>
+    <p class="gp-lede">Each level is 28 short answers about things you can open and count — your calendar, your invoices, your customers. Nothing to prepare. It is all in front of you.</p>
+    <ol class="gp-mlist">${moves}<li class="gp-move gp-then">
+      <span class="gp-mt">Then</span><b>A session with Alexandru</b>
+      <p>He reads what you wrote before you speak. The session opens levels 04–05.</p></li></ol>
+    <div class="gp-btns">
+      <button class="cta" type="button" data-level="1">Start Level 01 →</button>
+      <a class="gp-line" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my session with Alexandru</a>
+    </div>
+  </section>
+
+  <section class="gp-wrap gp-road">
+    <p class="eyebrow">Where this road goes</p>
+    <h2 class="gp-h">From where you are to where you said you want to be.</h2>
+    <div class="gp-scroll"><ol class="gp-nodes" aria-label="The road from today to your goal">${road}</ol></div>
+    <p class="gp-lede">Every step on this road is something you finish, not something you wait for. The first one is open now.</p>
+    <button class="cta" type="button" data-level="1">Start Level 01 →</button>
+    <p class="savenote">${account.joined() ? 'Your work is saved to your account and follows you between devices.' : 'Your work is saved on this device.'}</p>
+  </section>
+  </div>`;
 }
 
 // ── The workspace ────────────────────────────────────────────────────────────
@@ -436,7 +501,7 @@ function render() {
   const st = state.stage || 'build';
   document.body.classList.toggle('inwork', view === 'work');
   $('#tnav').innerHTML = state.stage && state.me
-    ? `<button type="button" data-go="read" ${view === 'read' ? 'aria-current="page"' : ''}>Your reading</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button>`
+    ? `<button type="button" data-go="read" ${view === 'read' ? 'aria-current="page"' : ''}>Your Ground Plan</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button>`
     : '';
   $('#main').innerHTML = view === 'work'
     ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work">${moduleHTML(st)}</div></div>`
@@ -524,7 +589,7 @@ document.addEventListener('submit', async (e) => {
       ? ex.message
       : 'We could not reach the account service just now.';
     show(why + ' Your work is saved on this device — carry on, and it will sync when we can reach it.');
-    if (go) { go.disabled = false; go.textContent = 'Open my reading anyway →'; go.dataset.go = 'read'; }
+    if (go) { go.disabled = false; go.textContent = 'Open my Ground Plan anyway →'; go.dataset.go = 'read'; }
   }
 });
 

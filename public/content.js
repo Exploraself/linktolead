@@ -58,7 +58,7 @@ export const WEEKS = {
 // The ladder. What opens, and on what.
 export const LADDER = [
   { from: 1, to: 3, key: 'free', n: 'Free, and free to stay', price: 'Free',
-    what: 'All four domains at levels one to three. No payment, now or later — an account, so your reading and your answers are kept and follow you.' },
+    what: 'All four domains at levels one to three. No payment, now or later — an account, so your Ground Plan and your answers are kept and follow you.' },
   { from: 4, to: 5, key: 'session', n: 'One session with Alexandru', price: 'Book a 1:1',
     what: 'He reads your first three levels before you speak. You leave knowing which of the four domains is costing you most, why it is that one, and with levels four and five opened and walked through. These two are not handed over cold.' },
   { from: 6, to: 9, key: 'lab', n: 'Personal Leadership LAB', price: '$97',
@@ -248,7 +248,7 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 /** The journey, in four steps, for the entrance. Short on purpose. */
 export const JOURNEY = [
   { n: 'You are here', t: 'Ten questions',
-    d: 'Two minutes. It works out which of the four domains is thinnest and which stage you are actually in. The reading opens once you say where to keep it.' },
+    d: 'Two minutes. It works out which of the four domains is thinnest and which stage you are actually in. Your Ground Plan opens once you say where to keep it.' },
   { n: 'Next', t: 'The Incubator — levels 01 to 03',
     d: 'Free, and free to stay. All four domains, twelve modules, every worksheet. You come out with an offer, a customer, a standard and a week you can see.' },
   { n: 'Then', t: 'Your reading',
@@ -256,3 +256,57 @@ export const JOURNEY = [
   { n: 'After that', t: 'The rest of the twelve',
     d: 'Levels 04 onward, with Alexandru in them. Same four domains, going deeper, until the stage is finished and the next one opens.' },
 ];
+
+// ── The Ground Plan ──────────────────────────────────────────────────────────
+// What a founder sees after the join. Every line traces to one of their ten
+// answers: their own words quoted back, the price of each weak answer, the
+// three free levels, and the road to where they said they want to be.
+
+/** The four, as the founder meets them on the landing page. */
+export const LEAD = { self: 'Lead yourself', people: 'Lead your people', work: 'Lead your business', market: 'Lead the market' };
+
+/** Where "Book my session" goes. The free 1:1 form linked from exploraself.com. */
+export const BOOKING = 'https://forms.gle/opnxfhFTJJg69Qy77';
+
+/** The price of each weak answer, by question (0–7) and answer value (0 or 1).
+ *  Principles, never figures: nothing here claims a number about anyone. */
+export const COSTS = [
+  { 0: 'Hours you cannot see are hours anyone can take. The week fills itself, and rarely with what grows the business.',
+    1: '“Roughly” is where the leaks hide. The hour you would never spend on purpose gets spent anyway, every week.' },
+  { 0: 'Without a line written down, every request is a fresh negotiation — and the loudest one usually wins.',
+    1: 'A rule only you know is a rule only you can enforce. Every exception lands back on your desk.' },
+  { 0: 'What you do not say still gets said — in rework, in missed dates, in a standard nobody is holding.',
+    1: 'Late and badly is the expensive way to say it: the problem has grown, and the conversation is harder than it had to be.' },
+  { 0: 'Without one honest voice, you hear about your blind spots from the market — which is the costly way to hear it.',
+    1: 'Truth you rarely ask for arrives late, usually when it is already expensive.' },
+  { 0: 'The business only earns while you are in the room. That is not a business yet — it is a job you cannot leave.',
+    1: 'Every day away is borrowed from the business. The longer that stays true, the more it costs to change.' },
+  { 0: 'Everything lives in your head, so everything waits for your head. Nobody can help with work they cannot see.',
+    1: 'A process in your head is a process only you can run. Every new pair of hands starts from zero.' },
+  { 0: 'Every month starts from zero. Your next sale depends on whoever happens to find you.',
+    1: 'A type cannot be called. Without names, your next sale depends on whoever happens to find you.' },
+  { 0: 'You are guessing which words sell you — and every page, post and pitch repeats the guess.',
+    1: 'Once or twice is a rumour, not a reason. Ask again, and your pitch can borrow their words instead of yours.' },
+];
+
+/** The text of the option a founder chose for question i. */
+export function answerText(i, v) {
+  const q = DIAGNOSTIC[i];
+  const o = q && q.o.find((x) => String(x[1]) === String(v));
+  return o ? o[0] : '';
+}
+
+/** Build the Ground Plan from the ten answers and the referee's verdict.
+ *  costs: up to three weak answers, weakest first, the thin domain first. */
+export function groundPlan(diag, r) {
+  const said = (d) => DIAGNOSTIC.map((q, i) => [q, i]).filter(([q]) => q.d === d)
+    .map(([, i]) => answerText(i, diag[i])).filter(Boolean);
+  const answers = DOMAINS.map((d) => ({ k: d.k, n: LEAD[d.k], score: (r.score || {})[d.k] || 0, said: said(d.k) }));
+  const costs = DIAGNOSTIC.map((q, i) => ({ i, d: q.d, v: diag[i] }))
+    .filter((x) => x.v === 0 || x.v === 1)
+    .sort((a, b) => a.v - b.v || (b.d === r.thin) - (a.d === r.thin) || a.i - b.i)
+    .slice(0, 3)
+    .map((x) => ({ k: x.d, n: LEAD[x.d], said: answerText(x.i, x.v), cost: COSTS[x.i][x.v] }));
+  const wantI = DIAGNOSTIC.findIndex((q) => q.d === 'want');
+  return { answers, costs, wantWords: answerText(wantI, diag[wantI]) };
+}
