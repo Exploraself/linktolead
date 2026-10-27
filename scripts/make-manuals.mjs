@@ -9,7 +9,7 @@ import { createRequire } from 'node:module';
 // Playwright is installed globally in this environment and resolves through
 // CommonJS but not through a bare ESM specifier from this directory.
 const { chromium } = createRequire(import.meta.url.replace('/scripts/', '/'))('playwright');
-import { DOMAINS, SEVEN, STAGES, LEVELS, gateFor, weekTitle } from '../public/content.js';
+import { DOMAINS, SEVEN, STAGES, LEVELS, LEAD, gateFor, weekTitle } from '../public/content.js';
 import { FW_BUILD } from '../public/fw-build.js';
 import { FW_GROW } from '../public/fw-grow.js';
 import { FW_SCALE } from '../public/fw-scale.js';
@@ -58,7 +58,7 @@ function manual(stage) {
     const n = i + 1, e = S.emphasis[i];
     const d = DOMAINS.find((x) => x.k === e);
     return `<tr><td class="n">${String(n).padStart(2, '0')}</td><td>${esc(weekTitle(stage, n))}</td>
-      <td class="e">${d ? d.n : 'All four'}</td><td class="g">${GATE[gateFor(n)]}</td></tr>`;
+      <td class="e">${d ? LEAD[d.k] : 'All four'}</td><td class="g">${GATE[gateFor(n)]}</td></tr>`;
   }).join('');
 
   const body = Array.from({ length: 12 }, (_, i) => {
@@ -69,7 +69,7 @@ function manual(stage) {
     return `<section class="level">
       <header class="lh">
         <span class="ln">${String(n).padStart(2, '0')}</span>
-        <div><p class="eyebrow">Level ${n} · ${esc(S.n)} · emphasis ${d ? d.n.toLowerCase() : 'all four'}</p>
+        <div><p class="eyebrow">Level ${n} · ${esc(S.n)} · leans on ${d ? LEAD[d.k].toLowerCase() : 'all four'}</p>
         <h2>${esc(weekTitle(stage, n))}</h2></div>
       </header>
       <div class="promise"><p class="plabel">The promise of this level</p><p class="ptext">${esc(L.promise)}</p></div>
@@ -77,7 +77,7 @@ function manual(stage) {
         const D = L[dom.k];
         const lead = dom.k === e;
         return `<div class="domain${lead ? ' lead' : ''}">
-          <h3><span class="dk" style="background:${dom.hex}"></span>${dom.n}<small>${esc(D.title)} — ${esc(D.sub)}</small></h3>
+          <h3><span class="dk" style="background:${dom.hex}"></span>${LEAD[dom.k]}<small>${esc(D.title)} — ${esc(D.sub)}</small></h3>
           <ol class="steps">${D.steps.map((q, si) => `<li><span class="sn">${SEVEN[si].n}</span><span class="sq">${esc(q)}</span><span class="rule"></span><span class="rule"></span>${
             fwFor(stage, n, dom.k) && fwFor(stage, n, dom.k).after === si + 1 ? sheetHTML(fwFor(stage, n, dom.k)) : ''}</li>`).join('')}</ol>
         </div>`;
