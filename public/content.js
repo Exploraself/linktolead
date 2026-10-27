@@ -60,14 +60,14 @@ export const LADDER = [
   { from: 1, to: 3, key: 'free', n: 'Free, and free to stay', price: 'Free',
     what: 'All four domains at levels one to three. No payment, now or later — an account, so your Ground Plan and your answers are kept and follow you.' },
   { from: 4, to: 5, key: 'session', n: 'One session with Alexandru', price: 'Book a 1:1',
-    what: 'He reads your first three levels before you speak. You leave knowing which of the four domains is costing you most, why it is that one, and with levels four and five opened and walked through. These two are not handed over cold.' },
+    what: 'Alexandru and the team read your first three levels before you speak. You leave knowing which of the four domains is costing you most, why it is that one, and with levels four and five opened and walked through. These two are not handed over cold.' },
   { from: 6, to: 9, key: 'lab', n: 'Personal Leadership LAB', price: '$97',
     what: 'Nine levels, self-paced, in your own time. The library comes with it: the 32 frameworks, the 99 tools, the books and the workbook for your stage.',
     url: 'https://exploraself.com/lab' },
   { from: 10, to: 12, key: 'hub', n: 'Business Growth HUB', price: '$399',
     what: 'The full Blueprint, unlocked immediately. Three sessions with Alexandru, the LAB included, and every resource.',
     url: 'https://exploraself.com/hub' },
-  { from: 0, to: 0, key: 'premium', n: 'Premium — the whole thing, with him in it', price: '$1,989',
+  { from: 0, to: 0, key: 'premium', n: 'Premium — the whole thing, with Alexandru and the team', price: '$1,989',
     what: 'All twelve levels, the LAB, the HUB, every resource — and Alexandru mentoring you every week, not three times.',
     url: 'https://exploraself.com/hub' },
 ];
@@ -88,7 +88,24 @@ export const LEVELS = { build: BUILD, grow: GROW, scale: SCALE };
 
 /** The title shown on the map: taken from the level itself wherever the level
  *  is written, so the map and the level can never drift apart. */
+/** The level names a founder sees in the menu and level header — short and
+ *  practical, chosen by Alexandru (27 Oct). The worksheets inside keep their
+ *  own titles; only the name of the level changes. */
+export const LEVEL_NAMES = {
+  build: ['Count your week', 'Why it exists, in one line', 'Your client, by name', 'Price your hour',
+    'Their yes, in their words', 'The 3 talks you’re avoiding', 'A week you chose', 'Your offer, tested',
+    'Out of your head', 'Your first hundred', 'The truth you avoided', 'Your next 90 days, on one page'],
+  grow: ['Only you, on one list', 'Hire on paper first', 'Fix what breaks first', 'Say the hard thing',
+    'Define “finished”', 'Five customers, one phrase', 'Write the unwritten deal', 'Your week, on one page',
+    'Remove one brick', 'Fix the failing handoff', 'Trust, checked', 'Your business, on one page'],
+  scale: ['Two decisions given away', 'Who could do your job', 'A system with a new owner', 'Find the next demand',
+    'The talk your team avoids', 'One number, read weekly', 'Your bet, tested small', 'Grow one leader',
+    'Stop one thing', 'Your edge, proven', 'What success is for', 'Held together, handed on'],
+};
+
 export function weekTitle(stage, n) {
+  const named = (LEVEL_NAMES[stage] || [])[n - 1];
+  if (named) return named;
   const L = (LEVELS[stage] || {})[n];
   const e = STAGES[stage].emphasis[n - 1];
   // A closing level leads on all four, so it keeps its own planned title
@@ -137,7 +154,7 @@ export const SECTIONS = [
   { k: 'free', n: 'The Incubator', sub: 'Where everything begins', from: 1, to: 3,
     note: 'Three levels, all four domains, free and free to stay.' },
   { k: 'session', n: 'With Alexandru', sub: 'Two levels, walked through', from: 4, to: 5,
-    note: 'He reads your first three before you speak. You leave knowing which domain is costing you most.' },
+    note: 'Alexandru and the team read your first three before you speak. You leave knowing which domain is costing you most.' },
   { k: 'lab', n: 'The LAB', sub: 'Personal Leadership LAB', from: 6, to: 9,
     note: 'Four more levels in your own time, with the whole library behind them.' },
   { k: 'hub', n: 'The HUB', sub: 'Business Growth HUB', from: 10, to: 12,

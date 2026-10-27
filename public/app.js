@@ -189,7 +189,7 @@ function joinView() {
     <button class="backlink" type="button" data-go="quiz">← Back to the questions</button>
     <p class="eyebrow">${compass} Ten of ten</p>
     <h1 class="qh">Where shall we send your Ground Plan?</h1>
-    <p class="sec-lede">It is drawn and waiting on the other side of this form. An account also lets your work follow you from this screen to your phone — and lets Alexandru read what you wrote before you ever speak to him.</p>
+    <p class="sec-lede">It is drawn and waiting on the other side of this form. An account also lets your work follow you from this screen to your phone — and lets Alexandru and the team read what you wrote before you ever speak to them.</p>
     <form class="joinbox bare" id="joinbox" novalidate>
       <div class="joinrow">
         <label><span>First name</span><input id="jf" name="fname" autocomplete="given-name" required></label>
@@ -278,7 +278,7 @@ function readView() {
     <p class="gp-lede">Each level is 28 short answers about things you can open and count — your calendar, your invoices, your customers. Nothing to prepare. It is all in front of you.</p>
     <ol class="gp-mlist">${moves}<li class="gp-move gp-then">
       <span class="gp-mt">Then</span><b>A session with Alexandru</b>
-      <p>He reads what you wrote before you speak. The session opens levels 04–05.</p></li></ol>
+      <p>Alexandru and the team read what you wrote before you speak. The session opens levels 04–05.</p></li></ol>
     <div class="gp-btns">
       <button class="cta" type="button" data-level="1">Start Level 01 →</button>
       <a class="gp-line" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my session with Alexandru</a>
@@ -347,7 +347,7 @@ function railHTML(st) {
       </section>`;
     }).join('')}
     <div class="rprem">
-      <p class="eyebrow">Everything, with him in it</p>
+      <p class="eyebrow">Everything, with Alexandru and the team</p>
       <h4>Premium</h4>
       <p>All twelve levels, the LAB, the HUB and every resource — and Alexandru mentoring you every week.</p>
       <span class="price">$1,989</span>
@@ -362,7 +362,7 @@ function moduleHTML(st) {
   const g = gateFor(level);
   const owned = holds(state.tier, g);
   const tabs = DOMAINS.map((d) => `<button type="button" class="mtab" data-dom="${d.k}" data-k="${d.k}"
-      aria-pressed="${d.k === dom}"><b>${d.n}</b><em>${answered(st, level, d.k)}/7</em></button>`).join('');
+      aria-pressed="${d.k === dom}"><b>${esc(LEAD[d.k])}</b><em>${answered(st, level, d.k)}/7</em></button>`).join('');
 
   if (!owned) {
     const rung = LADDER.find((r) => r.key === g);
@@ -395,11 +395,12 @@ function moduleHTML(st) {
   const full = answered(st, level, dom) === 7;
 
   return `${levelHead(st, title)}
+    ${stageStrip(st)}
     <div class="mtabs" role="tablist">${tabs}</div>
     <article class="mod">
       <header class="modh">
         <span class="dkey" style="background:var(--${dom})"></span>
-        <div><p class="eyebrow">${esc(DOMAINS.find((d) => d.k === dom).n)} · ${esc(DOMAINS.find((d) => d.k === dom).full)}</p>
+        <div><p class="eyebrow">${esc(LEAD[dom])} · ${esc(DOMAINS.find((d) => d.k === dom).full)}</p>
         ${D.title === weekTitle(st, level) ? '' : `<h3>${esc(D.title)}</h3>`}
         <p class="modsub">${esc(D.sub)}</p></div>
       </header>
@@ -483,17 +484,28 @@ function levelHead(st, title) {
   const done = levelDone(st, level);
   return `<header class="lvh">
     <button class="backrail" type="button" data-go="rail">☰ Levels</button>
-    <p class="eyebrow">Level ${String(level).padStart(2, '0')} · ${esc(STAGES[st].n)} · emphasis ${esc(emphasisName(st, level).toLowerCase())}</p>
+    <p class="eyebrow">Level ${String(level).padStart(2, '0')} · ${esc(STAGES[st].n)} · leans on ${esc(emphasisName(st, level).toLowerCase())}</p>
     <h2>${esc(title)}</h2>
     <div class="lvtrack"><i style="width:${done / 28 * 100}%"></i></div>
     <p class="lvcount" id="lvcount">${done} of 28 answered</p>
   </header>`;
 }
 
+/** Where the founder is: the three stages as rising steps, theirs lit. */
+function stageStrip(st) {
+  const order = ['build', 'grow', 'scale'];
+  return `<section class="stagestrip" aria-label="Your stage"><p class="eyebrow">Your stage</p><ol>${order.map((k, i) => {
+    const now = k === st;
+    return `<li class="ss-step ss-${i + 1}${now ? ' ss-now' : ''}"${now ? ' aria-current="step"' : ''}>
+      ${now ? '<span class="ss-here">You are here</span>' : ''}
+      <span><b>${esc(STAGES[k].n)}</b><span class="ss-line">${esc(STAGES[k].blurb)}</span></span></li>`;
+  }).join('')}</ol></section>`;
+}
+
 function emphasisName(st, lv) {
   const e = STAGES[st].emphasis[lv - 1];
   const d = DOMAINS.find((x) => x.k === e);
-  return d ? d.n : 'All four';
+  return d ? LEAD[d.k] : 'All four';
 }
 
 // ── Render ───────────────────────────────────────────────────────────────────
@@ -568,10 +580,10 @@ document.addEventListener('submit', async (e) => {
   const first = val('#jf'), last = val('#jl'), email = val('#je'),
         company = val('#jc'), phone = val('#jp');
   const show = (m) => { if (err) { err.textContent = m; err.hidden = false; } };
-  if (!first || !last) return show('First and last name, so he knows who he is reading.');
+  if (!first || !last) return show('First and last name, so Alexandru and the team know who they are reading.');
   if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return show('That does not look like an email address.');
   if (!company) return show('What the business is called.');
-  if (!phone) return show('A phone number, so he can reach you about the session.');
+  if (!phone) return show('A phone number, so the team can reach you about the session.');
   if (err) err.hidden = true;
   if (go) { go.disabled = true; go.textContent = 'One moment…'; }
   try {

@@ -25,7 +25,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const name = (first || last) ? `${first} ${last}`.trim() : whole;
 
   if (!looksLikeEmail(email)) return bad('That does not look like an email address.');
-  if (!name) return bad('A name, so Alexandru knows who he is reading.');
+  if (!name) return bad('A name, so Alexandru and the team know who they are reading.');
 
   const stage = ['build', 'grow', 'scale'].includes(body.stage) ? body.stage : null;
   const thin = ['self', 'people', 'work', 'market'].includes(body.thin) ? body.thin : null;
