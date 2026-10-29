@@ -6,20 +6,36 @@
 //                  and the notes waiting for a reply
 // GET ?csv=1       the same list as a CSV file
 // GET ?student=id  one founder's work
-// POST { action }  reply · tier (change step) · pause · delete · signin-link ·
-//                  message · mc-test · mc-backfill. Every action is logged as
-//                  an event; every Mailchimp call also in mailchimp_log.
+// POST { action }  reply · tier (change step, and its step tags in Mailchimp) ·
+//                  pause · delete · signin-link · message · mc-test ·
+//                  mc-backfill. Every action is logged as an event; every
+//                  Mailchimp call also in mailchimp_log.
 
 import { json, bad, db, now, mentorOk, clean, looksLikeEmail, accountTables, newToken, STUDENT_TABLES } from '../_shared.js';
 import { DOMAIN_STEPS, WHATIF_STEPS, ALL_STEP_IDS } from '../_plans.js';
 import { sendLink } from './signin.js';
 import { send, esc, origin, mailState } from '../_mail.js';
 import { profile, unsubLink } from '../_account.js';
-import { mailchimpState, syncFounder, testJoin, backfillList } from '../_mailchimp.js';
+import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER } from '../_mailchimp.js';
 
 /** Each plan step's domain and title, so ticks can be read by domain. */
 const STEP = Object.fromEntries([...DOMAIN_STEPS, ...WHATIF_STEPS].map((s) => [s.id, s]));
 export const STEPS = { free: 'Founder Launchpad', session: 'The Boardroom', lab: 'LAB', hub: 'HUB', premium: 'The Summit' };
+
+/** A founder's climb, oldest first: the account itself (The Founder
+ *  Launchpad, on the day they joined), then every step change the mentor
+ *  made. Older 'mentor-step' events hold only the new step; newer ones hold
+ *  { from, to }. A change to the step they were already on adds no line. */
+export function climbOf(student, events) {
+  const out = [{ tier: 'free', name: stepName('free'), at: student.joined_at }];
+  for (const e of events || []) {
+    let to = e.detail;
+    try { const d = JSON.parse(e.detail); if (d && typeof d === 'object') to = d.to; } catch { /* a bare step key */ }
+    if (!TIER_ORDER.includes(to) || to === out[out.length - 1].tier) continue;
+    out.push({ tier: to, name: stepName(to), at: e.at });
+  }
+  return out;
+}
 
 async function roster(D) {
   const rows = await D.prepare(`
@@ -60,7 +76,7 @@ export async function onRequestGet({ request, env }) {
   if (one) {
     const me = await D.prepare('SELECT * FROM student WHERE id = ?').bind(one).first();
     if (!me) return bad('Not found.', 404);
-    const [answers, sheets, compass, notes, prof, ticks, auth, messages] = await Promise.all([
+    const [answers, sheets, compass, notes, prof, ticks, auth, messages, steps] = await Promise.all([
       D.prepare('SELECT stage,level,domain,step,body,updated_at FROM answer WHERE student_id=? ORDER BY level,domain,step').bind(one).all(),
       D.prepare('SELECT key,value FROM sheet WHERE student_id=?').bind(one).all(),
       D.prepare('SELECT * FROM compass WHERE student_id=?').bind(one).first(),
@@ -69,10 +85,12 @@ export async function onRequestGet({ request, env }) {
       D.prepare('SELECT step_id,done_at FROM plan_tick WHERE student_id=? ORDER BY done_at').bind(one).all(),
       D.prepare('SELECT pass_hash IS NOT NULL AS has_password, paused, set_at FROM account_auth WHERE student_id=?').bind(one).first(),
       D.prepare('SELECT subject,body,channel,sent_at,read_at FROM message WHERE student_id=? ORDER BY sent_at DESC LIMIT 20').bind(one).all(),
+      D.prepare("SELECT detail, at FROM event WHERE student_id=? AND kind='mentor-step' ORDER BY id").bind(one).all(),
     ]);
     delete me.diag_json;
     return json({ ok: true, student: me, answers: answers.results || [], work: sheets.results || [],
       compass: compass || null, notes: notes.results || [], profile: prof || null, auth: auth || null, messages: messages.results || [],
+      climb: climbOf(me, steps.results || []),
       ticks: (ticks.results || []).map((t) => ({ ...t, domain: STEP[t.step_id] ? STEP[t.step_id].domain : null, title: STEP[t.step_id] ? STEP[t.step_id].title : t.step_id })) });
   }
 
@@ -84,9 +102,10 @@ export async function onRequestGet({ request, env }) {
       WHERE n.status = 'new' ORDER BY n.created_at DESC LIMIT 100`).all();
   const mc = mailchimpState(env);
   const mcLog = await D.prepare('SELECT student_id, email, action, mode, status, detail, at FROM mailchimp_log ORDER BY id DESC LIMIT 20').all();
-  const waitingSync = (await backfillList(D, 5000, mc.mode)).length;
+  const waitingJoin = (await backfillList(D, 5000, mc.mode)).length;
+  const waitingTags = canTag(env) ? (await stepsBackfillList(D, 5000, mc.mode)).length : 0;
   return json({ ok: true, students, waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, mailReady: mailState(env).ready,
-    mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingSync } });
+    mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags } });
 }
 
 /** The email a mentor message becomes. Everything typed is escaped. */
@@ -126,31 +145,40 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: true, status: out.status, detail: out.detail });
   }
   if (body.action === 'mc-backfill') {
-    // Everyone with consent, not unsubscribed and not yet in Mailchimp, ten a
-    // second, up to fifty a press so one request stays well inside its time.
-    const mode = mailchimpState(env).mode;
+    // Everyone with consent, not unsubscribed and not yet in Mailchimp; then,
+    // with what is left of the press, the step tags of founders already in it
+    // (a join carries its own). Ten a second, up to fifty a press so one
+    // request stays well inside its time.
+    const mode = mailchimpState(env).mode, tagging = canTag(env);
     const ids = await backfillList(D, 50, mode);
-    const tally = { ok: 0, test: 0, failed: 0, skipped: 0 };
-    for (const [i, sid] of ids.entries()) {
-      if (i) await new Promise((r) => setTimeout(r, 100));
-      const out = await syncFounder(env, D, sid, 'join');
-      tally[out.status] = (tally[out.status] || 0) + 1;
+    const tagIds = tagging && ids.length < 50 ? await stepsBackfillList(D, 50 - ids.length, mode) : [];
+    const tally = { ok: 0, test: 0, failed: 0, skipped: 0 }, tags = { ok: 0, test: 0, failed: 0, skipped: 0 };
+    let n = 0;
+    for (const [list, action, t] of [[ids, 'join', tally], [tagIds, 'tags', tags]]) {
+      for (const sid of list) {
+        if (n++) await new Promise((r) => setTimeout(r, 100));
+        const out = await syncFounder(env, D, sid, action);
+        t[out.status] = (t[out.status] || 0) + 1;
+      }
     }
-    const left = (await backfillList(D, 5000, mode)).length;
-    await log('mentor', 'mentor-mc-backfill', JSON.stringify({ ...tally, left }));
-    return json({ ok: true, done: ids.length, ...tally, left });
+    const left = (await backfillList(D, 5000, mode)).length + (tagging ? (await stepsBackfillList(D, 5000, mode)).length : 0);
+    await log('mentor', 'mentor-mc-backfill', JSON.stringify({ ...tally, tags, left }));
+    return json({ ok: true, done: ids.length, ...tally, tagged: tagIds.length, tags, left });
   }
 
   const id = clean(body.student, 80);
-  const me = id ? await D.prepare('SELECT id, email, name FROM student WHERE id = ?').bind(id).first() : null;
+  const me = id ? await D.prepare('SELECT id, email, name, tier FROM student WHERE id = ?').bind(id).first() : null;
   if (!me) return bad('Unknown founder.', 404);
 
   if (body.action === 'tier') {
     const tier = ['free', 'session', 'lab', 'hub', 'premium'].includes(body.tier) ? body.tier : null;
     if (!tier) return bad('Unknown step.');
     await D.prepare('UPDATE student SET tier=? WHERE id=?').bind(tier, me.id).run();
-    await log(me.id, 'mentor-step', tier);
-    return json({ ok: true });
+    await log(me.id, 'mentor-step', JSON.stringify({ from: me.tier || 'free', to: tier }));
+    // The step tags go at once (API mode; the public form cannot tag, so it is
+    // skipped there). Tags only accumulate: a lower step removes none.
+    const mcOut = await syncFounder(env, D, me.id, 'tags');
+    return json({ ok: true, mailchimp: mcOut.status, mailchimpDetail: mcOut.detail });
   }
   if (body.action === 'pause') {
     const paused = body.paused ? 1 : 0;

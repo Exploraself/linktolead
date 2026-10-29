@@ -22,6 +22,9 @@ const when = (s) => {
   const d = Math.round(h / 24); return d + (d === 1 ? ' day ago' : ' days ago');
 };
 const yes = (v) => (v ? 'yes' : '—');
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** "30 Oct 2026". */
+const day = (s) => { const d = new Date(s); return isNaN(d) ? '—' : `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
 
 function gate(msg) {
   $('#main').innerHTML = `<div class="gate"><h2>Sign in</h2>
@@ -74,6 +77,7 @@ function mailchimpHTML() {
     <div class="bar" style="margin-top:12px"><input id="mc-email" type="email" placeholder="Email for a test join" autocomplete="off" style="max-width:280px">
       <button class="ghost" id="mc-test">Send a test join</button><span style="flex:1"></span>
       <button class="ghost" id="mc-backfill"${M.waiting ? '' : ' disabled'}>Send everyone with consent (${M.waiting} waiting)</button></div>
+    ${M.waitingTags ? `<p class="tiny" style="margin-top:6px">${M.waitingTags} of them ${M.waitingTags === 1 ? 'is' : 'are'} already in Mailchimp and only need${M.waitingTags === 1 ? 's' : ''} their step tags.</p>` : ''}
     ${(M.log || []).length ? `<div class="tscroll"><table class="mclog"><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Mode</th><th>Status</th><th>Detail</th></tr></thead><tbody>
       ${M.log.map((r) => `<tr><td class="tiny">${when(r.at)}</td><td class="tiny">${esc(r.email || (r.student_id === 'mentor' ? 'mentor' : '—'))}</td><td class="tiny">${esc(r.action)}</td><td class="tiny">${esc(r.mode)}</td>
         <td>${r.status === 'failed' ? '<b class="warn">failed</b>' : esc(r.status)}</td><td class="tiny">${esc(r.detail || '')}</td></tr>`).join('')}</tbody></table></div>`
@@ -114,6 +118,9 @@ function draw() {
   const qi = $('#q');
   qi.oninput = () => { q = qi.value; const pos = qi.selectionStart; draw(); const n = $('#q'); n.focus(); n.setSelectionRange(pos, pos); };
 }
+
+/** What Mailchimp did with the step tags after a step change. */
+const tagNote = (d) => (d && d.mailchimp === 'ok' ? ' Step tags sent to Mailchimp.' : d && d.mailchimp === 'failed' ? ` Mailchimp: ${d.mailchimpDetail}` : d && d.mailchimp === 'test' ? ' Mailchimp: step tags logged only (test mode).' : '');
 
 /** What Mailchimp did on a pause or delete, when there is anything to say. */
 const mcNote = (d) => (d && d.mailchimp === 'ok' ? ' Unsubscribed in Mailchimp.' : d && d.mailchimp === 'failed' ? ` Mailchimp: ${d.mailchimpDetail}` : d && d.mailchimp === 'test' ? ' Mailchimp: logged only (test mode).' : '');
@@ -177,7 +184,7 @@ async function csv() {
 async function one(id) {
   const r = await api('?student=' + encodeURIComponent(id));
   if (!r.ok) return load();
-  const d = r.data, s = d.student, A = d.answers || [], C = d.compass, N = d.notes || [], P = d.profile || {}, T = d.ticks || [], M = d.messages || [];
+  const d = r.data, s = d.student, A = d.answers || [], C = d.compass, N = d.notes || [], P = d.profile || {}, T = d.ticks || [], M = d.messages || [], K = d.climb || [];
   const DOMS = [['self', 'Lead yourself'], ['people', 'Lead your people'], ['work', 'Lead your business'], ['market', 'Lead the market']];
   const byLevel = {};
   for (const a of A) { if (!a.body) continue; (byLevel[a.level] = byLevel[a.level] || []).push(a); }
@@ -195,6 +202,8 @@ async function one(id) {
         <div class="k"><b>Unsubscribed</b><span>${P.unsubscribed ? 'yes' : 'no'}</span></div>
         <div class="k"><b>Password</b><span>${d.auth && d.auth.has_password ? 'yes' : 'no'}${d.auth && d.auth.paused ? ' · paused' : ''}</span></div>
       </div></div>
+    <div class="panel"><h2>Climb</h2>
+      <ul class="climb" style="margin:8px 0 0;padding-left:18px">${K.map((c) => `<li>${esc(c.name)} · ${esc(day(c.at))}</li>`).join('')}</ul></div>
     ${C ? `<div class="panel"><h2>Compass</h2><p class="tiny">Saved ${when(C.updated_at)}${C.stage ? ' · stage ' + esc(C.stage) : ''}</p>
       <pre class="pre">${esc(JSON.stringify(JSON.parse(C.results_json || '{}'), null, 2))}</pre>
       ${C.flags_json && C.flags_json !== 'null' ? `<p class="tiny" style="margin-top:10px"><b>Choices:</b> ${esc(C.flags_json)}</p>` : ''}</div>`
@@ -247,7 +256,9 @@ document.addEventListener('click', async (e) => {
     b.disabled = true; b.textContent = 'Sending…';
     const r = await act({ action: 'mc-backfill' });
     flash = !r.ok ? (r.data.error || 'That did not run.')
-      : `Sent ${r.data.done}: ${r.data.ok || 0} in Mailchimp, ${r.data.test || 0} logged in test mode, ${r.data.failed || 0} failed.${r.data.left ? ` ${r.data.left} still waiting: press again.` : ''}`;
+      : `Sent ${r.data.done}: ${r.data.ok || 0} in Mailchimp, ${r.data.test || 0} logged in test mode, ${r.data.failed || 0} failed.`
+        + (r.data.tagged ? ` Step tags for ${r.data.tagged}: ${r.data.tags.ok || 0} sent, ${r.data.tags.test || 0} logged in test mode, ${r.data.tags.failed || 0} failed.` : '')
+        + (r.data.left ? ` ${r.data.left} still waiting: press again.` : '');
     return load();
   }
   if (d.link || d.reset) {
@@ -265,7 +276,7 @@ document.addEventListener('change', async (e) => {
   const s = e.target.closest('select[data-step]');
   if (!s) return;
   const r = await act({ action: 'tier', student: s.dataset.step, tier: s.value });
-  flash = r.ok ? `${person(s.dataset.step).email} is now in ${STEP_NAMES[s.value]}.` : (r.data.error || 'That did not save.');
+  flash = r.ok ? `${person(s.dataset.step).email} is now in ${STEP_NAMES[s.value]}.` + tagNote(r.data) : (r.data.error || 'That did not save.');
   load();
 });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#dlg')) $('#dlg').innerHTML = ''; });

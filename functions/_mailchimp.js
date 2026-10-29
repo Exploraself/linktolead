@@ -24,6 +24,21 @@ export const DEFAULT_FORM = { host: 'exploraselfmba.us8.list-manage.com', server
 /** The four domains, as tags, in the Compass's own order. */
 export const DOMAIN_TAGS = ['lead-yourself', 'lead-your-people', 'lead-your-business', 'lead-the-market'];
 const STAGE_TAGS = ['build', 'grow', 'scale'];
+
+/** One tag per programme step, keyed by the tier values the site already
+ *  uses ('premium' is The Summit). In the ladder's order: a founder carries
+ *  the tag of their step and of every step before it. */
+export const STEP_TAGS = {
+  free: 'Link to Lead - The Founder Launchpad',
+  session: 'Link to Lead - The Boardroom',
+  lab: 'Link to Lead - The LAB',
+  hub: 'Link to Lead - The HUB',
+  premium: 'Link to Lead - The Summit',
+};
+/** The same order as TIER_ORDER in public/content.js (a test holds them equal). */
+export const TIER_ORDER = Object.keys(STEP_TAGS);
+/** A step's name for people: its tag without the "Link to Lead - " prefix. */
+export const stepName = (tier) => (STEP_TAGS[tier] || STEP_TAGS.free).replace(/^Link to Lead - /, '');
 const PROGRAMME = { building: 'build', growing: 'grow', scaling: 'scale', leading: 'scale', build: 'build', grow: 'grow', scale: 'scale', lead: 'scale' };
 
 const text = (v) => (typeof v === 'string' ? v.trim() : '');
@@ -60,11 +75,16 @@ export function mailchimpState(env = {}) {
 }
 
 /** The tags for one founder. In API mode each stage and domain tag is sent as
- *  active or inactive, so a founder who moves on loses the old one. */
-export function tagsFor({ source, stage, weakest }) {
+ *  active or inactive, so a founder who moves on loses the old one. Step tags
+ *  only accumulate: the founder's step and every step before it, always
+ *  active and never sent as inactive, so a step lowered by mistake takes
+ *  nothing away. */
+export function tagsFor({ source, stage, weakest, tier }) {
   const st = PROGRAMME[stage] || null;
   const out = [{ name: 'linktolead', status: 'active' }];
   if (source) out.push({ name: source, status: 'active' });
+  const reached = Math.max(0, TIER_ORDER.indexOf(tier || 'free'));
+  for (const t of TIER_ORDER.slice(0, reached + 1)) out.push({ name: STEP_TAGS[t], status: 'active' });
   if (st) for (const s of STAGE_TAGS) out.push({ name: s, status: s === st ? 'active' : 'inactive' });
   if (weakest) for (const d of DOMAIN_TAGS) out.push({ name: d, status: d === weakest ? 'active' : 'inactive' });
   return out;
@@ -195,7 +215,7 @@ export async function record(D, { studentId, email, action, mode, status, detail
  * for someone who once gave consent, so nobody else is ever named to Mailchimp.
  */
 export async function syncFounder(env, D, studentId, action = 'join', { keepLog = true } = {}) {
-  const s = await D.prepare('SELECT id, email, name, stage FROM student WHERE id = ?').bind(studentId).first();
+  const s = await D.prepare('SELECT id, email, name, stage, tier FROM student WHERE id = ?').bind(studentId).first();
   if (!s) return { status: 'skipped', detail: 'No such founder.' };
   const p = await D.prepare('SELECT consent, unsubscribed, source FROM student_profile WHERE student_id = ?').bind(studentId).first();
   if (!p || !p.consent) return { status: 'skipped', detail: 'No consent.' };
@@ -209,10 +229,27 @@ export async function syncFounder(env, D, studentId, action = 'join', { keepLog 
   const c = await D.prepare('SELECT stage, results_json FROM compass WHERE student_id = ?').bind(studentId).first();
   const [first, ...rest] = String(s.name || '').split(' ');
   const member = { email: s.email, first, last: rest.join(' '), source: p.source || 'compass',
-    stage: (c && c.stage) || s.stage, weakest: c ? weakestTag(c.results_json) : null };
+    stage: (c && c.stage) || s.stage, weakest: c ? weakestTag(c.results_json) : null, tier: s.tier || 'free' };
   const out = await push(env, member, action);
   if (keepLog) await record(D, { studentId, email: s.email, action, mode: st.mode, status: out.status, detail: out.detail });
+  // Which step's tags went with it, so the backfill knows who still needs
+  // them. A test only marks it as tested ("test:<step>"), so going live
+  // still sends them for real; it never overwrites a real send.
+  if (action !== 'unsubscribe' && canTag(env) && (out.status === 'ok' || out.status === 'test')) {
+    const tier = member.tier;
+    await D.prepare(out.status === 'ok'
+      ? 'UPDATE student_profile SET mailchimp_steps = ? WHERE student_id = ?'
+      : "UPDATE student_profile SET mailchimp_steps = CASE WHEN mailchimp_steps = ?1 THEN mailchimp_steps ELSE 'test:' || ?1 END WHERE student_id = ?2")
+      .bind(tier, studentId).run();
+  }
   return out;
+}
+
+/** Whether tags can go at all: API mode, or TEST mode with a key (which logs
+ *  the API request). The public form cannot tag. */
+export function canTag(env = {}) {
+  const st = mailchimpState(env);
+  return (st.mode === 'api' && st.ready) || (st.mode === 'test' && !!env.MAILCHIMP_API_KEY);
 }
 
 /** The mentor's test join, for an address Alexandru types himself. */
@@ -232,6 +269,23 @@ export async function backfillList(D, limit = 50, mode = 'form') {
       LEFT JOIN account_auth au ON au.student_id = s.id
     WHERE p.consent = 1 AND COALESCE(p.unsubscribed, 0) = 0 AND COALESCE(au.paused, 0) = 0
       AND COALESCE(p.mailchimp_status, '') NOT IN ${done}
+    ORDER BY s.joined_at LIMIT ?`).bind(limit).all();
+  return (rows.results || []).map((r) => r.id);
+}
+
+/** Founders already in the audience whose step tags have not been sent for
+ *  the step they are on now: everyone who joined before the step tags
+ *  existed, and anyone whose step changed while a send failed. Same consent,
+ *  unsubscribe and pause rules as backfillList. */
+export async function stepsBackfillList(D, limit = 50, mode = 'api') {
+  const inAudience = mode === 'test' ? "('ok','test')" : "('ok')";
+  const done = mode === 'test'
+    ? "(p.mailchimp_steps = COALESCE(s.tier, 'free') OR p.mailchimp_steps = 'test:' || COALESCE(s.tier, 'free'))"
+    : "p.mailchimp_steps = COALESCE(s.tier, 'free')";
+  const rows = await D.prepare(`SELECT s.id FROM student s JOIN student_profile p ON p.student_id = s.id
+      LEFT JOIN account_auth au ON au.student_id = s.id
+    WHERE p.consent = 1 AND COALESCE(p.unsubscribed, 0) = 0 AND COALESCE(au.paused, 0) = 0
+      AND COALESCE(p.mailchimp_status, '') IN ${inAudience} AND NOT COALESCE(${done}, 0)
     ORDER BY s.joined_at LIMIT ?`).bind(limit).all();
   return (rows.results || []).map((r) => r.id);
 }
