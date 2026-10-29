@@ -122,7 +122,7 @@
     if (el) el.textContent = !stored ? '○ This session only · download a backup' : signedIn() ? '○ Saved to your account' : '○ Saved on this browser';
   }
   const UI = { page: 'overview', gate: false, after: null, how: false, ws: false, saved: false, mail: '', mailReady: false, mailWhy: '', sending: false,
-    plans: null, note: '', signin: '', signinBusy: false, fine: false, glow: null };
+    plans: null, note: '', signin: '', signinBusy: false, fine: false, glow: null, signinOpen: false, pwmsg: '', hasPw: null };
   const identified = () => !!S.profile.email;
 
   /* ── The account ─────────────────────────────────────────────────────────── */
@@ -189,6 +189,11 @@
     let me;
     try { me = (await A.signinWith(code)).me || {}; }
     catch (e) { toast(e && e.message ? e.message : 'That sign-in link did not work. Ask for a new one.'); return; }
+    await afterSignIn(me);
+  }
+  /* Signed in (by link or password): bring the account's Compass here if this
+   * browser has none; otherwise this browser's copy goes up to the account. */
+  async function afterSignIn(me) {
     const theirs = await A.loadCompass();
     if (!hasWork(S) && theirs && theirs.answers) {
       const keepTheme = S.theme;
@@ -200,6 +205,23 @@
     S.acct = { email: S.profile.email, state: 'yes' };
     save(); await sync(); status(); render();
     toast('You are signed in. Your Compass is saved to your account.');
+  }
+  async function pwSignIn(where) {
+    const email = (($(where === 'gate' ? '#g-email' : '#ws-signin') || {}).value || '').trim(), pw = ($('#si-pw-' + where) || {}).value || '';
+    if (!A) return;
+    if (!pw) { UI.signin = 'Type your password, or use “Email me a sign-in link”.'; render(); return; }
+    UI.signinBusy = true; render();
+    try { const out = await A.login(email, pw); UI.gate = false; UI.signin = ''; await afterSignIn(out.me || {}); }
+    catch (e) { UI.signin = e && e.message && !/fetch|network|load failed/i.test(e.message) ? e.message : 'We could not reach the account service just now.'; }
+    UI.signinBusy = false; render();
+  }
+  async function savePassword() {
+    const a = ($('#pw-1') || {}).value || '', c = ($('#pw-2') || {}).value || '';
+    const say = (m) => { UI.pwmsg = m; render(); };
+    if (a.length < 10) return say('At least 10 characters, please.');
+    if (a !== c) return say('The two passwords are different.');
+    try { const r = await A.setPassword(a, c); UI.hasPw = true; say(r.changed ? 'Your password is changed.' : 'Your password is set.'); }
+    catch (e) { say(e && e.message ? e.message : 'It did not save. Try again in a minute.'); }
   }
   async function boot() {
     try { A = await import('/account.js'); } catch { A = null; }
@@ -294,7 +316,7 @@
         <span class="sf" style="font-size: 18px; line-height: 1.25">${line}</span>
         <div style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; font-weight: 600">${D.map((d, i) => `<span style="display: inline-flex; align-items: center; gap: 6px; color: ${LIGHT[i]}"><span style="width: 9px; height: 9px; border-radius: 50%; background: ${LIGHT[i]}"></span>${d.name} ${c.pc.per[i]}/4</span>`).join('')}</div>
       </div>
-      ${ready ? '<a class="pop cta" href="/start" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 18px; border-radius: 5px; background: #C9A24A; color: #14100B; font-weight: 600; text-decoration: none">You’re ready · Enter the Founder Launchpad →</a>' : ''}`;
+      ${ready ? '<a class="pop cta" href="/start#home" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 18px; border-radius: 5px; background: #C9A24A; color: #14100B; font-weight: 600; text-decoration: none">You’re ready · Enter the Founder Launchpad →</a>' : ''}`;
   }
 
   const pRing = (c) => `<svg width="74" height="74" viewBox="0 0 74 74" role="img" aria-label="${c.answered} of 8 answered">
@@ -642,7 +664,7 @@
       </div>
       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; border-top: 1px solid #3A2F20; padding-top: 16px">
         <p style="flex: 1 1 360px; font-size: 14px; color: #D3C4A5; line-height: 1.7">Every column is one week, and every week works all four. The weight shifts toward ${f === null ? 'the domain that needs you most' : D[f].name}. The coverage never drops. You are at week 1. The Summit ($1,989): the whole incubator, with Alexandru every week.</p>
-        <a href="/start" class="go no-print" style="display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 4px; background: #C9A24A; color: #14100B; font-weight: 600; text-decoration: none">Start week 1 free · The Founder Launchpad <span class="arr" aria-hidden="true">→</span></a>
+        <a href="/start#home" class="go no-print" style="display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 4px; background: #C9A24A; color: #14100B; font-weight: 600; text-decoration: none">Start week 1 free · The Founder Launchpad <span class="arr" aria-hidden="true">→</span></a>
       </div>`;
   }
 
@@ -953,11 +975,23 @@
         <span id="gate-err" role="alert" style="font-size: 13px; color: var(--self); font-weight: 600"></span>
         <button type="submit" data-f="gate-go" style="min-height: 50px; border-radius: 5px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; font-size: 15px; cursor: pointer">Start my compass →</button>
         <button type="button" data-act="gate-skip" data-f="gate-skip" style="min-height: 44px; border-radius: 5px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-weight: 600; cursor: pointer">Skip for now · keep exploring</button>
-        <button type="button" data-act="signin-gate" data-f="signin-gate" ${UI.signinBusy ? 'disabled' : ''} style="border: 0; background: none; padding: 6px 0; color: var(--goldink); font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer">Already have an account? Email me a sign-in link</button>
-        ${UI.signin ? `<span role="status" style="font-size: 13px; color: var(--ink); text-align: center">${esc(UI.signin)}</span>` : ''}
+        ${UI.signinOpen ? `<div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); padding-top: 12px"><span style="font-size: 13px; font-weight: 600">Already have an account? Sign in with the email above.</span>${pSignin('gate')}</div>`
+          : '<button type="button" data-act="signin-open" data-f="signin-open" style="border: 0; background: none; padding: 6px 0; color: var(--goldink); font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer">Already have an account? Sign in</button>'}
         <span style="font-size: 12px; color: var(--muted); text-align: center">Until you add your email, your answers stay only in this browser. Came from our page? You will not see this box.</span>
       </form></div>`;
   }
+  /* Password boxes, each with a show / hide button. */
+  const pwInput = (id, label, auto) => `<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">${label}<span style="display: flex; gap: 6px"><input class="inp" id="${id}" type="password" autocomplete="${auto}" style="flex: 1; min-width: 0"><button type="button" data-act="eye" data-v="${id}" data-f="eye-${id}" aria-label="Show ${label.toLowerCase()}" aria-pressed="false" style="width: 46px; border: 1px solid var(--line); border-radius: 5px; background: var(--paper); color: var(--ink); cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></button></span></label>`;
+  const linkBtn = (where, t) => `<button type="button" data-act="signin-${where}" data-f="signin-${where}-${t.length}" ${UI.signinBusy ? 'disabled' : ''} style="border: 0; background: none; padding: 6px 0; color: var(--goldink); font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer">${t}</button>`;
+  /** Sign in: a password, or a one-time link by email ("Forgot your password?" sends the same link). */
+  const pSignin = (where) => `${pwInput('si-pw-' + where, 'Password', 'current-password')}
+    <button type="button" data-act="pw-in" data-v="${where}" data-f="pw-in-${where}" ${UI.signinBusy ? 'disabled' : ''} style="min-height: 46px; border-radius: 5px; border: 0; background: var(--deep); color: #F7F2E7; font-weight: 600; cursor: pointer">Sign in</button>
+    <span style="display: flex; gap: 14px; flex-wrap: wrap">${linkBtn(where, 'Email me a sign-in link')}${linkBtn(where, 'Forgot your password?')}</span>
+    ${UI.signin ? `<span role="status" style="font-size: 13px; color: var(--ink)">${esc(UI.signin)}</span>` : ''}`;
+  const pPassword = () => `<details${UI.pwmsg ? ' open' : ''}><summary style="cursor: pointer; font-weight: 600; color: var(--goldink); min-height: 32px">${UI.hasPw ? 'Change your password' : 'Set a password (optional)'}</summary>
+    <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 8px; max-width: 420px">${pwInput('pw-1', 'Password', 'new-password')}${pwInput('pw-2', 'Confirm password', 'new-password')}
+    <button type="button" data-act="pw-save" data-f="pw-save" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border-radius: 5px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; cursor: pointer">Save my password</button>
+    ${UI.pwmsg ? `<span role="status" style="font-size: 13px; color: var(--ink)">${esc(UI.pwmsg)}</span>` : ''}</div></details>`;
   const pHow = () => (UI.how ? `<div class="card pop" style="padding: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 13px">
       <span style="display: flex; gap: 8px"><b style="color: var(--goldink)">1</b>Say where you are and where you want to get.</span>
       <span style="display: flex; gap: 8px"><b style="color: var(--goldink)">2</b>Answer 8 questions from real life.</span>
@@ -985,9 +1019,8 @@
       </div>
       ${UI.saved ? `<span class="pop" role="status" style="font-size: 13px; color: ${UI.saved === true ? 'var(--people)' : 'var(--self)'}; font-weight: 600">${UI.saved === true ? (signedIn() ? 'Saved to your account. Your preferences and numbers are locked to this workspace.' : 'Saved. Your preferences and numbers are kept with this workspace on this browser.') : esc(UI.saved)}</span>` : ''}
       <div style="border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 8px">
-        ${signedIn() ? `<span style="font-size: 13px; color: var(--muted)">Signed in${P.email ? ' as <b style="color: var(--ink)">' + esc(P.email) + '</b>' : ''}. On another device, ask for a sign-in link with this address.</span>`
-          : `<label style="${lab}">Already have an account? Email me a sign-in link<span style="display: flex; gap: 8px; flex-wrap: wrap"><input class="inp" id="ws-signin" type="email" autocomplete="email" value="${esc(P.email)}" placeholder="Your email" style="flex: 1 1 200px"><button type="button" data-act="signin-ws" data-f="signin-ws" ${UI.signinBusy ? 'disabled' : ''} style="min-height: 44px; padding: 0 16px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 600; cursor: pointer">Email me a link</button></span></label>
-          ${UI.signin ? `<span role="status" style="font-size: 13px; color: var(--ink)">${esc(UI.signin)}</span>` : ''}`}
+        ${signedIn() ? `<span style="font-size: 13px; color: var(--muted)">Signed in${P.email ? ' as <b style="color: var(--ink)">' + esc(P.email) + '</b>' : ''}. On another device, sign in with this address.</span>${pPassword()}`
+          : `<span style="font-size: 13px; font-weight: 600">Already have an account? Sign in</span><label style="${lab}">Email<input class="inp" id="ws-signin" type="email" autocomplete="email" value="${esc(P.email)}"></label>${pSignin('ws')}`}
       </div>
     </div>`;
   }
@@ -1119,7 +1152,10 @@
     const a = t.dataset.act, i = Number(t.dataset.i), v = t.dataset.v;
     switch (a) {
       case 'how': UI.how = !UI.how; render(); return;
-      case 'ws': UI.ws = !UI.ws; UI.saved = false; render(); return;
+      case 'ws':
+        UI.ws = !UI.ws; UI.saved = false; render();
+        if (UI.ws && signedIn() && UI.hasPw === null) A.loadCompass().then((c) => { UI.hasPw = !!(c && c.hasPassword); render(); });
+        return;
       case 'download': {
         try {
           const url = URL.createObjectURL(new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' }));
@@ -1159,6 +1195,10 @@
       case 'note-x': UI.note = ''; render(); return;
       case 'signin-gate': { const el = $('#g-email'); askLink(el ? el.value.trim() : '', 'gate'); return; }
       case 'signin-ws': { const el = $('#ws-signin'); askLink(el ? el.value.trim() : '', 'ws'); return; }
+      case 'signin-open': UI.signinOpen = true; render(); return;
+      case 'pw-in': pwSignIn(v); return;
+      case 'pw-save': savePassword(); return;
+      case 'eye': { const el = $('#' + v), show = el && el.type === 'password'; if (el) el.type = show ? 'text' : 'password'; t.setAttribute('aria-pressed', String(!!show)); return; }
       case 'gate-skip': UI.after = null; S.skipped = true; save(); closeGate(); return;
       case 'theme': S.theme = v; save(); render(); return;
       case 'ws-save': {
@@ -1221,4 +1261,20 @@
   document.addEventListener('visibilitychange', () => { if (document.hidden) sync(true); });
   window.addEventListener('pagehide', () => sync(true));
   if (location.protocol !== 'file:') boot();
+  /* Animations rest when their section is off screen or the tab is hidden.
+   * With reduced motion, SVG animations show their settled frame and stop. */
+  (function calm() {
+    const rest = (el, off) => {
+      el.toggleAttribute('data-off', off);
+      el.querySelectorAll('svg').forEach((g) => { try { if (off || reduced()) g.pauseAnimations(); else g.unpauseAnimations(); } catch { /* no SMIL */ } });
+    };
+    if (reduced()) document.querySelectorAll('svg').forEach((g) => { try { g.setCurrentTime(3.4); g.pauseAnimations(); } catch { /* no SMIL */ } });
+    const parts = [...document.querySelectorAll('#main > section, #main > div, .side')];
+    const seen = new Map();
+    try {
+      const io = new IntersectionObserver((es) => es.forEach((e) => { seen.set(e.target, e.isIntersecting); rest(e.target, !e.isIntersecting || document.hidden); }));
+      parts.forEach((el) => io.observe(el));
+      document.addEventListener('visibilitychange', () => parts.forEach((el) => rest(el, document.hidden || seen.get(el) === false)));
+    } catch { /* old browser: everything simply keeps running */ }
+  })();
 })();

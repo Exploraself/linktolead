@@ -9,10 +9,11 @@ import { createRequire } from 'node:module';
 // Playwright is installed globally in this environment and resolves through
 // CommonJS but not through a bare ESM specifier from this directory.
 const { chromium } = createRequire(import.meta.url.replace('/scripts/', '/'))('playwright');
-import { DOMAINS, SEVEN, STAGES, LEVELS, LEAD, gateFor, weekTitle } from '../public/content.js';
+import { DOMAINS, SEVEN, STAGES, LEVELS, LEAD, gateFor, weekTitle, loadStage } from '../public/content.js';
 import { FW_BUILD } from '../public/fw-build.js';
 import { FW_GROW } from '../public/fw-grow.js';
 import { FW_SCALE } from '../public/fw-scale.js';
+await Promise.all(['build', 'grow', 'scale'].map(loadStage));
 
 // The worksheets, as paper. The same definitions the app uses, drawn as ruled
 // boxes to fill by hand — so a founder working from the book and a founder

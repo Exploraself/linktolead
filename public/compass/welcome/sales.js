@@ -1,12 +1,12 @@
 /* The Leadership Compass sales page: three now-and-want sliders, the stage
- * finder, the life-first calculator and the name + email step.
+ * finder, the life-first calculator and the account box.
  *
  * Every number shown is arithmetic on what the visitor slid; nothing is a
  * benchmark. The name, email and stage are kept in this browser and picked up
- * by the Compass (same site), so they are never asked twice. "Open my Compass"
- * also makes the free account (/api/signup, through /account.js, the same
- * token the Compass uses). If that cannot be reached, the Compass makes it
- * when it opens. Nothing else is sent from this page. */
+ * by the Compass (same site), so they are never asked twice. The account box
+ * makes the free account (/api/signup, through /account.js, the same token the
+ * Compass and /start use) and opens the founder's Ground Plan. Nothing else is
+ * sent from this page. */
 'use strict';
 /* The arithmetic and the sentences, with no page attached, so the tests can
  * run them at the edges (0 clients, 10,000 clients, 0 hours). */
@@ -143,36 +143,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
     redraw(k);
   }));
 
-  /* Tap a number to type it exactly. The slider jumps to the nearest place;
-   * the maths keeps the typed value, even above the slider's top. */
-  function edit(span) {
-    const k = span.dataset.edit, slider = document.querySelector(`[data-in="${k}"]`);
-    if (!slider || span.querySelector('input')) return;
-    const [min, max] = RANGES[k] || [0, Infinity];
-    const box = document.createElement('input');
-    box.type = 'text'; box.inputMode = 'numeric'; box.className = 'numbox'; box.value = String(val[k]);
-    box.setAttribute('aria-label', (slider.labels && slider.labels[0] ? slider.labels[0].textContent : k) + ', exact number');
-    const keepText = span.textContent; span.textContent = ''; span.appendChild(box); box.focus(); box.select();
-    let done = false;
-    const commit = (save) => {
-      if (done) return; done = true;
-      const typed = Number(String(box.value).replace(/[^\d.]/g, ''));
-      span.textContent = keepText;
-      if (save && box.value.trim() !== '' && Number.isFinite(typed)) {
-        val[k] = Math.max(min, PERCENT.has(k) ? Math.min(100, typed) : typed);
-        slider.value = String(LADDER[k] ? SalesMath.posOf(LADDER[k], val[k]) : Math.min(max, val[k]));
-        slider.setAttribute('aria-valuetext', String(val[k]));
-      }
-      redraw(k);
-      span.focus();
-    };
-    box.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); commit(true); } if (e.key === 'Escape') { e.preventDefault(); commit(false); } });
-    box.addEventListener('blur', () => commit(true));
-  }
+  /* Tap a number to type it exactly (edit.js, loaded on the first tap). */
+  const ctx = { val, RANGES, LADDER, PERCENT, posOf: SalesMath.posOf, redraw: (k) => redraw(k) };
   document.querySelectorAll('[data-edit]').forEach((span) => {
     span.setAttribute('role', 'button'); span.setAttribute('tabindex', '0'); span.title = 'Tap to type an exact number';
-    span.addEventListener('click', () => edit(span));
-    span.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('input')) { e.preventDefault(); edit(span); } });
+    const open = () => import('/compass/welcome/edit.js').then((m) => m.edit(span, ctx)).catch(() => {});
+    span.addEventListener('click', open);
+    span.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('input')) { e.preventDefault(); open(); } });
   });
 
   /* The stage finder: three yes / not-yet questions. */
@@ -205,52 +182,38 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
     finder();
   }));
 
-  /* The look inside: pause and play. */
-  const play = $('#play');
-  play.addEventListener('click', () => {
-    const paused = play.getAttribute('aria-pressed') !== 'true';
-    play.setAttribute('aria-pressed', String(paused));
-    play.textContent = paused ? '▶ Play' : '❚❚ Pause';
-    $('#vid').style.setProperty('--ps', paused ? 'paused' : 'running');
-  });
+  /* "A look inside" (inside.js) loads as the visitor scrolls near it. */
+  const vid = $('#vid');
+  const fillVid = () => import('/compass/welcome/inside.js').then((m) => m.fill(vid)).catch(() => {});
+  try {
+    const io = new IntersectionObserver((es) => { if (es.some((x) => x.isIntersecting)) { io.disconnect(); fillVid(); } }, { rootMargin: '900px 0px' });
+    io.observe(vid);
+  } catch { fillVid(); }
 
-  /* Name + email, kept in this browser for the Compass to pick up. */
-  const KEY = 'exploraself-profile';
+  /* The account box. Its markup and code (account-box.js) load the first time
+   * it opens, so the page itself stays light. /compass/welcome#join opens it
+   * (where /start sends visitors without an account). */
   const gate = $('#gate');
-  let opener = null;
-  const known = () => { try { const p = JSON.parse(localStorage.getItem(KEY) || 'null'); return p && p.email ? p : null; } catch { return null; } };
-  function showJoined(p) {
-    $('#gate-form').hidden = true;
-    const j = $('#joined'); j.hidden = false; j.style.display = 'flex';
-    $('#joined-line').textContent = (p && p.stage ? `We carried your stage over: ${STAGES.find((s) => s.id === p.stage).name}. ` : '') + 'Start with your road, then the eight questions.';
-    $('#joined-h').focus();
-  }
+  let box = null;
+  const loadBox = () => box || (box = import('/compass/welcome/account-box.js').catch(() => { box = null; }));
   function openGate(e) {
-    opener = e && e.currentTarget;
+    const opener = e && e.currentTarget;
     gate.hidden = false;
-    const p = known();
-    if (p) { if (stage !== null) { p.stage = STAGES[stage].id; try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* private mode */ } } showJoined(p); }
-    else $('#j-first').focus();
+    loadBox().then((m) => m && m.open({ gate, opener, stage: stage === null ? null : STAGES[stage] }));
   }
-  function closeGate() { gate.hidden = true; if (opener) opener.focus(); }
   document.querySelectorAll('[data-gate]').forEach((b) => b.addEventListener('click', openGate));
-  gate.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', closeGate));
-  gate.addEventListener('click', (e) => { if (e.target === gate) closeGate(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !gate.hidden) closeGate(); });
-  $('#gate-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const first = $('#j-first').value.trim(), last = $('#j-last').value.trim(), email = $('#j-email').value.trim();
-    const err = (m) => { $('#gate-err').textContent = m; };
-    if (!first) return err('Your first name, so the Compass is yours.');
-    if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return err('That email does not look complete.');
-    const p = { first, last, email, consent: true, stage: stage === null ? '' : STAGES[stage].id };
-    try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* private mode: the Compass will simply ask again */ }
-    showJoined(p);
-    // The free account, quietly. An address that already has one is left for
-    // the Compass, which offers a sign-in link there.
-    import('/account.js').then((A) => (A.joined() ? null : A.signup({ first, last, email, consent: true, source: 'sales-page', stage: p.stage })))
-      .catch(() => { /* the Compass tries again when it opens */ });
-  });
+  if (location.hash === '#join') {
+    let has = false; try { has = !!localStorage.getItem('ftb-token'); } catch { /* private mode */ }
+    if (has) location.replace('/start#home'); else openGate();
+  }
+
+  /* Animations rest when their section is off screen or the tab is hidden. */
+  try {
+    const parts = [...document.querySelectorAll('.fc > section, .fc > header, .fc > div')], seen = new Map();
+    const io = new IntersectionObserver((es) => es.forEach((e) => { seen.set(e.target, e.isIntersecting); e.target.toggleAttribute('data-off', !e.isIntersecting || document.hidden); }));
+    parts.forEach((el) => io.observe(el));
+    document.addEventListener('visibilitychange', () => parts.forEach((el) => el.toggleAttribute('data-off', document.hidden || seen.get(el) === false)));
+  } catch { /* old browser: everything simply keeps running */ }
 
   dream(); plan(); finder();
 })();

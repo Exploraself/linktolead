@@ -84,7 +84,7 @@
   }
 
   function loop(now) {
-    if (!visible || reduced()) { running = false; return; }
+    if (!visible || document.hidden || reduced()) { running = false; return; }
     draw((now - t0) / 1000, false);
     requestAnimationFrame(loop);
   }
@@ -99,6 +99,8 @@
   setup();
   if (W) draw(reduced() ? 99 : 0, reduced());
   window.addEventListener('resize', () => { setup(); if (W) { if (reduced() || !visible) draw(99, true); } });
+  // A hidden tab rests too, and plays again when it comes back.
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { visible = false; } else if (cv.getBoundingClientRect().top < innerHeight && cv.getBoundingClientRect().bottom > 0) { visible = true; play(); } });
   try {
     new IntersectionObserver((es) => es.forEach((e) => {
       const was = visible; visible = e.isIntersecting;

@@ -64,7 +64,12 @@ for (const f of ['public/compass/index.html', 'public/compass/welcome/index.html
 for (const f of ['public/compass/welcome/index.html', 'public/compass/welcome-a/index.html', 'public/compass/welcome/sales.css']) {
   ok(!/Archivo|Caslon/.test(read(f)), `${f}: Compass fonts only`);
 }
-ok(read('public/compass/welcome/index.html').includes('family=Fraunces') && read('public/compass/welcome/sales.css').includes("url('../assets/libre700.ttf')"), 'sales pages load the Compass fonts the Compass way');
+// Fonts load once, from this site: no Google Fonts, no old .ttf files.
+for (const f of ['public/index.html', 'public/start/index.html', 'public/mentor/index.html', 'public/compass/index.html', 'public/compass/summit/index.html', 'public/compass/welcome/index.html', 'public/compass/welcome-a/index.html']) {
+  const s = read(f);
+  ok(s.includes('href="/assets/fonts.css"') && !s.includes('fonts.googleapis.com') && s.includes('rel="preload" href="/assets/fonts/fraunces.woff2"'), `${f}: fonts once, self-hosted, preloaded`);
+}
+for (const f of ['public/compass/style.css', 'public/compass/welcome/sales.css', 'public/style.css']) ok(!/\.ttf|googleapis/.test(read(f)), `${f}: no duplicate font source`);
 for (const d of ['self', 'people', 'work', 'market']) ok(!/n: '(Self|People|Work|Market)'/.test(read('public/content.js')), 'programme domain names in full');
 
 // PR 3: breathing space, the lab, then the dawn before The Summit.

@@ -8,9 +8,6 @@
 // could be answered by thinking hard is not a step; it is a reflection prompt,
 // and this programme does not have any.
 
-import { BUILD } from './levels-build.js';
-import { GROW } from './levels-grow.js';
-import { SCALE } from './levels-scale.js';
 
 export const DOMAINS = [
   { k: 'self', n: 'Lead yourself', full: 'Personal internal', line: 'How you notice, decide and follow through.' },
@@ -85,7 +82,24 @@ export function gateFor(level) {
 // is not yet written, the map still shows its title and its emphasis, and the
 // door says so plainly rather than opening onto nothing.
 
-export const LEVELS = { build: BUILD, grow: GROW, scale: SCALE };
+// Only the founder's own stage is loaded, when it is needed (a page carries
+// one stage's levels and worksheets, not all three). LEVELS and SHEETS fill
+// in as stages load; the manuals script and the preview bundle register all
+// three up front.
+export const LEVELS = {};
+export const SHEETS = {};
+const FILES = {
+  build: () => Promise.all([import('./levels-build.js'), import('./fw-build.js')]).then(([l, f]) => [l.BUILD, f.FW_BUILD]),
+  grow: () => Promise.all([import('./levels-grow.js'), import('./fw-grow.js')]).then(([l, f]) => [l.GROW, f.FW_GROW]),
+  scale: () => Promise.all([import('./levels-scale.js'), import('./fw-scale.js')]).then(([l, f]) => [l.SCALE, f.FW_SCALE]),
+};
+/** Load one stage's levels and worksheets (once). */
+export async function loadStage(stage) {
+  if (LEVELS[stage] || !FILES[stage]) return;
+  const [levels, sheets] = await FILES[stage]();
+  LEVELS[stage] = levels; SHEETS[stage] = sheets;
+}
+export const registerStage = (stage, levels, sheets) => { LEVELS[stage] = levels; SHEETS[stage] = sheets; };
 
 /** The title shown on the map: taken from the level itself wherever the level
  *  is written, so the map and the level can never drift apart. */
@@ -121,30 +135,6 @@ export function levelFor(stage, n) {
   return s[n] || null;
 }
 export function isWritten(stage, n) { return !!levelFor(stage, n); }
-
-// ── The entry diagnostic ─────────────────────────────────────────────────────
-export const DIAGNOSTIC = [
-  { d: 'self', label: 'Lead yourself · personal internal', q: 'Do you know where your week actually goes?',
-    o: [['I could not account for last week', 0], ['Roughly, if I thought about it', 1], ['Yes, and I protect the important blocks', 2]] },
-  { d: 'self', label: 'Lead yourself · personal internal', q: 'Have you written down what you will not do, at any price?',
-    o: [['Never written down', 0], ['I know them, nobody else does', 1], ['Written, and I have held them', 2]] },
-  { d: 'people', label: 'Lead your people · personal external', q: 'When something is wrong with someone, how long before you say it?',
-    o: [['Weeks, or never', 0], ['Eventually, usually badly', 1], ['Within days, plainly', 2]] },
-  { d: 'people', label: 'Lead your people · personal external', q: 'Is there someone who tells you the truth about your business?',
-    o: [['No one', 0], ['One person, rarely asked', 1], ['Yes, and I ask them on purpose', 2]] },
-  { d: 'work', label: 'Lead your business · business internal', q: 'If you stopped for two weeks, what happens?',
-    o: [['It stops with me', 0], ['It limps', 1], ['It runs, mostly', 2]] },
-  { d: 'work', label: 'Lead your business · business internal', q: 'Is there one written process somebody else could follow?',
-    o: [['Nothing is written', 0], ['Some of it, in my head', 1], ['Yes, and it is used', 2]] },
-  { d: 'market', label: 'Lead the market · business external', q: 'Can you name, today, who your next ten customers are?',
-    o: [['No', 0], ['A type, not names', 1], ['Names, and why each one', 2]] },
-  { d: 'market', label: 'Lead the market · business external', q: 'Do you know in their words why your customers chose you?',
-    o: [['I assume', 0], ['I have heard it once or twice', 1], ['I have asked, recently', 2]] },
-  { d: 'stage', label: 'Where you are', q: 'Which is nearest the truth right now?',
-    o: [['Finding the offer and the first clients', 'build'], ['Clients repeat, but everything runs through me', 'grow'], ['There is a team, and my job has changed', 'scale']] },
-  { d: 'want', label: 'Where you are going', q: 'And where do you want to be a year from now?',
-    o: [['An offer that works, and clients who come back', 'build'], ['A business that runs without me in every room', 'grow'], ['A team I trust with the decisions', 'scale']] },
-];
 
 // ── The rail ─────────────────────────────────────────────────────────────────
 // How the twelve levels are grouped down the side. The grouping is the offer,
@@ -192,148 +182,15 @@ export function holds(tier, needed) {
   return want <= have;
 }
 
-// ── The referee ──────────────────────────────────────────────────────────────
-// Three things are captured at the entrance and they are not the same thing:
-// where a founder says they are, where they want to be, and what their own
-// answers show. The programme compares them rather than taking a word for it.
-//
-// This is the whole service. Thirty-six levels exist; knowing which twelve a
-// founder actually needs is what they are paying for, and it is the one thing
-// they cannot work out from inside their own business.
-//
-// It is never an argument. Where the evidence disagrees, the founder is shown
-// the answer they themselves gave and handed the test rather than a verdict.
-// And nobody skips anything: the referee chooses which stage is walked and
-// which domain carries the emphasis, never how much of it gets done.
-
-/** What the eight domain answers show, as against what was claimed.
- *  Market settles whether Building is finished — a founder without an offer
- *  and named customers has not left it, whatever else is true. Work settles
- *  whether Growing is finished, because Growing is the stage that builds the
- *  systems. Each is scored out of 4. */
-export function stageFromEvidence(score) {
-  if (score.market < 3) return 'build';
-  if (score.work < 3) return 'grow';
-  return 'scale';
-}
-
-const RANK = { build: 0, grow: 1, scale: 2 };
-
-/** The reading at the entrance: generic, short, and honest about which of the
- *  three inputs it is leaning on. Returns the stage actually assigned. */
-export function referee({ said, want, score }) {
-  const shown = stageFromEvidence(score);
-  const assigned = shown;                       // evidence decides, always
-  const gap = RANK[said] - RANK[shown];
-  const thin = ['self', 'people', 'work', 'market']
-    .map((k) => [k, score[k]]).sort((a, b) => a[1] - b[1])[0][0];
-  const thinD = DOMAINS.find((d) => d.k === thin);
-
-  // The sentence that carries the evidence. Always one of their own answers.
-  const because = shown === 'build'
-    ? 'you said you cannot yet name your next ten customers by name, or why the last ones chose you'
-    : shown === 'grow'
-      ? 'you said the business would stop or limp without you, and that little of it is written down'
-      : 'you said the work runs without you and that somebody tells you the truth about it';
-
-  let kind, head, body;
-  if (gap === 0) {
-    kind = 'agree';
-    head = `${STAGES[assigned].n} — and that matches what you said`;
-    body = `You put yourself in ${STAGES[assigned].n.toLowerCase()}, and your answers agree. That is worth something on its own: founders who read their own situation accurately tend to fix it faster. ${cap(thinD.n)} is where you have least to point at, so that is the domain this stage will lean on.`;
-  } else if (gap > 0) {
-    // They placed themselves ahead of where the evidence puts them.
-    kind = 'ahead';
-    head = `You said ${STAGES[said].n.toLowerCase()}. Start in ${STAGES[assigned].n.toLowerCase()}.`;
-    body = `Not a demotion, and not a disagreement — ${because}. ${cap(STAGES[said].n)} assumes that is already settled, so starting there is what makes it frustrating rather than useful. ${cap(STAGES[assigned].n)} settles it, and then ${STAGES[said].n.toLowerCase()} works.`;
-  } else {
-    // They are being harder on themselves than the evidence warrants.
-    kind = 'behind';
-    head = `You said ${STAGES[said].n.toLowerCase()}. You are further than that.`;
-    body = `By your own answers, ${because}. ${cap(STAGES[said].n)} is where founders go to rebuild something that already works, and rebuilding feels like progress while nothing moves. ${cap(STAGES[assigned].n)} is the stage you are actually in.`;
-  }
-
-  // Where they want to be, taken seriously and connected to the path.
-  const ambition = want === assigned
-    ? `You want to be where this stage ends, which is the shortest version of this: twelve levels, then look again.`
-    : RANK[want] > RANK[assigned]
-      ? `You want ${STAGES[want].n.toLowerCase()} within the year. That is reachable from here and it is the right thing to want — it is also why the order matters, because ${STAGES[want].n.toLowerCase()} rests on what ${STAGES[assigned].n.toLowerCase()} settles.`
-      : `You said you want ${STAGES[want].n.toLowerCase()}. Worth saying plainly: you do not have to grow a business you do not want to grow. The levels below still apply — they are how you make this size work properly rather than how you make it bigger.`;
-
-  return { assigned, shown, said, want, kind, head, body, ambition, thin, thinD, score };
-}
-
-const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-
-/** The journey, in four steps, for the entrance. Short on purpose. */
-export const JOURNEY = [
-  { n: 'You are here', t: 'Ten questions',
-    d: 'Two minutes. It works out which of the four domains is thinnest and which stage you are actually in. Your Ground Plan opens once you say where to keep it.' },
-  { n: 'Next', t: 'The Founder Launchpad — levels 01 to 03',
-    d: 'Free, and free to stay. All four domains, twelve modules, every worksheet. You come out with an offer, a customer, a standard and a week you can see.' },
-  { n: 'Then', t: 'Your reading',
-    d: 'When level 03 closes, the Blueprint reads back what you actually wrote and tells you where you stand, what it is costing you, and what to do first.' },
-  { n: 'After that', t: 'The rest of the twelve',
-    d: 'Levels 04 onward, with Alexandru in them. Same four domains, going deeper, until the stage is finished and the next one opens.' },
-];
-
-// ── The Ground Plan ──────────────────────────────────────────────────────────
-// What a founder sees after the join. Every line traces to one of their ten
-// answers: their own words quoted back, the price of each weak answer, the
-// three free levels, and the road to where they said they want to be.
-
-/** The four, as the founder meets them on the landing page. */
+// ── Names and links ──────────────────────────────────────────────────────────
 export const LEAD = { self: 'Lead yourself', people: 'Lead your people', work: 'Lead your business', market: 'Lead the market' };
 
 /** Where "Book my session" goes. The free 1:1 form linked from exploraself.com. */
 export const BOOKING = 'https://forms.gle/opnxfhFTJJg69Qy77';
 
-/** The price of each weak answer, by question (0–7) and answer value (0 or 1).
- *  Principles, never figures: nothing here claims a number about anyone. */
-export const COSTS = [
-  { 0: 'Hours you cannot see are hours anyone can take. The week fills itself, and rarely with what grows the business.',
-    1: '“Roughly” is where the leaks hide. The hour you would never spend on purpose gets spent anyway, every week.' },
-  { 0: 'Without a line written down, every request is a fresh negotiation — and the loudest one usually wins.',
-    1: 'A rule only you know is a rule only you can enforce. Every exception lands back on your desk.' },
-  { 0: 'What you do not say still gets said — in rework, in missed dates, in a standard nobody is holding.',
-    1: 'Late and badly is the expensive way to say it: the problem has grown, and the conversation is harder than it had to be.' },
-  { 0: 'Without one honest voice, you hear about your blind spots from the market — which is the costly way to hear it.',
-    1: 'Truth you rarely ask for arrives late, usually when it is already expensive.' },
-  { 0: 'The business only earns while you are in the room. That is not a business yet — it is a job you cannot leave.',
-    1: 'Every day away is borrowed from the business. The longer that stays true, the more it costs to change.' },
-  { 0: 'Everything lives in your head, so everything waits for your head. Nobody can help with work they cannot see.',
-    1: 'A process in your head is a process only you can run. Every new pair of hands starts from zero.' },
-  { 0: 'Every month starts from zero. Your next sale depends on whoever happens to find you.',
-    1: 'A type cannot be called. Without names, your next sale depends on whoever happens to find you.' },
-  { 0: 'You are guessing which words sell you — and every page, post and pitch repeats the guess.',
-    1: 'Once or twice is a rumour, not a reason. Ask again, and your pitch can borrow their words instead of yours.' },
-];
-
-/** The text of the option a founder chose for question i. */
-export function answerText(i, v) {
-  const q = DIAGNOSTIC[i];
-  const o = q && q.o.find((x) => String(x[1]) === String(v));
-  return o ? o[0] : '';
-}
-
-/** Build the Ground Plan from the ten answers and the referee's verdict.
- *  costs: up to three weak answers, weakest first, the thin domain first. */
-export function groundPlan(diag, r) {
-  const said = (d) => DIAGNOSTIC.map((q, i) => [q, i]).filter(([q]) => q.d === d)
-    .map(([, i]) => answerText(i, diag[i])).filter(Boolean);
-  const answers = DOMAINS.map((d) => ({ k: d.k, n: LEAD[d.k], score: (r.score || {})[d.k] || 0, said: said(d.k) }));
-  const costs = DIAGNOSTIC.map((q, i) => ({ i, d: q.d, v: diag[i] }))
-    .filter((x) => x.v === 0 || x.v === 1)
-    .sort((a, b) => a.v - b.v || (b.d === r.thin) - (a.d === r.thin) || a.i - b.i)
-    .slice(0, 3)
-    .map((x) => ({ k: x.d, n: LEAD[x.d], said: answerText(x.i, x.v), cost: COSTS[x.i][x.v] }));
-  const wantI = DIAGNOSTIC.findIndex((q) => q.d === 'want');
-  return { answers, costs, wantWords: answerText(wantI, diag[wantI]) };
-}
-
 // ── The library ──────────────────────────────────────────────────────────────
 // Working materials and companion books, shown on the entrance and inside the
-// programme. One join (the five fields) opens every download; previews need
+// programme. A free account opens every download; previews need
 // nothing. Print editions are paid, through the shop and Amazon. The LAB
 // workbook is a paid product, so it opens on exploraself.com/lab, never here.
 export const LIBRARY = {

@@ -7,7 +7,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 
 const ORDER = ['levels-build.js', 'levels-grow.js', 'levels-scale.js', 'frameworks.js',
-  'fw-build.js', 'fw-grow.js', 'fw-scale.js', 'content.js', 'feedback.js', 'account.js', 'app.js'];
+  'fw-build.js', 'fw-grow.js', 'fw-scale.js', 'content.js', 'feedback.js', 'account.js', 'home.js', 'app.js'];
 
 const here = (p) => new URL('../public/' + p, import.meta.url);
 
@@ -77,12 +77,15 @@ for (const f of ORDER) {
     seen.set(name, f);
   }
   parts.push(`/* ── ${f} ───────────────────────────────── */\n` + src);
+  // On the site each stage loads when needed; in one file all three are here.
+  if (f === 'content.js') parts.push("registerStage('build', BUILD, FW_BUILD); registerStage('grow', GROW, FW_GROW); registerStage('scale', SCALE, FW_SCALE);");
 }
 
 const html = (await readFile(here('start/index.html'), 'utf8'))
   .replace('<link rel="stylesheet" href="/style.css">', `<style>\n${await readFile(here('style.css'), 'utf8')}\n</style>`)
   .replace('<script src="/app.js" type="module"></script>', `<script type="module">\n${parts.join('\n\n')}\n</script>`)
-  .replace('<link rel="icon" href="/assets/icon.svg">', '');
+  .replace('<link rel="icon" href="/assets/icon.svg">', '')
+  .replace('<script src="/compass/engine.js" defer></script>', `<script>\n${await readFile(here('compass/engine.js'), 'utf8')}\n</script>`);
 
 const out = process.argv[2] || 'preview.html';
 await writeFile(out, html);

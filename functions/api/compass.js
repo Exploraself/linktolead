@@ -7,7 +7,7 @@
 // GET hands the copy back, so a founder who signs in on another device finds
 // their Compass there.
 
-import { json, bad, db, now, clean, studentBy } from '../_shared.js';
+import { json, bad, db, now, clean, studentBy, accountTables } from '../_shared.js';
 
 /** Kept whole or not at all: a JSON string cut short could never be read back. */
 const cap = (o, n) => { if (!o || typeof o !== 'object') return null; const s = JSON.stringify(o); return s.length <= n ? s : null; };
@@ -41,8 +41,10 @@ export async function onRequestGet({ request, env }) {
   if (!D) return bad('Not configured.', 503);
   const me = await studentBy(D, new URL(request.url).searchParams.get('t'));
   if (!me) return bad('Not found.', 404);
+  await accountTables(D);
   const row = await D.prepare('SELECT answers_json, updated_at FROM compass WHERE student_id = ?').bind(me.id).first();
+  const auth = await D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(me.id).first();
   let answers = null;
   try { answers = row && row.answers_json ? JSON.parse(row.answers_json) : null; } catch { answers = null; }
-  return json({ ok: true, answers, updated_at: row ? row.updated_at : null });
+  return json({ ok: true, answers, updated_at: row ? row.updated_at : null, hasPassword: !!(auth && auth.pass_hash) });
 }
