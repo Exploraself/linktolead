@@ -12,10 +12,10 @@ const { ok, done } = tally('plans');
 // ── The data ────────────────────────────────────────────────────────────────
 const ids = [];
 for (const d of ['self', 'people', 'work', 'market']) for (let i = 1; i <= 4; i++) ids.push(`${d}-${i}`);
-for (const l of ['price', 'message', 'handover']) for (let i = 1; i <= 4; i++) ids.push(`${l}-${i}`);
-ok(ALL_STEP_IDS.length === 28 && new Set(ALL_STEP_IDS).size === 28, '28 distinct step ids');
+for (const l of ['price', 'message', 'hours', 'handover']) for (let i = 1; i <= 4; i++) ids.push(`${l}-${i}`);
+ok(ALL_STEP_IDS.length === 32 && new Set(ALL_STEP_IDS).size === 32, '32 distinct step ids (28 + the draft four for fewer hours)');
 for (const id of ids) ok(ALL_STEP_IDS.includes(id), `step ${id} exists`);
-ok(DOMAIN_STEPS.length === 16 && WHATIF_STEPS.length === 12, '16 domain steps and 12 What-if steps');
+ok(DOMAIN_STEPS.length === 16 && WHATIF_STEPS.length === 16, '16 domain steps and 16 What-if steps');
 for (const s of DOMAIN_STEPS) {
   ok(['id', 'domain', 'title', 'why', 'what', 'about', 'done', 'ask'].every((k) => typeof s[k] === 'string' && s[k].length > 3), `${s.id}: all six parts`);
   ok(s.band && ['now', 'shape', 'strength'].every((k) => typeof s.band[k] === 'string' && s.band[k]), `${s.id}: three band notes`);
@@ -60,7 +60,10 @@ ok(p.domains.find((d) => d.id === 'people').said[0] === 'Doing everything myself
 
 // The What-if plan: the lever moved most, as a share of its range.
 ok(planFor({ lab: { p: 0, m: 0, d: 0 } }).whatif === null && planFor({}).whatif === null, 'no lever moved: no What-if plan');
-ok(planFor({ lab: { p: 25, m: 40, d: 0 } }).whatif.id === 'price', '+25% of 50 beats +40% of 100');
+ok(planFor({ lab: { p: 25, m: 40, d: 0 } }).whatif.id === 'message', '+25% of 200 loses to +40% of 100');
+ok(planFor({ lab: { p: 100, m: 40, d: 0 } }).whatif.id === 'price', '+100% of 200 beats +40% of 100');
+ok(planFor({ lab: { p: 20, m: 30, f: 30, d: 10 } }).whatif.id === 'hours', 'fewer hours: 30 of 50 beats the rest');
+ok(planFor({ lab: { f: 10 } }).whatif.steps.map((s) => s.id).join() === 'hours-1,hours-2,hours-3,hours-4', 'the draft plan for fewer hours');
 ok(planFor({ lab: { p: 10, m: 60, d: 30 } }).whatif.id === 'message', '60% of 100 beats 30% of 60 and 10% of 50');
 ok(planFor({ lab: { p: 20, m: 30, d: 45 } }).whatif.id === 'handover', '45 of 60 beats the rest');
 const wf = planFor({ lab: { d: 5 } }).whatif;
@@ -80,7 +83,7 @@ r = await signup({ request: post('/api/signup', { first: 'Ana', email: 'ana@exam
 const token = (await r.json()).token;
 r = await plansGet({ request: get('/api/plans?t=' + token), env });
 j = await r.json();
-ok(r.status === 200 && j.compass === false && j.domains.length === 4 && j.whatif === null && j.count === 0 && j.total === 28, 'before the Compass: the fixed order, 0 of 28');
+ok(r.status === 200 && j.compass === false && j.domains.length === 4 && j.whatif === null && j.count === 0 && j.total === 32, 'before the Compass: the fixed order, 0 of 32');
 
 await compassPost({ request: post('/api/compass', { token, stage: 'building', answers: { v: 2 },
   results: { scores: [6, 6, 0, 3], answered: all }, flags: { pains: ['clients'], want: 'income', lab: { p: 0, m: 50, d: 0 } } }), env });
@@ -92,7 +95,7 @@ ok(j.whatif && j.whatif.id === 'message', 'after the Compass: the What-if plan f
 // Ticks.
 r = await tick({ request: post('/api/plans/tick', { token, step: 'work-1', done: true }), env });
 j = await r.json();
-ok(r.status === 200 && j.count === 1 && j.total === 28, 'a tick counts: 1 of 28');
+ok(r.status === 200 && j.count === 1 && j.total === 32, 'a tick counts: 1 of 32');
 await tick({ request: post('/api/plans/tick', { token, step: 'work-1', done: true }), env });
 await tick({ request: post('/api/plans/tick', { token, step: 'message-2', done: true }), env });
 r = await plansGet({ request: get('/api/plans?t=' + token), env });

@@ -107,3 +107,8 @@ input.now{accent-color:#5A6580}
   /* The look-inside shows its first screen, still. */
   .scr,.side{animation:none !important}.scr1{opacity:1}.side1{background:#15213B;color:#F3EFEA}
 }
+
+/* Tap a number to type it exactly. */
+[data-edit]{cursor:pointer;border-bottom:1.5px dashed currentColor;padding-bottom:1px}
+[data-edit]:focus-visible{outline:3px solid #C9A24A;outline-offset:3px}
+.numbox{font:inherit;color:inherit;width:6.5em;max-width:40vw;min-height:40px;padding:0 6px;border:1.5px solid #C9A24A;border-radius:5px;background:#FFFFFF;color:#15213B;text-align:right}

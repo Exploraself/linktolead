@@ -67,5 +67,17 @@ for (const f of ['public/compass/welcome/index.html', 'public/compass/welcome-a/
 ok(read('public/compass/welcome/index.html').includes('family=Fraunces') && read('public/compass/welcome/sales.css').includes("url('../assets/libre700.ttf')"), 'sales pages load the Compass fonts the Compass way');
 for (const d of ['self', 'people', 'work', 'market']) ok(!/n: '(Self|People|Work|Market)'/.test(read('public/content.js')), 'programme domain names in full');
 
+// PR 3: breathing space, the lab, then the dawn before The Summit.
+const C = read('public/compass/index.html');
+const at = (id) => C.indexOf(id);
+ok(at('id="s-climb"') < at('class="breath"') && at('class="breath"') < at('id="s-whatif"'), 'gold divider between your climb and the lab');
+ok(at('id="s-whatif"') < C.lastIndexOf('class="breath"') && C.lastIndexOf('class="breath"') < at('id="s-dawn"') && at('id="s-dawn"') < at('id="s-summit"'), 'divider, then the dawn, then The Summit');
+ok(C.includes('Move one of four levers and watch your cash, clients, time and people answer.'), 'lab header copy');
+ok(C.includes('<script src="dawn.js"></script>'), 'dawn script loaded');
+const LAB = read('public/compass/app.js') + read('public/compass/engine.js');
+ok(!/\$250|price: 250|n: 20, price/.test(LAB), 'no example month shipped');
+for (const t of ['See your real situation, from left to right.', 'Take me there ↑', 'Give me back time', 'Give me more money', 'Fine-tune (optional)', 'Each sale takes fewer hours']) ok(LAB.includes(t), `lab copy: ${t}`);
+ok(read('public/compass/dawn.js').includes('prefers-reduced-motion'), 'dawn respects reduced motion');
+
 console.log(`pages: ${passed} passed, ${failed} failed`);
 if (failed) process.exit(1);

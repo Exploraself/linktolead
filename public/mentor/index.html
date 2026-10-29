@@ -124,7 +124,7 @@ async function roster(){
       <td><span class="prog"><i style="width:${Math.min(100,Math.round((s.written||0)/336*100))}%"></i></span>
         <span class="tiny">${s.written||0} answers</span></td>
       <td>${s.compass_at?when(s.compass_at):'<span class="tiny">not yet</span>'}</td>
-      <td class="tiny">${s.plan_ticks||0} of 28</td>
+      <td class="tiny">${s.plan_ticks||0} done</td>
       <td class="tiny">${when(s.last_seen_at||s.joined_at)}</td>
       <td>${s.open_notes?`<span class="dot"></span>${s.open_notes}`:'<span class="tiny">—</span>'}</td>
     </tr>`).join('')}</tbody></table>`:'<div class="empty">Nobody has joined yet. The roster fills as founders sign up.</div>'}`;
@@ -167,7 +167,7 @@ async function one(id){
       ${C.flags_json&&C.flags_json!=='null'?`<p class="tiny" style="margin-top:10px"><b>Flags:</b> ${esc(C.flags_json)}</p>`:''}
     </div>`:'<div class="panel"><h2>Intelligence Report</h2><p class="tiny" style="margin-top:8px">Not completed yet.</p></div>'}
 
-    <div class="panel"><h2>Account plans · ${T.length} of 28 steps done</h2>
+    <div class="panel"><h2>Account plans · ${T.length} steps done</h2>
       ${T.length?DOMS.map(([k,label])=>{const rows=T.filter(t=>t.domain===k);
         return rows.length?`<div class="dom ${k}" style="padding-top:10px"><h3>${label}</h3>
           ${rows.map(t=>`<div class="ans"><em>${esc(t.title||t.step_id)}</em><p>Done ${when(t.done_at)}</p></div>`).join('')}</div>`:'';}).join('')
