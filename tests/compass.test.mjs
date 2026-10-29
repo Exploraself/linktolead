@@ -73,16 +73,49 @@ ok(E.numberLines(n, money)[2].includes('$3,500 left'), 'feedback number line for
 ok(E.labBase(blank()).ready === false, 'lab waits for numbers');
 const b = E.labBase(Object.assign(st, { lab: { rate: '20', hire: '1000' } }));
 ok(b.ready && b.limit === 150 && b.clients === 4, 'lab base from Step 03');
-const s0 = E.simulate(b, 0, 0, 0);
-ok(Math.round(s0.left) === 3500 - 800, 'today: sales − delivery − marketing − running');
-const sp = E.simulate(b, 20, 0, 0);
-ok(Math.round(sp.left - s0.left) === 2000 && sp.mine === s0.mine, '+20% price: +2,000, same hours');
-const sm = E.simulate(b, 0, 50, 0);
-ok(Math.round(sm.left - s0.left) === 3000 && sm.clients === 6 && sm.mine === 270, '+50% message: more orders, more delivery, more hours');
-const sd = E.simulate(b, 0, 0, 50);
-ok(sd.mine === 90 && sd.helpCost === 90 * 20 && Math.round(sd.left) === 2700 - 1800, 'half handed over at the founder’s rate');
-ok(E.simulate(Object.assign({}, b, { rate: null }), 0, 0, 10).left === null, 'no helper rate, no cash figure for handing over');
-ok(E.strongestLever(0, 0, 0) === -1 && E.strongestLever(25, 40, 0) === 0 && E.strongestLever(10, 80, 30) === 1, 'strongest lever as a share of its range');
+const near = (x, y) => x !== null && Math.abs(x - y) < 1e-6;
+// "Give me more money": serve everyone who wants to buy.
+const m0 = E.month(b, {}, 'money');
+ok(near(m0.cash, 3500 - 800) && near(m0.mine, 180) && near(m0.vol, 1), 'today: sales − delivery − marketing − running, own hours');
+const mp = E.month(b, { p: 20 }, 'money');
+ok(near(mp.cash - m0.cash, 2000) && near(mp.mine, 180), 'money mode, +20% price: +2,000, same hours');
+ok(near(mp.people, 2), 'the extra money, in people at the cost the founder set');
+const mm = E.month(b, { m: 50 }, 'money');
+ok(near(mm.cash - m0.cash, 3000) && near(mm.clients, 6) && near(mm.mine, 270), 'money mode, +50% message: more orders, more delivery, more hours');
+const md = E.month(b, { d: 50 }, 'money');
+ok(near(md.mine, 90) && near(md.helpCost, 90 * 20) && near(md.cash, 2700 - 1800), 'half handed over at the founder’s rate');
+ok(E.month(Object.assign({}, b, { rate: null }), { d: 10 }).cash === null, 'no helper rate, no cash figure for handing over');
+ok(E.month(Object.assign({}, b, { rate: null }), { d: 10 }).mine < 180, '…but the hours still move');
+ok(E.month(Object.assign({}, b, { hire: null }), { p: 20 }, 'money').people === null, 'no cost of one more person, no people figure');
+
+// "Give me back time" (the default): keep today's money with the least work.
+const t0 = E.month(b, {});
+ok(near(t0.cash, m0.cash) && near(t0.mine, m0.mine), 'time mode with no lever moved is today');
+const tp = E.month(b, { p: 20 });
+ok(near(tp.cash, t0.cash) && near(tp.mine, 135) && near(tp.vol, 0.75), 'time mode: a higher price keeps the money and lowers the hours');
+ok(E.month(b, { p: 100 }).mine < tp.mine, 'time mode: the higher the price, the fewer the hours');
+ok(near(tp.clients, 3) && near(tp.clientsWanted, 4), 'time mode: serve fewer, while the same number still want you');
+ok(near(E.month(b, { m: 50 }).mine, 180), 'time mode: a clearer message alone needs no more hours');
+const cap = E.month(b, { d: 50 });
+ok(near(cap.vol, 1) && cap.cash < t0.cash, 'demand cap: never serves more than the demand there is, even to keep the money');
+const capm = E.month(b, { d: 50, m: 50 });
+ok(near(capm.cash, t0.cash) && capm.vol > 1 && capm.vol < 1.5, '…with more demand, it serves just enough to keep the money');
+ok(near(E.month(b, { f: 50 }).mine, 90) && near(E.month(b, { f: 50 }).cash, t0.cash), 'fewer hours per sale: half the hours, same money');
+ok(E.month(b, { f: 50 }, 'money').mine === E.month(b, { f: 50 }).mine, 'fewer hours per sale works the same in both modes');
+const loss = E.month(Object.assign({}, b, { sales: 3000 }), { p: 20 });
+ok(near(loss.vol, 1), 'a month where the work leaves nothing: time mode serves all the demand');
+
+// The locked first visit: it says exactly which boxes are missing.
+ok(JSON.stringify(E.labBase(blank()).need) === '["sales","deliv","run","hrs"]', 'locked: all four boxes listed when Step 03 is empty');
+ok(JSON.stringify(E.labBase(blank({ nums: { 'yes.sales': own(5000), 'yes.hrs': own(100) } })).need) === '["deliv","run"]', 'locked: only the boxes actually missing');
+ok(E.labBase(blank({ nums: { 'yes.sales': own(5000), 'yes.deliv': own(1000), 'yes.run': own(500), 'yes.hrs': own(100) } })).ready, 'helper rate and cost of one more person never block the lab');
+
+// The lever moved most, as a share of its range, across four levers.
+ok(E.LEVER_RANGE.p === 200 && E.LEVER_RANGE.m === 100 && E.LEVER_RANGE.f === 50 && E.LEVER_RANGE.d === 60, 'lever ranges');
+ok(E.strongestLever(0, 0, 0, 0) === -1, 'no lever moved');
+ok(E.strongestLever(50, 40, 0, 0) === 1 && E.strongestLever(100, 40, 10, 0) === 0, 'price measured against its 200% range');
+ok(E.strongestLever(20, 30, 30, 10) === 2 && E.strongestLever(20, 30, 10, 45) === 3, 'fewer hours and handover');
+ok(E.LEVERS.length === 4 && E.LEVERS.map((l) => l.id).join() === 'price,message,hours,handover', 'four levers in the lab’s order');
 
 // Plan mode needs the customers a month they plan for.
 const plan = blank({ mode: 'offer', nums: { 'offer.price': own(500), 'offer.cpc': own(100), 'offer.hpc': { pick: '1' } }, lab: {} });
@@ -90,6 +123,7 @@ ok(E.labBase(plan).ready === false && E.labBase(plan).planned, 'plan lab waits f
 plan.lab.plan = '6';
 const pb = E.labBase(plan);
 ok(pb.ready && pb.sales === 3000 && pb.hours === 21, 'plan lab from the offer');
+ok(E.month(pb, { p: 50 }).mine < E.month(pb, {}).mine && E.month(pb, { f: 20 }).mine < 21, 'plan mode works with the same four levers');
 
 console.log(`compass: ${passed} passed, ${failed} failed`);
 if (failed) process.exit(1);

@@ -151,3 +151,75 @@ input[type=range]{width:100%;accent-color:#C9A24A;height:44px}
 }
 details[open] .st-open{visibility:hidden}
 details[data-step] summary::-webkit-details-marker{display:none}
+
+/* ── What-if lab v2 ── */
+.breath{height:14px;margin-block:-35px;display:flex;justify-content:center;align-items:center}
+.whead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,360px);gap:24px;align-items:center}
+.whub{width:100%;max-width:360px;height:auto;justify-self:end}
+.whub .node{transition:fill .5s}
+.wswitch{display:inline-grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border:1px solid #3A2F20;border-radius:999px;align-self:flex-start}
+.wswitch button{min-height:44px;padding:0 18px;border-radius:999px;border:0;background:transparent;color:#F7F2E7;font-weight:600;font-size:14px;cursor:pointer}
+.wswitch button[aria-pressed="true"]{background:#C9A24A;color:#1C1309}
+.wswitch button:disabled{cursor:not-allowed;opacity:.6}
+.wlock{border:1.5px solid #C9A24A;border-radius:10px;padding:16px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:rgba(201,162,74,.10);animation:wglow 2.2s ease-in-out infinite}
+@keyframes wglow{0%,100%{box-shadow:0 0 0 0 rgba(201,162,74,0)}50%{box-shadow:0 0 0 6px rgba(201,162,74,.22)}}
+.wlock-msg{flex:1 1 300px;display:flex;flex-direction:column;gap:8px;min-width:0;font-size:13px;color:#C4B69D}
+.wlock-msg strong{font-size:17px;color:#F7F2E7}
+.wchips{display:flex;flex-wrap:wrap;gap:6px}
+.wchip{font-size:12px;color:#F7F2E7;border:1px solid #594A32;border-radius:999px;padding:3px 10px;display:inline-flex;gap:6px;align-items:center}
+.wchip i{width:7px;height:7px;border-radius:50%;background:#E0A282;display:inline-block;animation:wblink 1.2s ease-in-out infinite}
+@keyframes wblink{50%{opacity:.25}}
+.wheads,.wpair{display:grid;grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr);gap:0 14px}
+.wheads{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#C4B69D;font-weight:600;margin-bottom:10px}
+.wrows{display:flex;flex-direction:column;gap:14px}
+.wpair{align-items:stretch}
+.warrow{display:flex;align-items:center;justify-content:center;color:#C9A24A}
+.warrow svg{width:26px;height:26px}
+.wcard{background:rgba(247,242,231,.05);border:1px solid #3A2F20;border-radius:9px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.wrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.wname{font-weight:600;font-size:15px;display:inline-flex;gap:10px;align-items:center;color:#F7F2E7}
+.wbig{font-family:Fraunces,Georgia,serif;font-size:25px;color:#E3C47E;font-variant-numeric:tabular-nums;white-space:nowrap}
+.wnote{font-size:13px;color:#C4B69D}
+.wdom{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+.wcard input[type=range]{width:100%;accent-color:#C9A24A;height:28px;margin:0;cursor:pointer}
+.wcard input[type=range]:disabled{cursor:not-allowed}
+.wtrack{position:relative;height:10px;border-radius:5px;background:#3A2F20;margin:16px 0 10px}
+.wfill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;transition:width .6s ease,background-color .4s ease}
+.wthumb{position:absolute;top:50%;width:22px;height:22px;margin-left:-11px;border-radius:50%;transform:translateY(-50%);background:#F7F2E7;border:3px solid #1C1309;box-shadow:0 0 0 2px currentColor;transition:left .6s ease,color .4s ease}
+.wtoday{position:absolute;top:-6px;bottom:-6px;width:2px;background:#F7F2E7;opacity:.45}
+.wtoday span{position:absolute;top:-17px;left:50%;transform:translateX(-50%);font-size:10px;color:#C4B69D;white-space:nowrap}
+.wlimit{position:absolute;top:-6px;bottom:-6px;border-left:2px dashed #DDBD69}
+.wlimit span{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);font-size:10px;color:#DDBD69;white-space:nowrap}
+.wlab.locked .wpair{opacity:.5;filter:saturate(.4)}
+.wlab.locked .wthumb,.wlab.locked .wfill{transition:none}
+.wverdict{background:rgba(201,162,74,.12);border-radius:9px;padding:14px 16px;font-weight:600;font-size:16px;line-height:1.45}
+.wverdict:empty{display:none}
+.wfine{border:1px solid #3A2F20;border-radius:9px;padding:12px 16px}
+.wfine summary{cursor:pointer;font-weight:600;color:#E3C47E;min-height:28px}
+.glowbox{border-color:#C9A24A !important;animation:wbox 1s ease-in-out 4}
+@keyframes wbox{0%,100%{box-shadow:0 0 0 0 rgba(201,162,74,0)}50%{box-shadow:0 0 0 6px rgba(201,162,74,.45)}}
+
+/* ── Dawn: the road to The Summit ── */
+.dawn{position:relative;overflow:hidden;border-radius:14px;background:linear-gradient(180deg,#07050A 0%,#120C08 55%,#2A1A0C 100%);color:#F7F2E7}
+.dawn canvas{display:block;width:100%;height:360px}
+.dawn-cap{position:absolute;left:0;right:0;top:26px;text-align:center;padding-inline:16px;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+.dawn-cap span{font-size:11px;letter-spacing:.32em;color:#E3C47E}
+.dawn-cap strong{font-family:Fraunces,Georgia,serif;font-weight:400;font-style:italic;font-size:clamp(22px,3.4vw,34px);line-height:1.2}
+
+@media (max-width:860px){
+  .breath{margin-block:-19px}
+  .whead{grid-template-columns:1fr}
+  .whub{justify-self:center;max-width:300px}
+  .wheads{display:none}
+  .wswitch{align-self:stretch;border-radius:14px}
+  .wswitch button{padding:6px 10px;font-size:13px;line-height:1.2;border-radius:10px}
+  .wpair{grid-template-columns:1fr;gap:6px}
+  .warrow{transform:rotate(90deg);height:26px}
+  .wrows{gap:22px}
+  .dawn canvas{height:340px}
+}
+@media (prefers-reduced-motion:reduce){
+  .wlock,.wchip i,.glowbox{animation:none}
+  .wfill,.wthumb,.whub .node{transition:none}
+}
+@media print{.breath,.dawn{display:none !important}}

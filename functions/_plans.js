@@ -1,13 +1,16 @@
 // The Account Plans: what a founder opens with a free account.
 //
 // Copied word for word from "00 Leadership Compass · The Account Plans"
-// (Drive). Sixteen domain steps (four per domain) and twelve What-if steps
+// (Drive). Sixteen domain steps (four per domain) and the What-if steps
 // (four per lever). Nothing here is written by the code; where the document
 // does not give a part (the What-if steps have no "why", "ask" or band notes),
 // the part is null and the page leaves it out.
 //
 // These live on the server and are only ever returned to a signed-in founder
 // (GET /api/plans). The free Compass shows the titles, locked.
+//
+// The four steps for "Each sale takes fewer hours" (hours-1 to hours-4) are a
+// DRAFT from PR 3, written in the same style, waiting for Alexandru's wording.
 //
 // `band` holds the three band notes: now = Needs you now, shape = Taking
 // shape, strength = A strength. `variant` names who a note was written for
@@ -152,8 +155,9 @@ export const DOMAIN_STEPS = [
 /** The three levers, in the What-if lab's order: price, message, handover.
  *  `max` is each slider's range, used to find the lever moved most. */
 export const LEVERS = [
-  { id: 'price', key: 'p', max: 50, name: 'Raise your price' },
+  { id: 'price', key: 'p', max: 200, name: 'Raise your price' },
   { id: 'message', key: 'm', max: 100, name: 'Make your message clearer' },
+  { id: 'hours', key: 'f', max: 50, name: 'Each sale takes fewer hours' },
   { id: 'handover', key: 'd', max: 60, name: 'Someone else does part of the work' },
 ];
 
@@ -170,6 +174,12 @@ export const WHATIF_STEPS = [
   wi('message-2', 'message', 'market', 'Write the one-sentence offer', 'Who it is for, the problem, what they get, in their words', '1 hour', 'One sentence three people can repeat'),
   wi('message-3', 'message', 'market', 'Put it where they already look', 'Your page, profile, email signature and first reply to every enquiry', '1 hour', 'The sentence live in four places'),
   wi('message-4', 'message', 'work', 'Track who says yes', 'Note each enquiry and whether it became a sale, for one month', '2 minutes each', 'A before-and-after count'),
+
+  // DRAFT (PR 3), waiting for Alexandru's wording: not yet in "The Account Plans".
+  wi('hours-1', 'hours', 'self', 'Time one sale from start to finish', 'Pick your most common sale. For the next three, write down every task it takes and the minutes each one took', '3 sales', 'A list of tasks with real minutes beside each'),
+  wi('hours-2', 'hours', 'work', 'Cut, template or batch the slowest task', 'Take the task that took longest. Drop it, turn it into a template or checklist, or do it for several customers at once', '1 hour', 'One task changed, and how, written down'),
+  wi('hours-3', 'hours', 'market', 'Tell customers what changes for them', 'If the change touches them (a form instead of a call, set delivery days), tell them in two sentences and why it serves them', '30 minutes', 'Customers told, and what they said noted'),
+  wi('hours-4', 'hours', 'self', 'Time it again and decide where the hours go', 'Time the next three sales the same way. Write the hours saved and choose what they go to: rest, better work or more customers', '30 minutes', 'Hours saved, written down, and where they go'),
 
   wi('handover-1', 'handover', 'self', 'Pick one task to hand over', 'List three tasks you think only you can do; choose the one that is not really true', '20 minutes', 'One task named'),
   wi('handover-2', 'handover', 'people', 'Write what "finished" looks like', 'Steps, the standard, and when to ask you', '45 minutes', 'One page someone else could follow'),

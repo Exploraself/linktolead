@@ -34,7 +34,7 @@
   /* ── State ──────────────────────────────────────────────────────────────── */
   const blank = () => ({ v: 2, theme: 'light', profile: { first: '', last: '', email: '', business: '', type: '', industry: '', currency: 'USD', consent: false },
     skipped: false, stage: 'building', goal: '', mode: 'yes', ans: {}, str: {}, pains: [], want: '', nums: {}, group: 0,
-    got: {}, more: {}, lean: null, stop: 0, lab: { p: 0, m: 0, d: 0, rate: '', hire: '', plan: '' }, acct: { email: '', state: '' } });
+    got: {}, more: {}, lean: null, stop: 0, lab: { p: 0, m: 0, f: 0, d: 0, mode: 'time', rate: '', hire: '', plan: '' }, acct: { email: '', state: '' } });
   const read = (k) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } };
 
   /** Keep only what this version knows, in the shapes it expects. */
@@ -61,7 +61,7 @@
     s.lean = Number.isInteger(raw.lean) && raw.lean >= 0 && raw.lean < 4 ? raw.lean : null;
     s.stop = Number.isInteger(raw.stop) && raw.stop >= 0 && raw.stop < 5 ? raw.stop : 0;
     const lab = raw.lab || {};
-    s.lab = { p: clampN(lab.p, 0, 50), m: clampN(lab.m, 0, 100), d: clampN(lab.d, 0, 60), rate: str(lab.rate, 12), hire: str(lab.hire, 12), plan: str(lab.plan, 12) };
+    s.lab = { p: clampN(lab.p, 0, 200), m: clampN(lab.m, 0, 100), f: clampN(lab.f, 0, 50), d: clampN(lab.d, 0, 60), mode: lab.mode === 'money' ? 'money' : 'time', rate: str(lab.rate, 12), hire: str(lab.hire, 12), plan: str(lab.plan, 12) };
     // What happened when this browser last tried to make an account for this email.
     if (raw.acct && ['yes', 'existing'].includes(raw.acct.state)) s.acct = { email: str(raw.acct.email, 120), state: raw.acct.state };
     return s;
@@ -122,7 +122,7 @@
     if (el) el.textContent = !stored ? '○ This session only · download a backup' : signedIn() ? '○ Saved to your account' : '○ Saved on this browser';
   }
   const UI = { page: 'overview', gate: false, after: null, how: false, ws: false, saved: false, mail: '', mailReady: false, mailWhy: '', sending: false,
-    plans: null, note: '', signin: '', signinBusy: false };
+    plans: null, note: '', signin: '', signinBusy: false, fine: false, glow: null };
   const identified = () => !!S.profile.email;
 
   /* ── The account ─────────────────────────────────────────────────────────── */
@@ -134,7 +134,7 @@
     const sc = E.scores(M, S);
     return { stage: S.stage, answers: S,
       results: { scores: sc.map((x) => x.score), answered: sc.map((x) => x.answered), bands: sc.map((x) => (x.answered ? E.BANDS[x.band] : null)) },
-      flags: { pains: S.pains, want: S.want, lab: { p: S.lab.p, m: S.lab.m, d: S.lab.d } } };
+      flags: { pains: S.pains, want: S.want, lab: { p: S.lab.p, m: S.lab.m, f: S.lab.f, d: S.lab.d } } };
   }
   /** Send the batch, if there is one. The device copy is already safe, so a
    *  failure only means it goes with the next batch. */
@@ -496,7 +496,7 @@
         const opts = [['', 'Choose…'], ...choices.map((ch, j) => [String(j), ch[0]]), ['own', isText ? 'Somewhere else…' : 'Type my own…'], ['unsure', 'Not sure yet']];
         return `<div style="display: flex; flex-direction: column; gap: 6px">
           <label for="f-${k}" style="font-size: 13px; font-weight: 600">${label}</label>
-          <select id="f-${k}" class="inp" data-num="${k}" data-f="num-${k}" style="border-color: ${cur.pick === 'own' ? '#C9A24A' : 'var(--line)'}">${opts.map(([v, t]) => `<option value="${v}"${cur.pick === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>
+          <select id="f-${k}" class="inp${UI.glow && UI.glow.keys.includes(k) && Date.now() < UI.glow.until ? ' glowbox' : ''}" data-num="${k}" data-f="num-${k}" style="border-color: ${cur.pick === 'own' ? '#C9A24A' : 'var(--line)'}">${opts.map(([v, t]) => `<option value="${v}"${cur.pick === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>
           ${cur.pick === 'own' ? `<input class="inp pop" type="text" ${isText ? '' : 'inputmode="decimal"'} data-own="${k}" data-f="own-${k}" value="${esc(cur.own)}" placeholder="${isText ? 'Where they gather' : 'Type the exact amount'}" aria-label="${esc(label)}, ${isText ? 'in your words' : 'exact amount'}" style="border-color: #C9A24A">` : ''}
         </div>`;
       }).join('');
@@ -523,6 +523,8 @@
 
   /* ── The Account Plans, opened in place when signed in ─────────────────── */
   const BAND_LABEL = { now: 'Needs you now', shape: 'Taking shape', strength: 'A strength' };
+  /* Fine-tune stays as the founder left it across redraws. */
+  document.addEventListener('toggle', (e) => { if (e.target.dataset && 'fine' in e.target.dataset) { UI.fine = e.target.open; cache['lab-in'] = pLabIn(); } }, true);
   /* Which steps are open, so a redraw (after a tick) leaves them open. */
   const OPEN = new Set();
   document.addEventListener('toggle', (e) => { const d = e.target; if (d.dataset && d.dataset.step) { if (d.open) OPEN.add(d.dataset.step); else OPEN.delete(d.dataset.step); } }, true);
@@ -684,124 +686,199 @@
       </div>`;
   }
 
-  /* ── The What-if lab ── */
-  const LEVER_UI = [
-    { k: 'p', q: 'What if you raised your price?', icon: 'M20 12l-8 8-9-9V3h8zM7.5 7.5h.01', max: 50 },
-    { k: 'm', q: 'What if your message were clearer?', icon: 'M4 5h16v10H8l-4 4z', max: 100 },
-    { k: 'd', q: 'What if someone else did part of the work?', icon: E.GROUPS.yes[3].icon, max: 60 },
+  /* ── The What-if lab v2 ──────────────────────────────────────────────────
+   * Four levers on the left, each in one row with the answer it moves most on
+   * the right. The answers are read-only sliders that glide to their new value.
+   * The lab runs only on the founder's own Step 03 numbers; until they are
+   * there it shows itself locked and says which boxes to fill. */
+  const PAIRS = [
+    { k: 'p', name: 'Raise your price', icon: 'M12 2v20M17 6.5C17 4.6 14.8 3.5 12 3.5S7 4.6 7 6.5s2 2.8 5 3.5 5 1.7 5 3.8-2.2 3.2-5 3.2-5-1.2-5-3.2',
+      out: { k: 'cash', name: 'Cash · left each month', d: 2 } },
+    { k: 'm', name: 'Make your message clearer', icon: 'M4 5h16v10H9l-5 4z',
+      out: { k: 'clients', name: 'Clients · each month', plan: 'Customers · each month', d: 3 } },
+    { k: 'f', name: 'Each sale takes fewer hours', icon: 'M12 22a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 8v5l3 2M9 2h6',
+      out: { k: 'time', name: 'Time · your hours a month', d: 0, lower: true } },
+    { k: 'd', name: 'Someone else does part of the work', icon: 'M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM17 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM2 20c0-3 3-5 6-5s6 2 6 5M13 20c0-2.4 1.8-4.4 4-4.9 2.6.3 5 2.2 5 4.9',
+      out: { k: 'people', name: 'People · help you can afford', d: 1 } },
   ];
-  function leverText(b, k) {
-    const { p, d } = S.lab, unit = S.mode === 'yes' ? 'of your sales' : 'a customer';
-    if (k === 'p') return [`+${p}%`, b && b.ready ? (S.mode === 'yes' ? `Every price ${p ? 'up ' + p + '%' : 'as today'}: sales of ${money(b.sales * (1 + p / 100))} for the same work. A clear message makes a fair price easier to ask.` : `Now ${money(b.sales / b.clients * (1 + p / 100))} ${unit}. A clear message makes a fair price easier to ask.`) : 'A clear message makes a fair price easier to ask.'];
-    if (k === 'm') return [`+${S.lab.m}%`, 'More people understand you and trust you, so more say yes for the same marketing spend.'];
-    const s = b && b.ready ? E.simulate(b, S.lab.p, S.lab.m, d) : null;
-    return [`${d}%`, !d ? 'Hand over part of the delivery: work you no longer do yourself.' : s && s.helpCost !== null ? `About ${money(s.helpCost)} a month for help, at the rate you set below.` : 'Set a helper rate below to see what the help costs.'];
-  }
-  function pLabIn() {
-    const b = E.labBase(S), plan = S.mode !== 'yes';
-    const input = (key, label, hint) => `<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #F7F2E7">${label}
-        <input class="inp" type="text" inputmode="decimal" data-lab="${key}" data-f="lab-${key}" value="${esc(S.lab[key])}" placeholder="${hint}" style="background: #231D15; color: #F7F2E7; border-color: #594A32"></label>`;
-    const inputs = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
-        ${plan ? input('plan', 'Customers a month you plan for', 'Your plan, a number') : ''}
-        ${input('rate', `Helper rate per hour (${S.profile.currency})`, 'What you would pay')}
-        ${input('hire', `Monthly cost of one more person (${S.profile.currency})`, 'Your estimate')}
-      </div>`;
-    if (!b.ready) {
-      const names = Object.fromEntries(E.fieldsFor(S.mode).map(([k, l]) => [k, l.toLowerCase()]));
-      const need = (b.need || []).map((k) => names[k]);
-      if (b.planned) need.push('the customers a month you plan for (below)');
-      return `<div style="background: rgba(247,242,231,.05); border: 1px solid #3A2F20; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
-          <span class="sf" style="font-size: 20px">The lab runs on your own month.</span>
-          <span style="font-size: 14px; color: #D3C4A5">It still needs: ${esc(need.join(', '))}. A range is enough.</span>
-          ${b.need && b.need.length ? '<button type="button" data-go="numbers" data-f="lab-add" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border-radius: 5px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; cursor: pointer">Add my numbers →</button>' : ''}
-        </div>${inputs}`;
-    }
-    return `<div style="display: flex; flex-wrap: wrap; gap: 26px">
-      <div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
-        ${LEVER_UI.map((l) => { const [val, note] = leverText(b, l.k); return `<div style="background: rgba(247,242,231,.05); border: 1px solid #3A2F20; border-radius: 9px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
-          <div style="display: flex; align-items: center; gap: 10px; justify-content: space-between">
-            <label for="w-${l.k}" style="display: inline-flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${l.icon}" fill="none" stroke="#C9A24A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>${l.q}</label>
-            <span class="sf" style="font-size: 26px; color: #E3C47E" id="lv-val-${l.k}">${val}</span></div>
-          <input id="w-${l.k}" type="range" min="0" max="${l.max}" step="5" value="${S.lab[l.k]}" data-lever="${l.k}" data-f="w-${l.k}">
-          <span style="font-size: 13px; color: #C4B69D" id="lv-note-${l.k}">${esc(note)}</span></div>`; }).join('')}
-        <div id="lab-head"></div>
-        ${inputs}
-      </div>
-      <div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 14px" id="lab-out"></div>
-    </div>`;
-  }
+  const WHATIF_IDS = ['price', 'message', 'hours', 'handover'];
+  const labMode = () => (S.lab.mode === 'money' ? 'money' : 'time');
+  const NUMW = ['no', 'this', 'these two', 'these three', 'these four'];
+
+  /** Everything the lab shows, from the state. */
   function labCalc() {
     const b = E.labBase(S);
-    if (!b.ready) return null;
-    const { p, m, d } = S.lab, s0 = E.simulate(b, 0, 0, 0), s = E.simulate(b, p, m, d);
-    const delta = s.left === null ? null : s.left - s0.left;
-    const room = b.hire && delta !== null ? Math.max(0, Math.floor(delta / b.hire)) : null;
-    const lim = b.limit;
-    const cashUp = delta !== null && delta > 1, clientsUp = s.clients !== null && s.clients > s0.clients, timeOk = s.mine < s0.mine - 0.5, peopleOk = d > 0 || (room || 0) > 0;
-    const improved = [cashUp, clientsUp, timeOk, peopleOk], count = improved.filter(Boolean).length;
-    return { b, s0, s, delta, room, lim, improved, count, cashUp, clientsUp };
+    if (!b.ready) {
+      const names = Object.fromEntries(E.fieldsFor(S.mode).map(([k, l]) => [k, l]));
+      return { locked: true, b, need: (b.need || []).map((k) => ({ k, label: names[k] })), planned: !!b.planned };
+    }
+    const mode = labMode(), t = E.month(b, {}, mode), s = E.month(b, S.lab, mode);
+    const scale = {
+      cash: t.cash > 0 ? t.cash * 4 : Math.max(b.sales * 0.5, 1),
+      clients: t.clients ? t.clients * 3 : 1,
+      time: Math.max(t.mine, b.limit || 0) * 1.5 || 1,
+    };
+    scale.people = b.hire ? Math.max(4, Math.ceil(scale.cash / b.hire)) : 4;
+    const vals = { cash: [s.cash, t.cash], clients: [s.clients, t.clients], time: [s.mine, t.mine], people: [s.people, t.people] };
+    const better = (o) => { const [v, w] = vals[o.k]; if (v === null || w === null) return false; return o.lower ? v < w - 0.5 : o.k === 'people' ? v > w + 0.05 : v > w + (o.k === 'cash' ? 1 : 0.05); };
+    const worse = (o) => { const [v, w] = vals[o.k]; if (v === null || w === null) return false; return o.lower ? v > w + 0.5 : v < w - (o.k === 'cash' ? 1 : 0.05); };
+    const improved = PAIRS.map((x) => better(x.out));
+    return { locked: false, b, mode, t, s, scale, vals, improved, worsened: PAIRS.map((x) => worse(x.out)), count: improved.filter(Boolean).length };
   }
-  function pLabHead(L) {
-    if (!L) return '';
-    const { p, m, d } = S.lab;
-    let h;
-    if (!p && !m && !d) h = 'Move one lever. Improve one of the four, and watch the other three follow.';
-    else if (L.lim && L.s.mine > L.lim * 1.1) h = 'More is coming in, but it is coming out of your life. What if someone else did part of the work?';
-    else if (L.count >= 3) h = 'This is leadership: more cash, more clients, your time protected and room for people. One change, four answers.';
-    else if (L.cashUp && !L.clientsUp) h = 'A fairer price gave you money without more hours. What if your message were clearer too?';
-    else h = 'Good. Now try a second lever and see which pain eases next.';
-    return `<div style="background: rgba(201,162,74,.12); border-radius: 9px; padding: 16px; display: flex; gap: 12px; align-items: flex-start" aria-live="polite">
-      <svg class="shim" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" fill="none" stroke="#C9A24A" stroke-width="1.7" stroke-linecap="round"/></svg>
-      <span style="font-size: 16px; font-weight: 600; line-height: 1.45">${h}</span></div>`;
+
+  /** The parts of the lab that only change with its shape (locked or not, the
+   *  plan box, Fine-tune). Values are set by updateLab, so the answers glide. */
+  function pLabIn() {
+    const L = labCalc(), plan = S.mode !== 'yes', cur = S.profile.currency;
+    const input = (key, label, hint) => `<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #F7F2E7">${label}
+        <input class="inp" type="text" inputmode="decimal" data-lab="${key}" data-f="lab-${key}" value="${esc(S.lab[key])}" placeholder="${hint}" style="background: #231D15; color: #F7F2E7; border-color: #594A32"></label>`;
+    const missing = L.locked ? L.need : [];
+    const chips = [...missing.map((x) => x.label), ...(L.locked && L.planned ? ['Customers a month you plan for (below)'] : [])];
+    const lock = L.locked ? `<div class="wlock" role="status">
+        <div class="wlock-msg">
+          <strong>See your real situation, from left to right.</strong>
+          <span>Fill ${NUMW[Math.min(4, chips.length)]} ${chips.length === 1 ? 'box' : 'boxes'} ${missing.length ? 'in Step 03 · Count what matters' : 'below'}. A range is enough. Then come back and every slider moves on your own month.</span>
+          <div class="wchips">${chips.map((c) => `<span class="wchip"><i aria-hidden="true"></i>${esc(c)}</span>`).join('')}</div>
+        </div>
+        ${missing.length ? '<button type="button" class="go" data-act="lab-take" data-f="lab-take" style="min-height: 48px; padding: 0 20px; border-radius: 5px; border: 0; background: #C9A24A; color: #1C1309; font-weight: 600; font-size: 15px; cursor: pointer">Take me there ↑</button>' : ''}
+      </div>` : '';
+    const dis = L.locked ? ' disabled' : '';
+    const rows = PAIRS.map((x) => `<div class="wpair">
+        <div class="wcard">
+          <div class="wrow"><label for="w-${x.k}" class="wname"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${x.icon}" fill="none" stroke="#C9A24A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>${x.name}</label><span class="wbig" id="lv-val-${x.k}">—</span></div>
+          <input id="w-${x.k}" type="range" min="0" max="${E.LEVER_RANGE[x.k]}" step="5" value="${L.locked ? 0 : S.lab[x.k] || 0}" data-lever="${x.k}" data-f="w-${x.k}"${dis}>
+          <span class="wnote" id="lv-note-${x.k}"></span>
+        </div>
+        <div class="warrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="wcard" role="meter" id="out-${x.out.k}" aria-labelledby="out-name-${x.out.k}" aria-valuemin="0">
+          <span class="wdom" style="color: ${LIGHT[x.out.d]}">${D[x.out.d].name}</span>
+          <div class="wrow"><span class="wname" id="out-name-${x.out.k}">${plan && x.out.plan ? x.out.plan : x.out.name}</span><span class="wbig" id="out-val-${x.out.k}">—</span></div>
+          <div class="wtrack"><div class="wfill" id="fill-${x.out.k}"></div><div class="wtoday" id="today-${x.out.k}"><span>today</span></div>${x.out.k === 'time' ? '<div class="wlimit" id="limit-time" hidden><span>your limit</span></div>' : ''}<div class="wthumb" id="thumb-${x.out.k}"></div></div>
+          <span class="wnote" id="out-note-${x.out.k}"></span>
+        </div></div>`).join('');
+    return `${lock}
+      ${plan ? `<div style="max-width: 320px">${input('plan', 'Customers a month you plan for', 'Your plan, a number')}</div>` : ''}
+      <div class="wswitch" role="group" aria-label="What should the gain go to?">
+        <button type="button" data-act="lab-mode" data-v="time" data-f="lab-mode-time"${dis}>Give me back time</button>
+        <button type="button" data-act="lab-mode" data-v="money" data-f="lab-mode-money"${dis}>Give me more money</button>
+      </div>
+      <div class="wlab${L.locked ? ' locked' : ''}">
+        <div class="wheads" aria-hidden="true"><span>You move</span><span></span><span>Moves by itself</span></div>
+        <div class="wrows">${rows}</div>
+      </div>
+      <details class="wfine" data-fine${UI.fine ? ' open' : ''}><summary>Fine-tune (optional)</summary>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding-top: 12px">
+          ${input('rate', `Helper rate per hour (${cur})`, 'What you would pay')}
+          ${input('hire', `Monthly cost of one more person (${cur})`, 'Your estimate')}
+        </div>
+        <span class="wnote" style="display: block; margin-top: 8px">Optional. They let the lab say what help costs and how many people the extra money could pay.</span>
+      </details>`;
   }
-  function pLabOut(L) {
-    if (!L) return '';
-    const { b, s0, s, delta, room, lim, improved } = L, plan = S.mode !== 'yes';
-    const bar = (pct, mark, color) => `<div style="position: relative; height: 12px; background: #3A2F20; border-radius: 6px" aria-hidden="true"><div class="bar" style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: ${color}; width: ${Math.max(2, Math.min(100, pct)).toFixed(1)}%"></div>${mark === null ? '' : `<div style="position: absolute; top: -5px; bottom: -5px; width: 2px; background: #F7F2E7; left: ${mark}%"></div>`}</div>`;
-    const cashPct = s0.left > 0 && s.left !== null ? s.left / (s0.left * 3) * 100 : s.left !== null && s.left > 0 ? 50 : 2;
-    const reacts = [
-      { name: plan ? 'Cash · left each month (before running costs)' : 'Cash · left each month', icon: E.GROUPS.yes[0].icon, val: s.left === null ? '—' : money(s.left),
-        pct: cashPct, mark: s0.left > 0 ? 100 / 3 : null, color: s.left === null || s.left >= s0.left ? '#9BC0A1' : '#E0A282',
-        note: s.left === null ? 'Set a helper rate below to see what handing over costs.' : `${signed(delta)} a month compared with today.` },
-      { name: plan ? 'Customers · each month' : 'New clients · each month', icon: E.GROUPS.yes[3].icon, val: s.clients === null ? '—' : whole(s.clients),
-        pct: s.clients === null ? 2 : s.clients / ((s0.clients || 1) * 2) * 100, mark: 50, color: L.clientsUp ? '#9BC0A1' : '#F7F2E7',
-        note: s.clients === null ? 'Add your new paying customers in Step 03 to see this.' : L.clientsUp ? `+${whole(s.clients - s0.clients)} a month without spending more on marketing.` : 'Same as today.' },
-      { name: 'Time · your hours a month', icon: E.GROUPS.yes[1].icon, val: whole(s.mine) + ' h',
-        pct: lim ? s.mine / (lim * 2) * 100 : 50, mark: lim ? 50 : null, color: !lim ? '#F7F2E7' : s.mine > lim * 1.1 ? '#E0A282' : s.mine > lim ? '#DDBD69' : '#9BC0A1',
-        note: !lim ? (plan ? 'Add the hours a week you can give to compare.' : 'Add the hours you want to work to compare.') : s.mine > lim ? `${whole(s.mine - lim)} hours beyond the ${whole(lim)} you chose.` : `Within the ${whole(lim)} hours you chose. Your life stays protected.` },
-      { name: 'People · help you can afford', icon: D[1].icon, val: room === null ? '—' : room + (room === 1 ? ' person' : ' people'),
-        pct: room === null ? 2 : room / 4 * 100, mark: 25, color: room ? '#9BC0A1' : '#F7F2E7',
-        note: room === null ? (b.hire === null ? 'Set the monthly cost of one more person below to see this.' : 'Set a helper rate below first.') : room > 0 ? `The extra money could pay ${room} more ${room === 1 ? 'person' : 'people'}, at the ${money(b.hire)} a month you set.` : 'Not yet. Raise the price or clarify the message to make room for help.' },
-    ];
+
+  /* The answers count to their new value; with reduced motion they jump. */
+  const shown = {};
+  function tween(k, to, fmt) {
+    const el = document.getElementById('out-val-' + k);
+    if (!el) return;
+    if (to === null) { el.textContent = '—'; delete shown[k]; return; }
+    const from = shown[k] ?? to, t0 = performance.now(), dur = reduced() ? 0 : 500;
+    shown[k] = to;
+    cancelAnimationFrame(tween[k]);
+    const step = (now) => { const a = dur ? Math.min(1, (now - t0) / dur) : 1, e = 1 - Math.pow(1 - a, 3); el.textContent = fmt(from + (to - from) * e); if (a < 1) tween[k] = requestAnimationFrame(step); };
+    tween[k] = requestAnimationFrame(step);
+  }
+  function hubSVG(improved) {
     const NP = [['Cash', 160, 23, 160, 12, 'middle'], ['Clients', 222, 85, 244, 89, 'start'], ['Time', 160, 147, 160, 168, 'middle'], ['People', 98, 85, 76, 89, 'end']];
-    return `<svg viewBox="0 0 320 175" style="width: 100%; max-width: 420px; height: auto; align-self: center" role="img" aria-label="Four answers: cash, clients, time, people. ${L.count} improved.">
-        <circle cx="160" cy="85" r="62" fill="none" stroke="${L.count >= 3 ? '#C9A24A' : '#3A2F20'}" stroke-width="2" stroke-dasharray="4 5"/>
-        <circle cx="160" cy="85" r="22" fill="#1C1309" stroke="#C9A24A" stroke-width="1.5"/><text x="160" y="90" text-anchor="middle" fill="#F7F2E7" font-family="Fraunces" font-size="13">You</text>
-        ${NP.map((n, i) => `<g><circle class="node" cx="${n[1]}" cy="${n[2]}" r="14" fill="${improved[i] ? '#C9A24A' : '#1C1309'}" stroke="#C9A24A" stroke-width="1.5"/><text x="${n[3]}" y="${n[4]}" text-anchor="${n[5]}" fill="#F7F2E7" font-family="Libre Franklin" font-weight="700" font-size="12">${n[0]}</text></g>`).join('')}
-      </svg>
-      ${reacts.map((r) => `<div style="background: rgba(247,242,231,.04); border: 1px solid #3A2F20; border-radius: 9px; padding: 14px; display: flex; flex-direction: column; gap: 6px">
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px"><span style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="${r.icon}" fill="none" stroke="${r.color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>${r.name}</span><span class="sf" style="font-size: 20px; color: ${r.color}">${r.val}</span></div>
-        ${bar(r.pct, r.mark, r.color)}
-        <span style="font-size: 13px; color: #C4B69D">${esc(r.note)}</span></div>`).join('')}`;
+    const all = improved.filter(Boolean).length;
+    return `<circle cx="160" cy="85" r="62" fill="none" stroke="${all >= 3 ? '#C9A24A' : '#3A2F20'}" stroke-width="2" stroke-dasharray="4 5"/>
+      <circle cx="160" cy="85" r="22" fill="#1C1309" stroke="#C9A24A" stroke-width="1.5"/><text x="160" y="90" text-anchor="middle" fill="#F7F2E7" font-family="Fraunces, Georgia, serif" font-size="13">You</text>
+      ${NP.map((n, i) => `<line x1="160" y1="85" x2="${n[1]}" y2="${n[2]}" stroke="#3A2F20" stroke-width="1"/><circle class="node" cx="${n[1]}" cy="${n[2]}" r="14" fill="${improved[i] ? '#C9A24A' : '#1C1309'}" stroke="#C9A24A" stroke-width="1.5"/><text x="${n[3]}" y="${n[4]}" text-anchor="${n[5]}" fill="#F7F2E7" font-family="Libre Franklin, Arial, sans-serif" font-size="11" font-weight="600">${n[0]}</text>`).join('')}`;
   }
-  function pLabDeep(L) {
-    if (!L) return '';
-    const { p, m, d } = S.lab, dom = E.strongestLever(p, m, d);
+
+  /** Set every value in the lab without redrawing it, so handles glide. */
+  function updateLab() {
+    const L = labCalc(), set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    const hub = $('#lab-hub'), hk = L.locked ? 'x' : L.improved.join();
+    if (hub && hub.dataset.k !== hk) { hub.innerHTML = hubSVG(L.locked ? [false, false, false, false] : L.improved); hub.dataset.k = hk; }
+    document.querySelectorAll('[data-act="lab-mode"]').forEach((el) => el.setAttribute('aria-pressed', String(el.dataset.v === labMode())));
+    const head = $('#lab-head');
+    if (L.locked) {
+      for (const x of PAIRS) {
+        set('lv-val-' + x.k, '—'); set('lv-note-' + x.k, 'Opens when Step 03 is filled.');
+        tween(x.out.k, null); set('out-note-' + x.out.k, 'Waiting for your numbers.');
+        const f = document.getElementById('fill-' + x.out.k), th = document.getElementById('thumb-' + x.out.k), td = document.getElementById('today-' + x.out.k);
+        if (f) { f.style.width = '0%'; f.style.background = '#8A7A5E'; }
+        if (th) { th.style.left = '50%'; th.style.color = '#8A7A5E'; }
+        if (td) td.style.left = '50%';
+      }
+      if (head) head.textContent = 'Fill the boxes above and this lab runs on your own month.';
+      return;
+    }
+    const { b, s, t, scale, vals, mode } = L, plan = S.mode !== 'yes', { p = 0, m = 0, f = 0, d = 0 } = S.lab;
+    const ab = (v) => (b.est || Math.abs(v - Math.round(v)) > 0.05 ? 'about ' : '');
+    set('lv-val-p', '+' + p + '%'); set('lv-val-m', '+' + m + '%'); set('lv-val-f', '−' + f + '%'); set('lv-val-d', d + '%');
+    set('lv-note-p', plan ? `Each customer: ${money(b.sales / b.clients)} → ${money(b.sales / b.clients * (1 + p / 100))}` : `Your sales for the same work: ${money(b.sales)} → ${money(b.sales * (1 + p / 100))}`);
+    set('lv-note-m', b.clients ? `Ready to buy: ${whole(b.clients)} → ${ab(b.clients * s.demand)}${whole(b.clients * s.demand)} a month, same marketing spend` : `${m ? '+' + m + '% more people say yes' : 'As many say yes as today'}, for the same marketing spend`);
+    set('lv-note-f', plan ? `Hours to serve one customer: ${Math.round(b.hours / b.clients * 10) / 10} h → ${Math.round(b.hours / b.clients * (1 - f / 100) * 10) / 10} h` : `Hours for today's work: ${whole(b.hours)} h → ${ab(b.hours * (1 - f / 100))}${whole(b.hours * (1 - f / 100))} h`);
+    set('lv-note-d', !d ? 'You do all the work yourself.' : b.rate !== null ? `${d}% of delivery hours go to a helper at ${money(b.rate)} an hour.` : `${d}% of delivery hours go to a helper. Set the rate in Fine-tune.`);
+
+    PAIRS.forEach((x, i) => {
+      const o = x.out, [v, w] = vals[o.k], max = scale[o.k];
+      const pct = (y) => Math.max(0, Math.min(100, y / max * 100));
+      const good = L.improved[i], bad = L.worsened[i], col = good ? '#9BC0A1' : bad ? '#E0A282' : null;
+      const fl = document.getElementById('fill-' + o.k), th = document.getElementById('thumb-' + o.k), td = document.getElementById('today-' + o.k), card = document.getElementById('out-' + o.k);
+      if (fl) { fl.style.width = (v === null ? 0 : pct(v)) + '%'; fl.style.background = col || '#8A7A5E'; }
+      if (th) { th.style.left = (v === null ? 50 : pct(v)) + '%'; th.style.color = col || '#F7F2E7'; }
+      if (td) { td.style.left = (w === null ? 50 : pct(w)) + '%'; td.hidden = w === null; }
+      if (card) { card.setAttribute('aria-valuemax', String(Math.round(max))); if (v !== null) card.setAttribute('aria-valuenow', String(Math.round(v))); }
+    });
+    const lim = document.getElementById('limit-time');
+    if (lim) { lim.hidden = !b.limit; if (b.limit) lim.style.left = Math.min(100, b.limit / scale.time * 100) + '%'; }
+    tween('cash', s.cash, money); tween('clients', s.clients, whole); tween('time', s.mine, (y) => whole(y) + ' h'); tween('people', s.people, (y) => (Math.round(y * 10) / 10).toFixed(1));
+
+    const dc = s.cash === null ? null : s.cash - t.cash;
+    set('out-note-cash', s.cash === null ? 'Set a helper rate in Fine-tune to see what the help costs.' : Math.abs(dc) < 1 ? 'Same money as today.' : `${signed(dc)} a month compared with today.`);
+    set('out-note-clients', s.clients === null ? 'Add your new paying customers in Step 03 to see this.'
+      : s.clients < s.clientsWanted - 0.05 ? `You serve ${ab(s.clients)}${whole(s.clients)}. ${whole(s.clientsWanted)} want you, so you can choose the best fit.`
+      : s.clients > t.clients + 0.05 ? `+${whole(s.clients - t.clients)} a month compared with today.` : 'Same as today.');
+    const back = t.mine - s.mine;
+    set('out-note-time', b.limit ? (s.mine > b.limit ? `${whole(s.mine - b.limit)} hours beyond the ${whole(b.limit)} you chose.` : `Within the ${whole(b.limit)} hours you chose.${back > 0.5 ? ` ${whole(back)} hours a month back.` : ''}`)
+      : `${back > 0.5 ? whole(back) + ' hours a month back.' : back < -0.5 ? whole(-back) + ' more hours a month.' : 'Same hours as today.'} Add the hours you want to work in Step 03 to see your limit.`);
+    set('out-note-people', s.people === null ? (b.hire === null ? 'Set the monthly cost of one more person in Fine-tune to see this.' : 'Set a helper rate in Fine-tune first.')
+      : s.people >= 0.1 ? `About ${(Math.round(s.people * 10) / 10).toFixed(1)} people at ${money(b.hire)} a month each.` : 'No room to pay for help yet.');
+
+    let v;
+    if (!p && !m && !f && !d) v = `Today: ${whole(t.mine)} hours a month${b.limit ? (t.mine > b.limit ? `, beyond the ${whole(b.limit)} you chose` : `, within the ${whole(b.limit)} you chose`) : ''}. Move one lever and watch the four answer.`;
+    else if (b.limit && s.mine > b.limit) v = 'Still beyond your limit. Try a fairer price, fewer hours for each sale, or hand part of the work to someone else.';
+    else if (L.count >= 3) v = 'This is leadership: one change, and most of the four answer at once.';
+    else if (mode === 'time' && s.mine < t.mine - 0.5 && dc !== null && dc > -1) v = 'Same money, fewer hours. Your price decides how much of your life the business needs.';
+    else if (mode === 'money' && dc !== null && dc > 1) v = 'More money for the same work. Now ask what that money is for.';
+    else v = 'Good. Now try a second lever and see which answer moves next.';
+    if (head) head.textContent = v;
+  }
+
+  function pLabDeep() {
+    const L = labCalc();
+    if (L.locked) return '';
+    const { p = 0, m = 0, f = 0, d = 0 } = S.lab, dom = E.strongestLever(p, m, f, d);
     if (dom < 0) return '';
-    const { b, s0, s, delta, room, lim } = L, LV = E.LEVERS[dom], plan = S.mode !== 'yes';
+    const { b, s, t } = L, LV = E.LEVERS[dom], plan = S.mode !== 'yes', lim = b.limit;
+    const delta = s.cash === null ? null : s.cash - t.cash;
     const fmtS = (x) => (x > 0 ? '+' : x < 0 ? '−' : '') + whole(Math.abs(x));
     const chain = [
       ['Cash, each month', delta === null ? '?' : delta >= 0 ? '↑' : '↓', delta === null ? 'set a helper rate' : signed(delta), delta === null || delta >= 0 ? '#9BC0A1' : '#E0A282'],
-      [plan ? 'Customers, each month' : 'New clients, each month', s.clients !== null && s.clients > s0.clients ? '↑' : '→', s.clients === null ? '—' : fmtS(s.clients - s0.clients), s.clients !== null && s.clients > s0.clients ? '#9BC0A1' : '#D3C4A5'],
-      ['Your hours, each month', s.mine < s0.mine ? '↓' : s.mine > s0.mine ? '↑' : '→', fmtS(s.mine - s0.mine) + ' h', s.mine <= s0.mine ? '#9BC0A1' : lim && s.mine > lim ? '#E0A282' : '#DDBD69'],
-      ['People you could afford', room ? '↑' : '→', room === null ? '—' : String(room), room ? '#9BC0A1' : '#D3C4A5'],
+      [plan ? 'Customers, each month' : 'Clients, each month', s.clients !== null && s.clients > t.clients + 0.05 ? '↑' : s.clients !== null && s.clients < t.clients - 0.05 ? '↓' : '→', s.clients === null ? '—' : fmtS(s.clients - t.clients), s.clients !== null && s.clients > t.clients ? '#9BC0A1' : '#D3C4A5'],
+      ['Your hours, each month', s.mine < t.mine - 0.5 ? '↓' : s.mine > t.mine + 0.5 ? '↑' : '→', fmtS(s.mine - t.mine) + ' h', s.mine <= t.mine + 0.5 ? '#9BC0A1' : lim && s.mine > lim ? '#E0A282' : '#DDBD69'],
+      ['People you could afford', s.people ? '↑' : '→', s.people === null ? '—' : (Math.round(s.people * 10) / 10).toFixed(1), s.people ? '#9BC0A1' : '#D3C4A5'],
     ];
-    let meaning = '';
-    if (dom === 0) meaning = !lim || s.mine <= lim ? 'A fairer price gives you money without taking more of your life. That is the quietest lever you have.' : 'More money, but your hours are still too high. Price alone will not give you your time back.';
-    if (dom === 1) meaning = lim && s.mine > lim ? 'Clarity brings people in. Without help, they arrive faster than you can serve them.' : 'More people understand you, so more say yes. Your market starts to work for you.';
-    if (dom === 2) meaning = delta === null ? 'You buy back your time. Set a helper rate to see what the trade costs.' : delta >= 0 ? 'You buy back your time and the business still grows. This is where leading starts.' : 'You buy back your time, and it costs money at first. Decide whether that trade is worth it to you.';
+    const meaning = [
+      labMode() === 'time' ? 'A fairer price keeps your money with fewer hours. That is the quietest lever you have.' : 'A fairer price gives you money without taking more of your life.',
+      lim && s.mine > lim ? 'Clarity brings people in. Without help, they arrive faster than you can serve them.' : 'More people understand you, so more say yes. Your market starts to work for you.',
+      'Each sale asks less of you. Those hours are yours to choose: rest, better work, or more customers.',
+      delta === null ? 'You buy back your time. Set a helper rate to see what the trade costs.' : delta >= 0 ? 'You buy back your time and the business still grows. This is where leading starts.' : 'You buy back your time, and it costs money at first. Decide whether that trade is worth it to you.',
+    ][dom];
     const g = E.GOALS.find((x) => x[0] === S.want);
-    const goalLine = g ? 'Your goal, ' + g[1].toLowerCase() + ': ' + (E.goalHelped(g[0], s0, s, d, room || 0) ? 'this change moves you toward it.' : 'this change alone does not get you there. Try another lever with it.') : '';
+    const goalLine = g ? 'Your goal, ' + g[1].toLowerCase() + ': ' + (E.goalHelped(g[0], t, s, d) ? 'this change moves you toward it.' : 'this change alone does not get you there. Try another lever with it.') : '';
     return `<div class="pop" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px">
       <div style="background: rgba(247,242,231,.05); border: 1px solid #3A2F20; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
         <span class="eb" style="color: #E3C47E">The chain reaction</span>
@@ -816,7 +893,7 @@
         <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: #D3C4A5"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#9BC0A1" stroke-width="2.2" stroke-linecap="round"/></svg><span><b style="color: #F7F2E7">First step this week:</b> ${LV.first}</span></div>
       </div>
       <div style="border: 1px solid #C9A24A; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 10px; background: rgba(201,162,74,.08)">
-        ${planBlock(LV.steps, UI.plans && UI.plans.whatif && UI.plans.whatif.id === ['price', 'message', 'handover'][dom] ? UI.plans.whatif.steps : null, 'Your plan for this change', 'Open my step-by-step plan')}
+        ${planBlock(LV.steps, UI.plans && UI.plans.whatif && UI.plans.whatif.id === WHATIF_IDS[dom] ? UI.plans.whatif.steps : null, 'Your plan for this change', 'Open my step-by-step plan')}
       </div></div>`;
   }
   function labFoot() {
@@ -825,8 +902,30 @@
     if (b.ready) parts.push(b.plan ? 'Built from your offer in Step 03 and the customers a month you plan for.' : 'Built from your month in Step 03.');
     if (b.ready && b.est) parts.push('Some of it comes from ranges, so read every figure as “about”.');
     if (b.ready && b.acqMissing) parts.push('Spending to win customers was not entered, so it counts as nothing here.');
+    parts.push(labMode() === 'time' ? '“Give me back time” serves only the work needed to keep today’s money.' : '“Give me more money” serves everyone who wants to buy.');
     parts.push('A higher price may change demand, and help costs money before it saves time. Check both before acting.');
     return parts.join(' ');
+  }
+
+  /** "Take me there": up to Step 03, the right group open, the missing boxes
+   *  glowing for about four seconds. */
+  function takeToNumbers() {
+    const L = labCalc();
+    if (!L.locked || !L.need.length) return;
+    const G = E.groupsFor(S.mode), first = L.need[0].k;
+    const gi = G.findIndex((g) => g.fields.some(([k]) => k === first));
+    if (gi >= 0) S.group = gi;
+    UI.glow = { keys: L.need.map((x) => S.mode + '.' + x.k), until: Date.now() + 4000 };
+    save(); UI.page = 'numbers'; render();
+    requestAnimationFrame(() => {
+      const el = document.querySelector('.glowbox') || document.getElementById('s-numbers');
+      if (!el) return;
+      // Below the sticky launchpad banner, with the box's label in view.
+      const bar = document.getElementById('banner'), top = el.getBoundingClientRect().top + window.scrollY - (bar ? bar.offsetHeight : 0) - 60;
+      window.scrollTo({ top: Math.max(0, top), behavior: reduced() ? 'auto' : 'smooth' });
+      el.focus({ preventScroll: true });
+    });
+    clearTimeout(takeToNumbers.t); takeToNumbers.t = setTimeout(() => { UI.glow = null; render(); }, 4100);
   }
 
   const pMbar = (c) => `${emblem(c.pc.per, 40, { small: true })}
@@ -896,7 +995,7 @@
   /* ── Drawing ─────────────────────────────────────────────────────────────── */
   const cache = {};
   /* When a part is replaced, the parts inside it start again from nothing. */
-  const INSIDE = { 'lab-in': ['lab-head', 'lab-out'] };
+  const INSIDE = {};
   function put(id, html) {
     if (cache[id] === html) return;
     const el = document.getElementById(id);
@@ -930,9 +1029,8 @@
     put('s-weeks', pWeeks(c));
     put('s-climb', pClimb());
     put('lab-in', pLabIn());
-    put('lab-head', pLabHead(L));
-    put('lab-out', pLabOut(L));
-    put('lab-deep', pLabDeep(L));
+    updateLab();
+    put('lab-deep', pLabDeep());
     $('#labtag').textContent = S.mode === 'yes' ? 'Step 04 · The what-if lab · your real month' : 'Step 04 · The what-if lab · your first customers (plan)';
     $('#labfoot').textContent = labFoot();
     put('mbar', pMbar(c));
@@ -948,12 +1046,9 @@
   }
   /* Slider moves redraw only what answers them, so the slider never jumps. */
   function renderLab() {
-    const b = E.labBase(S), L = labCalc();
-    for (const l of LEVER_UI) { const [v, note] = leverText(b, l.k); const a = $('#lv-val-' + l.k), n = $('#lv-note-' + l.k); if (a) a.textContent = v; if (n) n.textContent = note; }
     cache['lab-in'] = pLabIn();
-    put('lab-head', pLabHead(L));
-    put('lab-out', pLabOut(L));
-    put('lab-deep', pLabDeep(L));
+    updateLab();
+    put('lab-deep', pLabDeep());
     $('#labfoot').textContent = labFoot();
   }
 
@@ -1039,7 +1134,9 @@
         if (i > here || (here === 3 && i === here)) { S.goal = E.STAGES[i].id; save(); render(); }
         return;
       }
-      case 'mode': S.mode = v; S.group = 0; S.lab.p = 0; S.lab.m = 0; S.lab.d = 0; save(); render(); return;
+      case 'mode': S.mode = v; S.group = 0; S.lab.p = 0; S.lab.m = 0; S.lab.f = 0; S.lab.d = 0; save(); render(); return;
+      case 'lab-mode': S.lab.mode = v === 'money' ? 'money' : 'time'; save(); renderLab(); return;
+      case 'lab-take': takeToNumbers(); return;
       case 'ans': gated(() => { S.ans[t.dataset.q] = Number(v); }); return;
       case 'str': gated(() => { S.str[i] = Number(v); }); return;
       case 'pain': gated(() => { const cur = S.pains.slice(), ix = cur.indexOf(v); if (ix >= 0) cur.splice(ix, 1); else { cur.push(v); if (cur.length > 2) cur.shift(); } S.pains = cur; }); return;

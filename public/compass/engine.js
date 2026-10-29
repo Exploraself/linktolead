@@ -286,11 +286,19 @@
   }
 
   /* ── The What-if lab ─────────────────────────────────────────────────────────
-   * orders = base × (1 + message%); price = base × (1 + price%);
-   * your hours = hours × (1 − handed-over%); helper cost = handed-over hours ×
-   * a helper rate the founder sets; money left = sales − delivery − marketing −
-   * running costs − helper cost. Built from the founder's month (or, without
-   * customers yet, from their offer and the customers a month they plan for). */
+   * Four levers, each paired with the answer it moves most, and every lever
+   * moves all four answers ("The Intelligence", section 6, v2):
+   *   price  = today × (1 + price%)            → cash left each month
+   *   demand = today × (1 + message%)          → clients each month
+   *   hours  = hours per sale × (1 − fewer%)   → your hours a month
+   *   handed = that share of delivery hours, at a helper rate you set → people
+   * Worked on the founder's own month, scaled as a whole: a "unit" is today's
+   * volume of work, so no count of sales is needed. Without customers yet, the
+   * month is their offer × the customers a month they plan for.
+   *
+   * The switch decides where the gain goes. "Give me back time": serve only the
+   * work needed to keep today's money, never more than the demand there is, so
+   * a higher price lowers the hours. "Give me more money": serve all of it. */
   function labBase(state) {
     const n = numbers(state), lab = state.lab || {};
     const pos = (v) => { const x = Number(v); return String(v ?? '').trim() !== '' && Number.isFinite(x) && x >= 0 ? x : null; };
@@ -310,34 +318,61 @@
       hours: n.hpc.v * planned, limit: n.week ? n.week.v * 52 / 12 : null, clients: planned, rate, hire,
       est: est('price', 'cpc', 'hpc', 'week') };
   }
-  /** One month under the three levers (percentages). helpCost is null when
-   *  work is handed over but no helper rate has been set. */
-  function simulate(b, p, m, d) {
-    const vol = 1 + m / 100, pr = 1 + p / 100;
-    const hours = b.hours * vol, mine = hours * (1 - d / 100), helpHours = hours * d / 100;
-    const helpCost = helpHours > 0 ? (b.rate === null ? null : helpHours * b.rate) : 0;
-    const left = helpCost === null ? null : b.sales * vol * pr - b.deliv * vol - b.acq - b.fixed - helpCost;
-    return { price: pr, clients: b.clients === null ? null : b.clients * vol, hours, mine, helpHours, helpCost, left };
+
+  /** The four levers, in the lab's order, with their ranges. */
+  const LEVER_RANGE = { p: 200, m: 100, f: 50, d: 60 };
+  const LEVER_KEYS = ['p', 'm', 'f', 'd'];
+
+  /**
+   * One month under the levers. `s` = { p, m, f, d } in percent, and `mode`
+   * 'time' (default) or 'money'.
+   * Returns vol (today = 1), demand, cash (null when work is handed over and no
+   * helper rate is set), mine (your hours), helpHours, helpCost, clients (null
+   * without a count of customers), clientsWanted, and people (null without the
+   * monthly cost of one more person, or without a cash figure).
+   */
+  function month(b, s = {}, mode = 'time') {
+    const p = Number(s.p) || 0, m = Number(s.m) || 0, f = Number(s.f) || 0, d = Number(s.d) || 0;
+    const pr = 1 + p / 100, hf = 1 - f / 100, demand = 1 + m / 100, share = d / 100;
+    const unitHours = b.hours * hf, unitHelpHours = unitHours * share;
+    const unitHelp = unitHelpHours > 0 ? (b.rate === null ? null : unitHelpHours * b.rate) : 0;
+    const fixed = b.fixed + b.acq, cash0 = b.sales - b.deliv - fixed;
+    // What one unit of work leaves after delivery and help. Unknown help cost:
+    // the hours still move, the money cannot be said.
+    const perUnit = unitHelp === null ? null : b.sales * pr - b.deliv - unitHelp;
+    let vol = demand;
+    const keep = b.sales - b.deliv; // what today's work leaves before running costs
+    if (mode !== 'money' && perUnit !== null && perUnit > 0 && keep > 0) vol = Math.min(demand, keep / perUnit);
+    const cash = perUnit === null ? null : vol * perUnit - fixed;
+    const helpHours = vol * unitHelpHours, helpCost = unitHelp === null ? null : vol * unitHelp;
+    const mine = vol * unitHours * (1 - share);
+    const people = cash === null || b.hire === null || !(b.hire > 0) ? null : (Math.max(0, cash - cash0) + (helpCost || 0)) / b.hire;
+    return { vol, demand, cash, cash0, mine, helpHours, helpCost, people,
+      clients: b.clients === null ? null : b.clients * vol, clientsWanted: b.clients === null ? null : b.clients * demand };
   }
-  /** The lever moved most, as a share of its range: 0 price, 1 message, 2 handover; -1 none. */
-  function strongestLever(p, m, d) {
-    const share = [p / 50, m / 100, d / 60], max = Math.max(...share);
+  /** The lever moved most, as a share of its range: 0 price, 1 message,
+   *  2 fewer hours, 3 handover; -1 when none moved. */
+  function strongestLever(p, m, f, d) {
+    const share = [p / LEVER_RANGE.p, m / LEVER_RANGE.m, (f || 0) / LEVER_RANGE.f, (d || 0) / LEVER_RANGE.d], max = Math.max(...share);
     return max > 0 ? share.indexOf(max) : -1;
   }
+  /* The lever "Each sale takes fewer hours" and its plan are a DRAFT, waiting
+   * for Alexandru's wording (PR 3). */
   const LEVERS = [
-    { name: 'You raise your price', watch: 'Some customers may leave. Ask your best three first, and explain the value, not the cost.', first: 'Write your new price and say it out loud to one customer this week.', steps: ['Find your fair price, with your time in it', 'Test it on three customers', 'Explain the value in their words', 'Review who stayed and why'] },
-    { name: 'Your message gets clearer', watch: 'More enquiries need answering. Decide now who replies, and how fast.', first: 'Rewrite your offer in one sentence a customer would say.', steps: ['Ask three customers why they chose you', 'Write the one-sentence offer', 'Put it where they already look', 'Track who says yes'] },
-    { name: 'Someone else does part of the work', watch: 'Handing over takes time before it saves time. Expect two slow weeks.', first: 'List three tasks you think only you can do. Pick one that is not true.', steps: ['Pick one task to hand over', 'Write what “finished” looks like', 'Run a two-week test', 'Review, then hand over the next'] },
+    { id: 'price', name: 'You raise your price', watch: 'Some customers may leave. Ask your best three first, and explain the value, not the cost.', first: 'Write your new price and say it out loud to one customer this week.', steps: ['Find your fair price, with your time in it', 'Test it on three customers', 'Explain the value in their words', 'Review who stayed and why'] },
+    { id: 'message', name: 'Your message gets clearer', watch: 'More enquiries need answering. Decide now who replies, and how fast.', first: 'Rewrite your offer in one sentence a customer would say.', steps: ['Ask three customers why they chose you', 'Write the one-sentence offer', 'Put it where they already look', 'Track who says yes'] },
+    { id: 'hours', name: 'Each sale takes fewer hours', watch: 'Faster can become careless. Check the work still meets the standard your customers chose you for.', first: 'Time your next sale, task by task, and circle the slowest step.', steps: ['Time one sale from start to finish', 'Cut, template or batch the slowest task', 'Tell customers what changes for them', 'Time it again and decide where the hours go'] },
+    { id: 'handover', name: 'Someone else does part of the work', watch: 'Handing over takes time before it saves time. Expect two slow weeks.', first: 'List three tasks you think only you can do. Pick one that is not true.', steps: ['Pick one task to hand over', 'Write what “finished” looks like', 'Run a two-week test', 'Review, then hand over the next'] },
   ];
   /** Does this change move the founder toward their goal? */
-  function goalHelped(goal, s0, s, d, room) {
-    return { freedom: s.mine < s0.mine, income: s.left !== null && s0.left !== null && s.left > s0.left,
-      steady: s.clients !== null && s0.clients !== null && s.clients > s0.clients, team: d > 0 || room > 0,
-      clarity: true, grow: s.clients !== null && s0.clients !== null && s.clients > s0.clients }[goal];
+  function goalHelped(goal, s0, s, d) {
+    const more = (a, b) => a !== null && b !== null && a > b + 1e-9;
+    return { freedom: s.mine < s0.mine - 1e-9, income: more(s.cash, s0.cash), steady: s.vol > s0.vol + 1e-9 || more(s.clients, s0.clients),
+      team: d > 0 || (s.people || 0) > 0, clarity: true, grow: s.demand > s0.demand + 1e-9 }[goal];
   }
 
   const api = { DOMAINS, STAGES, ANSWERS, PAINS, GOALS, BANDS, FEEDBACK, PLAN_STEPS, STRENGTHS, MODES, GROUPS, LEVERS,
     band, groupsFor, fieldsFor, valueOf, numbers, questionsFor, scores, reading, pieces, feedback, insight, numberLines,
-    labBase, simulate, strongestLever, goalHelped };
+    labBase, month, LEVER_RANGE, LEVER_KEYS, strongestLever, goalHelped };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.CompassEngine = api;
 })(this);

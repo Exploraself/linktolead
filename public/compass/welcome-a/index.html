@@ -142,27 +142,27 @@
         <div class="slide-card">
           <div style="display: flex; align-items: center; gap: 10px"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11" fill="none" stroke="#15213B" stroke-width="2.5"/><path d="M15 8v7l5 3" fill="none" stroke="#9C7A35" stroke-width="2.5" stroke-linecap="round"/></svg><h3 style="font-weight: 900; font-size: 18px; text-transform: uppercase">Your time</h3></div>
           <span style="font-size: 15px; color: #3D4966">Hours you work in a week</span>
-          <div class="row"><label for="d-hn">Today</label><b><span data-out="hNow"></span> h</b></div>
-          <input id="d-hn" class="now" type="range" min="10" max="80" step="1" value="55" data-in="hNow">
-          <div class="row" style="color: #7A5E26"><label for="d-hw">Where I want to be</label><b><span data-out="hWant"></span> h</b></div>
-          <input id="d-hw" type="range" min="10" max="80" step="1" value="40" data-in="hWant">
+          <div class="row"><label for="d-hn">Today</label><b><span data-out="hNow" data-edit="hNow"></span> h</b></div>
+          <input id="d-hn" class="now" type="range" min="0" max="100" step="1" value="55" data-in="hNow">
+          <div class="row" style="color: #7A5E26"><label for="d-hw">Where I want to be</label><b><span data-out="hWant" data-edit="hWant"></span> h</b></div>
+          <input id="d-hw" type="range" min="0" max="100" step="1" value="40" data-in="hWant">
           <div class="msg" data-out="timeMsg" aria-live="polite"></div>
         </div>
         <div class="slide-card">
           <div style="display: flex; align-items: center; gap: 10px"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="10" cy="11" r="4.5" fill="none" stroke="#15213B" stroke-width="2.5"/><circle cx="21" cy="11" r="4.5" fill="none" stroke="#9C7A35" stroke-width="2.5"/><path d="M2 26c1-5 4-8 8-8s7 3 8 8M13 26c1-5 4-8 8-8s7 3 8 8" fill="none" stroke="#15213B" stroke-width="2.2" stroke-linecap="round"/></svg><h3 style="font-weight: 900; font-size: 18px; text-transform: uppercase">Your clients</h3></div>
           <span style="font-size: 15px; color: #3D4966">Paying clients in a month</span>
-          <div class="row"><label for="d-cn">Today</label><b data-out="cNow"></b></div>
-          <input id="d-cn" class="now" type="range" min="1" max="100" step="1" value="6" data-in="cNow">
-          <div class="row" style="color: #7A5E26"><label for="d-cw">Where I want to be</label><b data-out="cWant"></b></div>
-          <input id="d-cw" type="range" min="1" max="100" step="1" value="15" data-in="cWant">
+          <div class="row"><label for="d-cn">Today</label><b data-out="cNow" data-edit="cNow"></b></div>
+          <input id="d-cn" class="now" type="range" min="0" max="10000" step="1" value="6" data-in="cNow">
+          <div class="row" style="color: #7A5E26"><label for="d-cw">Where I want to be</label><b data-out="cWant" data-edit="cWant"></b></div>
+          <input id="d-cw" type="range" min="0" max="10000" step="1" value="15" data-in="cWant">
           <div class="msg" data-out="clientMsg" aria-live="polite"></div>
         </div>
         <div class="slide-card">
           <div style="display: flex; align-items: center; gap: 10px"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M4 24l7-7 5 4 10-12" fill="none" stroke="#15213B" stroke-width="2.5" stroke-linecap="round"/><path d="M19 9h7v7" fill="none" stroke="#9C7A35" stroke-width="2.5" stroke-linecap="round"/></svg><h3 style="font-weight: 900; font-size: 18px; text-transform: uppercase">Your scale</h3></div>
           <span style="font-size: 15px; color: #3D4966">How much of the business runs without you</span>
-          <div class="row"><label for="d-rn">Today</label><b><span data-out="rNow"></span>%</b></div>
+          <div class="row"><label for="d-rn">Today</label><b><span data-out="rNow" data-edit="rNow"></span>%</b></div>
           <input id="d-rn" class="now" type="range" min="0" max="100" step="5" value="10" data-in="rNow">
-          <div class="row" style="color: #7A5E26"><label for="d-rw">Where I want to be</label><b><span data-out="rWant"></span>%</b></div>
+          <div class="row" style="color: #7A5E26"><label for="d-rw">Where I want to be</label><b><span data-out="rWant" data-edit="rWant"></span>%</b></div>
           <input id="d-rw" type="range" min="0" max="100" step="5" value="50" data-in="rWant">
           <div class="msg" data-out="scaleMsg" aria-live="polite"></div>
         </div>
@@ -268,27 +268,27 @@
       <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
         <div style="flex: 1 1 380px; min-width: 0; background: #1E2C4C; border-radius: 8px; padding: 26px; display: flex; flex-direction: column; gap: 26px">
           <div style="display: flex; flex-direction: column; gap: 6px">
-            <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap"><label for="c-goal" style="font-weight: 700; font-size: 16px">1 · What do you want to take home each month?</label><span data-out="goalTxt" style="font-weight: 900; font-size: 26px; color: #C9A24A"></span></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap"><label for="c-goal" style="font-weight: 700; font-size: 16px">1 · What do you want to take home each month?</label><span data-out="goalTxt" data-edit="goal" style="font-weight: 900; font-size: 26px; color: #C9A24A"></span></div>
             <span style="font-size: 13px; color: #C9A24A; font-weight: 700" aria-hidden="true">Slide this →</span>
-            <input id="c-goal" type="range" min="1000" max="50000" step="500" value="6000" data-in="goal">
+            <input id="c-goal" type="range" min="1000" max="1000000" step="500" value="6000" data-in="goal">
           </div>
           <div style="display: flex; flex-direction: column; gap: 6px">
-            <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap"><label for="c-price" style="font-weight: 700; font-size: 16px">2 · What do you charge for one sale?</label><span data-out="priceTxt" style="font-weight: 900; font-size: 26px; color: #C9A24A"></span></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap"><label for="c-price" style="font-weight: 700; font-size: 16px">2 · What do you charge for one sale?</label><span data-out="priceTxt" data-edit="price" style="font-weight: 900; font-size: 26px; color: #C9A24A"></span></div>
             <span style="font-size: 13px; color: #C9A24A; font-weight: 700" aria-hidden="true">Slide this →</span>
-            <input id="c-price" type="range" min="50" max="5000" step="50" value="400" data-in="price">
+            <input id="c-price" type="range" min="1" max="100000" step="1" value="400" data-in="price">
           </div>
           <div style="display: flex; flex-direction: column; gap: 6px">
-            <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap"><label for="c-keep" style="font-weight: 700; font-size: 16px">3 · Of each sale, how much do you keep after costs?</label><span style="font-weight: 900; font-size: 26px; color: #C9A24A"><span data-out="keep"></span>%</span></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap"><label for="c-keep" style="font-weight: 700; font-size: 16px">3 · Of each sale, how much do you keep after costs?</label><span style="font-weight: 900; font-size: 26px; color: #C9A24A"><span data-out="keep" data-edit="keep"></span>%</span></div>
             <span style="font-size: 13px; color: #C9A24A; font-weight: 700" aria-hidden="true">Slide this →</span>
             <input id="c-keep" type="range" min="10" max="100" step="5" value="60" data-in="keep">
           </div>
           <div style="display: flex; flex-direction: column; gap: 6px">
-            <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap"><label for="c-hps" style="font-weight: 700; font-size: 16px">4 · How many hours does one sale take you, start to finish?</label><span style="font-weight: 900; font-size: 26px; color: #C9A24A"><span data-out="hps"></span> h</span></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap"><label for="c-hps" style="font-weight: 700; font-size: 16px">4 · How many hours does one sale take you, start to finish?</label><span style="font-weight: 900; font-size: 26px; color: #C9A24A"><span data-out="hps" data-edit="hps"></span> h</span></div>
             <span style="font-size: 13px; color: #C9A24A; font-weight: 700" aria-hidden="true">Slide this →</span>
-            <input id="c-hps" type="range" min="1" max="40" step="1" value="8" data-in="hps">
+            <input id="c-hps" type="range" min="1" max="200" step="1" value="8" data-in="hps">
           </div>
           <div style="display: flex; flex-direction: column; gap: 6px">
-            <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap"><label for="c-avail" style="font-weight: 700; font-size: 16px">5 · How many hours a month do you WANT to work?</label><span style="font-weight: 900; font-size: 26px; color: #C9A24A"><span data-out="avail"></span> h</span></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap"><label for="c-avail" style="font-weight: 700; font-size: 16px">5 · How many hours a month do you WANT to work?</label><span style="font-weight: 900; font-size: 26px; color: #C9A24A"><span data-out="avail" data-edit="avail"></span> h</span></div>
             <span style="font-size: 13px; color: #C9A24A; font-weight: 700" aria-hidden="true">Slide this →</span>
             <input id="c-avail" type="range" min="20" max="260" step="5" value="140" data-in="avail">
           </div>

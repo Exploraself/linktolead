@@ -2,7 +2,7 @@
 // without one the answer is 401 and carries nothing.
 //
 // The order comes from what the Compass saved (functions/_plans.js, planFor).
-// Ticks are the plans' own: "x of 28 steps done". They do not add to the
+// Ticks are the plans' own: "x of 32 steps done". They do not add to the
 // Compass's 16-piece launchpad.
 
 import { json, bad, db, accountTables, studentBy } from '../_shared.js';
