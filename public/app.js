@@ -248,7 +248,7 @@ function readView() {
   const road = [
     node('gp-here', '', 'You, today', `<span>${esc(STAGES[st].n)}</span>`),
     ...[1, 2, 3].map((n) => node('gp-free', String(n).padStart(2, '0'), esc(weekTitle(st, n)), '<span class="gp-fr">Free</span>')),
-    node('gp-next', '1:1', 'Session with Alexandru', '<span>Levels 04–05</span>'),
+    node('gp-next', '1:1', 'The Boardroom', '<span>With Alexandru · levels 04–05</span>'),
     node('gp-later', '06–12', 'LAB, then HUB', '<span>Levels 06–12</span>'),
     node('gp-goal', flag, esc(STAGES[r.want] ? STAGES[r.want].n : ''), `<span class="gp-ww">“${esc(gp.wantWords)}”</span><span>your words</span>`),
   ].join('');
@@ -281,7 +281,7 @@ function readView() {
     <h2 class="gp-h">Three levels, then a conversation with Alexandru.</h2>
     <p class="gp-lede">Each level is 28 short answers about things you can open and count — your calendar, your invoices, your customers. Nothing to prepare. It is all in front of you.</p>
     <ol class="gp-mlist">${moves}<li class="gp-move gp-then">
-      <span class="gp-mt">Then</span><b>A session with Alexandru</b>
+      <span class="gp-mt">Then</span><b>The Boardroom: a session with Alexandru</b>
       <p>Alexandru and the team read what you wrote before you speak. The session opens levels 04–05.</p></li></ol>
     <div class="gp-btns">
       <button class="cta" type="button" data-level="1">Start Level 01 →</button>
@@ -318,6 +318,17 @@ function reachable(st, n) {
   return holds(state.tier, gateFor(n)) && levelState(st, n) !== 'waiting';
 }
 
+/** The library at the top of the rail: four doors into the Library view. */
+const LIB_ICONS = [
+  ['3 manuals', 'The three manuals', '<path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z" fill="none" stroke="#C9A24A" stroke-width="1.6" stroke-linejoin="round"/>'],
+  ['99 tools', 'Built to Lead, 99 tools', '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-.5-.5-2.5z" fill="none" stroke="#C9A24A" stroke-width="1.6" stroke-linejoin="round"/>'],
+  ['32 frameworks', 'Worth Building, 32 frameworks', '<rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="#C9A24A" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="#C9A24A" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="#C9A24A" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="#C9A24A" stroke-width="1.6"/>'],
+  ['Soon', 'A New Way of Winning, coming soon', '<circle cx="12" cy="12" r="9" fill="none" stroke="#C9A24A" stroke-width="1.6"/><path d="M12 6l2 6-2 1.5-2-1.5z" fill="#C9A24A"/>'],
+];
+const libIcons = () => `<div class="rlib"><p class="eyebrow">Your library · now open</p><div class="rlibrow">${LIB_ICONS.map(([t, label, svg]) =>
+  `<button type="button" class="libi${t === 'Soon' ? ' soon' : ''}" data-go="library" aria-label="${esc(label)}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">${svg}</svg>${esc(t)}</button>`).join('')}</div></div>`;
+const bookIcon = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+
 function railHTML(st) {
   const marks = { done: '✓', open: '', waiting: '·', locked: '🔒' };
   return `<nav class="rail" id="rail" aria-label="The twelve levels">
@@ -326,13 +337,15 @@ function railHTML(st) {
       <h2>Your Blueprint</h2>
       <p class="railsub">${esc(STAGES[st].blurb)}</p>
     </div>
+    ${libIcons()}
     ${SECTIONS.map((sec) => {
       const owned = holds(state.tier, sec.k);
       const rung = LADDER.find((r) => r.key === sec.k);
+      const tag = sec.k === 'session' ? '1:1' : rung ? rung.price : '';
       return `<section class="rsec${owned ? '' : ' shut'}">
         <header class="rsh">
           <div><p class="rsn">${esc(sec.n)}</p><p class="rss">${esc(sec.sub)}</p></div>
-          ${owned ? '<span class="rtag open">Open</span>' : `<span class="rtag">${esc(rung ? rung.price : '')}</span>`}
+          ${owned ? '<span class="rtag open">Open</span>' : `<span class="rtag">${esc(tag)}</span>`}
         </header>
         <ul class="rlist">${Array.from({ length: sec.to - sec.from + 1 }, (_, i) => {
           const n = sec.from + i;
@@ -348,14 +361,14 @@ function railHTML(st) {
           </button></li>`;
         }).join('')}</ul>
         <p class="rnote">${esc(sec.note)}</p>
+        ${sec.k === 'session' && !owned ? `<a class="rbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>` : ''}
       </section>`;
     }).join('')}
-    <div class="rprem">
-      <p class="eyebrow">Everything, with Alexandru and the team</p>
-      <h4>Premium</h4>
-      <p>All twelve levels, the LAB, the HUB and every resource — and Alexandru mentoring you every week.</p>
-      <span class="price">$1,989</span>
-    </div>
+    <a class="rsummit" href="/compass/summit">
+      <small>THE TOP</small>
+      <b>The Summit</b>
+      <span>Everything, and Alexandru every week · $1,989</span>
+    </a>
   </nav>`;
 }
 
@@ -540,6 +553,20 @@ function libraryView() {
   </div></section>`;
 }
 
+/** After joining: the library just opened. Shown until opened or closed. */
+const BANNER_KEY = 'ftb-library-banner';
+const bannerSeen = () => { try { return localStorage.getItem(BANNER_KEY) === 'seen'; } catch { return true; } };
+const bannerDone = () => { try { localStorage.setItem(BANNER_KEY, 'seen'); } catch { /* private mode */ } };
+function libBanner() {
+  if (bannerSeen() || !(state.me || account.joined())) return '';
+  return `<div class="libban" role="status">
+    <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z" fill="none" stroke="#C9A24A" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    <div><b>Your library just got fuller.</b><p>With your free account: the three Founder’s Blueprint manuals, Built to Lead (99 practical tools) and Worth Building (32 leadership frameworks). A New Way of Winning is on its way.</p></div>
+    <button type="button" class="cta" data-go="library">Open my library →</button>
+    <button type="button" class="x" data-banner="close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  </div>`;
+}
+
 function emphasisName(st, lv) {
   const e = STAGES[st].emphasis[lv - 1];
   const d = DOMAINS.find((x) => x.k === e);
@@ -551,10 +578,10 @@ function render() {
   const st = state.stage || 'build';
   document.body.classList.toggle('inwork', view === 'work');
   $('#tnav').innerHTML = state.stage && state.me
-    ? `<button type="button" data-go="read" ${view === 'read' ? 'aria-current="page"' : ''}>Your Ground Plan</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button>`
+    ? `<button type="button" data-go="read" ${view === 'read' ? 'aria-current="page"' : ''}>Your Ground Plan</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button>${holds(state.tier, 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
     : '';
   $('#main').innerHTML = view === 'work'
-    ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work">${moduleHTML(st)}</div></div>`
+    ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work"><div id="libban">${libBanner()}</div><div id="mod">${moduleHTML(st)}</div></div></div>`
     : view === 'join' ? joinView()
     : view === 'read' ? readView()
     : view === 'library' ? libraryView()
@@ -567,7 +594,8 @@ function redrawModule() {
   const w = $('#work');
   if (!w) return render();
 
-  w.innerHTML = moduleHTML(state.stage || 'build');
+  const m = $('#mod');
+  if (m) m.innerHTML = moduleHTML(state.stage || 'build'); else w.innerHTML = moduleHTML(state.stage || 'build');
   w.scrollTo ? w.scrollTo({ top: 0, behavior: 'instant' }) : null;
   const r = $('#rail'); if (r) refreshRail();
 }
@@ -581,6 +609,8 @@ document.addEventListener('click', (e) => {
   const b = e.target.closest('button, a.cta');
   if (!b) return;
   if (b.dataset.go === 'rail') { document.body.classList.toggle('railopen'); return; }
+  if (b.dataset.banner === 'close') { bannerDone(); const h = $('#libban'); if (h) h.innerHTML = ''; return; }
+  if (b.dataset.go === 'library') bannerDone();
   if (b.dataset.go) {
     view = b.dataset.go; document.body.classList.remove('railopen'); render();
     window.scrollTo({ top: 0, behavior: 'instant' }); return;

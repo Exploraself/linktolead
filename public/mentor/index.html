@@ -150,7 +150,7 @@ async function one(id){
       </div>
       <p style="margin-top:16px"><label class="tiny">Change access&nbsp;</label>
         <select id="tier" style="max-width:220px;display:inline-block;width:auto">
-          ${['free','session','lab','hub','premium'].map(t=>`<option value="${t}"${t===(s.tier||'free')?' selected':''}>${t}</option>`).join('')}
+          ${[['free','free · Founder Launchpad'],['session','session · The Boardroom'],['lab','lab'],['hub','hub'],['premium','premium · The Summit']].map(([t,l])=>`<option value="${t}"${t===(s.tier||'free')?' selected':''}>${l}</option>`).join('')}
         </select> <button id="setTier">Save</button></p>
     </div>
 
