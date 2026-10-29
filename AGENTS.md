@@ -53,9 +53,13 @@ horizontal scroll, and respect `prefers-reduced-motion`.
 
 ## 8. The founder's answers
 
-They are the most valuable thing in the product. While this is in preview they
-live in `localStorage`, wrapped in try/catch, and nothing is sent anywhere.
-When accounts arrive, migrate them — never silently discard them.
+They are the most valuable thing in the product. They save to the device
+first, always, in `localStorage` wrapped in try/catch, so the page works with
+no account and no network. When the founder is signed in, they are also saved
+to their account, in batches, never on every keystroke or tap. The device copy
+comes first: a failed save only waits for the next batch. Answers given before
+an account existed are moved into it on signup, never silently discarded, and
+an account's token is only ever handed to the person who owns the email.
 
 ## 9. Numbers serve judgement. They are not the subject.
 

@@ -13,10 +13,10 @@ import { GROW } from './levels-grow.js';
 import { SCALE } from './levels-scale.js';
 
 export const DOMAINS = [
-  { k: 'self', n: 'Self', full: 'Personal internal', line: 'How you notice, decide and follow through.' },
-  { k: 'people', n: 'People', full: 'Personal external', line: 'How you listen, speak and build trust.' },
-  { k: 'work', n: 'Work', full: 'Business internal', line: 'How priorities become systems and action.' },
-  { k: 'market', n: 'Market', full: 'Business external', line: 'How you understand and serve customers.' },
+  { k: 'self', n: 'Lead yourself', full: 'Personal internal', line: 'How you notice, decide and follow through.' },
+  { k: 'people', n: 'Lead your people', full: 'Personal external', line: 'How you listen, speak and build trust.' },
+  { k: 'work', n: 'Lead your business', full: 'Business internal', line: 'How priorities become systems and action.' },
+  { k: 'market', n: 'Lead the market', full: 'Business external', line: 'How you understand and serve customers.' },
 ];
 
 // The spine. Seven points, every level, every domain. P.A.C.E. opened out.
@@ -124,21 +124,21 @@ export function isWritten(stage, n) { return !!levelFor(stage, n); }
 
 // ── The entry diagnostic ─────────────────────────────────────────────────────
 export const DIAGNOSTIC = [
-  { d: 'self', label: 'Self · personal internal', q: 'Do you know where your week actually goes?',
+  { d: 'self', label: 'Lead yourself · personal internal', q: 'Do you know where your week actually goes?',
     o: [['I could not account for last week', 0], ['Roughly, if I thought about it', 1], ['Yes, and I protect the important blocks', 2]] },
-  { d: 'self', label: 'Self · personal internal', q: 'Have you written down what you will not do, at any price?',
+  { d: 'self', label: 'Lead yourself · personal internal', q: 'Have you written down what you will not do, at any price?',
     o: [['Never written down', 0], ['I know them, nobody else does', 1], ['Written, and I have held them', 2]] },
-  { d: 'people', label: 'People · personal external', q: 'When something is wrong with someone, how long before you say it?',
+  { d: 'people', label: 'Lead your people · personal external', q: 'When something is wrong with someone, how long before you say it?',
     o: [['Weeks, or never', 0], ['Eventually, usually badly', 1], ['Within days, plainly', 2]] },
-  { d: 'people', label: 'People · personal external', q: 'Is there someone who tells you the truth about your business?',
+  { d: 'people', label: 'Lead your people · personal external', q: 'Is there someone who tells you the truth about your business?',
     o: [['No one', 0], ['One person, rarely asked', 1], ['Yes, and I ask them on purpose', 2]] },
-  { d: 'work', label: 'Work · business internal', q: 'If you stopped for two weeks, what happens?',
+  { d: 'work', label: 'Lead your business · business internal', q: 'If you stopped for two weeks, what happens?',
     o: [['It stops with me', 0], ['It limps', 1], ['It runs, mostly', 2]] },
-  { d: 'work', label: 'Work · business internal', q: 'Is there one written process somebody else could follow?',
+  { d: 'work', label: 'Lead your business · business internal', q: 'Is there one written process somebody else could follow?',
     o: [['Nothing is written', 0], ['Some of it, in my head', 1], ['Yes, and it is used', 2]] },
-  { d: 'market', label: 'Market · business external', q: 'Can you name, today, who your next ten customers are?',
+  { d: 'market', label: 'Lead the market · business external', q: 'Can you name, today, who your next ten customers are?',
     o: [['No', 0], ['A type, not names', 1], ['Names, and why each one', 2]] },
-  { d: 'market', label: 'Market · business external', q: 'Do you know in their words why your customers chose you?',
+  { d: 'market', label: 'Lead the market · business external', q: 'Do you know in their words why your customers chose you?',
     o: [['I assume', 0], ['I have heard it once or twice', 1], ['I have asked, recently', 2]] },
   { d: 'stage', label: 'Where you are', q: 'Which is nearest the truth right now?',
     o: [['Finding the offer and the first clients', 'build'], ['Clients repeat, but everything runs through me', 'grow'], ['There is a team, and my job has changed', 'scale']] },

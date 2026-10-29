@@ -1,11 +1,18 @@
 /* ExploraSelf Leadership Compass · v18. One continuous page; the menu scrolls
  * to each section.
  *
- * While the Compass is in preview, everything a founder enters stays in this
- * browser (localStorage, guarded). The only thing that leaves it is "Email me
- * my results", which sends the results once through /api/send-plan, and only
- * when the founder asks. Older Compass entries (exploraself-compass-v1) are
- * carried over on first load and left in place, never deleted.
+ * Everything a founder enters saves to this browser first (localStorage,
+ * guarded). With a free account it is also copied to the account
+ * (/api/compass), in batches: on a "Got it" tick, at the end of each section
+ * and when the page is hidden, never on every tap. "Who is this compass for?"
+ * creates the account; a visitor who already gave their name and email on the
+ * sales page gets one without being asked again. Answers given before the
+ * account existed are moved into it, never discarded. Older Compass entries
+ * (exploraself-compass-v1) are carried over on first load and left in place.
+ *
+ * The account calls live in /account.js, shared with the programme at /start,
+ * loaded here with import() so this stays a plain script. Without it (opened
+ * as a file, or offline) the Compass works exactly as before, on this browser.
  *
  * The page is drawn in parts. Each part is rebuilt from the state and only
  * written to the page when its markup changes, so an answer does not redraw
@@ -27,7 +34,7 @@
   /* ── State ──────────────────────────────────────────────────────────────── */
   const blank = () => ({ v: 2, theme: 'light', profile: { first: '', last: '', email: '', business: '', type: '', industry: '', currency: 'USD', consent: false },
     skipped: false, stage: 'building', goal: '', mode: 'yes', ans: {}, str: {}, pains: [], want: '', nums: {}, group: 0,
-    got: {}, more: {}, lean: null, stop: 0, lab: { p: 0, m: 0, d: 0, rate: '', hire: '', plan: '' } });
+    got: {}, more: {}, lean: null, stop: 0, lab: { p: 0, m: 0, d: 0, rate: '', hire: '', plan: '' }, acct: { email: '', state: '' } });
   const read = (k) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } };
 
   /** Keep only what this version knows, in the shapes it expects. */
@@ -55,6 +62,8 @@
     s.stop = Number.isInteger(raw.stop) && raw.stop >= 0 && raw.stop < 5 ? raw.stop : 0;
     const lab = raw.lab || {};
     s.lab = { p: clampN(lab.p, 0, 50), m: clampN(lab.m, 0, 100), d: clampN(lab.d, 0, 60), rate: str(lab.rate, 12), hire: str(lab.hire, 12), plan: str(lab.plan, 12) };
+    // What happened when this browser last tried to make an account for this email.
+    if (raw.acct && ['yes', 'existing'].includes(raw.acct.state)) s.acct = { email: str(raw.acct.email, 120), state: raw.acct.state };
     return s;
   }
   function clampN(v, lo, hi) { const n = Number(v); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : 0; }
@@ -88,9 +97,11 @@
     return old && old.version === 1 ? migrate(old) : blank();
   })();
   /* Details given on the Compass sales page arrive here, never asked twice. */
+  let fromSales = false;
   (() => {
     const pre = read(DEFAULT_PROFILE);
     if (!pre || S.profile.email) return;
+    fromSales = !!pre.email;
     for (const k of ['first', 'last', 'email']) if (pre[k]) S.profile[k] = String(pre[k]).slice(0, 120);
     if (pre.consent === true) S.profile.consent = true;
     // The stage finder on the sales page, used only before any answer here.
@@ -99,14 +110,112 @@
 
   let stored = true, saveTimer;
   function save() {
+    dirty = true;
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
       try { localStorage.setItem(KEY, JSON.stringify(S)); stored = true; } catch { stored = false; }
-      const el = $('#save-status'); if (el) el.textContent = stored ? '○ Saved on this browser' : '○ This session only · download a backup';
+      status();
     }, 150);
   }
-  const UI = { page: 'overview', gate: false, after: null, how: false, ws: false, saved: false, mail: '', mailReady: false, sending: false };
+  function status() {
+    const el = $('#save-status');
+    if (el) el.textContent = !stored ? '○ This session only · download a backup' : signedIn() ? '○ Saved to your account' : '○ Saved on this browser';
+  }
+  const UI = { page: 'overview', gate: false, after: null, how: false, ws: false, saved: false, mail: '', mailReady: false, mailWhy: '', sending: false,
+    plans: null, note: '', signin: '', signinBusy: false };
   const identified = () => !!S.profile.email;
+
+  /* ── The account ─────────────────────────────────────────────────────────── */
+  let A = null, dirty = false, syncing = false, leverTimer;
+  const signedIn = () => !!(A && A.joined());
+  /** What the account keeps: this whole state (so another device can carry
+   *  on), plus the scores and choices the Account Plans are ordered by. */
+  function payload() {
+    const sc = E.scores(M, S);
+    return { stage: S.stage, answers: S,
+      results: { scores: sc.map((x) => x.score), answered: sc.map((x) => x.answered), bands: sc.map((x) => (x.answered ? E.BANDS[x.band] : null)) },
+      flags: { pains: S.pains, want: S.want, lab: { p: S.lab.p, m: S.lab.m, d: S.lab.d } } };
+  }
+  /** Send the batch, if there is one. The device copy is already safe, so a
+   *  failure only means it goes with the next batch. */
+  async function sync(keepalive = false) {
+    if (!signedIn() || !dirty || syncing) return;
+    dirty = false; syncing = true;
+    try { await A.saveCompass(payload(), keepalive); if (!keepalive) refreshPlans(); }
+    catch { dirty = true; }
+    finally { syncing = false; }
+  }
+  async function refreshPlans() {
+    if (!signedIn()) return;
+    const p = await A.plans();
+    if (p && p.ok) { UI.plans = p; render(); }
+  }
+  /** Make the free account for the details in the profile. A new email is an
+   *  account at once and this browser's answers go into it. An email that
+   *  already has one is never handed its token: unless this is the silent
+   *  carry-over, a sign-in link is sent instead. */
+  async function createAccount(source, silent) {
+    if (!A || signedIn() || !identified()) return signedIn();
+    const P = S.profile;
+    let out;
+    try { out = await A.signup({ first: P.first, last: P.last, email: P.email, industry: P.industry, consent: P.consent, source, stage: S.stage }); }
+    catch { return false; }
+    S.acct = { email: P.email, state: out.token ? 'yes' : out.existing ? 'existing' : '' };
+    save();
+    if (out.token) { dirty = true; await sync(); status(); render(); return true; }
+    if (out.existing && !silent) await askLink(P.email, 'note');
+    return false;
+  }
+  /** Ask for a sign-in link. `where` is the place the reply is said. */
+  async function askLink(email, where) {
+    const say = (m) => { if (where === 'note') UI.note = m; else UI.signin = m; render(); };
+    if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email || '')) return say('Type your email first, then tap this again.');
+    if (!A) return say('Sign-in is not available here. Open linktolead.exploraself.com/compass.');
+    UI.signinBusy = true; render();
+    try {
+      const r = await A.signinLink(email);
+      say(where === 'note' ? 'This email already has an account. We have sent a sign-in link to it. Open it on this device and your answers here join your account. Until then they are saved on this browser.' : r.message);
+    } catch (e) {
+      say(e && e.message && !/fetch|network|load failed/i.test(e.message) ? e.message : 'We could not send a link just now. Try again in a minute.');
+    }
+    UI.signinBusy = false; render();
+  }
+  const hasWork = (s) => Object.keys(s.ans).length > 0 || Object.keys(s.str).length > 0 || Object.keys(s.nums).length > 0 || s.pains.length > 0 || !!s.want;
+  /** Arriving from a sign-in link: spend the code, then bring the account's
+   *  Compass here if this browser has none. If both have answers, this
+   *  browser's copy comes first and goes up to the account. */
+  async function signInFromLink(code) {
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch { /* old browser */ }
+    let me;
+    try { me = (await A.signinWith(code)).me || {}; }
+    catch (e) { toast(e && e.message ? e.message : 'That sign-in link did not work. Ask for a new one.'); return; }
+    const theirs = await A.loadCompass();
+    if (!hasWork(S) && theirs && theirs.answers) {
+      const keepTheme = S.theme;
+      S = sanitize(theirs.answers); S.theme = keepTheme;
+      try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { stored = false; }
+      dirty = false;
+    } else dirty = true;
+    for (const k of ['first', 'last', 'email', 'industry']) if (!S.profile[k] && me[k]) S.profile[k] = String(me[k]).slice(0, 120);
+    S.acct = { email: S.profile.email, state: 'yes' };
+    save(); await sync(); status(); render();
+    toast('You are signed in. Your Compass is saved to your account.');
+  }
+  async function boot() {
+    try { A = await import('/account.js'); } catch { A = null; }
+    if (!A) return;
+    let code = '';
+    try { code = new URLSearchParams(location.search).get('signin') || ''; } catch { /* no location */ }
+    if (code) await signInFromLink(code);
+    else if (!signedIn() && identified() && S.profile.consent && !(S.acct.email === S.profile.email && S.acct.state === 'existing')) {
+      // Name and email given before (on the sales page, or before accounts
+      // existed): the account is made without asking again.
+      await createAccount(fromSales ? 'sales-page' : 'compass', true);
+    }
+    status();
+    if (signedIn()) { dirty = true; await sync(); }
+    render();
+  }
 
   /** A first answer opens "Who is this compass for?". What they tapped is kept. */
   function gated(change) {
@@ -193,7 +302,11 @@
       <circle class="ringp" cx="37" cy="37" r="31" fill="none" stroke="#C9A24A" stroke-width="7" stroke-linecap="round" stroke-dasharray="194.8" style="stroke-dashoffset: ${(194.8 * (1 - c.answered / 8)).toFixed(1)}" transform="rotate(-90 37 37)"/>
       <text x="37" y="43" text-anchor="middle" font-family="Fraunces" font-size="19" fill="currentColor">${c.answered}/8</text></svg>`;
 
-  const pSkip = () => (S.skipped && !identified() ? `<div class="card pop" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-color: #C9A24A">
+  const pNotice = () => (UI.note ? `<div class="card pop" role="status" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-color: #C9A24A">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="#C9A24A" stroke-width="1.8"/><path d="M3 7l9 6 9-6" fill="none" stroke="#C9A24A" stroke-width="1.8"/></svg>
+      <span style="flex: 1; font-size: 14px">${esc(UI.note)}</span>
+      <button type="button" data-act="note-x" data-f="note-x" aria-label="Close" style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer">×</button></div>` : '');
+  const pSkip = () => pNotice() + (S.skipped && !identified() ? `<div class="card pop" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-color: #C9A24A">
       <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="#C9A24A" stroke-width="1.8"/><path d="M12 7v6M12 16.5v.5" stroke="#C9A24A" stroke-width="2" stroke-linecap="round"/></svg>
       <span style="flex: 1; font-size: 14px">You are exploring. Add your email when you want your results sent to you.</span>
       <button type="button" data-act="regate" data-f="regate" style="min-height: 40px; padding: 0 14px; border-radius: 4px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; cursor: pointer">Add my email</button></div>` : '');
@@ -408,6 +521,39 @@
       <p style="font-size: 12px; color: var(--muted)">A range is used at its middle, so what it tells you is said with “about”. Machines can do this arithmetic in seconds; what you do about it is the part only you can decide.</p>`;
   }
 
+  /* ── The Account Plans, opened in place when signed in ─────────────────── */
+  const BAND_LABEL = { now: 'Needs you now', shape: 'Taking shape', strength: 'A strength' };
+  /* Which steps are open, so a redraw (after a tick) leaves them open. */
+  const OPEN = new Set();
+  document.addEventListener('toggle', (e) => { const d = e.target; if (d.dataset && d.dataset.step) { if (d.open) OPEN.add(d.dataset.step); else OPEN.delete(d.dataset.step); } }, true);
+  function stepOpen(st, k) {
+    const done = !!(UI.plans && UI.plans.done[st.id]);
+    const row = (label, v) => (v ? `<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #F7F2E7"><b style="color: #E3C47E">${label}</b> ${esc(v)}</p>` : '');
+    return `<details data-step="${esc(st.id)}"${OPEN.has(st.id) ? ' open' : ''} style="border-top: 1px solid #3A2F20; padding-top: 8px">
+      <summary style="display: flex; gap: 12px; align-items: center; cursor: pointer; list-style: none; min-height: 40px"><span style="font-family: Fraunces, serif; color: #C9A24A; width: 22px">${done ? '✓' : k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7${done ? '; text-decoration: line-through; text-decoration-color: #8A7A5E' : ''}">${esc(st.title)}${st.domainName ? ` <span style="color: #C4B69D; font-size: 12px">· ${esc(st.domainName)}</span>` : ''}</span><span class="st-open" aria-hidden="true" style="color: #E3C47E; font-size: 12px">Open</span></summary>
+      <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px 0 6px 34px">
+        ${row('Why it matters:', st.why)}${row('What to do:', st.what)}${row('About:', st.about)}${row('Done looks like:', st.done)}
+        ${st.ask ? `<p class="sfi" style="margin: 0; font-size: 16px; color: #F7F2E7">“${esc(st.ask)}”</p>` : ''}
+        ${st.note ? row(`${BAND_LABEL[UI.plans && UI.plans.domains.find((d) => d.id === st.domain)?.band] || ''}${st.noteFor ? ' (' + esc(st.noteFor) + ')' : ''}:`, st.note) : ''}
+        <label style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid #594A32; border-radius: 6px; cursor: pointer; font-size: 14px; align-self: flex-start"><input type="checkbox" data-tick="${esc(st.id)}" data-f="tick-${esc(st.id)}"${done ? ' checked' : ''} style="width: 20px; height: 20px; accent-color: #C9A24A">Done</label>
+      </div></details>`;
+  }
+  const planCount = () => (UI.plans ? `${UI.plans.count} of ${UI.plans.total} steps done` : '');
+  /** The four steps for a domain card, or a What-if lever: open when signed
+   *  in and loaded, the locked titles otherwise. */
+  function planBlock(titles, steps, eyebrow, cta) {
+    if (signedIn() && steps) return `<span class="eb" style="color: #E3C47E">${eyebrow} · ${planCount()}</span>
+      ${steps.map(stepOpen).join('')}
+      <span style="font-size: 13px; color: #C4B69D">Times are about, not promises. Tick a step when it is done; the count is your plans’ own.</span>`;
+    if (signedIn()) return `<span class="eb" style="color: #E3C47E">${eyebrow}</span>
+      ${titles.map((t, k) => `<div style="display: flex; gap: 12px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Fraunces, serif; color: #C9A24A; width: 22px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7">${t}</span></div>`).join('')}
+      <span style="font-size: 13px; color: #C4B69D">Opening in your account…</span>`;
+    return `<span class="eb" style="color: #E3C47E">${eyebrow} · in your free account</span>
+      ${titles.map((t, k) => `<div style="display: flex; gap: 12px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Fraunces, serif; color: #C9A24A; width: 22px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7">${t}</span><span class="blurline" style="flex: 0 0 70px; height: 8px; border-radius: 4px; background: #594A32"></span>${lockIcon('#C4B69D')}</div>`).join('')}
+      <span style="font-size: 13px; color: #C4B69D">Each step opens with what to do, about how long it takes and what “done” looks like.</span>
+      <button type="button" data-act="account" data-f="account-${eyebrow.length}" class="go" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 5px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; cursor: pointer">${cta} <span class="arr" aria-hidden="true">→</span></button>`;
+  }
+
   /* Step 03 part 2: one card per domain. "Got it" opens the next. */
   function pFeedback(c, i) {
     const s = c.sc[i], f = E.feedback(i, s, S.pains, S.want), locked = i > 0 && !S.got[i - 1];
@@ -444,10 +590,7 @@
         <div class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 8px"><span class="eb" style="color: ${CSSV[i]}">Going deeper</span><span style="font-size: 15px; line-height: 1.6">${f.deep}</span>
           <span style="font-size: 14px; font-weight: 600; margin-top: 4px">This week: ${f.week}</span></div>
         <div class="deep" style="border-radius: 7px; padding: 20px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #C9A24A">
-          <span class="eb" style="color: #E3C47E">Your step-by-step plan · in your free account</span>
-          ${f.steps.map((t, k) => `<div style="display: flex; gap: 12px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Fraunces, serif; color: #C9A24A; width: 22px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7">${t}</span><span class="blurline" style="flex: 0 0 70px; height: 8px; border-radius: 4px; background: #594A32"></span>${lockIcon('#C4B69D')}</div>`).join('')}
-          <span style="font-size: 13px; color: #C4B69D">Each step opens with what to do, how long it takes and what “done” looks like.</span>
-          <a href="/start" class="go" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 5px; background: #C9A24A; color: #14100B; font-weight: 600; text-decoration: none">Create my free account <span class="arr" aria-hidden="true">→</span></a>
+          ${planBlock(f.steps, UI.plans && (UI.plans.domains.find((x) => x.id === D[i].id) || {}).steps, 'Your step-by-step plan', 'Create my free account')}
         </div></div>` : ''}
     </div>`;
   }
@@ -673,9 +816,7 @@
         <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: #D3C4A5"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#9BC0A1" stroke-width="2.2" stroke-linecap="round"/></svg><span><b style="color: #F7F2E7">First step this week:</b> ${LV.first}</span></div>
       </div>
       <div style="border: 1px solid #C9A24A; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 10px; background: rgba(201,162,74,.08)">
-        <span class="eb" style="color: #E3C47E">Your plan for this change · in your free account</span>
-        ${LV.steps.map((t, k) => `<div style="display: flex; gap: 10px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Fraunces, serif; color: #C9A24A; width: 20px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7">${t}</span>${lockIcon('#C4B69D')}</div>`).join('')}
-        <a href="/start" class="go no-print" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 16px; border-radius: 5px; background: #C9A24A; color: #14100B; font-weight: 600; text-decoration: none">Open my step-by-step plan <span class="arr" aria-hidden="true">→</span></a>
+        ${planBlock(LV.steps, UI.plans && UI.plans.whatif && UI.plans.whatif.id === ['price', 'message', 'handover'][dom] ? UI.plans.whatif.steps : null, 'Your plan for this change', 'Open my step-by-step plan')}
       </div></div>`;
   }
   function labFoot() {
@@ -713,6 +854,8 @@
         <span id="gate-err" role="alert" style="font-size: 13px; color: var(--self); font-weight: 600"></span>
         <button type="submit" data-f="gate-go" style="min-height: 50px; border-radius: 5px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; font-size: 15px; cursor: pointer">Start my compass →</button>
         <button type="button" data-act="gate-skip" data-f="gate-skip" style="min-height: 44px; border-radius: 5px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-weight: 600; cursor: pointer">Skip for now · keep exploring</button>
+        <button type="button" data-act="signin-gate" data-f="signin-gate" ${UI.signinBusy ? 'disabled' : ''} style="border: 0; background: none; padding: 6px 0; color: var(--goldink); font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer">Already have an account? Email me a sign-in link</button>
+        ${UI.signin ? `<span role="status" style="font-size: 13px; color: var(--ink); text-align: center">${esc(UI.signin)}</span>` : ''}
         <span style="font-size: 12px; color: var(--muted); text-align: center">Until you add your email, your answers stay only in this browser. Came from our page? You will not see this box.</span>
       </form></div>`;
   }
@@ -727,7 +870,7 @@
     const TYPES = ['Solopreneur (just me)', 'Small business with a team', 'Growing company with managers', 'Not started yet (an idea)'];
     const CUR = [['USD', 'USD $'], ['EUR', 'EUR €'], ['GBP', 'GBP £'], ['CAD', 'CAD $'], ['AUD', 'AUD $']];
     return `<div class="card pop" style="padding: 22px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 24px 50px rgba(28,19,9,.14)">
-      <div style="display: flex; flex-direction: column; gap: 4px"><span class="eb">Your workspace</span><span class="sf" style="font-size: 24px">Make this yours.</span><span style="font-size: 13px; color: var(--muted)">Your answers and numbers are kept on this browser while the Compass is in preview.</span></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><span class="eb">Your workspace</span><span class="sf" style="font-size: 24px">Make this yours.</span><span style="font-size: 13px; color: var(--muted)">${signedIn() ? 'Your answers and numbers are kept with your account.' : 'Your answers and numbers are kept on this browser. With a free account they follow you to any device.'}</span></div>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
         <label style="${lab}">First name<input class="inp" id="ws-first" type="text" autocomplete="given-name" value="${esc(P.first)}" data-f="ws-first"></label>
         <label style="${lab}">Surname<input class="inp" id="ws-last" type="text" autocomplete="family-name" value="${esc(P.last)}"></label>
@@ -741,7 +884,12 @@
         ${['light', 'dark'].map((t) => `<button type="button" data-act="theme" data-v="${t}" data-f="theme-${t}" aria-pressed="${S.theme === t}" style="min-height: 44px; padding: 0 16px; border-radius: 5px; border: 1.5px solid ${S.theme === t ? '#C9A24A' : 'var(--line)'}; background: var(--paper); color: var(--ink); cursor: pointer; font-weight: 600">${t === 'light' ? 'Light' : 'Dark'}</button>`).join('')}
         <button type="button" data-act="ws-save" data-f="ws-save" style="margin-left: auto; min-height: 46px; padding: 0 20px; border-radius: 5px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px">${lockIcon('#14100B', 16)}Save &amp; lock my workspace</button>
       </div>
-      ${UI.saved ? `<span class="pop" role="status" style="font-size: 13px; color: ${UI.saved === true ? 'var(--people)' : 'var(--self)'}; font-weight: 600">${UI.saved === true ? 'Saved. Your preferences and numbers are kept with this workspace on this browser.' : esc(UI.saved)}</span>` : ''}
+      ${UI.saved ? `<span class="pop" role="status" style="font-size: 13px; color: ${UI.saved === true ? 'var(--people)' : 'var(--self)'}; font-weight: 600">${UI.saved === true ? (signedIn() ? 'Saved to your account. Your preferences and numbers are locked to this workspace.' : 'Saved. Your preferences and numbers are kept with this workspace on this browser.') : esc(UI.saved)}</span>` : ''}
+      <div style="border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 8px">
+        ${signedIn() ? `<span style="font-size: 13px; color: var(--muted)">Signed in${P.email ? ' as <b style="color: var(--ink)">' + esc(P.email) + '</b>' : ''}. On another device, ask for a sign-in link with this address.</span>`
+          : `<label style="${lab}">Already have an account? Email me a sign-in link<span style="display: flex; gap: 8px; flex-wrap: wrap"><input class="inp" id="ws-signin" type="email" autocomplete="email" value="${esc(P.email)}" placeholder="Your email" style="flex: 1 1 200px"><button type="button" data-act="signin-ws" data-f="signin-ws" ${UI.signinBusy ? 'disabled' : ''} style="min-height: 44px; padding: 0 16px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 600; cursor: pointer">Email me a link</button></span></label>
+          ${UI.signin ? `<span role="status" style="font-size: 13px; color: var(--ink)">${esc(UI.signin)}</span>` : ''}`}
+      </div>
     </div>`;
   }
 
@@ -811,6 +959,7 @@
 
   const SECTION = { overview: 's-overview', clear: 's-clear', people: 's-people', numbers: 's-numbers', plan: 's-whatif', method: 's-method', journey: 's-journey', weeks: 's-weeks' };
   function go(page) {
+    sync(); // the end of a section
     UI.page = page in SECTION && page !== 'journey' ? page : page === 'journey' ? 'clear' : UI.page;
     render();
     const el = document.getElementById(SECTION[page]);
@@ -846,15 +995,20 @@
     const st = E.STAGES[c.here];
     return { name: S.profile.first, business: S.profile.business, stage: st.name, focus: st.focus, domains, numbers: rows.slice(0, 6), next, strategy: [] };
   }
+  /* Signed in: straight to the account's email. Otherwise name and email
+   * first (which makes the free account), then send. It only ever says "Sent"
+   * when the email service said yes. */
   async function sendEmail() {
-    if (!identified()) { openGate('email'); render(); return; }
+    if (!signedIn() && !identified()) { openGate('email'); render(); return; }
     if (!UI.mailReady) { UI.mail = 'Email is not switched on yet. Use Print or Save as PDF for now.'; render(); return; }
     UI.sending = true; UI.mail = ''; render();
     try {
-      const r = await fetch('/api/send-plan', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: S.profile.email, plan: planForEmail() }) });
+      if (!signedIn()) await createAccount('compass', true);
+      const body = signedIn() ? { token: A.token(), plan: planForEmail() } : { email: S.profile.email, plan: planForEmail() };
+      const r = await fetch('/api/send-plan', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j.ok) throw new Error(j.error || 'It did not send. Try again in a minute.');
-      UI.mail = 'Sent to ' + S.profile.email + '. Check your inbox: your results and your Founder Launchpad link.';
+      UI.mail = 'Sent to ' + (j.to || S.profile.email) + '. Check your inbox: your results and your Founder Launchpad link.';
     } catch (e) {
       UI.mail = (e && e.message && !/fetch|network|load failed/i.test(e.message)) ? e.message : 'We could not reach the email service just now. Use Print or Save as PDF.';
     }
@@ -890,13 +1044,24 @@
       case 'str': gated(() => { S.str[i] = Number(v); }); return;
       case 'pain': gated(() => { const cur = S.pains.slice(), ix = cur.indexOf(v); if (ix >= 0) cur.splice(ix, 1); else { cur.push(v); if (cur.length > 2) cur.shift(); } S.pains = cur; }); return;
       case 'want': gated(() => { S.want = S.want === v ? '' : v; }); return;
-      case 'grp': S.group = i; save(); render(); return;
+      case 'grp': S.group = i; save(); render(); sync(); return;
       case 'more': S.more[i] = !S.more[i]; save(); render(); return;
       case 'lean': S.lean = i; save(); render(); return;
       case 'stop': S.stop = i; save(); render(); return;
       case 'print': try { window.print(); } catch { /* no print dialog here */ } return;
       case 'email': sendEmail(); return;
       case 'regate': openGate(); render(); return;
+      case 'account': {
+        // Locked plans: make the free account, or sign in to the one there is.
+        if (signedIn()) return;
+        if (!identified()) { openGate('account'); render(); return; }
+        if (S.acct.email === S.profile.email && S.acct.state === 'existing') { askLink(S.profile.email, 'note'); return; }
+        createAccount('compass', false);
+        return;
+      }
+      case 'note-x': UI.note = ''; render(); return;
+      case 'signin-gate': { const el = $('#g-email'); askLink(el ? el.value.trim() : '', 'gate'); return; }
+      case 'signin-ws': { const el = $('#ws-signin'); askLink(el ? el.value.trim() : '', 'ws'); return; }
       case 'gate-skip': UI.after = null; S.skipped = true; save(); closeGate(); return;
       case 'theme': S.theme = v; save(); render(); return;
       case 'ws-save': {
@@ -911,7 +1076,17 @@
   });
   document.addEventListener('change', (e) => {
     const t = e.target;
-    if (t.dataset.act === 'got') { S.got[Number(t.dataset.i)] = t.checked; save(); render(); return; }
+    if (t.dataset.act === 'got') { S.got[Number(t.dataset.i)] = t.checked; save(); render(); sync(); return; }
+    if (t.dataset.tick && signedIn() && UI.plans) {
+      const id = t.dataset.tick, on = t.checked, was = UI.plans.done[id];
+      if (on) UI.plans.done[id] = new Date().toISOString(); else delete UI.plans.done[id];
+      UI.plans.count = Object.keys(UI.plans.done).length; render();
+      A.tick(id, on).then((r) => { if (r && Number.isInteger(r.count)) { UI.plans.count = r.count; render(); } })
+        .catch(() => { if (was) UI.plans.done[id] = was; else delete UI.plans.done[id]; UI.plans.count = Object.keys(UI.plans.done).length; render(); toast('That tick did not save. Try again.'); });
+      return;
+    }
+    // A lever let go of: send the move with the next quiet moment, not per step.
+    if (t.dataset.lever) { clearTimeout(leverTimer); leverTimer = setTimeout(sync, 4000); return; }
     if (t.dataset.num) { const k = t.dataset.num, cur = S.nums[k] || { pick: '', own: '' }; S.nums[k] = { pick: t.value, own: cur.own }; save(); render(); if (t.value === 'own') { const o = document.querySelector(`[data-own="${k}"]`); if (o) o.focus(); } return; }
     // Wait for focus to settle on the next field, then redraw and keep it there.
     if (t.dataset.own || t.dataset.lab) setTimeout(render, 0);
@@ -935,12 +1110,18 @@
     Object.assign(S.profile, { first: first.slice(0, 60), last: val('g-last').slice(0, 60), industry: val('g-industry') || S.profile.industry,
       email: email.slice(0, 120), consent: true });
     save(); closeGate();
-    if (UI.after === 'email') { UI.after = null; sendEmail(); }
+    const after = UI.after; UI.after = null;
+    // The account follows the box. The answers already here go into it.
+    createAccount('compass', after === 'email').then(() => { if (after === 'email') sendEmail(); });
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.gate) { S.skipped = true; save(); closeGate(); } });
 
   render();
   setTimeout(() => $('#cf').classList.add('settled'), 1500);
-  /* Email shows as available only once the site has its email key. */
-  try { if (location.protocol !== 'file:') fetch('/api/send-plan').then((r) => (r.ok ? r.json() : {})).then((j) => { UI.mailReady = !!j.ready; }).catch(() => {}); } catch { /* offline */ }
+  /* Email works only once the site has its email key and postal address. */
+  try { if (location.protocol !== 'file:') fetch('/api/send-plan').then((r) => (r.ok ? r.json() : {})).then((j) => { UI.mailReady = !!j.ready; UI.mailWhy = j.reason || ''; }).catch(() => {}); } catch { /* offline */ }
+  /* The last batch goes as the page is hidden or closed. */
+  document.addEventListener('visibilitychange', () => { if (document.hidden) sync(true); });
+  window.addEventListener('pagehide', () => sync(true));
+  if (location.protocol !== 'file:') boot();
 })();

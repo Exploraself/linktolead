@@ -1,30 +1,23 @@
-// "Send it by email" on the Compass plan.
+// "Email me my results" on the Compass.
 //
-// Off until RESEND_API_KEY is reachable. Alexandru keeps it in the account's
-// Secrets Store; wrangler.toml binds it to this Worker (a binding is read with
-// .get()). A plain project secret of the same name also works.
-// It sends from the same verified address as exploraself.com's results emails,
-// unless MAIL_FROM is set. Until the key exists, GET says { ready:false } and
-// the Compass hides the button.
+// Off until the mail is ready: the Resend key AND the postal address for the
+// footer (see functions/_mail.js). GET says { ready, reason } and the Compass
+// shows plainly when it cannot send.
 //
-// The plan is sent once, to the address typed, and nothing else happens: no
-// list, no tag, no stored copy. Everything visitor-written is escaped and
-// capped, and each address and connection is rate-limited.
+// The results go to the account. A signed-in founder sends with their token
+// and the email goes to the account address, without asking. Otherwise the
+// address typed must belong to an account (the Compass creates the free
+// account first), and it goes to that address. Results are something the
+// founder asked for in the moment, so they arrive even after an unsubscribe.
+// Everything visitor-written is escaped and capped, and each address and
+// connection is rate-limited.
 
-import { json, bad, db, clean, looksLikeEmail } from '../_shared.js';
+import { json, bad, db, clean, looksLikeEmail, accountTables, studentBy } from '../_shared.js';
+import { mailState, allowed, logged, send, esc as e, origin } from '../_mail.js';
+import { profile, unsubLink } from '../_account.js';
 
-const ready = (env) => !!(env && env.RESEND_API_KEY);
-/** The key, whether it arrives as a Secrets Store binding or a plain secret. */
-async function key(env) {
-  const k = env.RESEND_API_KEY;
-  if (typeof k === 'string') return k;
-  try { return k && typeof k.get === 'function' ? await k.get() : ''; } catch { return ''; }
-}
-const FROM = 'Alexandru at ExploraSelf <support@exploraself.com>';
+export const onRequestGet = ({ env }) => json(mailState(env));
 
-export const onRequestGet = ({ env }) => json({ ready: ready(env) });
-
-const e = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const list = (v, n, max) => (Array.isArray(v) ? v.slice(0, n).map((x) => clean(x, max)).filter(Boolean) : []);
 
 /** Rebuild a small, known shape from whatever arrived. Unknown keys are dropped. */
@@ -69,7 +62,7 @@ function render(p) {
       <p style="margin:8px 0 14px;font:14px/1.6 Arial;color:#D3C4A5">Link to Lead walks the same four domains, level by level, for your stage. It starts with The Founder Launchpad: levels 01 to 03, free.</p>
       <a href="https://linktolead.exploraself.com/start" style="display:inline-block;background:#C9A24A;color:#14100B;font:700 15px Arial;padding:12px 20px;text-decoration:none">Enter the Founder Launchpad →</a>
     </div>
-    <p style="margin:22px 0 0;font:12px/1.6 Arial;color:${muted}">You asked for this plan at linktolead.exploraself.com/compass. It was sent once, to this address. Planning aid only: not financial, tax or legal advice.</p>
+    <p style="margin:22px 0 0;font:12px/1.6 Arial;color:${muted}">Planning aid only: not financial, tax or legal advice.</p>
   </div></body></html>`;
 }
 
@@ -83,33 +76,35 @@ function text(p) {
 }
 
 export async function onRequestPost({ request, env }) {
-  if (!ready(env)) return bad('Email is not switched on yet. Use Print · save PDF for now.', 503);
+  const st = mailState(env);
+  if (!st.ready) return bad('Email is not switched on yet. Use Print or Save as PDF for now.', 503);
   let body;
   try { body = await request.json(); } catch { return bad('Could not read that.'); }
-  const email = clean(body.email, 200).toLowerCase();
-  if (!looksLikeEmail(email)) return bad('That address does not look complete.');
 
-  // Rate limit: 3 per address and 10 per connection, per hour. Needs the database;
-  // without it, sending still works but unthrottled is not acceptable, so refuse.
+  // The rate limit needs the database; unthrottled is not acceptable, so refuse.
   const D = db(env);
   if (!D) return bad('Email is not available right now.', 503);
+  await accountTables(D);
+
+  let me = body.token ? await studentBy(D, body.token) : null;
+  if (!me) {
+    const typed = clean(body.email, 200).toLowerCase();
+    if (!looksLikeEmail(typed)) return bad('That address does not look complete.');
+    me = await D.prepare('SELECT id,email,name FROM student WHERE email = ?').bind(typed).first();
+    if (!me) return bad('Create your free account first, then we can send your results.', 404);
+  }
+  const email = me.email;
+
   const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-  const hourAgo = Date.now() - 3600_000;
-  await D.prepare('CREATE TABLE IF NOT EXISTS mail_log (email TEXT, ip TEXT, at INTEGER)').run();
-  const seen = await D.prepare('SELECT SUM(email = ?) AS e, SUM(ip = ?) AS i FROM mail_log WHERE at > ?').bind(email, ip, hourAgo).first();
-  if ((seen?.e || 0) >= 3 || (seen?.i || 0) >= 10) return bad('That is a few already. Try again in an hour.', 429);
+  if (!(await allowed(D, email, ip))) return bad('That is a few already. Try again in an hour.', 429);
 
   const plan = shape(body.plan);
-  const apiKey = await key(env);
-  if (!apiKey) return bad('Email is not available right now.', 503);
-  const r = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
-    body: JSON.stringify({ from: env.MAIL_FROM || FROM, to: [email], subject: 'Your Leadership Compass plan', html: render(plan), text: text(plan) }),
-  }).catch(() => null);
-  if (!r || !r.ok) return bad('It did not send. Try again in a minute.', 502);
+  const p = await profile(D, me.id);
+  const base = origin(request);
+  const r = await send(env, { to: email, subject: 'Your Leadership Compass plan', html: render(plan), text: text(plan),
+    why: 'You asked for your results at linktolead.exploraself.com/compass. They were sent once, to this address.', unsubUrl: unsubLink(base, p) });
+  if (!r.ok) return bad('It did not send. Try again in a minute.', 502);
 
-  await D.prepare('INSERT INTO mail_log (email, ip, at) VALUES (?,?,?)').bind(email, ip, Date.now()).run();
-  await D.prepare('DELETE FROM mail_log WHERE at < ?').bind(Date.now() - 86400_000).run();
-  return json({ ok: true });
+  await logged(D, email, ip);
+  return json({ ok: true, to: email });
 }

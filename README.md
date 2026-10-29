@@ -5,7 +5,8 @@ Link to Lead — the twelve-week founder programme. Lives at
 
 ## What it is
 
-Four domains — Self, People, Work, Market. Twelve levels. Seven clarity points
+Four domains — Lead yourself, Lead your people, Lead your business, Lead the
+market. Twelve levels. Seven clarity points
 in each domain at each level, so twenty-eight answers close a level and
 eighty-four close the programme in one domain.
 

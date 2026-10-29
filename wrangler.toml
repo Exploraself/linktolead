@@ -5,6 +5,10 @@
 name = "linktolead"
 compatibility_date = "2026-10-26"
 main = "worker.js"
+# Variables set in the dashboard (MAIL_POSTAL_ADDRESS, MENTOR_KEY, MAIL_FROM)
+# survive each `wrangler deploy`. Without this, a deploy from this file, which
+# declares no [vars], removes them.
+keep_vars = true
 
 [assets]
 directory = "./public"
@@ -22,7 +26,7 @@ binding = "DB"
 database_name = "exploraself-blueprint"
 database_id = "615c8759-d290-4ff2-86a9-3f977d80f2b5"
 
-# The Resend key for the Compass "Send it by email" (functions/api/send-plan.js).
+# The Resend key for every email the site sends (functions/_mail.js).
 # It lives in the account's Secrets Store, not in this file; this only binds it.
 [[secrets_store_secrets]]
 binding = "RESEND_API_KEY"

@@ -4,8 +4,8 @@
 // level (four domains, seven steps each). A locked level opens its gate
 // instead of nothing, and the gate says plainly what opens it.
 //
-// Answers live on the device while this is in preview. Nothing is sent
-// anywhere and nothing is asserted about a payment or a subscription.
+// Answers save to the device first, and to the account when the founder has
+// one. Nothing is asserted about a payment or a subscription.
 
 import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, DIAGNOSTIC, SECTIONS, JOURNEY,
   gateFor, levelFor, isWritten, weekTitle, videoFor, nextGain, holds, referee,
@@ -158,7 +158,7 @@ function reading() {
 // ── Screen one: the ten questions, alone ────────────────────────────────────
 function quizView() {
   const done = Object.keys(state.diag).length, need = DIAGNOSTIC.length;
-  return `<section class="band qband"><div class="wrap narrow">
+  return `${acctPlans ? `<div class="gp">${plansCard()}</div>` : ''}<section class="band qband"><div class="wrap narrow">
     <a class="backlink" href="/">← Back</a>
     <p class="eyebrow">${compass} The entrance</p>
     <h1 class="qh">Let’s find where you actually stand</h1>
@@ -254,6 +254,7 @@ function readView() {
   ].join('');
 
   return `<div class="gp">
+  ${plansCard()}
   <section class="gp-wrap gp-top">
     <p class="eyebrow">${compass} Your Ground Plan</p>
     <h1 class="gp-title">${esc(first ? `${first}, here is your Ground Plan.` : 'Here is your Ground Plan.')}</h1>
@@ -468,7 +469,7 @@ function domFoot(st, full, gain) {
       <button class="ghost" type="button" data-dom="${next.k}">Next: ${next.n} →</button></div>`;
   }
   return `<div class="donext"><p>${28 - levelDone(st, level)} answers left in this level. It closes when all twenty-eight are written.</p>
-    <button class="ghost" type="button" data-dom="self">Back to Self</button></div>`;
+    <button class="ghost" type="button" data-dom="self">Back to Lead yourself</button></div>`;
 }
 
 /** What the Blueprint says back. Levels one to three only — after that the
@@ -565,6 +566,58 @@ function libBanner() {
     <button type="button" class="cta" data-go="library">Open my library →</button>
     <button type="button" class="x" data-banner="close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
   </div>`;
+}
+
+// ── Your account plans ──────────────────────────────────────────────────────
+// From the Compass, in this founder's order (GET /api/plans). One step per
+// domain this week: the first one not yet done. Each opens to its full text
+// and can be ticked. The count is the plans' own; it is not the Compass
+// launchpad.
+let acctPlans = null;
+const BANDS = { now: 'Needs you now', shape: 'Taking shape', strength: 'A strength' };
+/** Which steps are open, so a redraw after a tick leaves them open. */
+const openSteps = new Set();
+if (typeof document !== 'undefined') document.addEventListener('toggle', (e) => { const d = e.target; if (d.dataset && d.dataset.step) { if (d.open) openSteps.add(d.dataset.step); else openSteps.delete(d.dataset.step); } }, true);
+function planStep(st, band) {
+  const done = !!acctPlans.done[st.id];
+  const row = (k, v) => (v ? `<p><b>${k}</b> ${esc(v)}</p>` : '');
+  return `<details class="pl-step${done ? ' done' : ''}" data-step="${esc(st.id)}"${openSteps.has(st.id) ? ' open' : ''}>
+    <summary><span class="pl-dk" style="background:var(--${esc(st.domain)})"></span><span class="pl-t">${esc(st.title)}</span><span class="pl-open">Open</span></summary>
+    <div class="pl-body">
+      ${row('Why it matters:', st.why)}${row('What to do:', st.what)}${row('About:', st.about)}${row('Done looks like:', st.done)}
+      ${st.ask ? `<p class="pl-ask">“${esc(st.ask)}”</p>` : ''}
+      ${st.note ? `<p class="pl-note"><b>${esc(BANDS[band] || '')}${st.noteFor ? ` (${esc(st.noteFor)})` : ''}:</b> ${esc(st.note)}</p>` : ''}
+      <label class="pl-tick"><input type="checkbox" data-plantick="${esc(st.id)}"${done ? ' checked' : ''}> Done</label>
+    </div></details>`;
+}
+function plansCard() {
+  const P = acctPlans;
+  if (!P || !P.ok) return '';
+  const first = P.domains[0];
+  const rows = P.domains.map((d) => {
+    const next = d.steps.find((x) => !P.done[x.id]);
+    return `<div class="pl-dom">
+      <p class="pl-dn" style="color:var(--${esc(d.id)})">${esc(d.name)}${d.bandName ? ` · <span>${esc(d.bandName)}</span>` : ''}</p>
+      ${d.said.length ? `<p class="pl-said">You said: ${esc(d.said.join(' · '))}</p>` : ''}
+      ${d.goal ? `<p class="pl-goal">⚑ ${esc(d.goal)}</p>` : ''}
+      ${next ? planStep(next, d.band) : '<p class="pl-all">All four steps done in this domain.</p>'}
+    </div>`;
+  }).join('');
+  const w = P.whatif, wNext = w && w.steps.find((x) => !P.done[x.id]);
+  return `<section class="gp-wrap pl" id="plans" aria-labelledby="pl-h">
+    <p class="eyebrow">Your account plans · ${P.count} of ${P.total} steps done</p>
+    <h2 class="gp-h" id="pl-h">${P.compass ? `${esc(first.name)} opens first` : 'Your four domains, one step each week'}</h2>
+    <p class="gp-lede">${P.compass ? 'Your lowest domain from the Compass leads. One step per domain this week.' : 'Take the Compass and your lowest domain moves to the front. One step per domain each week.'}
+      ${P.compass ? '' : ' <a href="/compass">Open the Compass →</a>'}</p>
+    <div class="pl-grid">${rows}</div>
+    ${w ? `<div class="pl-dom pl-whatif"><p class="pl-dn">Your plan for this change · ${esc(w.name)}</p>${wNext ? planStep(wNext, null) : '<p class="pl-all">All four steps done.</p>'}</div>` : ''}
+    <p class="savenote">Times are about, not promises.</p>
+  </section>`;
+}
+async function loadPlans() {
+  if (!account.joined()) return;
+  const p = await account.plans();
+  if (p && p.ok) { acctPlans = p; if (view === 'read' || view === 'quiz') render(); }
 }
 
 function emphasisName(st, lv) {
@@ -674,6 +727,16 @@ document.addEventListener('submit', async (e) => {
   }
 });
 
+document.addEventListener('change', (e) => {
+  const t = e.target.closest('input[data-plantick]');
+  if (!t || !acctPlans) return;
+  const id = t.dataset.plantick, on = t.checked, was = acctPlans.done[id];
+  if (on) acctPlans.done[id] = new Date().toISOString(); else delete acctPlans.done[id];
+  acctPlans.count = Object.keys(acctPlans.done).length;
+  account.tick(id, on).then((r) => { if (r && Number.isInteger(r.count)) acctPlans.count = r.count; render(); })
+    .catch(() => { if (was) acctPlans.done[id] = was; else delete acctPlans.done[id]; acctPlans.count = Object.keys(acctPlans.done).length; render(); });
+});
+
 document.addEventListener('input', (e) => {
   const w = e.target.closest('input[data-w]');
   if (w) {
@@ -714,6 +777,8 @@ document.addEventListener('input', (e) => {
 });
 
 render();
+
+loadPlans();
 
 // If this founder has an account, their work follows them here. The device
 // copy wins on conflict — it is the one they were just typing into.

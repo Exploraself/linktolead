@@ -3,8 +3,10 @@
  *
  * Every number shown is arithmetic on what the visitor slid; nothing is a
  * benchmark. The name, email and stage are kept in this browser and picked up
- * by the Compass (same site), so they are never asked twice. Nothing is sent
- * from this page. */
+ * by the Compass (same site), so they are never asked twice. "Open my Compass"
+ * also makes the free account (/api/signup, through /account.js, the same
+ * token the Compass uses). If that cannot be reached, the Compass makes it
+ * when it opens. Nothing else is sent from this page. */
 'use strict';
 (function () {
   const $ = (s) => document.querySelector(s);
@@ -152,6 +154,10 @@
     const p = { first, last, email, consent: true, stage: stage === null ? '' : STAGES[stage].id };
     try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* private mode: the Compass will simply ask again */ }
     showJoined(p);
+    // The free account, quietly. An address that already has one is left for
+    // the Compass, which offers a sign-in link there.
+    import('/account.js').then((A) => (A.joined() ? null : A.signup({ first, last, email, consent: true, source: 'sales-page', stage: p.stage })))
+      .catch(() => { /* the Compass tries again when it opens */ });
   });
 
   dream(); plan(); finder();

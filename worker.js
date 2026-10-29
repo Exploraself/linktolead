@@ -17,6 +17,11 @@ import * as compass from './functions/api/compass.js';
 import * as note from './functions/api/note.js';
 import * as mentor from './functions/api/mentor.js';
 import * as sendPlan from './functions/api/send-plan.js';
+import * as signup from './functions/api/signup.js';
+import * as signin from './functions/api/signin.js';
+import * as unsubscribe from './functions/api/unsubscribe.js';
+import * as plans from './functions/api/plans.js';
+import * as planTick from './functions/api/plans/tick.js';
 
 /** One line per route. A new file in functions/api/ needs its line here. */
 export const ROUTES = {
@@ -26,6 +31,11 @@ export const ROUTES = {
   '/api/note': note,
   '/api/mentor': mentor,
   '/api/send-plan': sendPlan,
+  '/api/signup': signup,
+  '/api/signin': signin,
+  '/api/unsubscribe': unsubscribe,
+  '/api/plans': plans,
+  '/api/plans/tick': planTick,
 };
 
 export default {
