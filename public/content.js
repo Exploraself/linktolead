@@ -59,17 +59,18 @@ export const WEEKS = {
 export const LADDER = [
   { from: 1, to: 3, key: 'free', n: 'Free, and free to stay', price: 'Free',
     what: 'All four domains at levels one to three. No payment, now or later — an account, so your Ground Plan and your answers are kept and follow you.' },
-  { from: 4, to: 5, key: 'session', n: 'One session with Alexandru', price: 'Book a 1:1',
+  { from: 4, to: 5, key: 'session', n: 'The Boardroom — one session with Alexandru', price: 'Book a 1:1',
     what: 'Alexandru and the team read your first three levels before you speak. You leave knowing which of the four domains is costing you most, why it is that one, and with levels four and five opened and walked through. These two are not handed over cold.' },
   { from: 6, to: 9, key: 'lab', n: 'Personal Leadership LAB', price: '$97',
-    what: 'Nine levels, self-paced, in your own time. The library comes with it: the 32 frameworks, the 99 tools, the books and the workbook for your stage.',
+    what: 'Nine levels, self-paced, in your own time, and two sessions with Alexandru. The library comes with it: the 32 frameworks, the 99 tools, the books and the workbook for your stage.',
     url: 'https://exploraself.com/lab' },
-  { from: 10, to: 12, key: 'hub', n: 'Business Growth HUB', price: '$399',
-    what: 'The full Blueprint, unlocked immediately. Three sessions with Alexandru, the LAB included, and every resource.',
+  { from: 10, to: 12, key: 'hub', n: 'Business Growth HUB', price: '$397',
+    what: 'The full Blueprint, unlocked immediately. Three sessions with Alexandru in total, including one from the LAB, the LAB included, and every resource.',
     url: 'https://exploraself.com/hub' },
-  { from: 0, to: 0, key: 'premium', n: 'Premium — the whole thing, with Alexandru and the team', price: '$1,989',
+  // The internal key stays 'premium'; founders see The Summit.
+  { from: 0, to: 0, key: 'premium', n: 'The Summit — the whole thing, with Alexandru every week', price: '$1,989',
     what: 'All twelve levels, the LAB, the HUB, every resource — and Alexandru mentoring you every week, not three times.',
-    url: 'https://exploraself.com/hub' },
+    url: '/compass/summit' },
 ];
 
 export function gateFor(level) {
@@ -151,13 +152,13 @@ export const DIAGNOSTIC = [
 // and see exactly where it stops being free. Nothing is hidden, which is why
 // nothing has to be sold twice.
 export const SECTIONS = [
-  { k: 'free', n: 'The Incubator', sub: 'Where everything begins', from: 1, to: 3,
+  { k: 'free', n: 'The Founder Launchpad', sub: 'Where every founder begins', from: 1, to: 3,
     note: 'Three levels, all four domains, free and free to stay.' },
-  { k: 'session', n: 'With Alexandru', sub: 'Two levels, walked through', from: 4, to: 5,
+  { k: 'session', n: 'The Boardroom', sub: 'You and Alexandru · two levels', from: 4, to: 5,
     note: 'Alexandru and the team read your first three before you speak. You leave knowing which domain is costing you most.' },
-  { k: 'lab', n: 'The LAB', sub: 'Personal Leadership LAB', from: 6, to: 9,
+  { k: 'lab', n: 'Personal Leadership LAB', sub: 'Two sessions with Alexandru', from: 6, to: 9,
     note: 'Four more levels in your own time, with the whole library behind them.' },
-  { k: 'hub', n: 'The HUB', sub: 'Business Growth HUB', from: 10, to: 12,
+  { k: 'hub', n: 'Business HUB', sub: 'Three sessions in total', from: 10, to: 12,
     note: 'The last three, and the full Blueprint open from the day you start.' },
 ];
 
@@ -181,8 +182,10 @@ export function nextGain(stage, n) {
 
 // ── Tiers ────────────────────────────────────────────────────────────────────
 /** Which tiers a person holds, from the one they bought. Buying the HUB opens
- *  everything below it, because the ladder is access and not content. */
-export const TIER_ORDER = ['free', 'session', 'lab', 'hub'];
+ *  everything below it, because the ladder is access and not content. The
+ *  Summit (key 'premium') holds everything; without it here, a founder set to
+ *  premium in /mentor was locked out of every level, even the free ones. */
+export const TIER_ORDER = ['free', 'session', 'lab', 'hub', 'premium'];
 export function holds(tier, needed) {
   const have = TIER_ORDER.indexOf(tier || 'free');
   const want = TIER_ORDER.indexOf(needed);
@@ -266,7 +269,7 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 export const JOURNEY = [
   { n: 'You are here', t: 'Ten questions',
     d: 'Two minutes. It works out which of the four domains is thinnest and which stage you are actually in. Your Ground Plan opens once you say where to keep it.' },
-  { n: 'Next', t: 'The Incubator — levels 01 to 03',
+  { n: 'Next', t: 'The Founder Launchpad — levels 01 to 03',
     d: 'Free, and free to stay. All four domains, twelve modules, every worksheet. You come out with an offer, a customer, a standard and a week you can see.' },
   { n: 'Then', t: 'Your reading',
     d: 'When level 03 closes, the Blueprint reads back what you actually wrote and tells you where you stand, what it is costing you, and what to do first.' },

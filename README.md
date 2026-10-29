@@ -18,11 +18,11 @@ spreads across all four.
 
 | Levels | Opens with |
 | --- | --- |
-| 1–3 | Free. No payment, no email to look. |
-| 4–5 | One session with Alexandru. |
-| 1–9 | Personal Leadership LAB, self-paced. |
-| All 12 | Business Growth HUB, with three sessions and the LAB included. |
-| Everything | Premium, with weekly mentoring. |
+| 1–3 | The Founder Launchpad. Free. |
+| 4–5 | The Boardroom: one session with Alexandru, and the full Compass. |
+| 1–9 | Personal Leadership LAB, self-paced, two sessions. $97. |
+| All 12 | Business HUB, three sessions in total and the LAB included. $397. |
+| Everything | The Summit, with Alexandru every week. $1,989. (Internal tier key: `premium`.) |
 
 All twelve are built regardless of what anyone pays. The ladder decides what
 opens, never what exists.

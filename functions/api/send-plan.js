@@ -66,8 +66,8 @@ function render(p) {
     ${strat ? h('Your strategy') + strat : ''}
     <div style="margin-top:30px;padding:22px;background:#14100B;color:#F7F2E7">
       <p style="margin:0;font:600 20px/1.3 Georgia,serif;color:#E3C47E">Now walk it.</p>
-      <p style="margin:8px 0 14px;font:14px/1.6 Arial;color:#D3C4A5">Link to Lead is the Founder’s Blueprint incubator: twelve levels across the same four domains, built for your stage. Free to start.</p>
-      <a href="https://linktolead.exploraself.com/start" style="display:inline-block;background:#C9A24A;color:#14100B;font:700 15px Arial;padding:12px 20px;text-decoration:none">Start Link to Lead →</a>
+      <p style="margin:8px 0 14px;font:14px/1.6 Arial;color:#D3C4A5">Link to Lead walks the same four domains, level by level, for your stage. It starts with The Founder Launchpad: levels 01 to 03, free.</p>
+      <a href="https://linktolead.exploraself.com/start" style="display:inline-block;background:#C9A24A;color:#14100B;font:700 15px Arial;padding:12px 20px;text-decoration:none">Enter the Founder Launchpad →</a>
     </div>
     <p style="margin:22px 0 0;font:12px/1.6 Arial;color:${muted}">You asked for this plan at linktolead.exploraself.com/compass. It was sent once, to this address. Planning aid only: not financial, tax or legal advice.</p>
   </div></body></html>`;
@@ -78,7 +78,7 @@ function text(p) {
   for (const d of p.domains) out.push('', `${d.know} (${d.lead}): ${d.label}`, ...d.strengthen.map((q) => '  To strengthen: ' + q), ...d.steps.map((s, i) => `  ${i + 1}. ${s}`), d.level ? '  In Link to Lead: ' + d.level : '');
   if (p.numbers.length) out.push('', 'YOUR NUMBERS', ...p.numbers.map(([k, v]) => `${k}: ${v}`));
   if (p.next.length) out.push('', 'THREE PRACTICAL NEXT STEPS', ...p.next.map((a, i) => `${i + 1}. ${a.title} — ${a.text}`));
-  out.push('', 'NOW WALK IT: Link to Lead, free to start — https://linktolead.exploraself.com/start');
+  out.push('', 'NOW WALK IT: The Founder Launchpad, levels 01 to 03 of Link to Lead, free — https://linktolead.exploraself.com/start');
   return out.join('\n');
 }
 

@@ -543,3 +543,47 @@ body.inwork .foot{display:none}
 .bk3-man .bk3-cover small{display:none}
 .bk3-build .bk3-cover{background:linear-gradient(160deg,#6E3C21,#3A1E10)}.bk3-grow .bk3-cover{background:linear-gradient(160deg,#2F4D38,#16261B)}.bk3-scale .bk3-cover{background:linear-gradient(160deg,#23455C,#0F2230)}
 .bk3-blank{align-items:center;justify-content:center;text-align:center;background:#EFE6D3;border:1.5px dashed #C8B993;font:700 9.5px/1.3 var(--body);letter-spacing:1.2px;text-transform:uppercase;color:var(--gold-ink)}
+
+/* ── The dark rail (student dashboard, 29 Oct) ───────────────────────────────
+   Library icons at the top, the four steps of the ladder with their tags, the
+   1:1 booking under The Boardroom, and The Summit at the foot. */
+.rail{background:#1C1309;color:#F7F2E7;border-right:0;padding:22px 16px 26px;border-radius:0 0 8px 8px}
+@media(min-width:1000px){.rail{border-radius:8px}}
+.rail .eyebrow{color:#D3C4A5}
+.railtop{border-bottom:1px solid #3A2F20;padding:0 4px 16px}
+.railtop h2{color:#F7F2E7}
+.rail .railsub,.rail .rss,.rail .rnote,.rail .rtxt em,.rail .rmark{color:#D3C4A5}
+.rsec{border-bottom:1px solid #3A2F20;padding:14px 4px}
+.rsn{color:#F7F2E7}
+.rtag{color:#D3C4A5;border:0;background:rgba(247,242,231,.1);border-radius:10px;padding:4px 8px}
+.rtag.open{color:#14100B;background:var(--gold)}
+.rlev{border-radius:6px;border-left:0;color:#D3C4A5;padding:8px 8px 8px 6px}
+.rlev:hover{background:rgba(255,255,255,.06);color:#F7F2E7}
+.rlev .rtxt b{color:#F7F2E7}
+.rlev.waiting .rtxt b,.rlev.locked .rtxt b{color:#D3C4A5}
+.rlev.locked{opacity:.6}
+.rlev.locked .rnum{color:#8A7A5E}
+.rlev.done .rnum,.rmark.done{color:#9BC0A1}
+.rlev.here{background:rgba(201,162,74,.16);box-shadow:inset 0 0 0 1px rgba(201,162,74,.4)}
+.rlib{padding:16px 4px 6px}
+.rlib .eyebrow{color:#E3C47E}
+.rlibrow{display:flex;gap:6px;margin-top:8px}
+.libi{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:6px;border:1px solid #3A2F20;background:rgba(247,242,231,.04);color:#F7F2E7;font:10px/1.3 var(--body);text-align:center;transition:border-color .2s ease,transform .2s ease}
+.libi:hover{border-color:var(--gold);transform:translateY(-2px)}
+.libi.soon{opacity:.7}
+.rbook{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px 4px 0;min-height:44px;padding:0 12px;border-radius:5px;background:var(--gold);color:#14100B;font:600 13px/1.2 var(--body);text-align:center;animation:rbookPulse 2.4s ease-out infinite}
+@keyframes rbookPulse{0%,100%{box-shadow:0 0 0 0 rgba(201,162,74,.6)}60%{box-shadow:0 0 0 9px rgba(201,162,74,0)}}
+.rsummit{display:block;margin:18px 4px 0;border:1px solid rgba(201,162,74,.45);border-radius:8px;padding:14px;color:#F7F2E7}
+.rsummit:hover{border-color:var(--gold)}
+.rsummit small{display:block;font:600 9px/1.4 var(--body);letter-spacing:2px;color:#E3C47E}
+.rsummit b{display:block;font:500 20px/1.2 var(--display);color:#E3C47E;margin-top:3px}
+.rsummit span{display:block;font-size:12px;color:#D3C4A5;margin-top:3px}
+.tnav a.tbook{border-radius:999px;padding:8px 15px;font-size:11.5px;font-weight:600;background:var(--gold);color:var(--ink);display:inline-flex;align-items:center;gap:6px}
+.libban{display:flex;flex-wrap:wrap;align-items:center;gap:14px 16px;background:#1C1309;color:#F7F2E7;border:1px solid rgba(201,162,74,.5);border-radius:10px;padding:16px 18px;margin-bottom:22px;animation:libbanIn .7s cubic-bezier(.2,.7,.2,1) both}
+@keyframes libbanIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+.libban div{flex:1 1 260px;min-width:0}
+.libban b{display:block;font:500 20px/1.25 var(--display)}
+.libban p{font-size:13px;color:#D3C4A5;margin-top:3px;line-height:1.55}
+.libban .cta{margin-top:0}
+.libban .x{width:40px;height:40px;border-radius:50%;border:1px solid #594A32;color:#F7F2E7;display:inline-flex;align-items:center;justify-content:center}
+@media(prefers-reduced-motion:reduce){.rbook,.libban{animation:none}.libi{transition:none}}

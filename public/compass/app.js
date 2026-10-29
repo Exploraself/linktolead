@@ -1,168 +1,946 @@
-/* ExploraSelf Leadership Compass. Local-first: no visitor data is transmitted. */
+/* ExploraSelf Leadership Compass · v18. One continuous page; the menu scrolls
+ * to each section.
+ *
+ * While the Compass is in preview, everything a founder enters stays in this
+ * browser (localStorage, guarded). The only thing that leaves it is "Email me
+ * my results", which sends the results once through /api/send-plan, and only
+ * when the founder asks. Older Compass entries (exploraself-compass-v1) are
+ * carried over on first load and left in place, never deleted.
+ *
+ * The page is drawn in parts. Each part is rebuilt from the state and only
+ * written to the page when its markup changes, so an answer does not redraw
+ * the sections around it. The logic lives in engine.js; the questions per
+ * stage in model.js. */
 'use strict';
-const C=Compass,KEY='exploraself-compass-v1',BEFORE_DEMO=KEY+'-before-demo';
-let state=C.blank(),page='overview',domain='self',saveTimer,toastTimer;
-try{const stored=localStorage.getItem(KEY);if(stored)state=C.sanitize(JSON.parse(stored));}catch(_){/* A restricted browser can still use the tool without persistence. */}
-const $=s=>document.querySelector(s),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const stage=()=>C.stages.find(s=>s.id===state.stage),money=n=>n===null||!Number.isFinite(n)?'—':(C.estimatedKeys(state).length?'≈ ':'')+new Intl.NumberFormat('en-US',{style:'currency',currency:state.profile.currency,maximumFractionDigits:0}).format(n),pct=n=>n===null||!Number.isFinite(n)?'—':(C.estimatedKeys(state).length?'≈ ':'')+(n*100).toFixed(1)+'%',decimal=(n,suffix='')=>n===null||!Number.isFinite(n)?'—':(C.estimatedKeys(state).length?'≈ ':'')+new Intl.NumberFormat('en-US',{maximumFractionDigits:1}).format(n)+suffix;
-function save(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(state));$('#save-status').textContent='○ Saved on this browser';}catch(_){$('#save-status').textContent='○ Session only · download a backup';}},180);}
-function toast(message){$('#toast').textContent=message;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),4000);}
-function download(name,body,type='text/plain'){const url=URL.createObjectURL(new Blob([body],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-const stageDrawing=id=>{const shapes={building:'<circle cx="30" cy="24" r="9"/><path d="M14 60v-8c0-12 32-12 32 0v8M55 25h22v29H55zM61 34h10M61 41h6"/>',growing:'<path d="M14 61h65M22 56V44h12v12M44 56V33h12v23M66 56V20h12v36M19 33l24-13 14 3 19-14M66 9h10v10"/>',scaling:'<circle cx="46" cy="21" r="8"/><circle cx="20" cy="32" r="6"/><circle cx="72" cy="32" r="6"/><path d="M31 58V46c0-12 30-12 30 0v12M8 59v-9c0-9 15-10 21-4M63 45c6-5 21-4 21 5v9M36 64h20"/>',leading:'<circle cx="46" cy="17" r="8"/><circle cx="18" cy="56" r="7"/><circle cx="46" cy="56" r="7"/><circle cx="74" cy="56" r="7"/><path d="M46 25v15M18 49v-9h56v9M46 40v9M36 17l6 5 13-14"/>'};return `<svg viewBox="0 0 92 76" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${shapes[id]}</svg>`;};
-/* Each stage has one colour; the chosen tile and its statement share it. */
-const TONE={building:'#6E3C21',growing:'#2F4D38',scaling:'#23455C',leading:'#6B5114'};
-/* The four steps, each with its "Know…" name. */
-const STEPS=[{id:'clarity',n:'01',t:'Get clear',k:'Know yourself'},{id:'numbers',n:'02',t:'Lead your people',k:'Know your people'},{id:'picture',n:'03',t:'Count what matters',k:'Know your numbers'},{id:'plan',n:'04',t:'Choose your next steps',k:'Know your market'}];
-const STEP_COPY={clarity:['Find where you are today, choose where you want to get, answer eight questions.','Where you stand, in your own words.'],numbers:['Enter one month: sales, costs, hours, cash, customers. A range is enough.','Your business on one page. No spreadsheet.'],picture:['Read what is left, where your time goes and how long cash lasts. Test a what-if.','The arithmetic, done. The decisions stay yours.'],plan:['Read feedback for all four domains. Pick your next steps.','A plan to print, save or email, and a way into Link to Lead.']};
-const STEP_ART={clarity:'<circle cx="24" cy="24" r="15"/><circle cx="24" cy="24" r="5"/><path d="M24 3v7M24 38v7M3 24h7M38 24h7"/>',numbers:'<path d="M7 41h34M12 35V25M20 35V17M28 35V21M36 35V10"/>',picture:'<path d="M7 41h18M11 35v-8M18 35V20"/><circle cx="31" cy="21" r="9"/><path d="m38 28 6 6"/>',plan:'<path d="M8 39c9-1 12-7 15-14s8-12 18-13"/><path d="M33 7l8 5-5 8"/><circle cx="8" cy="39" r="3"/>'};
-const stepArt=id=>`<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${STEP_ART[id]}</svg>`;
-/* Feedback headings use the "Know…" names; the questions keep "Lead…". */
-const KNOW={self:'Know yourself',people:'Know your people',work:'Know your numbers',market:'Know your market'};
-/* Three plain moves per domain and stage, drawn from the Founder's Blueprint levels. */
-const FEED={
- building:{self:['Count one week: write down where every hour actually went.','Write in one line why this business exists and what it must give your life.','Set your limit: the money and months you can risk before you change course.'],people:['Tell the people closest to you what this business will ask of them: time, money, evenings.','Ask one honest person: “What is wrong with my idea?” Then just listen.','Name the conversation you have been avoiding, and have it this week.'],work:['Write what you sell, what it costs you and how many hours it takes.','Price your hour: what is left after costs, divided by the hours you worked.','Know your monthly number: what you must sell to cover your costs.'],market:['Name one real client, by name, and the problem they pay to solve.','Ask five people about their problem before you pitch anything.','Make one small paid offer and count who says yes.']},
- growing:{self:['List what only you can do. Everything else can be handed over.','Drop one recurring task for two weeks and see what breaks.','Put your week on one page, with protected time for growth.'],people:['Write the unwritten deal: what you expect, and what they expect.','Say the hard thing early, while it is still small.','Agree what “finished” means before the next job starts.'],work:['Fix what breaks most often first.','Check costs, payments and hours once a week, on the same day.','Write down one process only you know, so someone else can run it.'],market:['Ask five customers why they bought. Find the phrase they repeat.','Track where your best customers came from. Spend there first.','Call one customer who left and ask what changed.']},
- scaling:{self:['Give away two decisions, with clear limits.','Ask yourself: who could do my job in twelve months?','Stop one thing that keeps you the bottleneck.'],people:['Agree who decides in five common situations.','Name the conversation your team avoids, and have it.','Grow one leader: give them a real decision and back it.'],work:['Give one system a new owner and a written standard.','Choose one number and read it every week.','Test growth small: count the set-up cost and a slower-sales case.'],market:['Find where the next demand comes from, not just more of the same.','Prove your edge: ask customers what you do better.','Reduce your dependence on one customer, one channel or one person.']},
- leading:{self:['Write what success is for: what the business must give beyond you.','Check one commitment: does it still serve what matters?','Plan real time away and see what holds.'],people:['Practise a handover: who takes over if you are away for a month?','Ask your leaders which decisions still wait for you.','Grow the next leader with one real responsibility.'],work:['Compare three uses of the same money or time. Choose one.','Protect against one risk that could stop the business.','Hand one system on, written down, and check that it holds.'],market:['Review one customer, team and wider-impact result.','Find where the business makes a real difference, and do more of it.','Say no to one opportunity that pulls you off course.']}
-};
-/* Mirrors LEVEL_NAMES and STAGES.emphasis in /content.js: the first level that works on each domain. */
-const BP={building:'build',growing:'grow',scaling:'scale',leading:'scale'};
-const BP_LEVEL={build:{self:[1,'Count your week'],people:[6,'The 3 talks you’re avoiding'],work:[9,'Out of your head'],market:[3,'Your client, by name']},grow:{self:[1,'Only you, on one list'],people:[2,'Hire on paper first'],work:[3,'Fix what breaks first'],market:[6,'Five customers, one phrase']},scale:{self:[1,'Two decisions given away'],people:[2,'Who could do your job'],work:[3,'A system with a new owner'],market:[4,'Find the next demand']}};
-let mailReady=false;
-function journey(){const current=stage();return `<div class="journey" aria-label="Choose your business stage">${C.stages.map((st,i)=>`<button data-stage="${st.id}" style="--tone:${TONE[st.id]}" class="${st.id===state.stage?'active':''}" aria-pressed="${st.id===state.stage}"><span class="step">0${i+1}${st.id===state.stage?'<span class="stage-dot"></span>':''}</span><span class="stage-icon">${stageDrawing(st.id)}</span><b>${st.name}</b><small>${st.role}</small></button>`).join('')}</div><section class="stage-explainer toned" style="--tone:${TONE[current.id]}" aria-label="${current.name} explained"><div class="stage-story"><p class="eyebrow">${current.name.toUpperCase()} · DOES THIS SOUND LIKE YOU?</p><h3>${current.daily}</h3><p>${current.line}</p><p class="stage-promise">Leave this stage with a dated record in each domain, a written decision, a scheduled action and a review date.</p></div><div class="stage-map"><ol>${current.map.map((text,i)=>`<li><span>${i+1}</span><b>${text}</b>${i<2?'<i aria-hidden="true">→</i>':''}</li>`).join('')}</ol><p>${current.next}</p></div></section>`;}
-function stagePick(){return `<div class="pick"><span class="pick-n">Step 1</span><div><h2>Where are you <em>today?</em></h2><p>Tap the stage that is true now, not the one that would look best on a business card.</p></div></div>`;}
-function answerPick(){return `<div class="pick"><span class="pick-n">Step 3</span><div><h2>Eight questions. <em>Two in each domain.</em></h2><p>Honest beats impressive. “Not yet” is a perfectly good answer.</p></div></div>`;}
-function fourSteps(){return `<ol class="four-steps">${STEPS.map((x,i)=>`<li><a href="#${x.id}"><span class="fs-top"><span class="fs-n">${x.n}</span><span class="fs-art">${stepArt(x.id)}</span></span><b>${x.t}</b>${x.k?`<em>${x.k}</em>`:'<em>&nbsp;</em>'}<span class="fs-do">${STEP_COPY[x.id][0]}</span><span class="fs-get">${STEP_COPY[x.id][1]}</span></a>${i<3?'<i class="fs-arrow" aria-hidden="true">→</i>':''}</li>`).join('')}</ol>`;}
-function levels(){const at=STEPS.findIndex(x=>x.id===page);return `<nav class="steps" aria-label="The four steps">${STEPS.map((x,i)=>`<a href="#${x.id}" class="${i===at?'active':i<at?'done':''}" ${i===at?'aria-current="step"':''}><span class="steps-n">${i<at?'✓':x.n}</span><span class="steps-t"><b>${x.t}</b>${x.k?`<small>${x.k}</small>`:''}</span></a>`).join('')}</nav>`;}
-function badge(text,kind=''){return `<span class="badge ${kind}">${esc(text)}</span>`;}
-function demoStrip(){return state.demo?'<div class="demo-strip"><span>ILLUSTRATIVE EXAMPLE · These imported entries were labelled as a fictional example. Replace them with your own records before using a result.</span><button class="text-button" data-exit-demo>Return to my workspace ×</button></div>':'';}
-function compassArt(){return `<div class="compass-art" aria-hidden="true"><svg viewBox="0 0 400 400" font-family="inherit"><defs><path id="cmp-ring" d="M200,200 m-178,0 a178,178 0 1,1 356,0 a178,178 0 1,1 -356,0"/></defs><circle cx="200" cy="200" r="196" fill="none" stroke="#C9A24A" stroke-width="6" stroke-dasharray="1 9.26" opacity=".55"/><g><text font-weight="700" font-size="10.5" letter-spacing="2.6" fill="#C9A24A"><textPath href="#cmp-ring">PURPOSE · JUDGMENT · ENERGY · TRUST · BOUNDARIES · CONVERSATIONS · OFFER · COST · SYSTEMS · CUSTOMERS · DEMAND · IMPACT ·</textPath></text><animateTransform attributeName="transform" type="rotate" from="0 200 200" to="360 200 200" dur="70s" repeatCount="indefinite"/></g><g><circle cx="200" cy="200" r="162" fill="none" stroke="currentColor" opacity=".35" stroke-width="1" stroke-dasharray="14 6 2 6"/><animateTransform attributeName="transform" type="rotate" from="360 200 200" to="0 200 200" dur="45s" repeatCount="indefinite"/></g><g><circle cx="200" cy="38" r="4" fill="#C9A24A"/><animateTransform attributeName="transform" type="rotate" from="0 200 200" to="360 200 200" dur="14s" repeatCount="indefinite"/></g><path d="M200 200 L200 52 A148 148 0 0 1 348 200 Z" fill="#C9A24A" opacity=".15"><animate attributeName="opacity" values=".15;.9;.15" dur="4s" begin="0s" repeatCount="indefinite"/></path><path d="M200 200 L348 200 A148 148 0 0 1 200 348 Z" fill="#C9A24A" opacity=".15"><animate attributeName="opacity" values=".15;.9;.15" dur="4s" begin="1s" repeatCount="indefinite"/></path><path d="M200 200 L200 348 A148 148 0 0 1 52 200 Z" fill="#C9A24A" opacity=".15"><animate attributeName="opacity" values=".15;.9;.15" dur="4s" begin="2s" repeatCount="indefinite"/></path><path d="M200 200 L52 200 A148 148 0 0 1 200 52 Z" fill="#C9A24A" opacity=".15"><animate attributeName="opacity" values=".15;.9;.15" dur="4s" begin="3s" repeatCount="indefinite"/></path><circle cx="200" cy="200" r="148" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="200" cy="200" r="96" fill="none" stroke="currentColor" stroke-width=".6" opacity=".4"/><line x1="200" y1="52" x2="200" y2="348" stroke="currentColor" stroke-width=".8"/><line x1="52" y1="200" x2="348" y2="200" stroke="currentColor" stroke-width=".8"/><text x="262" y="122" fill="currentColor" font-weight="900" font-size="15" text-anchor="middle" letter-spacing="1.5">SELF</text><text x="262" y="137" fill="currentColor" opacity=".7" font-weight="500" font-size="8.5" text-anchor="middle" letter-spacing="1">LEAD YOURSELF</text><text x="262" y="285" fill="currentColor" font-weight="900" font-size="15" text-anchor="middle" letter-spacing="1.5">PEOPLE</text><text x="262" y="300" fill="currentColor" opacity=".7" font-weight="500" font-size="8.5" text-anchor="middle" letter-spacing="1">LEAD YOUR PEOPLE</text><text x="138" y="285" fill="currentColor" font-weight="900" font-size="15" text-anchor="middle" letter-spacing="1.5">WORK</text><text x="138" y="300" fill="currentColor" opacity=".7" font-weight="500" font-size="8.5" text-anchor="middle" letter-spacing="1">LEAD YOUR BUSINESS</text><text x="138" y="122" fill="currentColor" font-weight="900" font-size="15" text-anchor="middle" letter-spacing="1.5">MARKET</text><text x="138" y="137" fill="currentColor" opacity=".7" font-weight="500" font-size="8.5" text-anchor="middle" letter-spacing="1">LEAD THE MARKET</text><g transform="rotate(-150 200 200)"><polygon points="200,64 210,200 200,212 190,200" fill="#C9A24A"/><polygon points="200,336 210,200 200,188 190,200" fill="currentColor" opacity=".45"/><animateTransform attributeName="transform" type="rotate" values="-150 200 200;55 200 200;10 200 200;30 200 200;22 200 200" keyTimes="0;.4;.6;.75;1" dur="3s" begin="0.3s" fill="freeze"/><animateTransform attributeName="transform" type="rotate" values="22 200 200;34 200 200;22 200 200" dur="7s" begin="3.3s" repeatCount="indefinite"/></g><circle cx="200" cy="200" r="13" fill="var(--navy)" stroke="#C9A24A" stroke-width="3"/><circle cx="200" cy="200" r="4" fill="#C9A24A"/></svg></div>`;}
-function overview(){const s=C.summary(state),c=C.calculate(state.numbers,state.scenario,state.moneyRanges),focus=C.actions(state,c)[0],started=s.answered>0,all=Object.values(state.answers).length;return `${demoStrip()}<div class="intro"><div><p class="eyebrow">YOUR BUSINESS. YOUR LIFE. YOUR NEXT CHAPTER.</p><h1>${state.profile.name?'Welcome, '+esc(state.profile.name)+'.':'From founder to'}${state.profile.name?'<br><em>Let’s see the whole picture.</em>':'<br><em>intentional leader.</em>'}</h1><p class="lede">For solopreneurs and small businesses. Understand where you are, see what needs your attention, and build your next move with clarity.</p></div>${badge('THE EXPLORASELF WAY')}</div><section class="hero"><div class="hero-copy"><p class="eyebrow">${started?'CONTINUE YOUR EXPLORATION':'YOUR STARTING POINT'}</p><h2>A stronger business<br>starts with a <em>clearer you.</em></h2><p>Numbers reveal what is happening. Personal leadership helps you decide what to do about it. Bring both into focus.</p><div class="actions"><a class="primary" href="#clarity">${started?'Continue my assessment':'Find my starting point'} <span>↗</span></a></div></div>${compassArt()}</section><div class="section-row"><h2>Four steps. <em>In this order.</em></h2><p>Each step has a “Know…”.<br>Together they make the whole picture.</p></div>${fourSteps()}${stagePick()}${journey()}${goalPick()}<div class="section-row"><h2>Four domains. One whole you.</h2><p>${s.answered}/8 responses in ${stage().name.toLowerCase()} · ${all}/32 overall</p></div><div class="domain-grid">${s.scores.map(d=>`<a class="card domain-card domain-${d.id}" href="#clarity" data-domain="${d.id}"><div class="domain-icon domain-${d.id}">${d.icon}</div><div class="micro">${d.full}</div><h3>${d.name}</h3><p>${d.description}</p><div class="meter"><i style="width:${d.score??0}%"></i></div><div class="score-row"><span>${d.answered===d.total?'Self-rating':'Not yet complete'}</span><span>${d.answered===d.total?d.score+'%':d.answered+'/'+d.total+' answered'} ↗</span></div></a>`).join('')}</div><div class="bottom-grid"><div class="card focus-card"><div class="num">↗</div><div><p class="eyebrow">ONE USEFUL NEXT STEP</p><h3>${esc(focus.title)}</h3><p>${esc(focus.text)}</p><a class="text-button" href="#plan">See my next moves →</a></div></div><div class="mini-stats"><div class="mini-stat"><small>LEFT AFTER BUSINESS COSTS</small><b>${money(c.operating)}</b><p>Monthly money left before loan interest, tax and depreciation</p></div><div class="mini-stat"><small>MONTHS OF BILLS SAVED</small><b>${decimal(c.buffer,' mo')}</b><p>Available cash divided by one month of payments</p></div></div></div><div class="flow-note"><i></i><span>Clarity before momentum. Evidence before the next commitment.</span><i></i></div><p class="hint">Your progress stays in this browser. No assessment account is required. These are reflection prompts and planning calculations—not a psychological test or a certified stage rating.</p>`;}
-const answerLabels=[['Not yet','I need to work on this.'],['I think so','I have not checked it yet.'],['Mostly','I have real examples.'],['Yes, I’ve checked','I can show what happened.']];
-function clarity(){const s=C.summary(state),d=C.domains.find(d=>d.id===domain),qs=s.questions.filter(q=>q.domain===domain);return `${demoStrip()}<div class="intro"><div><p class="eyebrow">STEP 01 / GET CLEAR · KNOW YOURSELF</p><h1>What is true <em>today?</em></h1><p class="lede"><b>Explore these four stages and assess where you are.</b> Then answer eight short questions. A real example helps; business jargon does not.</p></div>${badge(s.answered+'/8 ANSWERED')}</div>${levels()}${stagePick()}${journey()}${goalPick()}${answerPick()}${state.goal?'':'<div class="card locked"><p><b>Choose where you want to get first.</b> The questions and your feedback are built on where you are and where you are going.</p><a class="primary" href="#goal">↑ Choose my destination</a></div>'}${state.goal?'':'<div hidden>'}<div class="level-tabs" aria-label="Assessment domain">${C.domains.map(x=>`<a href="#clarity" data-domain="${x.id}" class="${domain===x.id?'active':''}">${x.name} <span aria-hidden="true">${x.id===domain?'↗':''}</span></a>`).join('')}</div><div class="assessment-heading"><div class="domain-icon domain-${d.id}">${d.icon}</div><div><p class="eyebrow">${d.full} / ${stage().name}</p><h3>${d.lens}</h3><p>${stage().line}</p></div></div>${qs.map((q,i)=>`<section class="card question"><div class="question-top"><span class="qnum">0${C.domains.indexOf(d)*2+i+1}</span><div><h3>${q.text}</h3><p class="context">${q.prompt}</p></div></div><div class="answers" role="group" aria-label="Response to ${esc(q.text)}">${answerLabels.map((a,k)=>`<button class="answer ${state.answers[q.id]===k?'selected':''}" data-answer="${q.id}" data-value="${k}" aria-pressed="${state.answers[q.id]===k}"><b>${a[0]}</b>${a[1]}</button>`).join('')}</div><label for="evidence-${q.id}">What happened in real life?<textarea id="evidence-${q.id}" data-evidence="${q.id}" maxlength="1500" placeholder="For example: last month I tried… and the result was…">${esc(state.evidence[q.id]||'')}</textarea></label><p class="hint">Not sure? That is a useful starting point. Your example helps you choose what to work on next.</p></section>`).join('')}<div class="sticky-actions"><p class="hint">${s.answered}/8 responses · ${s.scores.reduce((sum,d)=>sum+d.evidenced,0)}/8 notes added<br>Saved as you go.</p><div class="actions">${domain!=='self'?'<button class="secondary" data-prev-domain>← Back</button>':''}${domain==='market'?'<a class="primary" href="#numbers">Next: lead your people →</a>':'<button class="primary" data-next-domain>Next domain →</button>'}</div></div>${state.goal?'':'</div>'}`;}
-const rawMoney=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:state.profile.currency,maximumFractionDigits:0}).format(n);
-function bandLabel(b){return b.low===0&&b.high===0?rawMoney(0)+' · none':b.high===null?rawMoney(b.low)+'+':b.low===0?'Under '+rawMoney(b.high):rawMoney(b.low)+'–'+rawMoney(b.high);}
-function rangeNote(f){const id=state.moneyRanges?.[f.key],band=C.bandsFor(f.key).find(b=>b.id===id);if(state.legacyAmounts?.[f.key]!==undefined)return 'Your older backup stored '+rawMoney(state.legacyAmounts[f.key])+'. Check it against your record, then choose a range or type the amount. It is kept but not used until you do.';if(!band)return '';if(band.high===band.low)return 'Using '+rawMoney(band.low)+'.';const v=C.num(state.numbers[f.key]);if(v===null)return '';return (band.high===null?'Using '+rawMoney(v)+' as a floor.':'Using about '+rawMoney(v)+', the middle of your range.')+' Know it exactly? Choose “Type the exact amount”.';}
-function rangeFieldInner(f){const id=state.moneyRanges?.[f.key],band=C.bandsFor(f.key).find(b=>b.id===id),exact=id==='exact'||(!band&&state.numbers[f.key]!=='');const box=exact?`<div class="amount-box"><input id="n-${f.key}" type="number" inputmode="decimal" min="0" step="any" data-number="${f.key}" value="${esc(state.numbers[f.key])}" placeholder="Type the exact amount" aria-describedby="help-${f.key}"><button type="button" class="amount-back" data-range-back="${f.key}" title="Choose a range instead">Ranges ▾</button></div>`:`<select id="r-${f.key}" data-money-range="${f.key}" aria-describedby="help-${f.key} range-note-${f.key}"><option value="unknown" ${band?'':'selected'}>Choose a range · or leave unknown</option>${C.bandsFor(f.key).map(b=>`<option value="${b.id}" ${id===b.id?'selected':''}>${bandLabel(b)}</option>`).join('')}<option value="exact">✎ Type the exact amount</option></select>`;return `<label for="${exact?'n':'r'}-${f.key}">${f.label}<span class="unit">${state.profile.currency} · ${f.unit}</span></label>${box}<small id="range-note-${f.key}" class="range-note">${rangeNote(f)}</small><small id="help-${f.key}">${f.help}</small>`;}
-function inputField(f){if(C.moneyKeys.includes(f.key))return `<div class="field" id="field-${f.key}">${rangeFieldInner(f)}</div>`;return `<div class="field"><label for="n-${f.key}">${f.label} <span class="unit">${f.unit}</span><input id="n-${f.key}" type="number" inputmode="decimal" min="0" ${f.key==='founderDependency'?'max="100"':''} step="${['orders','newCustomers','leads'].includes(f.key)?'1':'any'}" data-number="${f.key}" value="${esc(state.numbers[f.key])}" placeholder="Not sure yet" aria-describedby="help-${f.key}"></label><small id="help-${f.key}">${f.help}</small></div>`;}
-function estimateNotice(){const keys=C.estimatedKeys(state);return (state.needsAmountReview?'<div class="notice">Amounts from an older backup are kept for you to check. Choose a range or type the amount to use them.</div>':'')+(keys.length?`<div class="notice estimate-notice"><b>${keys.length} amount${keys.length===1?' is':'s are'} estimated (≈).</b> Where you chose a range, we use its middle. Type exact amounts for a sharper picture.</div>`:'');}
-function moneyMap(c){if(c.n.revenue===null||c.n.revenue<=0||c.n.variable===null||c.n.acquisition===null||c.n.fixed===null||c.errors.length)return '';const parts=[{label:'Delivery',v:c.n.variable,cls:'delivery'},{label:'Getting customers',v:c.n.acquisition,cls:'selling'},{label:'Running costs',v:c.n.fixed,cls:'running'},{label:'Left over',v:Math.max(0,c.operating),cls:'left'}],total=Math.max(c.n.revenue,c.n.variable+c.n.acquisition+c.n.fixed);return `<div class="money-map"><p class="eyebrow">WHERE YOUR SALES MONEY GOES</p><div class="money-track" role="img" aria-label="${parts.map(x=>x.label+': '+rawMoney(x.v)).join('. ')}${c.operating<0?'. Costs exceed sales.':''}">${parts.map(x=>`<span class="${x.cls}" style="width:${x.v/total*100}%"></span>`).join('')}</div><div class="money-key">${parts.map(x=>`<span><i class="${x.cls}"></i>${x.label}</span>`).join('')}</div><p class="hint">${c.operating<0?'Costs are '+rawMoney(-c.operating)+' higher than sales.':'From each '+rawMoney(100)+' sold, about '+rawMoney(c.operating/c.n.revenue*100)+' is left after these costs.'} ${C.estimatedKeys(state).length?'Based on range estimates.':''}</p></div>`;}
-function metric(title,value,note,kind=''){const decision=title.includes('customer')||title.includes('Customer')?'Open the matching customer records. Which customer or channel will you follow up?':title.includes('hour')||title.includes('time')?'Open your calendar. Which task will you stop, change or hand over?':title.includes('cash')||title.includes('Cash')||title.includes('bills')||title.includes('money out')?'Open your bank statement and payment dates. Which payment or collection needs action?':'Open the related sales and cost entries. Which price, cost or commitment will you change?';return `<div class="metric"><div><strong>${title}</strong><small>${note}</small><small class="metric-decision">${decision}</small></div><b class="${kind}">${value}</b></div>`;}
-function numberResults(){const c=C.calculate(state.numbers,state.scenario,state.moneyRanges),n=c.n;return `<p class="eyebrow">YOUR MONTHLY PICTURE</p><h3>Here is the picture.</h3><p class="hint">A machine can do this arithmetic. Only you can choose which price, promise, payment or working habit changes next.</p>${estimateNotice()}${moneyMap(c)}${c.errors.length?'<div class="validation" role="alert">'+c.errors.map(esc).join('<br>')+'</div>':''}${metric('Left after delivery & getting customers',money(c.contribution),'Your sales minus the cost of doing the work and getting customers. Regular running costs come next.',c.contribution===null?'':c.contribution<0?'negative':'positive')}${metric('Share left after delivery & selling',pct(c.contributionRate),'The percentage of sales left after delivery and customer-getting costs.')}${metric('Left after business costs',money(c.operating),'What is left after the costs you entered. Before loan interest, tax and depreciation.',c.operating===null?'':c.operating<0?'negative':'positive')}${metric('Left after allowing for your unpaid time',money(c.economic),'Take off a fair allowance for hours you worked without a wage. This helps you plan; it is not an extra bill you paid.',c.economic===null?'':c.economic<0?'negative':'positive')}${metric('Sales needed to cover running costs',money(c.breakEven),'The sales you need if your mix of products, prices and costs stays the same.')}${metric('What you spent per new customer',money(c.cac),'This month’s customer-getting spending divided by new paying customers. Some spending may lead to sales later.')}${metric('Money left per hour you worked',money(c.hourReturn),'Money left after business costs divided by your work hours. This is not your take-home wage.')}${metric('How much of your available time you used',pct(c.capacity),'Your actual hours compared with the hours you said you can comfortably work.',c.capacity!==null&&c.capacity>1?'negative':'')}${metric('Money in minus money out',money(c.cashFlow),'Actual customer payments received minus every payment made. New loans or investment are not included.',c.cashFlow===null?'':c.cashFlow<0?'negative':'positive')}${metric('How long your savings cover bills',decimal(c.buffer,' mo'),'Months of current bills your available cash would cover if no more money arrived.')}${metric('How long cash lasts at this monthly loss',c.cashFlow!==null&&c.cashFlow>=0?'Cash is not shrinking':decimal(c.runway,' mo'),'If money is going out faster than it comes in, this is how long today’s cash could last at that pace.')}${metric('Extra cash to reach your savings goal',money(c.bufferGap),'The extra amount needed to hold your chosen number of months of bills.')}${metric('Enquiries compared with new customers',pct(c.conversion),'New customers divided by serious enquiries this month. They may be different people if buying takes longer.')}${metric('Sales from returning customers',pct(c.repeatShare),'The part of this month’s sales from people who had bought before. It does not tell us how many stayed.')}${metric('Sales from your biggest customer',pct(c.concentration),'How much of your sales depends on just one customer.')}<p class="hint" style="margin-top:18px">“—” means we need more information or the calculation is not possible. Leave unknowns blank; enter zero only when the amount really is zero.</p>${n.newCustomers!==null&&n.leads!==null&&n.newCustomers>n.leads?'<div class="notice warn" style="margin-top:15px">You have more new customers than enquiries this month. Some may have enquired earlier or come from another source. Check before drawing a conclusion.</div>':''}${c.contribution!==null&&c.contribution<=0?'<div class="notice warn" style="margin-top:15px">Sales are not yet covering delivery and customer-getting costs. Selling more at the same price and costs will not fix that gap.</div>':''}`;}
-function scenarioResults(){const c=C.calculate(state.numbers,state.scenario,state.moneyRanges);if(!c.scenario)return '<div class="notice">Add sales, finished orders, delivery costs, customer-getting spending and running costs to try a what-if. Check any conflicting answers first.</div>';return `<div class="compare"><div class="mini-stat"><small>SALES IN THIS WHAT-IF</small><b>${money(c.scenario.revenue)}</b><p>${decimal(c.scenario.orders)} modeled orders</p></div><div class="mini-stat"><small>MONEY LEFT AFTER BUSINESS COSTS</small><b class="${c.scenario.operating<0?'negative':'positive'}">${money(c.scenario.operating)}</b><p>Before loan interest, tax and depreciation</p></div><div class="mini-stat"><small>CHANGE FROM TODAY</small><b class="${c.scenario.delta<0?'negative':'positive'}">${money(c.scenario.delta)}</b><p>Monthly change if these choices hold</p></div></div>`;}
-function numbers(){const sections=[['economics','01','Your sales & costs','Pick one month and use it throughout. Count each cost only once. You can choose a range or enter an exact amount.'],['founder','02','Your time & energy','How much work goes into this? Count your time, including the hours you do without a wage.'],['cash','03','Money in the bank','What actually arrived and went out? A sale is not money in the bank until the customer pays.'],['market','04','Your customers','Think about this same month. Who was interested, who bought and who came back?']];return `${demoStrip()}<div class="intro"><div><p class="eyebrow">STEP 02 / LEAD YOUR PEOPLE · KNOW YOUR PEOPLE</p><h1>Make the numbers <em>mean something.</em></h1><p class="lede">Pick one month. For each amount, choose a range, or choose “Type the exact amount” and write it in the same box. Leave unknowns blank.</p></div>${badge(state.profile.currency+' · MONTHLY INPUTS')}</div>${levels()}<div class="numbers-guide"><span>① One month</span><i>→</i><span>② A range or the exact amount</span><i>→</i><span>③ Know your numbers</span></div><div class="number-inputs">${sections.map(([id,num,title,desc])=>`<section class="card input-section"><p class="eyebrow">${num} / YOUR INPUTS</p><h3>${title}</h3><p class="hint">${desc}</p><div class="fields">${C.fields.filter(f=>f.section===id).map(inputField).join('')}</div></section>`).join('')}<section class="card"><label for="data-note">Where did these numbers come from?<textarea id="data-note" data-note="data" maxlength="2000" placeholder="For example: last month’s bank statement. Sales are exact; costs are my best guess.">${esc(state.notes.data||'')}</textarea></label><p class="hint" style="margin-top:9px">If some products leave much more money than others, check them separately too. These totals give you a starting picture.</p></section></div><div class="sticky-actions"><p class="hint">Saved as you type.<br>All amounts in ${state.profile.currency}.</p><a class="primary" href="#picture">Next: know your numbers →</a></div>`;}
-function picture(){const any=C.fields.some(f=>state.numbers[f.key]!=='');return `${demoStrip()}<div class="intro"><div><p class="eyebrow">STEP 03 / COUNT WHAT MATTERS · KNOW YOUR NUMBERS</p><h1>What your numbers <em>are telling you.</em></h1><p class="lede">The arithmetic is done for you. Read it top to bottom, then test one decision before you make it.</p></div>${badge(state.profile.currency+' · ONE MONTH')}</div>${levels()}${any?'':'<div class="card empty"><h3>No numbers yet.</h3><p>Three amounts already make a picture: sales, costs and hours are a good start.</p><div class="actions" style="justify-content:center"><a class="primary" href="#numbers">← Add my numbers</a></div></div>'}<div class="picture-layout"><section class="card result-panel" id="number-results" aria-label="Calculated business results">${numberResults()}</section><div class="picture-side"><section class="card scenario"><p class="eyebrow">THE WHAT-IF LAB</p><h2>Test a decision before you make it.</h2><p class="lede">What happens if you change your price, sell more orders or make each order cheaper to deliver? Move the sliders to explore.</p><div class="sliders">${[['price','Price change',-50,50],['volume','More or fewer orders',-50,100],['cost','Lower delivery cost per order',0,50]].map(([key,label,min,max])=>`<label for="s-${key}">${label}<output id="o-${key}">${state.scenario[key]>0?'+':''}${state.scenario[key]}%</output><input id="s-${key}" type="range" min="${min}" max="${max}" step="1" value="${state.scenario[key]}" data-scenario="${key}"></label>`).join('')}</div><div id="scenario-results">${scenarioResults()}</div><div id="scenario-estimates">${estimateNotice()}</div><p class="hint" style="margin-top:18px">This what-if changes your price, number of orders and delivery cost per order. Marketing spending and regular running costs stay the same. A higher price might change demand; more orders might need extra help. This model does not predict those changes or the money in your bank. Check them before acting.</p></section></div></div><div class="sticky-actions"><a class="text-button" href="#numbers">← Change my numbers</a><a class="primary" href="#plan">Next: choose your next steps →</a></div>`;}
-function checkpoint(c,s){const required=['revenue','variable','acquisition','fixed','cash','cashIn','cashOut','reserveMonths','hours','availableHours'];const missing=required.filter(k=>C.num(state.numbers[k])===null);const checks=[{ok:s.ready,text:s.ready?'All eight answers are “Mostly” or “Yes, I’ve checked”, with a real-life note.':`${s.missing.length} answer${s.missing.length===1?' needs':'s need'} more checking or a short real-life example.`},{ok:missing.length===0&&!c.errors.length,text:missing.length?`${missing.length} key money or time answers are still unknown.`:c.errors.length?'Some answers do not fit together.':'Your key money and time answers are filled in.'},{ok:c.contribution!==null&&c.contribution>0,text:c.contribution!==null&&c.contribution>0?'Sales cover the cost of delivering the work and getting customers.':'We have not yet shown that sales cover delivery and customer-getting costs.'},{ok:c.buffer!==null&&c.n.reserveMonths!==null&&c.buffer>=c.n.reserveMonths,text:c.buffer!==null&&c.n.reserveMonths!==null?`How long your savings cover bills: ${decimal(c.buffer)} months against your ${decimal(c.n.reserveMonths)}-month target.`:'How long your savings cover bills and your chosen target still need to be compared.'},{ok:c.capacity!==null&&c.capacity<=1,text:c.capacity!==null?`Your work hours versus your limit: ${pct(c.capacity)} of your chosen sustainable hours.`:'We still need to check your work hours against your chosen limit.'}];if(C.estimatedKeys(state).length)checks.push({ok:false,text:'Your ranges are a useful start. Confirm the important amounts before making a bigger commitment.'});return {checks,covered:checks.every(x=>x.ok)};}
-const strategicPrompts={
- building:{self:['A business that supports the life I want.','Try one week within the working hours I chose.','Hours worked, time to rest and progress toward my income goal.'],people:['People who support me and tell me the truth.','Agree one boundary and ask someone what I may be missing.','One clear agreement and one useful challenge to my idea.'],work:['An offer that leaves money after the work is done.','Work out the cost and try one small paid job.','Money left per job and the hours I actually worked.'],market:['A problem customers are willing to pay to solve.','Ask customers about the problem and try a small paid offer.','What customers told me, who paid and the result they got.']},
- growing:{self:['A rhythm that creates progress without consuming my life.','Remove one low-value recurring task for two weeks.','Founder hours against sustainable capacity.'],people:['Clearer agreements and fewer difficult surprises.','Use a clearer scope and change agreement on the next project.','Extra work, repeated mistakes and how well we work together.'],work:['Regular sales that leave enough money and time.','Check costs, customer payments and work hours every week.','Money left after delivery and selling costs, bank balance and hours worked.'],market:['A way to bring in the right customers more regularly.','Track one acquisition channel and interview lost customers.','Spending per new customer and money left after delivery and selling costs.']},
- scaling:{self:['People can make good decisions without waiting for me.','Let someone else make one decision within clear limits.','Decisions completed without founder rescue.'],people:['People know their job and have the skills and trust to do it.','Agree who decides in five common situations.','How often people need my help, how decisions went and what they learned.'],work:['More work delivered well, with enough money to pay for it.','Try one small increase in help. Include set-up costs and a slower-sales case.','Money left after costs, lowest bank balance and customer results during the test.'],market:['Customers can find and buy from us without depending on one person or platform.','Try one new way to find customers, with a clear spending limit.','Money left after costs and customer results compared with the usual offer.']},
- leading:{self:['A goal that is worth the time and energy it needs.','Check whether one commitment still serves what matters to me.','Time freed up and what changed in the things I care about.'],people:['People who can lead when I am absent.','Practise how someone else would take over if I were away.','Decisions others handled and problems we fixed in the handover.'],work:['Money and time going to the things that matter most.','Compare three ways to use the same money or time. Test one protection against a problem.','What we could lose, what we give up and what actually happened.'],market:['A business that helps people and takes responsibility for its effects.','Review one customer, team and wider-impact outcome.','Real results, unwanted effects and what we changed.']}
-};
-function strategyCanvas(c,s){const saved=state.strategy[state.stage]||{},personal=[...s.scores].filter(x=>['self','people'].includes(x.id)).sort((a,b)=>(b.weak.length-a.weak.length))[0],business=[...s.scores].filter(x=>['work','market'].includes(x.id)).sort((a,b)=>(b.weak.length-a.weak.length))[0];let direction='Check what you know before taking the next big step.';if(c.errors.length)direction='Check the answers that do not fit before making a money decision.';else if(c.contribution!==null&&c.contribution<=0)direction='Make sure each sale leaves money before trying to sell more.';else if(c.cashFlow!==null&&c.cashFlow<0)direction='Understand the cash gap and protect near-term choices.';else if(c.capacity!==null&&c.capacity>1)direction='Make the work fit your available hours before taking on more.';else if(c.operating!==null)direction={building:'Test a paid offer within the time and money you can afford to risk.',growing:'Repeat what brings good customers and leaves enough money and time.',scaling:'Try sharing work and decisions before adding more customers.',leading:'Choose where your money and time help people and the business most.'}[state.stage];return `<section class="strategy-section"><div class="section-row"><h2>Your personal + business strategy.</h2><p>A simple plan for the next 90 days.<br>Choose it. Try it. Check what happened.</p></div><div class="strategy-thesis"><p class="eyebrow">YOUR SUGGESTED FOCUS / ${stage().name}</p><h3>${direction}</h3><p>Three lines per domain. Start from our suggestions, then make them yours. Explore <strong>${personal.name}</strong> and <strong>${business.name}</strong> first.</p><button class="secondary no-print" data-use-suggest>Use the suggestions ↓</button></div><div class="strategy-grid">${C.domains.map(d=>{const v=saved[d.id]||{},prompts=strategicPrompts[state.stage][d.id];return `<section class="card"><div class="strategy-domain"><div class="domain-icon domain-${d.id}">${d.icon}</div><div><p class="eyebrow">${KNOW[d.id]}</p><h3>${d.name}</h3></div></div>${[['goal','In 90 days, I want…',prompts[0]],['experiment','This week, I will…',prompts[1]],['review','I’ll know it worked when…',prompts[2]]].map(([key,label,ph])=>`<label>${label}<textarea rows="2" data-strategy="${d.id}" data-strategy-key="${key}" maxlength="600" placeholder="${esc(ph)}">${esc(v[key]||'')}</textarea></label>`).join('')}</section>`;}).join('')}</div><div class="notice">Small and done beats big and planned. Check what you learned after 30 days.</div></section>`;}
+(function () {
+  const E = window.CompassEngine, M = window.Compass;
+  const KEY = 'exploraself-compass-v2', OLD = 'exploraself-compass-v1', DEFAULT_PROFILE = 'exploraself-profile';
+  /* The same places /content.js points to: the free 1:1 form, the LAB, the HUB. */
+  const BOOKING = 'https://forms.gle/opnxfhFTJJg69Qy77';
+  const LAB_URL = 'https://exploraself.com/lab', HUB_URL = 'https://exploraself.com/hub';
+  const D = E.DOMAINS, LIGHT = D.map((d) => d.light), CSSV = D.map((d) => `var(--${d.id})`), TINT = D.map((d) => `var(--t${d.id})`);
+  const $ = (s) => document.querySelector(s);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const lockIcon = (c, s = 14) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="${c}" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="${c}" stroke-width="2"/></svg>`;
+  const reduced = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { return false; } };
 
-/* Where they want to get. What it looks like on arrival, and the move that gets them there, per domain. */
-const ARRIVE={
- growing:{self:['You protect time for growth, not just delivery.','Drop or hand over the tasks that only feel urgent. Keep one planning hour a week.'],people:['Clients and helpers know what to expect from you, in writing.','Write your standard: what you deliver, by when, and what “finished” means.'],work:['Every sale leaves money, and you know how much.','Know your margin per job and your monthly break-even number.'],market:['Customers come back, or send others.','Ask every happy customer for a referral, and track where buyers come from.']},
- scaling:{self:['The business runs for a week without you.','List the decisions only you make. Give two away, with clear limits.'],people:['Someone else owns real work and decides within limits.','Hire or assign on paper first: the role, the result, the authority.'],work:['Your key processes are written down and run by others.','Write the three processes that break when you are away. Hand one over.'],market:['Demand no longer depends on you personally.','Build one channel that brings customers without your personal network.']},
- leading:{self:['Your job is direction and people, not daily operations.','Write what success is for. Check your calendar against it every month.'],people:['Leaders below you make good decisions and grow others.','Grow one leader: a real decision, a review, then a bigger one.'],work:['Money and time go where they matter most, by choice.','Each quarter, review where money and time go. Stop one thing.'],market:['The business has a reputation that outlasts you.','Name the difference you make, and check it with customers and team.']}
-};
-/* One move per question: a weak answer gets exactly the move that answers it. */
-const QMOVE={
- q1:'Write three things this business must give your life: income, time, and one more that matters to you.',
- q2:'Write your limit: the most money and months you will risk before you change course.',
- q3:'Sit down with the people affected and agree what the business can take: hours, money, evenings.',
- q4:'Ask one honest person what is wrong with your idea. Write down what they say, without defending it.',
- q5:'For your main offer, write the price, what it costs you and the hours it takes.',
- q6:'Work out your monthly number: what you must sell, and how much must stay in the bank.',
- q7:'Ask five people about the problem, then offer a small paid version and count the yeses.',
- q8:'Write one sentence: who it helps, and what they get. Test it on three people.',
- q9:'Every Friday, compare where your hours went with what matters most. Change one thing for next week.',
- q10:'Put your income goal and your hour limit side by side. Cut, or price up, the work that breaks the limit.',
- q11:'Write what is included, what is not, and what happens when something changes. Send it before the next job.',
- q12:'Ask one client and one helper what you could do better. Raise the hard thing within a week, not a month.',
- q13:'Once a week, write three numbers: money left after costs, money that arrived, hours worked.',
- q14:'Write your main service as a checklist, so each job starts from it, not from scratch.',
- q15:'Ask every new customer how they found you. Divide your marketing spend by the new customers.',
- q16:'Ask three loyal customers why they stay, and one lost customer why they left.',
- q17:'Choose one decision someone else makes from now on. Agree the limits, then do not take it back.',
- q18:'Find one place where your way slows things. Agree a “good enough” standard and let it go.',
- q19:'Write who decides what in five common situations, and share it with the team.',
- q20:'Every week, ask the team for one thing going wrong. Thank the messenger, then fix it.',
- q21:'Before saying yes to more work, write what the extra help costs and where that money comes from.',
- q22:'Take one day fully away. Write down what stopped, and fix the first thing that did.',
- q23:'Test one new customer group or channel small, with a spending limit, and check what is left after costs.',
- q24:'Write what happens if your biggest customer or channel disappears, and one step that softens it.',
- q25:'Write what “enough” means to you, and why the next goal is worth what it costs.',
- q26:'Book a monthly hour to question the plan. Stop one piece of work that no longer matters.',
- q27:'Give one person a real decision, review it with them, then give them a bigger one.',
- q28:'Name who steps in for each key role if you are away. Test it for a week.',
- q29:'For the next big commitment, compare three options on money, time and risk before choosing.',
- q30:'Walk through one serious disruption on paper: what breaks first, and what you would do.',
- q31:'Check one result for customers, one for your people and one for the wider world. Change one thing.',
- q32:'Ask five customers what is changing for them. Adjust one part of your plan.'
-};
-/* Which of the stage's three general moves each question's own move already covers, so the two never repeat. */
-const QDUP={q1:[1],q2:[2],q3:[0],q4:[1],q5:[0],q6:[2],q7:[1,2],q9:[2],q11:[0,2],q12:[1],q13:[1],q14:[2],q15:[1],q16:[0,2],q17:[0],q18:[2],q19:[0],q20:[1],q21:[2],q22:[0],q23:[0],q24:[2],q25:[0],q26:[1],q27:[2],q28:[0],q29:[0],q30:[1],q31:[0],q32:[1]};
-const goalStage=()=>C.stages.find(x=>x.id===state.goal);
-const goalChoices=()=>{const i=C.stages.findIndex(x=>x.id===state.stage);return i===C.stages.length-1?[C.stages[i]]:C.stages.slice(i+1);};
-/* The stages to cross, in order: from just after today's stage up to the goal. */
-const pathStages=()=>{const i=C.stages.findIndex(x=>x.id===state.stage),g=C.stages.findIndex(x=>x.id===state.goal);return g>i?C.stages.slice(i+1,g+1):[];};
-function goalPick(){const i=C.stages.findIndex(x=>x.id===state.stage),gi=C.stages.findIndex(x=>x.id===state.goal),top=i===C.stages.length-1,words=['','one stage','two stages','three stages'],cur=stage(),g=goalStage();
- const line=gi<0?'':gi===i?`<b>You are here:</b> ${esc(cur.name)} · <b>Your goal:</b> go deeper. We sharpen what you already do.`:`<b>You are here:</b> ${esc(cur.name)} → <b>Your goal:</b> ${esc(g.name)} · ${words[gi-i]} to go${gi-i>1?'. We take them one at a time.':', the next one.'}`;
- return `<div class="pick" id="goal"><span class="pick-n">Step 2</span><div><h2>Where do you want <em>to get?</em></h2><p>Now tap the stage you want to reach. <b>Required.</b></p></div></div><div class="ladder" role="group" aria-label="Choose your destination"><span class="ladder-track" aria-hidden="true"><i style="left:${12.5+25*i}%;width:${gi>i?25*(gi-i):0}%;--tone:${TONE[(g||cur).id]}"></i></span>${C.stages.map((st,k)=>{const here=k===i,on=k===gi,can=k>i||(top&&here);return `<button type="button" ${can?`data-goal="${st.id}"`:'disabled'} class="rung${here?' here':''}${on?' on':''}${k>i&&k<gi?' through':''}${k<i?' past':''}" style="--tone:${TONE[st.id]}" aria-pressed="${on}"><span class="rung-dot" aria-hidden="true"></span><b>${st.name}</b><small>${here?(top?'You are here · tap to go deeper':'You are here'):k<i?'Behind you':st.role}</small></button>`;}).join('')}</div>${line?`<p class="ladder-line">${line}</p>`:''}`;}
-function pathLine(){if(!state.goal)return '';const i=C.stages.indexOf(stage()),gi=C.stages.findIndex(x=>x.id===state.goal),list=[stage()];if(gi>i)list.push(C.stages[i+1]);if(gi>i+1)list.push(C.stages[gi]);return `<div class="path-line" aria-label="Your path">${list.map((x,k)=>`<span style="--tone:${TONE[x.id]}" class="${k===0?'from':''}">${x.name}${k===0?' · today':''}</span>`).join(`<i aria-hidden="true">${gi>i+2?'→ … →':'→'}</i>`.replace('→ … →','→'))}${gi===i?'<span class="deeper">deeper</span>':''}</div>`;}
-function domainPath(d){const cur=stage(),i=C.stages.indexOf(cur),gi=C.stages.findIndex(x=>x.id===state.goal),qs=C.Q.filter(q=>q.stage===state.stage&&q.domain===d.id).map(q=>({q,v:Number.isInteger(state.answers[q.id])?state.answers[q.id]:-1})).filter(x=>x.v>=0&&x.v<2).sort((x,y)=>x.v-y.v);
- const own=qs.map(x=>QMOVE[x.q.id]).filter(Boolean),dup=new Set(qs.flatMap(x=>QDUP[x.q.id]||[])),first=[...own,...FEED[state.stage][d.id].filter((t,k)=>!dup.has(k))].slice(0,3);
- const steps=[{h:(gi===i?'Go deeper in ':'First, finish ')+cur.name,items:first}];
- if(gi>i){const next=C.stages[i+1],[m1,v1]=ARRIVE[next.id][d.id];steps.push({h:'Then, reach '+next.name,items:[v1],mark:m1});}
- if(gi>i+1){const g=C.stages[gi],[m2,v2]=ARRIVE[g.id][d.id];steps.push({h:(gi>i+2?'Then, on to ':'Then, reach ')+g.name,items:[v2],mark:m2});}
- return steps;}
-function standing(d){if(d.answered<d.total)return ['open','Not answered yet','Answer its two questions in step 01 to see where you stand.'];if(d.score<=33)return ['start','Start here','The thinnest part of your picture today. Small moves here pay off first.'];if(d.score<=66)return ['build','Partly in place','Something is working. Make it visible, then make it repeatable.'];return ['strong','A strength','Use it to carry the rest. Write down what makes it work.'];}
-function domainFeedback(s){const lv=BP_LEVEL[BP[state.stage]];return `<section class="feedback"><div class="section-row"><h2>Where you are. <em>What to strengthen.</em></h2><p>Weakest first,<br>three steps at most.</p></div>${pathLine()}${state.goal?'':'<div class="card locked"><p><b>Where do you want to get?</b> Choose your destination and this feedback becomes your path, step by step.</p><a class="primary" href="#clarity">Choose my destination →</a></div>'}<div class="feedback-grid">${[...s.scores].sort((x,y)=>(x.answered<x.total?999:x.score)-(y.answered<y.total?999:y.score)).map(d=>{const [k,label,line]=standing(d),weak=s.questions.filter(q=>q.domain===d.id&&!(state.answers[q.id]>=2));return `<article class="card fb fb-${k} domain-${d.id}"><header><div class="domain-icon domain-${d.id}">${d.icon}</div><div><h3>${KNOW[d.id]}</h3><p class="fb-lead">${d.name}</p></div><span class="fb-tag">${label}</span></header><div class="fb-meter" aria-hidden="true"><i style="width:${d.score??0}%"></i></div><p class="fb-line">${line}</p>${weak.length?`<p class="fb-h">To strengthen</p><ul class="fb-weak">${weak.map(q=>`<li>${esc(q.text)}<span>${Number.isInteger(state.answers[q.id])?'You said: '+answerLabels[state.answers[q.id]][0]:'Not answered yet'}</span></li>`).join('')}</ul>`:'<p class="fb-h">To keep</p><p class="fb-line">Both answers come with real examples. Keep the record.</p>'}<p class="fb-h">${state.goal?'Your path, step by step':'Do this'}</p><ol class="fb-path">${domainPath(d).map((st,i)=>`<li><span class="fb-n">${i+1}</span><div><b>${st.h}</b>${st.mark?`<em>You are there when: ${st.mark}</em>`:''}<ul>${st.items.map(t=>`<li>${t}</li>`).join('')}</ul></div></li>`).join('')}</ol><p class="fb-ltl">In Link to Lead: <b>Level ${String(lv[d.id][0]).padStart(2,'0')} · ${lv[d.id][1]}</b></p></article>`;}).join('')}</div></section>`;}
-function linkToLead(){const first=BP_LEVEL[BP[state.stage]].self[1];return `<section class="ltl"><p class="eyebrow">YOUR NEXT MOVE</p><h2>Here’s where you are. Here’s what to strengthen. <em>Now walk it.</em></h2><p class="ltl-lede">A compass points; you still have to walk. Link to Lead is the Founder’s Blueprint incubator: twelve levels across these same four domains, built for your stage${goalStage()&&goalStage().id!==state.stage?' and the road to '+goalStage().name.toLowerCase():''}.</p><ol class="ltl-steps"><li><span>1</span><b>Keep your results</b><small>Print, save or email them.</small></li><li><span>2</span><b>Join Link to Lead</b><small>Free to start.</small></li><li><span>3</span><b>Open Level 01</b><small>${first}</small></li></ol><div class="actions no-print"><a class="primary" href="/start">Start Link to Lead, free →</a><button class="secondary" data-print>Print · save PDF</button>${mailReady?'<button class="secondary" data-email-open>Email it to me</button>':''}</div><p class="print-only">Next: Link to Lead · linktolead.exploraself.com</p></section>`;}
-function report(){const s=C.summary(state),c=C.calculate(state.numbers,state.scenario,state.moneyRanges),p=C.patterns(state,c),acts=C.actions(state,c),check=checkpoint(c,s),hasAny=s.answered>0||C.fields.some(f=>state.numbers[f.key]!==''),strong=[...s.scores].filter(d=>d.answered===d.total).sort((a,b)=>b.score-a.score),index=C.stages.findIndex(x=>x.id===state.stage);return `${demoStrip()}<div class="intro no-print"><div><p class="eyebrow">STEP 04 / CHOOSE YOUR NEXT STEPS · KNOW YOUR MARKET</p><h1>Clarity is useful.<br><em>Your next move matters.</em></h1><p class="lede">Bring your answers and numbers together. Choose one small step that helps your business and your life.</p></div></div>${levels()}${journey()}<div class="print-only"><p>EXPLORASELF · LEADERSHIP COMPASS · ${new Date().toLocaleDateString('en-GB')}</p><p>${esc(state.profile.name)}${state.profile.business?' · '+esc(state.profile.business):''} · ${stage().name} · ${state.profile.currency}${state.demo?' · FICTIONAL EXAMPLE':''}</p></div><div class="report-head"><div><p class="eyebrow">${stage().name}${goalStage()&&goalStage().id!==state.stage?' → '+goalStage().name:''} / ${stage().role}</p><h2>${goalStage()&&goalStage().id!==state.stage?goalStage().focus:stage().focus}</h2><p>${hasAny?(check.covered?'Your answers cover this checklist. Choose the next stage to explore; this is not a readiness verdict.':'Stay curious about the gaps before your next commitment.'):'Your plan begins with a clear starting point. Enter responses and numbers to make this specific.'}</p></div><div class="actions"><button class="primary" data-print>Print · save · download PDF ↓</button>${mailReady?'<button class="secondary" data-email-open>Send it by email ✉</button>':''}</div></div>${!hasAny?'<div class="card empty no-print"><h3>There is no score to chase.</h3><p>Give this plan something real to work with: eight reflections for your stage and the business numbers you know.</p><div class="actions" style="justify-content:center"><a class="primary" href="#clarity">Begin the assessment →</a><a class="secondary" href="#method">How to use this</a></div></div>':''}${domainFeedback(s)}<div class="report-grid"><section class="card"><p class="eyebrow">SEE YOUR NUMBERS</p><h3>The numbers behind the plan.</h3>${metric('Monthly money left after business costs',money(c.operating),'Simplified, before interest, tax and depreciation.')}${metric('After allowing for your unpaid time',money(c.economic),'Using the hourly value you chose for work without a wage.')}${metric('Money in minus money out',money(c.cashFlow),'Actual customer payments received minus all money paid out.')}${metric('How much of your available time you used',pct(c.capacity),'Compared with the hours you said you can comfortably work.')}<a class="text-button no-print" href="#numbers">Review all calculations and inputs →</a>${c.errors.length?'<p class="validation">'+c.errors.map(esc).join(' ')+'</p>':''}</section><section class="card"><p class="eyebrow">POSSIBLE BLIND SPOTS</p><h3>A different question to ask.</h3>${p.map(x=>`<div class="pattern"><h4>${esc(x.title)}</h4><p>${esc(x.why)}</p><p class="question-prompt">“${esc(x.ask)}”</p></div>`).join('')}<p class="hint">These are rule-based prompts. They do not establish a bias, a personality trait or a clinical diagnosis.</p></section><section class="card wide-card"><p class="eyebrow">NEXT STAGE TO EXPLORE</p><h3>${check.covered?'Choose the next stage to explore.':'Here is what still needs checking.'}</h3><ul class="stage-checks">${check.checks.map(x=>`<li>${x.ok?'✓':'○'} ${esc(x.text)}</li>`)}</ul><p class="hint" style="margin-top:15px">Check your real examples, whether sales cover delivery and selling costs, your cash goal and your work hours. These are conversation starters. You can explore any stage at any time.</p><details style="margin-top:15px"><summary style="font-size:11px;cursor:pointer">Records to open before the next step</summary><ul class="stage-checks">${stage().gates.map(x=>'<li>'+esc(x)+'</li>').join('')}</ul></details>${index<3?`<button class="secondary no-print" data-stage="${C.stages[index+1].id}" style="margin-top:17px">Explore ${C.stages[index+1].name.toLowerCase()} →</button>`:'<p class="hint" style="margin-top:17px">Leading is a continuing practice. Revisit all four domains whenever the context changes.</p>'}</section></div>${strategyCanvas(c,s)}<div class="section-row"><h2>Three practical next steps.</h2><p>Suggested sequence · adapt the pace<br>to your real constraints.</p></div><div class="plan-list">${acts.map((a,i)=>`<article class="card plan-step"><div class="n">0${i+1}</div><div><p class="task-meta">${['NEXT 48 HOURS','NEXT 7 DAYS','NEXT 30 DAYS'][i]} · ${C.domains.find(d=>d.id===a.domain)?.name.toUpperCase()||'WORK'}</p><h3>${esc(a.title)}</h3><p>${esc(a.text)}</p><p style="margin-top:10px"><strong>Make it visible:</strong> ${esc(a.deliverable)}</p></div><div class="task-check"><label><input type="checkbox" data-done="${state.stage+'-'+a.key}" ${state.done[state.stage+'-'+a.key]?'checked':''}> I completed this step</label><p class="hint">Mark the action complete when you can show the result. Reassess after learning.</p></div></article>`).join('')}</div><section class="card" style="margin-top:24px"><p class="eyebrow">YOUR COMMITMENT</p><h3>Choose it. Name it. Review it.</h3><div class="reflection"><label>My first commitment<textarea data-note="commitment" maxlength="2000" placeholder="I will… by… so that…">${esc(state.notes.commitment||'')}</textarea></label><label>What I will stop or change<textarea data-note="stop" maxlength="2000" placeholder="To make room, I will stop…">${esc(state.notes.stop||'')}</textarea></label><label>Review date<input type="date" data-note="date" value="${esc(state.notes.date||'')}"></label><label>Evidence I will look for<textarea data-note="review" maxlength="2000" placeholder="I will know I have learned something when…">${esc(state.notes.review||'')}</textarea></label></div></section>${linkToLead()}<p class="hint" style="margin-top:20px">Planning aid only. Your inputs and assumptions need checking against your records. This report is not an audit, a business valuation, a professional qualification or a guarantee of outcomes. No financial, tax or legal advice is provided.</p>`;}
-function method(){return `<div class="intro"><div><p class="eyebrow">THE EXPLORASELF APPROACH</p><h1>See the whole.<br><em>Choose the next step.</em></h1><p class="lede">A business decision changes your working life, your relationships, your systems and your place in the market. This compass makes those connections visible.</p></div></div><div class="section-row"><h2>Four steps. <em>In this order.</em></h2><p>Do · get</p></div>${fourSteps()}<div class="method-journey" aria-hidden="true"><span>Know yourself</span><i></i><span>Know your people</span><i></i><span>Know your numbers</span><i></i><span>Know your market</span><i></i><b>Link to Lead</b></div><div class="section-row"><h2>What sits underneath.</h2><p>Everything is shown,<br>nothing is hidden.</p></div><div class="method-grid"><section class="card"><p class="eyebrow">01 / FOUR DOMAINS</p><h3>Personal leadership meets business reality.</h3>${C.domains.map(d=>`<p style="margin-top:14px"><strong>${d.name} · ${d.full}</strong><br>${d.description} ${d.lens}</p>`).join('')}</section><section class="card"><p class="eyebrow">02 / FOUR STAGES</p><h3>From your first sale to helping others lead.</h3>${C.stages.map(s=>`<p style="margin-top:14px"><strong>${s.name} · ${s.role}</strong><br>${s.line}</p>`).join('')}<p style="margin-top:14px">These are useful contexts, not a hierarchy of personal worth. A small, sustainable business can be an intentional destination. You can be building one offer while leading another.</p></section><section class="card"><p class="eyebrow">03 / HOW THE ANSWERS ARE READ</p><h3>Transparent by design.</h3><p>Each stage has eight reflections: two per domain. Responses carry 0, 1, 2 or 3 points. A domain self-rating appears only after both responses are answered: points ÷ 6 × 100, rounded. Unknown responses are not zero.</p><p style="margin-top:14px">Evidence notes count as added when you write something, but the tool cannot verify their quality. The checklist repeats your answers and notes; it does not certify readiness. These responses are your own record, not a validated test.</p><p style="margin-top:14px">A next-commitment checkpoint also asks for core numbers, positive contribution, a cash buffer at your chosen target and founder hours within your chosen capacity. It is a discussion aid. No stage is locked.</p><details><summary>How patterns and priorities are chosen</summary><p style="margin-top:12px">Prompts look for: positive surplus with a non-positive unpaid-time residual; profit with negative cash movement; hours above capacity; a completed business-domain response with costs not yet covered; a completed market-domain response with missing acquisition cost; one customer above 35% of revenue; or scaling/leading with founder dependency above 50%. Alex chose 35% customer share and 50% founder dependence as question prompts, not industry benchmarks. They never label a business ready, unsafe or worse than another founder.</p><p style="margin-top:12px">Actions prioritise conflicting inputs, then non-positive contribution, negative cash movement and capacity overload. Remaining actions come from the lowest-rated or unanswered reflections. No psychological diagnosis or causal claim is made.</p></details></section><section class="card"><p class="eyebrow">04 / FORMULAS & ASSUMPTIONS</p><h3>Every result has a definition.</h3><p>For each amount, choose a range or type the exact amount in the same box. A range uses its middle (an open top range uses its floor), and every result that leans on a range carries “≈”. The zero choice uses zero. Type the exact amount when you have a record to copy.</p><ul><li>Contribution = revenue − variable delivery costs − acquisition spending.</li><li>Left after business costs = contribution − shared operating costs.</li><li>Unpaid-time residual = operating surplus − unpaid founder hours × hourly value.</li><li>Sales needed to cover running costs = shared costs ÷ contribution margin, for positive margins only and an unchanged mix.</li><li>CAC = acquisition spending ÷ new paying customers.</li><li>Cash movement = actual collections − all cash payments.</li><li>How long your savings cover bills = available cash ÷ monthly payments.</li><li>Runway = cash ÷ net monthly burn, only if burn is positive.</li><li>Capacity use = total founder hours ÷ sustainable hours.</li></ul><p>Taxes, financing, depreciation, multi-period effects and offer-level variation require fuller models. Keep earned revenue separate from cash received.</p><details><summary>Primary reference material</summary><ul><li><a href="https://www.sba.gov/counseling/plan-your-business/break-even-point-calculator/" target="_blank" rel="noopener">U.S. Small Business Administration · Break-even</a></li><li><a href="https://www.sec.gov/about/reports-publications/beginners-guide-financial-statements" target="_blank" rel="noopener">U.S. SEC · Financial statements and cash flow</a></li><li><a href="https://business.gov.au/finance/cash-flow/set-up-a-cash-flow-statement" target="_blank" rel="noopener">business.gov.au · Cash-flow planning</a></li></ul><p>The ExploraSelf prompts, stage rules, action matching and scenario model are a proposed implementation for this tool. The sources do not validate those assessment rules.</p></details></section><section class="card"><p class="eyebrow">05 / YOUR DATA</p><h3>Your workspace stays with you.</h3><p>Assessment entries are stored in this browser’s local storage, not sent to an ExploraSelf server. The one exception is your choice: “Send it by email” sends your plan once, to the address you type. Use Settings to restore or clear data; use the download arrow to keep a backup. Private browsing or clearing site data may remove your progress.</p><p style="margin-top:14px">The tool starts blank. Every calculated amount comes from your entries or an explicitly restored backup. The report can be printed or saved as a PDF using your browser, and downloaded as a text plan.</p></section><section class="card"><p class="eyebrow">06 / A HUMAN DECISION</p><h3>The point is a wiser next move.</h3><p>Use this tool to notice tensions, challenge assumptions and choose an experiment. It cannot decide what matters in your life, validate your records or certify that a business is ready to scale.</p><p style="margin-top:14px">Start where you are. A blank field, a changed mind or a smaller ambition can each be a useful answer.</p><a class="primary" href="#clarity" style="margin-top:22px">Find my starting point →</a></section></div>`;}
-function render(){const theme=state.profile.theme||'system';if(theme==='system')document.documentElement.removeAttribute('data-theme');else document.documentElement.dataset.theme=theme;page=location.hash.slice(1)||'overview';if(!['overview','clarity','numbers','picture','plan','method'].includes(page))page='overview';$('#main').innerHTML=({overview,clarity,numbers,picture,plan:report,method})[page]();document.querySelectorAll('[data-page]').forEach(a=>{a.classList.toggle('active',a.dataset.page===page);if(a.dataset.page===page)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});$('#nav-count').textContent=C.summary(state).answered+'/8';document.title=({overview:'Your compass',clarity:'01 Get clear',numbers:'02 Lead your people',picture:'03 Count what matters',plan:'04 Choose your next steps',method:'How it works'})[page]+' · ExploraSelf';}
-function enterDemo(){location.hash='method';}
-function exitDemo(){state.demo=false;save();render();}
-function planText(){const s=C.summary(state),c=C.calculate(state.numbers,state.scenario,state.moneyRanges),checks=checkpoint(c,s),acts=C.actions(state,c);return ['EXPLORASELF · LEADERSHIP COMPASS',new Date().toLocaleDateString('en-GB'),[state.profile.name,state.profile.business].filter(Boolean).join(' · '),state.demo?'FICTIONAL EXAMPLE':'PERSONAL WORKSPACE','Stage: '+stage().name+' · '+stage().role,'Destination: '+(goalStage()?goalStage().name:'Not chosen yet'),'Currency: '+state.profile.currency,...(C.estimatedKeys(state).length?['APPROXIMATE AMOUNTS: every amount was entered by the visitor. Ranges never supply a midpoint. Review estimates against your records.']:[]),'',stage().focus,'','FOUR DOMAINS',...s.scores.map(d=>d.name+': '+(d.answered===d.total?d.score+'% self-rating':'Incomplete')+'; '+d.answered+'/2 responses, '+d.evidenced+'/2 notes.'),'','SEE YOUR NUMBERS','Left after business costs: '+money(c.operating),'After allowing for your unpaid time: '+money(c.economic),'Money in minus money out: '+money(c.cashFlow),'How long your savings cover bills: '+decimal(c.buffer,' months'),'Your work hours versus your limit: '+pct(c.capacity),'',...c.errors,'','POSSIBLE BLIND SPOTS',...C.patterns(state,c).flatMap(p=>[p.title,p.why,p.ask,'']),'WHAT TO CHECK NEXT',...checks.checks.map(x=>(x.ok?'[x] ':'[ ] ')+x.text),'','WHERE YOU ARE · WHAT TO STRENGTHEN',...s.scores.flatMap(d=>{const lv=BP_LEVEL[BP[state.stage]][d.id];return [KNOW[d.id].toUpperCase()+' ('+d.name+'): '+standing(d)[1],...domainPath(d).flatMap((st,i)=>[(i+1)+'. '+st.h+(st.mark?' (you are there when: '+st.mark+')':''),...st.items.map(t=>'   - '+t)]),'In Link to Lead: Level '+String(lv[0]).padStart(2,'0')+' · '+lv[1],''];}),'PERSONAL + BUSINESS STRATEGY',...C.domains.flatMap(d=>{const v=state.strategy[state.stage]?.[d.id]||{};return [d.name,...[['goal','In 90 days, I want'],['experiment','This week, I will'],['review','I’ll know it worked when']].map(([k,l])=>l+': '+(v[k]||'Not yet written')),''];}),'NEXT MOVES',...acts.flatMap((a,i)=>[(i+1)+'. '+a.title,a.text,'Visible outcome: '+a.deliverable,'Complete: '+(state.done[state.stage+'-'+a.key]?'Yes':'Not yet'),'']),'MY FIRST STEP',state.notes.commitment||'Not yet chosen','What I will stop or change: '+(state.notes.stop||'Not yet chosen'),'Review date: '+(state.notes.date||'Not yet chosen'),'Evidence to look for: '+(state.notes.review||'Not yet chosen'),'','INPUTS & DEFINITIONS',...C.fields.map(f=>f.label+': '+(state.moneyRanges?.[f.key]&&state.moneyRanges[f.key]!=='exact'?bandLabel(C.bandsFor(f.key).find(b=>b.id===state.moneyRanges[f.key]))+'; calculation uses '+(state.numbers[f.key]===''?'unknown':state.numbers[f.key]):state.numbers[f.key]===''?'Unknown':state.numbers[f.key])+' ('+f.unit+')'),'Data limitations: '+(state.notes.data||'Not recorded'),'','ASSESSMENT EVIDENCE',...s.questions.flatMap(q=>[q.text,'Response: '+(Number.isInteger(state.answers[q.id])?answerLabels[state.answers[q.id]][0]:'Unknown'),'Note: '+(state.evidence[q.id]||'None'),'']),'NEXT: Link to Lead · linktolead.exploraself.com/start · free to start','','Self-reported reflection and simplified planning only. This is not a validated readiness test, an audit or professional financial advice. Positive contribution, your chosen cash target and capacity limit are proposed discussion criteria, not universal benchmarks. Approximate amounts are those you entered within your chosen ranges. All sources and formulas are available in How it works.'].join('\n');}
-function askStage(to,answered){const from=stage(),next=C.stages.find(x=>x.id===to);let d=document.getElementById('stage-dialog');
- if(!d){d=document.createElement('dialog');d.id='stage-dialog';document.body.appendChild(d);}
- d.innerHTML=`<p class="eyebrow">ONE STAGE AT A TIME</p><h2>You chose ${esc(from.name)}.</h2><p>Your summary uses the eight answers for one stage only, so it stays true to where you are. You have answered ${answered} for ${esc(from.name)}.</p><p><b>Change to ${esc(next.name)}?</b> Your ${esc(from.name)} answers are kept if you come back.</p><div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:18px"><button class="primary" id="stage-yes">Yes, change to ${esc(next.name)}</button><button class="secondary" id="stage-no">Stay with ${esc(from.name)}</button></div>`;
- d.querySelector('#stage-yes').onclick=()=>{d.close();state.stage=to;if(!goalChoices().some(x=>x.id===state.goal))state.goal='';save();render();toast(next.name+' selected.');};
- d.querySelector('#stage-no').onclick=()=>d.close();d.showModal();}
-document.addEventListener('click',e=>{const b=e.target.closest('button,a,label');if(!b)return;
- if(b.dataset.stage){const to=b.dataset.stage;if(to===state.stage)return;
-  // One stage at a time: the summary reads only the chosen stage's eight answers.
-  const answered=C.Q.filter(q=>q.stage===state.stage&&Number.isInteger(state.answers[q.id])).length;
-  if(answered){askStage(to,answered);return;}
-  state.stage=to;if(!goalChoices().some(x=>x.id===state.goal))state.goal='';save();render();toast(stage().name+' selected. Now: where do you want to get?');}
- if(b.dataset.goal){state.goal=b.dataset.goal;save();const y=window.scrollY;render();window.scrollTo(0,y);toast('Destination: '+goalStage().name+'. Now the questions.');return;}
- if(b.dataset.domain){domain=b.dataset.domain;if(page==='clarity'){e.preventDefault();render();}}
- if(b.hasAttribute('data-answer')){state.answers[b.dataset.answer]=Number(b.dataset.value);save();const y=window.scrollY;render();window.scrollTo(0,y);document.querySelector(`[data-answer="${b.dataset.answer}"][data-value="${b.dataset.value}"]`)?.focus({preventScroll:true});}
- if(b.hasAttribute('data-next-domain')||b.hasAttribute('data-prev-domain')){domain=C.domains[C.domains.findIndex(d=>d.id===domain)+(b.hasAttribute('data-next-domain')?1:-1)].id;render();$('#main').scrollIntoView({block:'start'});}
- if(b.hasAttribute('data-demo'))enterDemo();if(b.hasAttribute('data-exit-demo'))exitDemo();if(b.hasAttribute('data-print'))window.print();if(b.hasAttribute('data-plan-download'))download('ExploraSelf-Leadership-Plan.txt',planText());
- if(b.dataset.rangeBack){const key=b.dataset.rangeBack;C.applyMoneyChoice(state,key,'unknown');save();$('#field-'+key).innerHTML=rangeFieldInner(C.fields.find(f=>f.key===key));updateNumberResults();$('#r-'+key)?.focus();}
- if(b.hasAttribute('data-use-suggest')){const st=state.strategy[state.stage]||(state.strategy[state.stage]={});for(const d of C.domains){const v=st[d.id]||(st[d.id]={}),pr=strategicPrompts[state.stage][d.id];[['goal',0],['experiment',1],['review',2]].forEach(([k,i])=>{if(!String(v[k]||'').trim())v[k]=pr[i];});}save();const y=window.scrollY;render();window.scrollTo(0,y);toast('Suggestions added. Make them yours.');}
- if(b.hasAttribute('data-email-open'))emailDialog();
-});
-document.addEventListener('input',e=>{const el=e.target;if(el.dataset.number){state.numbers[el.dataset.number]=el.value===''?'':Number(el.value);if(el.value!==''&&state.legacyAmounts){delete state.legacyAmounts[el.dataset.number];state.needsAmountReview=Object.keys(state.legacyAmounts).length>0;}save();updateNumberResults();}if(el.dataset.scenario){state.scenario[el.dataset.scenario]=Number(el.value);$('#o-'+el.dataset.scenario).textContent=(Number(el.value)>0?'+':'')+el.value+'%';save();$('#scenario-results').innerHTML=scenarioResults();}if(el.dataset.strategy){const st=state.strategy[state.stage]||(state.strategy[state.stage]={});const d=st[el.dataset.strategy]||(st[el.dataset.strategy]={});d[el.dataset.strategyKey]=el.value;save();}if(el.dataset.evidence){state.evidence[el.dataset.evidence]=el.value;save();}if(el.dataset.note){state.notes[el.dataset.note]=el.value;save();}});
-function updateNumberResults(){for(const [id,fn] of [['#number-results',numberResults],['#scenario-results',scenarioResults],['#scenario-estimates',estimateNotice]]){const el=$(id);if(el)el.innerHTML=fn();}}
-document.addEventListener('change',e=>{if(e.target.dataset.moneyRange){const key=e.target.dataset.moneyRange;C.applyMoneyChoice(state,key,e.target.value);save();const f=C.fields.find(f=>f.key===key);$('#field-'+key).innerHTML=rangeFieldInner(f);updateNumberResults();($('#n-'+key)||$('#r-'+key))?.focus();}if(e.target.dataset.done){state.done[e.target.dataset.done]=e.target.checked;save();}});
-$('#demo').addEventListener('click',enterDemo);$('#export').addEventListener('click',()=>download('ExploraSelf-Compass-Backup.json',JSON.stringify(state,null,2),'application/json'));
-$('#settings').addEventListener('click',()=>{for(const key of ['name','business','type','currency','theme'])$('#profile-'+key).value=state.profile[key];$('#settings-dialog').showModal();});
-$('#save-settings').addEventListener('click',()=>{for(const key of ['name','business','type','currency','theme'])state.profile[key]=$('#profile-'+key).value.trim();save();$('#settings-dialog').close();render();toast('Preferences saved. Currency labels do not convert amounts.');});
-$('#reset').addEventListener('click',()=>{if(confirm('Clear all assessment answers, business inputs and notes in this workspace? Download a backup first if you want to keep them.')){state=C.blank();try{localStorage.removeItem(BEFORE_DEMO);window.priorState=null;}catch(_){}save();$('#settings-dialog').close();render();toast('Your workspace has been cleared.');}});
-$('#import-file').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{if(f.size>200000)throw Error('Please choose a Compass backup smaller than 200 KB.');const next=C.sanitize(JSON.parse(await f.text()));if(!confirm('Replace the current workspace with this backup?'))return;state=next;save();$('#settings-dialog').close();render();toast('Your backup has been restored.');}catch(err){toast(err.message||'This backup could not be read.');}finally{e.target.value='';}});
-window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0);$('#main').focus({preventScroll:true});});
-/* Real email, switched on only when the site has an email-service key (see /api/send-plan). */
-function planForEmail(){const s=C.summary(state),c=C.calculate(state.numbers,state.scenario,state.moneyRanges),acts=C.actions(state,c),lv=BP_LEVEL[BP[state.stage]];return {name:state.profile.name,business:state.profile.business,stage:stage().name+(goalStage()&&goalStage().id!==state.stage?' → '+goalStage().name:''),focus:stage().focus,domains:s.scores.map(d=>({know:KNOW[d.id],lead:d.name,label:standing(d)[1],strengthen:s.questions.filter(q=>q.domain===d.id&&!(state.answers[q.id]>=2)).map(q=>q.text),steps:domainPath(d).flatMap(st=>st.items.map(t=>st.h+': '+t)),level:'Level '+String(lv[d.id][0]).padStart(2,'0')+' · '+lv[d.id][1]})),numbers:[['Left after business costs',money(c.operating)],['Money in minus money out',money(c.cashFlow)],['How long your savings cover bills',decimal(c.buffer,' months')],['Your hours against your limit',pct(c.capacity)]],next:acts.map(a=>({title:a.title,text:a.text})),strategy:C.domains.map(d=>{const v=state.strategy[state.stage]?.[d.id]||{};return {lead:d.name,goal:v.goal||'',week:v.experiment||'',check:v.review||''};})};}
-function emailDialog(){let d=document.getElementById('email-dialog');if(!d){d=document.createElement('dialog');d.id='email-dialog';document.body.appendChild(d);}
- d.innerHTML=`<form method="dialog"><button class="dialog-close" aria-label="Close">×</button></form><p class="eyebrow">SEND IT BY EMAIL</p><h2>Your plan, in your inbox.</h2><p>We send it once, to this address. Nothing else is signed up.</p><label>Your email<input type="email" id="email-to" autocomplete="email" required placeholder="you@business.com"></label><p class="hint" id="email-msg" role="status"></p><button class="primary" id="email-send">Send my plan</button>`;
- d.querySelector('#email-send').onclick=async()=>{const to=d.querySelector('#email-to').value.trim(),msg=d.querySelector('#email-msg'),btn=d.querySelector('#email-send');if(!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(to)){msg.textContent='That address does not look complete.';return;}btn.disabled=true;msg.textContent='Sending…';try{const r=await fetch('/api/send-plan',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:to,plan:planForEmail()})}),j=await r.json().catch(()=>({}));if(!r.ok||!j.ok)throw Error(j.error||'It did not send. Try again in a minute.');msg.textContent='Sent. Check your inbox (and the spam folder, just in case).';btn.textContent='Sent ✓';}catch(err){msg.textContent=err.message;btn.disabled=false;}};
- d.showModal();d.querySelector('#email-to').focus();}
-try{if(location.protocol!=='file:')fetch('/api/send-plan').then(r=>r.ok?r.json():{}).then(j=>{mailReady=!!j.ready;if(mailReady&&page==='plan')render();}).catch(()=>{});}catch(_){}
-/* A range chosen before ranges counted on their own: give it its middle now. */
-for(const key of C.moneyKeys){const id=state.moneyRanges?.[key],b=C.bandsFor(key).find(x=>x.id===id);if(b&&state.numbers[key]==='')C.applyMoneyChoice(state,key,id);}
-render();
+  /* ── State ──────────────────────────────────────────────────────────────── */
+  const blank = () => ({ v: 2, theme: 'light', profile: { first: '', last: '', email: '', business: '', type: '', industry: '', currency: 'USD', consent: false },
+    skipped: false, stage: 'building', goal: '', mode: 'yes', ans: {}, str: {}, pains: [], want: '', nums: {}, group: 0,
+    got: {}, more: {}, lean: null, stop: 0, lab: { p: 0, m: 0, d: 0, rate: '', hire: '', plan: '' } });
+  const read = (k) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } };
+
+  /** Keep only what this version knows, in the shapes it expects. */
+  function sanitize(raw) {
+    const s = blank();
+    if (!raw || typeof raw !== 'object') return s;
+    const str = (v, n) => String(v ?? '').slice(0, n);
+    const p = raw.profile || {};
+    for (const k of ['first', 'last', 'email', 'business', 'type', 'industry']) s.profile[k] = str(p[k], 120);
+    if (['USD', 'EUR', 'GBP', 'CAD', 'AUD'].includes(p.currency)) s.profile.currency = p.currency;
+    s.profile.consent = p.consent === true;
+    s.theme = raw.theme === 'dark' ? 'dark' : 'light';
+    s.skipped = raw.skipped === true;
+    if (E.STAGES.some((x) => x.id === raw.stage)) s.stage = raw.stage;
+    if (E.STAGES.some((x) => x.id === raw.goal)) s.goal = raw.goal;
+    if (E.MODES.some((m) => m[0] === raw.mode)) s.mode = raw.mode;
+    for (const q of M.Q) if (Number.isInteger(raw.ans?.[q.id]) && raw.ans[q.id] >= 0 && raw.ans[q.id] <= 3) s.ans[q.id] = raw.ans[q.id];
+    for (let i = 0; i < 4; i++) { const v = raw.str?.[i]; if (Number.isInteger(v) && v >= 1 && v <= 5) s.str[i] = v; }
+    s.pains = (Array.isArray(raw.pains) ? raw.pains : []).filter((x) => E.PAINS.some((p2) => p2[0] === x)).slice(0, 2);
+    if (E.GOALS.some((g) => g[0] === raw.want)) s.want = raw.want;
+    for (const [k, v] of Object.entries(raw.nums || {})) if (/^(yes|offer|idea)\.\w+$/.test(k) && v && typeof v === 'object') s.nums[k] = { pick: str(v.pick, 8), own: str(v.own, 80) };
+    s.group = Number.isInteger(raw.group) && raw.group >= 0 && raw.group <= 4 ? raw.group : 0;
+    for (let i = 0; i < 4; i++) { if (raw.got?.[i] === true) s.got[i] = true; if (raw.more?.[i] === true) s.more[i] = true; }
+    s.lean = Number.isInteger(raw.lean) && raw.lean >= 0 && raw.lean < 4 ? raw.lean : null;
+    s.stop = Number.isInteger(raw.stop) && raw.stop >= 0 && raw.stop < 5 ? raw.stop : 0;
+    const lab = raw.lab || {};
+    s.lab = { p: clampN(lab.p, 0, 50), m: clampN(lab.m, 0, 100), d: clampN(lab.d, 0, 60), rate: str(lab.rate, 12), hire: str(lab.hire, 12), plan: str(lab.plan, 12) };
+    return s;
+  }
+  function clampN(v, lo, hi) { const n = Number(v); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : 0; }
+
+  /** Carry a founder's entries over from the Compass before v18. Their old
+   *  record stays where it is. */
+  function migrate(old) {
+    const s = blank();
+    const p = old.profile || {};
+    s.profile.first = String(p.name || '').slice(0, 60);
+    s.profile.business = String(p.business || '').slice(0, 80);
+    s.profile.type = p.type === 'small' ? 'Small business with a team' : p.type === 'solo' ? 'Solopreneur (just me)' : '';
+    if (['USD', 'EUR', 'GBP', 'CAD', 'AUD'].includes(p.currency)) s.profile.currency = p.currency;
+    s.theme = p.theme === 'dark' ? 'dark' : 'light';
+    if (E.STAGES.some((x) => x.id === old.stage)) s.stage = old.stage;
+    if (E.STAGES.some((x) => x.id === old.goal)) s.goal = old.goal;
+    for (const [k, v] of Object.entries(old.answers || {})) if (Number.isInteger(v)) s.ans[k] = v;
+    const map = { revenue: 'sales', variable: 'deliv', fixed: 'run', hours: 'hrs', availableHours: 'want', unpaidHours: 'unpaid',
+      cash: 'save', reserveMonths: 'months', cashOut: 'out', newCustomers: 'newc', acquisition: 'acq' };
+    for (const [from, to] of Object.entries(map)) {
+      const v = old.numbers && old.numbers[from];
+      if (v !== '' && v !== null && v !== undefined && Number.isFinite(Number(v))) s.nums['yes.' + to] = { pick: 'own', own: String(v) };
+    }
+    return sanitize(s);
+  }
+
+  let S = (() => {
+    const cur = read(KEY);
+    if (cur) return sanitize(cur);
+    const old = read(OLD);
+    return old && old.version === 1 ? migrate(old) : blank();
+  })();
+  /* Details given on the Compass sales page arrive here, never asked twice. */
+  (() => {
+    const pre = read(DEFAULT_PROFILE);
+    if (!pre || S.profile.email) return;
+    for (const k of ['first', 'last', 'email']) if (pre[k]) S.profile[k] = String(pre[k]).slice(0, 120);
+    if (pre.consent === true) S.profile.consent = true;
+    // The stage finder on the sales page, used only before any answer here.
+    if (E.STAGES.some((x) => x.id === pre.stage) && !Object.keys(S.ans).length) S.stage = pre.stage;
+  })();
+
+  let stored = true, saveTimer;
+  function save() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      try { localStorage.setItem(KEY, JSON.stringify(S)); stored = true; } catch { stored = false; }
+      const el = $('#save-status'); if (el) el.textContent = stored ? '○ Saved on this browser' : '○ This session only · download a backup';
+    }, 150);
+  }
+  const UI = { page: 'overview', gate: false, after: null, how: false, ws: false, saved: false, mail: '', mailReady: false, sending: false };
+  const identified = () => !!S.profile.email;
+
+  /** A first answer opens "Who is this compass for?". What they tapped is kept. */
+  function gated(change) {
+    change();
+    if (!identified() && !S.skipped) openGate();
+    save(); render();
+  }
+  /** Open the gate, and remember where to put focus back when it closes. */
+  function openGate(after) {
+    const a = document.activeElement;
+    UI.returnF = a && a.dataset ? a.dataset.f : null;
+    UI.gate = true; UI.after = after || null;
+    setTimeout(() => { const f = $('#g-first'); if (f) f.focus(); }, 0);
+  }
+  function closeGate() {
+    UI.gate = false; render();
+    const back = UI.returnF && document.querySelector(`[data-f="${UI.returnF}"]`);
+    if (back) back.focus({ preventScroll: true });
+  }
+
+  /* ── Money and numbers ──────────────────────────────────────────────────── */
+  function money(x) {
+    try { return new Intl.NumberFormat('en-US', { style: 'currency', currency: S.profile.currency, maximumFractionDigits: 0 }).format(Math.round(x)); }
+    catch { return Math.round(x).toLocaleString('en-US'); }
+  }
+  const signed = (x) => (x > 0 ? '+' : x < 0 ? '−' : '') + money(Math.abs(x)).replace('-', '');
+  const whole = (x) => Math.round(x).toLocaleString('en-US');
+
+  /* ── What everything below is drawn from ────────────────────────────────── */
+  function context() {
+    const qs = E.questionsFor(M, S.stage), sc = E.scores(M, S), rd = E.reading(sc, S.str), pc = E.pieces(sc, S.str, S.got);
+    const answered = sc.reduce((a, s) => a + s.answered, 0);
+    return { qs, sc, rd, pc, answered, n: E.numbers(S), here: E.STAGES.findIndex((x) => x.id === S.stage), goal: E.STAGES.findIndex((x) => x.id === S.goal) };
+  }
+
+  /* ── The launchpad emblem: four quarters, four bands each, filling from the centre ── */
+  function emblem(per, size, opts = {}) {
+    const pt = (rr, a) => [60 + rr * Math.cos(a * Math.PI / 180), 60 + rr * Math.sin(a * Math.PI / 180)];
+    const bandPath = (ri, ro, a0, a1) => { const [x0, y0] = pt(ro, a0), [x1, y1] = pt(ro, a1), [x2, y2] = pt(ri, a1), [x3, y3] = pt(ri, a0);
+      return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${ro} ${ro} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} L${x2.toFixed(1)} ${y2.toFixed(1)} A${ri} ${ri} 0 0 0 ${x3.toFixed(1)} ${y3.toFixed(1)} Z`; };
+    const total = per.reduce((a, b) => a + b, 0);
+    let segs = '';
+    D.forEach((_, i) => { const a0 = -90 + i * 90 + 3, a1 = a0 + 84; for (let k = 0; k < 4; k++) { const ri = 14 + k * 11, ro = ri + 9, on = k < per[i];
+      segs += `<path class="band" d="${bandPath(ri, ro, a0, a1)}" fill="${on ? LIGHT[i] : 'none'}" stroke="${on ? LIGHT[i] : '#8A7A5E'}" stroke-width="${opts.small ? 2 : 1}" stroke-dasharray="${on ? '0' : '2 3'}" style="opacity: ${on ? 1 : .55}; transition: fill .5s ease, opacity .5s ease"/>`; } });
+    const coreR = (3 + total / 16 * 7).toFixed(1), coreOp = (0.3 + total / 16 * 0.7).toFixed(2);
+    return `<svg class="${opts.cls || ''}" width="${size}" height="${size}" viewBox="0 0 120 120" role="img" aria-label="Your launchpad: ${total} of 16 pieces in place" style="flex: none">
+      ${opts.small ? '' : '<g class="spin"><circle cx="60" cy="60" r="59" fill="none" stroke="#C9A24A" stroke-width=".8" stroke-dasharray="1.5 5" opacity=".7"/></g>'}
+      ${segs}
+      ${opts.small ? '' : '<line x1="60" y1="2" x2="60" y2="118" stroke="#1C1309" stroke-width="2"/><line x1="2" y1="60" x2="118" y2="60" stroke="#1C1309" stroke-width="2"/>'}
+      <circle cx="60" cy="60" r="${coreR}" fill="#C9A24A" style="opacity: ${coreOp}; transition: r .6s ease, opacity .6s ease"/>
+      ${opts.small ? '' : '<circle cx="60" cy="60" r="11" fill="none" stroke="#F7F2E7" stroke-width=".8" opacity=".5"/><g class="orbit2"><circle cx="60" cy="3" r="2.5" fill="#F7F2E7"/></g>'}
+    </svg>`;
+  }
+
+  /* ── Parts ──────────────────────────────────────────────────────────────── */
+  const NAV = [['overview', '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><g><polygon points="12,4 14,12 12,13.5 10,12" fill="#C9A24A"/><polygon points="12,20 14,12 12,10.5 10,12" fill="currentColor" opacity=".5"/><animateTransform attributeName="transform" type="rotate" values="20 12 12;34 12 12;20 12 12" dur="7s" repeatCount="indefinite"/></g></svg>', 'Your compass'],
+    ['clear', '01', 'Get clear'], ['people', '02', 'Lead your people'], ['numbers', '03', 'Count what matters'], ['plan', '04', 'Choose your next steps'], ['method', '⌘', 'How it works']];
+  const pNav = (c) => NAV.map(([id, ni, t]) => `<button type="button" class="nl ${UI.page === id ? 'on' : ''}" data-go="${id}" data-f="nav-${id}"${UI.page === id ? ' aria-current="true"' : ''}><span class="ni">${ni}</span>${t}${id === 'clear' ? `<small style="margin-left: auto; font-size: 9px">${c.answered}/8</small>` : ''}</button>`).join('');
+
+  const STEP_CARDS = [['01', 'Get clear', 'Know yourself', 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'clear'],
+    ['02', 'Lead your people', 'Know your people', D[1].icon, 'people'], ['03', 'Count what matters', 'Know your numbers', 'M4 20V10M10 20V4M16 20v-7M22 20H2', 'numbers'],
+    ['04', 'Choose your next steps', 'Know your market', 'M6 21V4M6 4h11l-3 4 3 4H6', 'plan']];
+  const pStepcards = () => STEP_CARDS.map(([n, t, k, icon, go], i) => `<button type="button" data-go="${go}" data-f="card-${go}" class="card lift stepc rise" style="animation-delay: ${(i + 1) / 10}s; text-align: left; padding: 18px; cursor: pointer; color: var(--ink); display: flex; flex-direction: column; gap: 8px; min-height: 150px">
+      <span style="display: flex; justify-content: space-between; align-items: center; width: 100%"><span style="font-size: 11px; letter-spacing: .14em; color: var(--goldink); font-weight: 600">STEP ${n}</span><svg class="sico" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="${icon}" fill="none" stroke="${CSSV[i]}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="sf" style="font-size: 21px; display: flex; align-items: center; gap: 8px">${t} <span class="sarr" aria-hidden="true">→</span></span>
+      <span style="font-size: 13px; color: var(--muted)">${k}</span></button>`).join('');
+
+  const LINES = ['Every answer puts a piece in place. Watch your launchpad build from the centre out.', 'It is taking shape. Keep going: each domain has four pieces.',
+    'More than half built. The weakest corner shows you where to look.', 'Almost complete. Tick “Got it” on your feedback to finish it.', 'Your launchpad is ready. The next step is inside.'];
+  function pBanner(c) {
+    const t = c.pc.total, ready = t >= 12;
+    const line = t === 16 ? LINES[4] : t === 0 ? LINES[0] : t < 8 ? LINES[1] : t < 12 ? LINES[2] : LINES[3];
+    return `${emblem(c.pc.per, 124, { cls: 'lp-emb' })}
+      <div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 4px; min-width: 0">
+        <span class="eb" style="color: #E3C47E">Your launchpad · ${t} of 16 pieces in place</span>
+        <span class="sf" style="font-size: 18px; line-height: 1.25">${line}</span>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; font-weight: 600">${D.map((d, i) => `<span style="display: inline-flex; align-items: center; gap: 6px; color: ${LIGHT[i]}"><span style="width: 9px; height: 9px; border-radius: 50%; background: ${LIGHT[i]}"></span>${d.name} ${c.pc.per[i]}/4</span>`).join('')}</div>
+      </div>
+      ${ready ? '<a class="pop cta" href="/start" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 18px; border-radius: 5px; background: #C9A24A; color: #14100B; font-weight: 600; text-decoration: none">You’re ready · Enter the Founder Launchpad →</a>' : ''}`;
+  }
+
+  const pRing = (c) => `<svg width="74" height="74" viewBox="0 0 74 74" role="img" aria-label="${c.answered} of 8 answered">
+      <circle cx="37" cy="37" r="31" fill="none" stroke="var(--cream)" stroke-width="7"/>
+      <circle class="ringp" cx="37" cy="37" r="31" fill="none" stroke="#C9A24A" stroke-width="7" stroke-linecap="round" stroke-dasharray="194.8" style="stroke-dashoffset: ${(194.8 * (1 - c.answered / 8)).toFixed(1)}" transform="rotate(-90 37 37)"/>
+      <text x="37" y="43" text-anchor="middle" font-family="Fraunces" font-size="19" fill="currentColor">${c.answered}/8</text></svg>`;
+
+  const pSkip = () => (S.skipped && !identified() ? `<div class="card pop" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-color: #C9A24A">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="#C9A24A" stroke-width="1.8"/><path d="M12 7v6M12 16.5v.5" stroke="#C9A24A" stroke-width="2" stroke-linecap="round"/></svg>
+      <span style="flex: 1; font-size: 14px">You are exploring. Add your email when you want your results sent to you.</span>
+      <button type="button" data-act="regate" data-f="regate" style="min-height: 40px; padding: 0 14px; border-radius: 4px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; cursor: pointer">Add my email</button></div>` : '');
+
+  /* Journey: Step 1 where you are today, Step 2 the road to where you want to get. */
+  function pJourney(c) {
+    const S4 = E.STAGES, here = c.here, hasGoal = c.goal >= 0, goal = c.goal, top = here === 3;
+    const pos = (i) => 12.5 + 25 * i;
+    const stages = S4.map((s, i) => {
+      const isHere = i === here, isGoal = hasGoal && i === goal && i !== here, isWay = hasGoal && i > here && i < goal;
+      const behind = i < here, can = i > here || (top && isHere);
+      return { s, i, isHere, isGoal, isWay, behind, can,
+        dotSize: isHere ? 26 : isGoal ? 30 : isWay ? 18 : 20,
+        dotBg: isHere || isGoal ? '#C9A24A' : isWay ? '#E3C47E' : behind ? '#3A2F20' : '#1C1309',
+        dotBorder: isHere || isGoal ? '#F7F2E7' : isWay ? '#C9A24A' : behind ? '#3A2F20' : '#8A7A5E',
+        tag: isHere ? (top ? 'YOU ARE HERE · GO DEEPER' : 'YOU ARE HERE') : isGoal ? 'YOUR GOAL' : isWay ? 'ON THE WAY' : behind ? 'BEHIND YOU' : 'TAP TO AIM' };
+    });
+    const gi = hasGoal ? goal : here, gap = gi - here;
+    const words = ['', 'one stage to go, the next one', 'two stages to go — one at a time', 'three stages to go — one at a time'];
+    const path = S4.slice(here, gi + 1).map((s) => s.name);
+    const roadText = gap === 0 ? 'deeper into ' + S4[here].name : 'first finish ' + S4[here].name + ', then ' + path.slice(1).join(', then ');
+    const chips = (hasGoal ? path : [S4[here].name]).map((nm, k, arr) => `<span style="padding: 5px 9px; border-radius: 12px; background: ${k === 0 ? '#C9A24A' : k === arr.length - 1 ? '#1C1309' : '#EFE4CC'}; color: ${k === arr.length - 1 && k !== 0 ? '#F7F2E7' : '#1C1309'}">${nm}</span>`).join('');
+    return `<section class="rise r1" style="display: flex; flex-direction: column; gap: 18px">
+      <div style="display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap">
+        <span style="background: #C9A24A; color: #1C1309; font-weight: 900; font-size: 13px; padding: 6px 10px; border-radius: 3px; letter-spacing: .08em">STEP 1</span>
+        <h2 style="font-weight: 900; font-size: 28px">Where are you <span class="serif" style="color: var(--goldink); font-weight: 400">today?</span></h2>
+      </div>
+      <p style="color: var(--muted); font-size: 16px">Tap the stage that is true now, not the one that would look best on a business card.</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px" role="group" aria-label="Where are you today?">
+        ${stages.map((x) => `<button type="button" data-act="here" data-i="${x.i}" data-f="here-${x.i}" aria-pressed="${x.isHere}" style="text-align: left; cursor: pointer; color: #1C1309; background: ${x.isHere ? '#EFE4CC' : '#FFFFFF'}; border: 2px solid ${x.isHere ? '#6E5213' : '#D6C9AC'}; border-radius: 8px; padding: 18px; min-height: 120px; display: flex; flex-direction: column; gap: 8px; transition: background .3s ease, border-color .3s ease">
+          <span style="display: flex; justify-content: space-between; align-items: center; width: 100%"><span style="font-weight: 900; font-size: 12px; letter-spacing: .14em; color: #6E5213">0${x.i + 1}</span><span style="font-size: 11px; font-weight: 900; letter-spacing: .12em; color: #6E5213">${x.isHere ? 'YOU ARE HERE' : ''}</span></span>
+          <span class="stname" style="font-size: 23px">${x.s.name}</span>
+          <span class="serif" style="font-size: 14px; line-height: 1.4; color: #6A6052">${x.s.focus}</span></button>`).join('')}
+      </div>
+    </section>
+    <section class="rise r2" style="display: flex; flex-direction: column; gap: 18px">
+      <div style="display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap">
+        <span style="background: #C9A24A; color: #1C1309; font-weight: 900; font-size: 13px; padding: 6px 10px; border-radius: 3px; letter-spacing: .08em">STEP 2</span>
+        <h2 style="font-weight: 900; font-size: 28px">Where do you want <span class="serif" style="color: var(--goldink); font-weight: 400">to get?</span></h2>
+      </div>
+      <p style="color: var(--muted); font-size: 16px">Now tap the stage you want to reach on your road.</p>
+      <div style="background: #1C1309; color: #F7F2E7; border-radius: 12px; padding: 34px 18px 22px; box-shadow: 0 30px 60px rgba(28,19,9,.18)">
+        <div style="position: relative; height: 150px">
+          <div style="position: absolute; left: 12.5%; right: 12.5%; top: 50%; height: 4px; margin-top: -2px; background: repeating-linear-gradient(90deg, #594A32 0 10px, transparent 10px 18px); border-radius: 2px"></div>
+          <div class="fill" style="position: absolute; top: 50%; height: 6px; margin-top: -3px; border-radius: 3px; background: #C9A24A; box-shadow: 0 0 14px rgba(201,162,74,.7); left: ${pos(here)}%; width: ${hasGoal ? 25 * gap : 0}%"></div>
+          ${hasGoal && gap > 0 ? `<span class="trav" style="--from: ${pos(here)}%; --to: ${pos(gi)}%"></span>` : ''}
+          ${stages.map((x) => `<div style="position: absolute; top: 0; bottom: 0; left: ${pos(x.i)}%; width: 0">
+            ${x.isGoal ? '<svg class="flag" width="28" height="34" viewBox="0 0 28 34" aria-hidden="true" style="position: absolute; left: 0; top: 8px"><path d="M6 32V3" stroke="#F7F2E7" stroke-width="2"/><path d="M6 4h18l-5 6 5 6H6z" fill="#C9A24A"/></svg>' : ''}
+            ${x.isHere ? '<span class="jring"></span><span class="jring ring2"></span>' : ''}
+            ${x.isWay ? `<span class="way" style="position: absolute; left: 0; top: 50%; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #C9A24A; transform: translate(-50%,-50%); animation-delay: ${(0.35 * (x.i - here)).toFixed(2)}s"></span>` : ''}
+            <button type="button" data-act="goal" data-i="${x.i}" data-f="goal-${x.i}" ${x.can ? '' : 'disabled'} aria-label="Set ${x.s.name} as my goal"${x.isGoal || (x.isHere && hasGoal && gap === 0) ? ' aria-pressed="true"' : ''} class="${x.isGoal ? 'beacon' : ''}" style="position: absolute; left: 0; top: 50%; transform: translate(-50%,-50%); width: ${x.dotSize}px; height: ${x.dotSize}px; border-radius: 50%; background: ${x.dotBg}; border: 3px solid ${x.dotBorder}; cursor: ${x.can ? 'pointer' : 'default'}; padding: 0; transition: background .3s ease, width .3s ease, height .3s ease"></button>
+            <div style="position: absolute; left: 0; bottom: 0; transform: translateX(-50%); width: 140px; max-width: 24vw; text-align: center; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-weight: 900; font-size: 15px; text-transform: uppercase; color: ${x.behind ? '#8A7A5E' : '#F7F2E7'}">${x.s.name}</span>
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: .1em; color: ${x.isHere || x.isGoal ? '#C9A24A' : '#C4B69D'}">${x.tag}</span>
+            </div></div>`).join('')}
+        </div>
+        ${hasGoal ? `<div class="rise" style="margin-top: 26px; border-top: 1px solid #3A2F20; padding-top: 20px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center">
+            <span style="font-size: 20px; line-height: 1.4"><b style="color: #C9A24A">You are here:</b> ${S4[here].name} <span style="color: #C4B69D">→</span> <b style="color: #C9A24A">Your goal:</b> ${gap === 0 ? 'go deeper' : S4[gi].name} · ${gap === 0 ? 'we sharpen what you already do' : words[gap]}</span>
+            <span class="serif" style="font-size: 16px; color: #EFE4CC; max-width: 680px; line-height: 1.45">Your questions stay about where you are today. Your goal shapes your road in Step 04 — ${roadText}.</span></div>`
+        : '<p style="margin-top: 22px; text-align: center; color: #C4B69D; font-size: 15px">Tap a stage ahead of you. Your road will draw itself.</p>'}
+      </div>
+    </section>
+    <section class="rise r3" style="display: flex; flex-direction: column; gap: 16px">
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: .18em; color: var(--goldink)">WHAT HAPPENS NEXT</span>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px">
+        <a href="#s-questions" class="next1" style="text-decoration: none; color: #1C1309; background: #C9A24A; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 8px; min-height: 140px">
+          <span style="font-weight: 900; font-size: 13px; letter-spacing: .14em">01 · YOU ARE GOING HERE NOW</span>
+          <span style="font-weight: 900; font-size: 20px">Answer 8 questions about today</span>
+          <span style="font-size: 14px">About ${S4[here].name} — across all four domains. Start →</span></a>
+        <div style="background: #1C1309; color: #F7F2E7; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 8px; min-height: 140px">
+          <span style="font-weight: 900; font-size: 13px; letter-spacing: .14em; color: #C4B69D">02 · THEN</span>
+          <span style="font-weight: 900; font-size: 20px">Add your numbers</span>
+          <span style="font-size: 14px; color: #D3C4A5">One month. A range is enough.</span></div>
+        <div style="background: #FFFFFF; border: 1.5px solid #D6C9AC; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 10px; min-height: 140px; color: #1C1309">
+          <span style="font-weight: 900; font-size: 13px; letter-spacing: .14em; color: #6E5213">03 · AND YOU GET</span>
+          <span style="font-weight: 900; font-size: 20px">Your road, step by step</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; font-weight: 900">${chips}</div></div>
+      </div>
+    </section>`;
+  }
+
+  const pHerebar = (c) => (c.goal >= 0 ? `<div id="s-questions" class="card" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="10" r="3" fill="none" stroke="var(--goldink)" stroke-width="1.8"/><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" fill="none" stroke="var(--goldink)" stroke-width="1.8"/></svg>
+      <span><b>You are here:</b> ${E.STAGES[c.here].name}</span><span style="color: var(--muted)">→</span><span><b>Your goal:</b> ${c.goal === c.here ? 'go deeper' : E.STAGES[c.goal].name}</span>
+      <button type="button" data-go="journey" data-f="change-road" style="margin-left: auto; font-size: 13px; font-weight: 600; padding: 8px 0; background: none; border: 0; color: var(--goldink); cursor: pointer; text-decoration: underline">Change</button></div>`
+    : '<div id="s-questions"></div>');
+
+  const pModes = () => `<div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 10px">
+      <span style="font-weight: 600" id="modes-h">Do you have paying customers yet?</span>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px" role="group" aria-labelledby="modes-h">
+        ${E.MODES.map(([id, label, sub]) => `<button type="button" data-act="mode" data-v="${id}" data-f="mode-${id}" aria-pressed="${S.mode === id}" style="text-align: left; min-height: 56px; padding: 10px 12px; border-radius: 5px; border: 1.5px solid ${S.mode === id ? 'var(--ink)' : 'var(--line)'}; background: ${S.mode === id ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); cursor: pointer; display: flex; flex-direction: column; gap: 1px"><span style="font-weight: 600">${label}</span><span style="font-size: 12px; color: var(--muted)">${sub}</span></button>`).join('')}
+      </div>
+      <span style="font-size: 12px; color: var(--muted)">This changes the numbers we ask for and the feedback you get. No customers yet? We will not turn this into a sales calculator.</span></div>`;
+
+  const pDombars = (c) => `<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px" aria-hidden="true">${D.map((d, i) => `<div style="display: flex; flex-direction: column; gap: 6px">
+      <div style="height: 5px; border-radius: 3px; background: var(--cream); overflow: hidden"><div class="bar" style="height: 5px; background: ${CSSV[i]}; width: ${c.sc[i].answered * 50}%"></div></div>
+      <span style="font-size: 11px; font-weight: 600; letter-spacing: .08em; color: ${CSSV[i]}">${d.name} · ${c.sc[i].answered}/2</span></div>`).join('')}</div>`;
+
+  function pQuestions(c) {
+    const firstOpen = c.qs.findIndex((q) => !Number.isInteger(S.ans[q.id]));
+    return c.qs.map((q, i) => {
+      const di = D.findIndex((d) => d.id === q.domain), done = Number.isInteger(S.ans[q.id]);
+      return `<div style="display: flex; flex-direction: column; gap: 12px">
+        ${i % 2 === 0 ? `<div style="display: flex; align-items: center; gap: 10px; margin-top: 12px">
+          <span style="width: 34px; height: 34px; border-radius: 50%; background: ${TINT[di]}; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="${D[di].icon}" fill="none" stroke="${CSSV[di]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <h3 class="sf" style="font-size: 20px; font-weight: 500">${D[di].name}</h3><span style="flex: 1; height: 1px; background: var(--line)"></span></div>` : ''}
+        <div style="background: var(--paper); border: 1.5px solid ${i === firstOpen ? '#C9A24A' : done ? 'var(--line)' : 'var(--cream)'}; border-radius: 7px; padding: 18px; display: flex; flex-direction: column; gap: 12px; transition: border-color .3s ease">
+          <div style="display: flex; gap: 12px; align-items: flex-start">
+            <span style="font-family: Fraunces, serif; font-size: 15px; color: ${CSSV[di]}; flex: none; padding-top: 2px">0${i + 1}</span>
+            <div style="display: flex; flex-direction: column; gap: 4px; flex: 1"><span style="font-weight: 600; font-size: 16px; line-height: 1.35" id="qt-${q.id}">${esc(q.text)}</span><span style="font-size: 13px; color: var(--muted)">${esc(q.prompt)}</span></div>
+            ${done ? '<svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Answered" style="flex: none"><circle cx="12" cy="12" r="10" fill="#C9A24A"/><path d="M7 12.5l3.2 3L17 9" fill="none" stroke="#14100B" stroke-width="2.2" stroke-linecap="round"/></svg>' : ''}
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px" role="group" aria-labelledby="qt-${q.id}">
+            ${E.ANSWERS.map(([label, sub], k) => { const on = S.ans[q.id] === k; return `<button type="button" data-act="ans" data-q="${q.id}" data-v="${k}" data-f="ans-${q.id}-${k}" aria-pressed="${on}" style="text-align: left; min-height: 52px; padding: 9px 12px; border-radius: 5px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); cursor: pointer; display: flex; flex-direction: column; gap: 1px"><span style="font-weight: 600; font-size: 14px">${label}</span><span style="font-size: 12px; color: var(--muted)">${sub}</span></button>`; }).join('')}
+          </div></div></div>`;
+    }).join('');
+  }
+
+  const pPains = () => `<div style="display: flex; flex-direction: column; gap: 6px">
+      <span class="eb">Two more taps · they shape your feedback</span>
+      <h2 class="sf" style="font-size: 26px; line-height: 1.2" id="pains-h">What hurts most right now? <span class="sfi" style="color: var(--goldink)">Pick up to two.</span></h2></div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px" role="group" aria-labelledby="pains-h">
+      ${E.PAINS.map(([id, t, di]) => { const on = S.pains.includes(id); return `<button type="button" data-act="pain" data-v="${id}" data-f="pain-${id}" aria-pressed="${on}" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px"><span style="width: 9px; height: 9px; border-radius: 50%; background: ${D[di].hex}"></span>${t}</button>`; }).join('')}
+    </div>
+    <h2 class="sf" style="font-size: 22px; line-height: 1.2; margin-top: 4px" id="want-h">And what do you want most? <span class="sfi" style="color: var(--goldink)">Pick one.</span></h2>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px" role="group" aria-labelledby="want-h">
+      ${E.GOALS.map(([id, t]) => { const on = S.want === id; return `<button type="button" data-act="want" data-v="${id}" data-f="want-${id}" aria-pressed="${on}" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 4h11l-3 4 3 4H6" fill="none" stroke="#C9A24A" stroke-width="2" stroke-linejoin="round"/></svg>${t}</button>`; }).join('')}
+    </div>`;
+
+  function pReading(c) {
+    const R = 150, sc = c.sc.map((s) => s.score), str = c.rd.str;
+    const rA = sc.map((v) => 14 + v / 6 * (R - 14)), rS = str.map((v) => 14 + v / 5 * (R - 14));
+    const pts = (r) => `200,${200 - r[0]} ${200 + r[1]},200 200,${200 + r[2]} ${200 - r[3]},200`;
+    const any = c.rd.any, hi = c.rd.hi, lo = c.rd.lo;
+    return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 700px">
+        <span class="eb">Your compass reading</span>
+        <h2 class="sf" style="font-size: clamp(28px, 3.6vw, 40px); line-height: 1.05">Where you are strong. <span class="sfi" style="color: var(--goldink)">Where you are low.</span></h2>
+        <p style="color: var(--muted)">Rate four strengths honestly. Together with your answers, they draw your compass.</p></div>
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+        <div class="card" style="flex: 1 1 340px; min-width: 0; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+          <span style="font-weight: 600">How strong are you at…</span>
+          ${E.STRENGTHS.map((s, i) => `<div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="display: flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="${s.icon}" fill="none" stroke="${CSSV[s.d]}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-weight: 600; font-size: 14px" id="st-${i}">${s.name}</span><span style="font-size: 12px; color: var(--muted)">· ${D[s.d].name}</span></div>
+            <div style="display: flex; gap: 6px" role="group" aria-labelledby="st-${i}">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-act="str" data-i="${i}" data-v="${n}" data-f="str-${i}-${n}" aria-label="${s.name}: ${n} of 5" aria-pressed="${str[i] === n}" style="flex: 1; min-height: 44px; border-radius: 5px; border: 1.5px solid ${str[i] >= n ? '#C9A24A' : 'var(--line)'}; background: ${str[i] >= n ? '#C9A24A' : 'var(--paper)'}; color: ${str[i] >= n ? '#14100B' : 'var(--ink)'}; cursor: pointer; font-weight: 600">${n}</button>`).join('')}</div></div>`).join('')}
+          <span style="font-size: 12px; color: var(--muted)">1 = not yet · 5 = people come to me for this</span>
+        </div>
+        <div class="deep" style="flex: 1 1 420px; min-width: 0; border-radius: 9px; padding: 18px; display: flex; flex-wrap: wrap; gap: 18px; align-items: center">
+          <svg viewBox="0 0 400 400" style="flex: 1 1 260px; max-width: 340px; height: auto" role="img" aria-label="Your compass: Lead yourself ${sc[0]}, Lead your people ${sc[1]}, Lead your business ${sc[2]}, Lead the market ${sc[3]}, each out of 6">
+            <g class="spin"><circle cx="200" cy="200" r="186" fill="none" stroke="#C9A24A" stroke-width="1" stroke-dasharray="2 8" opacity=".6"/></g>
+            <circle cx="200" cy="200" r="150" fill="none" stroke="#3A2F20"/><circle cx="200" cy="200" r="100" fill="none" stroke="#3A2F20"/><circle cx="200" cy="200" r="50" fill="none" stroke="#3A2F20"/>
+            <line x1="200" y1="44" x2="200" y2="356" stroke="#3A2F20"/><line x1="44" y1="200" x2="356" y2="200" stroke="#3A2F20"/>
+            <polygon points="${pts(rS)}" fill="none" stroke="#F7F2E7" stroke-width="1.5" stroke-dasharray="5 4" opacity=".75"/>
+            <polygon points="${pts(rA)}" fill="rgba(201,162,74,.35)" stroke="#C9A24A" stroke-width="2.5" stroke-linejoin="round"/>
+            <circle cx="200" cy="${200 - rA[0]}" r="6" fill="#E0A282"/><circle cx="${200 + rA[1]}" cy="200" r="6" fill="#9BC0A1"/><circle cx="200" cy="${200 + rA[2]}" r="6" fill="#91B8D5"/><circle cx="${200 - rA[3]}" cy="200" r="6" fill="#DDBD69"/>
+            <text x="200" y="30" fill="#E0A282" font-family="Libre Franklin" font-weight="800" font-size="11" text-anchor="middle" letter-spacing="1.2">LEAD YOURSELF · ${sc[0]}/6</text>
+            <text x="372" y="196" fill="#9BC0A1" font-family="Libre Franklin" font-weight="800" font-size="11" text-anchor="end" letter-spacing="1.2">LEAD YOUR PEOPLE</text>
+            <text x="372" y="214" fill="#9BC0A1" font-family="Libre Franklin" font-weight="700" font-size="12" text-anchor="end">${sc[1]}/6</text>
+            <text x="200" y="384" fill="#91B8D5" font-family="Libre Franklin" font-weight="800" font-size="11" text-anchor="middle" letter-spacing="1.2">LEAD YOUR BUSINESS · ${sc[2]}/6</text>
+            <text x="28" y="196" fill="#DDBD69" font-family="Libre Franklin" font-weight="800" font-size="11" letter-spacing="1.2">LEAD THE MARKET</text>
+            <text x="28" y="214" fill="#DDBD69" font-family="Libre Franklin" font-weight="700" font-size="12">${sc[3]}/6</text>
+            <circle cx="200" cy="200" r="7" fill="#1C1309" stroke="#C9A24A" stroke-width="2"/>
+          </svg>
+          <div style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 10px">
+            <div style="display: flex; gap: 14px; font-size: 12px; color: #C4B69D; flex-wrap: wrap"><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 10px; background: rgba(201,162,74,.5); border: 2px solid #C9A24A"></span>Your answers</span><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 0; border-top: 2px dashed #F7F2E7"></span>Your strengths</span></div>
+            <div style="display: flex; flex-direction: column; gap: 2px"><span class="eb" style="color: #9BC0A1">Your strength</span><span class="sf" style="font-size: 20px">${any ? D[hi].name : 'Answer and rate to see it'}</span></div>
+            <div style="display: flex; flex-direction: column; gap: 2px"><span class="eb" style="color: #E0A282">Lowest right now</span><span class="sf" style="font-size: 20px">${any ? D[lo].name : '—'}</span></div>
+            <div style="display: flex; flex-direction: column; gap: 2px"><span class="eb" style="color: #E3C47E">Start here</span><span style="font-size: 14px">${any ? D[lo].step : 'Your first step appears here.'}</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px">
+        ${D.map((d, i) => `<div class="card" style="padding: 14px; display: flex; gap: 10px; align-items: flex-start; border-top: 3px solid ${CSSV[i]}">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${d.icon}" fill="none" stroke="${CSSV[i]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600; font-size: 13px">${d.name} · next step</span><span style="font-size: 13px; color: var(--muted)">${i === lo && any ? 'Start here. ' : ''}${d.step}</span></div></div>`).join('')}
+      </div>`;
+  }
+
+  /* Step 03 part 1: three numbers a group, one group open at a time. */
+  function pNumbers(c) {
+    const G = E.groupsFor(S.mode), has = S.mode === 'yes', gi = Math.min(S.group, G.length);
+    const TINTG = { 0: 'var(--tself)', 1: 'var(--tpeople)', 2: 'var(--twork)', 3: 'var(--tmarket)' };
+    const groups = G.map((g, i) => {
+      const ins = E.insight(g.key, c.n, S.mode, money), active = gi === i;
+      const status = i < gi ? (ins || 'Not enough yet to say anything. Open it to add a range.') : active ? 'Three quick answers · pick a range or type your own' : 'Next';
+      const fields = g.fields.map(([key, label, choices]) => {
+        const k = S.mode + '.' + key, cur = S.nums[k] || { pick: '', own: '' }, isText = typeof choices[0][1] === 'string';
+        const opts = [['', 'Choose…'], ...choices.map((ch, j) => [String(j), ch[0]]), ['own', isText ? 'Somewhere else…' : 'Type my own…'], ['unsure', 'Not sure yet']];
+        return `<div style="display: flex; flex-direction: column; gap: 6px">
+          <label for="f-${k}" style="font-size: 13px; font-weight: 600">${label}</label>
+          <select id="f-${k}" class="inp" data-num="${k}" data-f="num-${k}" style="border-color: ${cur.pick === 'own' ? '#C9A24A' : 'var(--line)'}">${opts.map(([v, t]) => `<option value="${v}"${cur.pick === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>
+          ${cur.pick === 'own' ? `<input class="inp pop" type="text" ${isText ? '' : 'inputmode="decimal"'} data-own="${k}" data-f="own-${k}" value="${esc(cur.own)}" placeholder="${isText ? 'Where they gather' : 'Type the exact amount'}" aria-label="${esc(label)}, ${isText ? 'in your words' : 'exact amount'}" style="border-color: #C9A24A">` : ''}
+        </div>`;
+      }).join('');
+      return `<div style="background: var(--paper); border: 1.5px solid ${active ? '#C9A24A' : 'var(--line)'}; border-radius: 7px; overflow: hidden; transition: border-color .3s ease">
+        <button type="button" data-act="grp" data-i="${i}" data-f="grp-${i}" aria-expanded="${active}" style="width: 100%; background: none; border: 0; padding: 16px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; text-align: left; color: var(--ink)">
+          <span style="width: 38px; height: 38px; border-radius: 50%; background: ${i < gi ? '#C9A24A' : TINTG[g.d]}; display: inline-flex; align-items: center; justify-content: center; flex: none"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="${g.icon}" fill="none" stroke="${i < gi ? '#14100B' : CSSV[g.d]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span style="display: flex; flex-direction: column; flex: 1; min-width: 0"><span style="font-weight: 600; font-size: 16px">0${i + 1} · ${g.title}</span><span style="font-size: 13px; color: var(--muted)">${esc(status)}</span></span>
+          <span style="font-size: 12px; font-weight: 600; color: var(--goldink)">${i < gi ? 'Done · edit' : active ? '' : 'Open'}</span></button>
+        ${active ? `<div class="pop" style="padding: 0 18px 18px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">${fields}</div>
+          <div class="pop deep" style="border-radius: 7px; padding: 16px 18px; display: flex; gap: 14px; align-items: center; animation-delay: .2s">
+            <svg class="shim" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z" fill="none" stroke="#C9A24A" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            <div style="display: flex; flex-direction: column; gap: 2px" aria-live="polite"><span class="eb" style="color: #E3C47E">What this already tells you</span><span style="font-size: 16px; font-weight: 600">${esc(ins || 'Pick a range for each, or type your own. The answer appears here.')}</span></div></div>
+          <button type="button" data-act="grp" data-i="${i + 1}" data-f="grp-next-${i}" style="align-self: flex-end; min-height: 46px; padding: 0 20px; border-radius: 5px; border: 0; background: var(--deep); color: #F7F2E7; font-weight: 600; cursor: pointer">${i === G.length - 1 ? 'See what it all means →' : 'Next group →'}</button>
+        </div>` : ''}</div>`;
+    }).join('');
+    return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 720px">
+        <span class="eb">Step 03 · Count what matters · Part 1 of 2</span>
+        <h1 class="sf" style="font-size: clamp(30px, 4vw, 44px); line-height: 1.05">${has ? 'Four small groups.' : 'No sales yet? Good.'} <span class="sfi" style="color: var(--goldink)">${has ? 'An insight after each.' : 'Start with your offer, your runway and your market.'}</span></h1>
+        <p style="color: var(--muted)">${has ? 'One month. Pick a range from the list, or type your own. Each group tells you something before you move on.' : 'We will not ask you for sales you do not have yet. Three small groups, and an insight after each.'}</p></div>
+      <div style="display: flex; flex-direction: column; gap: 10px">${groups}</div>
+      <p style="font-size: 12px; color: var(--muted)">A range is used at its middle, so what it tells you is said with “about”. Machines can do this arithmetic in seconds; what you do about it is the part only you can decide.</p>`;
+  }
+
+  /* Step 03 part 2: one card per domain. "Got it" opens the next. */
+  function pFeedback(c, i) {
+    const s = c.sc[i], f = E.feedback(i, s, S.pains, S.want), locked = i > 0 && !S.got[i - 1];
+    // Before either question is answered there is nothing to read back yet.
+    if (!s.answered) Object.assign(f, { big: `Answer the two ${D[i].name.toLowerCase()} questions in Step 01, and this card fills in.`, why: 'Nothing here is said about you before you have said it yourself.', feel: [] });
+    const nums = S.mode === 'yes' ? E.numberLines(c.n, money)[i] : '';
+    const bg = ['#F4E1D6', '#F3EAD3', '#E3ECE4'], ink = ['#8A4524', '#6E5213', '#35593D'];
+    const open = !!S.more[i];
+    return `<div style="display: flex; flex-direction: column; gap: 10px; opacity: ${locked ? '.45' : '1'}; transition: opacity .5s ease"${locked ? ' inert' : ''}>
+      ${locked ? `<span style="font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 8px">${lockIcon('currentColor')}Tick “Got it” on the domain above to open this one.</span>` : ''}
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"><span style="width: 34px; height: 34px; border-radius: 50%; background: ${TINT[i]}; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="${D[i].icon}" fill="none" stroke="${CSSV[i]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h3 class="sf" style="font-size: 20px; font-weight: 500">${D[i].name}</h3>
+        <span style="font-size: 11px; font-weight: 600; letter-spacing: .12em; padding: 4px 10px; border-radius: 12px; background: ${f.bandIndex === null ? 'var(--cream)' : bg[f.bandIndex]}; color: ${f.bandIndex === null ? 'var(--muted)' : ink[f.bandIndex]}">${f.band}</span>
+        <span style="display: inline-flex; gap: 3px" role="img" aria-label="${s.score} of 6">${[0, 1, 2, 3, 4, 5].map((k) => `<span style="width: 14px; height: 6px; border-radius: 3px; background: ${k < s.score ? CSSV[i] : 'var(--cream)'}"></span>`).join('')}</span>
+        <span style="flex: 1; height: 1px; background: var(--line); min-width: 40px"></span></div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+        <div class="card lift" style="border-top: 4px solid ${CSSV[i]}; padding: 18px; display: flex; flex-direction: column; gap: 8px">
+          <span class="eb" style="color: ${CSSV[i]}">What it means for you now</span>
+          <span class="sf" style="font-size: 21px; line-height: 1.25">${f.big}</span>
+          <span style="font-size: 14px; color: var(--muted)">${f.why}</span>
+          ${f.goalLine ? `<span style="font-size: 13px; font-weight: 600; color: var(--goldink); display: inline-flex; gap: 6px; align-items: center"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 4h11l-3 4 3 4H6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>${f.goalLine}</span>` : ''}
+          ${nums ? `<span style="font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 8px">Your numbers: ${esc(nums)}</span>` : ''}
+        </div>
+        <div class="card lift" style="padding: 18px; display: flex; flex-direction: column; gap: 10px">
+          <span class="eb">What you may be feeling</span>
+          ${f.pains.length ? `<span style="font-size: 13px; font-weight: 600; padding: 6px 10px; border-radius: 6px; background: var(--cream); align-self: flex-start">You said: ${f.pains.join(' · ')}</span>` : ''}
+          ${f.feel.map((t) => `<span style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><circle cx="12" cy="12" r="8" fill="none" stroke="${CSSV[i]}" stroke-width="2"/><circle cx="12" cy="12" r="2.5" fill="${CSSV[i]}"/></svg>${t}</span>`).join('')}
+        </div>
+        <div class="deep" style="border-radius: 7px; padding: 18px; display: flex; flex-direction: column; gap: 8px"><span class="eb" style="color: #E3C47E">Ask yourself</span><span class="sfi" style="font-size: 19px; line-height: 1.35">“${f.ask}”</span>
+          <label style="display: flex; align-items: center; gap: 10px; margin-top: 6px; padding: 10px 12px; border: 1px solid #594A32; border-radius: 6px; cursor: pointer; font-size: 14px"><input type="checkbox" data-act="got" data-i="${i}" data-f="got-${i}"${S.got[i] ? ' checked' : ''} style="width: 20px; height: 20px; accent-color: #C9A24A">Got it, I’ve read this</label>
+          <button type="button" data-act="more" data-i="${i}" data-f="more-${i}" aria-expanded="${open}" class="no-print" style="align-self: flex-start; margin-top: 4px; background: none; border: 1px solid #594A32; color: #E3C47E; border-radius: 5px; min-height: 40px; padding: 0 14px; font-weight: 600; cursor: pointer">${open ? 'Show less' : 'Show more'}</button>
+        </div>
+      </div>
+      ${open ? `<div class="pop" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px">
+        <div class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 8px"><span class="eb" style="color: ${CSSV[i]}">Going deeper</span><span style="font-size: 15px; line-height: 1.6">${f.deep}</span>
+          <span style="font-size: 14px; font-weight: 600; margin-top: 4px">This week: ${f.week}</span></div>
+        <div class="deep" style="border-radius: 7px; padding: 20px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #C9A24A">
+          <span class="eb" style="color: #E3C47E">Your step-by-step plan · in your free account</span>
+          ${f.steps.map((t, k) => `<div style="display: flex; gap: 12px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Fraunces, serif; color: #C9A24A; width: 22px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7">${t}</span><span class="blurline" style="flex: 0 0 70px; height: 8px; border-radius: 4px; background: #594A32"></span>${lockIcon('#C4B69D')}</div>`).join('')}
+          <span style="font-size: 13px; color: #C4B69D">Each step opens with what to do, how long it takes and what “done” looks like.</span>
+          <a href="/start" class="go" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 5px; background: #C9A24A; color: #14100B; font-weight: 600; text-decoration: none">Create my free account <span class="arr" aria-hidden="true">→</span></a>
+        </div></div>` : ''}
+    </div>`;
+  }
+
+  const pSave = () => `<div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 10px">
+      <span class="eb">Save your results</span>
+      <h2 class="sf" style="font-size: 26px; line-height: 1.2">Keep what you found. <span class="sfi" style="color: var(--goldink)">Print it or send it to yourself.</span></h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 14px; font-size: 14px">
+        ${['Your first insight', 'Your compass reading', 'Your feedback in all four domains', 'A next step for each domain', 'Your twelve weeks'].map((t) => `<span style="display: inline-flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#C9A24A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>${t}</span>`).join('')}
+      </div>
+      <span style="font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px">${lockIcon('currentColor', 13)}The deeper “Show more” insights stay inside your account.</span>
+    </div>
+    <div style="flex: 0 1 280px; display: flex; flex-direction: column; gap: 8px; min-width: 240px">
+      <button type="button" data-act="email" data-f="email" ${UI.sending ? 'disabled' : ''} style="min-height: 50px; border-radius: 5px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="#14100B" stroke-width="1.8"/><path d="M3 7l9 6 9-6" fill="none" stroke="#14100B" stroke-width="1.8"/></svg>${UI.sending ? 'Sending…' : 'Email me my results'}</button>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+        <button type="button" data-act="print" data-f="print" style="min-height: 46px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Print</button>
+        <button type="button" data-act="print" data-f="pdf" style="min-height: 46px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Save as PDF</button>
+      </div>
+      <span role="status" style="font-size: 13px; color: ${UI.mail.startsWith('Sent') ? 'var(--people)' : 'var(--muted)'}; font-weight: 600">${esc(UI.mail)}</span>
+    </div>`;
+
+  function pWeeks(c) {
+    const WC = D.map((d) => d.hex), f = S.lean !== null ? S.lean : (c.rd.any ? c.rd.lo : null);
+    const row = (d, i) => `<div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; align-items: center; padding: 4px 0; border-radius: 6px; outline: ${f === i ? '1px solid rgba(201,162,74,.55)' : '1px solid transparent'}; outline-offset: 3px; transition: outline-color .4s ease">
+        <span style="font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: ${f === i ? '#F7F2E7' : '#D3C4A5'}; display: inline-flex; align-items: center; gap: 8px">${d.name}${f === i ? '<span style="font-size: 10px; color: #14100B; background: #C9A24A; border-radius: 3px; padding: 1px 5px">LEAN</span>' : ''}</span>
+        ${Array.from({ length: 12 }, (_, k) => `<span class="cellin" style="height: 34px; border-radius: 3px; background: ${WC[i]}; opacity: ${Math.min(1, (0.28 + k * 0.055) * (f === null ? 1 : f === i ? 1.25 : 0.8)).toFixed(2)}; animation-delay: ${(k * 0.06 + i * 0.04).toFixed(2)}s; transition: opacity .5s ease"></span>`).join('')}</div>`;
+    const band = (span, text, on) => `<span style="grid-column: span ${span}; border-top: 2px solid ${on ? '#C9A24A' : '#594A32'}; padding-top: 8px; text-align: center; font-size: 11px; font-weight: 600; letter-spacing: .1em; color: ${on ? '#E3C47E' : '#D3C4A5'}">${text}</span>`;
+    return `<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 8px; max-width: 680px">
+          <span class="eb" style="color: #E3C47E">How twelve weeks run · your version</span>
+          <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; color: #F7F2E7">All four, every week. <span class="sfi" style="color: #E3C47E">${f === null ? 'Leaning where you need it.' : 'Leaning on ' + D[f].name.toLowerCase() + '.'}</span></h2>
+          <p style="color: #D3C4A5; font-size: 15px; line-height: 1.7">Not a module on mindset, then a module on sales. Every week works all four and leans on the one you are thinnest in.</p>
+        </div>
+        <div class="no-print" style="display: flex; flex-direction: column; gap: 6px">
+          <span style="font-size: 11px; letter-spacing: .14em; color: #D3C4A5" id="lean-h">PREVIEW A DIFFERENT LEAN</span>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap" role="group" aria-labelledby="lean-h">${D.map((d, i) => `<button type="button" data-act="lean" data-i="${i}" data-f="lean-${i}" aria-pressed="${f === i}" style="min-height: 40px; padding: 0 12px; border-radius: 4px; border: 1px solid ${f === i ? '#C9A24A' : '#594A32'}; background: ${f === i ? 'rgba(201,162,74,.18)' : 'transparent'}; color: #F7F2E7; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px"><span style="width: 9px; height: 9px; border-radius: 2px; background: ${WC[i]}"></span>${d.name}</button>`).join('')}</div>
+        </div>
+      </div>
+      <div style="overflow-x: auto" role="img" aria-label="Twelve weeks across, the four domains down. Every week works all four${f === null ? '' : ', with more weight on ' + D[f].name}.">
+        <div style="min-width: 760px; display: flex; flex-direction: column; gap: 8px">
+          <div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; align-items: end"><span></span>
+            ${Array.from({ length: 12 }, (_, k) => `<span style="text-align: center; font-size: 12px; font-weight: 600; color: ${k < 3 ? '#E3C47E' : '#8A7A5E'}; display: flex; flex-direction: column; align-items: center; gap: 4px">${k + 1}${k === 0 ? '<span class="pinp" style="width: 8px; height: 8px; border-radius: 50%; background: #C9A24A"></span>' : ''}</span>`).join('')}</div>
+          ${D.map(row).join('')}
+          <div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; margin-top: 8px"><span></span>
+            ${band(3, 'FOUNDER LAUNCHPAD · FREE', true)}${band(2, 'THE 1:1 · FULL COMPASS')}${band(4, 'PERSONAL LEADERSHIP LAB · $97 · 2 SESSIONS')}${band(3, 'BUSINESS HUB · $397 · 3 SESSIONS IN TOTAL')}</div>
+        </div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; border-top: 1px solid #3A2F20; padding-top: 16px">
+        <p style="flex: 1 1 360px; font-size: 14px; color: #D3C4A5; line-height: 1.7">Every column is one week, and every week works all four. The weight shifts toward ${f === null ? 'the domain that needs you most' : D[f].name}. The coverage never drops. You are at week 1. The Summit ($1,989): the whole incubator, with Alexandru every week.</p>
+        <a href="/start" class="go no-print" style="display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 4px; background: #C9A24A; color: #14100B; font-weight: 600; text-decoration: none">Start week 1 free · The Founder Launchpad <span class="arr" aria-hidden="true">→</span></a>
+      </div>`;
+  }
+
+  const STOPS = [
+    { n: '1', short: 'Founder Launchpad', name: 'The Founder Launchpad', tag: 'Step 1 · start here', line: 'Know yourself before you build.', modules: '01–03', sessions: '—', price: 'Free', cta: 'Start free', href: '/start', x: 150, y: 360, lx: 136, ly: 364, anchor: 'end' },
+    { n: '2', short: 'The Boardroom', name: 'The Boardroom', tag: 'Step 2 · you and Alexandru', line: 'Sit at the table. Unlock the full Compass.', modules: '04–05', sessions: '1 session', price: '[YOUR PRICE]', cta: 'Book the Boardroom', href: BOOKING, ext: true, x: 290, y: 300, lx: 306, ly: 304, anchor: 'start' },
+    { n: '3', short: 'Leadership LAB', name: 'The Personal Leadership LAB', tag: 'Step 3', line: 'Lead yourself first.', modules: '06–09', sessions: '2 sessions', price: '$97', cta: 'Join the LAB', href: LAB_URL, ext: true, x: 175, y: 235, lx: 161, ly: 239, anchor: 'end' },
+    { n: '4', short: 'Business HUB', name: 'The Business HUB', tag: 'Step 4', line: 'Build the business that carries it.', modules: '10–12', sessions: '3 in total (incl. 1 from the LAB)', price: '$397', cta: 'Join the HUB', href: HUB_URL, ext: true, x: 285, y: 160, lx: 301, ly: 164, anchor: 'start' },
+    { n: '5', short: 'The Summit', name: 'The Summit', tag: 'The top', line: 'The whole incubator, with Alexandru every week.', modules: 'All', sessions: 'Every week', price: '$1,989', cta: 'Talk about The Summit', href: '/compass/summit', x: 230, y: 58, lx: 258, ly: 62, anchor: 'start' },
+  ];
+  function pClimb() {
+    const si = S.stop, sv = STOPS[si];
+    return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 720px">
+        <span class="eb" style="color: #E3C47E">Link to Lead · the incubator</span>
+        <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; color: #F7F2E7">Your climb. <span class="sfi" style="color: #E3C47E">One step at a time.</span></h2>
+        <p style="color: #D3C4A5; font-size: 15px; line-height: 1.7">Tap a stop on the trail to see what opens there.</p></div>
+      <div style="display: flex; flex-wrap: wrap; gap: 26px; align-items: center">
+        <svg viewBox="0 0 460 420" style="flex: 1 1 340px; max-width: 520px; height: auto" role="img" aria-label="A mountain trail from The Founder Launchpad at the bottom to The Summit at the top">
+          <circle cx="60" cy="60" r="1.5" fill="#E3C47E" opacity=".7"/><circle cx="400" cy="90" r="1.2" fill="#E3C47E" opacity=".6"/><circle cx="350" cy="40" r="1" fill="#F7F2E7" opacity=".5"/><circle cx="110" cy="130" r="1" fill="#F7F2E7" opacity=".4"/>
+          <polygon points="20,395 230,40 440,395" fill="rgba(201,162,74,.08)" stroke="#8A7A5E" stroke-width="1.2"/>
+          <polyline points="140,395 230,40 320,395" fill="none" stroke="#594A32" stroke-width="1"/>
+          <polyline points="200,96 230,40 262,96" fill="none" stroke="#F7F2E7" stroke-width="1.6" opacity=".6"/>
+          <polyline class="trail" points="190,395 150,360 290,300 175,235 285,160 230,58" fill="none" stroke="#C9A24A" stroke-width="2.2" stroke-dasharray="6 6" stroke-linecap="round"/>
+          <g class="flagw"><path d="M230 58V26" stroke="#F7F2E7" stroke-width="1.6"/><path d="M230 27h20l-6 6 6 6h-20z" fill="#C9A24A"/></g>
+          ${STOPS.map((t, i) => `<g>${i === si ? `<circle class="halo" cx="${t.x}" cy="${t.y}" r="20" fill="none" stroke="#C9A24A" stroke-width="1.5"/>` : ''}
+            <circle class="stopc" cx="${t.x}" cy="${t.y}" r="${i === si ? 11 : 8}" fill="${i === si ? '#C9A24A' : i === 4 ? '#E3C47E' : '#1C1309'}" stroke="#F7F2E7" stroke-width="1.5" style="animation-delay: ${(0.2 + i * 0.15).toFixed(2)}s"/>
+            <text x="${t.lx}" y="${t.ly}" text-anchor="${t.anchor}" fill="${i === si ? '#E3C47E' : '#D3C4A5'}" font-family="Libre Franklin" font-weight="600" font-size="12.5">${t.short}</text></g>`).join('')}
+        </svg>
+        <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+          <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 6px" role="group" aria-label="Stops on the climb">${STOPS.map((t, i) => `<button type="button" data-act="stop" data-i="${i}" data-f="stop-${i}" aria-pressed="${i === si}" style="min-height: 40px; padding: 0 12px; border-radius: 4px; border: 1px solid ${i === si ? '#C9A24A' : '#594A32'}; background: ${i === si ? 'rgba(201,162,74,.18)' : 'transparent'}; color: #F7F2E7; font-size: 12px; font-weight: 600; cursor: pointer">${t.n} · ${t.short}</button>`).join('')}</div>
+          <div class="pop" style="background: rgba(247,242,231,.05); border: 1px solid #594A32; border-radius: 9px; padding: 20px; display: flex; flex-direction: column; gap: 10px" aria-live="polite">
+            <span class="eb" style="color: #E3C47E">${sv.tag}</span>
+            <span class="sf" style="font-size: 28px; color: #F7F2E7; line-height: 1.15">${sv.name}</span>
+            <span class="sfi" style="font-size: 18px; color: #E3C47E; line-height: 1.35">${sv.line}</span>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-top: 4px">
+              ${[['MODULES', sv.modules], ['WITH ALEXANDRU', sv.sessions], ['PRICE', sv.price]].map(([k, v]) => `<div style="border: 1px solid #3A2F20; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #D3C4A5; letter-spacing: .1em">${k}</span><span style="font-weight: 600; color: #F7F2E7">${v}</span></div>`).join('')}
+            </div>
+            <a href="${sv.href}" class="go no-print"${sv.ext ? ' target="_blank" rel="noopener"' : ''} style="align-self: flex-start; margin-top: 6px; display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 4px; background: #C9A24A; color: #14100B; font-weight: 600; text-decoration: none">${sv.cta} <span class="arr" aria-hidden="true">${sv.ext ? '↗' : '→'}</span></a>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  /* ── The What-if lab ── */
+  const LEVER_UI = [
+    { k: 'p', q: 'What if you raised your price?', icon: 'M20 12l-8 8-9-9V3h8zM7.5 7.5h.01', max: 50 },
+    { k: 'm', q: 'What if your message were clearer?', icon: 'M4 5h16v10H8l-4 4z', max: 100 },
+    { k: 'd', q: 'What if someone else did part of the work?', icon: E.GROUPS.yes[3].icon, max: 60 },
+  ];
+  function leverText(b, k) {
+    const { p, d } = S.lab, unit = S.mode === 'yes' ? 'of your sales' : 'a customer';
+    if (k === 'p') return [`+${p}%`, b && b.ready ? (S.mode === 'yes' ? `Every price ${p ? 'up ' + p + '%' : 'as today'}: sales of ${money(b.sales * (1 + p / 100))} for the same work. A clear message makes a fair price easier to ask.` : `Now ${money(b.sales / b.clients * (1 + p / 100))} ${unit}. A clear message makes a fair price easier to ask.`) : 'A clear message makes a fair price easier to ask.'];
+    if (k === 'm') return [`+${S.lab.m}%`, 'More people understand you and trust you, so more say yes for the same marketing spend.'];
+    const s = b && b.ready ? E.simulate(b, S.lab.p, S.lab.m, d) : null;
+    return [`${d}%`, !d ? 'Hand over part of the delivery: work you no longer do yourself.' : s && s.helpCost !== null ? `About ${money(s.helpCost)} a month for help, at the rate you set below.` : 'Set a helper rate below to see what the help costs.'];
+  }
+  function pLabIn() {
+    const b = E.labBase(S), plan = S.mode !== 'yes';
+    const input = (key, label, hint) => `<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #F7F2E7">${label}
+        <input class="inp" type="text" inputmode="decimal" data-lab="${key}" data-f="lab-${key}" value="${esc(S.lab[key])}" placeholder="${hint}" style="background: #231D15; color: #F7F2E7; border-color: #594A32"></label>`;
+    const inputs = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
+        ${plan ? input('plan', 'Customers a month you plan for', 'Your plan, a number') : ''}
+        ${input('rate', `Helper rate per hour (${S.profile.currency})`, 'What you would pay')}
+        ${input('hire', `Monthly cost of one more person (${S.profile.currency})`, 'Your estimate')}
+      </div>`;
+    if (!b.ready) {
+      const names = Object.fromEntries(E.fieldsFor(S.mode).map(([k, l]) => [k, l.toLowerCase()]));
+      const need = (b.need || []).map((k) => names[k]);
+      if (b.planned) need.push('the customers a month you plan for (below)');
+      return `<div style="background: rgba(247,242,231,.05); border: 1px solid #3A2F20; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+          <span class="sf" style="font-size: 20px">The lab runs on your own month.</span>
+          <span style="font-size: 14px; color: #D3C4A5">It still needs: ${esc(need.join(', '))}. A range is enough.</span>
+          ${b.need && b.need.length ? '<button type="button" data-go="numbers" data-f="lab-add" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border-radius: 5px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; cursor: pointer">Add my numbers →</button>' : ''}
+        </div>${inputs}`;
+    }
+    return `<div style="display: flex; flex-wrap: wrap; gap: 26px">
+      <div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
+        ${LEVER_UI.map((l) => { const [val, note] = leverText(b, l.k); return `<div style="background: rgba(247,242,231,.05); border: 1px solid #3A2F20; border-radius: 9px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+          <div style="display: flex; align-items: center; gap: 10px; justify-content: space-between">
+            <label for="w-${l.k}" style="display: inline-flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${l.icon}" fill="none" stroke="#C9A24A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>${l.q}</label>
+            <span class="sf" style="font-size: 26px; color: #E3C47E" id="lv-val-${l.k}">${val}</span></div>
+          <input id="w-${l.k}" type="range" min="0" max="${l.max}" step="5" value="${S.lab[l.k]}" data-lever="${l.k}" data-f="w-${l.k}">
+          <span style="font-size: 13px; color: #C4B69D" id="lv-note-${l.k}">${esc(note)}</span></div>`; }).join('')}
+        <div id="lab-head"></div>
+        ${inputs}
+      </div>
+      <div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 14px" id="lab-out"></div>
+    </div>`;
+  }
+  function labCalc() {
+    const b = E.labBase(S);
+    if (!b.ready) return null;
+    const { p, m, d } = S.lab, s0 = E.simulate(b, 0, 0, 0), s = E.simulate(b, p, m, d);
+    const delta = s.left === null ? null : s.left - s0.left;
+    const room = b.hire && delta !== null ? Math.max(0, Math.floor(delta / b.hire)) : null;
+    const lim = b.limit;
+    const cashUp = delta !== null && delta > 1, clientsUp = s.clients !== null && s.clients > s0.clients, timeOk = s.mine < s0.mine - 0.5, peopleOk = d > 0 || (room || 0) > 0;
+    const improved = [cashUp, clientsUp, timeOk, peopleOk], count = improved.filter(Boolean).length;
+    return { b, s0, s, delta, room, lim, improved, count, cashUp, clientsUp };
+  }
+  function pLabHead(L) {
+    if (!L) return '';
+    const { p, m, d } = S.lab;
+    let h;
+    if (!p && !m && !d) h = 'Move one lever. Improve one of the four, and watch the other three follow.';
+    else if (L.lim && L.s.mine > L.lim * 1.1) h = 'More is coming in, but it is coming out of your life. What if someone else did part of the work?';
+    else if (L.count >= 3) h = 'This is leadership: more cash, more clients, your time protected and room for people. One change, four answers.';
+    else if (L.cashUp && !L.clientsUp) h = 'A fairer price gave you money without more hours. What if your message were clearer too?';
+    else h = 'Good. Now try a second lever and see which pain eases next.';
+    return `<div style="background: rgba(201,162,74,.12); border-radius: 9px; padding: 16px; display: flex; gap: 12px; align-items: flex-start" aria-live="polite">
+      <svg class="shim" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" fill="none" stroke="#C9A24A" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <span style="font-size: 16px; font-weight: 600; line-height: 1.45">${h}</span></div>`;
+  }
+  function pLabOut(L) {
+    if (!L) return '';
+    const { b, s0, s, delta, room, lim, improved } = L, plan = S.mode !== 'yes';
+    const bar = (pct, mark, color) => `<div style="position: relative; height: 12px; background: #3A2F20; border-radius: 6px" aria-hidden="true"><div class="bar" style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: ${color}; width: ${Math.max(2, Math.min(100, pct)).toFixed(1)}%"></div>${mark === null ? '' : `<div style="position: absolute; top: -5px; bottom: -5px; width: 2px; background: #F7F2E7; left: ${mark}%"></div>`}</div>`;
+    const cashPct = s0.left > 0 && s.left !== null ? s.left / (s0.left * 3) * 100 : s.left !== null && s.left > 0 ? 50 : 2;
+    const reacts = [
+      { name: plan ? 'Cash · left each month (before running costs)' : 'Cash · left each month', icon: E.GROUPS.yes[0].icon, val: s.left === null ? '—' : money(s.left),
+        pct: cashPct, mark: s0.left > 0 ? 100 / 3 : null, color: s.left === null || s.left >= s0.left ? '#9BC0A1' : '#E0A282',
+        note: s.left === null ? 'Set a helper rate below to see what handing over costs.' : `${signed(delta)} a month compared with today.` },
+      { name: plan ? 'Customers · each month' : 'New clients · each month', icon: E.GROUPS.yes[3].icon, val: s.clients === null ? '—' : whole(s.clients),
+        pct: s.clients === null ? 2 : s.clients / ((s0.clients || 1) * 2) * 100, mark: 50, color: L.clientsUp ? '#9BC0A1' : '#F7F2E7',
+        note: s.clients === null ? 'Add your new paying customers in Step 03 to see this.' : L.clientsUp ? `+${whole(s.clients - s0.clients)} a month without spending more on marketing.` : 'Same as today.' },
+      { name: 'Time · your hours a month', icon: E.GROUPS.yes[1].icon, val: whole(s.mine) + ' h',
+        pct: lim ? s.mine / (lim * 2) * 100 : 50, mark: lim ? 50 : null, color: !lim ? '#F7F2E7' : s.mine > lim * 1.1 ? '#E0A282' : s.mine > lim ? '#DDBD69' : '#9BC0A1',
+        note: !lim ? (plan ? 'Add the hours a week you can give to compare.' : 'Add the hours you want to work to compare.') : s.mine > lim ? `${whole(s.mine - lim)} hours beyond the ${whole(lim)} you chose.` : `Within the ${whole(lim)} hours you chose. Your life stays protected.` },
+      { name: 'People · help you can afford', icon: D[1].icon, val: room === null ? '—' : room + (room === 1 ? ' person' : ' people'),
+        pct: room === null ? 2 : room / 4 * 100, mark: 25, color: room ? '#9BC0A1' : '#F7F2E7',
+        note: room === null ? (b.hire === null ? 'Set the monthly cost of one more person below to see this.' : 'Set a helper rate below first.') : room > 0 ? `The extra money could pay ${room} more ${room === 1 ? 'person' : 'people'}, at the ${money(b.hire)} a month you set.` : 'Not yet. Raise the price or clarify the message to make room for help.' },
+    ];
+    const NP = [['Cash', 160, 23, 160, 12, 'middle'], ['Clients', 222, 85, 244, 89, 'start'], ['Time', 160, 147, 160, 168, 'middle'], ['People', 98, 85, 76, 89, 'end']];
+    return `<svg viewBox="0 0 320 175" style="width: 100%; max-width: 420px; height: auto; align-self: center" role="img" aria-label="Four answers: cash, clients, time, people. ${L.count} improved.">
+        <circle cx="160" cy="85" r="62" fill="none" stroke="${L.count >= 3 ? '#C9A24A' : '#3A2F20'}" stroke-width="2" stroke-dasharray="4 5"/>
+        <circle cx="160" cy="85" r="22" fill="#1C1309" stroke="#C9A24A" stroke-width="1.5"/><text x="160" y="90" text-anchor="middle" fill="#F7F2E7" font-family="Fraunces" font-size="13">You</text>
+        ${NP.map((n, i) => `<g><circle class="node" cx="${n[1]}" cy="${n[2]}" r="14" fill="${improved[i] ? '#C9A24A' : '#1C1309'}" stroke="#C9A24A" stroke-width="1.5"/><text x="${n[3]}" y="${n[4]}" text-anchor="${n[5]}" fill="#F7F2E7" font-family="Libre Franklin" font-weight="700" font-size="12">${n[0]}</text></g>`).join('')}
+      </svg>
+      ${reacts.map((r) => `<div style="background: rgba(247,242,231,.04); border: 1px solid #3A2F20; border-radius: 9px; padding: 14px; display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px"><span style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="${r.icon}" fill="none" stroke="${r.color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>${r.name}</span><span class="sf" style="font-size: 20px; color: ${r.color}">${r.val}</span></div>
+        ${bar(r.pct, r.mark, r.color)}
+        <span style="font-size: 13px; color: #C4B69D">${esc(r.note)}</span></div>`).join('')}`;
+  }
+  function pLabDeep(L) {
+    if (!L) return '';
+    const { p, m, d } = S.lab, dom = E.strongestLever(p, m, d);
+    if (dom < 0) return '';
+    const { b, s0, s, delta, room, lim } = L, LV = E.LEVERS[dom], plan = S.mode !== 'yes';
+    const fmtS = (x) => (x > 0 ? '+' : x < 0 ? '−' : '') + whole(Math.abs(x));
+    const chain = [
+      ['Cash, each month', delta === null ? '?' : delta >= 0 ? '↑' : '↓', delta === null ? 'set a helper rate' : signed(delta), delta === null || delta >= 0 ? '#9BC0A1' : '#E0A282'],
+      [plan ? 'Customers, each month' : 'New clients, each month', s.clients !== null && s.clients > s0.clients ? '↑' : '→', s.clients === null ? '—' : fmtS(s.clients - s0.clients), s.clients !== null && s.clients > s0.clients ? '#9BC0A1' : '#D3C4A5'],
+      ['Your hours, each month', s.mine < s0.mine ? '↓' : s.mine > s0.mine ? '↑' : '→', fmtS(s.mine - s0.mine) + ' h', s.mine <= s0.mine ? '#9BC0A1' : lim && s.mine > lim ? '#E0A282' : '#DDBD69'],
+      ['People you could afford', room ? '↑' : '→', room === null ? '—' : String(room), room ? '#9BC0A1' : '#D3C4A5'],
+    ];
+    let meaning = '';
+    if (dom === 0) meaning = !lim || s.mine <= lim ? 'A fairer price gives you money without taking more of your life. That is the quietest lever you have.' : 'More money, but your hours are still too high. Price alone will not give you your time back.';
+    if (dom === 1) meaning = lim && s.mine > lim ? 'Clarity brings people in. Without help, they arrive faster than you can serve them.' : 'More people understand you, so more say yes. Your market starts to work for you.';
+    if (dom === 2) meaning = delta === null ? 'You buy back your time. Set a helper rate to see what the trade costs.' : delta >= 0 ? 'You buy back your time and the business still grows. This is where leading starts.' : 'You buy back your time, and it costs money at first. Decide whether that trade is worth it to you.';
+    const g = E.GOALS.find((x) => x[0] === S.want);
+    const goalLine = g ? 'Your goal, ' + g[1].toLowerCase() + ': ' + (E.goalHelped(g[0], s0, s, d, room || 0) ? 'this change moves you toward it.' : 'this change alone does not get you there. Try another lever with it.') : '';
+    return `<div class="pop" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px">
+      <div style="background: rgba(247,242,231,.05); border: 1px solid #3A2F20; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+        <span class="eb" style="color: #E3C47E">The chain reaction</span>
+        <span style="display: inline-flex; align-self: flex-start; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 16px; background: #C9A24A; color: #14100B; font-weight: 600; font-size: 13px">${LV.name}</span>
+        ${chain.map(([nm, ar, v, col], k) => `<div class="itemin" style="display: flex; align-items: center; gap: 10px; font-size: 14px; animation-delay: ${(0.1 + k * 0.15).toFixed(2)}s"><svg width="22" height="14" viewBox="0 0 22 14" aria-hidden="true"><path d="M1 7h16M13 2l5 5-5 5" fill="none" stroke="#8A7A5E" stroke-width="1.6" stroke-linecap="round"/></svg><span style="flex: 1; color: #F7F2E7">${nm}</span><span style="font-weight: 600; color: ${col}">${ar} ${esc(v)}</span></div>`).join('')}
+      </div>
+      <div style="background: rgba(247,242,231,.05); border: 1px solid #3A2F20; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+        <span class="eb" style="color: #E3C47E">What this means for you</span>
+        <span class="sf" style="font-size: 20px; line-height: 1.3; color: #F7F2E7">${meaning}</span>
+        ${goalLine ? `<span style="font-size: 14px; color: #E3C47E">${goalLine}</span>` : ''}
+        <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: #D3C4A5; border-top: 1px solid #3A2F20; padding-top: 10px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M12 3l9 16H3z" fill="none" stroke="#DDBD69" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4M12 16.5v.5" stroke="#DDBD69" stroke-width="2" stroke-linecap="round"/></svg><span><b style="color: #F7F2E7">Watch out:</b> ${LV.watch}</span></div>
+        <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: #D3C4A5"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#9BC0A1" stroke-width="2.2" stroke-linecap="round"/></svg><span><b style="color: #F7F2E7">First step this week:</b> ${LV.first}</span></div>
+      </div>
+      <div style="border: 1px solid #C9A24A; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 10px; background: rgba(201,162,74,.08)">
+        <span class="eb" style="color: #E3C47E">Your plan for this change · in your free account</span>
+        ${LV.steps.map((t, k) => `<div style="display: flex; gap: 10px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Fraunces, serif; color: #C9A24A; width: 20px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7">${t}</span>${lockIcon('#C4B69D')}</div>`).join('')}
+        <a href="/start" class="go no-print" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 16px; border-radius: 5px; background: #C9A24A; color: #14100B; font-weight: 600; text-decoration: none">Open my step-by-step plan <span class="arr" aria-hidden="true">→</span></a>
+      </div></div>`;
+  }
+  function labFoot() {
+    const b = E.labBase(S);
+    const parts = [];
+    if (b.ready) parts.push(b.plan ? 'Built from your offer in Step 03 and the customers a month you plan for.' : 'Built from your month in Step 03.');
+    if (b.ready && b.est) parts.push('Some of it comes from ranges, so read every figure as “about”.');
+    if (b.ready && b.acqMissing) parts.push('Spending to win customers was not entered, so it counts as nothing here.');
+    parts.push('A higher price may change demand, and help costs money before it saves time. Check both before acting.');
+    return parts.join(' ');
+  }
+
+  const pMbar = (c) => `${emblem(c.pc.per, 40, { small: true })}
+    <span style="flex: 1; font-size: 12px; color: #D3C4A5; line-height: 1.3"><b style="color: #F7F2E7">${c.pc.total}/16</b> pieces in place</span>
+    <button type="button" data-act="print" data-f="m-print" aria-label="Print or save as PDF" style="width: 44px; height: 44px; border-radius: 50%; border: 1px solid #594A32; background: transparent; color: #F7F2E7; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+    <button type="button" data-act="email" data-f="m-email" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; cursor: pointer">Email me</button>`;
+
+  const INDUSTRIES = ['Coaching & consulting', 'Creative & design', 'E-commerce & retail', 'Food & hospitality', 'Health & wellness', 'Beauty & personal care', 'Education & training', 'Professional services', 'Trades & construction', 'Technology & software', 'Real estate', 'Manufacturing', 'Nonprofit & social impact', 'Other'];
+  const industrySelect = (id, extra = '') => `<select class="inp" id="${id}" ${extra}><option value="">Choose your industry…</option>${INDUSTRIES.map((x) => `<option${S.profile.industry === x ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select>`;
+  function pGate() {
+    if (!UI.gate) return '';
+    const P = S.profile, lab = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600';
+    return `<div style="position: fixed; inset: 0; z-index: 50; background: rgba(16,13,9,.6); display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto">
+      <form class="card pop" id="gate-form" role="dialog" aria-modal="true" aria-labelledby="gate-h" novalidate style="position: relative; width: 100%; max-width: 480px; padding: 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.35); margin: auto">
+        <button type="button" data-act="gate-skip" data-f="gate-x" aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <div style="display: flex; align-items: center; gap: 12px; padding-right: 44px"><svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10" fill="none" stroke="#C9A24A" stroke-width="1.4"/><polygon points="12,4 14,12 12,13.5 10,12" fill="#C9A24A"/></svg><div style="display: flex; flex-direction: column"><span class="eb">Before your first answer</span><span class="sf" style="font-size: 22px" id="gate-h">Who is this compass for?</span></div></div>
+        <span style="font-size: 14px; color: var(--muted)">We keep your answers with your name, so your feedback and your launchpad are yours.</span>
+        <div class="gate-two" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+          <label style="${lab}">First name<input class="inp" id="g-first" type="text" autocomplete="given-name" value="${esc(P.first)}" data-f="g-first"></label>
+          <label style="${lab}">Surname<input class="inp" id="g-last" type="text" autocomplete="family-name" value="${esc(P.last)}"></label>
+        </div>
+        <label style="${lab}">Email<input class="inp" id="g-email" type="email" autocomplete="email" value="${esc(P.email)}"></label>
+        <label style="${lab}">Industry${industrySelect('g-industry')}</label>
+        <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: var(--muted)"><input type="checkbox" id="g-consent"${P.consent ? ' checked' : ''} style="width: 18px; height: 18px; margin-top: 1px; accent-color: #C9A24A; flex: none">I agree that ExploraSelf may email me my results and occasional guidance. I can unsubscribe any time.</label>
+        <span id="gate-err" role="alert" style="font-size: 13px; color: var(--self); font-weight: 600"></span>
+        <button type="submit" data-f="gate-go" style="min-height: 50px; border-radius: 5px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; font-size: 15px; cursor: pointer">Start my compass →</button>
+        <button type="button" data-act="gate-skip" data-f="gate-skip" style="min-height: 44px; border-radius: 5px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-weight: 600; cursor: pointer">Skip for now · keep exploring</button>
+        <span style="font-size: 12px; color: var(--muted); text-align: center">Until you add your email, your answers stay only in this browser. Came from our page? You will not see this box.</span>
+      </form></div>`;
+  }
+  const pHow = () => (UI.how ? `<div class="card pop" style="padding: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 13px">
+      <span style="display: flex; gap: 8px"><b style="color: var(--goldink)">1</b>Say where you are and where you want to get.</span>
+      <span style="display: flex; gap: 8px"><b style="color: var(--goldink)">2</b>Answer 8 questions from real life.</span>
+      <span style="display: flex; gap: 8px"><b style="color: var(--goldink)">3</b>Add rough numbers. A range is enough.</span>
+      <span style="display: flex; gap: 8px"><b style="color: var(--goldink)">4</b>Read your compass, ask “what if?”, tick “Got it”, choose your next steps.</span></div>` : '');
+  function pWs() {
+    if (!UI.ws) return '';
+    const P = S.profile, lab = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600';
+    const TYPES = ['Solopreneur (just me)', 'Small business with a team', 'Growing company with managers', 'Not started yet (an idea)'];
+    const CUR = [['USD', 'USD $'], ['EUR', 'EUR €'], ['GBP', 'GBP £'], ['CAD', 'CAD $'], ['AUD', 'AUD $']];
+    return `<div class="card pop" style="padding: 22px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 24px 50px rgba(28,19,9,.14)">
+      <div style="display: flex; flex-direction: column; gap: 4px"><span class="eb">Your workspace</span><span class="sf" style="font-size: 24px">Make this yours.</span><span style="font-size: 13px; color: var(--muted)">Your answers and numbers are kept on this browser while the Compass is in preview.</span></div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+        <label style="${lab}">First name<input class="inp" id="ws-first" type="text" autocomplete="given-name" value="${esc(P.first)}" data-f="ws-first"></label>
+        <label style="${lab}">Surname<input class="inp" id="ws-last" type="text" autocomplete="family-name" value="${esc(P.last)}"></label>
+        <label style="${lab}">Business name<input class="inp" id="ws-business" type="text" value="${esc(P.business)}" placeholder="Your business"></label>
+        <label style="${lab}">Business type<select class="inp" id="ws-type"><option value="">Choose…</option>${TYPES.map((t) => `<option${P.type === t ? ' selected' : ''}>${t}</option>`).join('')}</select></label>
+        <label style="${lab}">Industry <span style="color: var(--self); font-weight: 400">required</span>${industrySelect('ws-industry', 'required')}</label>
+        <label style="${lab}">Currency<select class="inp" id="ws-currency">${CUR.map(([v, t]) => `<option value="${v}"${P.currency === v ? ' selected' : ''}>${t}</option>`).join('')}</select></label>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+        <span style="font-size: 13px; font-weight: 600">Theme</span>
+        ${['light', 'dark'].map((t) => `<button type="button" data-act="theme" data-v="${t}" data-f="theme-${t}" aria-pressed="${S.theme === t}" style="min-height: 44px; padding: 0 16px; border-radius: 5px; border: 1.5px solid ${S.theme === t ? '#C9A24A' : 'var(--line)'}; background: var(--paper); color: var(--ink); cursor: pointer; font-weight: 600">${t === 'light' ? 'Light' : 'Dark'}</button>`).join('')}
+        <button type="button" data-act="ws-save" data-f="ws-save" style="margin-left: auto; min-height: 46px; padding: 0 20px; border-radius: 5px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px">${lockIcon('#14100B', 16)}Save &amp; lock my workspace</button>
+      </div>
+      ${UI.saved ? `<span class="pop" role="status" style="font-size: 13px; color: ${UI.saved === true ? 'var(--people)' : 'var(--self)'}; font-weight: 600">${UI.saved === true ? 'Saved. Your preferences and numbers are kept with this workspace on this browser.' : esc(UI.saved)}</span>` : ''}
+    </div>`;
+  }
+
+  /* ── Drawing ─────────────────────────────────────────────────────────────── */
+  const cache = {};
+  /* When a part is replaced, the parts inside it start again from nothing. */
+  const INSIDE = { 'lab-in': ['lab-head', 'lab-out'] };
+  function put(id, html) {
+    if (cache[id] === html) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = html;
+    cache[id] = html;
+    for (const child of INSIDE[id] || []) delete cache[child];
+  }
+  function render() {
+    const keep = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.f : null;
+    const c = context(), L = labCalc();
+    const cf = $('#cf');
+    cf.dataset.theme = S.theme;
+    document.body.classList.toggle('dark', S.theme === 'dark');
+    put('nav', pNav(c));
+    put('stepcards', pStepcards());
+    const cont = $('#continue'); if (cont) cont.innerHTML = `${c.answered > 0 ? 'Continue my assessment' : 'Show me my road'} <span class="arr" aria-hidden="true">↓</span>`;
+    put('banner', pBanner(c));
+    put('ring', pRing(c));
+    put('skipnote', pSkip());
+    put('s-journey', pJourney(c));
+    put('herebar', pHerebar(c));
+    put('modes', pModes());
+    put('dombars', pDombars(c));
+    put('questions', pQuestions(c));
+    put('s-pains', pPains());
+    put('s-reading', pReading(c));
+    put('s-numbers', pNumbers(c));
+    for (let i = 0; i < 4; i++) put('fb-' + i, pFeedback(c, i));
+    put('s-save', pSave());
+    put('s-weeks', pWeeks(c));
+    put('s-climb', pClimb());
+    put('lab-in', pLabIn());
+    put('lab-head', pLabHead(L));
+    put('lab-out', pLabOut(L));
+    put('lab-deep', pLabDeep(L));
+    $('#labtag').textContent = S.mode === 'yes' ? 'Step 04 · The what-if lab · your real month' : 'Step 04 · The what-if lab · your first customers (plan)';
+    $('#labfoot').textContent = labFoot();
+    put('mbar', pMbar(c));
+    put('gate', pGate());
+    put('how', pHow());
+    put('ws', pWs());
+    $('#how-btn').setAttribute('aria-expanded', String(UI.how));
+    $('#ws-btn').setAttribute('aria-expanded', String(UI.ws));
+    if (keep && (!document.activeElement || document.activeElement === document.body || !document.activeElement.isConnected)) {
+      const el = document.querySelector(`[data-f="${keep}"]`);
+      if (el) el.focus({ preventScroll: true });
+    }
+  }
+  /* Slider moves redraw only what answers them, so the slider never jumps. */
+  function renderLab() {
+    const b = E.labBase(S), L = labCalc();
+    for (const l of LEVER_UI) { const [v, note] = leverText(b, l.k); const a = $('#lv-val-' + l.k), n = $('#lv-note-' + l.k); if (a) a.textContent = v; if (n) n.textContent = note; }
+    cache['lab-in'] = pLabIn();
+    put('lab-head', pLabHead(L));
+    put('lab-out', pLabOut(L));
+    put('lab-deep', pLabDeep(L));
+    $('#labfoot').textContent = labFoot();
+  }
+
+  const SECTION = { overview: 's-overview', clear: 's-clear', people: 's-people', numbers: 's-numbers', plan: 's-whatif', method: 's-method', journey: 's-journey', weeks: 's-weeks' };
+  function go(page) {
+    UI.page = page in SECTION && page !== 'journey' ? page : page === 'journey' ? 'clear' : UI.page;
+    render();
+    const el = document.getElementById(SECTION[page]);
+    if (el) el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' });
+  }
+  function toast(msg) {
+    const t = $('#toast'); t.textContent = msg; t.style.display = 'block';
+    clearTimeout(toast.timer); toast.timer = setTimeout(() => { t.style.display = 'none'; }, 4000);
+  }
+
+  /* ── Email: sent once through /api/send-plan, only when asked ─────────────── */
+  function planForEmail() {
+    const c = context(), n = c.n;
+    const domains = D.map((d, i) => { const f = E.feedback(i, c.sc[i], S.pains, S.want);
+      return c.sc[i].answered ? { know: d.name, lead: f.band, label: f.big, strengthen: [f.ask], steps: [f.week], level: '' }
+        : { know: d.name, lead: f.band, label: 'Not answered yet', strengthen: [], steps: [], level: '' }; });
+    const rows = [];
+    const add = (k, v) => { if (v) rows.push([k, v]); };
+    const ab = (...k) => (k.some((x) => n[x] && n[x].est) ? '≈ ' : '');
+    if (S.mode === 'yes') {
+      if (n.sales && n.deliv && n.run) add('Left this month', ab('sales', 'deliv', 'run') + money(n.sales.v - n.deliv.v - n.run.v));
+      if (n.hrs && n.want && n.want.v > 0) add('Hours against the hours you chose', ab('hrs', 'want') + Math.round(n.hrs.v / n.want.v * 100) + '%');
+      if (n.unpaid) add('Unpaid hours a month', ab('unpaid') + whole(n.unpaid.v));
+      if (n.save && n.out && n.out.v > 0) add('Months your savings cover', ab('save', 'out') + (Math.round(n.save.v / n.out.v * 10) / 10));
+      if (n.newc && n.newc.v > 0 && n.acq) add('Cost to win one customer', ab('newc', 'acq') + money(n.acq.v / n.newc.v));
+    } else {
+      if (n.price && n.cpc) add('Each customer leaves you', ab('price', 'cpc') + money(n.price.v - n.cpc.v));
+      if (n.wait) add('Months you can wait for income', ab('wait') + n.wait.v);
+      if (n.talked) add('People you talked to', ab('talked') + whole(n.talked.v));
+    }
+    const order = c.rd.any ? c.rd.combo.map((v, i) => [v, i]).sort((a, b) => a[0] - b[0]).map((x) => x[1]) : [0, 1, 2, 3];
+    const next = order.slice(0, 3).map((i) => ({ title: D[i].name, text: E.feedback(i, c.sc[i], S.pains, S.want).week }));
+    const st = E.STAGES[c.here];
+    return { name: S.profile.first, business: S.profile.business, stage: st.name, focus: st.focus, domains, numbers: rows.slice(0, 6), next, strategy: [] };
+  }
+  async function sendEmail() {
+    if (!identified()) { openGate('email'); render(); return; }
+    if (!UI.mailReady) { UI.mail = 'Email is not switched on yet. Use Print or Save as PDF for now.'; render(); return; }
+    UI.sending = true; UI.mail = ''; render();
+    try {
+      const r = await fetch('/api/send-plan', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: S.profile.email, plan: planForEmail() }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok) throw new Error(j.error || 'It did not send. Try again in a minute.');
+      UI.mail = 'Sent to ' + S.profile.email + '. Check your inbox: your results and your Founder Launchpad link.';
+    } catch (e) {
+      UI.mail = (e && e.message && !/fetch|network|load failed/i.test(e.message)) ? e.message : 'We could not reach the email service just now. Use Print or Save as PDF.';
+    }
+    UI.sending = false; render();
+    if (window.innerWidth <= 860) toast(UI.mail);
+  }
+
+  /* ── Events ──────────────────────────────────────────────────────────────── */
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-go],[data-act]');
+    if (!t || t.tagName === 'INPUT') return;
+    if (t.dataset.go) { e.preventDefault(); go(t.dataset.go); return; }
+    const a = t.dataset.act, i = Number(t.dataset.i), v = t.dataset.v;
+    switch (a) {
+      case 'how': UI.how = !UI.how; render(); return;
+      case 'ws': UI.ws = !UI.ws; UI.saved = false; render(); return;
+      case 'download': {
+        try {
+          const url = URL.createObjectURL(new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' }));
+          const link = document.createElement('a'); link.href = url; link.download = 'leadership-compass.json'; link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch { toast('Your browser would not save the file.'); }
+        return;
+      }
+      case 'here': S.stage = E.STAGES[i].id; S.goal = ''; save(); render(); return;
+      case 'goal': {
+        const here = E.STAGES.findIndex((x) => x.id === S.stage);
+        if (i > here || (here === 3 && i === here)) { S.goal = E.STAGES[i].id; save(); render(); }
+        return;
+      }
+      case 'mode': S.mode = v; S.group = 0; S.lab.p = 0; S.lab.m = 0; S.lab.d = 0; save(); render(); return;
+      case 'ans': gated(() => { S.ans[t.dataset.q] = Number(v); }); return;
+      case 'str': gated(() => { S.str[i] = Number(v); }); return;
+      case 'pain': gated(() => { const cur = S.pains.slice(), ix = cur.indexOf(v); if (ix >= 0) cur.splice(ix, 1); else { cur.push(v); if (cur.length > 2) cur.shift(); } S.pains = cur; }); return;
+      case 'want': gated(() => { S.want = S.want === v ? '' : v; }); return;
+      case 'grp': S.group = i; save(); render(); return;
+      case 'more': S.more[i] = !S.more[i]; save(); render(); return;
+      case 'lean': S.lean = i; save(); render(); return;
+      case 'stop': S.stop = i; save(); render(); return;
+      case 'print': try { window.print(); } catch { /* no print dialog here */ } return;
+      case 'email': sendEmail(); return;
+      case 'regate': openGate(); render(); return;
+      case 'gate-skip': UI.after = null; S.skipped = true; save(); closeGate(); return;
+      case 'theme': S.theme = v; save(); render(); return;
+      case 'ws-save': {
+        const val = (id) => { const el = $('#' + id); return el ? el.value.trim() : ''; };
+        const ind = val('ws-industry');
+        if (!ind) { UI.saved = 'Choose your industry, so the feedback can speak to your business.'; render(); return; }
+        Object.assign(S.profile, { first: val('ws-first').slice(0, 60), last: val('ws-last').slice(0, 60), business: val('ws-business').slice(0, 80), type: val('ws-type'), industry: ind, currency: val('ws-currency') || 'USD' });
+        UI.saved = true; save(); render(); return;
+      }
+      default:
+    }
+  });
+  document.addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.dataset.act === 'got') { S.got[Number(t.dataset.i)] = t.checked; save(); render(); return; }
+    if (t.dataset.num) { const k = t.dataset.num, cur = S.nums[k] || { pick: '', own: '' }; S.nums[k] = { pick: t.value, own: cur.own }; save(); render(); if (t.value === 'own') { const o = document.querySelector(`[data-own="${k}"]`); if (o) o.focus(); } return; }
+    // Wait for focus to settle on the next field, then redraw and keep it there.
+    if (t.dataset.own || t.dataset.lab) setTimeout(render, 0);
+  });
+  document.addEventListener('input', (e) => {
+    const t = e.target;
+    if (t.dataset.lever) { S.lab[t.dataset.lever] = Number(t.value); save(); renderLab(); return; }
+    if (t.dataset.own) { S.nums[t.dataset.own] = { pick: 'own', own: t.value.slice(0, 80) }; save(); return; }
+    if (t.dataset.lab) { S.lab[t.dataset.lab] = t.value.replace(/[^\d.]/g, '').slice(0, 12); save(); }
+  });
+  document.addEventListener('submit', (e) => {
+    if (e.target.id !== 'gate-form') return;
+    e.preventDefault();
+    const val = (id) => { const el = $('#' + id); return el ? el.value.trim() : ''; };
+    const first = val('g-first'), email = val('g-email'), consent = !!($('#g-consent') || {}).checked;
+    // Errors are said in place, so nothing typed is lost.
+    const err = (m) => { const el = $('#gate-err'); if (el) el.textContent = m; };
+    if (!first) return err('Your first name, so the feedback is yours.');
+    if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return err('That email does not look complete.');
+    if (!consent) return err('Tick the box so we may send you your results. Or skip for now and keep exploring.');
+    Object.assign(S.profile, { first: first.slice(0, 60), last: val('g-last').slice(0, 60), industry: val('g-industry') || S.profile.industry,
+      email: email.slice(0, 120), consent: true });
+    save(); closeGate();
+    if (UI.after === 'email') { UI.after = null; sendEmail(); }
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.gate) { S.skipped = true; save(); closeGate(); } });
+
+  render();
+  setTimeout(() => $('#cf').classList.add('settled'), 1500);
+  /* Email shows as available only once the site has its email key. */
+  try { if (location.protocol !== 'file:') fetch('/api/send-plan').then((r) => (r.ok ? r.json() : {})).then((j) => { UI.mailReady = !!j.ready; }).catch(() => {}); } catch { /* offline */ }
+})();

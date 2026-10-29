@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0E0A05">
+<title>The Summit · Link to Lead · ExploraSelf</title>
+<meta name="description" content="The top of Link to Lead. The whole incubator, with Alexandru beside you every week. $1,989.">
+<link rel="icon" href="/compass/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/compass/assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/compass/assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ExploraSelf">
+<meta property="og:title" content="The Summit · Link to Lead">
+<meta property="og:description" content="The whole incubator. With Alexandru beside you, every week.">
+<meta property="og:url" content="https://linktolead.exploraself.com/compass/summit">
+<meta property="og:image" content="https://linktolead.exploraself.com/compass/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://linktolead.exploraself.com/compass/assets/og-image.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&amp;family=Libre+Franklin:wght@400;500;600;700&amp;display=swap">
+<style>
+/* The Summit: black and gold, a double frame, gold-foil titles. Same palette
+   as the Summit section at the foot of the Compass. */
+html{scroll-behavior:smooth}
+body{margin:0;background:#0E0A05}
+a{color:#E3C47E}a:hover{color:#F7F2E7}
+:focus-visible{outline:3px solid #E3C47E;outline-offset:3px}
+.su *{box-sizing:border-box}
+.su h1,.su h2,.su h3,.su p{margin:0}
+.su{font-family:'Libre Franklin',Arial,sans-serif;color:#F7F2E7;font-size:15px;line-height:1.65;min-height:100vh}
+.sf{font-family:Fraunces,Georgia,serif;font-weight:500;letter-spacing:-.02em}
+.sfi{font-family:Fraunces,Georgia,serif;font-style:italic;font-weight:400}
+.k{font-size:11px;letter-spacing:.32em;color:#E3C47E;text-transform:uppercase}
+.lux{background-color:#0E0A05;background-image:radial-gradient(ellipse 60% 45% at 72% 12%,rgba(201,162,74,.22),transparent 70%),radial-gradient(ellipse 40% 30% at 8% 70%,rgba(201,162,74,.10),transparent 70%),repeating-radial-gradient(circle at 72% 12%,rgba(201,162,74,.06) 0 1px,transparent 1px 64px)}
+.wrap{max-width:1180px;margin:0 auto;padding:40px 24px}
+.frame{border:1px solid rgba(201,162,74,.5);border-radius:10px;padding:8px}
+.frame2{border:1px solid rgba(201,162,74,.22);border-radius:7px}
+.foil{background:linear-gradient(100deg,#C9A24A 0%,#F3DDA0 25%,#C9A24A 45%,#8E6A22 60%,#E3C47E 80%,#C9A24A 100%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:foil 7s ease-in-out infinite}
+@keyframes foil{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes twinkle{0%,100%{opacity:.2}50%{opacity:1}}
+.tw{animation:twinkle 3.2s ease-in-out infinite}.tw2{animation-delay:1.1s}.tw3{animation-delay:2.2s}
+@keyframes glowPk{0%,100%{opacity:.45;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}
+.glow{transform-box:fill-box;transform-origin:center;animation:glowPk 4s ease-in-out infinite}
+@keyframes draw{from{stroke-dasharray:0 900}to{stroke-dasharray:900 0}}
+.draw{animation:draw 2.4s ease-out both}
+@keyframes flag{0%,100%{transform:skewY(0)}50%{transform:skewY(-6deg)}}
+.flag{transform-box:fill-box;transform-origin:left center;animation:flag 3s ease-in-out infinite}
+@keyframes rise{from{opacity:0;transform:translateY(22px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+.rise{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}.r1{animation-delay:.15s}.r2{animation-delay:.3s}.r3{animation-delay:.45s}
+@supports (animation-timeline: view()){.reveal{animation:rise linear both;animation-timeline:view();animation-range:entry 0% cover 30%}}
+.btn{min-height:52px;padding:0 26px;border-radius:3px;border:1px solid #E3C47E;background:#C9A24A;color:#14100B;font-family:inherit;font-weight:600;font-size:15px;letter-spacing:.03em;text-decoration:none;display:inline-flex;align-items:center;gap:10px;cursor:pointer}
+.btn:hover{color:#14100B;background:#E3C47E}
+.btn .arr{transition:transform .25s ease}.btn:hover .arr{transform:translateX(5px)}
+.ghost{min-height:44px;padding:0 20px;border-radius:3px;border:1px solid rgba(201,162,74,.5);background:transparent;color:#F7F2E7;font-family:inherit;font-weight:600;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.step{border:1px solid rgba(201,162,74,.28);border-radius:8px;background:rgba(247,242,231,.03);transition:transform .3s ease,border-color .3s ease}.step:hover{transform:translateY(-4px);border-color:#C9A24A}
+.muted{color:#D3C4A5}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.dom{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.dom{grid-template-columns:1fr}.hero{padding:40px 22px !important}.wrap{padding:28px 16px}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.foil,.tw,.glow,.draw,.flag,.rise,.reveal{animation:none !important}.step{transition:none}}
+</style>
+</head>
+<body>
+<div class="su lux">
+  <header class="wrap" style="padding-top: 22px; padding-bottom: 22px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap">
+    <a href="/compass" class="ghost"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Back to your Compass</a>
+    <span style="flex: 1"></span>
+    <img src="/compass/assets/logo.webp" alt="" style="width: 32px; height: auto"><span style="font-size: 11px; letter-spacing: .28em; color: #E3C47E">EXPLORASELF · LINK TO LEAD</span>
+  </header>
+
+  <main>
+  <!-- HERO -->
+  <section class="wrap" style="padding-top: 20px; padding-bottom: 60px">
+    <div class="frame"><div class="frame2 hero" style="padding: 60px 44px; display: flex; flex-wrap: wrap; align-items: center; gap: 40px">
+      <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 20px; min-width: 0">
+        <span class="k rise">The top of Link to Lead</span>
+        <h1 class="sf foil rise r1" style="font-size: clamp(64px, 9vw, 128px); line-height: .92">The Summit</h1>
+        <p class="sfi rise r2" style="font-size: clamp(22px, 2.4vw, 30px); line-height: 1.35; color: #EFE4CC">The whole incubator. With Alexandru beside you, every week.</p>
+        <div class="rise r3" style="display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: 8px">
+          <a href="#talk" class="btn">Talk with Alexandru about The Summit <span class="arr" aria-hidden="true">→</span></a>
+          <span class="sf" style="font-size: 32px">$1,989</span>
+        </div>
+      </div>
+      <svg viewBox="0 0 320 280" style="flex: 0 1 380px; width: 100%; max-width: 380px; height: auto" aria-hidden="true">
+        <circle class="tw" cx="40" cy="36" r="1.6" fill="#E3C47E"/><circle class="tw tw2" cx="280" cy="26" r="1.2" fill="#F7F2E7"/><circle class="tw tw3" cx="220" cy="78" r="1" fill="#E3C47E"/><circle class="tw" cx="96" cy="96" r="1" fill="#F7F2E7"/><circle class="tw tw2" cx="300" cy="120" r="1.3" fill="#E3C47E"/>
+        <circle class="glow" cx="160" cy="62" r="44" fill="rgba(201,162,74,.2)"/>
+        <polyline class="draw" points="8,272 160,62 312,272" fill="none" stroke="#C9A24A" stroke-width="1.8"/>
+        <polyline points="80,272 160,62 240,272" fill="none" stroke="#594A32" stroke-width="1.1"/>
+        <polyline points="134,96 160,62 188,98" fill="none" stroke="#F7F2E7" stroke-width="1.6" opacity=".7"/>
+        <path d="M160 62V26" stroke="#F7F2E7" stroke-width="1.4"/><path class="flag" d="M160 27h24l-7 7 7 7h-24z" fill="#C9A24A"/>
+        <polyline points="96,272 120,228 150,232 132,188 168,170 150,130 160,96" fill="none" stroke="#E3C47E" stroke-width="1.4" stroke-dasharray="3 5" opacity=".8"/>
+      </svg>
+    </div></div>
+  </section>
+
+  <!-- EVERYTHING OPENED -->
+  <section class="wrap" style="display: flex; flex-direction: column; gap: 26px">
+    <div class="reveal" style="display: flex; flex-direction: column; gap: 10px; max-width: 720px">
+      <span class="k">Everything, opened</span>
+      <h2 class="sf" style="font-size: clamp(36px, 4.6vw, 58px); line-height: 1.04">Every step of the climb, from day one.</h2>
+      <p class="muted" style="font-size: 16px">Full access to the incubator: all twelve levels, the full Compass and the library.</p>
+    </div>
+    <div class="grid4">
+      <div class="step reveal" style="padding: 22px; display: flex; flex-direction: column; gap: 8px"><span class="sf" style="font-size: 34px; color: #C9A24A">01–03</span><span class="sf" style="font-size: 21px">The Founder Launchpad</span><span class="muted" style="font-size: 14px">Know yourself before you build.</span></div>
+      <div class="step reveal" style="padding: 22px; display: flex; flex-direction: column; gap: 8px"><span class="sf" style="font-size: 34px; color: #C9A24A">04–05</span><span class="sf" style="font-size: 21px">The Boardroom</span><span class="muted" style="font-size: 14px">With the full Compass.</span></div>
+      <div class="step reveal" style="padding: 22px; display: flex; flex-direction: column; gap: 8px"><span class="sf" style="font-size: 34px; color: #C9A24A">06–09</span><span class="sf" style="font-size: 21px">The Personal Leadership LAB</span><span class="muted" style="font-size: 14px">Lead yourself first.</span></div>
+      <div class="step reveal" style="padding: 22px; display: flex; flex-direction: column; gap: 8px"><span class="sf" style="font-size: 34px; color: #C9A24A">10–12</span><span class="sf" style="font-size: 21px">The Business HUB</span><span class="muted" style="font-size: 14px">Build the business that carries it.</span></div>
+    </div>
+  </section>
+
+  <!-- EVERY WEEK -->
+  <section class="wrap" style="display: flex; flex-wrap: wrap; gap: 40px; align-items: center">
+    <div class="reveal" style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 14px; min-width: 0">
+      <span class="k">Every week</span>
+      <h2 class="sf" style="font-size: clamp(36px, 4.6vw, 58px); line-height: 1.04">A seat at the table, every week.</h2>
+      <p class="sfi" style="font-size: 21px; color: #EFE4CC">One session with Alexandru each week. Your four domains on one table.</p>
+      <p class="muted">Session length: [SESSION LENGTH] · Format: [ONLINE OR IN PERSON]</p>
+    </div>
+    <div class="dom" style="flex: 1 1 420px; min-width: 0">
+      <div class="step reveal" style="border-top: 3px solid #E0A282; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: Fraunces, serif; color: #E0A282; font-size: 15px">I</span><span class="sf" style="font-size: 19px">Lead yourself</span><span class="muted" style="font-size: 13px">What you want this business to give your life.</span></div>
+      <div class="step reveal" style="border-top: 3px solid #9BC0A1; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: Fraunces, serif; color: #9BC0A1; font-size: 15px">II</span><span class="sf" style="font-size: 19px">Lead your people</span><span class="muted" style="font-size: 13px">Who carries the work, and how they grow.</span></div>
+      <div class="step reveal" style="border-top: 3px solid #91B8D5; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: Fraunces, serif; color: #91B8D5; font-size: 15px">III</span><span class="sf" style="font-size: 19px">Lead your business</span><span class="muted" style="font-size: 13px">The numbers behind your decisions.</span></div>
+      <div class="step reveal" style="border-top: 3px solid #DDBD69; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: Fraunces, serif; color: #DDBD69; font-size: 15px">IV</span><span class="sf" style="font-size: 19px">Lead the market</span><span class="muted" style="font-size: 13px">Who you serve, and why they choose you.</span></div>
+    </div>
+  </section>
+
+  <!-- WHO + QUOTE -->
+  <section class="wrap" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 24px">
+    <div class="reveal" style="display: flex; flex-direction: column; gap: 14px">
+      <span class="k">Who it is for</span>
+      <h2 class="sf" style="font-size: clamp(32px, 4vw, 48px); line-height: 1.08">For founders who want to lead, not only run.</h2>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px">
+        <div style="border-top: 1px solid rgba(201,162,74,.25); padding-top: 10px"><b>You carry too much alone.</b> <span class="muted">You want someone at your side who sees all four domains.</span></div>
+        <div style="border-top: 1px solid rgba(201,162,74,.25); padding-top: 10px"><b>You are ready to decide.</b> <span class="muted">Not more information. Clear choices, made every week.</span></div>
+        <div style="border-top: 1px solid rgba(201,162,74,.25); padding-top: 10px"><b>You want a business that works</b> <span class="muted">and a life that matters.</span></div>
+      </div>
+    </div>
+    <figure class="frame reveal" style="margin: 0"><div class="frame2" style="padding: 36px; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 16px">
+      <svg width="34" height="26" viewBox="0 0 34 26" aria-hidden="true"><path d="M2 26V14C2 6 7 1 14 0v5c-4 1-6 4-6 9h6v12zM20 26V14c0-8 5-13 12-14v5c-4 1-6 4-6 9h6v12z" fill="#C9A24A"/></svg>
+      <blockquote class="sfi" style="margin: 0; font-size: clamp(22px, 2.4vw, 30px); line-height: 1.35">I do not want you to become impressive at a life you have never chosen.</blockquote>
+      <figcaption style="font-size: 13px; letter-spacing: .14em; color: #E3C47E">ALEXANDRU COJOCARI · A NEW WAY OF WINNING</figcaption>
+    </div></figure>
+  </section>
+
+  <!-- HOW IT STARTS -->
+  <section class="wrap" style="display: flex; flex-direction: column; gap: 22px">
+    <div class="reveal" style="display: flex; flex-direction: column; gap: 10px"><span class="k">How it starts</span><h2 class="sf" style="font-size: clamp(32px, 4vw, 48px)">Three steps to the top.</h2></div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px">
+      <div class="step reveal" style="padding: 22px; display: flex; gap: 14px"><span class="sf" style="font-size: 30px; color: #C9A24A">1</span><span><b>Book a call.</b><br><span class="muted">Talk with Alexandru about where you are and where you want to get.</span></span></div>
+      <div class="step reveal" style="padding: 22px; display: flex; gap: 14px"><span class="sf" style="font-size: 30px; color: #C9A24A">2</span><span><b>Decide together.</b><br><span class="muted">If it is the right fit for both of you, you join.</span></span></div>
+      <div class="step reveal" style="padding: 22px; display: flex; gap: 14px"><span class="sf" style="font-size: 30px; color: #C9A24A">3</span><span><b>Start the climb.</b><br><span class="muted">Everything opens, and your first weekly session is set.</span></span></div>
+    </div>
+  </section>
+
+  <!-- FINAL -->
+  <section id="talk" class="wrap" style="padding-bottom: 90px">
+    <div class="frame"><div class="frame2" style="padding: 54px 24px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px">
+      <span class="k">Your place at The Summit</span>
+      <h2 class="sf foil" style="font-size: clamp(44px, 6vw, 76px); line-height: 1">Reach the top. Together.</h2>
+      <p class="sfi" style="font-size: 22px; color: #EFE4CC">$1,989 · Everything in Link to Lead, and Alexandru every week.</p>
+      <a href="[YOUR BOOKING LINK]" class="btn" data-booking>Talk with Alexandru about The Summit <span class="arr" aria-hidden="true">→</span></a>
+      <p id="booking-note" class="muted" role="status" style="font-size: 13px"></p>
+      <a href="/start" style="font-size: 14px; padding: 10px 0">Not yet? Start with the Founder Launchpad, free.</a>
+    </div></div>
+  </section>
+  </main>
+</div>
+<script>
+/* Until the booking link replaces its [PLACEHOLDER], the button says so
+   instead of opening a page that does not exist. */
+document.querySelectorAll('a[data-booking]').forEach(function (a) {
+  if (a.getAttribute('href').charAt(0) !== '[') return;
+  a.addEventListener('click', function (e) {
+    e.preventDefault();
+    document.getElementById('booking-note').textContent = 'Booking opens soon: [YOUR BOOKING LINK]';
+  });
+});
+</script>
+</body>
+</html>

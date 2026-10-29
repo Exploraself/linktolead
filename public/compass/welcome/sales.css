@@ -1,0 +1,99 @@
+/* The Leadership Compass sales page (versions A and B share this file).
+   Navy, cream and one gold; Archivo for the voice, Libre Caslon for the
+   human lines. Motion stops under prefers-reduced-motion. */
+html{scroll-behavior:smooth}
+body{margin:0;background:#F3EFEA}
+a{color:#7A5E26}a:hover{color:#15213B}
+:focus-visible{outline:3px solid #C9A24A;outline-offset:3px}
+.fc *{box-sizing:border-box}
+.fc h1,.fc h2,.fc h3,.fc p{margin:0}
+.fc{font-family:Archivo,'Helvetica Neue',Arial,sans-serif;color:#15213B;background:#F3EFEA;overflow:hidden}
+.fc button{font-family:inherit}
+.serif{font-family:'Libre Caslon Text',Georgia,serif;font-style:italic;font-weight:400}
+.wrap{max-width:1160px;margin:0 auto}
+.kick{font-size:13px;font-weight:700;letter-spacing:.16em;color:#7A5E26}
+.kick.gold{color:#C9A24A}
+.h2{font-weight:900;font-size:clamp(32px,4.6vw,56px);line-height:1;text-transform:uppercase}
+.lede{font-size:18px;line-height:1.6;color:#3D4966}
+.gold-btn{border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 26px;background:#C9A24A;color:#15213B;font-weight:900;font-size:15px;text-transform:uppercase;letter-spacing:.06em;border-radius:4px;text-decoration:none}
+.gold-btn:hover{color:#15213B;background:#E2C47E}
+.yn{min-height:48px;min-width:96px;border:2px solid #15213B;background:#FFFFFF;color:#15213B;font-weight:900;font-size:15px;cursor:pointer;border-radius:4px}
+.yn[aria-pressed="true"]{background:#15213B;color:#F3EFEA}
+.inp{font-family:inherit;font-size:15px;min-height:46px;padding:0 12px;border:1.5px solid #D8CDBB;border-radius:5px;width:100%;color:#15213B;background:#FFFFFF}
+.slide-card{background:#FFFFFF;border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 18px 40px rgba(21,33,59,.07)}
+.row{display:flex;justify-content:space-between;font-weight:700;font-size:14px;gap:10px}
+.row b{font-weight:900;font-size:22px}
+.msg{background:#F3EFEA;border-radius:6px;padding:14px;font-size:15px;line-height:1.45;min-height:66px}
+input[type=range]{width:100%;accent-color:#C9A24A;height:44px}
+input.now{accent-color:#5A6580}
+.grid-bg{background-color:#111D38;background-image:linear-gradient(rgba(201,162,74,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(201,162,74,.07) 1px,transparent 1px);background-size:28px 28px}
+.seg{display:flex;align-items:flex-end;padding:10px;font-weight:700;font-size:13px;border-radius:4px;overflow:hidden;box-shadow:inset 0 2px 0 rgba(255,255,255,.25)}
+[hidden]{display:none !important}
+
+@keyframes gpop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes settle{0%{transform:rotate(-150deg)}40%{transform:rotate(55deg)}60%{transform:rotate(10deg)}75%{transform:rotate(30deg)}100%{transform:rotate(22deg)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes glow{0%,100%{opacity:.15}50%{opacity:.9}}
+@keyframes statement{0%{opacity:0;transform:translateY(16px)}100%{opacity:1;transform:none}}
+@keyframes chip{0%,30%{background:#FFFFFF;color:#15213B}40%,90%{background:#15213B;color:#F3EFEA}100%{background:#FFFFFF;color:#15213B}}
+@keyframes lineIn{0%,20%{transform:scaleX(0)}50%,100%{transform:scaleX(1)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,162,74,.55)}60%{box-shadow:0 0 0 14px rgba(201,162,74,0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:none}}
+@keyframes show{0%{opacity:0}2%,23%{opacity:1}25%,100%{opacity:0}}
+@keyframes sideOn{0%,23%{background:#15213B;color:#F3EFEA}25%,100%{background:transparent;color:#15213B}}
+@keyframes prog{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes ringRev{to{transform:rotate(-360deg)}}
+@keyframes orbit{to{transform:rotate(360deg)}}
+@keyframes sway{0%,100%{transform:rotate(22deg)}50%{transform:rotate(34deg)}}
+@keyframes gA{0%{flex-basis:13%}50%{flex-basis:22%}100%{flex-basis:17%}}
+@keyframes gB{0%{flex-basis:13%}60%{flex-basis:8%}100%{flex-basis:21%}}
+@keyframes gC{0%{flex-basis:13%}40%{flex-basis:24%}100%{flex-basis:19%}}
+@keyframes gD{0%{flex-basis:13%}55%{flex-basis:18%}100%{flex-basis:15%}}
+@keyframes sA{0%{flex-basis:15%}50%{flex-basis:7%}100%{flex-basis:3%}}
+@keyframes sB{0%{flex-basis:15%}45%{flex-basis:10%}100%{flex-basis:4%}}
+@keyframes sC{0%{flex-basis:15%}60%{flex-basis:5%}100%{flex-basis:2%}}
+@keyframes lblOut{0%,45%{opacity:1}80%,100%{opacity:0}}
+@keyframes scan{from{left:0}to{left:calc(100% - 2px)}}
+.gpop{animation:gpop .45s cubic-bezier(.2,.7,.2,1) both}
+.rise{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
+.d1{animation-delay:.2s}.d2{animation-delay:.45s}.d3{animation-delay:.7s}.d4{animation-delay:.95s}
+.settle{transform-box:view-box;transform-origin:200px 200px;animation:settle 3s cubic-bezier(.3,.6,.2,1) .3s both}
+.ring{transform-box:fill-box;transform-origin:center;animation:spin 70s linear infinite}
+.q1{animation:glow 4s ease-in-out infinite}.q2{animation:glow 4s ease-in-out 1s infinite}.q3{animation:glow 4s ease-in-out 2s infinite}.q4{animation:glow 4s ease-in-out 3s infinite}
+.st1{animation:statement .8s ease-out .2s both}.st2{animation:statement .8s ease-out 1.1s both}.st3{animation:statement .8s ease-out 2s both}
+.c2{animation:chip 5s ease-in-out infinite}
+.ln{transform-origin:left;animation:lineIn 5s ease-in-out infinite alternate}
+.cta{animation:pulse 2.6s ease-out infinite}
+.pop{animation:popIn .45s cubic-bezier(.2,.7,.2,1) both}
+@supports (animation-timeline: view()){
+  .reveal{animation:rise linear both;animation-timeline:view();animation-range:entry 0% cover 28%}
+  .st1,.st2,.st3{animation:statement linear both;animation-timeline:view();animation-range:entry 10% cover 35%}
+}
+.vid *{animation-play-state:var(--ps,running)}
+.scr{opacity:0;animation:show 16s linear infinite}
+.scr2{animation-delay:4s}.scr3{animation-delay:8s}.scr4{animation-delay:12s}
+.side{animation:sideOn 16s linear infinite}
+.side2{animation-delay:4s}.side3{animation-delay:8s}.side4{animation-delay:12s}
+.prog{animation:prog 16s linear infinite}
+.ring-rev{transform-box:fill-box;transform-origin:center;animation:ringRev 45s linear infinite}
+.orbit{transform-box:view-box;transform-origin:200px 200px;animation:orbit 14s linear infinite}
+.needle5{transform-box:view-box;transform-origin:200px 200px;animation:settle 3s cubic-bezier(.3,.6,.2,1) .3s both,sway 7s ease-in-out 3.3s infinite}
+.dA{animation:gA 8s ease-in-out infinite alternate}.dB{animation:gB 11s ease-in-out infinite alternate}.dC{animation:gC 9s ease-in-out infinite alternate}.dD{animation:gD 13s ease-in-out infinite alternate}
+.cA{animation:sA 10s ease-in-out infinite alternate}.cB{animation:sB 12s ease-in-out infinite alternate}.cC{animation:sC 9s ease-in-out infinite alternate}
+.cA span{animation:lblOut 10s ease-in-out infinite alternate}.cB span{animation:lblOut 12s ease-in-out infinite alternate}.cC span{animation:lblOut 9s ease-in-out infinite alternate}
+.scan{animation:scan 5s linear infinite}
+
+@media (max-width:520px){
+  .fc section{padding-left:16px !important;padding-right:16px !important}
+  .two{grid-template-columns:1fr !important}
+  .week-bar .seg{font-size:10px;padding:6px 3px}
+  .lookin{min-height:430px !important}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .gpop,.rise,.settle,.ring,.q1,.q2,.q3,.q4,.st1,.st2,.st3,.c2,.ln,.cta,.pop,.reveal,.prog,.ring-rev,.orbit,.seg,.seg span,.scan{animation:none !important}
+  .needle5{animation:none !important;transform:rotate(22deg)}
+  /* The look-inside shows its first screen, still. */
+  .scr,.side{animation:none !important}.scr1{opacity:1}.side1{background:#15213B;color:#F3EFEA}
+}
