@@ -75,11 +75,13 @@ export async function note({ body, level, domain }) {
 
 // ── The free account from the Compass ────────────────────────────────────────
 
-/** Create the free account, or find it. A new email returns a token, kept
- *  here. An email that already has an account returns { existing: true } and
+/** Create the free account, or find it. `type` is 'full' (with company,
+ *  interest and industry) or 'simple'. No password here: the password gate
+ *  asks for one when the founder starts the Launchpad. A new email returns a
+ *  token, kept here. An email that already has an account returns { existing: true } and
  *  no token: that browser signs in by email link instead. */
-export async function signup({ first, last, email, industry, consent, source, stage, password, confirm }) {
-  const out = await post('/api/signup', { first, last, email, industry, consent, source, stage, password, confirm, token: token() });
+export async function signup({ first, last, email, industry, consent, source, stage, type, company, noCompany, interest }) {
+  const out = await post('/api/signup', { first, last, email, industry, consent, source, stage, type, company, noCompany, interest, token: token() });
   if (out.token) keep(out.token);
   return out;
 }
@@ -95,7 +97,11 @@ export async function login(email, password) {
   return out;
 }
 
-/** Set or change the optional password, once signed in. */
+/** The password gate: the password, and whatever business details are still
+ *  missing (company, interest, industry). */
+export const complete = (fields) => post('/api/complete', { token: token(), ...fields });
+
+/** Change the password, once signed in. */
 export const setPassword = (password, confirm) => post('/api/password', { token: token(), password, confirm });
 
 /** Notes from Alexandru and the team, and marking one read. */

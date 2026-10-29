@@ -1,5 +1,8 @@
-// A free account from the Compass or its sales page: first name, surname,
-// email, industry, consent, where they came from and their stage.
+// A free account from the Compass or a sales page: first name, surname,
+// email, consent, where they came from and their stage. Two forms
+// (functions/_profile.js): FULL also gives company (or "No company yet"),
+// interest and industry; SIMPLE does not, and gives them at the password gate.
+// No password is asked here: it is set when the founder starts the Launchpad.
 //
 // One email is one record. A new email makes the record and returns its token,
 // which the browser keeps (public/account.js, key 'ftb-token'). An email that
@@ -16,10 +19,11 @@
 // wait.
 
 import { json, bad, db, now, newToken, clean, looksLikeEmail, accountTables } from '../_shared.js';
-import { profile, sendWelcome } from '../_account.js';
+import { profile, sendWelcome, SOURCES } from '../_account.js';
 import { allowed, logged, mailState, origin } from '../_mail.js';
 import { passwordProblem, setPassword } from '../_auth.js';
 import { syncFounder } from '../_mailchimp.js';
+import { details } from '../_profile.js';
 
 /** Run after the reply when the platform allows it; never let it throw. */
 const later = (waitUntil, job) => {
@@ -41,8 +45,12 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (!looksLikeEmail(email)) return bad('That email does not look complete.');
   if (!first) return bad('Your first name, so the Compass is yours.');
   const consent = body.consent === true;
-  const source = ['compass', 'sales-page'].includes(body.source) ? body.source : 'compass';
+  const source = SOURCES.includes(body.source) ? body.source : 'compass';
   const stage = STAGE[body.stage] || null;
+  const type = body.type === 'full' ? 'full' : 'simple';
+  const d = type === 'full' ? details(body) : null;
+  if (d && d.problem) return bad(d.problem);
+  const industry = d ? d.industry : body.industry;
   // The password is optional. When one is given it must be sound before
   // anything is made, so a founder is never left half signed up.
   const password = typeof body.password === 'string' && body.password !== '' ? body.password : null;
@@ -56,7 +64,10 @@ export async function onRequestPost({ request, env, waitUntil }) {
     // Consent counts only from the browser that holds this record: someone
     // typing another person's address cannot agree on their behalf.
     const mine = clean(body.token, 80) === found.id;
-    const p = await profile(D, found.id, { industry: body.industry, consent: mine && consent, source });
+    const p = await profile(D, found.id, { industry: mine ? industry : null, consent: mine && consent, source });
+    // From the founder's own browser, a full form fills what is missing.
+    if (mine && d) await D.prepare(`UPDATE student_profile SET company = COALESCE(company, ?), interest = COALESCE(NULLIF(interest, ''), ?),
+        signup_type = 'full' WHERE student_id = ?`).bind(d.company, d.interest, found.id).run();
     await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(found.id, 'signup', now(), 'existing').run();
     // Consent given from the founder's own browser: into the audience too.
     if (mine && consent && !p.unsubscribed && p.mailchimp_status !== 'ok') await later(waitUntil, () => syncFounder(env, D, found.id, 'join'));
@@ -67,9 +78,11 @@ export async function onRequestPost({ request, env, waitUntil }) {
   await D.prepare(`INSERT INTO student (id,email,name,phone,company,stage,tier,joined_at,last_seen_at)
       VALUES (?,?,?,?,?,?,?,?,?)`)
     .bind(id, email, `${first} ${last}`.trim(), '', '', stage, 'free', now(), now()).run();
-  const p = await profile(D, id, { industry: body.industry, consent, source });
+  const p = await profile(D, id, { industry, consent, source });
+  await D.prepare('UPDATE student_profile SET signup_type = ?, company = ?, interest = ? WHERE student_id = ?')
+    .bind(type, d ? d.company : null, d ? d.interest : null, id).run();
   if (password) await setPassword(D, id, password);
-  await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(id, 'signup', now(), source).run();
+  await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(id, 'signup', now(), `${source} · ${type}`).run();
 
   // The welcome goes after the reply, so a slow email service never makes
   // anyone wait for their account.

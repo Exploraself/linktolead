@@ -27,6 +27,7 @@ import * as messages from './functions/api/messages.js';
 import * as library from './functions/api/library.js';
 import * as stage from './functions/api/stage.js';
 import * as thread from './functions/api/thread.js';
+import * as complete from './functions/api/complete.js';
 
 /** One line per route. A new file in functions/api/ needs its line here. */
 export const ROUTES = {
@@ -46,6 +47,7 @@ export const ROUTES = {
   '/api/library': library,
   '/api/stage': stage,
   '/api/thread': thread,
+  '/api/complete': complete,
 };
 
 export default {

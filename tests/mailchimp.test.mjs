@@ -103,7 +103,7 @@ ok(c[0].method === 'PUT' && c[0].url === `https://us19.api.mailchimp.com/3.0/lis
 ok(c[0].body.status_if_new === 'subscribed' && c[0].body.email_address === 'ana@example.com' && c[0].body.merge_fields.FNAME === 'Ana' && c[0].body.merge_fields.LNAME === 'Pop', 'API: status and merge fields');
 ok(c[0].auth === 'Basic ' + btoa('linktolead:secretkey-us19'), 'API: the key as basic auth, never in the URL');
 const active = (call) => call.body.tags.filter((t) => t.status === 'active').map((t) => t.name).sort().join(',');
-ok(c[1].method === 'POST' && c[1].url.endsWith(`/members/${hash}/tags`) && active(c[1]) === 'Link to Lead - The Founder Launchpad,grow,linktolead,sales-page', 'API: tags linktolead, source, stage and the first step');
+ok(c[1].method === 'POST' && c[1].url.endsWith(`/members/${hash}/tags`) && active(c[1]) === 'Link to Lead - The Founder Launchpad,Signup - Simple,grow,linktolead,sales-page', 'API: tags linktolead, source, stage and the first step');
 ok(c[1].body.tags.some((t) => t.name === 'build' && t.status === 'inactive'), 'API: the other stages are switched off');
 ok(logOf(env)[0].status === 'ok' && logOf(env)[0].mode === 'api', 'API: logged ok');
 env = fresh({ MAILCHIMP_API_KEY: 'secretkey-us19', MAILCHIMP_DOUBLE_OPTIN: 'yes' });
@@ -117,7 +117,7 @@ calls = [];
 const done4 = { token: j.token, stage: 'leading', results: { scores: [5, 1, 3, 4], answered: [2, 2, 2, 2] } };
 await compassPost({ request: post('/api/compass', done4), env });
 c = mcCalls();
-ok(c.length === 1 && c[0].url.endsWith('/tags') && active(c[0]) === 'Link to Lead - The Founder Launchpad,lead-your-people,linktolead,sales-page,scale', 'Compass done: stage (Leading → scale) and weakest domain');
+ok(c.length === 1 && c[0].url.endsWith('/tags') && active(c[0]) === 'Link to Lead - The Founder Launchpad,Signup - Simple,lead-your-people,linktolead,sales-page,scale', 'Compass done: stage (Leading → scale) and weakest domain');
 calls = [];
 await compassPost({ request: post('/api/compass', done4), env });
 ok(mcCalls().length === 0, 'the same Compass again: no new call');

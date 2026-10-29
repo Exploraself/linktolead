@@ -50,7 +50,7 @@ function tilesHTML(S) {
   return `<div class="tiles">
     ${t('all', S.total, 'Founders in total')}${t('new', S.newWeek, 'New this week')}${t('compass', S.compass, 'Compass done')}
     ${STEP_KEYS.map((k) => t(k, S.steps[k], 'In ' + STEP_NAMES[k])).join('')}
-    ${t('notes', S.notes, 'Questions waiting for an answer')}${t('quiet', S.quiet, 'Quiet for 14+ days')}${t('library', S.library, 'Downloaded from the library')}
+    ${t('notes', S.notes, 'Questions waiting for an answer')}${t('quiet', S.quiet, 'Quiet for 14+ days')}${t('library', S.library, 'Downloaded from the library')}${t('full', S.full, 'Signed up · full form')}${t('simple', S.simple, 'Signed up · simple form')}${t('nopw', S.noPassword, 'No password yet')}
   </div>`;
 }
 
@@ -92,14 +92,15 @@ function tableHTML() {
       <span class="count">${rows.length} of ${data.students.length}</span><span style="flex:1"></span>
       <button class="ghost" id="csv">Export CSV</button><button class="ghost" id="refresh">Refresh</button></div>
     ${flash ? `<p class="flash" role="status">${esc(flash)}</p>` : ''}
-    ${rows.length ? `<div class="tscroll"><table><thead><tr><th>Founder</th><th>Joined</th><th>Last seen</th><th>Stage</th><th>Step</th><th>Compass</th><th>Plans</th><th>Password</th><th>Consent</th><th>Unsub.</th><th>Paused</th><th>Mailchimp</th><th>Actions</th></tr></thead>
+    ${rows.length ? `<div class="tscroll"><table><thead><tr><th>Founder</th><th>Joined</th><th>Last seen</th><th>Stage</th><th>Step</th><th>Compass</th><th>Plans</th><th>Form</th><th>Company</th><th>Interest</th><th>Industry</th><th>Password</th><th>Consent</th><th>Unsub.</th><th>Paused</th><th>Mailchimp</th><th>Actions</th></tr></thead>
     <tbody>${rows.map((s) => `<tr>
       <td><span class="nm" data-open="${esc(s.id)}">${esc(s.name || '—')}</span><span class="em">${esc(s.email)}</span>${s.open_notes ? `<span class="em warn"><span class="dot"></span>${s.open_notes} unanswered question${s.open_notes > 1 ? 's' : ''}</span>` : ''}</td>
       <td class="tiny">${when(s.joined_at)}</td><td class="tiny">${when(s.last_seen_at || s.joined_at)}</td>
       <td>${esc(s.stage || '—')}</td>
       <td><select data-step="${esc(s.id)}" aria-label="Step for ${esc(s.name || s.email)}">${STEP_KEYS.map((k) => `<option value="${k}"${(s.tier || 'free') === k ? ' selected' : ''}>${STEP_NAMES[k]}</option>`).join('')}</select></td>
       <td>${s.compass_at ? 'done' : '—'}</td><td class="tiny">${s.plan_ticks || 0} of ${total}</td>
-      <td>${yes(s.has_password)}</td><td>${yes(s.consent)}</td><td>${s.unsubscribed ? '<b class="warn">yes</b>' : '—'}</td><td>${s.paused ? '<b class="warn">paused</b>' : '—'}</td>
+      <td class="tiny">${esc(s.signup_type || '—')}</td><td class="tiny">${s.company === '' ? 'No company yet' : esc(s.company || '—')}</td><td class="tiny">${esc(s.interest || '—')}</td><td class="tiny">${esc(s.industry || '—')}</td>
+      <td>${s.has_password ? 'yes' : '<b class="warn">not yet</b>'}</td><td>${yes(s.consent)}</td><td>${s.unsubscribed ? '<b class="warn">yes</b>' : '—'}</td><td>${s.paused ? '<b class="warn">paused</b>' : '—'}</td>
       <td class="tiny">${s.mailchimp_status ? (s.mailchimp_status === 'failed' ? '<b class="warn">failed</b>' : esc(MC_STATUS[s.mailchimp_status] || s.mailchimp_status)) + ' · ' + when(s.mailchimp_at) : (s.consent && !s.unsubscribed ? 'not sent yet' : '—')}</td>
       <td class="acts">
         <button class="ghost" data-open="${esc(s.id)}">Open work</button>
@@ -201,11 +202,14 @@ async function one(id) {
         <div class="k"><b>Stage</b><span>${esc(s.stage || '—')}</span></div>
         <div class="k"><b>Step</b><span>${esc(STEP_NAMES[s.tier || 'free'] || s.tier)}</span></div>
         <div class="k"><b>Answers written</b><span>${A.filter((a) => a.body).length}</span></div>
+        <div class="k"><b>Signed up with</b><span>${esc(P.signup_type ? P.signup_type + ' form' : '—')}</span></div>
+        <div class="k"><b>Company</b><span>${P.company === '' ? 'No company yet' : esc(P.company || '—')}</span></div>
+        <div class="k"><b>Interest</b><span>${esc(P.interest || '—')}</span></div>
         <div class="k"><b>Industry</b><span>${esc(P.industry || '—')}</span></div>
         <div class="k"><b>Came from</b><span>${esc(P.source || 'programme')}</span></div>
         <div class="k"><b>Consent</b><span>${P.consent ? 'yes' + (P.consent_at ? ' · ' + when(P.consent_at) : '') : 'no'}</span></div>
         <div class="k"><b>Unsubscribed</b><span>${P.unsubscribed ? 'yes' : 'no'}</span></div>
-        <div class="k"><b>Password</b><span>${d.auth && d.auth.has_password ? 'yes' : 'no'}${d.auth && d.auth.paused ? ' · paused' : ''}</span></div>
+        <div class="k"><b>Password</b><span>${d.auth && d.auth.has_password ? 'yes' : '<b class="warn">not yet</b>'}${d.auth && d.auth.paused ? ' · paused' : ''}</span></div>
       </div></div>
     <div class="panel"><h2>Climb</h2>
       <ul class="climb" style="margin:8px 0 0;padding-left:18px">${K.map((c) => `<li>${esc(c.name)} · ${esc(day(c.at))}</li>`).join('')}</ul></div>

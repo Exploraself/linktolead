@@ -23,6 +23,9 @@ export function summary(students, waiting, now = Date.now()) {
     notes: (waiting || []).length,
     quiet: list.filter((s) => isQuiet(s, now)).length,
     library: list.filter((s) => !!s.library).length,
+    full: list.filter((s) => s.signup_type === 'full').length,
+    simple: list.filter((s) => s.signup_type === 'simple').length,
+    noPassword: list.filter((s) => !s.has_password).length,
   };
 }
 
@@ -35,6 +38,8 @@ export function filter(students, { tile = 'all', q = '' } = {}, now = Date.now()
     if (tile === 'notes' && !(s.open_notes > 0)) return false;
     if (tile === 'quiet' && !isQuiet(s, now)) return false;
     if (tile === 'library' && !s.library) return false;
+    if ((tile === 'full' || tile === 'simple') && s.signup_type !== tile) return false;
+    if (tile === 'nopw' && s.has_password) return false;
     if (STEP_KEYS.includes(tile) && (s.tier || 'free') !== tile) return false;
     if (needle && !`${s.name || ''} ${s.email || ''} ${s.company || ''}`.toLowerCase().includes(needle)) return false;
     return true;

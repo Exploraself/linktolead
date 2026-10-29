@@ -1,0 +1,3 @@
+# Permanent moves. Cloudflare reads this file before serving anything in public/.
+/compass/welcome-a  /  301
+/compass/welcome-a/  /  301

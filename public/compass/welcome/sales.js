@@ -81,7 +81,14 @@ const SalesMath = (() => {
     else if (ratio > 0.85) Object.assign(o, { level: 'tight', title: 'It fits — just. No room for a bad week.', text: `The plan uses ${n(need)} of your ${n(avail)} hours. One sick day, one difficult client, and it spills into your life.`, ask: 'What happens to this plan when one week goes wrong?' });
     else Object.assign(o, { level: 'fits', title: 'It fits, with room to breathe.', text: `The plan needs ${n(need)} of the ${n(avail)} hours you want to work. Now the real question is not money.`, ask: 'Do you know what enough looks like — and why you want the next goal?' });
     o.ratio = ratio;
+    // The badge. Over the hours you want is said as just that.
+    o.badge = o.level === 'red' ? 'OVER YOUR HOURS' : o.level === 'tight' ? 'TIGHT' : 'IT FITS';
+    // The bar: the hours you want are the whole track; anything over shows
+    // beyond it, as "<N> h over".
+    o.over = Math.max(0, need - avail);
     const salesFit = hps > 0 ? Math.floor(avail / hps) : 0;
+    // Lever 1: what the plan pays if you keep to your hours. Whole sales only.
+    o.paysAtHours = salesFit * perSale;
     o.priceFit = salesFit >= 1 && keep > 0 ? Math.ceil(goal / (salesFit * keep / 100) / 10) * 10 : null;
     o.hpsFit = sales > 0 ? Math.max(0.5, Math.floor((avail / sales) * 2) / 2) : null;
     return o;
@@ -103,6 +110,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
   };
   const PERCENT = new Set(['rNow', 'rWant', 'keep']);
   const val = {}, LADDER = {};
+  let labApi = null;
   document.querySelectorAll('[data-in]').forEach((el) => {
     const k = el.dataset.in, [min, max, stepped] = RANGES[k] || [Number(el.min), Number(el.max)], start = Number(el.value);
     if (stepped) {
@@ -125,14 +133,22 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
     const v = val, o = SalesMath.plan(v);
     out('goalTxt', money(v.goal)); out('priceTxt', money(v.price)); out('keep', v.keep); out('hps', v.hps); out('avail', money(v.avail));
     out('sales', money(o.sales)); out('perSaleTxt', money(o.perSale)); out('need', money(o.need));
-    const look = { red: ['#C8432B', '#FFFFFF', 'IN THE RED'], tight: ['#C9A24A', '#15213B', 'TIGHT'], fits: ['#2F7D5B', '#FFFFFF', 'IT FITS'] }[o.level];
+    const look = { red: ['#C8432B', '#FFFFFF'], tight: ['#C9A24A', '#15213B'], fits: ['#2F7D5B', '#FFFFFF'] }[o.level];
     out('fbTitle', o.title); out('fbText', o.text); out('fbAsk', o.ask);
-    const st = $('#status'); st.textContent = look[2]; st.style.background = look[0]; st.style.color = look[1];
+    const st = $('#status'); st.textContent = o.badge; st.style.background = look[0]; st.style.color = look[1];
     $('#plan-card').style.borderTopColor = look[0];
-    const bar = $('#needbar'); bar.style.width = (Number.isFinite(o.ratio) ? Math.min(100, Math.round(o.ratio * 100)) : 100) + '%'; bar.style.background = look[0];
+    // The wanted hours are the whole track; what the plan needs beyond them
+    // sits past its end, in red.
+    const total = Math.max(o.need, v.avail) || 1;
+    $('#hbar-track').style.width = (v.avail / total * 100) + '%';
+    const bar = $('#needbar'); bar.style.width = (v.avail > 0 ? Math.min(100, o.need / v.avail * 100) : 0) + '%'; bar.style.background = o.over > 0 ? '#C9A24A' : look[0];
+    const ov = $('#hbar-over'); ov.style.width = (o.over / total * 100) + '%'; ov.hidden = !(o.over > 0);
+    out('overTxt', o.over > 0 ? `${money(o.over)} h over` : '');
+    out('paysAtHours', money(o.paysAtHours));
     out('priceFit', o.priceFit === null ? '—' : money(o.priceFit));
     out('hpsFit', o.hpsFit === null ? '—' : o.hpsFit);
     $('#levers').hidden = !(o.ratio > 0.85);
+    if (labApi) labApi.update();
   }
   const redraw = (k) => (['goal', 'price', 'keep', 'hps', 'avail'].includes(k) ? plan() : dream());
 
@@ -182,9 +198,40 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
     finder();
   }));
 
-  /* "A look inside" (inside.js) loads as the visitor scrolls near it. */
+  /* A win has four sides: the circles drift in once when the section is
+   * seen, and each domain line lights its circle and changes the caption. */
+  const W4 = { self: 'You, still standing at the end of it.', people: 'The people around you, better for it.', business: 'A business that pays its way.', market: 'Customers who would miss you.' };
+  const w4box = $('.win4-box'), w4list = $('#win4-list');
+  if (w4box && w4list) {
+    const light = (d) => {
+      if (d) w4box.dataset.active = d; else delete w4box.dataset.active;
+      w4list.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.dom === d)));
+      $('#win4-cap').textContent = d ? W4[d] : 'A win is where all four meet.';
+    };
+    w4list.querySelectorAll('button').forEach((b) => {
+      b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('mouseenter', () => light(b.dataset.dom));
+      b.addEventListener('focus', () => light(b.dataset.dom));
+      b.addEventListener('click', () => light(w4box.dataset.active === b.dataset.dom ? null : b.dataset.dom));
+    });
+    w4list.addEventListener('mouseleave', () => { if (!w4list.contains(document.activeElement)) light(null); });
+    w4list.addEventListener('focusout', (e) => { if (!w4list.contains(e.relatedTarget)) light(null); });
+    w4box.classList.add('wait');
+    try {
+      const io = new IntersectionObserver((es) => { if (es.some((x) => x.isIntersecting)) { io.disconnect(); w4box.classList.remove('wait'); w4box.classList.add('go'); } }, { threshold: 0.25 });
+      io.observe(w4box);
+    } catch { w4box.classList.remove('wait'); w4box.classList.add('go'); }
+  }
+
+  /* "A look inside": the Compass's What-if lab (lab.js, on the Compass's own
+   * engine.js), live on the five numbers above. Loads as the visitor scrolls
+   * near it, and follows the sliders from then on. */
   const vid = $('#vid');
-  const fillVid = () => import('/compass/welcome/inside.js').then((m) => m.fill(vid)).catch(() => {});
+  const engine = () => (window.CompassEngine ? Promise.resolve(window.CompassEngine) : new Promise((ok, no) => {
+    const s = document.createElement('script'); s.src = '/compass/engine.js'; s.onload = () => ok(window.CompassEngine); s.onerror = no; document.head.appendChild(s);
+  }));
+  const fillVid = () => Promise.all([engine(), import('/compass/welcome/lab.js')])
+    .then(([E, m]) => { labApi = m.fill(vid, { E, get: () => ({ ...val }), openGate }); }).catch(() => {});
   try {
     const io = new IntersectionObserver((es) => { if (es.some((x) => x.isIntersecting)) { io.disconnect(); fillVid(); } }, { rootMargin: '900px 0px' });
     io.observe(vid);

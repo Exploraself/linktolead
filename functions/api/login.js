@@ -1,5 +1,6 @@
-// Sign in with email and password, for founders who chose to set one. The
-// email link (/api/signin) always works as well.
+// Sign in with email and password (set at the password gate, when a founder
+// starts the Launchpad). "Forgot your password? Email me a sign-in link"
+// (/api/signin) always works as well.
 //
 // The answer is the same whether the email has no account, has no password or
 // the password is wrong, so the form cannot be used to find out who has an
@@ -10,7 +11,7 @@
 import { json, bad, db, now, clean, looksLikeEmail, accountTables } from '../_shared.js';
 import { verifyPassword, hashPassword, PAUSED } from '../_auth.js';
 
-const NO = 'That email and password do not match. If you are not sure, use “Email me a sign-in link”.';
+const NO = 'That email and password do not match. If you are not sure, use “Forgot your password? Email me a sign-in link”.';
 export const LIMIT = { email: 5, ip: 20, windowMs: 3600_000 };
 
 export async function onRequestPost({ request, env }) {
