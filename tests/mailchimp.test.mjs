@@ -6,7 +6,10 @@ import { onRequestPost as signup } from '../functions/api/signup.js';
 import { onRequestPost as compassPost } from '../functions/api/compass.js';
 import { onRequestGet as unsub } from '../functions/api/unsubscribe.js';
 import { onRequestGet as mGet, onRequestPost as mPost } from '../functions/api/mentor.js';
-import { mailchimpState, parseFormUrl, buildRequest, readFormReply, weakestTag, md5, DEFAULT_FORM, backfillList } from '../functions/_mailchimp.js';
+import { mailchimpState, parseFormUrl, buildRequest, readFormReply, weakestTag, md5, DEFAULT_FORM, backfillList,
+  tagsFor, STEP_TAGS, TIER_ORDER, stepsBackfillList, stepName } from '../functions/_mailchimp.js';
+import { climbOf } from '../functions/api/mentor.js';
+import { TIER_ORDER as SITE_TIERS } from '../public/content.js';
 import { fakeD1, post, get, tally } from './_d1.mjs';
 import { createHash } from 'node:crypto';
 
@@ -100,7 +103,7 @@ ok(c[0].method === 'PUT' && c[0].url === `https://us19.api.mailchimp.com/3.0/lis
 ok(c[0].body.status_if_new === 'subscribed' && c[0].body.email_address === 'ana@example.com' && c[0].body.merge_fields.FNAME === 'Ana' && c[0].body.merge_fields.LNAME === 'Pop', 'API: status and merge fields');
 ok(c[0].auth === 'Basic ' + btoa('linktolead:secretkey-us19'), 'API: the key as basic auth, never in the URL');
 const active = (call) => call.body.tags.filter((t) => t.status === 'active').map((t) => t.name).sort().join(',');
-ok(c[1].method === 'POST' && c[1].url.endsWith(`/members/${hash}/tags`) && active(c[1]) === 'grow,linktolead,sales-page', 'API: tags linktolead, source and stage');
+ok(c[1].method === 'POST' && c[1].url.endsWith(`/members/${hash}/tags`) && active(c[1]) === 'Link to Lead - The Founder Launchpad,grow,linktolead,sales-page', 'API: tags linktolead, source, stage and the first step');
 ok(c[1].body.tags.some((t) => t.name === 'build' && t.status === 'inactive'), 'API: the other stages are switched off');
 ok(logOf(env)[0].status === 'ok' && logOf(env)[0].mode === 'api', 'API: logged ok');
 env = fresh({ MAILCHIMP_API_KEY: 'secretkey-us19', MAILCHIMP_DOUBLE_OPTIN: 'yes' });
@@ -114,7 +117,7 @@ calls = [];
 const done4 = { token: j.token, stage: 'leading', results: { scores: [5, 1, 3, 4], answered: [2, 2, 2, 2] } };
 await compassPost({ request: post('/api/compass', done4), env });
 c = mcCalls();
-ok(c.length === 1 && c[0].url.endsWith('/tags') && active(c[0]) === 'lead-your-people,linktolead,sales-page,scale', 'Compass done: stage (Leading → scale) and weakest domain');
+ok(c.length === 1 && c[0].url.endsWith('/tags') && active(c[0]) === 'Link to Lead - The Founder Launchpad,lead-your-people,linktolead,sales-page,scale', 'Compass done: stage (Leading → scale) and weakest domain');
 calls = [];
 await compassPost({ request: post('/api/compass', done4), env });
 ok(mcCalls().length === 0, 'the same Compass again: no new call');
@@ -208,5 +211,76 @@ const G = await (await mGet({ request: new Request('https://x/api/mentor', { hea
 ok(G.mailchimp.mode === 'test' && /Test mode/.test(G.mailchimp.reason) && G.mailchimp.log.length > 0 && G.mailchimp.log.length <= 20, 'GET: mode, reason and the last 20 rows');
 ok(G.students.find((s) => s.id === failedBefore).mailchimp_status === 'test', 'the account manager has each founder’s status');
 ok((await mPost({ request: new Request('https://x/api/mentor', { method: 'POST', body: JSON.stringify({ action: 'mc-backfill' }) }), env })).status === 401, 'backfill needs the mentor key');
+
+// ── Step tags: one per step reached, cumulative, never inactive ──────────────
+const NAMES = ['Link to Lead - The Founder Launchpad', 'Link to Lead - The Boardroom', 'Link to Lead - The LAB', 'Link to Lead - The HUB', 'Link to Lead - The Summit'];
+ok(JSON.stringify(TIER_ORDER) === JSON.stringify(SITE_TIERS) && JSON.stringify(TIER_ORDER.map((t) => STEP_TAGS[t])) === JSON.stringify(NAMES), 'STEP_TAGS: the five steps, in the site’s TIER_ORDER');
+const stepTags = (tags) => tags.filter((t) => t.name.startsWith('Link to Lead - '));
+for (const [i, tier] of TIER_ORDER.entries()) {
+  const tg = tagsFor({ source: 'compass', stage: 'growing', weakest: 'lead-the-market', tier });
+  const st = stepTags(tg);
+  ok(JSON.stringify(st.map((t) => t.name)) === JSON.stringify(NAMES.slice(0, i + 1)) && st.every((t) => t.status === 'active'), `tagsFor ${tier}: its step and every step before it, all active`);
+  ok(['linktolead', 'compass', 'grow', 'lead-the-market'].every((n) => tg.some((t) => t.name === n && t.status === 'active')), `tagsFor ${tier}: the existing tags stay`);
+}
+ok(JSON.stringify(stepTags(tagsFor({})).map((t) => t.name)) === JSON.stringify(NAMES.slice(0, 1)), 'no step yet: The Founder Launchpad');
+ok(!TIER_ORDER.some((tier) => stepTags(tagsFor({ tier })).some((t) => t.status !== 'active')), 'a step tag is never sent as inactive');
+ok(stepName('premium') === 'The Summit' && stepName('free') === 'The Founder Launchpad', 'display names: the tag without "Link to Lead - "');
+
+// The mentor changes a step: tags at once in API mode, from and to logged.
+mc = () => ({ status: 200, body: '{}' });
+env = fresh({ MAILCHIMP_API_KEY: 'secretkey-us19' });
+const ana = (await join(env, {})).token;
+calls = [];
+[st, out] = await M(env, { action: 'tier', student: ana, tier: 'hub' });
+let tagCall = mcCalls().at(-1);
+ok(st === 200 && out.mailchimp === 'ok' && mcCalls().length === 1 && tagCall.method === 'POST' && /\/members\/[0-9a-f]{32}\/tags$/.test(tagCall.url), 'step change: one tags call to Mailchimp, at once');
+ok(JSON.stringify(stepTags(tagCall.body.tags).map((t) => t.name)) === JSON.stringify(NAMES.slice(0, 4)), 'step change to The HUB: Launchpad, Boardroom, LAB and HUB');
+calls = [];
+[st, out] = await M(env, { action: 'tier', student: ana, tier: 'session' });
+tagCall = mcCalls().at(-1);
+ok(st === 200 && JSON.stringify(stepTags(tagCall.body.tags).map((t) => t.name)) === JSON.stringify(NAMES.slice(0, 2)), 'lowered to The Boardroom: its two tags are sent');
+ok(!tagCall.body.tags.some((t) => t.status === 'inactive' && t.name.startsWith('Link to Lead - ')), 'lowered: the LAB and HUB tags are not removed (nothing inactive)');
+const evs = env.DB.raw.prepare("SELECT detail FROM event WHERE student_id = ? AND kind = 'mentor-step' ORDER BY id").all(ana).map((e) => JSON.parse(e.detail));
+ok(evs.length === 2 && evs[0].from === 'free' && evs[0].to === 'hub' && evs[1].from === 'hub' && evs[1].to === 'session', 'mentor-step event: from and to');
+ok(logOf(env).at(-1).action === 'tags' && logOf(env).at(-1).status === 'ok', 'the tags call is in the Mailchimp log');
+
+// The climb on the founder's page in /mentor.
+const one = await (await mGet({ request: new Request('https://x/api/mentor?student=' + ana, { headers: K }), env })).json();
+const joinedAt = env.DB.raw.prepare('SELECT joined_at FROM student WHERE id = ?').get(ana).joined_at;
+ok(JSON.stringify(one.climb.map((c) => c.name)) === JSON.stringify(['The Founder Launchpad', 'The HUB', 'The Boardroom']) && one.climb[0].at === joinedAt, 'climb: the account (signup date), then each change, oldest first');
+const old = climbOf({ joined_at: '2026-10-27T10:00:00Z' }, [{ detail: 'lab', at: '2026-10-28T10:00:00Z' }, { detail: '{"from":"lab","to":"lab"}', at: '2026-10-29T10:00:00Z' }, { detail: 'gold', at: '2026-10-29T11:00:00Z' }]);
+ok(JSON.stringify(old.map((c) => [c.name, c.at])) === JSON.stringify([['The Founder Launchpad', '2026-10-27T10:00:00Z'], ['The LAB', '2026-10-28T10:00:00Z']]), 'climb: older events (a bare step) read; no change and unknown steps add no line');
+
+// Form mode cannot tag: the step changes and nothing is sent.
+env = fresh();
+const bea = (await join(env, {}, { email: 'bea@example.com' })).token;
+calls = [];
+[st, out] = await M(env, { action: 'tier', student: bea, tier: 'lab' });
+ok(st === 200 && out.mailchimp === 'skipped' && mcCalls().length === 0, 'FORM mode: the step changes, no tags are sent');
+
+// The backfill sends step tags to founders already in Mailchimp.
+env = fresh({ MAILCHIMP_API_KEY: 'secretkey-us19' });
+const early = (await join(env, {}, { email: 'early@example.com' })).token;
+env.DB.raw.prepare("UPDATE student SET tier = 'lab' WHERE id = ?").run(early);
+env.DB.raw.prepare('UPDATE student_profile SET mailchimp_steps = NULL WHERE student_id = ?').run(early); // joined before step tags
+const quiet = (await join(env, {}, { email: 'quiet@example.com', consent: false })).token;
+ok(JSON.stringify(await stepsBackfillList(env.DB, 50, 'api')) === JSON.stringify([early]), 'step tags waiting: only founders in Mailchimp, with consent, without them');
+let G2 = await (await mGet({ request: new Request('https://x/api/mentor', { headers: K }), env })).json();
+ok(G2.mailchimp.waitingTags === 1 && G2.mailchimp.waitingJoin === 0 && G2.mailchimp.waiting === 1, 'the backfill button counts founders waiting for step tags');
+calls = [];
+[st, out] = await M(env, { action: 'mc-backfill' });
+ok(st === 200 && out.done === 0 && out.tagged === 1 && out.tags.ok === 1 && out.left === 0 && mcCalls().length === 1, 'backfill: step tags for the founder already in Mailchimp');
+ok(JSON.stringify(stepTags(mcCalls()[0].body.tags).map((t) => t.name)) === JSON.stringify(NAMES.slice(0, 3)) && !mcCalls().some((c) => c.url.includes(md5('quiet@example.com'))), 'backfill: their tags up to The LAB; nobody without consent');
+ok((await stepsBackfillList(env.DB, 50, 'api')).length === 0, 'backfill: once sent, nobody waits for step tags');
+env = fresh({ MAILCHIMP_MODE: 'test', MAILCHIMP_API_KEY: 'k-us19' });
+const tst = (await join(env, {}, { email: 'tst@example.com' })).token;
+env.DB.raw.prepare('UPDATE student_profile SET mailchimp_steps = NULL WHERE student_id = ?').run(tst);
+calls = [];
+[st, out] = await M(env, { action: 'mc-backfill' });
+ok(st === 200 && out.tagged === 1 && out.tags.test === 1 && mcCalls().length === 0, 'TEST mode: step tags logged, not sent');
+ok((await stepsBackfillList(env.DB, 50, 'test')).length === 0 && (await stepsBackfillList(env.DB, 50, 'api')).length === 0, 'TEST mode: the tested one is no longer waiting there');
+env.DB.raw.prepare("UPDATE student_profile SET mailchimp_status = 'ok' WHERE student_id = ?").run(tst);
+ok((await stepsBackfillList(env.DB, 50, 'api')).length === 1, 'live: step tags only tested are still sent for real');
+ok(!calls.some((c) => !/list-manage|api\.mailchimp|api\.resend/.test(c.url)), 'no other network');
 
 done();
