@@ -8,10 +8,12 @@
 // browser is told to sign in by email link instead. The one exception is the
 // browser that already holds this record's token.
 //
-// The welcome email is sent once, to new accounts that consented and have not
-// unsubscribed, within the mail limits. The same founders are added to the
-// Mailchimp audience (functions/_mailchimp.js). Both happen after the reply,
-// so a slow email service or a slow Mailchimp never makes anyone wait.
+// The welcome letter ("launchpad-welcome") is sent once, to new accounts that
+// consented and have not unsubscribed, within the mail limits. It is the only
+// email a new account gets, so nobody receives two. The same founders are
+// added to the Mailchimp audience (functions/_mailchimp.js). Both happen after
+// the reply, so a slow email service or a slow Mailchimp never makes anyone
+// wait.
 
 import { json, bad, db, now, newToken, clean, looksLikeEmail, accountTables } from '../_shared.js';
 import { profile, sendWelcome } from '../_account.js';
@@ -78,7 +80,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
       const r = await sendWelcome(env, origin(request), { email, first, p });
       if (r.ok) await logged(D, email, ip);
       await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)')
-        .bind(id, r.ok ? 'welcome' : 'welcome-failed', now(), r.why || null).run();
+        .bind(id, r.ok ? 'launchpad-welcome' : 'launchpad-welcome-failed', now(), r.why || null).run();
     })().catch(() => {});
     if (typeof waitUntil === 'function') waitUntil(go); else await go;
   }

@@ -133,3 +133,18 @@ export async function plans() {
   try { const r = await fetch(`/api/plans?t=${encodeURIComponent(t)}`); return r.ok ? await r.json() : null; } catch { return null; }
 }
 export const tick = (step, done) => post('/api/plans/tick', { token: token(), step, done });
+
+/** "Change where I stand": the stage on the account, with the one it replaced. */
+export const setStage = (stage, from) => post('/api/stage', { token: token(), stage, from });
+
+/** "Ask Alexandru": the thread (questions and answers, newest last), and
+ *  marking the answers read. Questions themselves go through note(). */
+export async function thread() {
+  const t = token();
+  if (!t) return null;
+  try { const r = await fetch(`/api/thread?t=${encodeURIComponent(t)}`); return r.ok ? await r.json() : null; } catch { return null; }
+}
+export const threadRead = () => post('/api/thread', { token: token() });
+
+/** A library download, through the account so it is counted. */
+export const libraryHref = (item) => `/api/library?item=${encodeURIComponent(item)}&t=${encodeURIComponent(token())}`;

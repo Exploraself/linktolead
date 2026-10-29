@@ -14,22 +14,12 @@
 
 import { json, bad, db, now, clean, looksLikeEmail, accountTables, newToken, sha256 } from '../_shared.js';
 import { profile, unsubLink } from '../_account.js';
-import { allowed, logged, mailState, origin, send, esc } from '../_mail.js';
+import { allowed, logged, mailState, origin, send } from '../_mail.js';
+import { signinLetter } from '../_letters.js';
 import { PAUSED } from '../_auth.js';
 
 export const TTL = 30 * 60_000;
 const SAME = { ok: true, message: 'If there is an account for that address, a sign-in link is on its way. It works once, for 30 minutes.' };
-
-function linkEmail(link) {
-  const html = `<!doctype html><html><body style="margin:0;background:#F7F2E7"><div style="max-width:600px;margin:0 auto;padding:28px 22px;background:#FFFFFF">
-    <p style="margin:0;font:700 11px Arial;letter-spacing:3px;color:#7A5C16">EXPLORASELF · LEADERSHIP COMPASS</p>
-    <h1 style="margin:12px 0 10px;font:600 26px/1.25 Georgia,serif;color:#14100B">Your sign-in link</h1>
-    <p style="margin:0 0 16px;font:15px/1.6 Arial;color:#5E5446">Open it on the device you want to use. It works once, for 30 minutes. If you did not ask for it, ignore this email: nothing changes.</p>
-    <a href="${esc(link)}" style="display:inline-block;background:#C9A24A;color:#14100B;font:700 15px Arial;padding:12px 20px;text-decoration:none">Sign me in →</a>
-  </div></body></html>`;
-  const text = `Your sign-in link for the Leadership Compass. Open it on the device you want to use. It works once, for 30 minutes. If you did not ask for it, ignore this email: nothing changes.\n\n${link}`;
-  return { subject: 'Your Leadership Compass sign-in link', html, text };
-}
 
 /** Make a one-time code for this founder and email the link. The link opens
  *  where the founder asked from: the Compass or their Ground Plan. Also used
@@ -40,7 +30,9 @@ export async function sendLink(env, D, base, me, page = 'compass') {
   await D.prepare('INSERT INTO signin_code (code_hash, student_id, expires_at) VALUES (?,?,?)')
     .bind(await sha256(code), me.id, Date.now() + TTL).run();
   const p = await profile(D, me.id);
-  return send(env, { to: me.email, ...linkEmail(`${base}/${page === 'start' ? 'start' : 'compass'}?signin=${code}`),
+  const who = me.name !== undefined ? me : await D.prepare('SELECT name FROM student WHERE id = ?').bind(me.id).first();
+  const first = String((who && who.name) || '').split(' ')[0];
+  return send(env, { to: me.email, ...signinLetter(base, `${base}/${page === 'start' ? 'start' : 'compass'}?signin=${code}`, { first, to: me.email }),
     why: 'Someone asked for a sign-in link to this ExploraSelf account. If it was not you, nothing changes.', unsubUrl: unsubLink(base, p) });
 }
 

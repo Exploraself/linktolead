@@ -82,6 +82,9 @@ export async function accountTables(D) {
   for (const col of ['mailchimp_status TEXT', 'mailchimp_at TEXT', 'mailchimp_steps TEXT']) {
     try { await D.prepare(`ALTER TABLE student_profile ADD COLUMN ${col}`).run(); } catch { /* already there */ }
   }
+  // An answer in "Ask Alexandru" is a message that points at the question
+  // (a note) it answers.
+  try { await D.prepare('ALTER TABLE message ADD COLUMN note_id TEXT').run(); } catch { /* already there */ }
   READY.add(D);
 }
 

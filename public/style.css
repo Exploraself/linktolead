@@ -635,3 +635,29 @@ body.inwork .foot{display:none}
 .pweye{flex:none;width:46px;min-height:46px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 .pweye[aria-pressed="true"]{background:var(--cream)}
 #signinform .ghost,#signinform .lib-link{margin-top:10px;margin-right:10px}
+
+/* ── Where you stand, and Ask Alexandru (/start) ─────────────────────────── */
+.stand-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.stand-row h2{margin:0}
+.stand-row .ghost,.stand-pick .ghost,.stand-pick .cta,.stand-nudge .cta,.stand-nudge .ghost,.gp-askcard .cta{margin-top:0}
+.stand-pick{display:flex;flex-wrap:wrap;gap:8px}
+.stand-pick .savenote{margin-top:0}
+.gp-stand .savenote{margin-top:-6px}
+.note-acts{display:flex;flex-wrap:wrap;gap:8px}
+.thread{list-style:none;margin:26px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.thread li{background:var(--panel);border:1px solid var(--line);padding:14px 16px;max-width:92%}
+.thread .th-q{align-self:flex-end;border-right:3px solid var(--line)}
+.thread .th-a{align-self:flex-start;border-left:3px solid var(--gold)}
+.thread .th-new{background:var(--cream)}
+.th-meta{font:600 10px/1.5 var(--body);letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.th-meta .tdot{margin:0 6px 0 0}
+.th-body{margin-top:6px;font-size:14.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.askform{margin-top:28px;border-top:1px solid var(--line);padding-top:22px;display:flex;flex-direction:column;gap:14px}
+.askform label span{display:block;font:600 10px/1.4 var(--body);letter-spacing:1.1px;text-transform:uppercase;color:var(--gold-ink);margin-bottom:6px}
+.askform label span em{font-style:normal;text-transform:none;letter-spacing:0;color:var(--muted);font-weight:400}
+.askform textarea,.askform select{width:100%;background:var(--panel);color:var(--ink);border:1px solid var(--line);padding:11px 13px;font:14px/1.6 var(--body)}
+.askform textarea{resize:vertical;min-height:96px}
+.askrow{display:grid;gap:14px}
+@media(min-width:560px){.askrow{grid-template-columns:1fr 1fr}}
+.askform .cta{margin-top:4px;align-self:flex-start}
+.stand-nudge{margin-bottom:20px}

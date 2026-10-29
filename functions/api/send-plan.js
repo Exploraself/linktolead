@@ -1,4 +1,5 @@
-// "Email me my results" on the Compass.
+// "Email me my results" on the Compass: a short letter from Alexandru with the
+// link to the results and the domain to start with (functions/_letters.js).
 //
 // Off until the mail is ready: the Resend key AND the postal address for the
 // footer (see functions/_mail.js). GET says { ready, reason } and the Compass
@@ -13,8 +14,10 @@
 // connection is rate-limited.
 
 import { json, bad, db, clean, looksLikeEmail, accountTables, studentBy } from '../_shared.js';
-import { mailState, allowed, logged, send, esc as e, origin } from '../_mail.js';
+import { mailState, allowed, logged, send, origin } from '../_mail.js';
 import { profile, unsubLink } from '../_account.js';
+import { resultsLetter } from '../_letters.js';
+import { weakestTag } from '../_mailchimp.js';
 
 export const onRequestGet = ({ env }) => json(mailState(env));
 
@@ -35,44 +38,21 @@ function shape(p) {
   return { name: clean(p.name, 60), business: clean(p.business, 80), stage: clean(p.stage, 40), focus: clean(p.focus, 120), domains, numbers, next, strategy };
 }
 
-function render(p) {
-  const gold = '#7A5C16', ink = '#14100B', muted = '#5E5446', line = '#E2D7BF';
-  const h = (t) => `<p style="margin:28px 0 8px;font:700 11px Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;color:${gold}">${e(t)}</p>`;
-  const domains = p.domains.map((d) => `
-    <div style="border-top:3px solid ${gold};padding:14px 0 6px;margin-top:14px">
-      <p style="margin:0;font:600 20px Georgia,serif;color:${ink}">${e(d.know)} <span style="font:13px Arial,sans-serif;color:${muted}">· ${e(d.lead)} · ${e(d.label)}</span></p>
-      ${d.strengthen.length ? `<p style="margin:10px 0 4px;font:700 11px Arial;color:${gold}">TO STRENGTHEN</p>${d.strengthen.map((q) => `<p style="margin:2px 0;font:14px Arial;color:${ink}">${e(q)}</p>`).join('')}` : ''}
-      <p style="margin:10px 0 4px;font:700 11px Arial;color:${gold}">DO THIS</p>
-      <ol style="margin:0;padding-left:20px;font:14px/1.55 Arial;color:${ink}">${d.steps.map((s) => `<li>${e(s)}</li>`).join('')}</ol>
-      ${d.level ? `<p style="margin:10px 0 0;font:13px Arial;color:${muted}">In Link to Lead: <b style="color:${ink}">${e(d.level)}</b></p>` : ''}
-    </div>`).join('');
-  const nums = p.numbers.map(([k, v]) => `<tr><td style="padding:7px 0;border-bottom:1px solid ${line};font:14px Arial;color:${muted}">${e(k)}</td><td style="padding:7px 0;border-bottom:1px solid ${line};font:600 15px Arial;color:${ink};text-align:right">${e(v)}</td></tr>`).join('');
-  const next = p.next.map((a, i) => `<p style="margin:12px 0 2px;font:600 16px Georgia,serif;color:${ink}">${i + 1}. ${e(a.title)}</p><p style="margin:0;font:14px/1.55 Arial;color:${muted}">${e(a.text)}</p>`).join('');
-  const strat = p.strategy.filter((s) => s.goal || s.week || s.check).map((s) => `<p style="margin:12px 0 2px;font:600 15px Arial;color:${ink}">${e(s.lead)}</p>${[['In 90 days, I want', s.goal], ['This week, I will', s.week], ['I’ll know it worked when', s.check]].filter((r) => r[1]).map(([l, v]) => `<p style="margin:2px 0;font:14px/1.55 Arial;color:${ink}"><span style="color:${muted}">${l}:</span> ${e(v)}</p>`).join('')}`).join('');
-  return `<!doctype html><html><body style="margin:0;background:#F7F2E7"><div style="max-width:600px;margin:0 auto;padding:28px 22px;background:#FFFFFF">
-    <p style="margin:0;font:700 11px Arial;letter-spacing:3px;color:${gold}">EXPLORASELF · LEADERSHIP COMPASS</p>
-    <h1 style="margin:12px 0 4px;font:600 28px/1.2 Georgia,serif;color:${ink}">${p.name ? e(p.name) + ', here' : 'Here'} is your plan.</h1>
-    <p style="margin:0;font:15px/1.6 Arial;color:${muted}">${e(p.stage)}${p.business ? ' · ' + e(p.business) : ''}. ${e(p.focus)}</p>
-    ${h('Where you are · what to strengthen')}${domains}
-    ${nums ? h('Your numbers') + `<table style="width:100%;border-collapse:collapse">${nums}</table><p style="font:12px Arial;color:${muted}">“—” means not enough information yet. “≈” means an estimate from a range.</p>` : ''}
-    ${next ? h('Three practical next steps') + next : ''}
-    ${strat ? h('Your strategy') + strat : ''}
-    <div style="margin-top:30px;padding:22px;background:#14100B;color:#F7F2E7">
-      <p style="margin:0;font:600 20px/1.3 Georgia,serif;color:#E3C47E">Now walk it.</p>
-      <p style="margin:8px 0 14px;font:14px/1.6 Arial;color:#D3C4A5">Link to Lead walks the same four domains, level by level, for your stage. It starts with The Founder Launchpad: levels 01 to 03, free.</p>
-      <a href="https://linktolead.exploraself.com/start" style="display:inline-block;background:#C9A24A;color:#14100B;font:700 15px Arial;padding:12px 20px;text-decoration:none">Enter the Founder Launchpad →</a>
-    </div>
-    <p style="margin:22px 0 0;font:12px/1.6 Arial;color:${muted}">Planning aid only: not financial, tax or legal advice.</p>
-  </div></body></html>`;
-}
+const DOMAIN_NAMES = { 'lead-yourself': 'Lead yourself', 'lead-your-people': 'Lead your people', 'lead-your-business': 'Lead your business', 'lead-the-market': 'Lead the market' };
+const BANDS = ['Needs you now', 'Taking shape', 'A strength'];
 
-function text(p) {
-  const out = [`EXPLORASELF · LEADERSHIP COMPASS`, `${p.name ? p.name + ', here' : 'Here'} is your plan. ${p.stage}. ${p.focus}`, '', 'WHERE YOU ARE · WHAT TO STRENGTHEN'];
-  for (const d of p.domains) out.push('', `${d.know} (${d.lead}): ${d.label}`, ...d.strengthen.map((q) => '  To strengthen: ' + q), ...d.steps.map((s, i) => `  ${i + 1}. ${s}`), d.level ? '  In Link to Lead: ' + d.level : '');
-  if (p.numbers.length) out.push('', 'YOUR NUMBERS', ...p.numbers.map(([k, v]) => `${k}: ${v}`));
-  if (p.next.length) out.push('', 'THREE PRACTICAL NEXT STEPS', ...p.next.map((a, i) => `${i + 1}. ${a.title} — ${a.text}`));
-  out.push('', 'NOW WALK IT: The Founder Launchpad, levels 01 to 03 of Link to Lead, free — https://linktolead.exploraself.com/start');
-  return out.join('\n');
+/** The domain that needs the founder most, in full: from the Compass saved
+ *  in the account (the lowest score, a tie to the first); else from the
+ *  bands in the plan the page sent. Empty when neither says. */
+export function weakestName(record, plan) {
+  const tag = record ? weakestTag(record.results_json) : null;
+  if (tag) return DOMAIN_NAMES[tag];
+  let best = null;
+  for (const d of plan.domains) {
+    const rank = BANDS.indexOf(d.lead);
+    if (rank >= 0 && Object.values(DOMAIN_NAMES).includes(d.know) && (!best || rank < best.rank)) best = { rank, name: d.know };
+  }
+  return best ? best.name : '';
 }
 
 export async function onRequestPost({ request, env }) {
@@ -90,7 +70,7 @@ export async function onRequestPost({ request, env }) {
   if (!me) {
     const typed = clean(body.email, 200).toLowerCase();
     if (!looksLikeEmail(typed)) return bad('That address does not look complete.');
-    me = await D.prepare('SELECT id,email,name FROM student WHERE email = ?').bind(typed).first();
+    me = await D.prepare('SELECT id,email,name,tier FROM student WHERE email = ?').bind(typed).first();
     if (!me) return bad('Create your free account first, then we can send your results.', 404);
   }
   const email = me.email;
@@ -101,7 +81,9 @@ export async function onRequestPost({ request, env }) {
   const plan = shape(body.plan);
   const p = await profile(D, me.id);
   const base = origin(request);
-  const r = await send(env, { to: email, subject: 'Your Leadership Compass plan', html: render(plan), text: text(plan),
+  const record = await D.prepare('SELECT results_json FROM compass WHERE student_id = ?').bind(me.id).first();
+  const first = String(me.name || '').split(' ')[0] || plan.name;
+  const r = await send(env, { to: email, ...resultsLetter(base, { first, weakest: weakestName(record, plan), to: email, tier: me.tier }),
     why: 'You asked for your results at linktolead.exploraself.com/compass. They were sent once, to this address.', unsubUrl: unsubLink(base, p) });
   if (!r.ok) return bad('It did not send. Try again in a minute.', 502);
 

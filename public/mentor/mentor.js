@@ -50,16 +50,16 @@ function tilesHTML(S) {
   return `<div class="tiles">
     ${t('all', S.total, 'Founders in total')}${t('new', S.newWeek, 'New this week')}${t('compass', S.compass, 'Compass done')}
     ${STEP_KEYS.map((k) => t(k, S.steps[k], 'In ' + STEP_NAMES[k])).join('')}
-    ${t('notes', S.notes, 'Notes waiting for a reply')}${t('quiet', S.quiet, 'Quiet for 14+ days')}
+    ${t('notes', S.notes, 'Questions waiting for an answer')}${t('quiet', S.quiet, 'Quiet for 14+ days')}${t('library', S.library, 'Downloaded from the library')}
   </div>`;
 }
 
 function needsHTML() {
   const N = needsYou(data.students, data.waiting);
-  if (!N.length) return '<div class="panel"><h2>Needs you</h2><p class="tiny" style="margin-top:8px">Nothing waiting. No unread notes, and nobody quiet for 14 days or more.</p></div>';
+  if (!N.length) return '<div class="panel"><h2>Needs you</h2><p class="tiny" style="margin-top:8px">Nothing waiting. No unanswered questions, and nobody quiet for 14 days or more.</p></div>';
   return `<div class="panel"><h2>Needs you</h2><ul class="needs">${N.slice(0, 30).map((x) => `<li>
-      <div><b>${esc(x.name || x.email)}</b><span class="em">${x.kind === 'note' ? `Note: “${esc(String(x.text).slice(0, 160))}” · ${when(x.at)}` : `Quiet for ${x.days} days`}</span></div>
-      <span class="acts">${x.kind === 'note' ? `<button class="ghost" data-open="${esc(x.id)}">Read and reply</button>` : ''}<button class="ghost" data-msg="${esc(x.id)}">Send a message</button></span></li>`).join('')}</ul></div>`;
+      <div><b>${esc(x.name || x.email)}</b><span class="em">${x.kind === 'note' ? `Question: “${esc(String(x.text).slice(0, 160))}” · ${when(x.at)}` : `Quiet for ${x.days} days`}</span></div>
+      <span class="acts">${x.kind === 'note' ? `<button class="ghost" data-open="${esc(x.id)}">Read and answer</button>` : ''}<button class="ghost" data-msg="${esc(x.id)}">Send a message</button></span></li>`).join('')}</ul></div>`;
 }
 
 const MC_MODE = { test: 'Test', form: 'Form', api: 'Live API' };
@@ -94,7 +94,7 @@ function tableHTML() {
     ${flash ? `<p class="flash" role="status">${esc(flash)}</p>` : ''}
     ${rows.length ? `<div class="tscroll"><table><thead><tr><th>Founder</th><th>Joined</th><th>Last seen</th><th>Stage</th><th>Step</th><th>Compass</th><th>Plans</th><th>Password</th><th>Consent</th><th>Unsub.</th><th>Paused</th><th>Mailchimp</th><th>Actions</th></tr></thead>
     <tbody>${rows.map((s) => `<tr>
-      <td><span class="nm" data-open="${esc(s.id)}">${esc(s.name || '—')}</span><span class="em">${esc(s.email)}</span>${s.open_notes ? `<span class="em warn"><span class="dot"></span>${s.open_notes} unread note${s.open_notes > 1 ? 's' : ''}</span>` : ''}</td>
+      <td><span class="nm" data-open="${esc(s.id)}">${esc(s.name || '—')}</span><span class="em">${esc(s.email)}</span>${s.open_notes ? `<span class="em warn"><span class="dot"></span>${s.open_notes} unanswered question${s.open_notes > 1 ? 's' : ''}</span>` : ''}</td>
       <td class="tiny">${when(s.joined_at)}</td><td class="tiny">${when(s.last_seen_at || s.joined_at)}</td>
       <td>${esc(s.stage || '—')}</td>
       <td><select data-step="${esc(s.id)}" aria-label="Step for ${esc(s.name || s.email)}">${STEP_KEYS.map((k) => `<option value="${k}"${(s.tier || 'free') === k ? ' selected' : ''}>${STEP_NAMES[k]}</option>`).join('')}</select></td>
@@ -184,12 +184,17 @@ async function csv() {
 async function one(id) {
   const r = await api('?student=' + encodeURIComponent(id));
   if (!r.ok) return load();
-  const d = r.data, s = d.student, A = d.answers || [], C = d.compass, N = d.notes || [], P = d.profile || {}, T = d.ticks || [], M = d.messages || [], K = d.climb || [];
+  const d = r.data, s = d.student, A = d.answers || [], C = d.compass, P = d.profile || {}, T = d.ticks || [], M = d.messages || [], K = d.climb || [];
+  const SC = d.stages || [], LB = d.library || [], TH = d.thread || [];
+  const LEADN = { self: 'Lead yourself', people: 'Lead your people', work: 'Lead your business', market: 'Lead the market' };
+  const answered = new Set(TH.filter((x) => x.from === 'mentor').map((x) => x.note));
   const DOMS = [['self', 'Lead yourself'], ['people', 'Lead your people'], ['work', 'Lead your business'], ['market', 'Lead the market']];
   const byLevel = {};
   for (const a of A) { if (!a.body) continue; (byLevel[a.level] = byLevel[a.level] || []).push(a); }
   const levels = Object.keys(byLevel).map(Number).sort((x, y) => x - y);
+  const said = flash; flash = '';
   $('#main').innerHTML = `<div class="bar"><button class="ghost" id="back">← All founders</button><button class="ghost" data-msg="${esc(id)}">Send a message</button></div>
+    ${said ? `<p class="flash" role="status">${esc(said)}</p>` : ''}
     <div class="panel"><h2>${esc(s.name || s.email)}</h2>
       <p class="tiny">${esc(s.email)} · joined ${when(s.joined_at)}</p>
       <div class="kv">
@@ -204,6 +209,12 @@ async function one(id) {
       </div></div>
     <div class="panel"><h2>Climb</h2>
       <ul class="climb" style="margin:8px 0 0;padding-left:18px">${K.map((c) => `<li>${esc(c.name)} · ${esc(day(c.at))}</li>`).join('')}</ul></div>
+    <div class="panel"><h2>Where they stand</h2>
+      ${SC.length ? `<ul class="climb" style="margin:8px 0 0;padding-left:18px">${SC.map((c) => `<li>${c.from ? esc(c.from) + ' → ' : ''}${esc(c.to)} · ${esc(day(c.at))}</li>`).join('')}</ul>`
+        : '<p class="tiny" style="margin-top:8px">No stage changes. They walk the stage from their Compass or sign-up.</p>'}</div>
+    <div class="panel"><h2>Library</h2>
+      ${LB.length ? `<ul class="climb" style="margin:8px 0 0;padding-left:18px">${LB.map((x) => `<li>${esc(x.name)} · ${esc(day(x.at))}</li>`).join('')}</ul>`
+        : '<p class="tiny" style="margin-top:8px">Nothing downloaded yet.</p>'}</div>
     ${C ? `<div class="panel"><h2>Compass</h2><p class="tiny">Saved ${when(C.updated_at)}${C.stage ? ' · stage ' + esc(C.stage) : ''}</p>
       <pre class="pre">${esc(JSON.stringify(JSON.parse(C.results_json || '{}'), null, 2))}</pre>
       ${C.flags_json && C.flags_json !== 'null' ? `<p class="tiny" style="margin-top:10px"><b>Choices:</b> ${esc(C.flags_json)}</p>` : ''}</div>`
@@ -212,11 +223,13 @@ async function one(id) {
       ${T.length ? DOMS.map(([k, label]) => { const rows = T.filter((t) => t.domain === k); return rows.length ? `<div class="dom ${k}" style="padding-top:10px"><h3>${label}</h3>${rows.map((t) => `<div class="ans"><em>${esc(t.title || t.step_id)}</em><p>Done ${when(t.done_at)}</p></div>`).join('')}</div>` : ''; }).join('')
         : '<p class="tiny" style="margin-top:8px">No steps ticked yet.</p>'}</div>
     ${M.length ? `<div class="panel"><h2>Messages sent</h2>${M.map((m) => `<div class="note"><p class="meta">${esc(m.channel)} · ${when(m.sent_at)} · ${m.read_at ? 'read' : 'not read yet'}</p><p><b>${esc(m.subject)}</b></p><p>${esc(m.body)}</p></div>`).join('')}</div>` : ''}
-    ${N.length ? `<div class="panel"><h2>Notes</h2>${N.map((n) => `<div class="note">
-      <p class="meta">${n.level ? 'Level ' + n.level : ''}${n.domain ? ' · ' + esc(n.domain) : ''} · ${when(n.created_at)} · ${esc(n.status)}</p>
-      <p>${esc(n.body)}</p>
-      ${n.reply ? `<p class="tiny" style="margin-top:9px"><b>You replied:</b> ${esc(n.reply)}</p>` : `<textarea data-note="${esc(n.id)}" placeholder="Reply…"></textarea><p style="margin-top:8px"><button class="ghost reply" data-note="${esc(n.id)}">Send reply</button></p>`}
-    </div>`).join('')}</div>` : ''}
+    <div class="panel"><h2>Ask Alexandru · their thread</h2>
+      ${TH.length ? TH.map((x) => x.from === 'founder' ? `<div class="note">
+        <p class="meta">They asked · ${esc(day(x.at))}${x.level ? ' · Level ' + String(x.level).padStart(2, '0') : ''}${x.domain ? ' · ' + esc(LEADN[x.domain] || x.domain) : ''}</p>
+        <p>${esc(x.body)}</p>
+        ${answered.has(x.id) ? '' : `<textarea data-note="${esc(x.id)}" placeholder="Your answer… It shows in their Ground Plan and goes by email as a letter."></textarea><p style="margin-top:8px"><button class="ghost reply" data-note="${esc(x.id)}">Send answer</button></p>`}
+      </div>` : `<div class="note" style="border-left:3px solid #C9A24A"><p class="meta">You answered · ${esc(day(x.at))} · ${x.read ? 'read' : 'not read yet'}</p><p>${esc(x.body)}</p></div>`).join('')
+        : '<p class="tiny" style="margin-top:8px">No questions yet.</p>'}</div>
     <div class="panel"><h2>Their work</h2>
       ${levels.length ? levels.map((l) => `<div class="dom"><h3>Level ${l}</h3>${DOMS.map(([k, label]) => { const rows = byLevel[l].filter((a) => a.domain === k); return rows.length ? `<div class="dom ${k}" style="border-top:0;padding-top:10px"><h3>${label}</h3>${rows.sort((a, b) => a.step - b.step).map((a) => `<div class="ans"><em>Step ${a.step + 1}</em><p>${esc(a.body)}</p></div>`).join('')}</div>` : ''; }).join('')}</div>`).join('')
         : '<p class="tiny" style="margin-top:8px">Nothing written yet.</p>'}</div>
@@ -225,7 +238,10 @@ async function one(id) {
   document.querySelectorAll('.reply').forEach((b) => b.onclick = async () => {
     const t = document.querySelector(`textarea[data-note="${b.dataset.note}"]`);
     if (!t || !t.value.trim()) return;
-    await act({ action: 'reply', note: b.dataset.note, reply: t.value });
+    b.disabled = true;
+    const r = await act({ action: 'reply', note: b.dataset.note, reply: t.value });
+    flash = !r.ok ? (r.data.error || 'The answer did not save.') : r.data.emailed ? 'Answered: in their Ground Plan and emailed as a letter.'
+      : `Answered: in their Ground Plan${r.data.unsubscribed ? ' only (they unsubscribed, so no email)' : ' only (email is not switched on)'}.`;
     one(id);
   });
 }
