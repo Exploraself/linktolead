@@ -86,17 +86,19 @@ Three sales pages, all ending at `/start`:
 | Page | Address | Account form | Landing |
 |---|---|---|---|
 | A | `/a` (the 12 Scrolls page) | SIMPLE | `a` |
-| B | `/` and `/b` (the long page; `/b/index.html` is a copy of `/index.html`) | SIMPLE | `b` |
+| B | `/` and `/b` (the long page, with the What-if Lab before the close; `/b/index.html` is a copy of `/index.html`) | FULL | `b` |
 | C | `/c` → 302 to `/compass/welcome` (query string kept), and `/compass/welcome-a` | FULL | `c` |
 
-The Compass's own "Who is this compass for?" box is the SIMPLE form (landing
-`compass`). SIMPLE: first name, surname, email, consent — no password, ever;
+Every call to action on A, B and C opens that page's form; none of them sends
+a visitor to another page. The Compass's own "Who is this compass for?" box is
+the SIMPLE form (landing `compass`, no landing tag). SIMPLE: first name, surname, email, consent — no password, ever;
 these founders sign in by email link. FULL: also company (or "No company yet"),
 what they want most, industry and a password (required, at least 10
 characters). Either way the founder is signed in at once and lands on `/start`.
 `student_profile` keeps `signup_type`, `landing` and the `utm_*` tags they
 arrived with. Mailchimp gets `Signup - Full` / `Signup - Simple`,
-`Landing - A` / `B` / `C`, `Interest - <goal>`, `Industry - <name>` and
+`Landing - 12 Scrolls` (A) / `Landing - Home` (B) / `Landing - Compass welcome` (C),
+`Interest - <goal>`, `Industry - <name>` and
 COMPANY. `/mentor` shows all of it and a table of sign-ups per landing.
 Unknown addresses get `public/404.html` with a 404 status.
 

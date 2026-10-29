@@ -2,12 +2,12 @@
 // (the full form), and where they came from.
 //
 // Two forms make the same student record:
-//   FULL   (/compass/welcome and /compass/welcome-a, landing "c"): first name,
-//          surname, email, company (or "No company yet"), interest, industry,
-//          a password (required), consent.
-//   SIMPLE (/a, /b = "/", and the Compass's "Who is this compass for?" box):
-//          first name, surname, email, consent. No password, ever: these
-//          founders sign in by email link.
+//   FULL   (/compass/welcome and /compass/welcome-a, landing "c"; / and /b,
+//          landing "b"): first name, surname, email, company (or "No company
+//          yet"), interest, industry, a password (required), consent.
+//   SIMPLE (/a, landing "a", and the Compass's "Who is this compass for?"
+//          box): first name, surname, email, consent. No password, ever:
+//          these founders sign in by email link.
 // signup_type says which; landing says which sales page ('a', 'b', 'c' or
 // 'compass'), and utm_* the tags the founder arrived with.
 //
