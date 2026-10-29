@@ -1,19 +1,29 @@
 /* The Leadership Compass sales page (versions A and B share this file).
-   Navy, cream and one gold; Archivo for the voice, Libre Caslon for the
-   human lines. Motion stops under prefers-reduced-motion. */
+   Navy, cream and one gold; the Compass's own fonts: Fraunces for headings
+   and the italic human lines, Libre Franklin for everything else. Loaded the
+   same way as /compass (style.css there). Motion stops under
+   prefers-reduced-motion. */
+@font-face{font-family:Fraunces;src:url('../assets/fraunces.ttf');font-display:swap}
+@font-face{font-family:'Libre Franklin';src:url('../assets/libre500.ttf');font-weight:400 500;font-display:swap}
+@font-face{font-family:'Libre Franklin';src:url('../assets/libre700.ttf');font-weight:600 800;font-display:swap}
 html{scroll-behavior:smooth}
 body{margin:0;background:#F3EFEA}
 a{color:#7A5E26}a:hover{color:#15213B}
 :focus-visible{outline:3px solid #C9A24A;outline-offset:3px}
 .fc *{box-sizing:border-box}
 .fc h1,.fc h2,.fc h3,.fc p{margin:0}
-.fc{font-family:Archivo,'Helvetica Neue',Arial,sans-serif;color:#15213B;background:#F3EFEA;overflow:hidden}
+.fc{font-family:'Libre Franklin',Arial,sans-serif;color:#15213B;background:#F3EFEA;overflow:hidden}
 .fc button{font-family:inherit}
-.serif{font-family:'Libre Caslon Text',Georgia,serif;font-style:italic;font-weight:400}
+.serif{font-family:Fraunces,Georgia,serif;font-style:italic;font-weight:400}
+/* Headings in Fraunces. It is a serif with a lighter top weight than the old
+   sans, so the 900 of the old headings becomes Fraunces's 600, with the
+   Compass's slight negative tracking. */
+.fc h1,.fc h2,.fc h3,.h2{font-family:Fraunces,Georgia,serif;font-weight:600 !important;letter-spacing:-.015em !important}
+.fc h1 .serif,.fc h2 .serif,.fc h3 .serif{font-weight:400 !important}
 .wrap{max-width:1160px;margin:0 auto}
 .kick{font-size:13px;font-weight:700;letter-spacing:.16em;color:#7A5E26}
 .kick.gold{color:#C9A24A}
-.h2{font-weight:900;font-size:clamp(32px,4.6vw,56px);line-height:1;text-transform:uppercase}
+.h2{font-size:clamp(32px,4.6vw,56px);line-height:1;text-transform:uppercase}
 .lede{font-size:18px;line-height:1.6;color:#3D4966}
 .gold-btn{border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 26px;background:#C9A24A;color:#15213B;font-weight:900;font-size:15px;text-transform:uppercase;letter-spacing:.06em;border-radius:4px;text-decoration:none}
 .gold-btn:hover{color:#15213B;background:#E2C47E}

@@ -54,5 +54,18 @@ for (const f of ['public/compass/index.html', 'public/compass/summit/index.html'
 const L = read('public/index.html');
 ok(L.includes('<h1>What is your business <em>for?</em></h1>') && L.includes('Your business, on paper. <em>Not in your head.</em>'), 'landing headline and alternate');
 
+// The four domains are always named in full on screen: no SELF / PEOPLE /
+// WORK / MARKET labels, and no Archivo or Libre Caslon left on the sales pages.
+for (const f of ['public/compass/index.html', 'public/compass/welcome/index.html', 'public/compass/welcome-a/index.html', 'public/index.html']) {
+  const s = read(f);
+  ok(!/>\s*(SELF|PEOPLE|WORK|MARKET|YOURSELF|BUSINESS)\s*</.test(s), `${f}: no short domain labels`);
+  ok(!/LEAD YOURSELF<\/text>|LEAD THE MARKET<\/text>/.test(s), `${f}: no duplicate small domain lines`);
+}
+for (const f of ['public/compass/welcome/index.html', 'public/compass/welcome-a/index.html', 'public/compass/welcome/sales.css']) {
+  ok(!/Archivo|Caslon/.test(read(f)), `${f}: Compass fonts only`);
+}
+ok(read('public/compass/welcome/index.html').includes('family=Fraunces') && read('public/compass/welcome/sales.css').includes("url('../assets/libre700.ttf')"), 'sales pages load the Compass fonts the Compass way');
+for (const d of ['self', 'people', 'work', 'market']) ok(!/n: '(Self|People|Work|Market)'/.test(read('public/content.js')), 'programme domain names in full');
+
 console.log(`pages: ${passed} passed, ${failed} failed`);
 if (failed) process.exit(1);

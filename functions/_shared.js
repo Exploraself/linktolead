@@ -46,3 +46,35 @@ export function mentorOk(request, env) {
   for (let i = 0; i < key.length; i++) diff |= key.charCodeAt(i) ^ given.charCodeAt(i);
   return diff === 0;
 }
+
+/** SHA-256 as hex. Sign-in codes are stored only this way, never as sent. */
+export async function sha256(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(s)));
+  return [...new Uint8Array(buf)].map((x) => x.toString(16).padStart(2, '0')).join('');
+}
+
+/** The tables the account adds. Created here, idempotently, the first time a
+ *  route needs them in this isolate — so there is no manual database step and
+ *  no ALTER TABLE on the tables that already hold founders' work. */
+const READY = new WeakSet();
+export async function accountTables(D) {
+  if (READY.has(D)) return;
+  await D.batch([
+    D.prepare(`CREATE TABLE IF NOT EXISTS student_profile (student_id TEXT PRIMARY KEY, industry TEXT,
+      consent INTEGER DEFAULT 0, consent_at TEXT, source TEXT, unsub_id TEXT UNIQUE,
+      unsubscribed INTEGER DEFAULT 0, unsub_at TEXT)`),
+    D.prepare(`CREATE TABLE IF NOT EXISTS signin_code (code_hash TEXT PRIMARY KEY, student_id TEXT NOT NULL,
+      expires_at INTEGER NOT NULL, used_at INTEGER)`),
+    D.prepare(`CREATE TABLE IF NOT EXISTS plan_tick (student_id TEXT NOT NULL, step_id TEXT NOT NULL,
+      done_at TEXT NOT NULL, PRIMARY KEY (student_id, step_id))`),
+    D.prepare('CREATE TABLE IF NOT EXISTS mail_log (email TEXT, ip TEXT, at INTEGER)'),
+  ]);
+  READY.add(D);
+}
+
+/** The founder a token belongs to, or null. */
+export async function studentBy(D, token) {
+  const t = clean(token, 80);
+  if (t.length < 20) return null;
+  return D.prepare('SELECT id,email,name,stage,tier FROM student WHERE id = ?').bind(t).first();
+}

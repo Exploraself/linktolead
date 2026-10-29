@@ -8,7 +8,8 @@ let passed = 0, failed = 0;
 const ok = (cond, msg) => { if (cond) passed++; else { failed++; console.error('FAIL:', msg); } };
 
 // Every file in functions/api/ has a route.
-for (const f of readdirSync(new URL('../functions/api/', import.meta.url))) {
+for (const f of readdirSync(new URL('../functions/api/', import.meta.url), { recursive: true })) {
+  if (!f.endsWith('.js')) continue;
   ok(ROUTES['/api/' + f.replace(/\.js$/, '')], `route for functions/api/${f}`);
 }
 

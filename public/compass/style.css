@@ -149,3 +149,5 @@ input[type=range]{width:100%;accent-color:#C9A24A;height:44px}
   .jring,.trav{display:none}
   .bar,.ringp,.node,.fill,.card,.nl{transition:none !important}
 }
+details[open] .st-open{visibility:hidden}
+details[data-step] summary::-webkit-details-marker{display:none}

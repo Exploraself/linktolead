@@ -111,17 +111,20 @@ async function roster(){
   const list=r.data.students||[];
   $('#main').innerHTML=`<div class="bar"><span class="count">${list.length} student${list.length===1?'':'s'}</span>
       <button class="ghost" id="refresh">Refresh</button></div>
-    ${list.length?`<table><thead><tr><th>Who</th><th>Stage</th><th>Access</th><th>Progress</th><th>Report</th><th>Last seen</th><th>Notes</th></tr></thead>
+    ${list.length?`<table><thead><tr><th>Who</th><th>Stage</th><th>Access</th><th>Progress</th><th>Report</th><th>Plans</th><th>Last seen</th><th>Notes</th></tr></thead>
     <tbody>${list.map(s=>`<tr>
       <td><span class="nm" data-id="${esc(s.id)}">${esc(s.name||'—')}</span><span class="em">${esc(s.email)}</span>
         ${s.company?`<span class="em">${esc(s.company)}</span>`:''}
         ${s.phone?`<span class="em">${esc(s.phone)}</span>`:''}
-        ${s.mailchimp_sent?'':'<span class="em warn">not on the list</span>'}</td>
+        ${s.mailchimp_sent?'':'<span class="em warn">not on the list</span>'}
+        ${s.industry?`<span class="em">${esc(s.industry)}</span>`:''}
+        <span class="em">${esc(s.source||'programme')} · ${s.consent?'consented':'no consent'}${s.unsubscribed?' · <b class="warn">unsubscribed</b>':''}</span></td>
       <td>${esc(s.stage||'—')}${s.thin_domain?`<span class="em">thinnest: ${esc(s.thin_domain)}</span>`:''}</td>
       <td><span class="pill ${esc(s.tier||'free')}">${esc(s.tier||'free')}</span></td>
       <td><span class="prog"><i style="width:${Math.min(100,Math.round((s.written||0)/336*100))}%"></i></span>
         <span class="tiny">${s.written||0} answers</span></td>
       <td>${s.compass_at?when(s.compass_at):'<span class="tiny">not yet</span>'}</td>
+      <td class="tiny">${s.plan_ticks||0} of 28</td>
       <td class="tiny">${when(s.last_seen_at||s.joined_at)}</td>
       <td>${s.open_notes?`<span class="dot"></span>${s.open_notes}`:'<span class="tiny">—</span>'}</td>
     </tr>`).join('')}</tbody></table>`:'<div class="empty">Nobody has joined yet. The roster fills as founders sign up.</div>'}`;
@@ -132,7 +135,7 @@ async function roster(){
 async function one(id){
   const r=await api('?student='+encodeURIComponent(id));
   if(!r.ok)return roster();
-  const d=r.data, s=d.student, A=d.answers||[], C=d.compass, N=d.notes||[];
+  const d=r.data, s=d.student, A=d.answers||[], C=d.compass, N=d.notes||[], P=d.profile||{}, T=d.ticks||[];
   const DOMS=[['self','Lead yourself'],['people','Lead your people'],['work','Lead your business'],['market','Lead the market']];
   const byLevel={};
   for(const a of A){ if(!a.body)continue; (byLevel[a.level]=byLevel[a.level]||[]).push(a); }
@@ -147,6 +150,10 @@ async function one(id){
         <div class="k"><b>Thinnest</b><span>${esc(s.thin_domain||'—')}</span></div>
         <div class="k"><b>Access</b><span>${esc(s.tier||'free')}</span></div>
         <div class="k"><b>Answers written</b><span>${A.filter(a=>a.body).length}</span></div>
+        <div class="k"><b>Industry</b><span>${esc(P.industry||'—')}</span></div>
+        <div class="k"><b>Came from</b><span>${esc(P.source||'programme')}</span></div>
+        <div class="k"><b>Consent</b><span>${P.consent?'yes'+(P.consent_at?' · '+when(P.consent_at):''):'no'}</span></div>
+        <div class="k"><b>Unsubscribed</b><span>${P.unsubscribed?'yes'+(P.unsub_at?' · '+when(P.unsub_at):''):'no'}</span></div>
       </div>
       <p style="margin-top:16px"><label class="tiny">Change access&nbsp;</label>
         <select id="tier" style="max-width:220px;display:inline-block;width:auto">
@@ -159,6 +166,13 @@ async function one(id){
       <pre style="white-space:pre-wrap;font:12.5px/1.6 ui-monospace,Menlo,monospace;background:var(--cream);padding:14px;margin-top:12px;overflow-x:auto">${esc(JSON.stringify(JSON.parse(C.results_json||'{}'),null,2))}</pre>
       ${C.flags_json&&C.flags_json!=='null'?`<p class="tiny" style="margin-top:10px"><b>Flags:</b> ${esc(C.flags_json)}</p>`:''}
     </div>`:'<div class="panel"><h2>Intelligence Report</h2><p class="tiny" style="margin-top:8px">Not completed yet.</p></div>'}
+
+    <div class="panel"><h2>Account plans · ${T.length} of 28 steps done</h2>
+      ${T.length?DOMS.map(([k,label])=>{const rows=T.filter(t=>t.domain===k);
+        return rows.length?`<div class="dom ${k}" style="padding-top:10px"><h3>${label}</h3>
+          ${rows.map(t=>`<div class="ans"><em>${esc(t.title||t.step_id)}</em><p>Done ${when(t.done_at)}</p></div>`).join('')}</div>`:'';}).join('')
+        :'<p class="tiny" style="margin-top:8px">No steps ticked yet.</p>'}
+    </div>
 
     ${N.length?`<div class="panel"><h2>Notes</h2>${N.map(n=>`<div class="note">
       <p class="meta">${n.level?'Level '+n.level:''}${n.domain?' · '+esc(n.domain):''} · ${when(n.created_at)} · ${esc(n.status)}</p>
