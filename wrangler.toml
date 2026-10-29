@@ -9,6 +9,14 @@ main = "worker.js"
 # survive each `wrangler deploy`. Without this, a deploy from this file, which
 # declares no [vars], removes them.
 keep_vars = true
+#
+# Mailchimp (functions/_mailchimp.js), all optional, set in the dashboard:
+#   MAILCHIMP_MODE          text    "test" stops every call; each join is only logged
+#   MAILCHIMP_FORM_URL      text    another sign-up form link; empty = Link to Lead form
+#   MAILCHIMP_AUDIENCE_ID   text    audience for API mode; empty = the form's list id
+#   MAILCHIMP_API_KEY       secret  switches to API mode (tags, unsubscribe)
+#   MAILCHIMP_DOUBLE_OPTIN  text    "yes" = Mailchimp confirms by email first
+# Never put the API key in this file.
 
 [assets]
 directory = "./public"

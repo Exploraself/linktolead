@@ -8,13 +8,22 @@
 // browser is told to sign in by email link instead. The one exception is the
 // browser that already holds this record's token.
 //
-// No Mailchimp here (that comes later). The welcome email is sent once, to new
-// accounts that consented and have not unsubscribed, within the mail limits.
+// The welcome email is sent once, to new accounts that consented and have not
+// unsubscribed, within the mail limits. The same founders are added to the
+// Mailchimp audience (functions/_mailchimp.js). Both happen after the reply,
+// so a slow email service or a slow Mailchimp never makes anyone wait.
 
 import { json, bad, db, now, newToken, clean, looksLikeEmail, accountTables } from '../_shared.js';
 import { profile, sendWelcome } from '../_account.js';
 import { allowed, logged, mailState, origin } from '../_mail.js';
 import { passwordProblem, setPassword } from '../_auth.js';
+import { syncFounder } from '../_mailchimp.js';
+
+/** Run after the reply when the platform allows it; never let it throw. */
+const later = (waitUntil, job) => {
+  const go = Promise.resolve().then(job).catch(() => {});
+  return typeof waitUntil === 'function' ? (waitUntil(go), null) : go;
+};
 
 /** The Compass's four stages, as the programme names its three. */
 const STAGE = { building: 'build', growing: 'grow', scaling: 'scale', build: 'build', grow: 'grow', scale: 'scale' };
@@ -45,8 +54,10 @@ export async function onRequestPost({ request, env, waitUntil }) {
     // Consent counts only from the browser that holds this record: someone
     // typing another person's address cannot agree on their behalf.
     const mine = clean(body.token, 80) === found.id;
-    await profile(D, found.id, { industry: body.industry, consent: mine && consent, source });
+    const p = await profile(D, found.id, { industry: body.industry, consent: mine && consent, source });
     await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(found.id, 'signup', now(), 'existing').run();
+    // Consent given from the founder's own browser: into the audience too.
+    if (mine && consent && !p.unsubscribed && p.mailchimp_status !== 'ok') await later(waitUntil, () => syncFounder(env, D, found.id, 'join'));
     return json(mine ? { ok: true, token: found.id, existing: true } : { ok: true, existing: true });
   }
 
@@ -71,6 +82,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     })().catch(() => {});
     if (typeof waitUntil === 'function') waitUntil(go); else await go;
   }
+  if (consent && !p.unsubscribed) await later(waitUntil, () => syncFounder(env, D, id, 'join'));
 
   return json({ ok: true, token: id, existing: false });
 }

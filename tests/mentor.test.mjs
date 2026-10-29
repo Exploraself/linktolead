@@ -107,7 +107,7 @@ ok((await mGet({ request: req('GET', '?csv=1', null, {}), env })).status === 401
 ok(st === 400 && DB.raw.prepare('SELECT 1 FROM student WHERE id=?').get(ana), 'delete needs the exact email typed');
 [st] = await M({ action: 'delete', student: ana, confirm: 'ANA@example.com' });
 ok(st === 200, 'delete with the email typed');
-const left = ['student', 'answer', 'compass', 'note', 'event', 'student_profile', 'plan_tick', 'message', 'account_auth', 'signin_code']
+const left = ['student', 'answer', 'compass', 'note', 'event', 'student_profile', 'plan_tick', 'message', 'account_auth', 'signin_code', 'mailchimp_log']
   .map((t) => [t, DB.raw.prepare(`SELECT COUNT(*) n FROM ${t} WHERE ${t === 'student' ? 'id' : 'student_id'} = ?`).get(ana).n]).filter(([, n]) => n > 0);
 ok(left.length === 0, 'every row for that founder is gone' + (left.length ? ' (left: ' + left.map((x) => x[0]).join(', ') + ')' : ''));
 ok(DB.raw.prepare("SELECT COUNT(*) n FROM mail_log WHERE email='ana@example.com'").get().n === 0, 'their mail log too');

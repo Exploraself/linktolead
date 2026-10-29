@@ -73,7 +73,14 @@ export async function accountTables(D) {
     D.prepare('CREATE TABLE IF NOT EXISTS auth_log (email TEXT, ip TEXT, at INTEGER)'),
     D.prepare(`CREATE TABLE IF NOT EXISTS message (id TEXT PRIMARY KEY, student_id TEXT NOT NULL, subject TEXT,
       body TEXT NOT NULL, channel TEXT NOT NULL, sent_at TEXT NOT NULL, read_at TEXT)`),
+    D.prepare(`CREATE TABLE IF NOT EXISTS mailchimp_log (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id TEXT NOT NULL,
+      email TEXT, action TEXT NOT NULL, mode TEXT NOT NULL, status TEXT NOT NULL, detail TEXT, at TEXT NOT NULL)`),
   ]);
+  // The last Mailchimp sync, on the profile. SQLite cannot add a column "if
+  // not exists", so an error here only means it is already there.
+  for (const col of ['mailchimp_status TEXT', 'mailchimp_at TEXT']) {
+    try { await D.prepare(`ALTER TABLE student_profile ADD COLUMN ${col}`).run(); } catch { /* already there */ }
+  }
   READY.add(D);
 }
 
@@ -85,4 +92,4 @@ export async function studentBy(D, token) {
 }
 
 /** Every table that holds a row for a student, for a full delete. */
-export const STUDENT_TABLES = ['answer', 'sheet', 'compass', 'note', 'event', 'student_profile', 'signin_code', 'plan_tick', 'account_auth', 'message'];
+export const STUDENT_TABLES = ['answer', 'sheet', 'compass', 'note', 'event', 'student_profile', 'signin_code', 'plan_tick', 'account_auth', 'message', 'mailchimp_log'];
