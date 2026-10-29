@@ -5,8 +5,9 @@
 // GET              every founder, with what the dashboard and the table need,
 //                  and the notes waiting for a reply
 // GET ?csv=1       the same list as a CSV file
-// GET ?student=id  one founder's work
-// POST { action }  reply · tier (change step, and its step tags in Mailchimp) ·
+// GET ?student=id  one founder's work, climb, stage changes, library
+//                  downloads and their "Ask Alexandru" thread
+// POST { action }  reply (an answer in the thread, emailed as a letter) · tier (change step, and its step tags in Mailchimp) ·
 //                  pause · delete · signin-link · message · mc-test ·
 //                  mc-backfill. Every action is logged as an event; every
 //                  Mailchimp call also in mailchimp_log.
@@ -14,7 +15,10 @@
 import { json, bad, db, now, mentorOk, clean, looksLikeEmail, accountTables, newToken, STUDENT_TABLES } from '../_shared.js';
 import { DOMAIN_STEPS, WHATIF_STEPS, ALL_STEP_IDS } from '../_plans.js';
 import { sendLink } from './signin.js';
-import { send, esc, origin, mailState } from '../_mail.js';
+import { send, origin, mailState } from '../_mail.js';
+import { mentorLetter, answerLetter } from '../_letters.js';
+import { LIBRARY_ITEMS } from './library.js';
+import { thread } from './thread.js';
 import { profile, unsubLink } from '../_account.js';
 import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER } from '../_mailchimp.js';
 
@@ -37,6 +41,13 @@ export function climbOf(student, events) {
   return out;
 }
 
+const STAGE_NAMES = { build: 'Building', grow: 'Growing', scale: 'Scaling' };
+/** The founder's own stage changes on /start, oldest first. */
+export function stageChanges(events) {
+  return (events || []).map((e) => { let d = {}; try { d = JSON.parse(e.detail) || {}; } catch { /* unreadable */ } return { from: STAGE_NAMES[d.from] || null, to: STAGE_NAMES[d.to] || null, at: e.at }; })
+    .filter((x) => x.to);
+}
+
 async function roster(D) {
   const rows = await D.prepare(`
     SELECT s.id, s.name, s.email, s.phone, s.company, s.tier,
@@ -46,6 +57,7 @@ async function roster(D) {
       (SELECT COUNT(*) FROM note n WHERE n.student_id = s.id AND n.status = 'new') AS open_notes,
       (SELECT updated_at FROM compass c WHERE c.student_id = s.id) AS compass_at,
       (SELECT COUNT(*) FROM plan_tick t WHERE t.student_id = s.id) AS plan_ticks,
+      (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'library-download') AS library,
       p.industry, p.source, p.consent, p.unsubscribed, p.mailchimp_status, p.mailchimp_at,
       CASE WHEN au.pass_hash IS NULL THEN 0 ELSE 1 END AS has_password, COALESCE(au.paused, 0) AS paused
     FROM student s
@@ -56,12 +68,13 @@ async function roster(D) {
 }
 
 const CSV_COLS = [['name', 'Name'], ['email', 'Email'], ['joined_at', 'Joined'], ['last_seen_at', 'Last seen'], ['stage', 'Stage'], ['step', 'Step'],
-  ['compass', 'Compass done'], ['plan_ticks', 'Plan steps done'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp']];
+  ['compass', 'Compass done'], ['plan_ticks', 'Plan steps done'], ['library_names', 'Library'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp']];
 export function toCSV(list) {
   // Quoted, and a leading = + - @ is defused so a spreadsheet never runs it.
   const cell = (v) => { let s = String(v ?? ''); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
   const yes = (v) => (v ? 'yes' : 'no');
-  const row = (s) => ({ ...s, step: STEPS[s.tier || 'free'] || s.tier, compass: yes(s.compass_at), has_password: yes(s.has_password), consent: yes(s.consent), unsubscribed: yes(s.unsubscribed), paused: yes(s.paused) });
+  const books = (v) => String(v || '').split(',').filter((k) => LIBRARY_ITEMS[k]).map((k) => LIBRARY_ITEMS[k].name).join('; ');
+  const row = (s) => ({ ...s, step: STEPS[s.tier || 'free'] || s.tier, library_names: books(s.library), compass: yes(s.compass_at), has_password: yes(s.has_password), consent: yes(s.consent), unsubscribed: yes(s.unsubscribed), paused: yes(s.paused) });
   return [CSV_COLS.map(([, h]) => cell(h)).join(','), ...list.map((s) => { const r = row(s); return CSV_COLS.map(([k]) => cell(r[k])).join(','); })].join('\r\n') + '\r\n';
 }
 
@@ -76,7 +89,7 @@ export async function onRequestGet({ request, env }) {
   if (one) {
     const me = await D.prepare('SELECT * FROM student WHERE id = ?').bind(one).first();
     if (!me) return bad('Not found.', 404);
-    const [answers, sheets, compass, notes, prof, ticks, auth, messages, steps] = await Promise.all([
+    const [answers, sheets, compass, notes, prof, ticks, auth, messages, steps, stages, library, asked] = await Promise.all([
       D.prepare('SELECT stage,level,domain,step,body,updated_at FROM answer WHERE student_id=? ORDER BY level,domain,step').bind(one).all(),
       D.prepare('SELECT key,value FROM sheet WHERE student_id=?').bind(one).all(),
       D.prepare('SELECT * FROM compass WHERE student_id=?').bind(one).first(),
@@ -84,13 +97,17 @@ export async function onRequestGet({ request, env }) {
       D.prepare('SELECT industry,consent,consent_at,source,unsubscribed,unsub_at FROM student_profile WHERE student_id=?').bind(one).first(),
       D.prepare('SELECT step_id,done_at FROM plan_tick WHERE student_id=? ORDER BY done_at').bind(one).all(),
       D.prepare('SELECT pass_hash IS NOT NULL AS has_password, paused, set_at FROM account_auth WHERE student_id=?').bind(one).first(),
-      D.prepare('SELECT subject,body,channel,sent_at,read_at FROM message WHERE student_id=? ORDER BY sent_at DESC LIMIT 20').bind(one).all(),
+      D.prepare('SELECT subject,body,channel,sent_at,read_at FROM message WHERE student_id=? AND note_id IS NULL ORDER BY sent_at DESC LIMIT 20').bind(one).all(),
       D.prepare("SELECT detail, at FROM event WHERE student_id=? AND kind='mentor-step' ORDER BY id").bind(one).all(),
+      D.prepare("SELECT detail, at FROM event WHERE student_id=? AND kind='stage-change' ORDER BY id").bind(one).all(),
+      D.prepare("SELECT detail AS item, MIN(at) AS at FROM event WHERE student_id=? AND kind='library-download' GROUP BY detail ORDER BY MIN(at)").bind(one).all(),
+      thread(D, one),
     ]);
     delete me.diag_json;
     return json({ ok: true, student: me, answers: answers.results || [], work: sheets.results || [],
       compass: compass || null, notes: notes.results || [], profile: prof || null, auth: auth || null, messages: messages.results || [],
-      climb: climbOf(me, steps.results || []),
+      climb: climbOf(me, steps.results || []), stages: stageChanges(stages.results || []), thread: asked.items,
+      library: (library.results || []).filter((r) => LIBRARY_ITEMS[r.item]).map((r) => ({ item: r.item, name: LIBRARY_ITEMS[r.item].name, at: r.at })),
       ticks: (ticks.results || []).map((t) => ({ ...t, domain: STEP[t.step_id] ? STEP[t.step_id].domain : null, title: STEP[t.step_id] ? STEP[t.step_id].title : t.step_id })) });
   }
 
@@ -108,17 +125,6 @@ export async function onRequestGet({ request, env }) {
     mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags } });
 }
 
-/** The email a mentor message becomes. Everything typed is escaped. */
-export function messageEmail(subject, text) {
-  const html = `<!doctype html><html><body style="margin:0;background:#F7F2E7"><div style="max-width:600px;margin:0 auto;padding:28px 22px;background:#FFFFFF">
-    <p style="margin:0;font:700 11px Arial;letter-spacing:3px;color:#7A5C16">A NOTE FROM ALEXANDRU AND THE TEAM</p>
-    <h1 style="margin:12px 0 10px;font:600 24px/1.25 Georgia,serif;color:#14100B">${esc(subject)}</h1>
-    <div style="font:15px/1.65 Arial;color:#14100B;white-space:pre-wrap">${esc(text)}</div>
-    <p style="margin:18px 0 0;font:14px/1.6 Arial;color:#5E5446">It is also in your Ground Plan: <a href="https://linktolead.exploraself.com/start" style="color:#7A5C16">linktolead.exploraself.com/start</a></p>
-  </div></body></html>`;
-  return { subject, html, text: `A note from Alexandru and the team\n\n${subject}\n\n${text}\n\nYour Ground Plan: https://linktolead.exploraself.com/start` };
-}
-
 export async function onRequestPost({ request, env }) {
   const D = db(env);
   if (!D) return bad('Not configured.', 503);
@@ -129,11 +135,27 @@ export async function onRequestPost({ request, env }) {
   const log = (student, kind, detail = null) => D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(student, kind, now(), detail).run();
 
   if (body.action === 'reply' && body.note) {
-    const n = await D.prepare('SELECT student_id FROM note WHERE id = ?').bind(clean(body.note, 80)).first();
-    await D.prepare('UPDATE note SET reply=?, status=?, answered_at=? WHERE id=?')
-      .bind(clean(body.reply, 3000), 'answered', now(), clean(body.note, 80)).run();
-    if (n) await log(n.student_id, 'mentor-reply');
-    return json({ ok: true });
+    // An answer in "Ask Alexandru": kept on the question, added to the
+    // founder's thread as a message, and emailed as a letter (Ground Plan
+    // only for a founder who unsubscribed, or when email is off).
+    const n = await D.prepare('SELECT n.id, n.student_id, n.body, s.email, s.name, s.tier FROM note n JOIN student s ON s.id = n.student_id WHERE n.id = ?').bind(clean(body.note, 80)).first();
+    const answer = clean(body.reply, 3000);
+    if (!n) return bad('Unknown question.', 404);
+    if (!answer) return bad('Write the answer first.');
+    const stamp = now();
+    await D.prepare('UPDATE note SET reply=?, status=?, answered_at=? WHERE id=?').bind(answer, 'answered', stamp, n.id).run();
+    const p = await profile(D, n.student_id);
+    let emailed = false;
+    if (!p.unsubscribed && mailState(env).ready) {
+      const base = origin(request);
+      const r = await send(env, { to: n.email, ...answerLetter(base, { first: String(n.name || '').split(' ')[0], question: n.body, answer, to: n.email, tier: n.tier }),
+        why: 'You asked Alexandru a question in your free ExploraSelf account.', unsubUrl: unsubLink(base, p) });
+      emailed = r.ok;
+    }
+    await D.prepare('INSERT INTO message (id, student_id, subject, body, channel, sent_at, note_id) VALUES (?,?,?,?,?,?,?)')
+      .bind(newToken(), n.student_id, 'An answer to your question', answer, emailed ? 'both' : 'plan', stamp, n.id).run();
+    await log(n.student_id, 'mentor-reply', emailed ? 'both' : 'plan');
+    return json({ ok: true, emailed, unsubscribed: !!p.unsubscribed });
   }
 
   if (body.action === 'mc-test') {
@@ -222,7 +244,7 @@ export async function onRequestPost({ request, env }) {
     let emailed = false;
     if (emailWanted && canEmail) {
       const base = origin(request);
-      const r = await send(env, { to: me.email, ...messageEmail(subject, text),
+      const r = await send(env, { to: me.email, ...mentorLetter(base, { subject, body: text, to: me.email, tier: me.tier }),
         why: 'Alexandru and the team wrote to you about your free ExploraSelf account.', unsubUrl: unsubLink(base, p) });
       if (!r.ok && channel === 'email') return bad('The email did not send. Nothing was saved; try again in a minute.', 502);
       emailed = r.ok;

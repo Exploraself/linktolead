@@ -12,7 +12,7 @@
 import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, SHEETS, SECTIONS, loadStage,
   gateFor, levelFor, isWritten, weekTitle, videoFor, nextGain, holds,
   LEAD, BOOKING, LIBRARY } from './content.js';
-import { entry, programmeStage, groundPlan } from './home.js';
+import { entry, programmeStage, groundPlan, stageNudge } from './home.js';
 import { result as fwResult } from './frameworks.js';
 import { report } from './feedback.js';
 import * as account from './account.js';
@@ -36,6 +36,8 @@ if (view === 'redirect') { try { location.replace('/compass/welcome#join'); } ca
 let level = 1, dom = 'self';
 /** The Compass record from the account, the notes, and whether a password is set. */
 let compassRec = null, inbox = null, hasPassword = false, replyTo = null;
+/** The "Ask Alexandru" thread (null until loaded), and the stage picker. */
+let ask = null, changingStage = false;
 
 const compass = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12 12 2.5Z"/><path d="m12 5.7 2 4.3 4.3 2-4.3 2-2 4.3-2-4.3-4.3-2 4.3-2 2-4.3Z" fill="currentColor" stroke="none"/></svg>';
 
@@ -164,7 +166,7 @@ function planHTML(gp, st) {
   const nx = nextLevel(st);
   const card = (k, body) => `<div class="gp-card"><p class="gp-k">${k}</p>${body}</div>`;
   return `<section class="gp-wrap gp-two gp-grid">
-      ${gp.stage ? card('Your stage', `<h2>${esc(gp.stage.programme)}</h2><p>${esc(gp.stage.line)}</p><p class="gp-said">${esc(gp.stage.lede)}</p>`) : ''}
+      ${standHTML(st)}
       ${gp.weakest ? card('Where the programme leans', `<h2 style="color:var(--${esc(gp.weakest.id)})">${esc(gp.weakest.name)} · ${esc(gp.weakest.band)}</h2><p>${esc(gp.weakest.big)} ${esc(gp.weakest.why)}</p><p><b>This week:</b> ${esc(gp.weakest.week)}</p>`) : ''}
       ${gp.goal || gp.pains.length ? card('What you told the Compass', `${gp.goal ? `<p class="gp-goalline">⚑ ${esc(gp.goal.line)}</p>` : ''}${gp.pains.map((p) => `<p class="gp-said">You said: ${esc(p.label)} · ${esc(p.domain)}</p>`).join('')}`) : ''}
     </section>
@@ -176,6 +178,88 @@ function planHTML(gp, st) {
         <a class="gp-line" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my 1:1 with Alexandru</a></div>
     </section>
     ${plansCard()}`;
+}
+
+// ── Where I stand ────────────────────────────────────────────────────────────
+// The stage the founder walks, and "Change": Building, Growing or Scaling. The
+// answers stay; each stage has its own levels. Saved on the device first, then
+// on the account (a failed save is retried on the next visit).
+const NUDGE_KEY = 'ftb-stage-nudge';
+const nudgeSeen = () => { try { return localStorage.getItem(NUDGE_KEY) || ''; } catch { return ''; } };
+const nudgeDone = (pair) => { try { localStorage.setItem(NUDGE_KEY, pair); } catch { /* private mode */ } };
+
+function standHTML(st) {
+  return `<div class="gp-card gp-stand"><p class="gp-k">Where you stand</p>
+    <div class="stand-row"><h2>${esc(STAGES[st].n)}</h2><button type="button" class="ghost" data-stagechange aria-expanded="${changingStage}">Change</button></div>
+    ${changingStage ? `<div class="stand-pick" role="group" aria-label="Pick your stage">${['build', 'grow', 'scale'].map((k) =>
+      `<button type="button" class="${k === st ? 'cta' : 'ghost'}" data-setstage="${k}" aria-pressed="${k === st}">${esc(STAGES[k].n)}</button>`).join('')}</div>
+      <p class="savenote">Your answers stay. Each stage has its own levels.</p>` : ''}
+    <p class="gp-said">${esc(STAGES[st].lede)}</p></div>`;
+}
+
+/** Once, when the Compass placed the founder in another stage. */
+function nudgeHTML(st) {
+  const to = compassRec ? stageNudge({ compass: compassRec.stage, current: st, seen: nudgeSeen() }) : null;
+  if (!to) return '';
+  return `<section class="gp-wrap"><div class="note-from stand-nudge" role="status">
+    <p>Your Compass placed you in ${esc(STAGES[to].n)}. Not sure? Starting one stage earlier settles what the later one assumes.</p>
+    <div class="note-acts"><button type="button" class="cta" data-setstage="${to}" data-nudge="${to}|${st}">Switch to ${esc(STAGES[to].n)}</button><button type="button" class="ghost" data-keepstage="${to}|${st}">Keep ${esc(STAGES[st].n)}</button></div>
+  </div></section>`;
+}
+
+function setStage(k) {
+  const from = state.stage || 'build';
+  changingStage = false;
+  if (STAGES[k] && k !== from) {
+    state.stage = k; state.stageSync = { stage: k, from }; save();
+    account.setStage(k, from).then(() => { delete state.stageSync; save(); }).catch(() => { /* kept on the device; sent next visit */ });
+  }
+  render();
+}
+
+// ── Ask Alexandru ────────────────────────────────────────────────────────────
+// One thread per founder: their questions and Alexandru's answers, newest
+// last. A question is a note (it also tells Alexandru); answers come from
+// /mentor, here and by email. Opening the thread marks the answers read.
+const askUnread = () => (ask && ask.unread) || 0;
+
+function askCard() {
+  return `<section class="gp-wrap"><div class="note-from gp-askcard">
+    <p class="eyebrow">Ask Alexandru</p>
+    <p>A question about your business, your answers or a level? Ask it here.${askUnread() ? ' <b>You have a new answer.</b>' : ''}</p>
+    <div class="note-acts"><button type="button" class="cta" data-go="ask">${askUnread() ? 'Read the answer →' : 'Ask Alexandru →'}</button></div>
+  </div></section>`;
+}
+
+function askView() {
+  const day = (s) => { const d = new Date(s); return isNaN(d) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
+  const items = (ask && ask.items) || [];
+  const row = (x) => x.from === 'founder'
+    ? `<li class="th-q"><p class="th-meta">You · ${esc(day(x.at))}${x.level ? ` · Level ${String(x.level).padStart(2, '0')}` : ''}${x.domain && LEAD[x.domain] ? ` · ${esc(LEAD[x.domain])}` : ''}</p><p class="th-body">${esc(x.body)}</p></li>`
+    : `<li class="th-a${x.read ? '' : ' th-new'}"><p class="th-meta">${x.read ? '' : '<span class="tdot" aria-hidden="true"></span><span class="vh">New · </span>'}Alexandru · ${esc(day(x.at))}</p><p class="th-body">${esc(x.body)}</p></li>`;
+  return `<section class="band qband ask"><div class="wrap narrow">
+    <p class="eyebrow">${compass} Ask Alexandru</p>
+    <h1 class="qh">Ask Alexandru</h1>
+    <p class="sec-lede">A question about your business, your answers or a level. Your questions and Alexandru’s answers stay here, newest last. Answers also come by email, unless you unsubscribed.</p>
+    ${!ask ? '<p class="savenote" role="status">Opening your questions…</p>'
+      : ask.failed ? '<p class="joinerr" role="alert">We could not open your questions just now. Check your connection and reload.</p>'
+      : items.length ? `<ol class="thread">${items.map(row).join('')}</ol>` : '<p class="savenote">No questions yet. Your first one starts the conversation.</p>'}
+    <form id="askform" class="askform" novalidate>
+      <label class="askq"><span>Your question</span><textarea rows="4" maxlength="3000" required></textarea></label>
+      <div class="askrow">
+        <label><span>Level <em>(optional)</em></span><select id="ask-level"><option value="">Any level</option>${Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}">Level ${String(i + 1).padStart(2, '0')}</option>`).join('')}</select></label>
+        <label><span>Domain <em>(optional)</em></span><select id="ask-dom"><option value="">Any domain</option>${DOMAINS.map((d) => `<option value="${d.k}">${esc(d.n)}</option>`).join('')}</select></label>
+      </div>
+      <button class="cta" type="submit">Send my question</button><p class="joinerr" role="status"></p>
+    </form>
+  </div></section>`;
+}
+
+async function openAsk() {
+  const t = await account.thread();
+  if (t && t.ok) ask = t; else if (!ask) ask = { items: [], unread: 0, failed: true };
+  if (view === 'ask') render();
+  if (t && t.unread) account.threadRead().then(() => { if (ask) ask.unread = 0; drawNav(); }).catch(() => {});
 }
 
 function accountHTML() {
@@ -203,7 +287,9 @@ function homeView() {
       <h1 class="gp-title">From founder to <em>intentional leader.</em></h1>
       <p class="gp-lede">${first ? `Welcome back, ${esc(first)}. ` : ''}Here is where you are, and what is open to you now.</p>
     </section>
-    ${gp ? planHTML(gp, st) : howItWorks(st)}
+    ${nudgeHTML(st)}
+    ${gp ? planHTML(gp, st) : `<section class="gp-wrap gp-two gp-grid">${standHTML(st)}</section>${howItWorks(st)}`}
+    ${askCard()}
     ${accountHTML()}
   </div>`;
 }
@@ -457,7 +543,7 @@ function libraryView() {
   const manuals = LIBRARY.manuals.map((m) => `<li class="lib-man${m.k === state.stage ? ' lib-yours' : ''}">
       <span class="bk3 bk3-man bk3-${m.k}" aria-hidden="true"><span class="bk3-cover"><small>ExploraSelf</small><b>${esc(STAGES[m.k].n)}</b></span><i class="bk3-spine"></i></span>
       <span class="lib-mtext"><b>${esc(m.n)}</b><small>${esc(m.sub)} · ${m.pages} pages${m.k === state.stage ? ' · your stage' : ''}</small></span>
-      ${joined ? `<a class="lib-btn" href="${esc(m.file)}" download>${dl}Download PDF</a>` : `<a class="lib-btn" href="/compass/welcome#join">Create a free account to download</a>`}
+      ${joined ? `<a class="lib-btn" href="${esc(account.libraryHref(m.k))}" download>${dl}Download PDF</a>` : `<a class="lib-btn" href="/compass/welcome#join">Create a free account to download</a>`}
     </li>`).join('');
   const books = LIBRARY.books.map((b) => b.soon
     ? `<li class="lib-book lib-soon">${b.cover ? `<span class="bk3"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>` : '<span class="bk3" aria-hidden="true"><span class="bk3-cover bk3-blank">In preparation</span></span>'}
@@ -465,7 +551,7 @@ function libraryView() {
     : `<li class="lib-book"><span class="bk3"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small>
         <span class="lib-acts"><a href="${esc(b.preview)}" target="_blank" rel="noopener">Preview the first pages →</a>
-        ${joined ? `<a href="${esc(b.file)}" download>${dl}Free digital copy</a>` : `<a class="lib-link" href="/compass/welcome#join">Create a free account for the free digital copy</a>`}
+        ${joined ? `<a href="${esc(account.libraryHref(b.k))}" download>${dl}Free digital copy</a>` : `<a class="lib-link" href="/compass/welcome#join">Create a free account for the free digital copy</a>`}
         <span class="lib-print">${b.print ? `<a href="${esc(b.print)}" target="_blank" rel="noopener">Print edition ↗</a>` : 'Print edition coming'}</span></span></span></li>`).join('');
   const L = LIBRARY.lab;
   return `<section class="band qband lib"><div class="wrap">
@@ -554,13 +640,17 @@ function emphasisName(st, lv) {
 }
 
 // ── Render ───────────────────────────────────────────────────────────────────
+function drawNav() {
+  const unread = inbox ? inbox.unread : 0, answers = askUnread();
+  $('#tnav').innerHTML = account.joined() && !['signin', 'redirect', 'loading'].includes(view)
+    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Ground Plan${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button><button type="button" data-go="ask" ${view === 'ask' ? 'aria-current="page"' : ''}>Ask Alexandru${answers ? `<span class="tdot" aria-label="${answers} new ${answers === 1 ? 'answer' : 'answers'}"></span>` : ''}</button>${holds(state.tier, 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
+    : '';
+}
+
 function render() {
   const st = state.stage || 'build';
   document.body.classList.toggle('inwork', view === 'work');
-  const unread = inbox ? inbox.unread : 0;
-  $('#tnav').innerHTML = account.joined() && !['signin', 'redirect', 'loading'].includes(view)
-    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Ground Plan${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button>${holds(state.tier, 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
-    : '';
+  drawNav();
   if ((view === 'work' || view === 'home') && !LEVELS[st]) {
     // Only this founder's stage is loaded, and only when needed.
     $('#main').innerHTML = '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="status">Opening your programme…</p></div></section>';
@@ -571,6 +661,7 @@ function render() {
     ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work"><div id="libban">${libBanner()}</div><div id="mod">${moduleHTML(st)}</div></div></div>`
     : view === 'home' ? homeView()
     : view === 'library' ? libraryView()
+    : view === 'ask' ? askView()
     : view === 'signin' ? signinView()
     : '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="status">One moment…</p></div></section>';
 }
@@ -599,8 +690,13 @@ document.addEventListener('click', (e) => {
   if (b.dataset.go === 'library') bannerDone();
   if (b.dataset.go) {
     view = b.dataset.go; document.body.classList.remove('railopen'); render();
-    window.scrollTo({ top: 0, behavior: 'instant' }); return;
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (view === 'ask') openAsk();
+    return;
   }
+  if (b.hasAttribute('data-stagechange')) { changingStage = !changingStage; render(); const p = document.querySelector('.stand-pick button'); if (p) p.focus(); return; }
+  if (b.dataset.keepstage) { nudgeDone(b.dataset.keepstage); render(); return; }
+  if (b.dataset.setstage) { if (b.dataset.nudge) nudgeDone(b.dataset.nudge); setStage(b.dataset.setstage); return; }
   if (b.dataset.eye) {
     const inp = document.getElementById(b.dataset.eye), show = inp && inp.type === 'password';
     if (inp) inp.type = show ? 'text' : 'password';
@@ -653,6 +749,18 @@ document.addEventListener('submit', async (e) => {
     if (a !== c) return say('The two passwords are different.');
     try { const r = await account.setPassword(a, c); hasPassword = true; $('#pw1').value = ''; $('#pw2').value = ''; say(r.changed ? 'Your password is changed.' : 'Your password is set.'); }
     catch (ex) { say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'It did not save. Try again in a minute.'); }
+    return;
+  }
+  if (f.id === 'askform') {
+    e.preventDefault();
+    const t = f.querySelector('textarea'), msg = f.querySelector('.joinerr'), body = t.value.trim();
+    if (!body) { msg.textContent = 'Write your question first.'; t.focus(); return; }
+    const lv = parseInt($('#ask-level').value, 10), dm = $('#ask-dom').value;
+    try {
+      await account.note({ body, level: lv || undefined, domain: dm || undefined });
+      await openAsk();
+      const m = document.querySelector('#askform .joinerr'); if (m) m.textContent = 'Sent. It is in the thread above.';
+    } catch (ex) { msg.textContent = ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'It did not send. Your question is still here; try again in a minute.'; }
     return;
   }
   if (f.matches('form[data-reply]')) {
@@ -727,8 +835,9 @@ async function comeHome() {
   if (view === 'redirect') return;
   render();
   if (!account.joined()) return;
-  const [r, msgs] = await Promise.all([account.pull(), account.messages()]);
+  const [r, msgs, th] = await Promise.all([account.pull(), account.messages(), account.thread()]);
   if (msgs && msgs.ok) inbox = msgs;
+  if (th && th.ok) ask = th;
   if (r && r.ok) {
     for (const [k, v] of Object.entries(r.answers || {})) if (v && !state.answers[k]) state.answers[k] = v;
     for (const [k, v] of Object.entries(r.work || {})) if (v && !state.work[k]) state.work[k] = v;
@@ -740,10 +849,17 @@ async function comeHome() {
     }
     let sales = '';
     try { sales = (JSON.parse(localStorage.getItem('exploraself-profile') || 'null') || {}).stage || ''; } catch { /* private mode */ }
-    state.stage = programmeStage({ local: state.stage, compass: compassRec && compassRec.stage, account: (r.me && r.me.stage) || sales });
+    // A stage change not yet on the account goes now, and the device keeps it.
+    if (state.stageSync) {
+      const p = state.stageSync;
+      account.setStage(p.stage, p.from).then(() => { delete state.stageSync; save(); }).catch(() => {});
+    }
+    const chosen = !state.stageSync && r.me && r.me.stageChosen ? r.me.stage : '';
+    state.stage = programmeStage({ chosen, local: state.stage, compass: compassRec && compassRec.stage, account: (r.me && r.me.stage) || sales });
     save();
   }
   render();
+  if (view === 'ask') openAsk();
   loadPlans();
 }
 comeHome();

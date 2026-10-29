@@ -113,6 +113,8 @@ export function buildRequest(st, member, action) {
     if (action === 'unsubscribe') {
       return [{ method: 'PUT', url: `${base}?skip_merge_validation=true`, body: { email_address: email, status_if_new: 'unsubscribed', status: 'unsubscribed' } }];
     }
+    // One tag on its own ('tag': a library download), or the founder's whole set.
+    if (action === 'tag') return [{ method: 'POST', url: `${base}/tags`, body: { tags: [{ name: member.tag, status: 'active' }] } }];
     const tags = { method: 'POST', url: `${base}/tags`, body: { tags: tagsFor(member) } };
     if (action === 'tags') return [tags];
     return [{ method: 'PUT', url: `${base}?skip_merge_validation=true`,
@@ -210,11 +212,13 @@ export async function record(D, { studentId, email, action, mode, status, detail
 
 /**
  * Sync one founder: 'join' (new account, or consent given), 'tags' (Compass
- * done; API mode only) or 'unsubscribe' (unsubscribed, paused, deleted).
+ * done, a step or stage changed; API mode only), 'tag' (one more tag, `tag`,
+ * such as a library download; API mode only) or 'unsubscribe' (unsubscribed,
+ * paused, deleted).
  * Joins and tags need consent and no unsubscribe; an unsubscribe is sent only
  * for someone who once gave consent, so nobody else is ever named to Mailchimp.
  */
-export async function syncFounder(env, D, studentId, action = 'join', { keepLog = true } = {}) {
+export async function syncFounder(env, D, studentId, action = 'join', { keepLog = true, tag = '' } = {}) {
   const s = await D.prepare('SELECT id, email, name, stage, tier FROM student WHERE id = ?').bind(studentId).first();
   if (!s) return { status: 'skipped', detail: 'No such founder.' };
   const p = await D.prepare('SELECT consent, unsubscribed, source FROM student_profile WHERE student_id = ?').bind(studentId).first();
@@ -225,17 +229,20 @@ export async function syncFounder(env, D, studentId, action = 'join', { keepLog 
     if (paused) return { status: 'skipped', detail: 'Paused.' };
   }
   const st = mailchimpState(env);
-  if (action === 'tags' && st.mode === 'form') return { status: 'skipped', detail: 'Form mode does not tag.' };
+  if ((action === 'tags' || action === 'tag') && st.mode === 'form') return { status: 'skipped', detail: 'Form mode does not tag.' };
+  if (action === 'tag' && !tag) return { status: 'skipped', detail: 'No tag.' };
   const c = await D.prepare('SELECT stage, results_json FROM compass WHERE student_id = ?').bind(studentId).first();
+  // A stage the founder chose on /start wins over the Compass's.
+  const chose = await D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'stage-change' LIMIT 1").bind(studentId).first();
   const [first, ...rest] = String(s.name || '').split(' ');
   const member = { email: s.email, first, last: rest.join(' '), source: p.source || 'compass',
-    stage: (c && c.stage) || s.stage, weakest: c ? weakestTag(c.results_json) : null, tier: s.tier || 'free' };
+    stage: (chose && s.stage) || (c && c.stage) || s.stage, weakest: c ? weakestTag(c.results_json) : null, tier: s.tier || 'free', tag };
   const out = await push(env, member, action);
   if (keepLog) await record(D, { studentId, email: s.email, action, mode: st.mode, status: out.status, detail: out.detail });
   // Which step's tags went with it, so the backfill knows who still needs
   // them. A test only marks it as tested ("test:<step>"), so going live
   // still sends them for real; it never overwrites a real send.
-  if (action !== 'unsubscribe' && canTag(env) && (out.status === 'ok' || out.status === 'test')) {
+  if ((action === 'join' || action === 'tags') && canTag(env) && (out.status === 'ok' || out.status === 'test')) {
     const tier = member.tier;
     await D.prepare(out.status === 'ok'
       ? 'UPDATE student_profile SET mailchimp_steps = ? WHERE student_id = ?'

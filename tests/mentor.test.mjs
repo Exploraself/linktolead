@@ -66,7 +66,8 @@ ok(st === 200 && sent.length === 1 && sent[0].body.to[0] === 'bo@example.com' &&
 sent = fakeResend();
 [st, r] = await M({ action: 'message', student: ana, subject: 'Your <first> step', body: 'Book the Boardroom & bring level 03.', channel: 'email' });
 ok(st === 200 && r.channel === 'email' && sent.length === 1, 'email only: sent by email');
-ok(sent[0].body.html.includes('Your &lt;first&gt; step') && sent[0].body.html.includes('&amp; bring') && sent[0].body.text.includes('Via Esempio 1') && sent[0].body.html.includes('/api/unsubscribe?u='), 'escaped, with the footer and unsubscribe');
+ok(sent[0].body.subject === 'Your <first> step' && sent[0].body.html.includes('&amp; bring') && sent[0].body.text.includes('Via Esempio 1') && sent[0].body.html.includes('/api/unsubscribe?u='), 'a letter: his text escaped, with the footer and unsubscribe');
+ok(sent[0].body.html.includes('/mail/signature.png') && sent[0].body.text.includes('Book the Boardroom & bring level 03.') && /\nP\.S\. /.test(sent[0].body.text), 'mentor letter: his own words, signed, with a P.S.');
 let mine = await (await msgGet({ request: get('/api/messages?t=' + ana), env })).json();
 ok(mine.messages.length === 0, 'email only: not in the Ground Plan');
 sent = fakeResend();
@@ -126,7 +127,7 @@ const W = [{ student_id: 'a', name: 'Ana', email: 'a@x.co', body: 'Help', create
 const S = summary(F, W, now);
 ok(S.total === 4 && S.newWeek === 2 && S.compass === 2 && S.notes === 1 && S.quiet === 2, 'tiles: total, new this week, Compass done, notes waiting, quiet 14+ days');
 ok(S.steps.free === 2 && S.steps.session === 1 && S.steps.lab === 0 && S.steps.hub === 0 && S.steps.premium === 1, 'counts per step; an empty step is 0');
-ok(JSON.stringify(summary([], [], now)) === JSON.stringify({ total: 0, newWeek: 0, compass: 0, steps: { free: 0, session: 0, lab: 0, hub: 0, premium: 0 }, notes: 0, quiet: 0 }), 'no founders: every tile 0');
+ok(JSON.stringify(summary([], [], now)) === JSON.stringify({ total: 0, newWeek: 0, compass: 0, steps: { free: 0, session: 0, lab: 0, hub: 0, premium: 0 }, notes: 0, quiet: 0, library: 0 }), 'no founders: every tile 0');
 ok(filter(F, { tile: 'quiet' }, now).map((s) => s.id).join() === 'b,c' && filter(F, { tile: 'premium' }, now).map((s) => s.id).join() === 'c', 'tiles filter the table');
 ok(filter(F, { q: 'B@X' }, now).map((s) => s.id).join() === 'b' && filter(F, { tile: 'free', q: 'di' }, now).map((s) => s.id).join() === 'd', 'search, alone and with a tile');
 const N = needsYou(F, W, now);

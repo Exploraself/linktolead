@@ -1,6 +1,8 @@
 // Notes from Alexandru and the team, shown at the top of the founder's Ground
 // Plan. GET lists them (newest first); POST { token, id } marks one read when
 // the founder taps "Got it". Replies go to /api/note, as every note does.
+// Answers to "Ask Alexandru" questions live in the thread (api/thread.js), so
+// they are left out here.
 
 import { json, bad, db, now, clean, accountTables, studentBy } from '../_shared.js';
 
@@ -10,7 +12,7 @@ export async function onRequestGet({ request, env }) {
   const me = await studentBy(D, new URL(request.url).searchParams.get('t'));
   if (!me) return bad('Not found.', 404);
   await accountTables(D);
-  const rows = await D.prepare("SELECT id, subject, body, sent_at, read_at FROM message WHERE student_id = ? AND channel IN ('plan','both') ORDER BY sent_at DESC LIMIT 20").bind(me.id).all();
+  const rows = await D.prepare("SELECT id, subject, body, sent_at, read_at FROM message WHERE student_id = ? AND channel IN ('plan','both') AND note_id IS NULL ORDER BY sent_at DESC LIMIT 20").bind(me.id).all();
   const list = rows.results || [];
   return json({ ok: true, messages: list, unread: list.filter((m) => !m.read_at).length });
 }

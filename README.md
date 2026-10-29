@@ -72,11 +72,28 @@ so a deploy never removes them.
 | `MAIL_POSTAL_ADDRESS` | Text | The postal address in every email footer. Without it no email is sent. |
 | `MENTOR_KEY` | Secret | The key that opens `/mentor`. |
 | `MAIL_FROM` | Text, optional | A different sender than `support@exploraself.com`. |
+| `MENTOR_EMAIL` | Text, optional | Where a founder's question in **Ask Alexandru** is announced. Empty means `alex@exploraself.com`. |
 | `MAILCHIMP_MODE` | Text, optional | `test` stops every Mailchimp call: each join is built and logged on `/mentor`, nothing is sent. Empty means send. |
 | `MAILCHIMP_FORM_URL` | Text, optional | A different Mailchimp sign-up form link (`…list-manage.com/subscribe/post?u=…&id=…`). Empty uses the Link to Lead form. |
 | `MAILCHIMP_AUDIENCE_ID` | Text, optional | The audience for API mode. Empty uses the form's list id. |
 | `MAILCHIMP_API_KEY` | **Secret** | Switches Mailchimp to API mode: tags, updates and unsubscribes, and no form fields to satisfy. |
 | `MAILCHIMP_DOUBLE_OPTIN` | Text, optional | `yes` makes Mailchimp send its own confirmation email before someone joins (API mode). |
+
+### Emails: letters from Alexandru
+
+Every email goes by Resend (Mailchimp sends none) as a short letter from Alexandru
+(`functions/_letters.js`): paper background, Georgia, no banner, no buttons, plain
+links, the signature image `/mail/signature.png` ("Alexandru" in a handwriting
+font until a scan of the real one replaces the file), a plain-text part, and a
+P.S. offer. The welcome (`launchpad-welcome`, once, on account creation), the
+Compass results, Alexandru's notes and his answers in **Ask Alexandru** may carry
+a paid offer (The Boardroom, Unshakeable); the sign-in link and **Your password was
+changed** carry free ones only (Leadionaire, First 100 Clients, Built to Lead).
+The footer (why it came, unsubscribe, postal address) is on every one.
+
+Library downloads go through `/api/library?item=<key>`: signed-in only, logged,
+and tagged once per book in Mailchimp as `Library - <book>` (API mode). `/mentor`
+lists them per founder, filters the roster by them and puts them in the CSV.
 
 ### Mailchimp, in three modes
 

@@ -26,9 +26,10 @@ const prof = DB.raw.prepare('SELECT * FROM student_profile WHERE student_id = ?'
 ok(prof && prof.industry === 'Coaching & consulting' && prof.consent === 1 && prof.consent_at && prof.source === 'compass', 'profile: industry, consent, consent_at, source');
 ok(prof.unsub_id && prof.unsub_id.length >= 40 && prof.unsubscribed === 0, 'profile: an unsubscribe id, subscribed');
 ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id = ? AND kind = 'signup'").get(token).n === 1, 'event: signup logged');
-ok(sent.length === 1 && sent[0].body.to[0] === 'ana@example.com' && /saved/i.test(sent[0].body.subject), 'welcome email sent');
+ok(sent.length === 1 && sent[0].body.to[0] === 'ana@example.com' && sent[0].body.subject === 'Welcome to The Founder Launchpad', 'one email on signup: the Launchpad welcome');
 const w = sent[0].body;
-ok(w.html.includes('https://linktolead.exploraself.com/start') && /sign-in link/i.test(w.text), 'welcome: Launchpad link and how to sign in again');
+ok(/^Hi Ana,/.test(w.text) && w.text.includes('Start with Level 01 tonight') && w.html.includes('/mail/signature.png') && /\nP\.S\. /.test(w.text), 'welcome: a letter, signed, with a P.S.');
+ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id = ? AND kind = 'launchpad-welcome'").get(token).n === 1, 'event: launchpad-welcome logged');
 ok(w.html.includes('/api/unsubscribe?u=' + prof.unsub_id) && w.text.includes('Via Esempio 1') && w.headers['List-Unsubscribe'], 'welcome: footer and headers');
 ok(DB.raw.prepare("SELECT COUNT(*) n FROM mailchimp_log WHERE student_id = ? AND action = 'join'").get(token).n === 1, 'the Mailchimp join is tried once, after the reply (tests/mailchimp.test.mjs covers it)');
 

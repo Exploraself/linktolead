@@ -22,6 +22,7 @@ export function summary(students, waiting, now = Date.now()) {
     steps,
     notes: (waiting || []).length,
     quiet: list.filter((s) => isQuiet(s, now)).length,
+    library: list.filter((s) => !!s.library).length,
   };
 }
 
@@ -33,13 +34,14 @@ export function filter(students, { tile = 'all', q = '' } = {}, now = Date.now()
     if (tile === 'compass' && !s.compass_at) return false;
     if (tile === 'notes' && !(s.open_notes > 0)) return false;
     if (tile === 'quiet' && !isQuiet(s, now)) return false;
+    if (tile === 'library' && !s.library) return false;
     if (STEP_KEYS.includes(tile) && (s.tier || 'free') !== tile) return false;
     if (needle && !`${s.name || ''} ${s.email || ''} ${s.company || ''}`.toLowerCase().includes(needle)) return false;
     return true;
   });
 }
 
-/** "Needs you": unread notes from founders, then founders quiet for 14+ days. */
+/** "Needs you": unanswered questions from founders, then founders quiet for 14+ days. */
 export function needsYou(students, waiting, now = Date.now()) {
   const notes = (waiting || []).map((n) => ({ kind: 'note', id: n.student_id, name: n.name, email: n.email, text: n.body, at: n.created_at }));
   const quiet = (students || []).filter((s) => isQuiet(s, now)).map((s) => ({ kind: 'quiet', id: s.id, name: s.name, email: s.email, days: Math.floor((now - seen(s)) / DAY) }));

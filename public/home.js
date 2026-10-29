@@ -14,21 +14,35 @@ const COMPASS_STAGE_NAME = { building: 'Building', growing: 'Growing', scaling: 
  * Where /start opens. Without an account: the sign-in screen when asked for
  * (#signin), otherwise off to the sales page to make one. With an account: a
  * founder from the old entrance opens on their programme, as before; everyone
- * else on their Ground Plan. #home, #programme and #library are honoured.
+ * else on their Ground Plan. #home, #programme, #library and #ask are
+ * honoured.
  */
 export function entry({ joined, old, hash = '' }) {
   if (!joined) return hash === '#signin' ? 'signin' : 'redirect';
   if (hash === '#library') return 'library';
+  if (hash === '#ask') return 'ask';
   if (hash === '#programme') return 'work';
   if (hash === '#home') return 'home';
   return old ? 'work' : 'home';
 }
 
-/** Which programme to walk: a stage already in use on this device stays (a
- *  founder never loses their place); then the Compass; then the stage on the
- *  account (from the sales page); then Building, where the programme starts. */
-export function programmeStage({ local, compass, account } = {}) {
-  return PROGRAMME[local] || PROGRAMME[compass] || PROGRAMME[account] || 'build';
+/** Which programme to walk: a stage the founder chose on /start ("Change
+ *  where I stand", kept on the account) wins everywhere; then a stage already
+ *  in use on this device (a founder never loses their place); then the
+ *  Compass; then the stage on the account (from the sales page); then
+ *  Building, where the programme starts. */
+export function programmeStage({ chosen, local, compass, account } = {}) {
+  return PROGRAMME[chosen] || PROGRAMME[local] || PROGRAMME[compass] || PROGRAMME[account] || 'build';
+}
+
+/** The once-only nudge when the Compass placed the founder in another stage
+ *  than the one they walk (Leading counts as Scaling). `seen` is what was
+ *  answered last ("<compass>|<current>"), so it shows once per pair. Returns
+ *  the programme stage the Compass suggests, or null. */
+export function stageNudge({ compass, current, seen = '' } = {}) {
+  const to = PROGRAMME[compass], now = PROGRAMME[current];
+  if (!to || !now || to === now || seen === `${to}|${now}`) return null;
+  return to;
 }
 
 const parse = (s) => { if (s && typeof s === 'object') return s; try { return s ? JSON.parse(s) : null; } catch { return null; } };

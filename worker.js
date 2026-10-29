@@ -24,6 +24,9 @@ import * as planTick from './functions/api/plans/tick.js';
 import * as login from './functions/api/login.js';
 import * as password from './functions/api/password.js';
 import * as messages from './functions/api/messages.js';
+import * as library from './functions/api/library.js';
+import * as stage from './functions/api/stage.js';
+import * as thread from './functions/api/thread.js';
 
 /** One line per route. A new file in functions/api/ needs its line here. */
 export const ROUTES = {
@@ -40,6 +43,9 @@ export const ROUTES = {
   '/api/login': login,
   '/api/password': password,
   '/api/messages': messages,
+  '/api/library': library,
+  '/api/stage': stage,
+  '/api/thread': thread,
 };
 
 export default {
