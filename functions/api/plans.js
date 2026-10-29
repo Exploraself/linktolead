@@ -1,5 +1,7 @@
 // The Account Plans for one founder, in their order. Only with a valid token:
-// without one the answer is 401 and carries nothing.
+// without one the answer is 401 and carries nothing. The one exception is
+// ?total, the number of steps (the same for everyone), which the sales pages
+// show so that number is never typed twice.
 //
 // The order comes from what the Compass saved (functions/_plans.js, planFor).
 // Ticks are the plans' own: "x of 32 steps done". They do not add to the
@@ -11,6 +13,9 @@ import { planFor, ALL_STEP_IDS } from '../_plans.js';
 const parse = (s) => { try { return s ? JSON.parse(s) : null; } catch { return null; } };
 
 export async function onRequestGet({ request, env }) {
+  if (new URL(request.url).searchParams.has('total')) {
+    return new Response(JSON.stringify({ ok: true, total: ALL_STEP_IDS.length }), { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
+  }
   const D = db(env);
   if (!D) return bad('Not configured.', 503);
   const me = await studentBy(D, new URL(request.url).searchParams.get('t'));

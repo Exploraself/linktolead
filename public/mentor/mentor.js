@@ -59,6 +59,28 @@ function needsHTML() {
       <span class="acts">${x.kind === 'note' ? `<button class="ghost" data-open="${esc(x.id)}">Read and reply</button>` : ''}<button class="ghost" data-msg="${esc(x.id)}">Send a message</button></span></li>`).join('')}</ul></div>`;
 }
 
+const MC_MODE = { test: 'Test', form: 'Form', api: 'Live API' };
+const MC_STATUS = { ok: 'in Mailchimp', test: 'test only', failed: 'failed' };
+
+/** Mailchimp: the mode, what is missing, a test join, the backfill and the
+ *  last 20 calls. Nothing here is a secret; the API key never leaves Cloudflare. */
+function mailchimpHTML() {
+  const M = data.mailchimp;
+  if (!M) return '';
+  const last = (M.log || [])[0];
+  const lastFail = last && last.status === 'failed' ? `<p class="flash warn" role="status"><b>Last call failed:</b> ${esc(last.detail)}</p>` : '';
+  return `<div class="panel mc"><h2>Mailchimp · ${esc(MC_MODE[M.mode] || M.mode)}</h2>
+    <p class="tiny" style="margin-top:6px">${esc(M.reason)}</p>${lastFail}
+    <div class="bar" style="margin-top:12px"><input id="mc-email" type="email" placeholder="Email for a test join" autocomplete="off" style="max-width:280px">
+      <button class="ghost" id="mc-test">Send a test join</button><span style="flex:1"></span>
+      <button class="ghost" id="mc-backfill"${M.waiting ? '' : ' disabled'}>Send everyone with consent (${M.waiting} waiting)</button></div>
+    ${(M.log || []).length ? `<div class="tscroll"><table class="mclog"><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Mode</th><th>Status</th><th>Detail</th></tr></thead><tbody>
+      ${M.log.map((r) => `<tr><td class="tiny">${when(r.at)}</td><td class="tiny">${esc(r.email || (r.student_id === 'mentor' ? 'mentor' : '—'))}</td><td class="tiny">${esc(r.action)}</td><td class="tiny">${esc(r.mode)}</td>
+        <td>${r.status === 'failed' ? '<b class="warn">failed</b>' : esc(r.status)}</td><td class="tiny">${esc(r.detail || '')}</td></tr>`).join('')}</tbody></table></div>`
+      : '<p class="tiny" style="margin-top:10px">No Mailchimp calls yet.</p>'}
+  </div>`;
+}
+
 function tableHTML() {
   const rows = filter(data.students, { tile, q });
   const total = data.totalSteps || 28;
@@ -66,7 +88,7 @@ function tableHTML() {
       <span class="count">${rows.length} of ${data.students.length}</span><span style="flex:1"></span>
       <button class="ghost" id="csv">Export CSV</button><button class="ghost" id="refresh">Refresh</button></div>
     ${flash ? `<p class="flash" role="status">${esc(flash)}</p>` : ''}
-    ${rows.length ? `<div class="tscroll"><table><thead><tr><th>Founder</th><th>Joined</th><th>Last seen</th><th>Stage</th><th>Step</th><th>Compass</th><th>Plans</th><th>Password</th><th>Consent</th><th>Unsub.</th><th>Paused</th><th>Actions</th></tr></thead>
+    ${rows.length ? `<div class="tscroll"><table><thead><tr><th>Founder</th><th>Joined</th><th>Last seen</th><th>Stage</th><th>Step</th><th>Compass</th><th>Plans</th><th>Password</th><th>Consent</th><th>Unsub.</th><th>Paused</th><th>Mailchimp</th><th>Actions</th></tr></thead>
     <tbody>${rows.map((s) => `<tr>
       <td><span class="nm" data-open="${esc(s.id)}">${esc(s.name || '—')}</span><span class="em">${esc(s.email)}</span>${s.open_notes ? `<span class="em warn"><span class="dot"></span>${s.open_notes} unread note${s.open_notes > 1 ? 's' : ''}</span>` : ''}</td>
       <td class="tiny">${when(s.joined_at)}</td><td class="tiny">${when(s.last_seen_at || s.joined_at)}</td>
@@ -74,6 +96,7 @@ function tableHTML() {
       <td><select data-step="${esc(s.id)}" aria-label="Step for ${esc(s.name || s.email)}">${STEP_KEYS.map((k) => `<option value="${k}"${(s.tier || 'free') === k ? ' selected' : ''}>${STEP_NAMES[k]}</option>`).join('')}</select></td>
       <td>${s.compass_at ? 'done' : '—'}</td><td class="tiny">${s.plan_ticks || 0} of ${total}</td>
       <td>${yes(s.has_password)}</td><td>${yes(s.consent)}</td><td>${s.unsubscribed ? '<b class="warn">yes</b>' : '—'}</td><td>${s.paused ? '<b class="warn">paused</b>' : '—'}</td>
+      <td class="tiny">${s.mailchimp_status ? (s.mailchimp_status === 'failed' ? '<b class="warn">failed</b>' : esc(MC_STATUS[s.mailchimp_status] || s.mailchimp_status)) + ' · ' + when(s.mailchimp_at) : (s.consent && !s.unsubscribed ? 'not sent yet' : '—')}</td>
       <td class="acts">
         <button class="ghost" data-open="${esc(s.id)}">Open work</button>
         <button class="ghost" data-msg="${esc(s.id)}">Send a message</button>
@@ -87,10 +110,13 @@ function tableHTML() {
 
 function draw() {
   const S = summary(data.students, data.waiting);
-  $('#main').innerHTML = `${tilesHTML(S)}${needsHTML()}<h2 style="margin-top:28px">Account manager</h2>${tableHTML()}<div id="dlg"></div>`;
+  $('#main').innerHTML = `${tilesHTML(S)}${needsHTML()}${mailchimpHTML()}<h2 style="margin-top:28px">Account manager</h2>${tableHTML()}<div id="dlg"></div>`;
   const qi = $('#q');
   qi.oninput = () => { q = qi.value; const pos = qi.selectionStart; draw(); const n = $('#q'); n.focus(); n.setSelectionRange(pos, pos); };
 }
+
+/** What Mailchimp did on a pause or delete, when there is anything to say. */
+const mcNote = (d) => (d && d.mailchimp === 'ok' ? ' Unsubscribed in Mailchimp.' : d && d.mailchimp === 'failed' ? ` Mailchimp: ${d.mailchimpDetail}` : d && d.mailchimp === 'test' ? ' Mailchimp: logged only (test mode).' : '');
 
 const person = (id) => data.students.find((s) => s.id === id) || { id };
 
@@ -135,7 +161,7 @@ function deleteBox(id) {
     e.preventDefault();
     const r = await act({ action: 'delete', student: id, confirm: $('#d-email').value });
     if (!r.ok) { $('#d-err').textContent = r.data.error || 'It was not deleted.'; return; }
-    flash = `${s.email} was deleted.`; load();
+    flash = `${s.email} was deleted.` + mcNote(r.data); load();
   };
 }
 
@@ -206,6 +232,24 @@ document.addEventListener('click', async (e) => {
   if ('close' in d) { $('#dlg').innerHTML = ''; return; }
   if (b.id === 'csv') return csv();
   if (b.id === 'refresh') { flash = ''; return load(); }
+  if (b.id === 'mc-test') {
+    const email = $('#mc-email').value.trim();
+    if (!email) { $('#mc-email').focus(); return; }
+    b.disabled = true;
+    const r = await act({ action: 'mc-test', email });
+    flash = !r.ok ? (r.data.error || 'The test join did not run.')
+      : r.data.status === 'ok' ? `Test join for ${email} accepted by Mailchimp. Look for it in the audience, with the tag.`
+      : r.data.status === 'test' ? `Test mode: the join for ${email} was built and logged, not sent.`
+      : `Mailchimp did not take the test join: ${r.data.detail}`;
+    return load();
+  }
+  if (b.id === 'mc-backfill') {
+    b.disabled = true; b.textContent = 'Sending…';
+    const r = await act({ action: 'mc-backfill' });
+    flash = !r.ok ? (r.data.error || 'That did not run.')
+      : `Sent ${r.data.done}: ${r.data.ok || 0} in Mailchimp, ${r.data.test || 0} logged in test mode, ${r.data.failed || 0} failed.${r.data.left ? ` ${r.data.left} still waiting: press again.` : ''}`;
+    return load();
+  }
   if (d.link || d.reset) {
     const id = d.link || d.reset, r = await act({ action: d.link ? 'signin-link' : 'reset-link', student: id });
     flash = r.ok ? `${d.link ? 'Sign-in' : 'Password reset'} link sent to ${person(id).email}.` : (r.data.error || 'It did not send.');
@@ -213,7 +257,7 @@ document.addEventListener('click', async (e) => {
   }
   if (d.pause) {
     const r = await act({ action: 'pause', student: d.pause, paused: d.v === '1' });
-    flash = r.ok ? `${person(d.pause).email} is ${d.v === '1' ? 'paused' : 'unpaused'}.` : (r.data.error || 'That did not work.');
+    flash = r.ok ? `${person(d.pause).email} is ${d.v === '1' ? 'paused' : 'unpaused'}.` + mcNote(r.data) : (r.data.error || 'That did not work.');
     return load();
   }
 });

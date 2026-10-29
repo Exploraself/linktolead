@@ -36,10 +36,14 @@ export function fakeD1() {
   };
 }
 
-/** Swap fetch for one that records every email and answers as Resend does. */
+/** Swap fetch for one that records every email and answers as Resend does.
+ *  Anything else (Mailchimp) is offline here: tests/mailchimp.test.mjs fakes it. */
 export function fakeResend(ok = true) {
   const sent = [];
-  globalThis.fetch = async (url, opts) => { sent.push({ url, body: JSON.parse(opts.body), auth: opts.headers.authorization }); return { ok }; };
+  globalThis.fetch = async (url, opts = {}) => {
+    if (!String(url).includes('api.resend.com')) return { ok: false, status: 503, headers: new Headers(), text: async () => 'offline in tests' };
+    sent.push({ url, body: JSON.parse(opts.body), auth: opts.headers.authorization }); return { ok };
+  };
   return sent;
 }
 

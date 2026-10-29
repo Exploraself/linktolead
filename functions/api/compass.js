@@ -8,11 +8,12 @@
 // their Compass there.
 
 import { json, bad, db, now, clean, studentBy, accountTables } from '../_shared.js';
+import { mailchimpState, syncFounder, weakestTag } from '../_mailchimp.js';
 
 /** Kept whole or not at all: a JSON string cut short could never be read back. */
 const cap = (o, n) => { if (!o || typeof o !== 'object') return null; const s = JSON.stringify(o); return s.length <= n ? s : null; };
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   const D = db(env);
   if (!D) return bad('Not configured.', 503);
   let body;
@@ -23,6 +24,7 @@ export async function onRequestPost({ request, env }) {
   if (!me) return bad('Not found.', 404);
 
   const stage = ['build', 'grow', 'scale', 'lead', 'building', 'growing', 'scaling', 'leading'].includes(body.stage) ? body.stage : null;
+  const before = await D.prepare('SELECT stage, results_json FROM compass WHERE student_id = ?').bind(me.id).first();
   await D.prepare(`INSERT INTO compass (student_id,stage,answers_json,numbers_json,results_json,flags_json,updated_at)
       VALUES (?,?,?,?,?,?,?)
       ON CONFLICT(student_id) DO UPDATE SET stage=COALESCE(excluded.stage,compass.stage),
@@ -33,6 +35,18 @@ export async function onRequestPost({ request, env }) {
     .bind(me.id, stage, cap(body.answers, 12000), cap(body.numbers, 6000),
           cap(body.results, 8000), cap(body.flags, 2000), now()).run();
   await D.prepare('INSERT INTO event (student_id,kind,at) VALUES (?,?,?)').bind(me.id, 'compass', now()).run();
+
+  // A finished Compass updates the founder's Mailchimp tags (stage and weakest
+  // domain), in API mode only and only when one of them changed, after the reply.
+  if (mailchimpState(env).mode === 'api') {
+    const after = await D.prepare('SELECT stage, results_json FROM compass WHERE student_id = ?').bind(me.id).first();
+    const was = before ? `${before.stage}|${weakestTag(before.results_json)}` : '';
+    const weakest = after ? weakestTag(after.results_json) : null;
+    if (weakest && `${after.stage}|${weakest}` !== was) {
+      const go = (async () => { await accountTables(D); await syncFounder(env, D, me.id, 'tags'); })().catch(() => {});
+      if (typeof waitUntil === 'function') waitUntil(go); else await go;
+    }
+  }
   return json({ ok: true });
 }
 

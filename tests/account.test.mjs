@@ -30,7 +30,7 @@ ok(sent.length === 1 && sent[0].body.to[0] === 'ana@example.com' && /saved/i.tes
 const w = sent[0].body;
 ok(w.html.includes('https://linktolead.exploraself.com/start') && /sign-in link/i.test(w.text), 'welcome: Launchpad link and how to sign in again');
 ok(w.html.includes('/api/unsubscribe?u=' + prof.unsub_id) && w.text.includes('Via Esempio 1') && w.headers['List-Unsubscribe'], 'welcome: footer and headers');
-ok(!sent.some((m) => /mailchimp|list-manage/.test(m.url)), 'no Mailchimp call');
+ok(DB.raw.prepare("SELECT COUNT(*) n FROM mailchimp_log WHERE student_id = ? AND action = 'join'").get(token).n === 1, 'the Mailchimp join is tried once, after the reply (tests/mailchimp.test.mjs covers it)');
 
 // Escaped: a name with markup.
 sent = fakeResend();

@@ -190,6 +190,25 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
     io.observe(vid);
   } catch { fillVid(); }
 
+  /* "What opens with your free account" (kit.js) loads the same way, with the
+   * library's titles and page counts (/content.js) and the live number of plan
+   * steps. Its buttons open the same account box. */
+  const kit = $('#kit-body');
+  const kitCss = () => new Promise((ok) => {
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/compass/welcome/kit.css';
+    l.onload = l.onerror = ok; document.head.appendChild(l);
+  });
+  const fillKit = () => Promise.all([
+    import('/compass/welcome/kit.js'), import('/content.js'), kitCss(),
+    fetch('/api/plans?total').then((r) => r.json()).then((j) => j.total).catch(() => null),
+  ]).then(([m, c, , steps]) => { m.fill(kit, c.LIBRARY, steps); kit.querySelectorAll('[data-gate]').forEach((b) => b.addEventListener('click', openGate)); }).catch(() => {});
+  if (kit) {
+    try {
+      const io = new IntersectionObserver((es) => { if (es.some((x) => x.isIntersecting)) { io.disconnect(); fillKit(); } }, { rootMargin: '900px 0px' });
+      io.observe(kit);
+    } catch { fillKit(); }
+  }
+
   /* The account box. Its markup and code (account-box.js) load the first time
    * it opens, so the page itself stays light. /compass/welcome#join opens it
    * (where /start sends visitors without an account). */

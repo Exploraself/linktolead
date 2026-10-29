@@ -58,3 +58,32 @@ The dashboard's defaults are correct as they stand:
 
 `wrangler.toml` points at `public/` and declares no Worker script, so Cloudflare
 serves the files directly.
+
+## 8. Settings in Cloudflare
+
+Everything the site reads from Cloudflare lives on the Pages project
+**linktolead** → **Settings → Variables and Secrets → Production**. After adding
+or changing one, open **Deployments** and press **Retry deployment** on the
+latest one, so the site picks it up. `wrangler.toml` keeps `keep_vars = true`,
+so a deploy never removes them.
+
+| Name | Type | What it does |
+|---|---|---|
+| `MAIL_POSTAL_ADDRESS` | Text | The postal address in every email footer. Without it no email is sent. |
+| `MENTOR_KEY` | Secret | The key that opens `/mentor`. |
+| `MAIL_FROM` | Text, optional | A different sender than `support@exploraself.com`. |
+| `MAILCHIMP_MODE` | Text, optional | `test` stops every Mailchimp call: each join is built and logged on `/mentor`, nothing is sent. Empty means send. |
+| `MAILCHIMP_FORM_URL` | Text, optional | A different Mailchimp sign-up form link (`…list-manage.com/subscribe/post?u=…&id=…`). Empty uses the Link to Lead form. |
+| `MAILCHIMP_AUDIENCE_ID` | Text, optional | The audience for API mode. Empty uses the form's list id. |
+| `MAILCHIMP_API_KEY` | **Secret** | Switches Mailchimp to API mode: tags, updates and unsubscribes, and no form fields to satisfy. |
+| `MAILCHIMP_DOUBLE_OPTIN` | Text, optional | `yes` makes Mailchimp send its own confirmation email before someone joins (API mode). |
+
+### Mailchimp, in three modes
+
+- **Test** (`MAILCHIMP_MODE` = `test`): nothing leaves; `/mentor` shows what would have been sent.
+- **Form** (the default): new founders with consent go through the public Link to Lead sign-up form. It cannot tag or unsubscribe, and Mailchimp refuses the join while the form marks a field as required that the account box does not ask for (Company and Phone). Fix that in Mailchimp: **Audience → Settings → Audience fields and \*|MERGE|\* tags**, untick **Required** for Company and Phone. Or add the API key.
+- **Live API** (`MAILCHIMP_API_KEY` set): the founder is added or updated with tags `linktolead`, where they came from (`compass` / `sales-page`), their stage (`build` / `grow` / `scale`) and, once the Compass is done, their weakest domain. Unsubscribing, a pause or a delete marks them unsubscribed in Mailchimp (never a hard delete).
+
+To get an API key: Mailchimp → your profile → **Extras → API keys → Create A Key**. Copy it once and add it in Cloudflare as a **Secret** named `MAILCHIMP_API_KEY`. Never paste it into the code, a chat or an email.
+
+Nobody is sent to Mailchimp without consent. `/mentor` shows the mode, what is missing, the last 20 calls, a **Send a test join** button and **Send everyone with consent** for founders not yet in Mailchimp.

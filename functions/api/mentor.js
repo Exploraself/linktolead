@@ -7,13 +7,15 @@
 // GET ?csv=1       the same list as a CSV file
 // GET ?student=id  one founder's work
 // POST { action }  reply · tier (change step) · pause · delete · signin-link ·
-//                  message. Every action is logged as an event.
+//                  message · mc-test · mc-backfill. Every action is logged as
+//                  an event; every Mailchimp call also in mailchimp_log.
 
-import { json, bad, db, now, mentorOk, clean, accountTables, newToken, STUDENT_TABLES } from '../_shared.js';
+import { json, bad, db, now, mentorOk, clean, looksLikeEmail, accountTables, newToken, STUDENT_TABLES } from '../_shared.js';
 import { DOMAIN_STEPS, WHATIF_STEPS, ALL_STEP_IDS } from '../_plans.js';
 import { sendLink } from './signin.js';
 import { send, esc, origin, mailState } from '../_mail.js';
 import { profile, unsubLink } from '../_account.js';
+import { mailchimpState, syncFounder, testJoin, backfillList } from '../_mailchimp.js';
 
 /** Each plan step's domain and title, so ticks can be read by domain. */
 const STEP = Object.fromEntries([...DOMAIN_STEPS, ...WHATIF_STEPS].map((s) => [s.id, s]));
@@ -28,7 +30,7 @@ async function roster(D) {
       (SELECT COUNT(*) FROM note n WHERE n.student_id = s.id AND n.status = 'new') AS open_notes,
       (SELECT updated_at FROM compass c WHERE c.student_id = s.id) AS compass_at,
       (SELECT COUNT(*) FROM plan_tick t WHERE t.student_id = s.id) AS plan_ticks,
-      p.industry, p.source, p.consent, p.unsubscribed,
+      p.industry, p.source, p.consent, p.unsubscribed, p.mailchimp_status, p.mailchimp_at,
       CASE WHEN au.pass_hash IS NULL THEN 0 ELSE 1 END AS has_password, COALESCE(au.paused, 0) AS paused
     FROM student s
       LEFT JOIN student_profile p ON p.student_id = s.id
@@ -38,7 +40,7 @@ async function roster(D) {
 }
 
 const CSV_COLS = [['name', 'Name'], ['email', 'Email'], ['joined_at', 'Joined'], ['last_seen_at', 'Last seen'], ['stage', 'Stage'], ['step', 'Step'],
-  ['compass', 'Compass done'], ['plan_ticks', 'Plan steps done'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused']];
+  ['compass', 'Compass done'], ['plan_ticks', 'Plan steps done'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp']];
 export function toCSV(list) {
   // Quoted, and a leading = + - @ is defused so a spreadsheet never runs it.
   const cell = (v) => { let s = String(v ?? ''); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
@@ -80,7 +82,11 @@ export async function onRequestGet({ request, env }) {
   }
   const waiting = await D.prepare(`SELECT n.id, n.student_id, n.body, n.created_at, s.name, s.email FROM note n JOIN student s ON s.id = n.student_id
       WHERE n.status = 'new' ORDER BY n.created_at DESC LIMIT 100`).all();
-  return json({ ok: true, students, waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, mailReady: mailState(env).ready });
+  const mc = mailchimpState(env);
+  const mcLog = await D.prepare('SELECT student_id, email, action, mode, status, detail, at FROM mailchimp_log ORDER BY id DESC LIMIT 20').all();
+  const waitingSync = (await backfillList(D, 5000, mc.mode)).length;
+  return json({ ok: true, students, waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, mailReady: mailState(env).ready,
+    mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingSync } });
 }
 
 /** The email a mentor message becomes. Everything typed is escaped. */
@@ -111,6 +117,30 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: true });
   }
 
+  if (body.action === 'mc-test') {
+    // A test join for an address Alexandru types himself.
+    const email = clean(body.email, 200).toLowerCase();
+    if (!looksLikeEmail(email)) return bad('Type the email to send the test join for.');
+    const out = await testJoin(env, D, { email, first: clean(body.first, 60) || 'Test', last: clean(body.last, 60) || 'Join' });
+    await log('mentor', 'mentor-mc-test', out.status);
+    return json({ ok: true, status: out.status, detail: out.detail });
+  }
+  if (body.action === 'mc-backfill') {
+    // Everyone with consent, not unsubscribed and not yet in Mailchimp, ten a
+    // second, up to fifty a press so one request stays well inside its time.
+    const mode = mailchimpState(env).mode;
+    const ids = await backfillList(D, 50, mode);
+    const tally = { ok: 0, test: 0, failed: 0, skipped: 0 };
+    for (const [i, sid] of ids.entries()) {
+      if (i) await new Promise((r) => setTimeout(r, 100));
+      const out = await syncFounder(env, D, sid, 'join');
+      tally[out.status] = (tally[out.status] || 0) + 1;
+    }
+    const left = (await backfillList(D, 5000, mode)).length;
+    await log('mentor', 'mentor-mc-backfill', JSON.stringify({ ...tally, left }));
+    return json({ ok: true, done: ids.length, ...tally, left });
+  }
+
   const id = clean(body.student, 80);
   const me = id ? await D.prepare('SELECT id, email, name FROM student WHERE id = ?').bind(id).first() : null;
   if (!me) return bad('Unknown founder.', 404);
@@ -126,11 +156,16 @@ export async function onRequestPost({ request, env }) {
     const paused = body.paused ? 1 : 0;
     await D.prepare(`INSERT INTO account_auth (student_id, paused) VALUES (?,?) ON CONFLICT(student_id) DO UPDATE SET paused=excluded.paused`).bind(me.id, paused).run();
     await log(me.id, paused ? 'mentor-pause' : 'mentor-unpause');
-    return json({ ok: true, paused: !!paused });
+    // A paused founder leaves the Mailchimp audience (unsubscribed, never deleted).
+    const mcOut = paused ? await syncFounder(env, D, me.id, 'unsubscribe') : null;
+    return json({ ok: true, paused: !!paused, mailchimp: mcOut ? mcOut.status : null, mailchimpDetail: mcOut ? mcOut.detail : null });
   }
   if (body.action === 'delete') {
     // Typing the founder's email is the confirmation.
     if (clean(body.confirm, 200).toLowerCase() !== me.email) return bad('Type the founder’s email exactly to confirm.');
+    // Out of Mailchimp first: unsubscribed, never a hard delete. The log row
+    // goes with everything else below, so the address is not kept here.
+    const mcOut = await syncFounder(env, D, me.id, 'unsubscribe', { keepLog: false });
     await D.batch([
       ...STUDENT_TABLES.map((t) => D.prepare(`DELETE FROM ${t} WHERE student_id = ?`).bind(me.id)),
       D.prepare('DELETE FROM mail_log WHERE email = ?').bind(me.email),
@@ -138,8 +173,8 @@ export async function onRequestPost({ request, env }) {
       D.prepare('DELETE FROM student WHERE id = ?').bind(me.id),
     ]);
     // Logged without the founder's details, which are gone.
-    await log('mentor', 'mentor-delete', 'one founder deleted');
-    return json({ ok: true });
+    await log('mentor', 'mentor-delete', `one founder deleted · mailchimp ${mcOut.status}`);
+    return json({ ok: true, mailchimp: mcOut.status, mailchimpDetail: mcOut.detail });
   }
   if (body.action === 'signin-link' || body.action === 'reset-link') {
     if (!mailState(env).ready) return bad('Email is not switched on yet.', 503);
