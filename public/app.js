@@ -1,18 +1,18 @@
-// The Founder's Blueprint — the programme.
+// The Founder's Blueprint — the programme, and the founder's home base.
 //
-// Three screens: the entrance (diagnostic), the map (twelve levels), and a
-// level (four domains, seven steps each). A locked level opens its gate
-// instead of nothing, and the gate says plainly what opens it.
+// /start is where a founder with an account comes home: their Ground Plan
+// (built from their Compass), the map of twelve levels, and a level (four
+// domains, seven steps each). A locked level opens its gate instead of
+// nothing, and the gate says plainly what opens it. Without an account, /start
+// sends the visitor to the Compass sales page to make one, or shows sign-in.
 //
 // Answers save to the device first, and to the account when the founder has
 // one. Nothing is asserted about a payment or a subscription.
 
-import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, DIAGNOSTIC, SECTIONS, JOURNEY,
-  gateFor, levelFor, isWritten, weekTitle, videoFor, nextGain, holds, referee,
-  LEAD, BOOKING, groundPlan, LIBRARY } from './content.js';
-import { FW_BUILD } from './fw-build.js';
-import { FW_GROW } from './fw-grow.js';
-import { FW_SCALE } from './fw-scale.js';
+import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, SHEETS, SECTIONS, loadStage,
+  gateFor, levelFor, isWritten, weekTitle, videoFor, nextGain, holds,
+  LEAD, BOOKING, LIBRARY } from './content.js';
+import { entry, programmeStage, groundPlan } from './home.js';
 import { result as fwResult } from './frameworks.js';
 import { report } from './feedback.js';
 import * as account from './account.js';
@@ -24,16 +24,18 @@ const KEY = 'ftb-v1';
 const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* private mode */ } };
 
-let state = Object.assign({ stage: '', scores: null, answers: {}, work: {}, diag: {}, tier: 'free', me: null }, load());
+let state = Object.assign({ stage: '', answers: {}, work: {}, tier: 'free', me: null }, load());
 if (!state.work) state.work = {};
-// 'quiz' → 'join' → 'read' → 'work'. The landing page at / sells it; this
-// page starts at the questions and never shows the reading before the join.
-// A returning founder lands on their Ground Plan until they have started writing,
-// then back where the work is.
-let view = !state.stage ? 'quiz' : (state.me || account.joined() ? (Object.keys(state.answers || {}).length ? 'work' : 'read') : 'join');
-// /start#library opens the library for anyone who has joined.
-try { if (location.hash === '#library' && (state.me || account.joined())) view = 'library'; } catch { /* no location */ }
+// A founder who joined through the old entrance (its ten questions, now gone)
+// keeps their stage, answers and work, and opens on their programme.
+const oldEntrance = !!(state.referee || (state.diag && Object.keys(state.diag).length)) && !!state.stage;
+const hashNow = (() => { try { return location.hash; } catch { return ''; } })();
+const linkCode = (() => { try { return new URLSearchParams(location.search).get('signin') || ''; } catch { return ''; } })();
+let view = linkCode ? 'loading' : entry({ joined: account.joined(), old: oldEntrance, hash: hashNow });
+if (view === 'redirect') { try { location.replace('/compass/welcome#join'); } catch { /* no location */ } }
 let level = 1, dom = 'self';
+/** The Compass record from the account, the notes, and whether a password is set. */
+let compassRec = null, inbox = null, hasPassword = false, replyTo = null;
 
 const compass = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12 12 2.5Z"/><path d="m12 5.7 2 4.3 4.3 2-4.3 2-2 4.3-2-4.3-4.3-2 4.3-2 2-4.3Z" fill="currentColor" stroke="none"/></svg>';
 
@@ -44,7 +46,6 @@ const aKey = (st, lv, dk, i) => `${st}.${lv}.${dk}.${i}`;
 // A worksheet belongs to one domain of one level and sits under the clarity
 // point it serves. Entries are kept apart from the written answers, so a level
 // still closes on the twenty-eight and never on arithmetic.
-const SHEETS = { build: FW_BUILD, grow: FW_GROW, scale: FW_SCALE };
 const wKey = (st, lv, dk, fk) => `w.${st}.${lv}.${dk}.${fk}`;
 function fwFor(st, lv, dk) {
   const stage = SHEETS[st];
@@ -116,189 +117,115 @@ function levelDone(st, lv) {
 }
 // (level access now comes from levelState and the tier — see the workspace below)
 
-// ── The entrance ─────────────────────────────────────────────────────────────
-// Three screens, in this order, and never out of it. The ten questions get a
-// screen to themselves, because a diagnostic finishes far more often when it
-// is the only thing on the page. Then we ask who they are. Then — and only
-// then — the reading. The landing page at / does the selling; by the time a
-// founder arrives here they have already decided to find out.
+// ── The Ground Plan home base ───────────────────────────────────────────────
+// The front door is the Compass sales page; /start is where a founder with an
+// account comes home. Before the Compass: how this works, in three steps.
+// After it: their Ground Plan, from their own answers, then the programme.
 
-/** Have the nine been answered? */
-function diagDone() {
-  return Object.keys(state.diag).length >= DIAGNOSTIC.length;
+const eye = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>';
+/** A password box with its show / hide button. */
+const pwField = (id, label, auto) => `<label class="pwf"><span>${label}</span><span class="pwrow"><input id="${id}" type="password" autocomplete="${auto}" minlength="10"><button type="button" class="pweye" data-eye="${id}" aria-label="Show ${label.toLowerCase()}" aria-pressed="false">${eye}</button></span></label>`;
+
+/** A promise's first sentence: what that level leaves you with by Sunday. */
+const promiseOf = (st, n) => { const L = (LEVELS[st] || {})[n]; return L && L.promise ? L.promise.split(/(?<=\.)\s+(?=[A-Z])/)[0] : ''; };
+const firstName = () => (state.me && state.me.name ? state.me.name.split(' ')[0] : '');
+
+/** The first level not yet finished and open to this founder. */
+function nextLevel(st) {
+  for (let n = 1; n <= 12; n++) if (levelDone(st, n) < 28) return reachable(st, n) ? n : Math.max(1, n - 1);
+  return 12;
 }
 
-/** Work out the stage, the thin domain and the four scores, and keep them.
- *  Runs the moment the ninth answer lands, so the join can carry the verdict
- *  up with it even though the founder has not seen the reading yet. */
-function settle() {
-  const score = { self: 0, people: 0, work: 0, market: 0 };
-  DIAGNOSTIC.forEach((q, i) => { if (score[q.d] !== undefined) score[q.d] += Number(state.diag[i]) || 0; });
-  const said = state.diag[DIAGNOSTIC.findIndex((q) => q.d === 'stage')];
-  const want = state.diag[DIAGNOSTIC.findIndex((q) => q.d === 'want')];
-  if (!said || !want) return null;
-
-  const r = referee({ said, want, score });
-  state.stage = r.assigned;
-  state.scores = {}; DOMAINS.forEach((d) => state.scores[d.k] = Math.round(score[d.k] / 4 * 100));
-  state.referee = { kind: r.kind, said, want, assigned: r.assigned, thin: r.thin };
-  state.raw = score;
-  save();
-  return r;
+function notesHTML() {
+  // The newest three unread; the rest show as these are dismissed.
+  const list = (inbox && inbox.messages || []).filter((m) => !m.read_at).slice(0, 3);
+  if (!list.length) return '';
+  return list.map((m) => `<section class="gp-wrap"><div class="note-from" role="status">
+      <p class="eyebrow">A note from Alexandru and the team · ${esc(new Date(m.sent_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }))}</p>
+      <h2>${esc(m.subject)}</h2>
+      <p class="note-body">${esc(m.body)}</p>
+      <div class="note-acts"><button type="button" class="cta" data-gotit="${esc(m.id)}">Got it</button><button type="button" class="ghost" data-replyto="${esc(m.id)}">Reply</button></div>
+      ${replyTo === m.id ? `<form class="note-reply" data-reply="${esc(m.id)}"><label><span class="vh">Your reply</span><textarea rows="3" placeholder="Write your reply" required></textarea></label><button class="cta" type="submit">Send reply</button><p class="joinerr" role="status"></p></form>` : ''}
+    </div></section>`).join('');
 }
 
-/** Rebuild the reading from what was settled earlier, with no side effects. */
-function reading() {
-  if (!state.referee) return settle();
-  const { said, want } = state.referee;
-  const score = state.raw || { self: 0, people: 0, work: 0, market: 0 };
-  return referee({ said, want, score });
+function howItWorks(st) {
+  return `<section class="gp-wrap gp-moves">
+    <p class="eyebrow">How this works</p>
+    <ol class="gp-mlist">
+      <li class="gp-move"><span class="gp-mn">01</span><b>Find where you stand</b><p>Eight plain questions, rough numbers, and feedback in all four domains. Free.</p><a class="cta" href="/compass">Open the Compass →</a></li>
+      <li class="gp-move"><span class="gp-mn">02</span><b>Walk the Founder Launchpad</b><p>Levels 01–03, free. Know yourself before you build.</p><button class="cta" type="button" data-level="1">Start level 01 →</button></li>
+      <li class="gp-move"><span class="gp-mn">03</span><b>Book The Boardroom</b><p>Sit at the table. Unlock the full Compass.</p><a class="cta" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my 1:1 with Alexandru ↗</a></li>
+    </ol>
+  </section>`;
 }
 
-// ── Screen one: the ten questions, alone ────────────────────────────────────
-function quizView() {
-  const done = Object.keys(state.diag).length, need = DIAGNOSTIC.length;
-  return `${acctPlans ? `<div class="gp">${plansCard()}</div>` : ''}<section class="band qband"><div class="wrap narrow">
-    <a class="backlink" href="/">← Back</a>
-    <p class="eyebrow">${compass} The entrance</p>
-    <h1 class="qh">Let’s find where you actually stand</h1>
-    <p class="sec-lede">Answer as last week actually went, not as you meant it to go — nobody grades this. It decides which stage you are in, which of the four domains is costing you most, and which level you start on. Two minutes.</p>
-    <div class="qcount" role="status"><span class="qbar"><i style="width:${Math.round(done / need * 100)}%"></i></span>
-      <span class="qnum">${done} of ${need} answered</span></div>
-    <div class="quiz">${DIAGNOSTIC.map((q, i) => `<div class="q${state.diag[i] !== undefined ? ' got' : ''}">
-      <p class="dl">${esc(q.label)}</p><h4><span class="qi">${i + 1}</span>${esc(q.q)}</h4>
-      <div class="opts">${q.o.map((o) => `<button class="opt" type="button" aria-pressed="${state.diag[i] === o[1]}" data-diag="${i}" data-val="${esc(String(o[1]))}">${esc(o[0])}</button>`).join('')}</div>
-    </div>`).join('')}</div>
-    <div id="resultHost"></div>
-  </div></section>`;
+function planHTML(gp, st) {
+  const nx = nextLevel(st);
+  const card = (k, body) => `<div class="gp-card"><p class="gp-k">${k}</p>${body}</div>`;
+  return `<section class="gp-wrap gp-two gp-grid">
+      ${gp.stage ? card('Your stage', `<h2>${esc(gp.stage.programme)}</h2><p>${esc(gp.stage.line)}</p><p class="gp-said">${esc(gp.stage.lede)}</p>`) : ''}
+      ${gp.weakest ? card('Where the programme leans', `<h2 style="color:var(--${esc(gp.weakest.id)})">${esc(gp.weakest.name)} · ${esc(gp.weakest.band)}</h2><p>${esc(gp.weakest.big)} ${esc(gp.weakest.why)}</p><p><b>This week:</b> ${esc(gp.weakest.week)}</p>`) : ''}
+      ${gp.goal || gp.pains.length ? card('What you told the Compass', `${gp.goal ? `<p class="gp-goalline">⚑ ${esc(gp.goal.line)}</p>` : ''}${gp.pains.map((p) => `<p class="gp-said">You said: ${esc(p.label)} · ${esc(p.domain)}</p>`).join('')}`) : ''}
+    </section>
+    <section class="gp-wrap gp-moves">
+      <p class="eyebrow">Your first three moves · free</p>
+      <ol class="gp-mlist">${gp.moves.map((m) => `<li class="gp-move"><span class="gp-mn">${String(m.n).padStart(2, '0')}</span><b>${esc(m.title)}</b><p>${esc(m.promise)}</p></li>`).join('')}
+        <li class="gp-move gp-then"><span class="gp-mt">Then</span><b>The Boardroom: a session with Alexandru</b><p>Alexandru and the team read what you wrote before you speak. The session opens levels 04–05.</p></li></ol>
+      <div class="gp-btns"><button class="cta" type="button" data-level="${nx}">Continue level ${String(nx).padStart(2, '0')} →</button>
+        <a class="gp-line" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my 1:1 with Alexandru</a></div>
+    </section>
+    ${plansCard()}`;
 }
 
-/** The foot of the quiz: nothing until all ten are in, then the way on. */
-function quizFoot() {
-  if (!diagDone()) {
-    const left = DIAGNOSTIC.length - Object.keys(state.diag).length;
-    return `<p class="qleft">${left} to go, and your Ground Plan is drawn.</p>`;
-  }
-  return `<div class="qdone">
-    <p class="eyebrow">${compass} All ten answered</p>
-    <h3>Your Ground Plan is drawn</h3>
-    <p>It shows the stage you are actually in, which of the four is costing you most, and your first three moves. ${account.joined() || state.me ? '' : 'Tell us where to keep it and it opens.'}</p>
-    <button class="cta" data-go="${account.joined() || state.me ? 'read' : 'join'}">${account.joined() || state.me ? 'See my Ground Plan →' : 'See where I stand →'}</button>
+function accountHTML() {
+  return `<section class="gp-wrap gp-account" aria-labelledby="acct-h">
+    <p class="eyebrow" id="acct-h">Your account</p>
+    <p class="gp-lede">${state.me && state.me.email ? `Signed in as <b>${esc(state.me.email)}</b>. ` : ''}Your work is saved to your account and follows you between devices.</p>
+    <details class="pw-box"><summary>${hasPassword ? 'Change your password' : 'Set a password (optional)'}</summary>
+      <form id="pwform" class="pwform" novalidate>
+        <p class="savenote">Optional. Without one, “Email me a sign-in link” always works. At least 10 characters.</p>
+        ${pwField('pw1', 'Password', 'new-password')}${pwField('pw2', 'Confirm password', 'new-password')}
+        <button class="cta" type="submit">Save my password</button><p class="joinerr" id="pwmsg" role="status"></p>
+      </form></details>
+    <button type="button" class="ghost" data-signout>Sign out on this device</button>
+  </section>`;
+}
+
+function homeView() {
+  const st = state.stage || 'build';
+  const gp = compassRec && window.CompassEngine ? groundPlan(compassRec, window.CompassEngine, { STAGES, weekTitle, promise: promiseOf }) : null;
+  const first = firstName();
+  return `<div class="gp">
+    ${notesHTML()}
+    <section class="gp-wrap gp-top">
+      <p class="eyebrow">${compass} Your Ground Plan</p>
+      <h1 class="gp-title">From founder to <em>intentional leader.</em></h1>
+      <p class="gp-lede">${first ? `Welcome back, ${esc(first)}. ` : ''}Here is where you are, and what is open to you now.</p>
+    </section>
+    ${gp ? planHTML(gp, st) : howItWorks(st)}
+    ${accountHTML()}
   </div>`;
 }
 
-// ── Screen two: who are you ──────────────────────────────────────────────────
-function joinView() {
+/** Signing in on this device: email and password, or a one-time email link. */
+function signinView() {
   return `<section class="band qband"><div class="wrap narrow">
-    <button class="backlink" type="button" data-go="quiz">← Back to the questions</button>
-    <p class="eyebrow">${compass} Ten of ten</p>
-    <h1 class="qh">Where shall we send your Ground Plan?</h1>
-    <p class="sec-lede">It is drawn and waiting on the other side of this form. An account also lets your work follow you from this screen to your phone — and lets Alexandru and the team read what you wrote before you ever speak to them.</p>
-    <form class="joinbox bare" id="joinbox" novalidate>
+    <p class="eyebrow">${compass} Your Ground Plan</p>
+    <h1 class="qh">Sign in</h1>
+    <p class="sec-lede">Use your password if you set one. Otherwise we email you a link that signs you in on this device.</p>
+    <form class="joinbox bare" id="signinform" novalidate>
       <div class="joinrow">
-        <label><span>First name</span><input id="jf" name="fname" autocomplete="given-name" required></label>
-        <label><span>Last name</span><input id="jl" name="lname" autocomplete="family-name" required></label>
-        <label><span>Email</span><input id="je" name="email" type="email" autocomplete="email" required></label>
-        <label><span>Your business</span><input id="jc" name="company" autocomplete="organization" required></label>
-        <label><span>Phone</span><input id="jp" name="phone" type="tel" autocomplete="tel" required></label>
+        <label><span>Email</span><input id="si-email" type="email" autocomplete="email" required></label>
+        ${pwField('si-pw', 'Password', 'current-password')}
       </div>
-      <button class="cta" type="submit" id="jgo">Open my Ground Plan →</button>
-      <p class="joinerr" id="jerr" hidden></p>
-      <p class="savenote">Free, and the first three levels stay free. No card, now or later.</p>
+      <button class="cta" type="submit">Sign in →</button>
+      <button class="ghost" type="button" data-link>Email me a sign-in link</button>
+      <button class="lib-link" type="button" data-link>Forgot your password?</button>
+      <p class="joinerr" id="si-msg" role="status"></p>
+      <p class="savenote">New here? <a href="/compass/welcome#join">Create your free account →</a></p>
     </form>
   </div></section>`;
-}
-
-// ── Screen three: the reading ────────────────────────────────────────────────
-function readView() {
-  const r = reading();
-  if (!r) return quizView();
-  const gp = groundPlan(state.diag, r);
-  const first = state.me ? state.me.name.split(' ')[0] : '';
-  const st = r.assigned;
-  const N = ['None', 'One', 'Two', 'Three'];
-  const promise = (n) => {
-    const L = (LEVELS[st] || {})[n];
-    const p = L && L.promise ? L.promise.split(/(?<=\.)\s+(?=[A-Z])/)[0] : '';
-    return p;
-  };
-
-  const told = gp.answers.map((a) => `<div class="gp-dom">
-      <div class="gp-dl"><span style="color:var(--${a.k})">${esc(a.n)}</span><span>${a.score} / 4${a.k === r.thin ? ' · thinnest' : ''}</span></div>
-      <div class="gp-track"><i style="width:${a.score * 25}%;background:var(--${a.k})"></i></div>
-      <p class="gp-said">${a.said.map((t) => `“${esc(t)}”`).join(' · ')}</p>
-    </div>`).join('');
-
-  const costs = gp.costs.length
-    ? `<h2 class="gp-h">${N[gp.costs.length]} of your answers ${gp.costs.length === 1 ? 'has' : 'have'} a price. <em>You are paying it every week.</em></h2>
-      <div class="gp-costs">${gp.costs.map((c) => `<div class="gp-cost">
-        <span class="gp-ck gp-${c.k}">${esc(c.n)}</span>
-        <p class="gp-cs">You answered: <i>“${esc(c.said)}”</i></p>
-        <p class="gp-cc">${esc(c.cost)}</p></div>`).join('')}</div>
-      <p class="gp-close">None of this gets more expensive overnight. It gets more familiar — and familiar is harder to change than expensive.</p>`
-    : `<h2 class="gp-h">None of your answers carries an obvious price. <em>The work now is keeping it that way.</em></h2>`;
-
-  const moves = [1, 2, 3].map((n) => `<li class="gp-move">
-      <span class="gp-mn">${String(n).padStart(2, '0')}</span>
-      <b>${esc(weekTitle(st, n))}</b>
-      <p>${esc(promise(n))}</p></li>`).join('');
-
-  const node = (cls, mark, title, sub) => `<li class="gp-node ${cls}"><span class="gp-dot">${mark}</span><b>${title}</b>${sub}</li>`;
-  const flag = '<svg width="26" height="30" viewBox="0 0 26 30" aria-hidden="true"><path d="M4 2v27" stroke="currentColor" stroke-width="2"/><path d="M5 3h17l-4 6 4 6H5z" fill="var(--gold)" stroke="currentColor" stroke-width="1.5"/></svg>';
-  const road = [
-    node('gp-here', '', 'You, today', `<span>${esc(STAGES[st].n)}</span>`),
-    ...[1, 2, 3].map((n) => node('gp-free', String(n).padStart(2, '0'), esc(weekTitle(st, n)), '<span class="gp-fr">Free</span>')),
-    node('gp-next', '1:1', 'The Boardroom', '<span>With Alexandru · levels 04–05</span>'),
-    node('gp-later', '06–12', 'LAB, then HUB', '<span>Levels 06–12</span>'),
-    node('gp-goal', flag, esc(STAGES[r.want] ? STAGES[r.want].n : ''), `<span class="gp-ww">“${esc(gp.wantWords)}”</span><span>your words</span>`),
-  ].join('');
-
-  return `<div class="gp">
-  ${plansCard()}
-  <section class="gp-wrap gp-top">
-    <p class="eyebrow">${compass} Your Ground Plan</p>
-    <h1 class="gp-title">${esc(first ? `${first}, here is your Ground Plan.` : 'Here is your Ground Plan.')}</h1>
-    <p class="gp-lede">Built from your ten answers. Nothing here is a guess about you — every line points back to something you chose.</p>
-  </section>
-
-  <section class="gp-wrap gp-two">
-    <div class="gp-card"><p class="gp-k">What you told us</p>${told}</div>
-    <div class="gp-card gp-verdict ${r.kind}">
-      <span class="gp-pill">Start in ${esc(STAGES[st].n)}</span>
-      <h2>${esc(r.head)}</h2>
-      <p>${esc(r.body)}</p>
-      <p>${esc(r.ambition)}</p>
-      ${r.kind === 'ahead' ? `<p class="sure"><b>Sure you are past this?</b> Then take it at speed. Levels 01 to 03 are free — answer them as precisely as you can, and the reading at the end of level 03 will say plainly whether you were right.</p>` : ''}
-    </div>
-  </section>
-
-  <section class="gp-dark"><div class="gp-wrap">
-    <p class="gp-k gp-gold">What waiting costs you</p>
-    ${costs}
-  </div></section>
-
-  <section class="gp-wrap gp-moves">
-    <p class="eyebrow">Your next three moves · free</p>
-    <h2 class="gp-h">Three levels, then a conversation with Alexandru.</h2>
-    <p class="gp-lede">Each level is 28 short answers about things you can open and count — your calendar, your invoices, your customers. Nothing to prepare. It is all in front of you.</p>
-    <ol class="gp-mlist">${moves}<li class="gp-move gp-then">
-      <span class="gp-mt">Then</span><b>The Boardroom: a session with Alexandru</b>
-      <p>Alexandru and the team read what you wrote before you speak. The session opens levels 04–05.</p></li></ol>
-    <div class="gp-btns">
-      <button class="cta" type="button" data-level="1">Start Level 01 →</button>
-      <a class="gp-line" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my session with Alexandru</a>
-    </div>
-  </section>
-
-  <section class="gp-wrap gp-road">
-    <p class="eyebrow">Where this road goes</p>
-    <h2 class="gp-h">From where you are to where you said you want to be.</h2>
-    <div class="gp-scroll"><ol class="gp-nodes" aria-label="The road from today to your goal">${road}</ol></div>
-    <p class="gp-lede">Every step on this road is something you finish, not something you wait for. The first one is open now.</p>
-    <button class="cta" type="button" data-level="1">Start Level 01 →</button>
-    <p class="savenote">${account.joined() ? 'Your work is saved to your account and follows you between devices.' : 'Your work is saved on this device.'}</p>
-  </section>
-  </div>`;
 }
 
 // ── The workspace ────────────────────────────────────────────────────────────
@@ -530,7 +457,7 @@ function libraryView() {
   const manuals = LIBRARY.manuals.map((m) => `<li class="lib-man${m.k === state.stage ? ' lib-yours' : ''}">
       <span class="bk3 bk3-man bk3-${m.k}" aria-hidden="true"><span class="bk3-cover"><small>ExploraSelf</small><b>${esc(STAGES[m.k].n)}</b></span><i class="bk3-spine"></i></span>
       <span class="lib-mtext"><b>${esc(m.n)}</b><small>${esc(m.sub)} · ${m.pages} pages${m.k === state.stage ? ' · your stage' : ''}</small></span>
-      ${joined ? `<a class="lib-btn" href="${esc(m.file)}" download>${dl}Download PDF</a>` : `<button type="button" class="lib-btn" data-go="${diagDone() ? 'join' : 'quiz'}">Join to download</button>`}
+      ${joined ? `<a class="lib-btn" href="${esc(m.file)}" download>${dl}Download PDF</a>` : `<a class="lib-btn" href="/compass/welcome#join">Create a free account to download</a>`}
     </li>`).join('');
   const books = LIBRARY.books.map((b) => b.soon
     ? `<li class="lib-book lib-soon">${b.cover ? `<span class="bk3"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>` : '<span class="bk3" aria-hidden="true"><span class="bk3-cover bk3-blank">In preparation</span></span>'}
@@ -538,13 +465,13 @@ function libraryView() {
     : `<li class="lib-book"><span class="bk3"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small>
         <span class="lib-acts"><a href="${esc(b.preview)}" target="_blank" rel="noopener">Preview the first pages →</a>
-        ${joined ? `<a href="${esc(b.file)}" download>${dl}Free digital copy</a>` : `<button type="button" class="lib-link" data-go="${diagDone() ? 'join' : 'quiz'}">Join for the free digital copy</button>`}
+        ${joined ? `<a href="${esc(b.file)}" download>${dl}Free digital copy</a>` : `<a class="lib-link" href="/compass/welcome#join">Create a free account for the free digital copy</a>`}
         <span class="lib-print">${b.print ? `<a href="${esc(b.print)}" target="_blank" rel="noopener">Print edition ↗</a>` : 'Print edition coming'}</span></span></span></li>`).join('');
   const L = LIBRARY.lab;
   return `<section class="band qband lib"><div class="wrap">
     <p class="eyebrow">${compass} Library &amp; working materials</p>
     <h1 class="qh">Everything that goes with the work</h1>
-    <p class="sec-lede">The three manuals are the programme on paper, to print and fill by hand. The books sit alongside it — the thinking the levels are built from.${joined ? '' : ' One join opens every download.'}</p>
+    <p class="sec-lede">The three manuals are the programme on paper, to print and fill by hand. The books sit alongside it — the thinking the levels are built from.${joined ? '' : ' A free account opens every download.'}</p>
     <h2 class="lib-h">The Founder’s Blueprint · the manuals</h2>
     <ul class="lib-mans">${manuals}</ul>
     <h2 class="lib-h">The books</h2>
@@ -617,7 +544,7 @@ function plansCard() {
 async function loadPlans() {
   if (!account.joined()) return;
   const p = await account.plans();
-  if (p && p.ok) { acctPlans = p; if (view === 'read' || view === 'quiz') render(); }
+  if (p && p.ok) { acctPlans = p; if (view === 'home') render(); }
 }
 
 function emphasisName(st, lv) {
@@ -630,16 +557,22 @@ function emphasisName(st, lv) {
 function render() {
   const st = state.stage || 'build';
   document.body.classList.toggle('inwork', view === 'work');
-  $('#tnav').innerHTML = state.stage && state.me
-    ? `<button type="button" data-go="read" ${view === 'read' ? 'aria-current="page"' : ''}>Your Ground Plan</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button>${holds(state.tier, 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
+  const unread = inbox ? inbox.unread : 0;
+  $('#tnav').innerHTML = account.joined() && !['signin', 'redirect', 'loading'].includes(view)
+    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Ground Plan${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button>${holds(state.tier, 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
     : '';
+  if ((view === 'work' || view === 'home') && !LEVELS[st]) {
+    // Only this founder's stage is loaded, and only when needed.
+    $('#main').innerHTML = '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="status">Opening your programme…</p></div></section>';
+    loadStage(st).then(render).catch(() => { $('#main').innerHTML = '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="alert">We could not open your programme just now. Check your connection and reload.</p></div></section>'; });
+    return;
+  }
   $('#main').innerHTML = view === 'work'
     ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work"><div id="libban">${libBanner()}</div><div id="mod">${moduleHTML(st)}</div></div></div>`
-    : view === 'join' ? joinView()
-    : view === 'read' ? readView()
+    : view === 'home' ? homeView()
     : view === 'library' ? libraryView()
-    : quizView();
-  if (view === 'quiz') { const h = $('#resultHost'); if (h) h.innerHTML = quizFoot(); }
+    : view === 'signin' ? signinView()
+    : '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="status">One moment…</p></div></section>';
 }
 
 /** Redraw only the module, so the rail does not flicker and its scroll holds. */
@@ -668,22 +601,21 @@ document.addEventListener('click', (e) => {
     view = b.dataset.go; document.body.classList.remove('railopen'); render();
     window.scrollTo({ top: 0, behavior: 'instant' }); return;
   }
-  if (b.dataset.diag !== undefined) {
-    const i = +b.dataset.diag, raw = b.dataset.val;
-    state.diag[i] = /^\d+$/.test(raw) ? +raw : raw;
-    save();
-    document.querySelectorAll(`[data-diag="${i}"]`).forEach((x) => x.setAttribute('aria-pressed', 'false'));
-    b.setAttribute('aria-pressed', 'true');
-    // The verdict is worked out and kept the moment the ninth answer lands, so
-    // the join can carry it. What it says stays behind the form until then.
-    if (diagDone()) settle();
-    const q = b.closest('.q'); if (q) q.classList.add('got');
-    const c = $('.qbar i'), n = $('.qnum'), done = Object.keys(state.diag).length;
-    if (c) c.style.width = Math.round(done / DIAGNOSTIC.length * 100) + '%';
-    if (n) n.textContent = `${done} of ${DIAGNOSTIC.length} answered`;
-    const h = $('#resultHost'); if (h) h.innerHTML = quizFoot();
+  if (b.dataset.eye) {
+    const inp = document.getElementById(b.dataset.eye), show = inp && inp.type === 'password';
+    if (inp) inp.type = show ? 'text' : 'password';
+    b.setAttribute('aria-pressed', String(!!show)); b.setAttribute('aria-label', (show ? 'Hide ' : 'Show ') + b.getAttribute('aria-label').replace(/^(Show|Hide) /, ''));
     return;
   }
+  if (b.dataset.gotit) {
+    const id = b.dataset.gotit, m = inbox && inbox.messages.find((x) => x.id === id);
+    if (m) { m.read_at = new Date().toISOString(); inbox.unread = inbox.messages.filter((x) => !x.read_at).length; }
+    account.messageRead(id).catch(() => {});
+    render(); return;
+  }
+  if (b.dataset.replyto) { replyTo = replyTo === b.dataset.replyto ? null : b.dataset.replyto; render(); const t = document.querySelector('.note-reply textarea'); if (t) t.focus(); return; }
+  if (b.dataset.signout !== undefined) { account.signOut(); location.replace('/compass/welcome'); return; }
+  if (b.hasAttribute('data-link')) { sendSigninLink(); return; }
   if (b.dataset.stage) { state.stage = b.dataset.stage; save(); view = 'work'; render(); window.scrollTo({ top: 0, behavior: 'instant' }); return; }
   if (b.dataset.level) {
     level = +b.dataset.level; dom = 'self'; view = 'work';
@@ -693,37 +625,44 @@ document.addEventListener('click', (e) => {
   if (b.dataset.dom) { dom = b.dataset.dom; redrawModule(); return; }
 });
 
+async function sendSigninLink() {
+  const msg = $('#si-msg'), email = ($('#si-email') || {}).value || '';
+  const say = (t) => { if (msg) msg.textContent = t; };
+  if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email.trim())) return say('Type your email first, then tap this again.');
+  try { const r = await account.signinLink(email.trim(), 'start'); say(r.message); }
+  catch (ex) { say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'We could not send a link just now. Try again in a minute.'); }
+}
+
 document.addEventListener('submit', async (e) => {
-  const f = e.target.closest('#joinbox');
-  if (!f) return;
-  e.preventDefault();
-  const err = $('#jerr'), go = $('#jgo');
-  const val = (id) => { const el = $(id); return el ? el.value.trim() : ''; };
-  const first = val('#jf'), last = val('#jl'), email = val('#je'),
-        company = val('#jc'), phone = val('#jp');
-  const show = (m) => { if (err) { err.textContent = m; err.hidden = false; } };
-  if (!first || !last) return show('First and last name, so Alexandru and the team know who they are reading.');
-  if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return show('That does not look like an email address.');
-  if (!company) return show('What the business is called.');
-  if (!phone) return show('A phone number, so the team can reach you about the session.');
-  if (err) err.hidden = true;
-  if (go) { go.disabled = true; go.textContent = 'One moment…'; }
-  try {
-    await account.join({ first, last, email, phone, company,
-      stage: state.stage, thin: state.referee && state.referee.thin, diag: state.diag });
-    state.me = { name: `${first} ${last}`, email }; save();
-    // Everything already written on this device goes up with the first sync.
-    for (const [k, v] of Object.entries(state.answers)) account.touch('answers', k, v);
-    for (const [k, v] of Object.entries(state.work)) account.touch('work', k, v);
-    account.flush();
-    view = 'read'; render(); window.scrollTo({ top: 0, behavior: 'instant' });
-  } catch (ex) {
-    // The account is a convenience, never a gate. Let them in regardless.
-    const why = ex && ex.message && !/fetch|network|load failed/i.test(ex.message)
-      ? ex.message
-      : 'We could not reach the account service just now.';
-    show(why + ' Your work is saved on this device — carry on, and it will sync when we can reach it.');
-    if (go) { go.disabled = false; go.textContent = 'Open my Ground Plan anyway →'; go.dataset.go = 'read'; }
+  const f = e.target;
+  if (f.id === 'signinform') {
+    e.preventDefault();
+    const msg = $('#si-msg'), email = $('#si-email').value.trim(), pw = $('#si-pw').value;
+    const say = (t) => { msg.textContent = t; };
+    if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return say('That email does not look complete.');
+    if (!pw) return say('Type your password, or use “Email me a sign-in link”.');
+    try { await account.login(email, pw); view = 'home'; try { history.replaceState(null, '', '/start#home'); } catch { /* old browser */ } comeHome(); }
+    catch (ex) { say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'We could not reach the account service just now.'); }
+    return;
+  }
+  if (f.id === 'pwform') {
+    e.preventDefault();
+    const msg = $('#pwmsg'), a = $('#pw1').value, c = $('#pw2').value;
+    const say = (t) => { msg.textContent = t; };
+    if (a.length < 10) return say('At least 10 characters, please.');
+    if (a !== c) return say('The two passwords are different.');
+    try { const r = await account.setPassword(a, c); hasPassword = true; $('#pw1').value = ''; $('#pw2').value = ''; say(r.changed ? 'Your password is changed.' : 'Your password is set.'); }
+    catch (ex) { say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'It did not save. Try again in a minute.'); }
+    return;
+  }
+  if (f.matches('form[data-reply]')) {
+    e.preventDefault();
+    const t = f.querySelector('textarea'), msg = f.querySelector('.joinerr'), m = inbox && inbox.messages.find((x) => x.id === f.dataset.reply);
+    if (!t.value.trim()) return;
+    try {
+      await account.note({ body: (m ? `Re: ${m.subject}\n\n` : '') + t.value.trim() });
+      t.value = ''; msg.textContent = 'Sent. Alexandru and the team will see it.';
+    } catch (ex) { msg.textContent = ex && ex.message ? ex.message : 'It did not send. Try again in a minute.'; }
   }
 });
 
@@ -776,24 +715,35 @@ document.addEventListener('input', (e) => {
   refreshRail();
 });
 
-render();
-
-loadPlans();
-
-// If this founder has an account, their work follows them here. The device
-// copy wins on conflict — it is the one they were just typing into.
-(async () => {
-  if (!account.joined()) return;
-  const r = await account.pull();
-  if (!r || !r.ok) return;
-  let changed = false;
-  for (const [k, v] of Object.entries(r.answers || {})) if (v && !state.answers[k]) { state.answers[k] = v; changed = true; }
-  for (const [k, v] of Object.entries(r.work || {})) if (v && !state.work[k]) { state.work[k] = v; changed = true; }
-  if (r.me) {
-    state.me = { name: r.me.name, email: r.me.email };
-    if (r.me.stage) state.stage = r.me.stage;
-    if (r.me.tier) state.tier = r.me.tier;
-    changed = true;
+/* Coming home: spend a sign-in link if there is one, then bring the account's
+ * work, Compass, notes and plans here. The device copy wins on conflict — it
+ * is the one the founder was just typing into. */
+async function comeHome() {
+  if (linkCode && view === 'loading') {
+    try { history.replaceState(null, '', location.pathname + '#home'); } catch { /* old browser */ }
+    try { await account.signinWith(linkCode); view = 'home'; }
+    catch (ex) { view = 'signin'; render(); const m = $('#si-msg'); if (m) m.textContent = ex.message || 'That sign-in link did not work. Ask for a new one.'; return; }
   }
-  if (changed) { save(); render(); }
-})();
+  if (view === 'redirect') return;
+  render();
+  if (!account.joined()) return;
+  const [r, msgs] = await Promise.all([account.pull(), account.messages()]);
+  if (msgs && msgs.ok) inbox = msgs;
+  if (r && r.ok) {
+    for (const [k, v] of Object.entries(r.answers || {})) if (v && !state.answers[k]) state.answers[k] = v;
+    for (const [k, v] of Object.entries(r.work || {})) if (v && !state.work[k]) state.work[k] = v;
+    compassRec = r.compass || null;
+    if (r.me) {
+      state.me = { name: r.me.name, email: r.me.email };
+      if (r.me.tier) state.tier = r.me.tier;
+      hasPassword = !!r.me.hasPassword;
+    }
+    let sales = '';
+    try { sales = (JSON.parse(localStorage.getItem('exploraself-profile') || 'null') || {}).stage || ''; } catch { /* private mode */ }
+    state.stage = programmeStage({ local: state.stage, compass: compassRec && compassRec.stage, account: (r.me && r.me.stage) || sales });
+    save();
+  }
+  render();
+  loadPlans();
+}
+comeHome();

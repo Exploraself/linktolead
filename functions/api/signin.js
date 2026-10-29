@@ -15,6 +15,7 @@
 import { json, bad, db, now, clean, looksLikeEmail, accountTables, newToken, sha256 } from '../_shared.js';
 import { profile, unsubLink } from '../_account.js';
 import { allowed, logged, mailState, origin, send, esc } from '../_mail.js';
+import { PAUSED } from '../_auth.js';
 
 export const TTL = 30 * 60_000;
 const SAME = { ok: true, message: 'If there is an account for that address, a sign-in link is on its way. It works once, for 30 minutes.' };
@@ -28,6 +29,19 @@ function linkEmail(link) {
   </div></body></html>`;
   const text = `Your sign-in link for the Leadership Compass. Open it on the device you want to use. It works once, for 30 minutes. If you did not ask for it, ignore this email: nothing changes.\n\n${link}`;
   return { subject: 'Your Leadership Compass sign-in link', html, text };
+}
+
+/** Make a one-time code for this founder and email the link. The link opens
+ *  where the founder asked from: the Compass or their Ground Plan. Also used
+ *  by /mentor ("Send sign-in link", "Send a password reset link"). */
+export async function sendLink(env, D, base, me, page = 'compass') {
+  const code = newToken() + newToken().slice(0, 16);
+  await D.prepare('DELETE FROM signin_code WHERE expires_at < ?').bind(Date.now()).run();
+  await D.prepare('INSERT INTO signin_code (code_hash, student_id, expires_at) VALUES (?,?,?)')
+    .bind(await sha256(code), me.id, Date.now() + TTL).run();
+  const p = await profile(D, me.id);
+  return send(env, { to: me.email, ...linkEmail(`${base}/${page === 'start' ? 'start' : 'compass'}?signin=${code}`),
+    why: 'Someone asked for a sign-in link to this ExploraSelf account. If it was not you, nothing changes.', unsubUrl: unsubLink(base, p) });
 }
 
 export async function onRequestPost({ request, env }) {
@@ -44,17 +58,10 @@ export async function onRequestPost({ request, env }) {
   if (!(await allowed(D, email, ip))) return bad('That is a few already. Try again in an hour.', 429);
   await logged(D, email, ip);
 
-  const me = await D.prepare('SELECT id FROM student WHERE email = ?').bind(email).first();
+  const me = await D.prepare('SELECT id, email FROM student WHERE email = ?').bind(email).first();
   if (!me) return json(SAME);
 
-  const code = newToken() + newToken().slice(0, 16);
-  await D.prepare('DELETE FROM signin_code WHERE expires_at < ?').bind(Date.now()).run();
-  await D.prepare('INSERT INTO signin_code (code_hash, student_id, expires_at) VALUES (?,?,?)')
-    .bind(await sha256(code), me.id, Date.now() + TTL).run();
-  const p = await profile(D, me.id);
-  const base = origin(request);
-  const r = await send(env, { to: email, ...linkEmail(`${base}/compass?signin=${code}`),
-    why: 'Someone asked for a sign-in link to this ExploraSelf account. If it was not you, nothing changes.', unsubUrl: unsubLink(base, p) });
+  const r = await sendLink(env, D, origin(request), me, body.to === 'start' ? 'start' : 'compass');
   await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)')
     .bind(me.id, r.ok ? 'signin-link' : 'signin-link-failed', now(), r.why || null).run();
   return json(SAME);
@@ -75,6 +82,7 @@ export async function onRequestGet({ request, env }) {
   if (r && r.meta && r.meta.changes === 0) return gone();
   const me = await D.prepare('SELECT id, email, name FROM student WHERE id = ?').bind(row.student_id).first();
   if (!me) return gone();
+  if (await D.prepare('SELECT 1 AS x FROM account_auth WHERE student_id = ? AND paused = 1').bind(me.id).first()) return bad(PAUSED, 403);
   const p = await D.prepare('SELECT industry FROM student_profile WHERE student_id = ?').bind(me.id).first();
   await D.prepare('INSERT INTO event (student_id,kind,at) VALUES (?,?,?)').bind(me.id, 'signin', now()).run();
   const [first, ...rest] = String(me.name || '').split(' ');

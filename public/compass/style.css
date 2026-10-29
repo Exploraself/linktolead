@@ -3,9 +3,6 @@
    atmosphere and motion, small line icons. Every colour is a token on .cf;
    the dark workspace theme redefines them. Motion stops under
    prefers-reduced-motion. */
-@font-face{font-family:Fraunces;src:url('assets/fraunces.ttf');font-display:swap}
-@font-face{font-family:'Libre Franklin';src:url('assets/libre500.ttf');font-weight:400 500;font-display:swap}
-@font-face{font-family:'Libre Franklin';src:url('assets/libre700.ttf');font-weight:600 800;font-display:swap}
 html{scroll-behavior:smooth}
 body{margin:0;background:#FFFDF8}
 body.dark{background:#231D15}
@@ -223,3 +220,18 @@ details[data-step] summary::-webkit-details-marker{display:none}
   .wfill,.wthumb,.whub .node{transition:none}
 }
 @media print{.breath,.dawn{display:none !important}}
+
+/* Phones: the title and the animated compass on the first screen, no
+   scrolling. Less space above the hero, the compass first in its card and a
+   little smaller. Desktop is unchanged. */
+@media (max-width:520px){
+  .cf main{padding-top:8px}
+  #s-overview{gap:16px !important;margin-top:-28px}
+  #s-overview .hero-badge{display:none}
+  #s-overview h1{font-size:38px !important}
+  #s-overview p{line-height:1.6 !important}
+  #s-overview .hero-cmp{order:-1;padding:16px 16px 0 !important}
+  #s-overview .hero-cmp>div{max-width:230px !important}
+  #s-overview .deep-hero{padding:18px 20px 24px !important}
+}
+[data-off],[data-off] *{animation-play-state:paused !important}

@@ -21,13 +21,11 @@
 // A rule fires only when its `when` can be decided. Any signal that is
 // missing makes the rule silent rather than guessing.
 
-import { DOMAINS, LEVELS, weekTitle } from './content.js';
-import { FW_BUILD } from './fw-build.js';
-import { FW_GROW } from './fw-grow.js';
-import { FW_SCALE } from './fw-scale.js';
+import { DOMAINS, LEVELS, SHEETS, weekTitle } from './content.js';
 import { result } from './frameworks.js';
 
-const FW_SETS = { build: FW_BUILD, grow: FW_GROW, scale: FW_SCALE };
+/** The worksheets of the stage being read (loaded with it; see loadStage). */
+const FW_SETS = SHEETS;
 const DOMK = ['self', 'people', 'work', 'market'];
 
 // ── Reading what they entered ────────────────────────────────────────────────

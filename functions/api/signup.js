@@ -14,6 +14,7 @@
 import { json, bad, db, now, newToken, clean, looksLikeEmail, accountTables } from '../_shared.js';
 import { profile, sendWelcome } from '../_account.js';
 import { allowed, logged, mailState, origin } from '../_mail.js';
+import { passwordProblem, setPassword } from '../_auth.js';
 
 /** The Compass's four stages, as the programme names its three. */
 const STAGE = { building: 'build', growing: 'grow', scaling: 'scale', build: 'build', grow: 'grow', scale: 'scale' };
@@ -31,6 +32,10 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const consent = body.consent === true;
   const source = ['compass', 'sales-page'].includes(body.source) ? body.source : 'compass';
   const stage = STAGE[body.stage] || null;
+  // The password is optional. When one is given it must be sound before
+  // anything is made, so a founder is never left half signed up.
+  const password = typeof body.password === 'string' && body.password !== '' ? body.password : null;
+  if (password) { const problem = passwordProblem(password, body.confirm); if (problem) return bad(problem); }
 
   await accountTables(D);
   const found = await D.prepare('SELECT id FROM student WHERE email = ?').bind(email).first();
@@ -50,6 +55,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
       VALUES (?,?,?,?,?,?,?,?,?)`)
     .bind(id, email, `${first} ${last}`.trim(), '', '', stage, 'free', now(), now()).run();
   const p = await profile(D, id, { industry: body.industry, consent, source });
+  if (password) await setPassword(D, id, password);
   await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(id, 'signup', now(), source).run();
 
   // The welcome goes after the reply, so a slow email service never makes

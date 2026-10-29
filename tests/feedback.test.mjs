@@ -1,5 +1,7 @@
 // The reading must never say more than the founder's own entries support.
 import { report, signals, RULES } from '../public/feedback.js';
+import { loadStage } from '../public/content.js';
+await Promise.all(['build', 'grow', 'scale'].map(loadStage));
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { c ? pass++ : (fail++, console.log('FAIL ' + m)); };

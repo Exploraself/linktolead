@@ -11,7 +11,6 @@
 // step and no package.json.
 
 import { json } from './functions/_shared.js';
-import * as join from './functions/api/join.js';
 import * as state from './functions/api/state.js';
 import * as compass from './functions/api/compass.js';
 import * as note from './functions/api/note.js';
@@ -22,10 +21,12 @@ import * as signin from './functions/api/signin.js';
 import * as unsubscribe from './functions/api/unsubscribe.js';
 import * as plans from './functions/api/plans.js';
 import * as planTick from './functions/api/plans/tick.js';
+import * as login from './functions/api/login.js';
+import * as password from './functions/api/password.js';
+import * as messages from './functions/api/messages.js';
 
 /** One line per route. A new file in functions/api/ needs its line here. */
 export const ROUTES = {
-  '/api/join': join,
   '/api/state': state,
   '/api/compass': compass,
   '/api/note': note,
@@ -36,6 +37,9 @@ export const ROUTES = {
   '/api/unsubscribe': unsubscribe,
   '/api/plans': plans,
   '/api/plans/tick': planTick,
+  '/api/login': login,
+  '/api/password': password,
+  '/api/messages': messages,
 };
 
 export default {

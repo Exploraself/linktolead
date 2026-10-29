@@ -3,9 +3,6 @@
    and the italic human lines, Libre Franklin for everything else. Loaded the
    same way as /compass (style.css there). Motion stops under
    prefers-reduced-motion. */
-@font-face{font-family:Fraunces;src:url('../assets/fraunces.ttf');font-display:swap}
-@font-face{font-family:'Libre Franklin';src:url('../assets/libre500.ttf');font-weight:400 500;font-display:swap}
-@font-face{font-family:'Libre Franklin';src:url('../assets/libre700.ttf');font-weight:600 800;font-display:swap}
 html{scroll-behavior:smooth}
 body{margin:0;background:#F3EFEA}
 a{color:#7A5E26}a:hover{color:#15213B}
@@ -112,3 +109,15 @@ input.now{accent-color:#5A6580}
 [data-edit]{cursor:pointer;border-bottom:1.5px dashed currentColor;padding-bottom:1px}
 [data-edit]:focus-visible{outline:3px solid #C9A24A;outline-offset:3px}
 .numbox{font:inherit;color:inherit;width:6.5em;max-width:40vw;min-height:40px;padding:0 6px;border:1.5px solid #C9A24A;border-radius:5px;background:#FFFFFF;color:#15213B;text-align:right}
+
+/* The optional password in the account box. */
+.pwopt summary{cursor:pointer;font-size:13px;font-weight:700;color:#7A5E26;min-height:32px}
+.pwopt{display:flex;flex-direction:column;gap:10px}
+.pwopt[open]{padding-bottom:4px}
+.pwhint{display:block;font-size:12px;color:#5A6580;margin:4px 0 8px}
+.pwl{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;margin-top:8px}
+.pwrow{display:flex;gap:6px}
+.pwrow .inp{flex:1;min-width:0}
+.pweye{flex:none;width:46px;min-height:46px;border:1.5px solid #D8CDBB;border-radius:5px;background:#FFFFFF;color:#15213B;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.pweye[aria-pressed="true"]{background:#F3EFEA}
+[data-off],[data-off] *{animation-play-state:paused !important}

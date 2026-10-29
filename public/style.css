@@ -611,3 +611,27 @@ body.inwork .foot{display:none}
 .pl-tick input{width:20px;height:20px;accent-color:var(--gold)}
 .pl-all{font-size:14px;color:var(--ok);font-weight:600}
 .pl-whatif{border-top-color:var(--ink)}
+
+/* ── The Ground Plan home base (PR 4) ── */
+.gp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px}
+.gp-goalline{font-weight:600;color:var(--gold-ink)}
+.note-from{margin-top:20px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--gold);padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.note-from h2{font-family:var(--display);font-weight:500;font-size:22px;margin:0}
+.note-body{white-space:pre-wrap;line-height:1.7}
+.note-acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.note-acts .cta{margin-top:0}
+.note-reply{display:flex;flex-direction:column;gap:8px}
+.note-reply textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--line);background:#fff}
+.note-reply .cta{margin-top:0;align-self:flex-start}
+.tdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#E0A282;margin-left:6px;vertical-align:middle}
+.gp-account{padding-block:28px 48px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.pw-box summary{cursor:pointer;font-weight:600;color:var(--gold-ink);min-height:44px;display:flex;align-items:center}
+.pwform{display:flex;flex-direction:column;gap:12px;max-width:420px;padding-top:8px}
+.pwform .cta{margin-top:0;align-self:flex-start}
+.pwf{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600}
+.pwrow,.joinrow .pwrow{display:flex;gap:6px;margin:0}
+.joinrow .pwrow input{width:auto}
+.pwrow input{flex:1;min-width:0;font:inherit;font-size:16px;min-height:46px;padding:0 12px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.pweye{flex:none;width:46px;min-height:46px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.pweye[aria-pressed="true"]{background:var(--cream)}
+#signinform .ghost,#signinform .lib-link{margin-top:10px;margin-right:10px}

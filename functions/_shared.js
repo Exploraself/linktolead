@@ -68,6 +68,11 @@ export async function accountTables(D) {
     D.prepare(`CREATE TABLE IF NOT EXISTS plan_tick (student_id TEXT NOT NULL, step_id TEXT NOT NULL,
       done_at TEXT NOT NULL, PRIMARY KEY (student_id, step_id))`),
     D.prepare('CREATE TABLE IF NOT EXISTS mail_log (email TEXT, ip TEXT, at INTEGER)'),
+    D.prepare(`CREATE TABLE IF NOT EXISTS account_auth (student_id TEXT PRIMARY KEY, pass_hash TEXT, salt TEXT,
+      iterations INTEGER, set_at TEXT, paused INTEGER DEFAULT 0)`),
+    D.prepare('CREATE TABLE IF NOT EXISTS auth_log (email TEXT, ip TEXT, at INTEGER)'),
+    D.prepare(`CREATE TABLE IF NOT EXISTS message (id TEXT PRIMARY KEY, student_id TEXT NOT NULL, subject TEXT,
+      body TEXT NOT NULL, channel TEXT NOT NULL, sent_at TEXT NOT NULL, read_at TEXT)`),
   ]);
   READY.add(D);
 }
@@ -78,3 +83,6 @@ export async function studentBy(D, token) {
   if (t.length < 20) return null;
   return D.prepare('SELECT id,email,name,stage,tier FROM student WHERE id = ?').bind(t).first();
 }
+
+/** Every table that holds a row for a student, for a full delete. */
+export const STUDENT_TABLES = ['answer', 'sheet', 'compass', 'note', 'event', 'student_profile', 'signin_code', 'plan_tick', 'account_auth', 'message'];

@@ -23,16 +23,6 @@ async function post(path, body, keepalive = false) {
   return data;
 }
 
-/** Join: the five fields (first, last, email, business, phone), plus what the
- *  ten questions worked out. All five must reach the server: it needs the name
- *  to create the record, and Mailchimp rejects a subscriber missing any of
- *  LNAME, COMPANY or PHONE. `name` is still accepted from older callers. */
-export async function join({ first, last, name, email, company, phone, stage, thin, diag }) {
-  const out = await post('/api/join', { first, last, name, email, company, phone, stage, thin, diag });
-  if (out.token) keep(out.token);
-  return out;
-}
-
 /** Pull the record on arrival, so work follows between devices. */
 export async function pull() {
   const t = token();
@@ -88,15 +78,36 @@ export async function note({ body, level, domain }) {
 /** Create the free account, or find it. A new email returns a token, kept
  *  here. An email that already has an account returns { existing: true } and
  *  no token: that browser signs in by email link instead. */
-export async function signup({ first, last, email, industry, consent, source, stage }) {
-  const out = await post('/api/signup', { first, last, email, industry, consent, source, stage, token: token() });
+export async function signup({ first, last, email, industry, consent, source, stage, password, confirm }) {
+  const out = await post('/api/signup', { first, last, email, industry, consent, source, stage, password, confirm, token: token() });
   if (out.token) keep(out.token);
   return out;
 }
 
 /** Ask for a one-time sign-in link. The reply is the same whether or not the
  *  address has an account. */
-export const signinLink = (email) => post('/api/signin', { email });
+export const signinLink = (email, to = 'compass') => post('/api/signin', { email, to });
+
+/** Sign in with email and password (for founders who set one); keeps the token. */
+export async function login(email, password) {
+  const out = await post('/api/login', { email, password });
+  if (out.token) keep(out.token);
+  return out;
+}
+
+/** Set or change the optional password, once signed in. */
+export const setPassword = (password, confirm) => post('/api/password', { token: token(), password, confirm });
+
+/** Notes from Alexandru and the team, and marking one read. */
+export async function messages() {
+  const t = token();
+  if (!t) return null;
+  try { const r = await fetch(`/api/messages?t=${encodeURIComponent(t)}`); return r.ok ? await r.json() : null; } catch { return null; }
+}
+export const messageRead = (id) => post('/api/messages', { token: token(), id });
+
+/** Forget this device's token (sign out). The device copy of the work stays. */
+export const signOut = () => { try { localStorage.removeItem(TOKEN_KEY); } catch { /* private mode */ } };
 
 /** Spend a sign-in code from the link; keeps the token it returns. */
 export async function signinWith(code) {
