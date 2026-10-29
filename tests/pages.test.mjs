@@ -113,7 +113,7 @@ const COPY = [
   '3 manuals, one for each stage · 99 practical tools · 32 leadership frameworks · 12 principles, coming soon',
   'You don’t have to figure it out alone. Your mentor, and the whole team behind you.', 'Notes from Alexandru and the team arrive on your Ground Plan, and you can reply.',
   'One question before you scroll on: what would one more free evening a week give your family?', '4 tools that work from day one', '3 manuals and 2 books to download, a third on the way', 'Alexandru and the team beside you',
-  'Free and yours to keep', 'Create my free account →', 'First name, surname and email. Add a password if you like. No card.',
+  'Free and yours to keep', 'Create my free account →', 'Your name, your email, a password and three short questions about your business. No card.',
 ];
 for (const t of COPY) ok(flat.includes(t), `kit copy: ${t}`);
 const I = items(LIBRARY, ALL_STEP_IDS.length);

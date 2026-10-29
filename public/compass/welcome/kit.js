@@ -76,7 +76,7 @@ export function markup(L, steps) {
         <ul class="kit-ticks"><li>${I.tools.length} tools that work from day one</li><li>${L.manuals.length} manuals and ${out} books to download${soon ? ', a third on the way' : ''}</li><li>Alexandru and the team beside you</li></ul></div>
       <div class="kit-cta"><span class="kick">Free and yours to keep</span>
         <button type="button" data-gate class="gold-btn">Create my free account →</button>
-        <span class="kit-small">First name, surname and email. Add a password if you like. No card.</span></div>
+        <span class="kit-small">Your name, your email, a password and three short questions about your business. No card.</span></div>
     </div>`;
 }
 

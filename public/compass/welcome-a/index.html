@@ -185,33 +185,32 @@
     </div>
   </section>
 
-  <!-- 4 · WHAT WINNING MEANS -->
-  <section style="padding: 104px 24px">
-    <div class="wrap" style="display: flex; flex-wrap: wrap; gap: 56px; align-items: center">
-      <div class="reveal" style="flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+  <!-- 4 · WHAT WINNING MEANS · four circles that overlap; the win is where
+       all four meet. They drift in once when the section is seen, then
+       breathe; each domain line lights its circle (sales.js). -->
+  <section style="padding: 104px 24px; background: #F4F0E8">
+    <div class="wrap win4" id="win4">
+      <div class="win4-tx">
         <div class="kick">A NEW WAY OF WINNING</div>
-        <h2 class="h2">A win has four sides.</h2>
+        <h2 class="h2 win4-h">A win has four sides.</h2>
         <p class="lede" style="line-height: 1.65">Profit alone is not a win. A business can be useful and fragile, profitable and cruel, admired from outside while it eats the person leading it. The Compass looks at all four sides at once.</p>
-        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 17px">
-          <div style="display: flex; gap: 14px; align-items: baseline"><span style="font-weight: 900; color: #7A5E26; width: 170px; flex: none">LEAD YOURSELF</span><span>A life you can stand behind</span></div>
-          <div style="display: flex; gap: 14px; align-items: baseline"><span style="font-weight: 900; color: #7A5E26; width: 170px; flex: none">LEAD YOUR PEOPLE</span><span>Honouring the people involved</span></div>
-          <div style="display: flex; gap: 14px; align-items: baseline"><span style="font-weight: 900; color: #7A5E26; width: 170px; flex: none">LEAD YOUR BUSINESS</span><span>Earning enough to sustain it</span></div>
-          <div style="display: flex; gap: 14px; align-items: baseline"><span style="font-weight: 900; color: #7A5E26; width: 170px; flex: none">LEAD THE MARKET</span><span>Creating useful value</span></div>
+        <div class="win4-list" id="win4-list">
+          <button type="button" data-dom="self" aria-describedby="win4-cap"><i aria-hidden="true" style="background: #A8623A"></i><b>Lead yourself</b><span>A life you can stand behind</span></button>
+          <button type="button" data-dom="people" aria-describedby="win4-cap"><i aria-hidden="true" style="background: #4C7355"></i><b>Lead your people</b><span>Honouring the people involved</span></button>
+          <button type="button" data-dom="business" aria-describedby="win4-cap"><i aria-hidden="true" style="background: #36607F"></i><b>Lead your business</b><span>Earning enough to sustain it</span></button>
+          <button type="button" data-dom="market" aria-describedby="win4-cap"><i aria-hidden="true" style="background: #9A7418"></i><b>Lead the market</b><span>Creating useful value</span></button>
         </div>
       </div>
-      <div style="flex: 1 1 300px; display: flex; justify-content: center; min-width: 0">
-        <svg viewBox="0 0 400 400" style="width: 100%; max-width: 420px; height: auto" role="img" aria-label="Four quadrants lighting in turn: Lead yourself, Lead your people, Lead your business, Lead the market">
-          <path class="q1" d="M200 200 L200 40 A160 160 0 0 1 360 200 Z" fill="#C9A24A"/>
-          <path class="q2" d="M200 200 L360 200 A160 160 0 0 1 200 360 Z" fill="#C9A24A"/>
-          <path class="q3" d="M200 200 L200 360 A160 160 0 0 1 40 200 Z" fill="#C9A24A"/>
-          <path class="q4" d="M200 200 L40 200 A160 160 0 0 1 200 40 Z" fill="#C9A24A"/>
-          <circle cx="200" cy="200" r="160" fill="none" stroke="#15213B" stroke-width="2"/>
-          <line x1="200" y1="40" x2="200" y2="360" stroke="#15213B" stroke-width="1.5"/>
-          <line x1="40" y1="200" x2="360" y2="200" stroke="#15213B" stroke-width="1.5"/>
-          <text x="262" y="112" fill="#15213B" font-family="Libre Franklin" font-weight="700" font-size="16" text-anchor="middle" letter-spacing=".3"><tspan x="262">Lead</tspan><tspan x="262" dy="19">yourself</tspan></text><text x="262" y="281" fill="#15213B" font-family="Libre Franklin" font-weight="700" font-size="16" text-anchor="middle" letter-spacing=".3"><tspan x="262">Lead your</tspan><tspan x="262" dy="19">people</tspan></text><text x="138" y="281" fill="#15213B" font-family="Libre Franklin" font-weight="700" font-size="16" text-anchor="middle" letter-spacing=".3"><tspan x="138">Lead your</tspan><tspan x="138" dy="19">business</tspan></text><text x="138" y="112" fill="#15213B" font-family="Libre Franklin" font-weight="700" font-size="16" text-anchor="middle" letter-spacing=".3"><tspan x="138">Lead the</tspan><tspan x="138" dy="19">market</tspan></text>
-          <circle cx="200" cy="200" r="34" fill="#15213B"/>
-          <text x="200" y="207" fill="#C9A24A" font-family="Libre Franklin" font-weight="900" font-size="18" text-anchor="middle">WIN</text>
-        </svg>
+      <div class="win4-vz">
+        <div class="win4-box" role="img" aria-label="Four overlapping circles, one per domain. The win is where all four meet.">
+          <div class="w4c w4-self" style="--rgb: 168,98,58"><div class="w4in"></div><span>Lead yourself</span></div>
+          <div class="w4c w4-people" style="--rgb: 76,115,85"><div class="w4in"></div><span>Lead your people</span></div>
+          <div class="w4c w4-business" style="--rgb: 54,96,127"><div class="w4in"></div><span>Lead your business</span></div>
+          <div class="w4c w4-market" style="--rgb: 154,116,24"><div class="w4in"></div><span>Lead the market</span></div>
+          <div class="w4ring" aria-hidden="true"></div>
+          <div class="w4disc" aria-hidden="true">A win</div>
+        </div>
+        <p class="win4-cap" id="win4-cap" aria-live="polite">A win is where all four meet.</p>
       </div>
     </div>
   </section>
@@ -269,7 +268,7 @@
       <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
         <div style="flex: 1 1 380px; min-width: 0; background: #1E2C4C; border-radius: 8px; padding: 26px; display: flex; flex-direction: column; gap: 26px">
           <div style="display: flex; flex-direction: column; gap: 6px">
-            <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap"><label for="c-goal" style="font-weight: 700; font-size: 16px">1 · What do you want to take home each month?</label><span data-out="goalTxt" data-edit="goal" style="font-weight: 900; font-size: 26px; color: #C9A24A"></span></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap"><label for="c-goal" style="font-weight: 700; font-size: 16px">1 · What do you want the business to pay you each month (before tax)?</label><span data-out="goalTxt" data-edit="goal" style="font-weight: 900; font-size: 26px; color: #C9A24A"></span></div>
             <span style="font-size: 13px; color: #C9A24A; font-weight: 700" aria-hidden="true">Slide this →</span>
             <input id="c-goal" type="range" min="1000" max="1000000" step="500" value="6000" data-in="goal">
           </div>
@@ -304,8 +303,12 @@
             <div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 15px; color: #3D4966">You need</span><span style="font-weight: 900; font-size: 44px; line-height: 1"><span data-out="sales"></span> sales a month</span><span style="font-size: 15px; color: #3D4966">Each one leaves you <span data-out="perSaleTxt"></span>.</span></div>
             <div style="display: flex; flex-direction: column; gap: 8px">
               <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; gap: 8px; flex-wrap: wrap"><span>Hours the plan needs: <span data-out="need"></span> h</span><span>You want: <span data-out="avail"></span> h</span></div>
-              <div style="position: relative; height: 18px; background: #E6DCCB; border-radius: 9px; overflow: hidden" aria-hidden="true"><div id="needbar" style="position: absolute; left: 0; top: 0; bottom: 0; transition: width .25s ease, background .3s ease"></div></div>
-              <span style="font-size: 13px; color: #3D4966">Full bar = the hours you said you want to work.</span>
+              <div style="display: flex; height: 18px" aria-hidden="true">
+                <div id="hbar-track" style="position: relative; height: 18px; width: 100%; background: #E6DCCB; border-radius: 9px; overflow: hidden; transition: width .25s ease"><div id="needbar" style="position: absolute; left: 0; top: 0; bottom: 0; transition: width .25s ease, background .3s ease"></div></div>
+                <div id="hbar-over" hidden style="height: 18px; margin-left: 3px; background: #C8432B; border-radius: 0 9px 9px 0; transition: width .25s ease"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13px; color: #3D4966"><span>The full track = the hours you said you want to work.</span><b data-out="overTxt" style="color: #C8432B"></b></div>
+              <span style="font-size: 13px; color: #3D4966">Not counted: the hours you spend finding clients and running the business.</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #D8CDBB; padding-top: 16px">
               <span data-out="fbTitle" style="font-weight: 900; font-size: 20px; line-height: 1.2"></span>
@@ -317,7 +320,7 @@
             <span style="font-weight: 900; font-size: 13px; letter-spacing: .14em; color: #C9A24A">WHAT COULD MOVE — PICK ONE AND SLIDE IT</span>
             <div style="display: flex; gap: 12px; align-items: baseline"><span style="font-weight: 900; color: #C9A24A; flex: none">2</span><span style="font-size: 15px; line-height: 1.45">Price: at about <b data-out="priceFit"></b> per sale, the plan fits your hours.</span></div>
             <div style="display: flex; gap: 12px; align-items: baseline"><span style="font-weight: 900; color: #C9A24A; flex: none">4</span><span style="font-size: 15px; line-height: 1.45">Time per sale: at <b><span data-out="hpsFit"></span> h</b> per sale it fits. That takes a system, or a helper.</span></div>
-            <div style="display: flex; gap: 12px; align-items: baseline"><span style="font-weight: 900; color: #C9A24A; flex: none">1</span><span style="font-size: 15px; line-height: 1.45">Or the hardest one: is <span data-out="goalTxt"></span> what you need — or what you were told to want?</span></div>
+            <div style="display: flex; gap: 12px; align-items: baseline"><span style="font-weight: 900; color: #C9A24A; flex: none">1</span><span style="font-size: 15px; line-height: 1.45">Or the hardest one: is <span data-out="goalTxt"></span> what you need — or what you were told to want?<br>At your hours, this plan pays about <b data-out="paysAtHours"></b>.</span></div>
           </div>
         </div>
       </div>
@@ -330,10 +333,10 @@
     <div class="wrap" style="display: flex; flex-direction: column; gap: 36px">
       <div style="display: flex; flex-direction: column; gap: 14px; max-width: 820px">
         <div class="kick">A LOOK INSIDE</div>
-        <h2 class="h2">That was three sliders. Imagine the whole picture.</h2>
-        <p class="lede">Inside, the Compass walks you through four steps — and turns your answers into a step-by-step road for your stage.</p>
+        <h2 class="h2">That was five sliders. Now pull the four levers.</h2>
+        <p class="lede">This is the What-if lab from inside the Compass, running on the five numbers you just slid. Move a lever and watch your pay, your sales, your hours and your people answer.</p>
       </div>
-      <div class="vid" id="vid" data-lazy style="background: #15213B; border-radius: 12px; padding: 14px; box-shadow: 0 30px 70px rgba(21,33,59,.25); min-height: 420px" aria-label="A look inside the Compass, loading"></div>
+      <div class="vid" id="vid" data-lazy style="min-height: 420px" aria-label="The What-if lab, loading"></div>
     </div>
   </section>
 

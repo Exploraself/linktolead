@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Link to Lead — The Founder's Blueprint | ExploraSelf</title>
-<meta name="description" content="Twelve weeks that put your business on paper instead of in your head. Ten questions decide which twelve you walk and which of the four domains they lean on. First three levels free.">
+<meta name="description" content="Twelve weeks that put your business on paper instead of in your head. The Leadership Compass shows which twelve you walk and which of the four domains they lean on. First three levels free.">
 <meta name="theme-color" content="#14100B">
 <link rel="icon" href="/assets/icon.svg">
 <link rel="preload" href="/assets/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
@@ -492,6 +492,9 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
 .joins .stalk{margin-left:-1px}
 .here{top:3px}
 @media(max-width:720px){.here p{font-size:9.5px}}
+button.cta{border:0;cursor:pointer}
+#gate{position:fixed;inset:0;z-index:60;background:rgba(16,13,9,.65);display:flex;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}
+#gate[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -511,7 +514,7 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
   <p class="lede">A twelve-week founder programme. Each week you open something real — your calendar, your invoices, your delivery — count it, and write down what is actually there.</p>
   <div class="go-row">
     <a class="cta" href="/compass/welcome">See where I stand →</a>
-    <p class="free"><b>FREE</b><span>Levels 01–03<br>10 questions · 2 minutes</span></p>
+    <p class="free"><b>FREE</b><span>Levels 01–03<br>Free account · one minute</span></p>
   </div>
   <p class="under">Your Ground Plan comes once you tell us where to send it.</p>
 </div></section>
@@ -632,7 +635,7 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
         <span class="ch" style="background:var(--market)">Lead the market</span></div></div></div>
   </div>
 
-  <p class="small" style="color:var(--muted-dark)">You work all four either way. Only the weight changes — and the ten questions set it, not you.</p>
+  <p class="small" style="color:var(--muted-dark)">You work all four either way. Only the weight changes — and your Leadership Compass sets it, not you.</p>
 </div></section>
 
 <!-- ═══ what changes ═══ -->
@@ -690,7 +693,7 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
   <h2 class="sectitle">Three things happen, in this order</h2>
   <div class="steps">
     <div class="stp"><span class="circ">1</span><h3>We find where you are</h3>
-      <p>Ten questions, then your Ground Plan: which stage you are in, and which of the four is costing you most.</p></div>
+      <p>A free account and the Leadership Compass, then your Ground Plan: which stage you are in, and which of the four is costing you most.</p></div>
     <div class="stp"><span class="circ">2</span><h3>You work one week at a time</h3>
       <p>Open something real, count it, write it down. Twenty-eight answers closes a week.</p></div>
     <div class="stp"><span class="circ">3</span><h3>You get an answer, in your own numbers</h3>
@@ -699,7 +702,7 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
   <p class="small">Every week asks you to open something real — your calendar, your invoices, your delivery — and write down what is actually there. That is the method, and it is why it works.</p>
   <p class="lead-why">The numbers are never the point. Each one is there to help you <b>make a decision</b>, <b>lead a person</b> or <b>hand something over</b> — the leadership work only you can do.</p>
   <div class="ctarow"><a class="cta" href="/compass/welcome">See where I stand</a>
-    <p class="under">Ten questions. Two minutes. Nothing to pay.</p></div>
+    <p class="under">One minute. Name and email. Nothing to pay.</p></div>
 </div></section>
 
 <!-- ═══ door 1 ═══ -->
@@ -1024,14 +1027,18 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
 <!-- ═══ close ═══ -->
 <section class="close" id="start"><div class="wrap">
   <p class="eyebrow">Start here</p>
-  <h2>Ten questions. Then your Ground Plan, and somewhere to build it.</h2>
-  <p class="lede">Which stage you are actually in, which of the four is costing you most, and exactly what week one asks of you.</p>
-  <a class="cta" href="/compass/welcome">See where I stand →</a>
-  <p class="under">Two minutes, and free. Everybody starts at week one — the questions decide which twelve weeks you walk, not how much of it you do.</p>
+  <h2>Start tonight, free. <em>By Tuesday, you’ll be ahead.</em></h2>
+  <button type="button" class="cta" data-join>Start free →</button>
+  <p class="under">Levels 01–03 free · Instant access</p>
 </div></section>
 
-<footer><div class="wrap"><strong style="color:#C9BCA4">ExploraSelf</strong> · A Good People Company · Lead yourself. Grow your business.<br>
-Mockup at real size. Nothing published to the live site yet.</div></footer>
+<footer><div class="wrap"><strong style="color:#C9BCA4">ExploraSelf</strong> · A Good People Company · Lead yourself. Grow your business.</div></footer>
+
+<!-- The simple account form (/compass/welcome/account-box.js): every "start"
+     link on this page opens it, so founders who arrive here stay on the
+     simple road (landing B). -->
+<div id="gate" hidden></div>
+<script type="module" src="/b/page.js"></script>
 
 <script>
 // A founder who has already joined is not starting: the buttons say so.

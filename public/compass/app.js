@@ -158,7 +158,9 @@
     if (!A || signedIn() || !identified()) return signedIn();
     const P = S.profile;
     let out;
-    try { out = await A.signup({ first: P.first, last: P.last, email: P.email, industry: P.industry, consent: P.consent, source, stage: S.stage }); }
+    let utm = {};
+    try { utm = (await import('/forms.js')).utm(); } catch { /* no tags kept */ }
+    try { out = await A.signup({ first: P.first, last: P.last, email: P.email, industry: P.industry, consent: P.consent, source, stage: S.stage, type: 'simple', landing: 'compass', utm }); }
     catch { return false; }
     S.acct = { email: P.email, state: out.token ? 'yes' : out.existing ? 'existing' : '' };
     save();
@@ -224,6 +226,7 @@
     catch (e) { say(e && e.message ? e.message : 'It did not save. Try again in a minute.'); }
   }
   async function boot() {
+    try { (await import('/forms.js')).rememberUtm(); } catch { /* old browser */ }
     try { A = await import('/account.js'); } catch { A = null; }
     if (!A) return;
     let code = '';
@@ -970,7 +973,6 @@
           <label style="${lab}">Surname<input class="inp" id="g-last" type="text" autocomplete="family-name" value="${esc(P.last)}"></label>
         </div>
         <label style="${lab}">Email<input class="inp" id="g-email" type="email" autocomplete="email" value="${esc(P.email)}"></label>
-        <label style="${lab}">Industry${industrySelect('g-industry')}</label>
         <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: var(--muted)"><input type="checkbox" id="g-consent"${P.consent ? ' checked' : ''} style="width: 18px; height: 18px; margin-top: 1px; accent-color: #C9A24A; flex: none">I agree that ExploraSelf may email me my results and occasional guidance. I can unsubscribe any time.</label>
         <span id="gate-err" role="alert" style="font-size: 13px; color: var(--self); font-weight: 600"></span>
         <button type="submit" data-f="gate-go" style="min-height: 50px; border-radius: 5px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; font-size: 15px; cursor: pointer">Start my compass →</button>
@@ -983,10 +985,10 @@
   /* Password boxes, each with a show / hide button. */
   const pwInput = (id, label, auto) => `<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">${label}<span style="display: flex; gap: 6px"><input class="inp" id="${id}" type="password" autocomplete="${auto}" style="flex: 1; min-width: 0"><button type="button" data-act="eye" data-v="${id}" data-f="eye-${id}" aria-label="Show ${label.toLowerCase()}" aria-pressed="false" style="width: 46px; border: 1px solid var(--line); border-radius: 5px; background: var(--paper); color: var(--ink); cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></button></span></label>`;
   const linkBtn = (where, t) => `<button type="button" data-act="signin-${where}" data-f="signin-${where}-${t.length}" ${UI.signinBusy ? 'disabled' : ''} style="border: 0; background: none; padding: 6px 0; color: var(--goldink); font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer">${t}</button>`;
-  /** Sign in: a password, or a one-time link by email ("Forgot your password?" sends the same link). */
+  /** Sign in: email and password; "Forgot your password? Email me a sign-in link" sends a one-time link. */
   const pSignin = (where) => `${pwInput('si-pw-' + where, 'Password', 'current-password')}
     <button type="button" data-act="pw-in" data-v="${where}" data-f="pw-in-${where}" ${UI.signinBusy ? 'disabled' : ''} style="min-height: 46px; border-radius: 5px; border: 0; background: var(--deep); color: #F7F2E7; font-weight: 600; cursor: pointer">Sign in</button>
-    <span style="display: flex; gap: 14px; flex-wrap: wrap">${linkBtn(where, 'Email me a sign-in link')}${linkBtn(where, 'Forgot your password?')}</span>
+    <span style="display: flex; gap: 14px; flex-wrap: wrap">${linkBtn(where, 'Forgot your password? Email me a sign-in link')}</span>
     ${UI.signin ? `<span role="status" style="font-size: 13px; color: var(--ink)">${esc(UI.signin)}</span>` : ''}`;
   const pPassword = () => `<details${UI.pwmsg ? ' open' : ''}><summary style="cursor: pointer; font-weight: 600; color: var(--goldink); min-height: 32px">${UI.hasPw ? 'Change your password' : 'Set a password (optional)'}</summary>
     <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 8px; max-width: 420px">${pwInput('pw-1', 'Password', 'new-password')}${pwInput('pw-2', 'Confirm password', 'new-password')}
@@ -1243,9 +1245,10 @@
     const err = (m) => { const el = $('#gate-err'); if (el) el.textContent = m; };
     if (!first) return err('Your first name, so the feedback is yours.');
     if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return err('That email does not look complete.');
-    if (!consent) return err('Tick the box so we may send you your results. Or skip for now and keep exploring.');
-    Object.assign(S.profile, { first: first.slice(0, 60), last: val('g-last').slice(0, 60), industry: val('g-industry') || S.profile.industry,
-      email: email.slice(0, 120), consent: true });
+    if (!val('g-last')) return err('Your surname, please.');
+    // The simple form: consent is the founder's choice. Without it the account
+    // is still made, and nothing is emailed but what they ask for.
+    Object.assign(S.profile, { first: first.slice(0, 60), last: val('g-last').slice(0, 60), email: email.slice(0, 120), consent });
     save(); closeGate();
     const after = UI.after; UI.after = null;
     // The account follows the box. The answers already here go into it.

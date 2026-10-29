@@ -69,9 +69,9 @@ ok(!Object.values(OFFERS).some((o) => /only|left|hurry|today|ends|last chance/i.
 // ── The routes ──────────────────────────────────────────────────────────────
 const env = { DB: fakeD1(), RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Via Esempio 1, Rome' };
 let sent = fakeResend();
-let r = await signup({ request: post('/api/signup', { first: 'Ana', last: 'Pop', email: 'ana@example.com', consent: true, password: 'a-long-password', confirm: 'a-long-password' }), env });
+let r = await signup({ request: post('/api/signup', { first: 'Ana', last: 'Pop', email: 'ana@example.com', consent: true, type: 'full', company: 'Acme', interest: 'Higher income', industry: 'Other', password: 'a-long-password', confirm: 'a-long-password' }), env });
 const ana = (await r.json()).token;
-ok(sent.length === 1 && sent[0].body.subject === 'Welcome to The Founder Launchpad' && sent[0].body.html.includes('signature.png'), 'signup (even with a password): exactly one email, the welcome letter');
+ok(sent.length === 1 && sent[0].body.subject === 'Welcome to The Founder Launchpad' && sent[0].body.html.includes('signature.png'), 'signup (full form, with its password): exactly one email, the welcome letter');
 ok(sent[0].body.text.includes('Unsubscribe:') && sent[0].body.text.includes('Via Esempio 1'), 'the footer is still there');
 
 sent = fakeResend();

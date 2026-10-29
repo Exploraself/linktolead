@@ -6,7 +6,7 @@ import { now, newToken, clean } from './_shared.js';
 import { send } from './_mail.js';
 import { launchpadWelcome } from './_letters.js';
 
-export const SOURCES = ['compass', 'sales-page'];
+export const SOURCES = ['compass', 'sales-page', 'home'];
 export const INDUSTRIES_MAX = 80;
 
 /** The profile row for a student, made if missing. Industry and consent only

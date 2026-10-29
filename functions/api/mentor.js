@@ -58,7 +58,7 @@ async function roster(D) {
       (SELECT updated_at FROM compass c WHERE c.student_id = s.id) AS compass_at,
       (SELECT COUNT(*) FROM plan_tick t WHERE t.student_id = s.id) AS plan_ticks,
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'library-download') AS library,
-      p.industry, p.source, p.consent, p.unsubscribed, p.mailchimp_status, p.mailchimp_at,
+      p.industry, p.source, p.consent, p.unsubscribed, p.mailchimp_status, p.mailchimp_at, p.signup_type, p.company, p.interest, p.landing, p.utm_source, p.utm_medium, p.utm_campaign, p.utm_content,
       CASE WHEN au.pass_hash IS NULL THEN 0 ELSE 1 END AS has_password, COALESCE(au.paused, 0) AS paused
     FROM student s
       LEFT JOIN student_profile p ON p.student_id = s.id
@@ -67,14 +67,17 @@ async function roster(D) {
   return rows.results || [];
 }
 
+const LANDING_NAMES = { a: 'A', b: 'B', c: 'C', compass: 'Compass box' };
 const CSV_COLS = [['name', 'Name'], ['email', 'Email'], ['joined_at', 'Joined'], ['last_seen_at', 'Last seen'], ['stage', 'Stage'], ['step', 'Step'],
+  ['signup', 'Sign-up form'], ['landing_name', 'Landing'], ['utm_source', 'utm_source'], ['utm_medium', 'utm_medium'], ['utm_campaign', 'utm_campaign'], ['utm_content', 'utm_content'], ['company_name', 'Company'], ['interest', 'Interest'], ['industry', 'Industry'],
   ['compass', 'Compass done'], ['plan_ticks', 'Plan steps done'], ['library_names', 'Library'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp']];
 export function toCSV(list) {
   // Quoted, and a leading = + - @ is defused so a spreadsheet never runs it.
   const cell = (v) => { let s = String(v ?? ''); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
   const yes = (v) => (v ? 'yes' : 'no');
   const books = (v) => String(v || '').split(',').filter((k) => LIBRARY_ITEMS[k]).map((k) => LIBRARY_ITEMS[k].name).join('; ');
-  const row = (s) => ({ ...s, step: STEPS[s.tier || 'free'] || s.tier, library_names: books(s.library), compass: yes(s.compass_at), has_password: yes(s.has_password), consent: yes(s.consent), unsubscribed: yes(s.unsubscribed), paused: yes(s.paused) });
+  const row = (s) => ({ ...s, step: STEPS[s.tier || 'free'] || s.tier, library_names: books(s.library), signup: s.signup_type || '',
+    company_name: s.company === '' ? 'No company yet' : s.company || '', landing_name: LANDING_NAMES[s.landing] || '', compass: yes(s.compass_at), has_password: yes(s.has_password), consent: yes(s.consent), unsubscribed: yes(s.unsubscribed), paused: yes(s.paused) });
   return [CSV_COLS.map(([, h]) => cell(h)).join(','), ...list.map((s) => { const r = row(s); return CSV_COLS.map(([k]) => cell(r[k])).join(','); })].join('\r\n') + '\r\n';
 }
 
@@ -94,7 +97,7 @@ export async function onRequestGet({ request, env }) {
       D.prepare('SELECT key,value FROM sheet WHERE student_id=?').bind(one).all(),
       D.prepare('SELECT * FROM compass WHERE student_id=?').bind(one).first(),
       D.prepare('SELECT id,level,domain,body,status,reply,created_at FROM note WHERE student_id=? ORDER BY created_at DESC').bind(one).all(),
-      D.prepare('SELECT industry,consent,consent_at,source,unsubscribed,unsub_at FROM student_profile WHERE student_id=?').bind(one).first(),
+      D.prepare('SELECT industry,consent,consent_at,source,unsubscribed,unsub_at,signup_type,company,interest,landing,utm_source,utm_medium,utm_campaign,utm_content,utm_term FROM student_profile WHERE student_id=?').bind(one).first(),
       D.prepare('SELECT step_id,done_at FROM plan_tick WHERE student_id=? ORDER BY done_at').bind(one).all(),
       D.prepare('SELECT pass_hash IS NOT NULL AS has_password, paused, set_at FROM account_auth WHERE student_id=?').bind(one).first(),
       D.prepare('SELECT subject,body,channel,sent_at,read_at FROM message WHERE student_id=? AND note_id IS NULL ORDER BY sent_at DESC LIMIT 20').bind(one).all(),

@@ -23,6 +23,10 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const problem = passwordProblem(body.password, body.confirm);
   if (problem) return bad(problem);
   await accountTables(D);
+  // Founders from the simple form never have a password: they sign in by
+  // email link.
+  const kind = await D.prepare('SELECT signup_type FROM student_profile WHERE student_id = ?').bind(me.id).first();
+  if (kind && kind.signup_type === 'simple') return bad('Your account signs in with a link we email you, so it has no password.', 403);
   const had = await D.prepare('SELECT 1 AS x FROM account_auth WHERE student_id = ? AND pass_hash IS NOT NULL').bind(me.id).first();
   await setPassword(D, me.id, body.password);
   await D.prepare('INSERT INTO event (student_id,kind,at) VALUES (?,?,?)').bind(me.id, had ? 'password-changed' : 'password-set', now()).run();

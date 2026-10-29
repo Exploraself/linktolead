@@ -38,6 +38,10 @@ let level = 1, dom = 'self';
 let compassRec = null, inbox = null, hasPassword = false, replyTo = null;
 /** The "Ask Alexandru" thread (null until loaded), and the stage picker. */
 let ask = null, changingStage = false;
+/** The account has been read this visit (the greeting waits for it, so a
+ *  name cached on this device is never shown for someone else), and which
+ *  form the founder signed up with ('simple' founders have no password). */
+let pulled = false, signupType = null;
 
 const compass = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12 12 2.5Z"/><path d="m12 5.7 2 4.3 4.3 2-4.3 2-2 4.3-2-4.3-4.3-2 4.3-2 2-4.3Z" fill="currentColor" stroke="none"/></svg>';
 
@@ -130,7 +134,8 @@ const pwField = (id, label, auto) => `<label class="pwf"><span>${label}</span><s
 
 /** A promise's first sentence: what that level leaves you with by Sunday. */
 const promiseOf = (st, n) => { const L = (LEVELS[st] || {})[n]; return L && L.promise ? L.promise.split(/(?<=\.)\s+(?=[A-Z])/)[0] : ''; };
-const firstName = () => (state.me && state.me.name ? state.me.name.split(' ')[0] : '');
+/** The founder's first name, from their account as read on this visit. */
+const firstName = () => (pulled && state.me && state.me.name ? state.me.name.split(' ')[0] : '');
 
 /** The first level not yet finished and open to this founder. */
 function nextLevel(st) {
@@ -263,15 +268,16 @@ async function openAsk() {
 }
 
 function accountHTML() {
+  const simple = signupType === 'simple' && !hasPassword;
   return `<section class="gp-wrap gp-account" aria-labelledby="acct-h">
     <p class="eyebrow" id="acct-h">Your account</p>
-    <p class="gp-lede">${state.me && state.me.email ? `Signed in as <b>${esc(state.me.email)}</b>. ` : ''}Your work is saved to your account and follows you between devices.</p>
-    <details class="pw-box"><summary>${hasPassword ? 'Change your password' : 'Set a password (optional)'}</summary>
+    <p class="gp-lede">${state.me && state.me.email ? `Signed in as <b>${esc(state.me.email)}</b>. ` : ''}Your work is saved to your account and follows you between devices.${simple ? ' On another device, sign in with a link we email you.' : ''}</p>
+    ${simple ? '' : `<details class="pw-box"><summary>${hasPassword ? 'Change your password' : 'Set your password'}</summary>
       <form id="pwform" class="pwform" novalidate>
-        <p class="savenote">Optional. Without one, “Email me a sign-in link” always works. At least 10 characters.</p>
+        <p class="savenote">At least 10 characters. “Forgot your password? Email me a sign-in link” always works too.</p>
         ${pwField('pw1', 'Password', 'new-password')}${pwField('pw2', 'Confirm password', 'new-password')}
         <button class="cta" type="submit">Save my password</button><p class="joinerr" id="pwmsg" role="status"></p>
-      </form></details>
+      </form></details>`}
     <button type="button" class="ghost" data-signout>Sign out on this device</button>
   </section>`;
 }
@@ -299,15 +305,14 @@ function signinView() {
   return `<section class="band qband"><div class="wrap narrow">
     <p class="eyebrow">${compass} Your Ground Plan</p>
     <h1 class="qh">Sign in</h1>
-    <p class="sec-lede">Use your password if you set one. Otherwise we email you a link that signs you in on this device.</p>
+    <p class="sec-lede">Your email and password. Signed up with your name and email only, or forgotten your password? We email you a link that signs you in on this device.</p>
     <form class="joinbox bare" id="signinform" novalidate>
       <div class="joinrow">
         <label><span>Email</span><input id="si-email" type="email" autocomplete="email" required></label>
         ${pwField('si-pw', 'Password', 'current-password')}
       </div>
       <button class="cta" type="submit">Sign in →</button>
-      <button class="ghost" type="button" data-link>Email me a sign-in link</button>
-      <button class="lib-link" type="button" data-link>Forgot your password?</button>
+      <button class="lib-link" type="button" data-link>Forgot your password? Email me a sign-in link</button>
       <p class="joinerr" id="si-msg" role="status"></p>
       <p class="savenote">New here? <a href="/compass/welcome#join">Create your free account →</a></p>
     </form>
@@ -836,6 +841,9 @@ async function comeHome() {
   render();
   if (!account.joined()) return;
   const [r, msgs, th] = await Promise.all([account.pull(), account.messages(), account.thread()]);
+  // The account this device remembers no longer exists (deleted): forget it
+  // and its cached name, and ask to sign in.
+  if (r && r.gone) { account.signOut(); state.me = null; save(); view = 'signin'; render(); return; }
   if (msgs && msgs.ok) inbox = msgs;
   if (th && th.ok) ask = th;
   if (r && r.ok) {
@@ -846,6 +854,8 @@ async function comeHome() {
       state.me = { name: r.me.name, email: r.me.email };
       if (r.me.tier) state.tier = r.me.tier;
       hasPassword = !!r.me.hasPassword;
+      signupType = r.me.signupType || null;
+      pulled = true;
     }
     let sales = '';
     try { sales = (JSON.parse(localStorage.getItem('exploraself-profile') || 'null') || {}).stage || ''; } catch { /* private mode */ }

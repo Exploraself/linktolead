@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Link to Lead — The Founder's Blueprint | ExploraSelf</title>
+<meta name="description" content="Twelve weeks that put your business on paper instead of in your head. The Leadership Compass shows your stage and which of the four domains to start with. Levels 01–03 free.">
+<meta name="theme-color" content="#14100B">
+<link rel="icon" href="/assets/icon.svg">
+<link rel="preload" href="/assets/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/libre-franklin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts.css">
+<style>
+/* The simple sales page: twelve scrolls, alternating dark and paper, each one
+   beat, with a small journey line (Arrive · Understand · See your path ·
+   Choose · Begin) that says where the reader is. Every "Join" opens the
+   simple account form. */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#14100B;color:#F3EBDA;font-family:'Libre Franklin',Arial,sans-serif;overflow-x:hidden}
+a{color:#E3C47E}a:hover{color:#F6EEDD}
+button{font:inherit}
+:focus-visible{outline:3px solid #C9A24A;outline-offset:3px}
+.skip{position:absolute;left:-999px;top:8px;background:#C9A24A;color:#14100B;padding:10px 14px;z-index:90}
+.skip:focus{left:8px}
+.backbar{position:sticky;top:0;z-index:40;background:#C9A24A;color:#14100B;text-align:center;padding:10px 16px;font:600 14px/1.3 'Libre Franklin',Arial,sans-serif}
+.backbar a{color:#14100B;text-decoration:underline;text-underline-offset:3px}
+.sc{min-height:640px;padding:clamp(56px,8vw,96px) 16px;display:flex;align-items:center}
+.dk{background:#14100B;color:#F3EBDA}.lt{background:#F6EFE2;color:#1C1309}
+.in{width:100%;max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(22px,3vw,34px)}
+.row{display:flex;flex-wrap:wrap;gap:clamp(28px,5vw,64px);align-items:center}
+.row>.tx{flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.row>.vz{flex:1 1 340px;min-width:0;display:flex;justify-content:center}
+.h1{margin:0;font:600 clamp(40px,6.4vw,76px)/1.03 Fraunces,Georgia,serif;letter-spacing:-.02em}
+.h2{margin:0;font:600 clamp(30px,4.6vw,54px)/1.08 Fraunces,Georgia,serif;letter-spacing:-.015em}
+.h1 em,.h2 em{font-style:italic;font-weight:500;color:#C9A24A}
+.lt .h2 em{color:#7A5C16}
+.sub{margin:0;font-size:clamp(17px,1.8vw,20px);line-height:1.55;color:#C9BDA6;max-width:46ch}
+.lt .sub{color:#5E5446}
+.jm{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 18px;font:600 11px/1 'Libre Franklin',Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+.jm li{display:flex;align-items:center;gap:7px;color:#8F8775}
+.jm li::before{content:"";width:7px;height:7px;border-radius:50%;border:1.5px solid currentColor;box-sizing:border-box}
+.jm .dn{color:#B9AC94}.jm .dn::before{background:currentColor}
+.jm .nw{color:#C9A24A}.jm .nw::before{background:#C9A24A;border-color:#C9A24A;box-shadow:0 0 0 4px rgba(201,162,74,.22)}
+.lt .jm li{color:#7D7262}.lt .jm .dn{color:#6B6153}.lt .jm .nw{color:#7A5C16}.lt .jm .nw::before{background:#C9A24A;border-color:#C9A24A}
+.cta{display:inline-flex;align-items:center;min-height:56px;padding:0 32px;border:0;background:#C9A24A;color:#14100B;font:700 18px/1 'Libre Franklin',Arial,sans-serif;text-decoration:none;cursor:pointer}
+.cta:hover{background:#E3C47E;color:#14100B}
+.note{font-size:14.5px;letter-spacing:.04em;color:#B7AB93}
+.lt .note{color:#5E5446}
+.k{font:700 11px/1.4 'Libre Franklin',Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#C9A24A}
+.cards{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.cards li{display:flex;flex-direction:column;gap:14px;padding:24px 22px;background:#FFFDF7;border:1px solid #DFD3B8}
+.cards b{font:600 21px/1.2 Fraunces,Georgia,serif}
+.cards span{font-size:15px;color:#5E5446}
+.four{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,170px));gap:8px}
+.four div{height:150px;padding:16px;border:1px solid #3A3022;background:#1E1710;font:600 18px/1.2 Fraunces,Georgia,serif;display:flex}
+.four .you{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:74px;height:74px;border-radius:50%;background:#F3EBDA;color:#14100B;display:flex;align-items:center;justify-content:center;font:700 13px/1 'Libre Franklin',Arial,sans-serif;letter-spacing:.14em;box-shadow:0 0 0 6px #14100B}
+.stairs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:end}
+.stairs li{padding:18px;background:#FFFDF7;border:1.5px solid #DFD3B8;display:flex;flex-direction:column;justify-content:flex-end;gap:4px}
+.stairs b{font:600 24px/1.1 Fraunces,Georgia,serif}
+.stairs span{font-size:14px;color:#5E5446}
+.stairs .s1{height:150px;background:linear-gradient(110deg,#B88F37,#E3C47E 50%,#C9A24A);border:0;color:#14100B}.stairs .s1 span{color:#14100B}
+.stairs .s2{height:190px}.stairs .s3{height:230px}
+@media(max-width:560px){.stairs{grid-template-columns:1fr}.stairs li{height:auto!important;min-height:96px}}
+.steps{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}
+.steps li{display:flex;flex-direction:column;gap:12px}
+.steps .n{width:52px;height:52px;border-radius:50%;border:1.5px solid #C9A24A;display:flex;align-items:center;justify-content:center;font:600 22px/1 Fraunces,Georgia,serif;color:#E3C47E}
+.steps .n.on{background:#C9A24A;color:#14100B}
+.steps b{font:600 22px/1.2 Fraunces,Georgia,serif}
+.steps span{font-size:15.5px;color:#C9BDA6}
+.lvhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px}
+.tabs{display:flex;border:1px solid #DFD3B8}
+.tabs button{min-height:44px;padding:0 18px;border:0;background:#FFFDF7;color:#1C1309;font:600 14px/1 'Libre Franklin',Arial,sans-serif;cursor:pointer}
+.tabs button[aria-selected="true"]{background:#1C1309;color:#F3EBDA}
+.levels{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.levels li{padding:14px;background:#FFFDF7;border:1px solid #DFD3B8}
+.levels li b{font:600 13px/1 'Libre Franklin',Arial,sans-serif;color:#6B6153}
+.levels li p{margin:8px 0 0;font:600 16px/1.25 Fraunces,Georgia,serif}
+.levels .free{background:#C9A24A;border-color:#C9A24A;color:#14100B}.levels .free b{color:#14100B}
+.levels .with{border-color:#C9A24A}.levels .with b{color:#7A5C16}
+.levels .last{background:#1C1309;border-color:#1C1309;color:#F3EBDA}.levels .last b{color:#E3C47E}
+.legend{display:flex;flex-wrap:wrap;gap:8px 22px}
+.legend i{display:inline-block;width:12px;height:12px;vertical-align:-1px;margin-right:6px}
+.change{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.change li{display:grid;grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr);align-items:center;gap:12px;padding:18px 20px;background:#1E1710}
+.change s{font-size:17px;color:#9D917E;text-decoration-color:rgba(157,145,126,.5)}
+.change b{font:600 20px/1.25 Fraunces,Georgia,serif;color:#E3C47E}
+@media(max-width:560px){.change li{grid-template-columns:1fr;gap:6px}.change li>span{display:none}}
+.shelf{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:28px}
+.mans{position:relative;width:250px;height:210px}
+.mans div{position:absolute;top:26px;width:118px;height:158px;box-shadow:0 16px 28px -14px rgba(0,0,0,.7);padding:12px 10px 10px 16px;color:#F6EEDC;font:600 17px/1.1 Fraunces,Georgia,serif}
+.mans .b{left:6px;transform:rotate(-9deg);background:linear-gradient(160deg,#6E3C21,#3A1E10)}
+.mans .s{right:6px;transform:rotate(9deg);background:linear-gradient(160deg,#23455C,#0F2230);text-align:right}
+.mans .g{left:66px;top:6px;z-index:2;background:linear-gradient(160deg,#2F4D38,#16261B);box-shadow:0 20px 34px -14px rgba(0,0,0,.8)}
+.books{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;justify-content:center}
+.books img,.books .soon{width:112px;height:112px;object-fit:cover;transform:perspective(600px) rotateY(-20deg);box-shadow:8px 14px 22px -10px rgba(28,19,9,.5)}
+.books .soon{box-shadow:none;border:1.5px dashed #C8B993;display:flex;align-items:center;justify-content:center;text-align:center;font:700 9.5px/1.3 'Libre Franklin',Arial,sans-serif;letter-spacing:.12em;color:#7A5C16}
+.line{list-style:none;margin:10px 0 0;padding:0;border-left:1.5px solid #3A3022;max-width:520px}
+.line li{position:relative;padding:0 0 18px 22px}
+.line li:last-child{padding-bottom:0}
+.line li::before{content:"";position:absolute;left:-6px;top:4px;width:10px;height:10px;border-radius:50%;background:#C9A24A}
+.line li.open::before{background:#14100B;border:1.5px solid #C9A24A;box-sizing:border-box}
+.line b{font:600 17px/1.3 Fraunces,Georgia,serif}
+.line span{font-size:14.5px;color:#C9BDA6}
+.ladder{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ladder li{display:grid;grid-template-columns:210px minmax(0,1fr) 150px;gap:18px;align-items:center;padding:14px 18px;background:#FFFDF7;border:1px solid #DFD3B8}
+.ladder .nm b{font:600 18px/1.2 Fraunces,Georgia,serif}
+.ladder .nm span{display:block;font-size:13px;color:#5E5446}
+.ladder .bars{display:grid;grid-template-columns:repeat(12,1fr);gap:3px}
+.ladder .bars i{height:10px;background:#EFE6D3}
+.ladder .bars i.on{background:#C9A24A}
+.ladder .pr{text-align:right;font-weight:700;font-size:16px}
+.ladder .top{background:#1C1309;color:#F3EBDA;box-shadow:inset 0 0 0 1.5px #C9A24A;border-color:#1C1309}
+.ladder .top .nm b,.ladder .top .pr{color:#E3C47E}.ladder .top .nm span{color:#C9BDA6}.ladder .top .bars i.on{background:#E3C47E}
+@media(max-width:700px){.ladder li{grid-template-columns:minmax(0,1fr) auto}.ladder .bars{grid-column:1/-1;grid-row:2}}
+.page90{width:300px;max-width:100%;padding:26px 24px;background:#F3EBDA;color:#1C1309;box-shadow:0 30px 50px -24px rgba(0,0,0,.8);display:flex;flex-direction:column;gap:14px}
+.page90 p{margin:0;font:700 10px/1 'Libre Franklin',Arial,sans-serif;letter-spacing:.2em;color:#7A5C16}
+.page90 b{font:600 15px/1.2 Fraunces,Georgia,serif}
+.page90 .bar{height:8px;margin-top:8px;background:#E6DCC5}
+.page90 .sep{padding-bottom:10px;border-bottom:1px solid #D6C9AC}
+.page90 .spark{margin-top:8px;display:flex;align-items:flex-end;gap:4px;height:34px}
+.page90 .spark i{flex:1;background:#C9A24A}
+.close{min-height:560px;background:radial-gradient(80% 120% at 50% 0%,#2A2014 0%,#14100B 65%);text-align:center}
+.foot{background:#0E0B07;color:#9D917E;font-size:13px;line-height:1.7;padding:28px 16px;text-align:center}
+#gate{position:fixed;inset:0;z-index:60;background:rgba(16,13,9,.65);display:flex;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}
+#gate[hidden]{display:none}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="backbar" id="backbar" hidden><a href="/start#home">Go to your Ground Plan →</a></div>
+<main class="pg" id="main">
+
+  <!-- 1 · ARRIVE · what this is -->
+  <section class="sc dk" style="min-height: 760px; background: radial-gradient(90% 90% at 20% 0%, #2A2014 0%, #14100B 60%); border-bottom: 3px solid #C9A24A">
+    <div class="in">
+      <ol class="jm" aria-label="Where you are on this page"><li class="nw">Arrive</li><li>Understand</li><li>See your path</li><li>Choose</li><li>Begin</li></ol>
+      <div class="row">
+        <div class="tx">
+          <div style="display: flex; align-items: center; gap: 12px"><svg width="28" height="28" viewBox="0 0 34 34" aria-hidden="true"><rect x="7" y="7" width="20" height="20" transform="rotate(45 17 17)" fill="none" stroke="#C9A24A" stroke-width="1.6"></rect><rect x="13" y="13" width="8" height="8" transform="rotate(45 17 17)" fill="#C9A24A"></rect></svg><div><p style="margin: 0; font: 600 24px/1 Fraunces, Georgia, serif; color: #E3C47E">Link to Lead</p><p class="k" style="margin: 5px 0 0; font-size: 10px">The Founder’s Blueprint · The Incubator</p></div></div>
+          <h1 class="h1">Your business, on paper.<br><em>Not in your head.</em></h1>
+          <p class="sub">A twelve-week programme for founders.</p>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 8px"><button type="button" class="cta" data-join>Join →</button><span class="note">3 levels · Instant access</span></div>
+        </div>
+        <div class="vz">
+          <svg viewBox="0 0 420 300" style="width: 100%; max-width: 420px; height: auto" role="img" aria-label="Thoughts in your head become a written page">
+            <g fill="none" stroke="#8F8775" stroke-width="1.6" stroke-linecap="round"><path d="M70 150c-24-6-30-40-6-52 6-30 46-34 58-12 22-14 52 2 46 26 22 6 22 40-4 44-4 26-44 30-56 10-18 14-48 4-38-16z"></path><path d="M78 128c14-10 30 6 18 16s-26-2-12-14M116 112c10 8 0 22-10 14M132 150c-8-10 12-18 16-6"></path></g>
+            <path d="M190 150h52" stroke="#C9A24A" stroke-width="2" stroke-dasharray="4 6"></path><path d="M238 142l10 8-10 8" fill="none" stroke="#C9A24A" stroke-width="2"></path>
+            <rect x="268" y="62" width="120" height="164" fill="#F3EBDA"></rect><rect x="268" y="62" width="120" height="164" fill="none" stroke="#C9A24A" stroke-width="1.5"></rect>
+            <g stroke="#C9B48A" stroke-width="1.2"><path d="M284 96h88M284 120h88M284 144h88M284 168h88M284 192h60"></path></g>
+            <g fill="none" stroke="#7A5C16" stroke-width="2" stroke-linecap="round"><path d="M284 90l4 4 8-8M284 114l4 4 8-8M284 138l4 4 8-8"></path></g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · ARRIVE · what changes -->
+  <section class="sc lt">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="nw">Arrive</li><li>Understand</li><li>See your path</li><li>Choose</li><li>Begin</li></ol>
+      <h2 class="h2">What changes for you.</h2>
+      <ul class="cards">
+        <li><svg width="38" height="38" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#7A5C16" stroke-width="1.5"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><b>Your week, visible</b><span>Where the hours go.</span></li>
+        <li><svg width="38" height="38" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#7A5C16" stroke-width="1.5"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.5" fill="#7A5C16"></circle></svg><b>Your market, understood</b><span>Why they chose you.</span></li>
+        <li><svg width="38" height="38" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#7A5C16" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="3"></circle><circle cx="16.5" cy="9.5" r="2.5"></circle><path d="M3 19c.9-3 3-4.6 5.5-4.6S13.1 16 14 19M14.5 14.6c2.6-.4 4.9.9 6 4.4"></path></svg><b>Your people, led</b><span>Not hoping they understood.</span></li>
+        <li><svg width="38" height="38" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#7A5C16" stroke-width="1.5"><path d="M12 3v14M7 8h10M5 14a7 7 0 0 0 14 0"></path><circle cx="12" cy="3.5" r="1.5"></circle></svg><b>A mind that holds</b><span>On a bad week too.</span></li>
+      </ul>
+      <p style="margin: 6px 0 0; padding-top: 20px; border-top: 3px solid #C9A24A; max-width: 44ch; font: 500 clamp(19px,2.2vw,24px)/1.45 Fraunces, Georgia, serif"><b style="font-weight: 600; color: #7A5C16">Everything you need to do it is here</b> — the questions, the worksheets, the numbers, and someone who has done it reading what you write.</p>
+    </div>
+  </section>
+
+  <!-- 3 · UNDERSTAND · the four -->
+  <section class="sc dk">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="nw">Understand</li><li>See your path</li><li>Choose</li><li>Begin</li></ol>
+      <div class="row">
+        <div class="tx">
+          <h2 class="h2">Four things hold your business up. <em>One is costing you most.</em></h2>
+          <p class="sub">Work the wrong one and nothing moves.</p>
+        </div>
+        <div class="vz">
+          <div class="four" role="img" aria-label="The four domains around you: Lead yourself, Lead your people, Lead your business and Lead the market, with one highlighted">
+            <div>Lead yourself</div>
+            <div style="justify-content: flex-end; text-align: right">Lead your people</div>
+            <div style="align-items: flex-end">Lead your business</div>
+            <div style="align-items: flex-end; justify-content: flex-end; text-align: right; border: 1.5px solid #C9A24A; background: rgba(201,162,74,.16); color: #E3C47E">Lead the market</div>
+            <span class="you">YOU</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · UNDERSTAND · your stage -->
+  <section class="sc lt">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="nw">Understand</li><li>See your path</li><li>Choose</li><li>Begin</li></ol>
+      <h2 class="h2">Your stage decides <em>what comes first.</em></h2>
+      <ol class="stairs">
+        <li class="s1"><b>Building</b><span>Finding the offer and the first clients</span></li>
+        <li class="s2"><b>Growing</b><span>Clients repeat, everything runs through you</span></li>
+        <li class="s3"><b>Scaling</b><span>There is a team, and your job has changed</span></li>
+      </ol>
+      <p class="sub">The Leadership Compass shows which one you are in.</p>
+    </div>
+  </section>
+
+  <!-- 5 · UNDERSTAND · how it works -->
+  <section class="sc dk">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="nw">Understand</li><li>See your path</li><li>Choose</li><li>Begin</li></ol>
+      <h2 class="h2">Three steps. <em>In this order.</em></h2>
+      <ol class="steps">
+        <li><span class="n" aria-hidden="true">1</span><b>Your free account</b><span>One minute. Name and email.</span></li>
+        <li><span class="n" aria-hidden="true">2</span><b>Your Ground Plan</b><span>Your stage and your first three moves.</span></li>
+        <li><span class="n on" aria-hidden="true">3</span><b>One level a week</b><span>Open it, count it, write it down.</span></li>
+      </ol>
+      <p style="margin: 8px 0 0; max-width: 52ch; font: 500 clamp(18px,2vw,21px)/1.5 Fraunces, Georgia, serif; color: #F3EBDA">The numbers are never the point. They help you <b style="color: #E3C47E; font-weight: 600">decide</b>, <b style="color: #E3C47E; font-weight: 600">lead a person</b> or <b style="color: #E3C47E; font-weight: 600">hand something over</b>.</p>
+    </div>
+  </section>
+
+  <!-- 6 · SEE YOUR PATH · the twelve levels (names from content.js) -->
+  <section class="sc lt">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="nw">See your path</li><li>Choose</li><li>Begin</li></ol>
+      <div class="lvhead">
+        <h2 class="h2" id="lv-h">Your twelve levels.</h2>
+        <div class="tabs" role="tablist" aria-label="Your stage">
+          <button type="button" role="tab" id="tab-build" aria-selected="true" aria-controls="levels" data-stage="build">Building</button>
+          <button type="button" role="tab" id="tab-grow" aria-selected="false" aria-controls="levels" data-stage="grow" tabindex="-1">Growing</button>
+          <button type="button" role="tab" id="tab-scale" aria-selected="false" aria-controls="levels" data-stage="scale" tabindex="-1">Scaling</button>
+        </div>
+      </div>
+      <ol class="levels" id="levels" role="tabpanel" aria-labelledby="tab-build"></ol>
+      <p class="note legend"><span><i style="background: #C9A24A"></i>Open the day you join</span><span><i style="border: 1px solid #C9A24A"></i>With Alexandru</span><span><i style="border: 1px solid #DFD3B8"></i>LAB and HUB</span></p>
+    </div>
+  </section>
+
+  <!-- 7 · SEE YOUR PATH · before → after -->
+  <section class="sc dk">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="nw">See your path</li><li>Choose</li><li>Begin</li></ol>
+      <h2 class="h2">From your head <em>to paper.</em></h2>
+      <ul class="change">
+        <li><s>A week you can’t account for</s><span aria-hidden="true" style="color: #C9A24A; text-align: center">→</span><b>Last week’s hours, visible</b></li>
+        <li><s>Customers you guess at</s><span aria-hidden="true" style="color: #C9A24A; text-align: center">→</span><b>Ten real names</b></li>
+        <li><s>Everything runs through you</s><span aria-hidden="true" style="color: #C9A24A; text-align: center">→</span><b>One process someone else ran</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 8 · SEE YOUR PATH · what you keep -->
+  <section class="sc lt">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="nw">See your path</li><li>Choose</li><li>Begin</li></ol>
+      <div class="row">
+        <div class="tx">
+          <h2 class="h2">What you keep.</h2>
+          <p class="sub">A manual for your stage. Two books alongside. A third on the way.</p>
+        </div>
+        <div class="vz shelf">
+          <div class="mans" role="img" aria-label="The three Blueprint manuals: Building, Growing and Scaling">
+            <div class="b" aria-hidden="true">Building</div><div class="s" aria-hidden="true">Scaling</div><div class="g" aria-hidden="true">Growing</div>
+          </div>
+          <div class="books">
+            <img src="/library/cover-built-to-lead.jpg" alt="Built to Lead" width="112" height="112" loading="lazy" decoding="async">
+            <img src="/library/cover-worth-building.jpg" alt="Worth Building" width="112" height="112" loading="lazy" decoding="async">
+            <div class="soon">A NEW WAY<br>OF WINNING<br>· soon ·</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · CHOOSE · who reads it (the photo shows once there is one) -->
+  <section class="sc dk">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="dn">See your path</li><li class="nw">Choose</li><li>Begin</li></ol>
+      <h2 class="h2">Alexandru and the team <em>read what you write.</em></h2>
+      <p class="sub">Before you ever speak.</p>
+      <ol class="line">
+        <li><b>Levels 01–03</b><br><span>You work. They read.</span></li>
+        <li><b>One hour with Alexandru</b><br><span>Your Intelligence Report, read first.</span></li>
+        <li class="open"><b>Then, as far as you choose</b></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 10 · CHOOSE · how far you go -->
+  <section class="sc lt">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="dn">See your path</li><li class="nw">Choose</li><li>Begin</li></ol>
+      <h2 class="h2">How far <em>you go.</em></h2>
+      <p class="sub" style="margin-top: -10px">Same programme. Each step opens more of it.</p>
+      <ul class="ladder" id="ladder">
+        <li><span class="nm"><b>The Founder Launchpad</b><span>On your own</span></span><span class="bars" role="img" aria-label="Levels 01 to 03" data-on="3"></span><span class="pr">No cost</span></li>
+        <li><span class="nm"><b>The Boardroom</b><span>With Alexandru</span></span><span class="bars" role="img" aria-label="Levels 01 to 05" data-on="5"></span><span class="pr">One 1:1 session</span></li>
+        <li><span class="nm"><b>The LAB</b><span>Self-paced</span></span><span class="bars" role="img" aria-label="Levels 01 to 09" data-on="9"></span><span class="pr">$97</span></li>
+        <li><span class="nm"><b>The HUB</b><span>All twelve + three sessions</span></span><span class="bars" role="img" aria-label="All twelve levels" data-on="12"></span><span class="pr">$397</span></li>
+        <li class="top"><span class="nm"><b>The Summit</b><span>All twelve + Alexandru every week</span></span><span class="bars" role="img" aria-label="All twelve levels" data-on="12"></span><span class="pr">$1,989</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 11 · BEGIN · twelve weeks from now -->
+  <section class="sc dk">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="dn">See your path</li><li class="dn">Choose</li><li class="nw">Begin</li></ol>
+      <div class="row">
+        <div class="tx">
+          <h2 class="h2">Twelve weeks from now, <em>one page.</em></h2>
+          <p class="sub">Your next 90 days — written, owned, checked weekly.</p>
+        </div>
+        <div class="vz">
+          <div class="page90" role="img" aria-label="One page: one outcome, three priorities, one number">
+            <p>THE NEXT 90 DAYS</p>
+            <div class="sep"><b>1 outcome</b><div class="bar"></div></div>
+            <div class="sep"><b>3 priorities, each with a name</b><div class="bar" style="width: 90%"></div><div class="bar" style="width: 80%; margin-top: 6px"></div><div class="bar" style="width: 70%; margin-top: 6px"></div></div>
+            <div><b>1 number, read weekly</b><div class="spark"><i style="height: 30%"></i><i style="height: 45%"></i><i style="height: 40%"></i><i style="height: 60%"></i><i style="height: 72%"></i><i style="height: 90%; background: #7A5C16"></i></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 · BEGIN · the close -->
+  <section class="sc close">
+    <div class="in" style="align-items: center">
+      <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="dn">See your path</li><li class="dn">Choose</li><li class="nw">Begin</li></ol>
+      <h2 class="h2">Start tonight, free. <em>By Tuesday, you’ll be ahead.</em></h2>
+      <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 22px"><button type="button" class="cta" data-join>Start free →</button><span class="note">Levels 01–03 free · Instant access</span></div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot"><strong style="color: #C9BCA4">ExploraSelf</strong> · A Good People Company · Lead yourself. Grow your business.<br>
+<a href="/start#signin">Sign in</a> · <a href="/compass/welcome">The Leadership Compass</a></footer>
+
+<!-- The simple account form (/compass/welcome/account-box.js), loaded the
+     first time a "Join" opens it. -->
+<div id="gate" hidden></div>
+<script type="module" src="/a/page.js"></script>
+</body>
+</html>

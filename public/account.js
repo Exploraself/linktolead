@@ -23,12 +23,14 @@ async function post(path, body, keepalive = false) {
   return data;
 }
 
-/** Pull the record on arrival, so work follows between devices. */
+/** Pull the record on arrival, so work follows between devices. { gone: true }
+ *  when the account this device remembers no longer exists. */
 export async function pull() {
   const t = token();
   if (!t) return null;
   try {
     const r = await fetch(`/api/state?t=${encodeURIComponent(t)}`);
+    if (r.status === 404) return { gone: true }; // the account no longer exists
     if (!r.ok) return null;
     return await r.json();
   } catch { return null; }
@@ -75,11 +77,13 @@ export async function note({ body, level, domain }) {
 
 // ── The free account from the Compass ────────────────────────────────────────
 
-/** Create the free account, or find it. A new email returns a token, kept
- *  here. An email that already has an account returns { existing: true } and
+/** Create the free account, or find it. `type` is 'full' (company, interest,
+ *  industry and a password) or 'simple' (no password, ever). `landing` is the
+ *  sales page ('a', 'b', 'c' or 'compass'); `utm` the tags the founder
+ *  arrived with. A new email returns a token, kept here. An email that already has an account returns { existing: true } and
  *  no token: that browser signs in by email link instead. */
-export async function signup({ first, last, email, industry, consent, source, stage, password, confirm }) {
-  const out = await post('/api/signup', { first, last, email, industry, consent, source, stage, password, confirm, token: token() });
+export async function signup({ first, last, email, industry, consent, source, stage, type, company, noCompany, interest, password, confirm, landing, utm }) {
+  const out = await post('/api/signup', { first, last, email, industry, consent, source, stage, type, company, noCompany, interest, password, confirm, landing, utm, token: token() });
   if (out.token) keep(out.token);
   return out;
 }
@@ -95,7 +99,7 @@ export async function login(email, password) {
   return out;
 }
 
-/** Set or change the optional password, once signed in. */
+/** Change the password, once signed in. */
 export const setPassword = (password, confirm) => post('/api/password', { token: token(), password, confirm });
 
 /** Notes from Alexandru and the team, and marking one read. */
