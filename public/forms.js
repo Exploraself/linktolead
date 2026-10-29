@@ -31,3 +31,23 @@ export function readDetails(p, need = ['company', 'interest', 'industry'], doc =
     : need.includes('industry') && !INDUSTRIES.includes(out.industry) ? 'Choose your industry.' : '';
   return out;
 }
+
+// ── Where a founder came from ───────────────────────────────────────────────
+// The utm_* tags of the address a founder first arrived on are kept in this
+// browser (first visit wins) and sent with the sign-up, beside the landing
+// page ('a', 'b', 'c' or 'compass'). Nothing else about the visit is kept.
+export const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+const UTM_STORE = 'ftb-utm';
+
+/** Keep the utm_* tags of this address, unless some are already kept. */
+export function rememberUtm(search = (typeof location !== 'undefined' ? location.search : '')) {
+  const q = new URLSearchParams(search), got = {};
+  for (const k of UTM_KEYS) { const v = q.get(k); if (v) got[k] = v.slice(0, 100); }
+  if (!Object.keys(got).length) return;
+  try { if (!localStorage.getItem(UTM_STORE)) localStorage.setItem(UTM_STORE, JSON.stringify(got)); } catch { /* private mode */ }
+}
+
+/** The kept utm_* tags, or {}. */
+export function utm() {
+  try { const o = JSON.parse(localStorage.getItem(UTM_STORE) || '{}'); return o && typeof o === 'object' ? o : {}; } catch { return {}; }
+}

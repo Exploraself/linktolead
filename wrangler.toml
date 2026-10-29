@@ -21,10 +21,12 @@ keep_vars = true
 [assets]
 directory = "./public"
 binding = "ASSETS"
-# One page, with the views handled in the browser, so any path serves it.
-not_found_handling = "single-page-application"
-# Only the API reaches worker.js; every page and file is served as before.
-run_worker_first = ["/api/*"]
+# An address with no page gets public/404.html and a real 404 status, never
+# the home page. Every page is its own folder (/, /a, /b, /start, /compass…).
+not_found_handling = "404-page"
+# The API and /c (a 302 to /compass/welcome, query string kept) reach
+# worker.js; every page and file is served as before.
+run_worker_first = ["/api/*", "/c", "/c/"]
 
 # The student record: programme answers, worksheet figures, Compass reports and
 # notes to the mentor. Free tier; see functions/_shared.js for how routes behave

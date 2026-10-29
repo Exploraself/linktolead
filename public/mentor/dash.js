@@ -25,7 +25,6 @@ export function summary(students, waiting, now = Date.now()) {
     library: list.filter((s) => !!s.library).length,
     full: list.filter((s) => s.signup_type === 'full').length,
     simple: list.filter((s) => s.signup_type === 'simple').length,
-    noPassword: list.filter((s) => !s.has_password).length,
   };
 }
 
@@ -39,10 +38,19 @@ export function filter(students, { tile = 'all', q = '' } = {}, now = Date.now()
     if (tile === 'quiet' && !isQuiet(s, now)) return false;
     if (tile === 'library' && !s.library) return false;
     if ((tile === 'full' || tile === 'simple') && s.signup_type !== tile) return false;
-    if (tile === 'nopw' && s.has_password) return false;
     if (STEP_KEYS.includes(tile) && (s.tier || 'free') !== tile) return false;
     if (needle && !`${s.name || ''} ${s.email || ''} ${s.company || ''}`.toLowerCase().includes(needle)) return false;
     return true;
+  });
+}
+
+/** Sign-ups per landing: sales pages A, B and C, and the Compass box. Each
+ *  row: all of them, the last 7 days, and how many used the full form. */
+export const LANDINGS = [['a', 'A · /a'], ['b', 'B · / and /b'], ['c', 'C · /compass/welcome'], ['compass', 'Compass box']];
+export function byLanding(students, now = Date.now()) {
+  return LANDINGS.map(([k, name]) => {
+    const rows = (students || []).filter((s) => s.landing === k);
+    return { k, name, total: rows.length, week: rows.filter((s) => isNew(s, now)).length, full: rows.filter((s) => s.signup_type === 'full').length };
   });
 }
 

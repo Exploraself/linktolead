@@ -1,15 +1,18 @@
 /* The account box on the sales pages: makes the free account and opens the
  * founder's Ground Plan at /start, signed in at once.
  *
- *   'full'   (/compass/welcome): first name, surname, email, company (or "No
- *            company yet"), interest, industry, consent.
- *   'simple' ("/"): first name, surname, email, consent.
+ *   'full'   (/compass/welcome and /compass/welcome-a, landing "c"): first
+ *            name, surname, email, company (or "No company yet"), interest,
+ *            industry, a password (required: at least 10 characters, typed
+ *            twice), consent.
+ *   'simple' (/a and /b = "/"): first name, surname, email, consent. No
+ *            password, ever: these founders sign in by email link.
  *
- * No password here: the Launchpad asks for one the first time it opens. The
- * consent box starts unticked; without it the account is still made, and
- * nothing is emailed but what the founder asks for. Loaded the first time a
- * box opens (sales.js, or the "/" page), then open() each time. */
-import { detailFields, readDetails, CONSENT } from '/forms.js';
+ * The consent box starts unticked; without it the account is still made, and
+ * nothing is emailed but what the founder asks for. The landing page and the
+ * utm_* tags the founder arrived with go with the sign-up. Loaded the first
+ * time a box opens (sales.js, /a, /b), then open() each time. */
+import { detailFields, readDetails, CONSENT, utm } from '/forms.js';
 
 const $ = (s) => document.querySelector(s);
 const KEY = 'exploraself-profile';
@@ -37,7 +40,10 @@ const markup = (variant) => `<div class="gpop abox" role="dialog" aria-modal="tr
         <label style="${LAB}">Surname<input class="inp" id="j-last" type="text" autocomplete="family-name" maxlength="60"></label>
       </div>
       <label style="${LAB}">Email<input class="inp" id="j-email" type="email" autocomplete="email" maxlength="120"></label>
-      ${variant === 'full' ? detailFields('j', LAB) : ''}
+      ${variant === 'full' ? detailFields('j', LAB) + `
+      <label style="${LAB}">Password<input class="inp" id="j-pw" type="password" autocomplete="new-password" minlength="10" maxlength="200"></label>
+      <label style="${LAB}">Confirm password<input class="inp" id="j-pw2" type="password" autocomplete="new-password" minlength="10" maxlength="200"></label>
+      <span style="font-size: 12px; color: #5A6580; margin-top: -6px">At least 10 characters. You sign in with your email and this password.</span>` : ''}
       <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: #3D4966"><input type="checkbox" id="j-consent" style="width: 18px; height: 18px; margin-top: 1px; accent-color: #C9A24A; flex: none">${CONSENT}</label>
       <span id="gate-err" role="alert" style="font-size: 13px; color: #B5512E; font-weight: 700"></span>
       <button type="submit" class="ab-go">OPEN MY GROUND PLAN →</button>
@@ -46,7 +52,7 @@ const markup = (variant) => `<div class="gpop abox" role="dialog" aria-modal="tr
     </form>
   </div>`;
 
-let ctx = { opener: null, stage: null, variant: 'full' };
+let ctx = { opener: null, stage: null, variant: 'full', landing: 'c' };
 function close() { $('#gate').hidden = true; if (ctx.opener) ctx.opener.focus(); }
 
 function wire(gate, variant) {
@@ -70,6 +76,9 @@ function wire(gate, variant) {
     if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return err('That email does not look complete.');
     const d = variant === 'full' ? readDetails('j') : null;
     if (d && d.problem) return err(d.problem);
+    const pw = variant === 'full' ? $('#j-pw').value : '', pw2 = variant === 'full' ? $('#j-pw2').value : '';
+    if (variant === 'full' && pw.length < 10) return err('A password of at least 10 characters, please.');
+    if (variant === 'full' && pw !== pw2) return err('The two passwords are different.');
     const p = { first, last, email, consent, stage: ctx.stage ? ctx.stage.id : '', industry: d ? d.industry : '' };
     try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* private mode */ }
     const go = form.querySelector('[type=submit]'); go.disabled = true; go.textContent = 'ONE MOMENT…';
@@ -78,7 +87,8 @@ function wire(gate, variant) {
       const A = await import('/account.js');
       const source = variant === 'full' ? 'sales-page' : 'home';
       const out = A.joined() ? { token: A.token() } : await A.signup({ first, last, email, consent, source, stage: p.stage, type: variant,
-        ...(d ? { company: d.company, noCompany: d.noCompany, interest: d.interest, industry: d.industry } : {}) });
+        landing: ctx.landing, utm: utm(),
+        ...(d ? { company: d.company, noCompany: d.noCompany, interest: d.interest, industry: d.industry, password: pw, confirm: pw2 } : {}) });
       if (out.token) { location.href = '/start#home'; return; }
       // An address that already has an account is never handed its key here.
       $('#gate-err').innerHTML = 'This email already has an account. <a href="/start#signin">Sign in →</a>';
@@ -91,8 +101,8 @@ function wire(gate, variant) {
 
 /** Open the box. A founder already signed in on this device goes straight to
  *  their Ground Plan. */
-export function open({ gate, opener, stage, variant = 'full' }) {
-  ctx = { opener, stage, variant };
+export function open({ gate, opener, stage, variant = 'full', landing = variant === 'full' ? 'c' : 'b' }) {
+  ctx = { opener, stage, variant, landing };
   if (hasAccount()) {
     if (stage) { const p = known() || {}; p.stage = stage.id; try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* private mode */ } }
     location.href = '/start#home';

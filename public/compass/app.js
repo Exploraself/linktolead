@@ -158,7 +158,9 @@
     if (!A || signedIn() || !identified()) return signedIn();
     const P = S.profile;
     let out;
-    try { out = await A.signup({ first: P.first, last: P.last, email: P.email, industry: P.industry, consent: P.consent, source, stage: S.stage, type: 'simple' }); }
+    let utm = {};
+    try { utm = (await import('/forms.js')).utm(); } catch { /* no tags kept */ }
+    try { out = await A.signup({ first: P.first, last: P.last, email: P.email, industry: P.industry, consent: P.consent, source, stage: S.stage, type: 'simple', landing: 'compass', utm }); }
     catch { return false; }
     S.acct = { email: P.email, state: out.token ? 'yes' : out.existing ? 'existing' : '' };
     save();
@@ -224,6 +226,7 @@
     catch (e) { say(e && e.message ? e.message : 'It did not save. Try again in a minute.'); }
   }
   async function boot() {
+    try { (await import('/forms.js')).rememberUtm(); } catch { /* old browser */ }
     try { A = await import('/account.js'); } catch { A = null; }
     if (!A) return;
     let code = '';

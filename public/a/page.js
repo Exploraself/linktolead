@@ -1,7 +1,9 @@
-// "/", the simple sales page: the twelve levels for the stage picked in the
-// tabs (names from content.js), the ladder's bars, the bar for founders who are
-// already signed in, and every "Join" opening the simple account form.
-import { weekTitle, loadStage } from './content.js';
+// "/a", sales page A (the 12 Scrolls design): the twelve levels for the stage
+// picked in the tabs (names from content.js), the ladder's bars, the bar for
+// founders who are already signed in, and every "Join" opening the simple
+// account form (landing "a").
+import { weekTitle, loadStage } from '../content.js';
+import { rememberUtm } from '../forms.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -32,6 +34,7 @@ function showStage(stage) {
 }
 
 if (typeof document !== 'undefined' && $('#levels')) {
+  rememberUtm();
   showStage('build');
   const tabs = [...document.querySelectorAll('[role="tab"][data-stage]')];
   tabs.forEach((t, i) => {
@@ -61,7 +64,7 @@ if (typeof document !== 'undefined' && $('#levels')) {
   const join = (e) => {
     const opener = e && e.currentTarget;
     gate.hidden = false;
-    loadBox().then((m) => m && m.open({ gate, opener, stage: null, variant: 'simple' }));
+    loadBox().then((m) => m && m.open({ gate, opener, stage: null, variant: 'simple', landing: 'a' }));
   };
   document.querySelectorAll('[data-join]').forEach((b) => b.addEventListener('click', join));
   if (location.hash === '#join') join();

@@ -3,7 +3,6 @@
 // inside D1's free daily allowance even with a few hundred students.
 
 import { json, bad, db, now, clean, accountTables } from '../_shared.js';
-import { missing } from '../_profile.js';
 
 async function student(D, token) {
   if (!token || token.length < 20) return null;
@@ -24,7 +23,7 @@ export async function onRequestGet({ request, env }) {
     D.prepare('SELECT stage,results_json,flags_json,updated_at FROM compass WHERE student_id = ?').bind(me.id).first(),
     D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(me.id).first(),
     D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'stage-change' LIMIT 1").bind(me.id).first(),
-    D.prepare('SELECT signup_type, company, interest, industry FROM student_profile WHERE student_id = ?').bind(me.id).first(),
+    D.prepare('SELECT signup_type FROM student_profile WHERE student_id = ?').bind(me.id).first(),
   ]);
   await D.prepare('UPDATE student SET last_seen_at=? WHERE id=?').bind(now(), me.id).run();
 
@@ -34,10 +33,10 @@ export async function onRequestGet({ request, env }) {
   for (const r of sheets.results || []) w[r.key] = r.value;
 
   // stageChosen: the founder picked this stage on /start ("Change where I
-  // stand"), so it wins over the Compass's on every device. needs: what the
-  // password gate must also ask (company, interest, industry).
+  // stand"), so it wins over the Compass's on every device. signupType:
+  // 'simple' founders never have a password, so /start offers none.
   return json({ ok: true, me: { name: me.name, email: me.email, stage: me.stage, stageChosen: !!chose, tier: me.tier, thin: me.thin_domain, hasPassword: !!(auth && auth.pass_hash),
-    signupType: (prof && prof.signup_type) || null, needs: missing(prof) },
+    signupType: (prof && prof.signup_type) || null },
     answers: a, work: w, compass: compass || null });
 }
 

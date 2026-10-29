@@ -31,17 +31,18 @@ ok(passwordProblem('short') !== '' && passwordProblem('ten chars!') === '', 'min
 ok(passwordProblem('same secret here', 'same secret here') === '', 'matching confirmation passes');
 ok(passwordProblem('same secret here', 'different words') === 'The two passwords are different.', 'non-matching confirmation is said plainly');
 
-// ── Signup with and without a password ──────────────────────────────────────
-let [st, j] = await J(await signup({ request: post('/api/signup', { first: 'Ana', email: 'ana@example.com', password: 'mismatch-one', confirm: 'mismatch-two' }), env }));
+// ── Signup: the full form with its password, the simple form without ────────
+const FULL = { type: 'full', company: 'Acme', interest: 'Higher income', industry: 'Other' };
+let [st, j] = await J(await signup({ request: post('/api/signup', { first: 'Ana', email: 'ana@example.com', ...FULL, password: 'mismatch-one', confirm: 'mismatch-two' }), env }));
 ok(st === 400 && j.error === 'The two passwords are different.' && !DB.raw.prepare("SELECT 1 FROM student WHERE email='ana@example.com'").get(), 'signup with different passwords makes nothing');
-[st, j] = await J(await signup({ request: post('/api/signup', { first: 'Ana', email: 'ana@example.com', password: 'correct horse', confirm: 'correct horse' }), env }));
+[st, j] = await J(await signup({ request: post('/api/signup', { first: 'Ana', email: 'ana@example.com', ...FULL, password: 'correct horse', confirm: 'correct horse' }), env }));
 const ana = j.token;
 const auth = DB.raw.prepare('SELECT * FROM account_auth WHERE student_id = ?').get(ana);
 ok(st === 200 && auth && auth.pass_hash && auth.salt && auth.iterations === 100000, 'signup with a password stores only a hash');
 ok(!JSON.stringify(DB.raw.prepare('SELECT * FROM account_auth').all()).includes('correct horse'), 'the password itself is never stored');
 [st, j] = await J(await signup({ request: post('/api/signup', { first: 'Bo', email: 'bo@example.com' }), env }));
 const bo = j.token;
-ok(!DB.raw.prepare('SELECT 1 FROM account_auth WHERE student_id = ?').get(bo), 'no password: none stored, the email link still works');
+ok(!DB.raw.prepare('SELECT 1 FROM account_auth WHERE student_id = ?').get(bo), 'simple form: no password stored, the email link works');
 
 // ── Signing in ───────────────────────────────────────────────────────────────
 const L = (email, password, ip = '1.1.1.1') => login({ request: post('/api/login', { email, password }, ip), env });
@@ -83,6 +84,10 @@ ok(st === 200 && j.token === ana, 'unpaused: signs in again, password kept');
 const P = (token, password, confirm) => setPw({ request: post('/api/password', { token, password, confirm }), env });
 [st] = await J(await P('x'.repeat(48), 'whatever long one', 'whatever long one'));
 ok(st === 401, 'setting a password needs to be signed in');
+[st, j] = await J(await P(bo, 'first password', 'first password'));
+ok(st === 403 && /link we email you/.test(j.error), 'simple form: no password, ever');
+// An account from before the two forms (no signup_type) can still set one.
+DB.raw.prepare('UPDATE student_profile SET signup_type = NULL WHERE student_id = ?').run(bo);
 [st, j] = await J(await P(bo, 'first password', 'first passwrod'));
 ok(st === 400 && j.error === 'The two passwords are different.', 'set: confirmation must match');
 [st, j] = await J(await P(bo, 'short', 'short'));

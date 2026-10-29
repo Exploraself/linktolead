@@ -79,20 +79,26 @@ so a deploy never removes them.
 | `MAILCHIMP_API_KEY` | **Secret** | Switches Mailchimp to API mode: tags, updates and unsubscribes, and no form fields to satisfy. |
 | `MAILCHIMP_DOUBLE_OPTIN` | Text, optional | `yes` makes Mailchimp send its own confirmation email before someone joins (API mode). |
 
-### Sign-up: two forms, one account, a password at the Launchpad
+### Three sales pages, two forms, one account
 
-Two sales pages lead to one account: `/` (the simple page) opens the SIMPLE form
-(first name, surname, email, consent) and `/compass/welcome` the FULL form (also
-company or "No company yet", what they want most, industry). The Compass's own
-"Who is this compass for?" box is the simple form. Either way the founder is
-signed in at once and lands on `/start`; `student_profile.signup_type` says
-which form. No password is asked at sign-up: the first time a founder opens the
-Launchpad without one, `/start` shows **Set your password to keep your work**
-(`/api/complete`), and a simple founder gives the business details there and
-becomes full. Sign-in is email and password, with "Forgot your password? Email
-me a sign-in link". Mailchimp gets `Signup - Full` / `Signup - Simple`,
-`Interest - <goal>`, `Industry - <name>` and COMPANY. `/compass/welcome-a`
-redirects to `/` (`public/_redirects`).
+Three sales pages, all ending at `/start`:
+
+| Page | Address | Account form | Landing |
+|---|---|---|---|
+| A | `/a` (the 12 Scrolls page) | SIMPLE | `a` |
+| B | `/` and `/b` (the long page; `/b/index.html` is a copy of `/index.html`) | SIMPLE | `b` |
+| C | `/c` → 302 to `/compass/welcome` (query string kept), and `/compass/welcome-a` | FULL | `c` |
+
+The Compass's own "Who is this compass for?" box is the SIMPLE form (landing
+`compass`). SIMPLE: first name, surname, email, consent — no password, ever;
+these founders sign in by email link. FULL: also company (or "No company yet"),
+what they want most, industry and a password (required, at least 10
+characters). Either way the founder is signed in at once and lands on `/start`.
+`student_profile` keeps `signup_type`, `landing` and the `utm_*` tags they
+arrived with. Mailchimp gets `Signup - Full` / `Signup - Simple`,
+`Landing - A` / `B` / `C`, `Interest - <goal>`, `Industry - <name>` and
+COMPANY. `/mentor` shows all of it and a table of sign-ups per landing.
+Unknown addresses get `public/404.html` with a 404 status.
 
 ### Emails: letters from Alexandru
 

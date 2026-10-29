@@ -79,13 +79,14 @@ export function mailchimpState(env = {}) {
  *  only accumulate: the founder's step and every step before it, always
  *  active and never sent as inactive, so a step lowered by mistake takes
  *  nothing away. */
-export function tagsFor({ source, stage, weakest, tier, signupType, interest, industry }) {
+export function tagsFor({ source, stage, weakest, tier, signupType, interest, industry, landing }) {
   const st = PROGRAMME[stage] || null;
   const out = [{ name: 'linktolead', status: 'active' }];
   if (source) out.push({ name: source, status: 'active' });
-  // Which form they signed up with. "Signup - Full" is added when a simple
-  // founder completes their details; the simple tag stays (never inactive).
+  // Which form they signed up with.
   if (signupType === 'full' || signupType === 'simple') out.push({ name: signupType === 'full' ? 'Signup - Full' : 'Signup - Simple', status: 'active' });
+  // The sales page they signed up on (the Compass box has none).
+  if (['a', 'b', 'c'].includes(landing)) out.push({ name: `Landing - ${landing.toUpperCase()}`, status: 'active' });
   // The audience has no merge fields for these, so they go as tags.
   if (interest) out.push({ name: `Interest - ${interest}`, status: 'active' });
   if (industry) out.push({ name: `Industry - ${industry}`, status: 'active' });
@@ -229,7 +230,7 @@ export async function record(D, { studentId, email, action, mode, status, detail
 export async function syncFounder(env, D, studentId, action = 'join', { keepLog = true, tag = '' } = {}) {
   const s = await D.prepare('SELECT id, email, name, stage, tier FROM student WHERE id = ?').bind(studentId).first();
   if (!s) return { status: 'skipped', detail: 'No such founder.' };
-  const p = await D.prepare('SELECT consent, unsubscribed, source, signup_type, company, interest, industry FROM student_profile WHERE student_id = ?').bind(studentId).first();
+  const p = await D.prepare('SELECT consent, unsubscribed, source, signup_type, company, interest, industry, landing FROM student_profile WHERE student_id = ?').bind(studentId).first();
   if (!p || !p.consent) return { status: 'skipped', detail: 'No consent.' };
   if (action !== 'unsubscribe') {
     if (p.unsubscribed) return { status: 'skipped', detail: 'Unsubscribed.' };
@@ -245,7 +246,7 @@ export async function syncFounder(env, D, studentId, action = 'join', { keepLog 
   const [first, ...rest] = String(s.name || '').split(' ');
   const member = { email: s.email, first, last: rest.join(' '), source: p.source || 'compass',
     stage: (chose && s.stage) || (c && c.stage) || s.stage, weakest: c ? weakestTag(c.results_json) : null, tier: s.tier || 'free', tag,
-    signupType: p.signup_type, interest: p.interest, industry: p.industry, company: p.company };
+    signupType: p.signup_type, interest: p.interest, industry: p.industry, company: p.company, landing: p.landing };
   const out = await push(env, member, action);
   if (keepLog) await record(D, { studentId, email: s.email, action, mode: st.mode, status: out.status, detail: out.detail });
   // Which step's tags went with it, so the backfill knows who still needs

@@ -1,6 +1,6 @@
 /* "What opens with your free account": everything on the other side of the
  * free account, each line with what it gives a founder's life and business.
- * Used by /compass/welcome; sales.js loads it as the
+ * Shared by /compass/welcome and /compass/welcome-a; sales.js loads it as the
  * visitor scrolls near it, with the library from /content.js (LIBRARY) and the
  * number of plan steps from the live plans data, so no title, page count or
  * step count is typed twice. Nothing here is a claim the copy did not make. */
@@ -76,7 +76,7 @@ export function markup(L, steps) {
         <ul class="kit-ticks"><li>${I.tools.length} tools that work from day one</li><li>${L.manuals.length} manuals and ${out} books to download${soon ? ', a third on the way' : ''}</li><li>Alexandru and the team beside you</li></ul></div>
       <div class="kit-cta"><span class="kick">Free and yours to keep</span>
         <button type="button" data-gate class="gold-btn">Create my free account →</button>
-        <span class="kit-small">Your name, your email and three short questions about your business. No card.</span></div>
+        <span class="kit-small">Your name, your email, a password and three short questions about your business. No card.</span></div>
     </div>`;
 }
 

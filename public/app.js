@@ -16,7 +16,6 @@ import { entry, programmeStage, groundPlan, stageNudge } from './home.js';
 import { result as fwResult } from './frameworks.js';
 import { report } from './feedback.js';
 import * as account from './account.js';
-import { detailFields, readDetails } from './forms.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -39,9 +38,10 @@ let level = 1, dom = 'self';
 let compassRec = null, inbox = null, hasPassword = false, replyTo = null;
 /** The "Ask Alexandru" thread (null until loaded), and the stage picker. */
 let ask = null, changingStage = false;
-/** The account has been read this visit, and what the password gate must ask
- *  besides the password (company, interest, industry). */
-let pulled = false, needs = [];
+/** The account has been read this visit (the greeting waits for it, so a
+ *  name cached on this device is never shown for someone else), and which
+ *  form the founder signed up with ('simple' founders have no password). */
+let pulled = false, signupType = null;
 
 const compass = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12 12 2.5Z"/><path d="m12 5.7 2 4.3 4.3 2-4.3 2-2 4.3-2-4.3-4.3-2 4.3-2 2-4.3Z" fill="currentColor" stroke="none"/></svg>';
 
@@ -134,7 +134,8 @@ const pwField = (id, label, auto) => `<label class="pwf"><span>${label}</span><s
 
 /** A promise's first sentence: what that level leaves you with by Sunday. */
 const promiseOf = (st, n) => { const L = (LEVELS[st] || {})[n]; return L && L.promise ? L.promise.split(/(?<=\.)\s+(?=[A-Z])/)[0] : ''; };
-const firstName = () => (state.me && state.me.name ? state.me.name.split(' ')[0] : '');
+/** The founder's first name, from their account as read on this visit. */
+const firstName = () => (pulled && state.me && state.me.name ? state.me.name.split(' ')[0] : '');
 
 /** The first level not yet finished and open to this founder. */
 function nextLevel(st) {
@@ -182,31 +183,6 @@ function planHTML(gp, st) {
         <a class="gp-line" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my 1:1 with Alexandru</a></div>
     </section>
     ${plansCard()}`;
-}
-
-// ── The password gate ────────────────────────────────────────────────────────
-// The first time a founder opens the Launchpad without a password: "Set your
-// password to keep your work". No way past it without one. A founder who
-// signed up with the simple form also gives company, interest and industry
-// here. Shown only once the account has been read, so an offline visit is
-// never locked out of work saved on the device.
-const needsPassword = () => account.joined() && pulled && !hasPassword;
-
-function passwordGateView() {
-  const lab = 'display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: .4px';
-  return `<section class="band qband pwgate"><div class="wrap narrow">
-    <p class="eyebrow">${compass} The Founder Launchpad</p>
-    <h1 class="qh" id="pwg-h">Set your password to keep your work</h1>
-    <p class="sec-lede">Everything you write in the Launchpad is saved to your account. A password keeps it yours, on any device.${needs.length ? ' Three short questions about your business come with it.' : ''}</p>
-    <form class="joinbox bare pwg-form" id="pwgate" novalidate aria-labelledby="pwg-h">
-      ${needs.length ? `<div class="pwg-details">${detailFields('pg', lab, needs)}</div>` : ''}
-      <div class="joinrow">${pwField('pg-pw1', 'Password', 'new-password')}${pwField('pg-pw2', 'Confirm password', 'new-password')}</div>
-      <p class="savenote">At least 10 characters.</p>
-      <button class="cta" type="submit">Save and open level ${String(level).padStart(2, '0')} →</button>
-      <p class="joinerr" id="pwg-msg" role="status"></p>
-      <button class="ghost" type="button" data-go="home">Back to my Ground Plan</button>
-    </form>
-  </div></section>`;
 }
 
 // ── Where I stand ────────────────────────────────────────────────────────────
@@ -292,15 +268,16 @@ async function openAsk() {
 }
 
 function accountHTML() {
+  const simple = signupType === 'simple' && !hasPassword;
   return `<section class="gp-wrap gp-account" aria-labelledby="acct-h">
     <p class="eyebrow" id="acct-h">Your account</p>
-    <p class="gp-lede">${state.me && state.me.email ? `Signed in as <b>${esc(state.me.email)}</b>. ` : ''}Your work is saved to your account and follows you between devices.</p>
-    <details class="pw-box"><summary>${hasPassword ? 'Change your password' : 'Set your password'}</summary>
+    <p class="gp-lede">${state.me && state.me.email ? `Signed in as <b>${esc(state.me.email)}</b>. ` : ''}Your work is saved to your account and follows you between devices.${simple ? ' On another device, sign in with a link we email you.' : ''}</p>
+    ${simple ? '' : `<details class="pw-box"><summary>${hasPassword ? 'Change your password' : 'Set your password'}</summary>
       <form id="pwform" class="pwform" novalidate>
         <p class="savenote">At least 10 characters. “Forgot your password? Email me a sign-in link” always works too.</p>
         ${pwField('pw1', 'Password', 'new-password')}${pwField('pw2', 'Confirm password', 'new-password')}
         <button class="cta" type="submit">Save my password</button><p class="joinerr" id="pwmsg" role="status"></p>
-      </form></details>
+      </form></details>`}
     <button type="button" class="ghost" data-signout>Sign out on this device</button>
   </section>`;
 }
@@ -328,7 +305,7 @@ function signinView() {
   return `<section class="band qband"><div class="wrap narrow">
     <p class="eyebrow">${compass} Your Ground Plan</p>
     <h1 class="qh">Sign in</h1>
-    <p class="sec-lede">Your email and password. No password yet, or forgotten it? We email you a link that signs you in on this device.</p>
+    <p class="sec-lede">Your email and password. Signed up with your name and email only, or forgotten your password? We email you a link that signs you in on this device.</p>
     <form class="joinbox bare" id="signinform" novalidate>
       <div class="joinrow">
         <label><span>Email</span><input id="si-email" type="email" autocomplete="email" required></label>
@@ -685,8 +662,7 @@ function render() {
     loadStage(st).then(render).catch(() => { $('#main').innerHTML = '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="alert">We could not open your programme just now. Check your connection and reload.</p></div></section>'; });
     return;
   }
-  $('#main').innerHTML = view === 'work' && needsPassword() ? passwordGateView()
-    : view === 'work'
+  $('#main').innerHTML = view === 'work'
     ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work"><div id="libban">${libBanner()}</div><div id="mod">${moduleHTML(st)}</div></div></div>`
     : view === 'home' ? homeView()
     : view === 'library' ? libraryView()
@@ -780,21 +756,6 @@ document.addEventListener('submit', async (e) => {
     catch (ex) { say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'It did not save. Try again in a minute.'); }
     return;
   }
-  if (f.id === 'pwgate') {
-    e.preventDefault();
-    const msg = $('#pwg-msg'), say = (t) => { msg.textContent = t; };
-    const d = needs.length ? readDetails('pg', needs) : { problem: '' };
-    if (d.problem) return say(d.problem);
-    const a = $('#pg-pw1').value, c = $('#pg-pw2').value;
-    if (a.length < 10) return say('At least 10 characters, please.');
-    if (a !== c) return say('The two passwords are different.');
-    const go = f.querySelector('[type=submit]'); go.disabled = true;
-    try {
-      await account.complete({ password: a, confirm: c, ...(needs.length ? { company: d.company, noCompany: d.noCompany, interest: d.interest, industry: d.industry } : {}) });
-      hasPassword = true; needs = []; render(); window.scrollTo({ top: 0, behavior: 'instant' });
-    } catch (ex) { go.disabled = false; say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'It did not save. Try again in a minute.'); }
-    return;
-  }
   if (f.id === 'askform') {
     e.preventDefault();
     const t = f.querySelector('textarea'), msg = f.querySelector('.joinerr'), body = t.value.trim();
@@ -819,7 +780,6 @@ document.addEventListener('submit', async (e) => {
 });
 
 document.addEventListener('change', (e) => {
-  if (e.target.id === 'pg-nocompany') { const c = $('#pg-company'); if (c) { c.disabled = e.target.checked; if (e.target.checked) c.value = ''; } return; }
   const t = e.target.closest('input[data-plantick]');
   if (!t || !acctPlans) return;
   const id = t.dataset.plantick, on = t.checked, was = acctPlans.done[id];
@@ -881,6 +841,9 @@ async function comeHome() {
   render();
   if (!account.joined()) return;
   const [r, msgs, th] = await Promise.all([account.pull(), account.messages(), account.thread()]);
+  // The account this device remembers no longer exists (deleted): forget it
+  // and its cached name, and ask to sign in.
+  if (r && r.gone) { account.signOut(); state.me = null; save(); view = 'signin'; render(); return; }
   if (msgs && msgs.ok) inbox = msgs;
   if (th && th.ok) ask = th;
   if (r && r.ok) {
@@ -891,7 +854,7 @@ async function comeHome() {
       state.me = { name: r.me.name, email: r.me.email };
       if (r.me.tier) state.tier = r.me.tier;
       hasPassword = !!r.me.hasPassword;
-      needs = Array.isArray(r.me.needs) ? r.me.needs : [];
+      signupType = r.me.signupType || null;
       pulled = true;
     }
     let sales = '';

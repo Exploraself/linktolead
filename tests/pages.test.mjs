@@ -35,10 +35,11 @@ for (const f of files('public')) {
   ok(!/Cornerstone|Enter the Incubator|\+ 12 sessions/.test(s), `${f}: no retired names`);
 }
 
-// The Compass sales page. Its old version A is retired: /compass/welcome-a
-// goes to "/" for good (public/_redirects).
-const B = read('public/compass/welcome/index.html');
-ok(B.includes('Your business, on paper.'), 'the sales page headline');
+// The sales page: B is the main one; A differs only in its hero and titles.
+const B = read('public/compass/welcome/index.html'), A = read('public/compass/welcome-a/index.html');
+ok(B.includes('Your business, on paper.') && A.includes('What is your business for?'), 'each version has its headline');
+const body = (s) => s.slice(s.indexOf('<!-- 1a · HANDSHAKE'));
+ok(body(A) === body(B), 'everything after the hero is the same in A and B');
 ok(B.includes('[PHOTO OF ALEXANDRU]'), 'photo placeholder kept');
 
 // The Summit page keeps its placeholders until Alexandru fills them.
@@ -47,28 +48,27 @@ for (const ph of ['[YOUR BOOKING LINK]', '[SESSION LENGTH]', '[ONLINE OR IN PERS
 ok(read('public/compass/app.js').includes('[YOUR PRICE]'), 'Boardroom price placeholder kept');
 
 // Every Compass page carries the favicon and the share image.
-for (const f of ['public/compass/index.html', 'public/compass/summit/index.html', 'public/compass/welcome/index.html']) {
+for (const f of ['public/compass/index.html', 'public/compass/summit/index.html', 'public/compass/welcome/index.html', 'public/compass/welcome-a/index.html']) {
   const s = read(f);
   ok(s.includes('favicon.svg') && s.includes('og:image') && s.includes('twitter:card'), `${f}: favicon and share image`);
 }
 
 // The Link to Lead headline, with its alternate kept.
 const L = read('public/index.html');
-ok(L.includes('<h1 class="h1">Your business, on paper.<br><em>Not in your head.</em></h1>'), 'landing headline');
-ok(!/ten questions|10 questions/i.test(L), 'no "ten questions" left on "/"');
+ok(L.includes('<h1>What is your business <em>for?</em></h1>') && L.includes('Your business, on paper. <em>Not in your head.</em>'), 'landing headline and alternate');
 
 // The four domains are always named in full on screen: no SELF / PEOPLE /
 // WORK / MARKET labels, and no Archivo or Libre Caslon left on the sales pages.
-for (const f of ['public/compass/index.html', 'public/compass/welcome/index.html', 'public/index.html']) {
+for (const f of ['public/compass/index.html', 'public/compass/welcome/index.html', 'public/compass/welcome-a/index.html', 'public/index.html']) {
   const s = read(f);
   ok(!/>\s*(SELF|PEOPLE|WORK|MARKET|YOURSELF|BUSINESS)\s*</.test(s), `${f}: no short domain labels`);
   ok(!/LEAD YOURSELF<\/text>|LEAD THE MARKET<\/text>/.test(s), `${f}: no duplicate small domain lines`);
 }
-for (const f of ['public/compass/welcome/index.html', 'public/compass/welcome/sales.css']) {
+for (const f of ['public/compass/welcome/index.html', 'public/compass/welcome-a/index.html', 'public/compass/welcome/sales.css']) {
   ok(!/Archivo|Caslon/.test(read(f)), `${f}: Compass fonts only`);
 }
 // Fonts load once, from this site: no Google Fonts, no old .ttf files.
-for (const f of ['public/index.html', 'public/start/index.html', 'public/mentor/index.html', 'public/compass/index.html', 'public/compass/summit/index.html', 'public/compass/welcome/index.html']) {
+for (const f of ['public/index.html', 'public/start/index.html', 'public/mentor/index.html', 'public/compass/index.html', 'public/compass/summit/index.html', 'public/compass/welcome/index.html', 'public/compass/welcome-a/index.html']) {
   const s = read(f);
   ok(s.includes('href="/assets/fonts.css"') && !s.includes('fonts.googleapis.com') && s.includes('rel="preload" href="/assets/fonts/fraunces.woff2"'), `${f}: fonts once, self-hosted, preloaded`);
 }
@@ -89,7 +89,7 @@ ok(read('public/compass/dawn.js').includes('prefers-reduced-motion'), 'dawn resp
 
 // PR 5: "What opens with your free account", on both sales pages, right after
 // "A look inside" and right before "Decide what winning is for."
-for (const [name, P] of [['welcome', B]]) {
+for (const [name, P] of [['welcome', B], ['welcome-a', A]]) {
   const look = P.indexOf('A LOOK INSIDE'), kit = P.indexOf('WHAT OPENS WITH YOUR FREE ACCOUNT'), fin = P.indexOf('Decide what winning is for.');
   ok(look > 0 && kit > look && fin > kit, `${name}: the section sits after A look inside, before the final band`);
   ok(P.indexOf('id="kit-body" data-lazy') > kit && P.indexOf('id="kit-body"') < fin, `${name}: its body is filled in place by kit.js`);
@@ -113,7 +113,7 @@ const COPY = [
   '3 manuals, one for each stage · 99 practical tools · 32 leadership frameworks · 12 principles, coming soon',
   'You don’t have to figure it out alone. Your mentor, and the whole team behind you.', 'Notes from Alexandru and the team arrive on your Ground Plan, and you can reply.',
   'One question before you scroll on: what would one more free evening a week give your family?', '4 tools that work from day one', '3 manuals and 2 books to download, a third on the way', 'Alexandru and the team beside you',
-  'Free and yours to keep', 'Create my free account →', 'Your name, your email and three short questions about your business. No card.',
+  'Free and yours to keep', 'Create my free account →', 'Your name, your email, a password and three short questions about your business. No card.',
 ];
 for (const t of COPY) ok(flat.includes(t), `kit copy: ${t}`);
 const I = items(LIBRARY, ALL_STEP_IDS.length);

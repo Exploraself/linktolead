@@ -1,13 +1,15 @@
-// What a founder tells us about their business when they sign up, or when
-// they first open the Launchpad: company, interest and industry.
+// What a founder tells us when they sign up: company, interest and industry
+// (the full form), and where they came from.
 //
 // Two forms make the same student record:
-//   FULL   (after /compass/welcome): first name, surname, email, company (or
-//          "No company yet"), interest, industry, consent.
-//   SIMPLE (after "/" and in the Compass's "Who is this compass for?" box):
-//          first name, surname, email, consent.
-// signup_type says which. A simple founder gives the rest at the password
-// gate (POST /api/complete) and becomes full. No password is asked at sign-up.
+//   FULL   (/compass/welcome and /compass/welcome-a, landing "c"): first name,
+//          surname, email, company (or "No company yet"), interest, industry,
+//          a password (required), consent.
+//   SIMPLE (/a, /b = "/", and the Compass's "Who is this compass for?" box):
+//          first name, surname, email, consent. No password, ever: these
+//          founders sign in by email link.
+// signup_type says which; landing says which sales page ('a', 'b', 'c' or
+// 'compass'), and utm_* the tags the founder arrived with.
 //
 // Stored on student_profile: company '' means "No company yet"; NULL means it
 // was never asked.
@@ -21,6 +23,14 @@ export const INDUSTRIES = ['Coaching & consulting', 'Creative & design', 'E-comm
   'Beauty & personal care', 'Education & training', 'Professional services', 'Trades & construction', 'Technology & software',
   'Real estate', 'Manufacturing', 'Nonprofit & social impact', 'Other'];
 export const SIGNUP_TYPES = ['full', 'simple'];
+export const LANDINGS = ['a', 'b', 'c', 'compass'];
+export const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+
+/** The utm_* tags sent with a sign-up, cleaned; anything else is dropped. */
+export function utmFrom(o) {
+  const src = o && typeof o === 'object' ? o : {};
+  return Object.fromEntries(UTM_KEYS.map((k) => [k, clean(src[k], 100) || null]));
+}
 
 /** The details from a form, checked. `problem` is the first thing missing, in
  *  plain words, or ''. */
@@ -33,11 +43,4 @@ export function details(body = {}) {
     : !interest ? 'Choose what you want most from the business.'
     : !industry ? 'Choose your industry.' : '';
   return { company: noCompany || company ? company : null, interest, industry, problem };
-}
-
-/** What a profile still lacks to count as full. */
-export function missing(p) {
-  if (!p) return ['company', 'interest', 'industry'];
-  return [p.company === null || p.company === undefined ? 'company' : null, INTERESTS.includes(p.interest) ? null : 'interest',
-    INDUSTRIES.includes(p.industry) ? null : 'industry'].filter(Boolean);
 }

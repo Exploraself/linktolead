@@ -260,6 +260,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
    * it opens, so the page itself stays light. /compass/welcome#join opens it
    * (where /start sends visitors without an account). */
   const gate = $('#gate');
+  import('/forms.js').then((m) => m.rememberUtm()).catch(() => {});
   let box = null;
   const loadBox = () => box || (box = import('/compass/welcome/account-box.js').catch(() => { box = null; }));
   function openGate(e) {
