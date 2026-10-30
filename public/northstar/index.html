@@ -194,13 +194,25 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
     <section id="s-summit" class="lux" style="border-radius: 14px; padding: 10px; position: relative; overflow: hidden">
       <div style="border: 1px solid rgba(111,147,184,.55); border-radius: 10px; padding: 8px">
         <div style="border: 1px solid rgba(111,147,184,.25); border-radius: 7px; padding: 46px 32px; display: flex; flex-wrap: wrap; align-items: center; gap: 36px">
-          <svg viewBox="0 0 260 200" style="flex: 0 1 260px; height: auto" aria-hidden="true">
-            <circle class="twinkle" cx="40" cy="30" r="1.4" fill="#A9C0D9"/><circle class="twinkle t2" cx="210" cy="22" r="1.1" fill="#EEF2F7"/><circle class="twinkle t3" cx="160" cy="54" r="1" fill="#A9C0D9"/><circle class="twinkle" cx="90" cy="64" r="0.9" fill="#EEF2F7"/>
-            <circle class="glowpeak" cx="130" cy="48" r="26" fill="rgba(111,147,184,.18)"/>
-            <polyline points="10,190 130,48 250,190" fill="none" stroke="#6F93B8" stroke-width="1.4"/>
-            <polyline points="70,190 130,48 190,190" fill="none" stroke="#2A3A50" stroke-width="1"/>
-            <polyline points="112,70 130,48 150,72" fill="none" stroke="#EEF2F7" stroke-width="1.4" opacity=".7"/>
-            <path d="M130 48V20" stroke="#EEF2F7" stroke-width="1.2"/><path class="flagw" d="M130 21h18l-5 5 5 5h-18z" fill="#6F93B8"/>
+          <svg class="sm" viewBox="0 0 280 220" width="300" height="236" style="flex: 0 1 300px; max-width: 100%; height: auto; overflow: visible" aria-hidden="true">
+            <defs>
+              <linearGradient id="sm-back" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A3A50"/><stop offset="1" stop-color="#121C2A"/></linearGradient>
+              <linearGradient id="sm-front" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A3A22"/><stop offset=".55" stop-color="#2B1B12"/><stop offset="1" stop-color="#1C1309"/></linearGradient>
+              <linearGradient id="sm-snow" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#F6EEDD" stop-opacity=".25"/><stop offset=".5" stop-color="#FFF6E0"/><stop offset="1" stop-color="#F6EEDD" stop-opacity=".25"/></linearGradient>
+              <linearGradient id="sm-fade" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".18" stop-color="#fff"/><stop offset=".82" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="sm-mask"><rect width="280" height="220" fill="url(#sm-fade)"/></mask>
+              <radialGradient id="sm-glow"><stop offset="0" stop-color="#FFE6B0" stop-opacity=".75"/><stop offset=".45" stop-color="#D6BF8F" stop-opacity=".22"/><stop offset="1" stop-color="#D6BF8F" stop-opacity="0"/></radialGradient>
+            </defs>
+            <circle class="twinkle" cx="34" cy="36" r="1.3" fill="#A9C0D9"/><circle class="twinkle t2" cx="236" cy="28" r="1.1" fill="#EEF2F7"/><circle class="twinkle t3" cx="198" cy="70" r="1" fill="#A9C0D9"/><circle class="twinkle" cx="78" cy="72" r=".9" fill="#EEF2F7"/><circle class="twinkle t2" cx="258" cy="96" r=".8" fill="#D6BF8F"/><circle class="twinkle t3" cx="16" cy="104" r=".8" fill="#D6BF8F"/>
+            <circle class="sm-halo" cx="140" cy="22" r="34" fill="url(#sm-glow)"/>
+            <g class="sm-star"><path d="M140 6 L143 19 L156 22 L143 25 L140 38 L137 25 L124 22 L137 19 Z" fill="#FFF3D6"/><path d="M140 14 L141.5 20.5 L148 22 L141.5 23.5 L140 30 L138.5 23.5 L132 22 L138.5 20.5 Z" fill="#D6BF8F" transform="rotate(45 140 22)"/></g>
+            <polygon points="0,210 0,150 70,112 112,150 170,88 220,132 280,104 280,210" fill="url(#sm-back)" opacity=".9" mask="url(#sm-mask)"/>
+            <polygon points="18,210 140,58 262,210" fill="url(#sm-front)" stroke="#B4703F" stroke-opacity=".7" stroke-width="1.2"/>
+            <polyline points="80,210 140,58 200,210" fill="none" stroke="#D6BF8F" stroke-opacity=".12" stroke-width="1"/>
+            <path class="sm-snow" d="M140 58 L121 82 L130 78 L136 86 L144 77 L152 84 L159 82 Z" fill="url(#sm-snow)"/>
+            <path class="sm-trail" d="M70 206 C 96 196, 112 190, 104 176 S 150 160, 168 150 S 128 128, 122 118 S 162 100, 152 88 S 140 72, 140 60" fill="none" stroke="#D6BF8F" stroke-width="1.6" stroke-dasharray="3 5" stroke-linecap="round" pathLength="100"/>
+            <g fill="#1C1309" stroke="#D6BF8F" stroke-width="1.2"><circle class="sm-camp c1" cx="104" cy="176" r="3.2"/><circle class="sm-camp c2" cx="168" cy="150" r="3.2"/><circle class="sm-camp c3" cx="122" cy="118" r="3.2"/><circle class="sm-camp c4" cx="152" cy="88" r="3.2"/></g>
+            <circle class="sm-climber" r="3.4" fill="#FFE6B0"><animateMotion dur="9s" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;.8;1" calcMode="linear" path="M70 206 C 96 196, 112 190, 104 176 S 150 160, 168 150 S 128 128, 122 118 S 162 100, 152 88 S 140 72, 140 60"/></circle>
+            <path d="M140 58V42" stroke="#F6EEDD" stroke-width="1.2"/><path class="flagw" d="M140 42.5h14l-4 4 4 4h-14z" fill="#B4703F"/>
           </svg>
           <div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 14px">
             <span style="font-size: 12px; letter-spacing: .32em; color: #A9C0D9">LINK TO LEAD · THE TOP</span>

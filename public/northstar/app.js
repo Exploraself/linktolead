@@ -1361,3 +1361,23 @@
     } catch { /* old browser: everything simply keeps running */ }
   })();
 })();
+
+/* The launchpad banner sticks just under the top bar, never under it, and
+ * shrinks to one slim line while it is stuck, so it covers as little of the
+ * page as possible. */
+(() => {
+  try {
+    const bar = document.querySelector('.topwrap') || document.querySelector('.topbar');
+    const ban = document.getElementById('banner');
+    if (!bar || !ban) return;
+    const place = () => {
+      const h = Math.max(0, Math.round(bar.getBoundingClientRect().bottom));
+      ban.style.top = h + 'px';
+      ban.classList.toggle('stuck', Math.round(ban.getBoundingClientRect().top) <= h + 1 && window.scrollY > 0);
+    };
+    window.addEventListener('scroll', place, { passive: true });
+    window.addEventListener('resize', place);
+    if (window.ResizeObserver) new ResizeObserver(place).observe(bar);
+    place();
+  } catch { /* old browser: the banner simply sticks at the top */ }
+})();
