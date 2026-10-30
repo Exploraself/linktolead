@@ -13,6 +13,11 @@ export const REDIRECTS = {
   '/a': '/road3/',
   // Your Ground Plan moved to its own name (30 Oct); old links and emails still land.
   '/start': '/ground-plan/',
+  // Short addresses (30 Oct): easy to say, type and put on ads.
+  '/summit': '/compass/summit/',
+  '/north-star': '/north1/',
+  '/northstar': '/north1/',
+  '/blueprint': '/road1/',
 };
 
 /** The redirect for this request, or null when its address is not an old one. */
