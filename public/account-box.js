@@ -26,7 +26,13 @@ const known = () => { try { const p = JSON.parse(localStorage.getItem(KEY) || 'n
 const hasAccount = () => { try { return !!localStorage.getItem('ftb-token'); } catch { return false; } };
 const LAB = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700';
 
-const STYLE = `.abox .inp{min-height:46px;border:1px solid #D8CDBB;border-radius:5px;padding:0 12px;font:15px 'Inter',Arial,sans-serif;color:#121C2D;background:#FFFFFF;width:100%;box-sizing:border-box}
+// The show-password eye (30 Oct): shows or hides what was typed, one per field.
+const EYE = '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const pwInput = (id) => `<span class="ab-pw"><input class="inp" id="${id}" type="password" autocomplete="new-password" minlength="10" maxlength="200"><button type="button" class="ab-eye" data-eye="${id}" aria-pressed="false" aria-label="Show password">${EYE}</button></span>`;
+const STYLE = `.ab-pw{display:flex;gap:6px}.ab-pw .inp{flex:1;min-width:0}
+.ab-eye{flex:none;width:46px;min-height:46px;border:1px solid #D8CDBB;border-radius:5px;background:#FFFFFF;color:#121C2D;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0}
+.ab-eye[aria-pressed="true"]{background:#F3EBDA}.ab-eye:focus-visible{outline:2px solid #B4975F;outline-offset:2px}
+.abox .inp{min-height:46px;border:1px solid #D8CDBB;border-radius:5px;padding:0 12px;font:15px 'Inter',Arial,sans-serif;color:#121C2D;background:#FFFFFF;width:100%;box-sizing:border-box}
 .abox select.inp{padding-right:8px}
 .abox .inp:focus-visible{outline:2px solid #B4975F;outline-offset:1px}
 .abox .ab-go{min-height:52px;border:0;border-radius:5px;background:#B4975F;color:#14100B;font:700 15px 'Inter',Arial,sans-serif;letter-spacing:.04em;cursor:pointer}
@@ -57,8 +63,8 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
       </div>
       <label style="${LAB}">Email<input class="inp" id="j-email" type="email" autocomplete="email" maxlength="120"></label>
       ${variant === 'full' ? detailFields('j', LAB) + `
-      <label style="${LAB}">Password<input class="inp" id="j-pw" type="password" autocomplete="new-password" minlength="10" maxlength="200"></label>
-      <label style="${LAB}">Confirm password<input class="inp" id="j-pw2" type="password" autocomplete="new-password" minlength="10" maxlength="200"></label>
+      <label style="${LAB}">Password${pwInput('j-pw')}</label>
+      <label style="${LAB}">Confirm password${pwInput('j-pw2')}</label>
       <span style="font-size: 12px; color: #5A6580; margin-top: -6px">At least 10 characters. You sign in with your email and this password.</span>` : ''}
       <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: #3D4966"><input type="checkbox" id="j-consent" style="width: 18px; height: 18px; margin-top: 1px; accent-color: #B4975F; flex: none">${CONSENT}</label>
       <span id="gate-err" role="alert" style="font-size: 13px; color: #B5512E; font-weight: 700"></span>
@@ -75,6 +81,13 @@ function wire(gate, variant, landing) {
   gate.innerHTML = markup(variant, HEAD[ctx.stay ? 'stay' : landing === 'summit' ? 'summit' : variant === 'full' && (landing === 'road2' || landing === 'road21') ? 'compass' : variant], ctx.stay);
   gate.dataset.variant = variant + ' ' + landing;
   gate.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
+  gate.querySelectorAll('[data-eye]').forEach((b) => b.addEventListener('click', (e) => {
+    e.preventDefault();
+    const f = gate.querySelector('#' + b.dataset.eye), show = f.type === 'password';
+    f.type = show ? 'text' : 'password';
+    b.setAttribute('aria-pressed', String(show));
+    b.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  }));
   if (!gate.dataset.wired) {
     gate.addEventListener('click', (e) => { if (e.target === gate) close(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !gate.hidden) close(); });

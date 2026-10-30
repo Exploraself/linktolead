@@ -149,7 +149,7 @@ const WB = read('public/road2/index.html');
 for (const W of [WB]) ok(W.includes('<button type="button" data-gate class="cta gold-btn" style="min-height: 56px; padding: 0 32px; font-size: 17px">Show me my road →</button>') && !W.includes('href="#dream"') && !/<a [^>]*href="\/(?!compass\/assets|assets)/.test(W), 'Road 2: "Show me my road" opens the full form; no link leaves the page');
 ok(read('public/road2/sales.js').includes("variant: 'full', landing: 'road2'") && WB.includes('src="/road2/sales.js"') && WB.includes('content="https://linktolead.exploraself.com/road2/"') && read('public/northstar/app.js').includes("type: 'simple', landing: 'compass'"), 'Road 2 stays FULL, landing road2; the /northstar box stays SIMPLE');
 const box = read('public/account-box.js');
-ok(/id="j-pw"/.test(box) && /variant === 'full' \? detailFields/.test(box) && /landing: ctx\.landing, utm: utm\(\)/.test(box), 'the account box: a password on the full form only, landing and utm sent');
+ok(/pwInput\('j-pw'\)/.test(box) && /pwInput\('j-pw2'\)/.test(box) && /data-eye=/.test(box) && /variant === 'full' \? detailFields/.test(box) && /landing: ctx\.landing, utm: utm\(\)/.test(box), 'the account box: a password (with the show-password eye) on the full form only, landing and utm sent');
 
 // ── Road 2: Your plan, live ────────────────────────────────────────────────
 const P = SalesMath.plan({ goal: 6000, price: 400, keep: 60, hps: 8, avail: 140 });
