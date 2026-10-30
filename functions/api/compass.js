@@ -25,6 +25,10 @@ export async function onRequestPost({ request, env, waitUntil }) {
 
   const stage = ['build', 'grow', 'scale', 'lead', 'building', 'growing', 'scaling', 'leading'].includes(body.stage) ? body.stage : null;
   const before = await D.prepare('SELECT stage, results_json FROM compass WHERE student_id = ?').bind(me.id).first();
+  // An empty Compass (nothing answered) never replaces one with answers: a
+  // fresh browser opened while signed in must not wipe the founder's work.
+  const count = (j) => { try { const r = typeof j === 'string' ? JSON.parse(j) : j; return (r && Array.isArray(r.answered) ? r.answered : []).reduce((a, b) => a + (Number(b) || 0), 0); } catch { return 0; } };
+  if (before && count(before.results_json) > 0 && count(body.results) === 0) return json({ ok: true, kept: true });
   await D.prepare(`INSERT INTO compass (student_id,stage,answers_json,numbers_json,results_json,flags_json,updated_at)
       VALUES (?,?,?,?,?,?,?)
       ON CONFLICT(student_id) DO UPDATE SET stage=COALESCE(excluded.stage,compass.stage),

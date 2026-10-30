@@ -60,7 +60,7 @@ ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id=? AND kind IN (
 // ── Sign-in and reset links ─────────────────────────────────────────────────
 sent = fakeResend();
 [st] = await M({ action: 'reset-link', student: bo });
-ok(st === 200 && sent.length === 1 && sent[0].body.to[0] === 'bo@example.com' && /\/start\?signin=/.test(sent[0].body.text), 'a password reset link is the one-time sign-in link, to their Ground Plan');
+ok(st === 200 && sent.length === 1 && sent[0].body.to[0] === 'bo@example.com' && /\/ground-plan\/\?signin=/.test(sent[0].body.text), 'a password reset link is the one-time sign-in link, to their Ground Plan');
 
 // ── Messages ────────────────────────────────────────────────────────────────
 sent = fakeResend();

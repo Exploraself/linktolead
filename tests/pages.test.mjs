@@ -67,7 +67,7 @@ for (const f of ['public/road2/index.html', 'public/road2/sales.css']) {
   ok(!/Archivo|Caslon/.test(read(f)), `${f}: Compass fonts only`);
 }
 // Fonts load once, from this site: no Google Fonts, no old .ttf files.
-for (const f of ['public/road1/index.html', 'public/start/index.html', 'public/mentor/index.html', 'public/compass/index.html', 'public/compass/summit/index.html', 'public/road2/index.html']) {
+for (const f of ['public/road1/index.html', 'public/ground-plan/index.html', 'public/mentor/index.html', 'public/compass/index.html', 'public/compass/summit/index.html', 'public/road2/index.html']) {
   const s = read(f);
   ok(s.includes('href="/assets/fonts.css"') && !s.includes('fonts.googleapis.com') && s.includes('rel="preload" href="/assets/fonts/fraunces.woff2"'), `${f}: fonts once, self-hosted, preloaded`);
 }

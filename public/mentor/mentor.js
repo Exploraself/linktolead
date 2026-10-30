@@ -230,9 +230,7 @@ async function one(id) {
     <div class="panel"><h2>Library</h2>
       ${LB.length ? `<ul class="climb" style="margin:8px 0 0;padding-left:18px">${LB.map((x) => `<li>${esc(x.name)} · ${esc(day(x.at))}</li>`).join('')}</ul>`
         : '<p class="tiny" style="margin-top:8px">Nothing downloaded yet.</p>'}</div>
-    ${C ? `<div class="panel"><h2>Compass</h2><p class="tiny">Saved ${when(C.updated_at)}${C.stage ? ' · stage ' + esc(C.stage) : ''}</p>
-      <pre class="pre">${esc(JSON.stringify(JSON.parse(C.results_json || '{}'), null, 2))}</pre>
-      ${C.flags_json && C.flags_json !== 'null' ? `<p class="tiny" style="margin-top:10px"><b>Choices:</b> ${esc(C.flags_json)}</p>` : ''}</div>`
+    ${C ? compassPanel(C)
       : '<div class="panel"><h2>Compass</h2><p class="tiny" style="margin-top:8px">Not done yet.</p></div>'}
     <div class="panel"><h2>Account plans · ${T.length} of ${data ? data.totalSteps || 28 : 28} steps done</h2>
       ${T.length ? DOMS.map(([k, label]) => { const rows = T.filter((t) => t.domain === k); return rows.length ? `<div class="dom ${k}" style="padding-top:10px"><h3>${label}</h3>${rows.map((t) => `<div class="ans"><em>${esc(t.title || t.step_id)}</em><p>Done ${when(t.done_at)}</p></div>`).join('')}</div>` : ''; }).join('')
@@ -313,3 +311,22 @@ document.addEventListener('change', async (e) => {
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#dlg')) $('#dlg').innerHTML = ''; });
 
 load();
+
+/** The Compass, readable: stage, the four domains (answers, score out of 6,
+ *  band), what they said is hard, and their goal. Never raw data. */
+const DOMS = [['Lead yourself', '#A8623A'], ['Lead your people', '#4C7355'], ['Lead your business', '#36607F'], ['Lead the market', '#9A7418']];
+const PAIN = { clients: 'Not enough clients', cash: 'Cash is tight', time: 'No time for myself', alone: 'Doing everything myself', team: 'Team not stepping up', direction: 'Unclear direction', price: 'Prices feel too low', switch: 'I can’t switch off' };
+const GOAL = { freedom: 'More free time', income: 'Higher income', steady: 'Steady clients', team: 'A team I trust', clarity: 'Clarity on direction', grow: 'A new market' };
+function compassPanel(C) {
+  let r = {}, f = {};
+  try { r = JSON.parse(C.results_json || '{}') || {}; } catch { r = {}; }
+  try { f = JSON.parse(C.flags_json || '{}') || {}; } catch { f = {}; }
+  const ans = r.answered || [], sc = r.scores || [], bd = r.bands || [];
+  const total = ans.reduce((a, b) => a + (b || 0), 0);
+  const stage = C.stage ? C.stage[0].toUpperCase() + C.stage.slice(1) : '—';
+  const pains = Array.isArray(f.pains) ? f.pains.map((k) => PAIN[k] || k) : [];
+  return `<div class="panel"><h2>Compass</h2><p class="tiny">Saved ${when(C.updated_at)} · stage ${esc(stage)} · ${total} of 8 questions answered</p>
+    ${total ? `<div class="kgrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:12px">${DOMS.map(([n, col], i) => `<div class="k" style="border-top:3px solid ${col}"><b>${n}</b><span>${ans[i] ? `${sc[i] ?? 0} of 6 · ${esc(bd[i] || '')}` : 'Not answered yet'}</span></div>`).join('')}</div>`
+      : '<p class="tiny" style="margin-top:8px">Opened, but no questions answered yet.</p>'}
+    ${pains.length || f.want ? `<p class="tiny" style="margin-top:12px">${pains.length ? `<b>Finds hard:</b> ${esc(pains.join(' · '))}` : ''}${pains.length && f.want ? ' &nbsp; ' : ''}${f.want ? `<b>Goal:</b> ${esc(GOAL[f.want] || f.want)}` : ''}</p>` : ''}</div>`;
+}

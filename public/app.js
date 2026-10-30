@@ -13,6 +13,7 @@ import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, SHEETS, SECTIONS, loadSt
   gateFor, levelFor, isWritten, weekTitle, videoFor, nextGain, holds,
   LEAD, BOOKING, LIBRARY } from './content.js';
 import { entry, programmeStage, groundPlan, stageNudge } from './home.js';
+import { cabinetHTML, cabinetShown, cabinetHidden, cabinetClick } from './cabinet.js';
 import { result as fwResult } from './frameworks.js';
 import { report } from './feedback.js';
 import * as account from './account.js';
@@ -284,20 +285,33 @@ function accountHTML() {
   </section>`;
 }
 
+/** What the Cabinet shows: only what this founder has given. */
+function cabinetData(st, gp, first) {
+  let bands = [];
+  try { const r = compassRec && (typeof compassRec.results_json === 'string' ? JSON.parse(compassRec.results_json) : compassRec.results); bands = (r && r.bands) || []; } catch { bands = []; }
+  const P = acctPlans && acctPlans.ok ? acctPlans : null;
+  let next = null;
+  if (P) for (const d of P.domains) { const x = d.steps.find((y) => !P.done[y.id]); if (x) { next = { title: x.title, domain: d.name }; break; } }
+  let lv = 1;
+  while (lv < 12 && levelDone(st, lv) === 28) lv++;
+  return {
+    first, name: state.me && state.me.name, tier: state.tier || 'free',
+    stageName: STAGES[st] && STAGES[st].n, aimName: null, startHere: gp && gp.weakest ? gp.weakest.name : null,
+    bands, plans: P ? { count: P.count, total: P.total, next } : null,
+    prog: { level: lv, title: weekTitle(st, lv), done: levelDone(st, lv) },
+    askUnread: askUnread(),
+  };
+}
+
 function homeView() {
   const st = state.stage || 'build';
   const gp = compassRec && window.CompassEngine ? groundPlan(compassRec, window.CompassEngine, { STAGES, weekTitle, promise: promiseOf }) : null;
   const first = firstName();
   return `<div class="gp">
+    ${cabinetHTML(cabinetData(st, gp, first))}
     ${notesHTML()}
-    <section class="gp-wrap gp-top">
-      <p class="eyebrow">${compass} Your Ground Plan</p>
-      <h1 class="gp-title">From founder to <em>intentional leader.</em></h1>
-      <p class="gp-lede">${first ? `Welcome back, ${esc(first)}. ` : ''}Here is where you are, and what is open to you now.</p>
-    </section>
     ${nudgeHTML(st)}
     ${gp ? planHTML(gp, st) : `<section class="gp-wrap gp-two gp-grid">${standHTML(st)}</section>${howItWorks(st)}`}
-    ${askCard()}
     ${accountHTML()}
   </div>`;
 }
@@ -688,6 +702,7 @@ function render() {
     loadStage(st).then(render).catch(() => { $('#main').innerHTML = '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="alert">We could not open your programme just now. Check your connection and reload.</p></div></section>'; });
     return;
   }
+  if (view !== 'home') cabinetHidden();
   $('#main').innerHTML = view === 'work'
     ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work"><div id="cban" class="cbanwrap">${compassBanner()}</div><div id="libban">${libBanner()}</div><div id="mod">${moduleHTML(st)}</div></div></div>`
     : view === 'home' ? homeView()
@@ -695,6 +710,7 @@ function render() {
     : view === 'ask' ? askView()
     : view === 'signin' ? signinView()
     : '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="status">One moment…</p></div></section>';
+  if (view === 'home') cabinetShown();
 }
 
 /** Redraw only the module, so the rail does not flicker and its scroll holds. */
@@ -717,6 +733,11 @@ document.addEventListener('click', (e) => {
   const b = e.target.closest('button, a.cta');
   if (!b) return;
   if (b.dataset.go === 'rail') { document.body.classList.toggle('railopen'); return; }
+  if (b.dataset.cab) {
+    if (cabinetClick(b)) return;
+    if (b.dataset.cab === 'stand') { changingStage = true; render(); const c = document.querySelector('.gp-stand'); if (c) c.scrollIntoView({ block: 'center' }); const p = document.querySelector('.stand-pick button'); if (p) p.focus({ preventScroll: true }); return; }
+    if (b.dataset.cab === 'plans') { const c = document.getElementById('plans'); if (c) c.scrollIntoView({ block: 'start' }); else location.href = '/compass/'; return; }
+  }
   if (b.dataset.cban === 'close') { cbSet(CB_TIMES); const h = $('#cban'); if (h) h.innerHTML = ''; return; }
   if (b.dataset.banner === 'close') { bannerDone(); const h = $('#libban'); if (h) h.innerHTML = ''; return; }
   if (b.dataset.go === 'library') bannerDone();
@@ -769,7 +790,7 @@ document.addEventListener('submit', async (e) => {
     const say = (t) => { msg.textContent = t; };
     if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return say('That email does not look complete.');
     if (!pw) return say('Type your password, or use “Email me a sign-in link”.');
-    try { await account.login(email, pw); view = 'home'; try { history.replaceState(null, '', '/start#home'); } catch { /* old browser */ } comeHome(); }
+    try { await account.login(email, pw); view = 'home'; try { history.replaceState(null, '', '/ground-plan/#home'); } catch { /* old browser */ } comeHome(); }
     catch (ex) { say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'We could not reach the account service just now.'); }
     return;
   }

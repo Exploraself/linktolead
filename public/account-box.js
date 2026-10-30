@@ -63,7 +63,7 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
       <span id="gate-err" role="alert" style="font-size: 13px; color: #B5512E; font-weight: 700"></span>
       <button type="submit" class="ab-go">${stay ? 'OPEN MY COMPASS →' : 'OPEN MY GROUND PLAN →'}</button>
       ${stay ? '' : '<button type="button" data-close style="min-height: 44px; border-radius: 5px; border: 1px solid #D8CDBB; background: transparent; color: #15213B; font-weight: 700; cursor: pointer">Not now · keep reading</button>'}
-      <a href="/start#signin" style="font-size: 13px; text-align: center; font-weight: 700; color: #7A5E26">Already have an account? Sign in</a>
+      <a href="/ground-plan/#signin" style="font-size: 13px; text-align: center; font-weight: 700; color: #7A5E26">Already have an account? Sign in</a>
     </form>
   </div>`;
 
@@ -104,10 +104,10 @@ function wire(gate, variant, landing) {
       const out = A.joined() ? { token: A.token() } : await A.signup({ first, last, email, consent, source, stage: p.stage, type: variant,
         landing: ctx.landing, utm: utm(),
         ...(d ? { company: d.company, noCompany: d.noCompany, interest: d.interest, industry: d.industry, password: pw, confirm: pw2 } : {}) });
-      if (out.token) { if (ctx.stay) location.reload(); else location.href = '/start#home'; return; }
+      if (out.token) { if (ctx.stay) location.reload(); else location.href = '/ground-plan/#home'; return; }
       if (ctx.onExisting) { close(); ctx.onExisting(email); return; }
       // An address that already has an account is never handed its key here.
-      $('#gate-err').innerHTML = 'This email already has an account. Sign in to open your plans. <a href="/start#signin">Sign in →</a>';
+      $('#gate-err').innerHTML = 'This email already has an account. Sign in to open your plans. <a href="/ground-plan/#signin">Sign in →</a>';
     } catch (ex) {
       err(ex && ex.message && !/fetch|network|load failed|import/i.test(ex.message) ? ex.message : 'We could not reach the account service just now. Try again in a minute.');
     }
@@ -122,7 +122,7 @@ export function open({ gate, opener, stage, variant = 'full', landing = variant 
   if (hasAccount() && stay) return;
   if (hasAccount()) {
     if (stage) { const p = known() || {}; p.stage = stage.id; try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* private mode */ } }
-    location.href = '/start#home';
+    location.href = '/ground-plan/#home';
     return;
   }
   if (gate.dataset.variant !== variant + ' ' + landing) wire(gate, variant, landing);

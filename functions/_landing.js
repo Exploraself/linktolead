@@ -11,6 +11,8 @@ export const REDIRECTS = {
   '/compass/welcome-a': '/road2/',
   '/c': '/road2/',
   '/a': '/road3/',
+  // Your Ground Plan moved to its own name (30 Oct); old links and emails still land.
+  '/start': '/ground-plan/',
 };
 
 /** The redirect for this request, or null when its address is not an old one. */
