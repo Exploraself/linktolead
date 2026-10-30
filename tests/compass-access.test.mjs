@@ -24,14 +24,32 @@ ok(read('public/style.css').includes('.cban,.cban::after,.cban-needle{animation:
 
 // The profile menu, both places.
 ok(compass.includes("import('/profile-menu.js')") && app.includes("import('/profile-menu.js')"), 'profile menu on the Compass and in the incubator');
-ok(read('public/start/index.html').includes('<div id="pmhost"></div>') && read('public/compass/index.html').includes('id="top-tools"'), 'its places in both headers');
+ok(read('public/ground-plan/index.html').includes('<div id="pmhost"></div>') && read('public/compass/index.html').includes('id="top-tools"'), 'its places in both headers');
 const src = read('public/profile-menu.js');
 ok(/signupType === 'simple' && !me\.hasPassword/.test(src) && src.includes("'Change my password'") && src.includes("premium: 'The Summit'"), 'menu: password only for full accounts, step names');
 ok(/key === 'Escape'/.test(src) && /!root\.contains\(e\.target\)/.test(src), 'Escape and a click outside close it');
 
 // One share preview everywhere.
-for (const f of ['public/road1/index.html', 'public/road2/index.html', 'public/road3/index.html', 'public/start/index.html', 'public/compass/index.html']) {
+for (const f of ['public/road1/index.html', 'public/road2/index.html', 'public/road3/index.html', 'public/ground-plan/index.html', 'public/compass/index.html']) {
   const h = read(f);
   ok(h.includes('https://linktolead.exploraself.com/compass/assets/og-image.png') && h.includes('assets/favicon.svg') && h.includes('summary_large_image'), `${f}: the Compass share image and icon`);
 }
+// An empty Compass never wipes one with answers (30 Oct: "Saved just now", all zeros).
+{
+  const { fakeD1, post } = await import('./_d1.mjs');
+  const { onRequestPost: save } = await import('../functions/api/compass.js');
+  const DB = fakeD1(), env = { DB };
+  const { accountTables } = await import('../functions/_shared.js');
+  await accountTables(DB);
+  DB.raw.prepare("INSERT INTO student (id, name, email, joined_at) VALUES ('t1','Ana Pop','ana@example.com','2026-10-30')").run();
+  const full = { scores: [4, 3, 2, 5], answered: [2, 2, 2, 2], bands: ['Taking shape', 'Taking shape', 'Needs you now', 'A strength'] };
+  await save({ request: post('/api/compass', { token: 't1', stage: 'growing', results: full, answers: { a: 1 } }), env });
+  const r = await (await save({ request: post('/api/compass', { token: 't1', stage: 'scaling', results: { scores: [0, 0, 0, 0], answered: [0, 0, 0, 0], bands: [null, null, null, null] }, answers: {} }), env })).json();
+  const row = DB.raw.prepare("SELECT stage, results_json FROM compass WHERE student_id = 't1'").get();
+  ok(r.kept === true && JSON.parse(row.results_json).answered[0] === 2 && row.stage === 'growing', 'an empty Compass is not saved over one with answers');
+}
+ok(/if \(!hasWork\(S\)\) \{\s*const theirs = await A\.loadCompass\(\)/.test(compass), 'signed in on a fresh browser: the account’s Compass comes here, nothing empty is sent');
+const mentor = read('public/mentor/mentor.js');
+ok(!mentor.includes('JSON.stringify(JSON.parse(C.results_json') && /function compassPanel\(C\)/.test(mentor) && mentor.includes("'Not answered yet'"), '/mentor shows the Compass in words, not raw data');
+
 done();

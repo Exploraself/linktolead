@@ -1069,8 +1069,8 @@ button.cta{border:0;cursor:pointer}
   var back=false;
   try { var st=JSON.parse(localStorage.getItem('ftb-v1')||'{}'); back=!!(st.me||localStorage.getItem('ftb-token')); } catch(e) {}
   if(!back) return;
-  [].forEach.call(document.querySelectorAll('a.cta[data-join]'),function(a){ a.removeAttribute('data-join'); a.href='/start#home'; a.textContent='Continue my Blueprint →'; });
-  [].forEach.call(document.querySelectorAll('#library a[data-join]'),function(a){ a.removeAttribute('data-join'); a.href='/start#library'; a.textContent=a.classList.contains('libx-btn')?'Open the library →':'Open in the library →'; });
+  [].forEach.call(document.querySelectorAll('a.cta[data-join]'),function(a){ a.removeAttribute('data-join'); a.href='/ground-plan/#home'; a.textContent='Continue my Blueprint →'; });
+  [].forEach.call(document.querySelectorAll('#library a[data-join]'),function(a){ a.removeAttribute('data-join'); a.href='/ground-plan/#library'; a.textContent=a.classList.contains('libx-btn')?'Open the library →':'Open in the library →'; });
 })();
 </script>
 <script>

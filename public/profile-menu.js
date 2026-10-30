@@ -1,5 +1,5 @@
 /* The profile circle and its menu: the founder's initials in gold, the same on
- * the Compass (/compass) and in the incubator (/start). Shown only when this
+ * the Compass (/compass) and in the incubator (/ground-plan/). Shown only when this
  * device holds an account. Name and step come from /api/state, kept on the
  * device so the circle draws at once on the next page.
  *
@@ -24,12 +24,12 @@ export function initials(name) {
 /** The menu's links, for this founder. */
 export function items(me) {
   const list = [
-    ['/start/#home', 'Your Ground Plan', 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'],
+    ['/ground-plan/#home', 'Your Ground Plan', 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'],
     ['/compass/', 'Leadership Compass', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm3.5 5.5-2 5-5 2 2-5z'],
-    ['/start/#library', 'Library', 'M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zm0 0a2 2 0 0 1 2-2h12'],
-    ['/start/#ask', 'Ask Alexandru', 'M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z'],
+    ['/ground-plan/#library', 'Library', 'M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zm0 0a2 2 0 0 1 2-2h12'],
+    ['/ground-plan/#ask', 'Ask Alexandru', 'M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z'],
   ];
-  if (!(me && me.signupType === 'simple' && !me.hasPassword)) list.push(['/start/#account', me && me.hasPassword ? 'Change my password' : 'Set my password', 'M6 11h12v10H6zM8 11V8a4 4 0 0 1 8 0v3']);
+  if (!(me && me.signupType === 'simple' && !me.hasPassword)) list.push(['/ground-plan/#account', me && me.hasPassword ? 'Change my password' : 'Set my password', 'M6 11h12v10H6zM8 11V8a4 4 0 0 1 8 0v3']);
   return list;
 }
 
@@ -73,7 +73,7 @@ export async function mount(host, { fixed = false } = {}) {
     const t = e.target.closest('button, a');
     if (!t) return;
     if (t.classList.contains('pm-b')) { e.stopPropagation(); set(!root.classList.contains('open')); return; }
-    if (t.dataset.pm === 'out') { A.signOut(); try { localStorage.removeItem(ME_KEY); } catch { /* private mode */ } location.href = '/start/#signin'; return; }
+    if (t.dataset.pm === 'out') { A.signOut(); try { localStorage.removeItem(ME_KEY); } catch { /* private mode */ } location.href = '/ground-plan/#signin'; return; }
     // A link to this same page: the page reads its #place on load.
     const u = new URL(t.href, location.href);
     if (u.pathname === location.pathname && u.hash) { e.preventDefault(); location.hash = u.hash; location.reload(); }

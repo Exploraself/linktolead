@@ -43,7 +43,7 @@ L = passwordChangedLetter(B, { first: 'Maria', offer: 'first100' });
 ok(L.subject === 'Your password was changed' && paras(L.text)[1] === 'Your password was just changed. If that was you, all is well and there’s nothing else to do.'
   && paras(L.text)[2] === 'If it wasn’t, just reply to this email and we’ll lock the account straight away. Your work is safe with us.', 'password: subject and words');
 ok(L.text.includes('P.S. If clients are the next thing on your mind, the First 100 Clients assessment is free and takes ten minutes: https://exploraself.com/first-100-clients'), 'password: the First 100 Clients P.S.');
-ok(passwordChangedLetter(B, { first: 'Maria', offer: 'library' }).text.includes(`P.S. While you’re in, open Built to Lead in your library: 99 practical tools, free with your account. ${B}/start#library`), 'the library P.S.');
+ok(passwordChangedLetter(B, { first: 'Maria', offer: 'library' }).text.includes(`P.S. While you’re in, open Built to Lead in your library: 99 practical tools, free with your account. ${B}/ground-plan/#library`), 'the library P.S.');
 ok(launchpadWelcome(B, { offer: null }).text.startsWith('Hi,\n\n'), 'no first name: "Hi,"');
 
 // ── The look ────────────────────────────────────────────────────────────────
@@ -56,7 +56,7 @@ ok(L.html.includes('First &lt;b&gt;line&lt;/b&gt; &amp; more.') && !L.html.inclu
 ok(paras(L.text)[0] === 'First <b>line</b> & more.' && paras(L.text)[1] === 'Second paragraph.', 'mentor letter: his own words, his paragraphs, in the plain-text part');
 ok(L.html.includes('<a href="https://exploraself.com/play" style="color:#6E5213">exploraself.com/play</a>'), 'plain text links in the html');
 L = answerLetter(B, { first: 'Ana', question: 'Where do I start?', answer: 'With level 01.', offer: 'boardroom' });
-ok(L.subject === 'An answer to your question' && L.text.includes('You asked: “Where do I start?”') && L.text.includes('With level 01.') && L.text.includes(`${B}/start#ask`), 'answer letter: the question, the answer, the thread');
+ok(L.subject === 'An answer to your question' && L.text.includes('You asked: “Where do I start?”') && L.text.includes('With level 01.') && L.text.includes(`${B}/ground-plan/#ask`), 'answer letter: the question, the answer, the thread');
 L = questionNotice(B, { name: 'Ana Pop', email: 'ana@example.com', question: 'Where do I start?', level: 2, domain: 'Lead yourself' });
 ok(L.subject === 'New question from Ana Pop' && L.text.includes('Level 02 · Lead yourself') && !L.text.includes('P.S.') && !L.html.includes('signature.png'), 'notice to Alexandru: plain, no offer, not signed');
 
@@ -79,7 +79,7 @@ ok(sent[0].body.text.includes('Unsubscribe:') && sent[0].body.text.includes('Via
 sent = fakeResend();
 await signinPost({ request: post('/api/signin', { email: 'ana@example.com', to: 'start' }, '9.9.9.1'), env });
 const s1 = sent[0].body;
-ok(s1.subject === 'Your link to get back in' && /^Hi Ana,/.test(s1.text) && /Sign me back in →: \S+\/start\?signin=[\w-]{40,}\n/.test(s1.text), 'sign-in route: the letter with a fresh link');
+ok(s1.subject === 'Your link to get back in' && /^Hi Ana,/.test(s1.text) && /Sign me back in →: \S+\/ground-plan\/\?signin=[\w-]{40,}\n/.test(s1.text), 'sign-in route: the letter with a fresh link');
 ok(s1.text.includes('P.S. One thing I’d love you to try: the Unshakeable assessment.') && !/Boardroom/.test(s1.text), 'sign-in route: the Unshakeable P.S., always');
 
 sent = fakeResend();

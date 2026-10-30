@@ -271,7 +271,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
   document.querySelectorAll('[data-gate]').forEach((b) => b.addEventListener('click', openGate));
   if (location.hash === '#join') {
     let has = false; try { has = !!localStorage.getItem('ftb-token'); } catch { /* private mode */ }
-    if (has) location.replace('/start#home'); else openGate();
+    if (has) location.replace('/ground-plan/#home'); else openGate();
   }
 
   /* Animations rest when their section is off screen or the tab is hidden. */

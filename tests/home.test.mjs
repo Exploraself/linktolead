@@ -25,7 +25,7 @@ ok(entry({ joined: true, old: false, hash: '#library' }) === 'library', '#librar
 
 // The page itself sends a visitor with no account away before any programme
 // code loads, but leaves the sign-in screen and a sign-in link alone.
-const html = readFileSync(new URL('../public/start/index.html', import.meta.url), 'utf8');
+const html = readFileSync(new URL('../public/ground-plan/index.html', import.meta.url), 'utf8');
 const early = html.indexOf("location.replace('/road2/#join')");
 ok(early > 0 && early < html.indexOf('<link rel="stylesheet"') && early < html.indexOf('app.js'), '/start redirects before its styles and programme load');
 ok(/location\.hash !== '#signin'/.test(html) && /signin=/.test(html), 'the early redirect spares #signin and sign-in links');

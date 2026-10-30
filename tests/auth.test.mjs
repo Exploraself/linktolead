@@ -73,7 +73,7 @@ ok(st === 401 && !/paused/i.test(j.error), 'a wrong password does not reveal the
 sent = fakeResend();
 await askLink({ request: post('/api/signin', { email: 'ana@example.com', to: 'start' }, '5.5.5.5'), env });
 const code = /signin=([0-9a-f]+)/.exec(sent.at(-1).body.text)[1];
-ok(/\/start\?signin=/.test(sent.at(-1).body.text), 'a link asked for from the Ground Plan opens the Ground Plan');
+ok(/\/ground-plan\/\?signin=/.test(sent.at(-1).body.text), 'a link asked for from the Ground Plan opens the Ground Plan');
 [st, j] = await J(await useLink({ request: get('/api/signin?code=' + code), env }));
 ok(st === 403 && j.error.includes('paused') && !j.token, 'a paused account cannot sign in by link either');
 await mentor({ action: 'pause', student: ana, paused: false });
@@ -108,7 +108,7 @@ ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id = ? AND kind IN
   sent = fakeResend();
   await askLink({ request: post('/api/signin', { email: 'ana@example.com', reset: true }, '8.8.8.1'), env });
   const m = sent.at(-1).body;
-  ok(m.subject === 'Choose a new password' && /Choose my new password →: \S+\/start\?signin=[0-9a-f]+&reset=1/.test(m.text), 'forgot password: a reset letter to /start?…&reset=1');
+  ok(m.subject === 'Choose a new password' && /Choose my new password →: \S+\/ground-plan\/\?signin=[0-9a-f]+&reset=1/.test(m.text), 'forgot password: a reset letter to /start?…&reset=1');
   const fs = await import('node:fs');
   const app = fs.readFileSync('public/app.js', 'utf8');
   ok(/get\('reset'\) === '1'/.test(app) && /function openReset\([\s\S]{0,300}box\.open = true/.test(app), 'the Ground Plan opens the password box after a reset link');
@@ -125,7 +125,7 @@ ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id = ? AND kind IN
   ok(LIMIT_MSG === "We've sent 3 emails to this address in the last hour. To keep your account safe, wait an hour, or sign in with your password.", 'limit message wording');
   const [s5] = await J(await L('ana@example.com', 'correct horse', '7.7.7.10'));
   ok(s5 === 200, 'password sign-in still works after the email limit is hit');
-  const src = ['functions/api/signin.js', 'functions/api/send-plan.js', 'public/account-box.js', 'public/compass/app.js', 'public/start/index.html'].map((f) => fs.readFileSync(f, 'utf8')).join('\n');
+  const src = ['functions/api/signin.js', 'functions/api/send-plan.js', 'public/account-box.js', 'public/compass/app.js', 'public/ground-plan/index.html'].map((f) => fs.readFileSync(f, 'utf8')).join('\n');
   ok(!src.includes('That is a few already'), 'the old limit message is gone everywhere');
   ok(!fs.readFileSync('functions/api/login.js', 'utf8').includes('allowed('), 'login.js does not use the email limit');
   const app = fs.readFileSync('public/compass/app.js', 'utf8');

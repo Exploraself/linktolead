@@ -22,7 +22,7 @@ export const TTL = 30 * 60_000;
 const SAME = { ok: true, message: 'If there is an account for that address, a sign-in link is on its way. It works once, for 30 minutes.' };
 
 /** Make a one-time code for this founder and email the link. The link always
- *  opens their Ground Plan (/start), the dashboard. `reset` (a forgotten
+ *  opens their Ground Plan (/ground-plan/), the dashboard. `reset` (a forgotten
  *  password, or the mentor's "Send a password reset link") adds &reset=1, so
  *  the Ground Plan opens the password box at once. Also used by /mentor. */
 export async function sendLink(env, D, base, me, page = 'start', { reset = false } = {}) {
@@ -33,7 +33,7 @@ export async function sendLink(env, D, base, me, page = 'start', { reset = false
   const p = await profile(D, me.id);
   const who = me.name !== undefined ? me : await D.prepare('SELECT name FROM student WHERE id = ?').bind(me.id).first();
   const first = String((who && who.name) || '').split(' ')[0];
-  return send(env, { to: me.email, ...signinLetter(base, `${base}/start?signin=${code}${reset ? '&reset=1' : ''}`, { first, to: me.email, reset }),
+  return send(env, { to: me.email, ...signinLetter(base, `${base}/ground-plan/?signin=${code}${reset ? '&reset=1' : ''}`, { first, to: me.email, reset }),
     why: 'Someone asked for a sign-in link to this ExploraSelf account. If it was not you, nothing changes.', unsubUrl: unsubLink(base, p) });
 }
 
