@@ -15,6 +15,7 @@ import { redirect } from './functions/_landing.js';
 import * as state from './functions/api/state.js';
 import * as compass from './functions/api/compass.js';
 import * as note from './functions/api/note.js';
+import * as comments from './functions/api/comments.js';
 import * as mentor from './functions/api/mentor.js';
 import * as sendPlan from './functions/api/send-plan.js';
 import * as signup from './functions/api/signup.js';
@@ -36,6 +37,7 @@ export const ROUTES = {
   '/api/state': state,
   '/api/compass': compass,
   '/api/note': note,
+  '/api/comments': comments,
   '/api/mentor': mentor,
   '/api/send-plan': sendPlan,
   '/api/signup': signup,

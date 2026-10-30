@@ -3,7 +3,7 @@
 // POST { email } answers the same way whether or not there is an account, so
 // the form cannot be used to find out who has one. When there is, it emails
 // /northstar?signin=<code>. The code is 32 random bytes; only its SHA-256 is
-// stored, it lasts 30 minutes and works once. Requests share the mail limits
+// stored, it lasts 30 minutes (any number of opens; a new password ends it). Requests share the mail limits
 // with every other email (3 per address, 10 per connection, per hour), and
 // they count whether or not the address has an account.
 //
@@ -20,7 +20,7 @@ import { PAUSED } from '../_auth.js';
 import { letterContext } from '../_mentor.js';
 
 export const TTL = 30 * 60_000;
-const SAME = { ok: true, message: 'If there is an account for that address, a sign-in link is on its way. It works once, for 30 minutes.' };
+const SAME = { ok: true, message: 'If there is an account for that address, a sign-in link is on its way. It works for the next 30 minutes.' };
 
 /** Make a one-time code for this founder and email the link. The link always
  *  opens their Base Camp (/ground-plan/), the dashboard. `reset` (a forgotten
@@ -66,15 +66,17 @@ export async function onRequestGet({ request, env }) {
   const D = db(env);
   if (!D) return bad('Sign-in is not available right now.', 503);
   const code = clean(new URL(request.url).searchParams.get('code'), 200);
-  const gone = () => bad('That sign-in link has expired or was already used. Ask for a new one.', 410);
+  const gone = () => bad('That link has run out: links last 30 minutes. Type your email below and we’ll send a fresh one.', 410);
   if (code.length < 40) return gone();
   await accountTables(D);
   const h = await sha256(code), t = Date.now();
   const row = await D.prepare('SELECT student_id, expires_at, used_at FROM signin_code WHERE code_hash = ?').bind(h).first();
-  if (!row || row.used_at || row.expires_at < t) return gone();
-  // Spend it. If two requests race, only the one that changes the row wins.
-  const r = await D.prepare('UPDATE signin_code SET used_at = ? WHERE code_hash = ? AND used_at IS NULL').bind(t, h).run();
-  if (r && r.meta && r.meta.changes === 0) return gone();
+  // A link works again and again for its 30 minutes. Phones open links in an
+  // in-app browser first and then in the real one, and a founder must never be
+  // locked out because the first open "spent" it. Saving a new password ends
+  // every link for the account (see password.js). used_at keeps the first open.
+  if (!row || row.expires_at < t) return gone();
+  if (!row.used_at) await D.prepare('UPDATE signin_code SET used_at = ? WHERE code_hash = ? AND used_at IS NULL').bind(t, h).run();
   const me = await D.prepare('SELECT id, email, name FROM student WHERE id = ?').bind(row.student_id).first();
   if (!me) return gone();
   if (await D.prepare('SELECT 1 AS x FROM account_auth WHERE student_id = ? AND paused = 1').bind(me.id).first()) return bad(PAUSED, 403);

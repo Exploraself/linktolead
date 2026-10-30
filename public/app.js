@@ -10,13 +10,14 @@
 // one. Nothing is asserted about a payment or a subscription.
 
 import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, SHEETS, SECTIONS, loadStage,
-  gateFor, levelFor, isWritten, weekTitle, videoFor, nextGain, holds,
+  gateFor, levelFor, isWritten, weekTitle, videoFor, levelVideo, nextGain, holds,
   LEAD, BOOKING, LIBRARY } from './content.js';
 import { entry, programmeStage, groundPlan, stageNudge } from './home.js';
 import { cabinetHTML, cabinetShown, cabinetHidden, cabinetClick, dashboardShown, levelDots, compassStripHTML } from './cabinet.js';
 import { result as fwResult } from './frameworks.js';
 import { report } from './feedback.js';
 import * as account from './account.js';
+import { videoBlock } from './video-talk.js';
 import * as M from './music.js';
 
 const $ = (s) => document.querySelector(s);
@@ -463,8 +464,10 @@ function moduleHTML(st) {
   const gain = nextGain(st, level);
   const full = answered(st, level, dom) === 7;
 
+  const lv = levelVideo(st, level);
   return `${levelHead(st, title)}
     ${stageStrip(st)}
+    ${videoBlock({ key: `${st}.${level}`, title: lv.title || title, sub: lv.sub || promiseOf(st, level), src: lv.src, poster: lv.poster })}
     <div class="mtabs" role="tablist">${tabs}</div>
     <article class="mod">
       <header class="modh">
@@ -923,7 +926,12 @@ async function comeHome() {
   if (linkCode && view === 'loading') {
     try { history.replaceState(null, '', location.pathname + '#home'); } catch { /* old browser */ }
     try { await account.signinWith(linkCode); view = 'home'; }
-    catch (ex) { view = 'signin'; render(); const m = $('#si-msg'); if (m) m.textContent = ex.message || 'That sign-in link did not work. Ask for a new one.'; return; }
+    catch (ex) {
+      // Already signed in on this device (the link was opened twice, or late):
+      // no need to stop them at the door, unless they came to reset a password.
+      if (account.joined() && !resetAsk) view = 'home';
+      else { view = 'signin'; render(); const m = $('#si-msg'); if (m) m.textContent = ex.message || 'That sign-in link did not work. Type your email below and we’ll send a fresh one.'; return; }
+    }
   }
   if (view === 'redirect') return;
   render();

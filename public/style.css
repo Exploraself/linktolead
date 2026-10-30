@@ -765,3 +765,26 @@ body.inwork .foot{display:none}
 .rstar .cban-needle{transform-origin:32px 32px;animation:rstarNeedle 7s ease-in-out infinite}
 @keyframes rstarNeedle{0%,100%{transform:rotate(-18deg)}50%{transform:rotate(24deg)}}
 @media(prefers-reduced-motion:reduce){.rstar .cban-needle{animation:none}.rstar:hover{transform:none}}
+
+/* The level's teaching video and the comments under it (video-talk.js). */
+.lv-video{margin:18px 0 6px;padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--field);display:flex;flex-direction:column;gap:8px}
+.lv-vt{margin:0;font-size:22px;line-height:1.2}
+.lv-vs{margin:0;color:var(--muted)}
+.lv-film{width:100%;aspect-ratio:16/9;border-radius:8px;background:var(--deep);display:block;margin-top:6px}
+.lv-soon{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#D6BF8F;text-align:center;padding:16px;font-size:14px;line-height:1.5}
+.lv-soon span{max-width:340px;color:var(--on-deep)}
+.lv-talk{margin-top:6px;border-top:1px solid var(--line);padding-top:10px}
+.lv-talk summary{cursor:pointer;font-weight:600;min-height:40px;display:flex;align-items:center}
+.lv-items{list-style:none;margin:8px 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.lv-items li{border-left:3px solid #B4703F;padding:4px 0 4px 12px}
+.lv-who{margin:0;font-size:13px;color:var(--muted)}
+.lv-who b{color:var(--ink)}
+.lv-body{margin:2px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.lv-del{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;padding:0}
+.lv-empty{color:var(--muted);font-size:14px}
+.lv-form{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.lv-form textarea{width:100%;box-sizing:border-box;font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--field);color:inherit}
+.lv-n{margin-left:6px;color:var(--muted);font-weight:500}
+.lv-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lv-msg{font-size:13px;color:var(--muted)}
+.lv-fine{font-size:12px;color:var(--muted);margin:0}

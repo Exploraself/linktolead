@@ -4,6 +4,7 @@
 
 import { onRequestPost as signup } from '../functions/api/signup.js';
 import { onRequestPost as askLink, onRequestGet as useLink, TTL } from '../functions/api/signin.js';
+import { onRequestPost as setPw } from '../functions/api/password.js';
 import { onRequestGet as unsub, onRequestPost as unsubPost } from '../functions/api/unsubscribe.js';
 import { sha256 } from '../functions/_shared.js';
 import { fakeD1, fakeResend, post, get, tally } from './_d1.mjs';
@@ -80,7 +81,23 @@ ok(stored[0].expires_at - Date.now() > TTL - 5000 && stored[0].expires_at - Date
 [st, j] = await jsonOf(await useLink({ request: get('/api/signin?code=' + code), env }));
 ok(st === 200 && j.token === token && j.me.email === 'ana@example.com' && j.me.first === 'Ana', 'a live code returns the token');
 [st, j] = await jsonOf(await useLink({ request: get('/api/signin?code=' + code), env }));
-ok(st === 410 && !j.token, 'single use: the second try gets nothing');
+ok(st === 200 && j.token === token, 'the same link works again within its 30 minutes (a phone opens it twice)');
+// Saving a new password ends every open link for the account.
+const mailMark = DB.raw.prepare('SELECT COALESCE(MAX(rowid), 0) m FROM mail_log').get().m;
+sent = fakeResend();
+await ask('ana@example.com', '9.9.9.4');
+const code3 = /signin=([0-9a-f]+)/.exec(sent[0].body.text)[1];
+const wasType = DB.raw.prepare('SELECT signup_type FROM student_profile WHERE student_id = ?').get(token).signup_type;
+DB.raw.prepare("UPDATE student_profile SET signup_type = 'full' WHERE student_id = ?").run(token);
+[st, j] = await jsonOf(await setPw({ request: post('/api/password', { token, password: 'a-long-pass-123', confirm: 'a-long-pass-123' }), env }));
+ok(st === 200 && j.ok, 'a password is saved');
+[st, j] = await jsonOf(await useLink({ request: get('/api/signin?code=' + code3), env }));
+ok(st === 410 && !j.token && /30 minutes/.test(j.error), 'after the new password the link is over, and the message says links last 30 minutes');
+[st, j] = await jsonOf(await useLink({ request: get('/api/signin?code=' + code), env }));
+ok(st === 410, 'the older link is over too');
+DB.raw.prepare('UPDATE student_profile SET signup_type = ? WHERE student_id = ?').run(wasType, token);
+DB.raw.prepare('DELETE FROM account_auth WHERE student_id = ?').run(token);
+DB.raw.prepare('DELETE FROM mail_log WHERE rowid > ?').run(mailMark); // keep the rate-limit tests below counting from zero
 
 // Expiry.
 sent = fakeResend();

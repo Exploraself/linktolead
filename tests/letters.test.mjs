@@ -37,7 +37,7 @@ ok(L.text.includes('P.S. One thing I’d love you to try: the Unshakeable assess
 ok(!resultsLetter(B, { first: 'Maria', offer: null }).text.includes('For you that’s'), 'results: no domain named when none is known');
 
 L = signinLetter(B, `${B}/start?signin=abc`, { first: 'Maria', offer: 'play' });
-ok(L.subject === 'Your link to get back in' && paras(L.text)[2] === 'Good to see you again. Everything you wrote is right where you left it.' && paras(L.text)[3] === `Sign me back in →: ${B}/start?signin=abc` && paras(L.text)[4] === 'The button works once, for the next 30 minutes.', 'sign-in: subject, words and the button');
+ok(L.subject === 'Your link to get back in' && paras(L.text)[2] === 'Good to see you again. Everything you wrote is right where you left it.' && paras(L.text)[3] === `Sign me back in →: ${B}/start?signin=abc` && paras(L.text)[4] === 'The button works for the next 30 minutes, on your phone or your computer.', 'sign-in: subject, words and the button');
 ok(L.text.includes('P.S. Got ten minutes? Play Leadionaire: fifteen decisions, thirty seconds each. It shows how you choose under pressure: https://exploraself.com/play'), 'sign-in: the game P.S.');
 
 L = passwordChangedLetter(B, { first: 'Maria', offer: 'first100' });

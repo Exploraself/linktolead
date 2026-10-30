@@ -30,6 +30,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (kind && kind.signup_type === 'simple') return bad('Your account signs in with a link we email you, so it has no password.', 403);
   const had = await D.prepare('SELECT 1 AS x FROM account_auth WHERE student_id = ? AND pass_hash IS NOT NULL').bind(me.id).first();
   await setPassword(D, me.id, body.password);
+  // The new password ends any sign-in or reset link still open for 30 minutes.
+  await D.prepare('DELETE FROM signin_code WHERE student_id = ?').bind(me.id).run();
   await D.prepare('INSERT INTO event (student_id,kind,at) VALUES (?,?,?)').bind(me.id, had ? 'password-changed' : 'password-set', now()).run();
 
   if (mailState(env).ready) {

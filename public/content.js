@@ -161,6 +161,15 @@ export const SECTIONS = [
 export const VIDEOS = {};
 export const videoFor = (stage, level, dk) => VIDEOS[`${stage}.${level}.${dk}`] || null;
 
+// Every level opens with one teaching video (public/video-talk.js): an MP4 on
+// Cloudflare R2. Key `stage.level` for one stage, or just the level number for
+// all three. title and sub are optional: without them the level's own name and
+// the first sentence of its promise are used.
+//
+// To add one: 'build.1': { src: 'https://<bucket address>/build-01.mp4', poster: 'https://<bucket address>/build-01.jpg' }
+export const LEVEL_VIDEOS = {};
+export const levelVideo = (stage, level) => LEVEL_VIDEOS[`${stage}.${level}`] || LEVEL_VIDEOS[String(level)] || {};
+
 // ── What the next level gives ────────────────────────────────────────────────
 /** The honest reason to keep going: the next level's own promise, which was
  *  written as things that exist by Sunday rather than things you will feel. */
