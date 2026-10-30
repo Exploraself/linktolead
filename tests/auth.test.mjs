@@ -102,4 +102,23 @@ ok(st === 200 && j.changed === true && DB.raw.prepare('SELECT salt FROM account_
 ok((await L('bo@example.com', 'first password')).status === 401 && (await L('bo@example.com', 'second password')).status === 200, 'the old password stops working, the new one works');
 ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id = ? AND kind IN ('password-set','password-changed')").get(bo).n === 2, 'set and change are logged');
 
+// ── The email limit never blocks password sign-in ───────────────────────────
+{
+  const { LIMIT_MSG } = await import('../functions/_mail.js');
+  const fs = await import('node:fs');
+  for (let k = 0; k < 3; k++) await askLink({ request: post('/api/signin', { email: 'ana@example.com' }, '7.7.7.' + k), env });
+  const [s4, j4] = await J(await askLink({ request: post('/api/signin', { email: 'ana@example.com' }, '7.7.7.9'), env }));
+  ok(s4 === 429 && j4.error === LIMIT_MSG, 'the 4th email in an hour is stopped with the plain message');
+  ok(LIMIT_MSG === "We've sent 3 emails to this address in the last hour. To keep your account safe, wait an hour, or sign in with your password.", 'limit message wording');
+  const [s5] = await J(await L('ana@example.com', 'correct horse', '7.7.7.10'));
+  ok(s5 === 200, 'password sign-in still works after the email limit is hit');
+  const src = ['functions/api/signin.js', 'functions/api/send-plan.js', 'public/account-box.js', 'public/compass/app.js', 'public/start/index.html'].map((f) => fs.readFileSync(f, 'utf8')).join('\n');
+  ok(!src.includes('That is a few already'), 'the old limit message is gone everywhere');
+  ok(!fs.readFileSync('functions/api/login.js', 'utf8').includes('allowed('), 'login.js does not use the email limit');
+  const app = fs.readFileSync('public/compass/app.js', 'utf8');
+  ok(app.includes("'This email already has an account. Sign in to open your plans.'") && /UI\.signinFor === 'plans'[\s\S]{0,1200}pSignin\('gate'\)/.test(app), 'Compass: an existing email opens the sign-in box with password + email link');
+  ok(/case 'account':[\s\S]{0,600}openSignin\(\)/.test(app) && !/case 'account':[\s\S]{0,600}askLink\(/.test(app), 'Compass: "Create my free account" no longer only emails a link');
+  ok(fs.readFileSync('public/account-box.js', 'utf8').includes('Sign in to open your plans.'), 'road pages and /start: same line for an existing email');
+}
+
 done();

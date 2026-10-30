@@ -100,7 +100,7 @@ function wire(gate, variant, landing) {
         ...(d ? { company: d.company, noCompany: d.noCompany, interest: d.interest, industry: d.industry, password: pw, confirm: pw2 } : {}) });
       if (out.token) { location.href = '/start#home'; return; }
       // An address that already has an account is never handed its key here.
-      $('#gate-err').innerHTML = 'This email already has an account. <a href="/start#signin">Sign in →</a>';
+      $('#gate-err').innerHTML = 'This email already has an account. Sign in to open your plans. <a href="/start#signin">Sign in →</a>';
     } catch (ex) {
       err(ex && ex.message && !/fetch|network|load failed|import/i.test(ex.message) ? ex.message : 'We could not reach the account service just now. Try again in a minute.');
     }
