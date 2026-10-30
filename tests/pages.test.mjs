@@ -108,11 +108,11 @@ const COPY = [
   'The Founder’s Blueprint for your stage', 'A manual for Building (79 pages), Growing (77) or Scaling (80). All three open with your account.', 'Advice for where you are, not for someone else’s business.', 'A clear road from your stage to the next one.',
   'Built to Lead', '99 practical tools. A personal leadership field guide.', 'A tool ready for the hard moment: the talk, the decision, the no.', 'Lead people with confidence, even if nobody taught you how.',
   'Worth Building', '32 leadership frameworks. The Founder’s Playbook.', 'Think bigger, with a structure behind it.', 'Build toward a business that lasts and can run without you.',
-  'A New Way of Winning', 'coming soon', '12 principles. Four stages. Four domains. In your library the day it opens.', 'A win that counts at home as well as at work.', 'Decide what winning is for, then build toward it.',
+  'A New Way of Winning', '12 principles. Four stages. Four domains. Free to download with your account.', 'A win that counts at home as well as at work.', 'Decide what winning is for, then build toward it.',
   'Your tools · they work for you from day one', 'Your library · download and keep', 'WHAT YOU GET', 'IN YOUR LIFE', 'IN YOUR BUSINESS',
-  '3 manuals, one for each stage · 99 practical tools · 32 leadership frameworks · 12 principles, coming soon',
+  '3 manuals, one for each stage · 99 practical tools · 32 leadership frameworks · 12 principles',
   'You don’t have to figure it out alone. Your mentor, and the whole team behind you.', 'Notes from Alexandru and the team arrive at your Base Camp, and you can reply.',
-  'One question before you scroll on: what would one more free evening a week give your family?', '4 tools that work from day one', '3 manuals and 2 books to download, a third on the way', 'Alexandru and the team beside you',
+  'One question before you scroll on: what would one more free evening a week give your family?', '4 tools that work from day one', '3 manuals and 3 books to download', 'Alexandru and the team beside you',
   'Free and yours to keep', 'Create my free account →', 'Your name, your email, a password and three short questions about your business. No card.',
 ];
 for (const t of COPY) ok(flat.includes(t), `kit copy: ${t}`);

@@ -369,7 +369,7 @@ const LIB_ICONS = [
   ['3 manuals', 'The three manuals', '<path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/>'],
   ['99 tools', 'Built to Lead, 99 tools', '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-.5-.5-2.5z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/>'],
   ['32 frameworks', 'Worth Building, 32 frameworks', '<rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/>'],
-  ['Soon', 'A New Way of Winning, coming soon', '<circle cx="12" cy="12" r="9" fill="none" stroke="#B4975F" stroke-width="1.6"/><path d="M12 6l2 6-2 1.5-2-1.5z" fill="#B4975F"/>'],
+  ['12 principles', 'A New Way of Winning, 12 principles', '<circle cx="12" cy="12" r="9" fill="none" stroke="#B4975F" stroke-width="1.6"/><path d="M12 6l2 6-2 1.5-2-1.5z" fill="#B4975F"/>'],
 ];
 const libIcons = () => `<div class="rlib"><p class="eyebrow">Your library · now open</p><div class="rlibrow">${LIB_ICONS.map(([t, label, svg]) =>
   `<button type="button" class="libi${t === 'Soon' ? ' soon' : ''}" data-go="library" aria-label="${esc(label)}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">${svg}</svg>${esc(t)}</button>`).join('')}</div></div>`;
@@ -617,7 +617,7 @@ function libBanner() {
   if (bannerSeen() || !(state.me || account.joined())) return '';
   return `<div class="libban" role="status">
     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/></svg>
-    <div><b>Your library just got fuller.</b><p>With your free account: the three Founder’s Blueprint manuals, Built to Lead (99 practical tools) and Worth Building (32 leadership frameworks). A New Way of Winning is on its way.</p></div>
+    <div><b>Your library just got fuller.</b><p>With your free account: the three Founder’s Blueprint manuals, Built to Lead (99 practical tools), Worth Building (32 leadership frameworks) and A New Way of Winning (12 principles).</p></div>
     <button type="button" class="cta" data-go="library">Open my library →</button>
     <button type="button" class="x" data-banner="close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
   </div>`;

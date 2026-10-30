@@ -101,7 +101,7 @@ const BOOKS = [
   { css: 'III', t: 'Scaling', sub: 'A team · a new job', cloth: '#18263F', cap: 'Volume III · 80 pages' },
   { img: '/library/cover-built-to-lead.jpg', t: 'Built to Lead', cap: '99 tools' },
   { img: '/library/cover-worth-building.jpg', t: 'Worth Building', cap: 'The Founder’s Playbook · 32 frameworks' },
-  { img: '/library/cover-a-new-way-of-winning.jpg', t: 'A New Way of Winning', cap: 'The Link to Lead Manual', soon: true },
+  { img: '/library/cover-a-new-way-of-winning.jpg', t: 'A New Way of Winning', cap: 'The Link to Lead Manual · 12 principles' },
 ];
 function book(b) {
   const inner = b.img
