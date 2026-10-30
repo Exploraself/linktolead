@@ -29,11 +29,12 @@ const day = (s) => { const d = new Date(s); return isNaN(d) ? '—' : `${d.getDa
 function gate(msg) {
   $('#main').innerHTML = `<div class="gate"><h2>Sign in</h2>
     <p>Enter the mentor key. It is set in Cloudflare as <b>MENTOR_KEY</b>.</p>
-    <p style="margin-top:16px"><input id="k" type="password" placeholder="Mentor key" autocomplete="off"></p>
+    <p style="margin-top:16px;display:flex;gap:6px;max-width:420px"><input id="k" type="password" placeholder="Mentor key" autocomplete="off" style="flex:1;min-width:0"><button type="button" id="k-eye" aria-label="Show the key" aria-pressed="false" style="width:46px;flex:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></p>
     <p style="margin-top:12px"><button id="go">Open the roster</button></p>
     ${msg ? `<p class="err">${esc(msg)}</p>` : ''}</div>`;
   $('#go').onclick = () => { key = $('#k').value.trim(); try { localStorage.setItem(KEY, key); } catch { /* private mode */ } load(); };
   $('#k').onkeydown = (e) => { if (e.key === 'Enter') $('#go').click(); };
+  $('#k-eye').onclick = () => { const f = $('#k'), show = f.type === 'password'; f.type = show ? 'text' : 'password'; $('#k-eye').setAttribute('aria-pressed', String(show)); $('#k-eye').setAttribute('aria-label', show ? 'Hide the key' : 'Show the key'); };
 }
 
 async function load() {
