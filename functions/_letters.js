@@ -8,7 +8,7 @@
 // a good word and some encouragement, "reply here" with a few one-tap
 // questions, "See you soon" with a wish for the founder's own part of the day
 // (morning, afternoon, evening or night, from their time zone), the mentor's
-// handwritten signature (/mail/signature.png, a scan of the real one) beside
+// handwritten signature (/mail/signature.png, La Belle Aurore in gold, chosen 30 Oct) beside
 // their round photo, then a P.S. with one promotion. Every letter has a
 // plain-text part.
 // The P.S. is always the Unshakeable assessment (Alexandru, 30 Oct 2026),
