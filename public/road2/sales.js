@@ -163,7 +163,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
   const ctx = { val, RANGES, LADDER, PERCENT, posOf: SalesMath.posOf, redraw: (k) => redraw(k) };
   document.querySelectorAll('[data-edit]').forEach((span) => {
     span.setAttribute('role', 'button'); span.setAttribute('tabindex', '0'); span.title = 'Tap to type an exact number';
-    const open = () => import('/compass/welcome/edit.js').then((m) => m.edit(span, ctx)).catch(() => {});
+    const open = () => import('/road2/edit.js').then((m) => m.edit(span, ctx)).catch(() => {});
     span.addEventListener('click', open);
     span.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('input')) { e.preventDefault(); open(); } });
   });
@@ -230,7 +230,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
   const engine = () => (window.CompassEngine ? Promise.resolve(window.CompassEngine) : new Promise((ok, no) => {
     const s = document.createElement('script'); s.src = '/compass/engine.js'; s.onload = () => ok(window.CompassEngine); s.onerror = no; document.head.appendChild(s);
   }));
-  const fillVid = () => Promise.all([engine(), import('/compass/welcome/lab.js')])
+  const fillVid = () => Promise.all([engine(), import('/road2/lab.js')])
     .then(([E, m]) => { labApi = m.fill(vid, { E, get: () => ({ ...val }), openGate }); }).catch(() => {});
   try {
     const io = new IntersectionObserver((es) => { if (es.some((x) => x.isIntersecting)) { io.disconnect(); fillVid(); } }, { rootMargin: '900px 0px' });
@@ -242,11 +242,11 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
    * steps. Its buttons open the same account box. */
   const kit = $('#kit-body');
   const kitCss = () => new Promise((ok) => {
-    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/compass/welcome/kit.css';
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/road2/kit.css';
     l.onload = l.onerror = ok; document.head.appendChild(l);
   });
   const fillKit = () => Promise.all([
-    import('/compass/welcome/kit.js'), import('/content.js'), kitCss(),
+    import('/road2/kit.js'), import('/content.js'), kitCss(),
     fetch('/api/plans?total').then((r) => r.json()).then((j) => j.total).catch(() => null),
   ]).then(([m, c, , steps]) => { m.fill(kit, c.LIBRARY, steps); kit.querySelectorAll('[data-gate]').forEach((b) => b.addEventListener('click', openGate)); }).catch(() => {});
   if (kit) {
@@ -257,16 +257,16 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
   }
 
   /* The account box. Its markup and code (account-box.js) load the first time
-   * it opens, so the page itself stays light. /compass/welcome#join opens it
+   * it opens, so the page itself stays light. /road2/#join opens it
    * (where /start sends visitors without an account). */
   const gate = $('#gate');
   import('/forms.js').then((m) => m.rememberUtm()).catch(() => {});
   let box = null;
-  const loadBox = () => box || (box = import('/compass/welcome/account-box.js').catch(() => { box = null; }));
+  const loadBox = () => box || (box = import('/account-box.js').catch(() => { box = null; }));
   function openGate(e) {
     const opener = e && e.currentTarget;
     gate.hidden = false;
-    loadBox().then((m) => m && m.open({ gate, opener, stage: stage === null ? null : STAGES[stage] }));
+    loadBox().then((m) => m && m.open({ gate, opener, stage: stage === null ? null : STAGES[stage], variant: 'full', landing: 'road2' }));
   }
   document.querySelectorAll('[data-gate]').forEach((b) => b.addEventListener('click', openGate));
   if (location.hash === '#join') {

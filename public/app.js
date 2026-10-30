@@ -32,7 +32,7 @@ const oldEntrance = !!(state.referee || (state.diag && Object.keys(state.diag).l
 const hashNow = (() => { try { return location.hash; } catch { return ''; } })();
 const linkCode = (() => { try { return new URLSearchParams(location.search).get('signin') || ''; } catch { return ''; } })();
 let view = linkCode ? 'loading' : entry({ joined: account.joined(), old: oldEntrance, hash: hashNow });
-if (view === 'redirect') { try { location.replace('/compass/welcome#join'); } catch { /* no location */ } }
+if (view === 'redirect') { try { location.replace('/road2/#join'); } catch { /* no location */ } }
 let level = 1, dom = 'self';
 /** The Compass record from the account, the notes, and whether a password is set. */
 let compassRec = null, inbox = null, hasPassword = false, replyTo = null;
@@ -314,7 +314,7 @@ function signinView() {
       <button class="cta" type="submit">Sign in →</button>
       <button class="lib-link" type="button" data-link>Forgot your password? Email me a sign-in link</button>
       <p class="joinerr" id="si-msg" role="status"></p>
-      <p class="savenote">New here? <a href="/compass/welcome#join">Create your free account →</a></p>
+      <p class="savenote">New here? <a href="/road2/#join">Create your free account →</a></p>
     </form>
   </div></section>`;
 }
@@ -548,7 +548,7 @@ function libraryView() {
   const manuals = LIBRARY.manuals.map((m) => `<li class="lib-man${m.k === state.stage ? ' lib-yours' : ''}">
       <span class="bk3 bk3-man bk3-${m.k}" aria-hidden="true"><span class="bk3-cover"><small>ExploraSelf</small><b>${esc(STAGES[m.k].n)}</b></span><i class="bk3-spine"></i></span>
       <span class="lib-mtext"><b>${esc(m.n)}</b><small>${esc(m.sub)} · ${m.pages} pages${m.k === state.stage ? ' · your stage' : ''}</small></span>
-      ${joined ? `<a class="lib-btn" href="${esc(account.libraryHref(m.k))}" download>${dl}Download PDF</a>` : `<a class="lib-btn" href="/compass/welcome#join">Create a free account to download</a>`}
+      ${joined ? `<a class="lib-btn" href="${esc(account.libraryHref(m.k))}" download>${dl}Download PDF</a>` : `<a class="lib-btn" href="/road2/#join">Create a free account to download</a>`}
     </li>`).join('');
   const books = LIBRARY.books.map((b) => b.soon
     ? `<li class="lib-book lib-soon">${b.cover ? `<span class="bk3"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>` : '<span class="bk3" aria-hidden="true"><span class="bk3-cover bk3-blank">In preparation</span></span>'}
@@ -556,7 +556,7 @@ function libraryView() {
     : `<li class="lib-book"><span class="bk3"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small>
         <span class="lib-acts"><a href="${esc(b.preview)}" target="_blank" rel="noopener">Preview the first pages →</a>
-        ${joined ? `<a href="${esc(account.libraryHref(b.k))}" download>${dl}Free digital copy</a>` : `<a class="lib-link" href="/compass/welcome#join">Create a free account for the free digital copy</a>`}
+        ${joined ? `<a href="${esc(account.libraryHref(b.k))}" download>${dl}Free digital copy</a>` : `<a class="lib-link" href="/road2/#join">Create a free account for the free digital copy</a>`}
         <span class="lib-print">${b.print ? `<a href="${esc(b.print)}" target="_blank" rel="noopener">Print edition ↗</a>` : 'Print edition coming'}</span></span></span></li>`).join('');
   const L = LIBRARY.lab;
   return `<section class="band qband lib"><div class="wrap">
@@ -715,7 +715,7 @@ document.addEventListener('click', (e) => {
     render(); return;
   }
   if (b.dataset.replyto) { replyTo = replyTo === b.dataset.replyto ? null : b.dataset.replyto; render(); const t = document.querySelector('.note-reply textarea'); if (t) t.focus(); return; }
-  if (b.dataset.signout !== undefined) { account.signOut(); location.replace('/compass/welcome'); return; }
+  if (b.dataset.signout !== undefined) { account.signOut(); location.replace('/road2/'); return; }
   if (b.hasAttribute('data-link')) { sendSigninLink(); return; }
   if (b.dataset.stage) { state.stage = b.dataset.stage; save(); view = 'work'; render(); window.scrollTo({ top: 0, behavior: 'instant' }); return; }
   if (b.dataset.level) {

@@ -2,14 +2,15 @@
 // (the full form), and where they came from.
 //
 // Two forms make the same student record:
-//   FULL   (/compass/welcome and /compass/welcome-a, landing "c"; /, landing
-//          "b"): first name, surname, email, company (or "No company
-//          yet"), interest, industry, a password (required), consent.
-//   SIMPLE (/a, landing "a", and the Compass's "Who is this compass for?"
-//          box): first name, surname, email, consent. No password, ever:
-//          these founders sign in by email link.
-// signup_type says which; landing says which sales page ('a', 'b', 'c' or
-// 'compass'), and utm_* the tags the founder arrived with.
+//   FULL   (/road1/, landing "road1"; /road2/, the Compass sales page,
+//          landing "road2"): first name, surname, email, company (or "No
+//          company yet"), interest, industry, a password (required), consent.
+//   SIMPLE (/road3/, the 12 Scrolls page, landing "road3", and the Compass's
+//          "Who is this compass for?" box, landing "compass"): first name,
+//          surname, email, consent. No password, ever: these founders sign
+//          in by email link.
+// signup_type says which; landing says which sales page ('road1', 'road2',
+// 'road3' or 'compass'), and utm_* the tags the founder arrived with.
 //
 // Stored on student_profile: company '' means "No company yet"; NULL means it
 // was never asked.
@@ -23,7 +24,13 @@ export const INDUSTRIES = ['Coaching & consulting', 'Creative & design', 'E-comm
   'Beauty & personal care', 'Education & training', 'Professional services', 'Trades & construction', 'Technology & software',
   'Real estate', 'Manufacturing', 'Nonprofit & social impact', 'Other'];
 export const SIGNUP_TYPES = ['full', 'simple'];
-export const LANDINGS = ['a', 'b', 'c', 'compass'];
+export const LANDINGS = ['road1', 'road2', 'road3', 'compass'];
+/** The landing keys before the roads, each to the road its page became. A
+ *  page loaded before the rename still sends one; stored ones are moved
+ *  over once (functions/_shared.js). */
+export const OLD_LANDINGS = { b: 'road1', c: 'road2', a: 'road3' };
+/** A landing key as stored: one of LANDINGS, or null. */
+export const landingOf = (k) => (LANDINGS.includes(k) ? k : Object.hasOwn(OLD_LANDINGS, k) ? OLD_LANDINGS[k] : null);
 export const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
 
 /** The utm_* tags sent with a sign-up, cleaned; anything else is dropped. */

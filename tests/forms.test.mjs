@@ -1,9 +1,10 @@
-// Three sales pages, one account, all ending at /start: A (/a, the 12 Scrolls
-// page) with the SIMPLE form, B (/, the long page, with the What-if Lab;
-// /b → /) and C (/c → the Compass sales page) with the FULL form. The forms (POST /api/signup): no
-// password on simple, ever; a password required on full; the landing and the
-// utm_* tags stored; the Mailchimp tags in TEST mode; /mentor's view; /b, /c,
-// the 404 page; and on the Compass sales page the "Your plan, live" badge, the
+// Three sales pages, the three roads, one account, all ending at /start:
+// Road 1 (/road1/, the long page, with the What-if Lab) and Road 2 (/road2/,
+// the Compass sales page) with the FULL form, Road 3 (/road3/, the 12 Scrolls
+// page) with the SIMPLE form. The forms (POST /api/signup): no password on
+// simple, ever; a password required on full; the landing and the utm_* tags
+// stored; the Mailchimp tags in TEST mode; /mentor's view; the old addresses
+// redirecting to their road; the 404 page; and on the Compass sales page the "Your plan, live" badge, the
 // lever-1 figure and the live lab. No network: Mailchimp is in TEST mode and
 // Resend is faked.
 
@@ -14,22 +15,22 @@ import { onRequestPost as password } from '../functions/api/password.js';
 import { onRequestGet as stateGet } from '../functions/api/state.js';
 import { onRequestPost as login } from '../functions/api/login.js';
 import { onRequestGet as mGet } from '../functions/api/mentor.js';
-import { onRequest as pagesB } from '../functions/b.js';
-import { onRequest as pagesC } from '../functions/c.js';
+import { onRequest as pagesRedirect } from '../functions/_middleware.js';
+import { accountTables } from '../functions/_shared.js';
 import worker from '../worker.js';
 import { INTERESTS, INDUSTRIES, details, utmFrom } from '../functions/_profile.js';
 import * as F from '../public/forms.js';
 import { summary, filter, byLanding } from '../public/mentor/dash.js';
-import { levelsHTML, band } from '../public/a/page.js';
+import { levelsHTML, band } from '../public/road3/page.js';
 import { weekTitle } from '../public/content.js';
-import { baseFrom } from '../public/compass/welcome/lab.js';
-import { baseOf, EXAMPLE, num } from '../public/lab.js';
+import { baseFrom } from '../public/road2/lab.js';
+import { baseOf, EXAMPLE, num } from '../public/road1/lab.js';
 import { tagsFor, LANDING_TAGS } from '../functions/_mailchimp.js';
 import { fakeD1, fakeResend, post, get, tally } from './_d1.mjs';
 
 const require = createRequire(import.meta.url);
 const E = require('../public/compass/engine.js');
-const SalesMath = require('../public/compass/welcome/sales.js');
+const SalesMath = require('../public/road2/sales.js');
 const read = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const { ok, done } = tally('forms');
 
@@ -50,7 +51,7 @@ const S = async (body) => { const r = await signup({ request: post('/api/signup'
 const prof = (id) => env.DB.raw.prepare('SELECT signup_type, company, interest, industry, landing, utm_source, utm_content FROM student_profile WHERE student_id = ?').get(id);
 const hasPw = (id) => !!env.DB.raw.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ? AND pass_hash IS NOT NULL').get(id);
 const mcLog = (id) => env.DB.raw.prepare('SELECT detail FROM mailchimp_log WHERE student_id = ? ORDER BY id').all(id).map((r) => r.detail).join(' ');
-const FULL = { first: 'Fay', last: 'Full', email: 'fay@example.com', consent: true, source: 'sales-page', type: 'full', landing: 'c', company: 'Fay & Co', interest: 'Higher income', industry: 'Real estate', utm: { utm_source: 'meta', utm_content: 'home-c' } };
+const FULL = { first: 'Fay', last: 'Full', email: 'fay@example.com', consent: true, source: 'sales-page', type: 'full', landing: 'road2', company: 'Fay & Co', interest: 'Higher income', industry: 'Real estate', utm: { utm_source: 'meta', utm_content: 'home-c' } };
 
 let [st, out] = await S({ ...FULL, company: '', password: 'a-long-password', confirm: 'a-long-password' });
 ok(st === 400 && /company/.test(out.error), 'full form: no company and no tick is refused');
@@ -62,20 +63,28 @@ ok(env.DB.raw.prepare("SELECT COUNT(*) n FROM student WHERE email = 'fay@example
 [st, out] = await S({ ...FULL, password: 'a-long-password', confirm: 'a-long-password' });
 const fay = out.token;
 ok(st === 200 && fay && hasPw(fay), 'full form: one record, signed in, with its password');
-ok(JSON.stringify(prof(fay)) === JSON.stringify({ signup_type: 'full', company: 'Fay & Co', interest: 'Higher income', industry: 'Real estate', landing: 'c', utm_source: 'meta', utm_content: 'home-c' }), 'full form: company, interest, industry, landing C and the utm tags stored');
-ok(/"Signup - Full".*"Landing - Compass welcome".*"Interest - Higher income".*"Industry - Real estate"/.test(mcLog(fay)) && /"COMPANY":"Fay & Co"/.test(mcLog(fay)), 'Mailchimp (TEST): "Signup - Full", "Landing - Compass welcome", interest and industry tags, COMPANY');
+ok(JSON.stringify(prof(fay)) === JSON.stringify({ signup_type: 'full', company: 'Fay & Co', interest: 'Higher income', industry: 'Real estate', landing: 'road2', utm_source: 'meta', utm_content: 'home-c' }), 'full form: company, interest, industry, landing Road 2 and the utm tags stored');
+ok(/"Signup - Full".*"Landing - Road 2".*"Interest - Higher income".*"Industry - Real estate"/.test(mcLog(fay)) && /"COMPANY":"Fay & Co"/.test(mcLog(fay)), 'Mailchimp (TEST): "Signup - Full", "Landing - Road 2", interest and industry tags, COMPANY');
 
-[st, out] = await S({ first: 'Sam', last: 'Simple', email: 'sam@example.com', consent: true, source: 'home', type: 'simple', landing: 'a', password: 'a-long-password', confirm: 'a-long-password', utm: { utm_source: 'exploraself', utm_medium: 'banner' } });
+[st, out] = await S({ first: 'Sam', last: 'Simple', email: 'sam@example.com', consent: true, source: 'home', type: 'simple', landing: 'road3', password: 'a-long-password', confirm: 'a-long-password', utm: { utm_source: 'exploraself', utm_medium: 'banner' } });
 const sam = out.token;
 ok(st === 200 && sam && !hasPw(sam), 'simple form: one record, signed in, and no password even if one is sent');
-ok(JSON.stringify(prof(sam)) === JSON.stringify({ signup_type: 'simple', company: null, interest: null, industry: null, landing: 'a', utm_source: 'exploraself', utm_content: null }), 'simple form: landing A and its utm tags');
-ok(/"Signup - Simple".*"Landing - 12 Scrolls"/.test(mcLog(sam)) && !/Signup - Full/.test(mcLog(sam)), 'Mailchimp (TEST): "Signup - Simple" and "Landing - 12 Scrolls"');
-[st, out] = await S({ ...FULL, first: 'Bea', last: 'Bee', email: 'bea@example.com', source: 'home', landing: 'b', password: 'a-long-password', confirm: 'a-long-password', utm: {} });
+ok(JSON.stringify(prof(sam)) === JSON.stringify({ signup_type: 'simple', company: null, interest: null, industry: null, landing: 'road3', utm_source: 'exploraself', utm_content: null }), 'simple form: landing Road 3 and its utm tags');
+ok(/"Signup - Simple".*"Landing - Road 3"/.test(mcLog(sam)) && !/Signup - Full/.test(mcLog(sam)), 'Mailchimp (TEST): "Signup - Simple" and "Landing - Road 3"');
+[st, out] = await S({ ...FULL, first: 'Bea', last: 'Bee', email: 'bea@example.com', source: 'home', landing: 'road1', password: 'a-long-password', confirm: 'a-long-password', utm: {} });
 const bea = out.token;
-ok(st === 200 && hasPw(bea) && prof(bea).signup_type === 'full' && prof(bea).landing === 'b' && /"Signup - Full".*"Landing - Home"/.test(mcLog(bea)), 'full form on B (Home): a password, landing B, "Landing - Home"');
+ok(st === 200 && hasPw(bea) && prof(bea).signup_type === 'full' && prof(bea).landing === 'road1' && /"Signup - Full".*"Landing - Road 1"/.test(mcLog(bea)), 'full form on Road 1: a password, landing road1, "Landing - Road 1"');
 [st, out] = await S({ first: 'Cora', last: 'Box', email: 'cora@example.com', consent: true, source: 'compass', type: 'simple', landing: 'compass' });
 const cora = out.token;
 ok(st === 200 && prof(cora).landing === 'compass' && !/Landing - /.test(mcLog(cora)), 'the Compass box: landing "compass", no landing tag');
+[st, out] = await S({ first: 'Olly', last: 'Old', email: 'olly@example.com', consent: false, type: 'simple', landing: 'a' });
+ok(st === 200 && prof(out.token).landing === 'road3', 'a page loaded before the rename sends "a": stored as road3');
+// Landings stored before the roads move to the road their page became, once.
+const D2 = fakeD1();
+D2.raw.exec(`CREATE TABLE student_profile (student_id TEXT PRIMARY KEY, landing TEXT);
+  INSERT INTO student_profile VALUES ('s1', 'a'), ('s2', 'b'), ('s3', 'c'), ('s4', 'compass'), ('s5', NULL);`);
+await accountTables(D2);
+ok(D2.raw.prepare('SELECT landing FROM student_profile ORDER BY student_id').all().map((x) => x.landing).join() === 'road3,road1,road2,compass,', 'stored landings a, b, c become road3, road1, road2; compass and none stay');
 [st, out] = await S({ first: 'Nia', last: 'None', email: 'nia@example.com', consent: false, type: 'simple', landing: 'nowhere' });
 ok(st === 200 && out.token && mcLog(out.token) === '' && prof(out.token).landing === null, 'no consent: the account is made, nothing goes to Mailchimp; an unknown landing is not stored');
 
@@ -93,67 +102,68 @@ ok((await stateGet({ request: get('/api/state?t=nobody-at-all-here-0000'), env }
 // ── /mentor ─────────────────────────────────────────────────────────────────
 const L = await (await mGet({ request: new Request('https://x/api/mentor', { headers: { 'x-mentor-key': 'mentor-key-123' } }), env })).json();
 const row = (e) => L.students.find((s) => s.email === e);
-ok(row('fay@example.com').signup_type === 'full' && row('fay@example.com').landing === 'c' && row('fay@example.com').company === 'Fay & Co' && row('fay@example.com').interest === 'Higher income' && row('sam@example.com').landing === 'a', '/mentor: signup type, landing, company, interest per founder');
+ok(row('fay@example.com').signup_type === 'full' && row('fay@example.com').landing === 'road2' && row('fay@example.com').company === 'Fay & Co' && row('fay@example.com').interest === 'Higher income' && row('sam@example.com').landing === 'road3', '/mentor: signup type, landing, company, interest per founder');
 const BL = Object.fromEntries(byLanding(L.students).map((x) => [x.k, x]));
-ok(BL.a.total === 1 && BL.b.total === 1 && BL.b.full === 1 && BL.c.total === 1 && BL.c.full === 1 && BL.compass.total === 1 && BL.a.week === 1, '/mentor: sign-ups per landing (A, B, C, the Compass box)');
+ok(BL.road3.total === 2 && BL.road1.total === 1 && BL.road1.full === 1 && BL.road2.total === 1 && BL.road2.full === 1 && BL.compass.total === 1 && BL.road3.week === 2, '/mentor: sign-ups per landing (Roads 1, 2, 3, the Compass box)');
 const Sm = summary(L.students, []);
-ok(Sm.full === 2 && Sm.simple === 3 && filter(L.students, { tile: 'full' }).length === 2, '/mentor: Full / Simple filters');
+ok(Sm.full === 2 && Sm.simple === 4 && filter(L.students, { tile: 'full' }).length === 2, '/mentor: Full / Simple filters');
 const csv = await (await mGet({ request: new Request('https://x/api/mentor?csv=1', { headers: { 'x-mentor-key': 'mentor-key-123' } }), env })).text();
 ok(/"Sign-up form","Landing","utm_source"/.test(csv) && csv.includes('"Fay & Co"') && csv.includes('"meta"'), 'CSV: form, landing and utm columns');
 
-// ── The three sales pages, /b, /c and the 404 ───────────────────────────────
+// ── The three roads, the old addresses and the 404 ─────────────────────────
 const assets = { ASSETS: { fetch: () => new Response('asset') } };
-let c = pagesC({ request: get('/c?utm_source=exploraself&utm_content=home-c') });
-ok(c.status === 302 && c.headers.get('location') === '/compass/welcome/?utm_source=exploraself&utm_content=home-c', '/c (Pages): 302 to /compass/welcome/, query string kept');
-c = await worker.fetch(get('/c/?utm_medium=banner'), assets, {});
-ok(c.status === 302 && c.headers.get('location') === '/compass/welcome/?utm_medium=banner', '/c (Worker): the same');
-let r = pagesB({ request: get('/b?utm_source=exploraself&utm_content=home-b') });
-ok(r.status === 302 && r.headers.get('location') === '/?utm_source=exploraself&utm_content=home-b', '/b (Pages): 302 to /, query string kept');
-r = await worker.fetch(get('/b/'), assets, {});
-ok(r.status === 302 && r.headers.get('location') === '/', '/b (Worker): the same');
-ok(!existsSync(new URL('../public/b', import.meta.url)), '/b keeps no copy of the page');
+const OLD = [['/', '/road1/'], ['/b', '/road1/'], ['/b/', '/road1/'], ['/compass/welcome', '/road2/'], ['/compass/welcome/', '/road2/'], ['/compass/welcome-a', '/road2/'],
+  ['/compass/welcome-a/', '/road2/'], ['/c', '/road2/'], ['/c/', '/road2/'], ['/a', '/road3/'], ['/a/', '/road3/']];
+for (const [from, to] of OLD) {
+  const q = '?utm_source=exploraself&utm_medium=banner&utm_content=home-3';
+  const w = await worker.fetch(get(from + q), assets, {});
+  const pg = await pagesRedirect({ request: get(from + q), next: () => new Response('asset') });
+  ok(w.status === 302 && w.headers.get('location') === to + q && pg.status === 302 && pg.headers.get('location') === to + q, `${from} → ${to}, utm kept (Worker and Pages)`);
+}
+ok((await worker.fetch(get('/b'), assets, {})).headers.get('location') === '/road1/', 'no query string: none added');
+for (const p of ['/road1/', '/road2/', '/road3/', '/compass', '/compass/summit', '/start']) ok(await (await worker.fetch(get(p), assets, {})).text() === 'asset' && await (await pagesRedirect({ request: get(p), next: () => new Response('asset') })).text() === 'asset', `${p} is served, not redirected`);
+for (const d of ['index.html', 'page.js', 'lab.js', 'a', 'b', 'compass/welcome', 'compass/welcome-a']) ok(!existsSync(new URL('../public/' + d, import.meta.url)), `public/${d}: no copy left at the old address`);
 const W = read('wrangler.toml');
-ok(/not_found_handling = "404-page"/.test(W) && /run_worker_first = \["\/api\/\*", "\/b", "\/b\/", "\/c", "\/c\/"\]/.test(W), 'Worker: unknown addresses get the 404 page; /b and /c reach the Worker');
+ok(/not_found_handling = "404-page"/.test(W) && OLD.every(([from]) => W.includes(`"${from}"`)), 'Worker: unknown addresses get the 404 page; every old address reaches the Worker');
 const NF = read('public/404.html');
 ok(existsSync(new URL('../public/404.html', import.meta.url)) && /noindex/.test(NF) && NF.includes('This page does not exist.') && !NF.includes('Link to Lead — The Founder'), 'a real 404 page (not the home page)');
-const B = read('public/index.html');
-ok(!/ten questions|10 questions/i.test(B) && !B.includes('Mockup at real size') && B.includes('Start tonight, free. <em>By Tuesday, you’ll be ahead.</em>') && B.includes('<button type="button" class="cta" data-join>Create my free account →</button>') && B.includes('Levels 01–03 free · Instant access'), 'B: no "ten questions", no mockup line; the close is "Start tonight, free…" with "Create my free account →"');
-ok(!B.includes('href="/compass/welcome') && (B.match(/<a [^>]*class="cta"[^>]*>/g) || []).every((a) => a.includes('data-join')) && read('public/page.js').includes("variant: 'full', landing: 'b'") && B.includes('<script type="module" src="/page.js"></script>'), 'B: every call to action opens the FULL form (landing B), none goes to /compass/welcome');
-ok(B.indexOf('<h2 class="sectitle">Move one lever. Watch the four answer.</h2>') > B.indexOf('id="library"') && B.indexOf('id="whatif-lab"') < B.indexOf('id="start"'), 'B: the What-if Lab, after the library and before the close');
-const A = read('public/a/index.html');
-ok(A.includes('The Leadership Compass shows which one you are in.') && A.includes('<b>Your free account</b><span>One minute. Name and email.</span>') && A.includes('<b>Your Ground Plan</b><span>Your stage and your first three moves.</span>'), 'A: the Compass line and the three steps');
-for (const [n, p] of [['The Founder Launchpad', 'No cost'], ['The Boardroom', 'One 1:1 session'], ['The LAB', '$97'], ['The HUB', '$397'], ['The Summit', '$1,989']]) ok(A.includes(`<b>${n}</b>`) && A.includes(`<span class="pr">${p}</span>`), `A: ${n} · ${p}`);
-ok(A.includes('All twelve + Alexandru every week') && A.includes('Start tonight, free. <em>By Tuesday, you’ll be ahead.</em>') && A.includes('>Start free →</button>') && A.includes('Levels 01–03 free · Instant access') && !/ten questions/i.test(A), 'A: The Summit line and the close');
-ok(!/PHOTO/.test(A) && read('public/a/page.js').includes("variant: 'simple', landing: 'a'"), 'A: no photo placeholder; Join opens the simple form, landing A');
-ok(levelsHTML('build').includes(`<p>${weekTitle('build', 1)}</p>`) && (levelsHTML('grow').match(/<li/g) || []).length === 12, 'A: level names come from content.js');
-ok([1, 3, 4, 5, 6, 11, 12].map(band).join() === 'free,free,with,with,,,last', 'A: the levels’ bands');
-const WA = read('public/compass/welcome-a/index.html'), WB = read('public/compass/welcome/index.html');
-ok(WA.includes('What is your business for?') && WA.slice(WA.indexOf('<!-- 1a · HANDSHAKE')) === WB.slice(WB.indexOf('<!-- 1a · HANDSHAKE')), '/compass/welcome-a stays, the same as /compass/welcome after its hero');
-for (const W of [WA, WB]) ok(W.includes('<button type="button" data-gate class="cta gold-btn" style="min-height: 56px; padding: 0 32px; font-size: 17px">Show me my road →</button>') && !W.includes('href="#dream"') && !/<a [^>]*href="\/(?!compass\/assets|assets)/.test(W), '/compass/welcome: "Show me my road" opens the full form; no link leaves the page');
-ok(!read('public/compass/welcome/sales.js').includes("variant: 'simple'") && read('public/compass/app.js').includes("type: 'simple', landing: 'compass'"), '/compass/welcome stays FULL; the /compass box stays SIMPLE');
-const box = read('public/compass/welcome/account-box.js');
+const B = read('public/road1/index.html');
+ok(!/ten questions|10 questions/i.test(B) && !B.includes('Mockup at real size') && B.includes('Start tonight, free. <em>By Tuesday, you’ll be ahead.</em>') && B.includes('<button type="button" class="cta" data-join>Create my free account →</button>') && B.includes('Levels 01–03 free · Instant access'), 'Road 1: no "ten questions", no mockup line; the close is "Start tonight, free…" with "Create my free account →"');
+ok(!/href="\/(compass\/welcome|road2)/.test(B) && (B.match(/<a [^>]*class="cta"[^>]*>/g) || []).every((a) => a.includes('data-join')) && read('public/road1/page.js').includes("variant: 'full', landing: 'road1'") && B.includes('<script type="module" src="/road1/page.js"></script>'), 'Road 1: every call to action opens the FULL form (landing road1), none goes to Road 2');
+ok(B.indexOf('<h2 class="sectitle">Move one lever. Watch the four answer.</h2>') > B.indexOf('id="library"') && B.indexOf('id="whatif-lab"') < B.indexOf('id="start"'), 'Road 1: the What-if Lab, after the library and before the close');
+const A = read('public/road3/index.html');
+ok(A.includes('The Leadership Compass shows which one you are in.') && A.includes('<b>Your free account</b><span>One minute. Name and email.</span>') && A.includes('<b>Your Ground Plan</b><span>Your stage and your first three moves.</span>'), 'Road 3: the Compass line and the three steps');
+for (const [n, p] of [['The Founder Launchpad', 'No cost'], ['The Boardroom', 'One 1:1 session'], ['The LAB', '$97'], ['The HUB', '$397'], ['The Summit', '$1,989']]) ok(A.includes(`<b>${n}</b>`) && A.includes(`<span class="pr">${p}</span>`), `Road 3: ${n} · ${p}`);
+ok(A.includes('All twelve + Alexandru every week') && A.includes('Start tonight, free. <em>By Tuesday, you’ll be ahead.</em>') && A.includes('>Start free →</button>') && A.includes('Levels 01–03 free · Instant access') && !/ten questions/i.test(A), 'Road 3: The Summit line and the close');
+ok(!/PHOTO/.test(A) && read('public/road3/page.js').includes("variant: 'simple', landing: 'road3'") && A.includes('src="/road3/page.js"') && A.includes('<a href="/road2/">The Leadership Compass</a>'), 'Road 3: no photo placeholder; Join opens the simple form, landing road3; its footer links to Road 2');
+ok(levelsHTML('build').includes(`<p>${weekTitle('build', 1)}</p>`) && (levelsHTML('grow').match(/<li/g) || []).length === 12, 'Road 3: level names come from content.js');
+ok([1, 3, 4, 5, 6, 11, 12].map(band).join() === 'free,free,with,with,,,last', 'Road 3: the levels’ bands');
+const WB = read('public/road2/index.html');
+for (const W of [WB]) ok(W.includes('<button type="button" data-gate class="cta gold-btn" style="min-height: 56px; padding: 0 32px; font-size: 17px">Show me my road →</button>') && !W.includes('href="#dream"') && !/<a [^>]*href="\/(?!compass\/assets|assets)/.test(W), 'Road 2: "Show me my road" opens the full form; no link leaves the page');
+ok(read('public/road2/sales.js').includes("variant: 'full', landing: 'road2'") && WB.includes('src="/road2/sales.js"') && WB.includes('content="https://linktolead.exploraself.com/road2/"') && read('public/compass/app.js').includes("type: 'simple', landing: 'compass'"), 'Road 2 stays FULL, landing road2; the /compass box stays SIMPLE');
+const box = read('public/account-box.js');
 ok(/id="j-pw"/.test(box) && /variant === 'full' \? detailFields/.test(box) && /landing: ctx\.landing, utm: utm\(\)/.test(box), 'the account box: a password on the full form only, landing and utm sent');
 
-// ── /compass/welcome: Your plan, live ───────────────────────────────────────
+// ── Road 2: Your plan, live ────────────────────────────────────────────────
 const P = SalesMath.plan({ goal: 6000, price: 400, keep: 60, hps: 8, avail: 140 });
 ok(P.badge === 'OVER YOUR HOURS' && P.over === 60, 'badge: over the hours you want is "OVER YOUR HOURS", 60 h over');
 ok(P.paysAtHours === 4080, 'lever 1: 6,000 / 400 / 60% / 8 h / 140 h → 4,080');
 ok(SalesMath.plan({ goal: 1000, price: 400, keep: 60, hps: 8, avail: 140 }).badge === 'IT FITS' && SalesMath.plan({ goal: 3900, price: 400, keep: 60, hps: 8, avail: 140 }).badge === 'TIGHT', 'badge: IT FITS and TIGHT unchanged');
-ok(!read('public/compass/welcome/sales.js').includes('IN THE RED'), 'no "IN THE RED" left');
+ok(!read('public/road2/sales.js').includes('IN THE RED'), 'no "IN THE RED" left');
 ok(WB.includes('1 · What do you want the business to pay you each month (before tax)?') && WB.includes('Not counted: the hours you spend finding clients and running the business.') && WB.includes('At your hours, this plan pays about <b data-out="paysAtHours"></b>.'), 'plan live: the new question, the note under the bar, the lever-1 line');
-ok(WB.includes('<h2 class="h2 win4-h">A win has four sides.</h2>') && (WB.match(/<button type="button" data-dom=/g) || []).length === 4 && WB.includes('A win is where all four meet.') && read('public/compass/welcome/sales.css').includes('prefers-reduced-motion:reduce){.win4-box'), 'four sides: overlapping circles, four buttons, the caption, reduced motion');
+ok(WB.includes('<h2 class="h2 win4-h">A win has four sides.</h2>') && (WB.match(/<button type="button" data-dom=/g) || []).length === 4 && WB.includes('A win is where all four meet.') && read('public/road2/sales.css').includes('prefers-reduced-motion:reduce){.win4-box'), 'four sides: overlapping circles, four buttons, the caption, reduced motion');
 ok(WB.includes('That was five sliders. Now pull the four levers.'), 'a look inside: the new heading');
 const b = baseFrom({ goal: 6000, price: 400, keep: 60, hps: 8, avail: 140 });
 const t = E.month(b, {}, 'time');
 ok(b.clients === 25 && t.cash === 6000 && t.mine === 200 && b.limit === 140, 'the lab starts from the five numbers: 25 sales, 6,000 left, 200 hours, 140 wanted');
 ok(E.month(b, { p: 50 }, 'time').mine < t.mine && E.month(b, { p: 50 }, 'money').cash > t.cash, 'the levers move it through the Compass engine');
-ok(/E\.month\(/.test(read('public/compass/welcome/lab.js')) && !/function month\(/.test(read('public/compass/welcome/lab.js')), 'the lab reuses engine.js, it does not copy the logic');
+ok(/E\.month\(/.test(read('public/road2/lab.js')) && !/function month\(/.test(read('public/road2/lab.js')), 'the lab reuses engine.js, it does not copy the logic');
 
-// ── The What-if Lab on / ───────────────────────────────────────────────────
-const LB = read('public/lab.js');
+// ── The What-if Lab on Road 1 ────────────────────────────────────────────────
+const LB = read('public/road1/lab.js');
 ok(/E\.month\(/.test(LB) && !/function month\(/.test(LB), 'the home lab reuses engine.js, it does not copy the logic');
 ok(LB.includes('An example founder') && LB.includes("box('price', 'Price per client ($)'") && LB.includes("box('clients', 'Clients a month'") && LB.includes("box('hours', 'Hours per client'") && LB.includes('>Create my free account →</button>') && LB.includes('openGate'), 'the home lab: "An example founder", three boxes to type into, "Create my free account →" opens the form');
-ok(read('public/page.js').includes("import('/lab.js')") && LB.includes('limit ${n0(b.limit)} h a month') && LB.includes('hours beyond the limit of ${n0(b.limit)} a month.') && LB.includes('Within the limit of ${n0(b.limit)} hours a month.') && LB.includes('within the limit of ${n0(b.limit)} a month') && LB.includes('Still beyond the limit of ${n0(b.limit)} hours a month.') && !/limit of \$\{n0\(b\.limit\)\}[.`]/.test(LB), 'the home lab: the hours limit always reads "a month"');
+ok(read('public/road1/page.js').includes("import('/road1/lab.js')") && LB.includes('limit ${n0(b.limit)} h a month') && LB.includes('hours beyond the limit of ${n0(b.limit)} a month.') && LB.includes('Within the limit of ${n0(b.limit)} hours a month.') && LB.includes('within the limit of ${n0(b.limit)} a month') && LB.includes('Still beyond the limit of ${n0(b.limit)} hours a month.') && !/limit of \$\{n0\(b\.limit\)\}[.`]/.test(LB), 'the home lab: the hours limit always reads "a month"');
 const hb = baseOf(EXAMPLE), ht = E.month(hb, {}, 'time');
 ok(hb.ready && hb.clients === 20 && ht.mine === 160 && ht.cash === 20 * 200 - 1500, 'the example founder: 20 clients, 160 hours, $2,500 left');
 ok(Math.round(E.month(hb, { p: 60 }, 'time').mine) === 91 && E.month(hb, { p: 60 }, 'time').cash === ht.cash && E.month(hb, { p: 60 }, 'money').cash > ht.cash, 'the levers move it: +60% price keeps the money in about 91 hours instead of 160 (time), more cash (money)');
@@ -164,7 +174,7 @@ const noRun = baseOf({ ...EXAMPLE, run: null, rate: null, hire: null }), nm = E.
 ok(noRun.fixed === 0 && nm.cash === null && nm.people === null && Number.isFinite(nm.mine), 'empty Fine-tune boxes: no money figure invented, the hours still move');
 
 // ── Mailchimp landing tags ──────────────────────────────────────────────────
-ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ b: 'Landing - Home', c: 'Landing - Compass welcome', a: 'Landing - 12 Scrolls' }), 'landing tags: Home, Compass welcome, 12 Scrolls');
+ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'Landing - Road 1', road2: 'Landing - Road 2', road3: 'Landing - Road 3' }), 'landing tags: Road 1, Road 2, Road 3');
 ok(!tagsFor({ landing: 'compass' }).some((x) => /^Landing - /.test(x.name)) && !tagsFor({ landing: 'toString' }).some((x) => /^Landing - /.test(x.name)), 'the Compass box and anything unknown get no landing tag');
 
 // ── /start: the greeting ────────────────────────────────────────────────────

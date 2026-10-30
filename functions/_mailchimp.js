@@ -75,9 +75,9 @@ export function mailchimpState(env = {}) {
 }
 
 /** The Mailchimp tag for each sales page (the landing key stored on the
- *  profile): /, /compass/welcome (and /c, /compass/welcome-a), and
- *  /a, the 12 Scrolls page. */
-export const LANDING_TAGS = { b: 'Landing - Home', c: 'Landing - Compass welcome', a: 'Landing - 12 Scrolls' };
+ *  profile): /road1/, /road2/ (the Compass sales page) and /road3/ (the 12
+ *  Scrolls page). Founders tagged before the roads keep their old tags. */
+export const LANDING_TAGS = { road1: 'Landing - Road 1', road2: 'Landing - Road 2', road3: 'Landing - Road 3' };
 
 /** The tags for one founder. In API mode each stage and domain tag is sent as
  *  active or inactive, so a founder who moves on loses the old one. Step tags
@@ -91,7 +91,7 @@ export function tagsFor({ source, stage, weakest, tier, signupType, interest, in
   // Which form they signed up with.
   if (signupType === 'full' || signupType === 'simple') out.push({ name: signupType === 'full' ? 'Signup - Full' : 'Signup - Simple', status: 'active' });
   // The sales page they signed up on (the Compass box has none).
-  if (LANDING_TAGS[landing]) out.push({ name: LANDING_TAGS[landing], status: 'active' });
+  if (Object.hasOwn(LANDING_TAGS, landing)) out.push({ name: LANDING_TAGS[landing], status: 'active' });
   // The audience has no merge fields for these, so they go as tags.
   if (interest) out.push({ name: `Interest - ${interest}`, status: 'active' });
   if (industry) out.push({ name: `Industry - ${industry}`, status: 'active' });

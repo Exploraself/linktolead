@@ -44,9 +44,9 @@ export function filter(students, { tile = 'all', q = '' } = {}, now = Date.now()
   });
 }
 
-/** Sign-ups per landing: sales pages A, B and C, and the Compass box. Each
+/** Sign-ups per landing: Roads 1, 2 and 3, and the Compass box. Each
  *  row: all of them, the last 7 days, and how many used the full form. */
-export const LANDINGS = [['a', 'A · /a'], ['b', 'B · /'], ['c', 'C · /compass/welcome'], ['compass', 'Compass box']];
+export const LANDINGS = [['road1', 'Road 1 · /road1/'], ['road2', 'Road 2 · /road2/'], ['road3', 'Road 3 · /road3/'], ['compass', 'Compass box']];
 export function byLanding(students, now = Date.now()) {
   return LANDINGS.map(([k, name]) => {
     const rows = (students || []).filter((s) => s.landing === k);

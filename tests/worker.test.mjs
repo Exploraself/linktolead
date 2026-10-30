@@ -17,8 +17,10 @@ const env = { ASSETS: { fetch: async () => new Response('<html>page</html>', { s
 const ctx = { waitUntil() {} };
 const call = (path, method = 'GET', body) => worker.fetch(new Request('https://x' + path, { method, body, headers: body ? { 'content-type': 'application/json' } : {} }), env, ctx);
 
-let r = await call('/');
+let r = await call('/road1/');
 ok((await r.text()).includes('page'), 'pages are served from public/');
+r = await call('/?utm_source=x');
+ok(r.status === 302 && r.headers.get('location') === '/road1/?utm_source=x', '/ is a 302 to /road1/, query string kept');
 r = await call('/api/nothing-here');
 ok(r.status === 404 && (await r.json()).ok === false, 'unknown API path answers JSON 404');
 r = await call('/api/signup', 'POST', '{}');

@@ -109,7 +109,7 @@ function tableHTML() {
       <td>${esc(s.stage || '—')}</td>
       <td><select data-step="${esc(s.id)}" aria-label="Step for ${esc(s.name || s.email)}">${STEP_KEYS.map((k) => `<option value="${k}"${(s.tier || 'free') === k ? ' selected' : ''}>${STEP_NAMES[k]}</option>`).join('')}</select></td>
       <td>${s.compass_at ? 'done' : '—'}</td><td class="tiny">${s.plan_ticks || 0} of ${total}</td>
-      <td class="tiny">${esc(s.signup_type || '—')}</td><td class="tiny">${esc(({ a: 'A', b: 'B', c: 'C', compass: 'Compass box' })[s.landing] || '—')}${s.utm_source ? `<span class="em">${esc(s.utm_source)}${s.utm_content ? ' · ' + esc(s.utm_content) : ''}</span>` : ''}</td><td class="tiny">${s.company === '' ? 'No company yet' : esc(s.company || '—')}</td><td class="tiny">${esc(s.interest || '—')}</td><td class="tiny">${esc(s.industry || '—')}</td>
+      <td class="tiny">${esc(s.signup_type || '—')}</td><td class="tiny">${esc(({ road1: 'Road 1', road2: 'Road 2', road3: 'Road 3', compass: 'Compass box' })[s.landing] || '—')}${s.utm_source ? `<span class="em">${esc(s.utm_source)}${s.utm_content ? ' · ' + esc(s.utm_content) : ''}</span>` : ''}</td><td class="tiny">${s.company === '' ? 'No company yet' : esc(s.company || '—')}</td><td class="tiny">${esc(s.interest || '—')}</td><td class="tiny">${esc(s.industry || '—')}</td>
       <td>${yes(s.has_password)}</td><td>${yes(s.consent)}</td><td>${s.unsubscribed ? '<b class="warn">yes</b>' : '—'}</td><td>${s.paused ? '<b class="warn">paused</b>' : '—'}</td>
       <td class="tiny">${s.mailchimp_status ? (s.mailchimp_status === 'failed' ? '<b class="warn">failed</b>' : esc(MC_STATUS[s.mailchimp_status] || s.mailchimp_status)) + ' · ' + when(s.mailchimp_at) : (s.consent && !s.unsubscribed ? 'not sent yet' : '—')}</td>
       <td class="acts">
@@ -213,7 +213,7 @@ async function one(id) {
         <div class="k"><b>Step</b><span>${esc(STEP_NAMES[s.tier || 'free'] || s.tier)}</span></div>
         <div class="k"><b>Answers written</b><span>${A.filter((a) => a.body).length}</span></div>
         <div class="k"><b>Signed up with</b><span>${esc(P.signup_type ? P.signup_type + ' form' : '—')}</span></div>
-        <div class="k"><b>Landing</b><span>${esc(({ a: 'Sales page A (/a)', b: 'Sales page B (/)', c: 'Sales page C (/compass/welcome)', compass: 'The Compass box' })[P.landing] || '—')}${P.utm_source ? ' · ' + esc([P.utm_source, P.utm_medium, P.utm_campaign, P.utm_content, P.utm_term].filter(Boolean).join(' / ')) : ''}</span></div>
+        <div class="k"><b>Landing</b><span>${esc(({ road1: 'Road 1 (/road1/)', road2: 'Road 2 (/road2/)', road3: 'Road 3 (/road3/)', compass: 'The Compass box' })[P.landing] || '—')}${P.utm_source ? ' · ' + esc([P.utm_source, P.utm_medium, P.utm_campaign, P.utm_content, P.utm_term].filter(Boolean).join(' / ')) : ''}</span></div>
         <div class="k"><b>Company</b><span>${P.company === '' ? 'No company yet' : esc(P.company || '—')}</span></div>
         <div class="k"><b>Interest</b><span>${esc(P.interest || '—')}</span></div>
         <div class="k"><b>Industry</b><span>${esc(P.industry || '—')}</span></div>
