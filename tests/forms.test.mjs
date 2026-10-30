@@ -137,8 +137,11 @@ ok(!/href="\/(compass\/welcome|road2)/.test(B) && (B.match(/<a [^>]*class="cta"[
 ok(B.indexOf('<h2 class="sectitle">Move one lever. Watch the four answer.</h2>') > B.indexOf('id="library"') && B.indexOf('id="whatif-lab"') < B.indexOf('id="start"'), 'Road 1: the What-if Lab, after the library and before the close');
 const A = read('public/road3/index.html');
 ok(A.includes('The Leader’s North Star shows which one you are in.') && A.includes('<b>Your free account</b><span>One minute. Name and email.</span>') && A.includes('<b>Your Ground Plan</b><span>Your stage and your first three moves.</span>'), 'Road 3: the North Star line and the three steps');
-for (const [n, p] of [['The Founder Launchpad', 'No cost'], ['The Boardroom', 'One 1:1 session'], ['The LAB', '$97'], ['The HUB', '$397'], ['The Summit', '$1,989']]) ok(A.includes(`<b>${n}</b>`) && A.includes(`<span class="pr">${p}</span>`), `Road 3: ${n} · ${p}`);
-ok(A.includes('All twelve + Alexandru every week') && A.includes('Start tonight, free. <em>By Tuesday, you’ll be ahead.</em>') && A.includes('>Start free →</button>') && A.includes('Levels 01–03 free · Instant access') && !/ten questions/i.test(A), 'Road 3: The Summit line and the close');
+for (const [n, p] of [['The Founder Launchpad', 'No cost'], ['The Boardroom', 'One 1:1 session']]) ok(A.includes(`<b>${n}</b>`) && A.includes(`<span class="pr">${p}</span>`), `Road 3: ${n} · ${p}`);
+// Cold visitors see only the next step, never the whole ladder (30 Oct).
+ok(!['$97', '$397', '$1,989'].some((p) => A.includes(`<span class="pr">${p}</span>`)) && A.includes('Start free. When you’re ready, one hour with Alexandru opens the next two weeks.'), 'Road 3: only the next step, no LAB, HUB or Summit prices');
+ok(A.includes('Your business can’t grow <em>past you.</em>') && A.includes('The Founder’s Blueprint · Link to Lead') && !/incubator/i.test(A), 'Road 3: its own headline, and no "Incubator"');
+ok(A.includes('Start tonight, free. <em>By Tuesday, you’ll be ahead.</em>') && A.includes('>Start free →</button>') && A.includes('Levels 01–03 free · Instant access') && !/ten questions/i.test(A), 'Road 3: the close');
 ok(!/PHOTO/.test(A) && read('public/road3/page.js').includes("variant: 'simple', landing: 'road3'") && A.includes('src="/road3/page.js"') && A.includes('<a href="/road2/">The Leader’s North Star</a>'), 'Road 3: no photo placeholder; Join opens the simple form, landing road3; its footer links to Road 2');
 ok(levelsHTML('build').includes(`<p>${weekTitle('build', 1)}</p>`) && (levelsHTML('grow').match(/<li/g) || []).length === 12, 'Road 3: level names come from content.js');
 ok([1, 3, 4, 5, 6, 11, 12].map(band).join() === 'free,free,with,with,,,last', 'Road 3: the levels’ bands');
