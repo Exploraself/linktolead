@@ -98,6 +98,26 @@ export const GOOD_WORDS = [
   'You don’t have to carry all of it alone anymore. We’re right here with you, and we believe in what you’re building.',
 ];
 
+/** The first line after "Hi …," in every letter, so it reads as a person
+ *  writing (Alexandru, 30 Oct). The second sentence is Alexandru's own story,
+ *  so another mentor says only who they are. */
+export function opener(M) {
+  return M.id === 'alexandru' || /^Alexandru\b/.test(M.name || '')
+    ? 'Alexandru from ExploraSelf here. I’m sure what I’ve put on paper will save your day, the way it once saved mine.'
+    : `${M.first} from ExploraSelf here.`;
+}
+
+/** The free assessments on exploraself.com. Every letter shows three under
+ *  the P.S. (Alexandru, 30 Oct), rotating with the letter's seed. */
+export const ASSESSMENTS = [
+  { n: 'First 100 Clients', u: 'https://exploraself.com/first-100-clients' },
+  { n: 'The Inner Boardroom', u: 'https://exploraself.com/unbound' },
+  { n: 'Allow Yourself to Rise', u: 'https://exploraself.com/rise' },
+  { n: 'The EQ Dividend', u: 'https://exploraself.com/eq' },
+  { n: 'The Two-Week Test', u: 'https://exploraself.com/two-week-test' },
+];
+export const threeAssessments = (seed = 0) => [0, 1, 2].map((i) => ASSESSMENTS[(seed + i) % ASSESSMENTS.length]);
+
 /** One-tap questions under "reply here": each opens a reply to the mentor
  *  with the question already written in the subject. */
 export const SHORTCUTS = {
@@ -121,6 +141,9 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
   const M = asMentor(mentor);
   const pic = (u) => (/^https:\/\//.test(u) ? u : `${base}${u}`);
   const P = paras.map(parts);
+  // The personal first line, right after the greeting.
+  if (sign && P.length && /^Hi\b/.test(P[0].text || '')) P.splice(1, 0, parts(opener(M)));
+  const tests = sign ? threeAssessments(seed) : [];
   const ps = offer && OFFERS[offer] ? parts(['P.S. ', ...OFFERS[offer].line(base)]) : null;
   const good = sign ? GOOD_WORDS[seed % GOOD_WORDS.length] : '';
   const qs = !sign || ask === null ? [] : Array.isArray(ask) ? ask : (SHORTCUTS[ask] || SHORTCUTS.start);
@@ -140,6 +163,7 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
       <td style="vertical-align:middle"><img src="${esc(pic(M.signature))}" width="190" height="53" alt="${esc(M.first)}" style="display:block;margin:0 0 2px;border:0;width:190px;height:auto">
       <p style="margin:0;font:13px/1.5 Arial,sans-serif;color:${MUTED}">${esc(M.name)} · ${esc(M.title)}</p></td></tr></table>` : ''}
     ${ps ? `<p style="margin:0;padding-top:14px;border-top:1px dashed #D6C9AC;font-style:italic">${ps.html}</p>` : ''}
+    ${tests.length ? `<p style="margin:14px 0 0;font:14px/1.6 Arial,sans-serif;color:${MUTED}">Free assessments, when you want to look deeper: ${tests.map((t) => `<a href="${esc(t.u)}" style="color:${GOLD_INK};text-decoration:underline">${esc(t.n)}</a>`).join(' · ')}</p>` : ''}
   </div></body></html>`;
   const text = [
     P.map((p) => p.text).join('\n\n'),
@@ -148,6 +172,7 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
     bye,
     sign ? `${M.first}\n${M.name} · ${M.title}` : '',
     ps ? ps.text : '',
+    tests.length ? 'Free assessments, when you want to look deeper:\n' + tests.map((t) => `· ${t.n}: ${t.u}`).join('\n') : '',
   ].filter(Boolean).join('\n\n');
   return { html, text, replyTo: M.email, fromName: `${M.first} at ExploraSelf` };
 }
