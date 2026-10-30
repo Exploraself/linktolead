@@ -22,7 +22,7 @@ export function entry({ joined, old, hash = '' }) {
   if (hash === '#library') return 'library';
   if (hash === '#ask') return 'ask';
   if (hash === '#programme') return 'work';
-  if (hash === '#home') return 'home';
+  if (hash === '#home' || hash === '#account') return 'home';
   return old ? 'work' : 'home';
 }
 

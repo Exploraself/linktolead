@@ -662,3 +662,23 @@ body.inwork .foot{display:none}
 .askform .cta{margin-top:4px;align-self:flex-start}
 .stand-nudge{margin-bottom:20px}
 
+
+/* The Compass banner in the programme: first five visits */
+.cbanwrap{position:relative;margin-bottom:18px}
+.cbanwrap:empty{display:none}
+.cban{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:16px 20px;padding:20px 64px 20px 22px;border-radius:12px;text-decoration:none;color:#F7F2E7;
+  background:radial-gradient(ellipse 60% 120% at 0% 50%,rgba(201,162,74,.28),transparent 60%),linear-gradient(120deg,#1C1309,#2B1B12 60%,#1C1309);
+  border:1px solid rgba(201,162,74,.7);box-shadow:0 18px 40px -22px rgba(28,19,9,.8),inset 0 1px 0 rgba(255,236,190,.12);overflow:hidden;animation:libbanIn .7s cubic-bezier(.2,.7,.2,1) both}
+.cban::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,226,160,.16) 50%,transparent 65%);transform:translateX(-100%);animation:cbanShine 3.6s ease-in-out 1s 2}
+@keyframes cbanShine{to{transform:translateX(100%)}}
+.cban-dial{flex:none;width:64px;height:64px}
+.cban-needle{transform-origin:32px 32px;animation:cbanNeedle 4s ease-in-out infinite}
+@keyframes cbanNeedle{0%,100%{transform:rotate(-38deg)}50%{transform:rotate(22deg)}}
+.cban-txt{flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.cban-k{font:600 11px/1.4 var(--body);letter-spacing:.18em;text-transform:uppercase;color:#E3C47E}
+.cban b{font:500 21px/1.25 var(--display)}
+.cban-p{font-size:13.5px;line-height:1.55;color:#D3C4A5}
+.cban-go{flex:none;display:inline-flex;align-items:center;min-height:46px;padding:0 20px;border-radius:999px;background:#C9A24A;color:#14100B;font-weight:700;font-size:14px}
+.cban:hover .cban-go,.cban:focus-visible .cban-go{background:#E3C47E}
+.cban-x{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;border:1px solid #594A32;background:rgba(28,19,9,.6);color:#F7F2E7;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;z-index:2}
+@media(prefers-reduced-motion:reduce){.cban,.cban::after,.cban-needle{animation:none}}

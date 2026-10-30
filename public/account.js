@@ -90,7 +90,7 @@ export async function signup({ first, last, email, industry, consent, source, st
 
 /** Ask for a one-time sign-in link. The reply is the same whether or not the
  *  address has an account. */
-export const signinLink = (email, to = 'compass') => post('/api/signin', { email, to });
+export const signinLink = (email, to = 'start', reset = false) => post('/api/signin', { email, to, reset });
 
 /** Sign in with email and password (for founders who set one); keeps the token. */
 export async function login(email, password) {

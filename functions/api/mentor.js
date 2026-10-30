@@ -231,7 +231,7 @@ export async function onRequestPost({ request, env }) {
   }
   if (body.action === 'signin-link' || body.action === 'reset-link') {
     if (!mailState(env).ready) return bad('Email is not switched on yet.', 503);
-    const r = await sendLink(env, D, origin(request), me, 'start');
+    const r = await sendLink(env, D, origin(request), me, 'start', { reset: body.action === 'reset-link' });
     await log(me.id, body.action === 'reset-link' ? 'mentor-reset-link' : 'mentor-signin-link', r.ok ? null : r.why);
     return r.ok ? json({ ok: true }) : bad('It did not send. Try again in a minute.', 502);
   }

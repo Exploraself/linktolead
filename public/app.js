@@ -31,6 +31,8 @@ if (!state.work) state.work = {};
 const oldEntrance = !!(state.referee || (state.diag && Object.keys(state.diag).length)) && !!state.stage;
 const hashNow = (() => { try { return location.hash; } catch { return ''; } })();
 const linkCode = (() => { try { return new URLSearchParams(location.search).get('signin') || ''; } catch { return ''; } })();
+/** Arrived from a password-reset email: open the password box once signed in. */
+let resetAsk = (() => { try { return new URLSearchParams(location.search).get('reset') === '1'; } catch { return false; } })();
 let view = linkCode ? 'loading' : entry({ joined: account.joined(), old: oldEntrance, hash: hashNow });
 if (view === 'redirect') { try { location.replace('/road2/#join'); } catch { /* no location */ } }
 let level = 1, dom = 'self';
@@ -586,6 +588,30 @@ function libBanner() {
   </div>`;
 }
 
+/** The Compass, inside the programme: for the founder's first five visits to
+ *  the programme, a banner that sends them back to the Compass for feedback
+ *  and material. Closing it ends it early. Counted once per page load. */
+const CB_KEY = 'ftb-compass-banner', CB_TIMES = 5;
+const cbSeen = () => { try { return Number(localStorage.getItem(CB_KEY) || 0); } catch { return CB_TIMES; } };
+const cbSet = (n) => { try { localStorage.setItem(CB_KEY, String(n)); } catch { /* private mode */ } };
+let cbCounted = false;
+function compassBanner() {
+  if (!(state.me || account.joined())) return '';
+  let n = cbSeen();
+  if (n >= CB_TIMES) return '';
+  if (!cbCounted) { cbCounted = true; cbSet(++n); }
+  return `<a class="cban" href="/compass/" aria-label="Open your Leadership Compass: feedback in all four domains, your plans and your numbers">
+    <span class="cban-dial" aria-hidden="true"><svg viewBox="0 0 64 64" width="64" height="64"><circle cx="32" cy="32" r="29" fill="none" stroke="#C9A24A" stroke-width="1.6"/><circle cx="32" cy="32" r="23" fill="none" stroke="#594A32"/>
+      <g stroke="#C9A24A" stroke-width="1.4"><line x1="32" y1="3" x2="32" y2="9"/><line x1="32" y1="55" x2="32" y2="61"/><line x1="3" y1="32" x2="9" y2="32"/><line x1="55" y1="32" x2="61" y2="32"/></g>
+      <circle cx="32" cy="11" r="2.6" fill="#A8623A"/><circle cx="53" cy="32" r="2.6" fill="#4C7355"/><circle cx="32" cy="53" r="2.6" fill="#36607F"/><circle cx="11" cy="32" r="2.6" fill="#9A7418"/>
+      <g class="cban-needle"><path d="M32 14 L36 32 L32 35 L28 32Z" fill="#E3C47E"/><path d="M32 50 L36 32 L32 29 L28 32Z" fill="#594A32"/></g><circle cx="32" cy="32" r="3" fill="#C9A24A"/></svg></span>
+    <span class="cban-txt"><span class="cban-k">Your Leadership Compass</span><b>Lost on a level? Your Compass knows the way.</b>
+      <span class="cban-p">Feedback in all four domains, your step-by-step plans and your numbers, all in one place. Come back whenever you need direction.</span></span>
+    <span class="cban-go">Open my Compass →</span>
+  </a>
+  <button type="button" class="cban-x" data-cban="close" aria-label="Hide the Compass banner"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>`;
+}
+
 // ── Your account plans ──────────────────────────────────────────────────────
 // From the Compass, in this founder's order (GET /api/plans). One step per
 // domain this week: the first one not yet done. Each opens to its full text
@@ -663,7 +689,7 @@ function render() {
     return;
   }
   $('#main').innerHTML = view === 'work'
-    ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work"><div id="libban">${libBanner()}</div><div id="mod">${moduleHTML(st)}</div></div></div>`
+    ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work"><div id="cban" class="cbanwrap">${compassBanner()}</div><div id="libban">${libBanner()}</div><div id="mod">${moduleHTML(st)}</div></div></div>`
     : view === 'home' ? homeView()
     : view === 'library' ? libraryView()
     : view === 'ask' ? askView()
@@ -691,6 +717,7 @@ document.addEventListener('click', (e) => {
   const b = e.target.closest('button, a.cta');
   if (!b) return;
   if (b.dataset.go === 'rail') { document.body.classList.toggle('railopen'); return; }
+  if (b.dataset.cban === 'close') { cbSet(CB_TIMES); const h = $('#cban'); if (h) h.innerHTML = ''; return; }
   if (b.dataset.banner === 'close') { bannerDone(); const h = $('#libban'); if (h) h.innerHTML = ''; return; }
   if (b.dataset.go === 'library') bannerDone();
   if (b.dataset.go) {
@@ -730,7 +757,7 @@ async function sendSigninLink() {
   const msg = $('#si-msg'), email = ($('#si-email') || {}).value || '';
   const say = (t) => { if (msg) msg.textContent = t; };
   if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email.trim())) return say('Type your email first, then tap this again.');
-  try { const r = await account.signinLink(email.trim(), 'start'); say(r.message); }
+  try { const r = await account.signinLink(email.trim(), 'start', true); say(r.message); }
   catch (ex) { say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'We could not send a link just now. Try again in a minute.'); }
 }
 
@@ -840,6 +867,7 @@ async function comeHome() {
   if (view === 'redirect') return;
   render();
   if (!account.joined()) return;
+  if (!profileMounted) { profileMounted = true; import('/profile-menu.js').then((m) => m.mount($('#pmhost'))).catch(() => {}); }
   const [r, msgs, th] = await Promise.all([account.pull(), account.messages(), account.thread()]);
   // The account this device remembers no longer exists (deleted): forget it
   // and its cached name, and ask to sign in.
@@ -870,6 +898,20 @@ async function comeHome() {
   }
   render();
   if (view === 'ask') openAsk();
+  if (resetAsk) openReset();
+  else if (hashNow === '#account') openReset('');
   loadPlans();
+}
+/** From a password-reset email: the password box, open and in view. */
+let profileMounted = false;
+function openReset(say = 'Choose your new password here. At least 10 characters.') {
+  resetAsk = false;
+  view = 'home'; render();
+  const box = document.querySelector('.pw-box');
+  if (!box) return;
+  box.open = true;
+  const m = $('#pwmsg'); if (m) m.textContent = say;
+  box.scrollIntoView({ block: 'center' });
+  const f = $('#pw1'); if (f) f.focus({ preventScroll: true });
 }
 comeHome();

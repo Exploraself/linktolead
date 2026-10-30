@@ -176,7 +176,7 @@
     if (!A) return say('Sign-in is not available here. Open linktolead.exploraself.com/compass.');
     UI.signinBusy = true; render();
     try {
-      const r = await A.signinLink(email);
+      const r = await A.signinLink(email, 'start', where !== 'note');
       say(where === 'note' ? 'This email already has an account. We have sent a sign-in link to it. Open it on this device and your answers here join your account. Until then they are saved on this browser.' : r.message);
     } catch (e) {
       say(e && e.message && !/fetch|network|load failed/i.test(e.message) ? e.message : 'We could not send a link just now. Try again in a minute.');
@@ -233,21 +233,45 @@
     let code = '';
     try { code = new URLSearchParams(location.search).get('signin') || ''; } catch { /* no location */ }
     if (code) await signInFromLink(code);
-    else if (!signedIn() && identified() && S.profile.consent && !(S.acct.email === S.profile.email && S.acct.state === 'existing')) {
-      // Name and email given before (on the sales page, or before accounts
-      // existed): the account is made without asking again.
-      await createAccount(fromSales ? 'sales-page' : 'compass', true);
-    }
     status();
-    if (signedIn()) { dirty = true; await sync(); }
+    if (signedIn()) {
+      // Signed up on any of our pages: the Compass knows who this is.
+      if (!S.profile.email) {
+        const r = await A.pull();
+        if (r && r.me) {
+          const [first, ...rest] = String(r.me.name || '').split(' ');
+          Object.assign(S.profile, { first: S.profile.first || first || '', last: S.profile.last || rest.join(' '), email: r.me.email || '' });
+          S.acct = { email: S.profile.email, state: 'yes' }; save();
+        }
+      }
+      dirty = true; await sync();
+    }
     render();
+    if (signedIn()) import('/profile-menu.js').then((m) => m.mount(document.getElementById('top-tools'))).catch(() => {});
+    // From outside, with answers already on this browser: the account first.
+    if (!signedIn() && !code && hasWork(S)) fullAccount();
   }
 
-  /** A first answer opens "Who is this compass for?". What they tapped is kept. */
+  /** A first answer from a visitor without an account opens the full account
+   *  form (name, surname, email, company, interest, industry, password). What
+   *  they tapped is kept, and comes into the account. */
   function gated(change) {
     change();
-    if (!identified() && !S.skipped) openGate();
     save(); render();
+    if (!signedIn()) fullAccount();
+  }
+  /** The full free account, on this page. Done: the page reloads signed in and
+   *  the whole Compass is open. An email that already has an account signs in
+   *  right here instead. */
+  let box = null;
+  function fullAccount() {
+    if (signedIn() || !A) return;
+    const gate = document.getElementById('acct-gate');
+    if (!gate) return;
+    const opener = document.activeElement;
+    (box || (box = import('/account-box.js'))).then((m) => m.open({ gate, opener, stage: null, variant: 'full', landing: 'compass', stay: true,
+      onExisting: (email) => { S.profile.email = email; S.acct = { email, state: 'existing' }; save(); openSignin(); } }))
+      .catch(() => { box = null; });
   }
   /** Open the gate, and remember where to put focus back when it closes. */
   function openGate(after) {
@@ -679,7 +703,7 @@
 
   const STOPS = [
     { n: '1', short: 'Founder Launchpad', name: 'The Founder Launchpad', tag: 'Step 1 · start here', line: 'Know yourself before you build.', modules: '01–03', sessions: '—', price: 'Free', cta: 'Start free', href: '/start', x: 150, y: 360, lx: 136, ly: 364, anchor: 'end' },
-    { n: '2', short: 'The Boardroom', name: 'The Boardroom', tag: 'Step 2 · you and Alexandru', line: 'Sit at the table. Unlock the full Compass.', modules: '04–05', sessions: '1 session', price: '[YOUR PRICE]', cta: 'Book the Boardroom', href: BOOKING, ext: true, x: 290, y: 300, lx: 306, ly: 304, anchor: 'start' },
+    { n: '2', short: 'The Boardroom', name: 'The Boardroom', tag: 'Step 2 · you and Alexandru', line: 'Sit at the table with Alexandru.', modules: '04–05', sessions: '1 session', price: '[YOUR PRICE]', cta: 'Book the Boardroom', href: BOOKING, ext: true, x: 290, y: 300, lx: 306, ly: 304, anchor: 'start' },
     { n: '3', short: 'Leadership LAB', name: 'The Personal Leadership LAB', tag: 'Step 3', line: 'Lead yourself first.', modules: '06–09', sessions: '2 sessions', price: '$97', cta: 'Join the LAB', href: LAB_URL, ext: true, x: 175, y: 235, lx: 161, ly: 239, anchor: 'end' },
     { n: '4', short: 'Business HUB', name: 'The Business HUB', tag: 'Step 4', line: 'Build the business that carries it.', modules: '10–12', sessions: '3 in total (incl. 1 from the LAB)', price: '$397', cta: 'Join the HUB', href: HUB_URL, ext: true, x: 285, y: 160, lx: 301, ly: 164, anchor: 'start' },
     { n: '5', short: 'The Summit', name: 'The Summit', tag: 'The top', line: 'The whole incubator, with Alexandru every week.', modules: 'All', sessions: 'Every week', price: '$1,989', cta: 'Talk about The Summit', href: '/compass/summit', x: 230, y: 58, lx: 258, ly: 62, anchor: 'start' },
@@ -1143,7 +1167,7 @@
    * first (which makes the free account), then send. It only ever says "Sent"
    * when the email service said yes. */
   async function sendEmail() {
-    if (!signedIn() && !identified()) { openGate('email'); render(); return; }
+    if (!signedIn()) { fullAccount(); return; }
     if (!UI.mailReady) { UI.mail = 'Email is not switched on yet. Use Print or Save as PDF for now.'; render(); return; }
     UI.sending = true; UI.mail = ''; render();
     try {
@@ -1199,16 +1223,14 @@
       case 'stop': S.stop = i; save(); render(); return;
       case 'print': try { window.print(); } catch { /* no print dialog here */ } return;
       case 'email': sendEmail(); return;
-      case 'regate': openGate(); render(); return;
+      case 'regate': fullAccount(); return;
       case 'account': {
         // Locked plans: make the free account, or sign in to the one there is.
         if (signedIn()) return;
-        if (!identified()) { openGate('account'); render(); return; }
         // An email that already has an account signs in right here: password,
-        // or "Email me a sign-in link". Never only a link that may be held up.
-        const there = () => S.acct.email === S.profile.email && S.acct.state === 'existing';
-        if (there()) { openSignin(); return; }
-        createAccount('compass', true).then(() => { if (there()) openSignin(); });
+        // or "Email me a sign-in link". Everyone else makes the full account.
+        if (S.acct.email && S.acct.email === S.profile.email && S.acct.state === 'existing') { openSignin(); return; }
+        fullAccount();
         return;
       }
       case 'si-x': UI.signinFor = null; UI.signin = ''; closeGate(); return;
