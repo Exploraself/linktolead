@@ -1,17 +1,18 @@
 /* The account box on the sales pages: makes the free account and opens the
  * founder's Ground Plan at /start, signed in at once.
  *
- *   'full'   (/compass/welcome and /compass/welcome-a, landing "c"; / and
- *            /b, landing "b"): first name, surname, email, company (or "No
+ *   'full'   (/road2/, the Compass sales page, landing "road2"; /road1/,
+ *            landing "road1"): first name, surname, email, company (or "No
  *            company yet"), interest, industry, a password (required: at
  *            least 10 characters, typed twice), consent.
- *   'simple' (/a, landing "a"): first name, surname, email, consent. No
+ *   'simple' (/road3/, the 12 Scrolls page, landing "road3"): first name,
+ *            surname, email, consent. No
  *            password, ever: these founders sign in by email link.
  *
  * The consent box starts unticked; without it the account is still made, and
  * nothing is emailed but what the founder asks for. The landing page and the
  * utm_* tags the founder arrived with go with the sign-up. Loaded the first
- * time a box opens (sales.js, /a, /b), then open() each time. */
+ * time a box opens (/road1/, /road2/, /road3/), then open() each time. */
 import { detailFields, readDetails, CONSENT, utm } from '/forms.js';
 
 const $ = (s) => document.querySelector(s);
@@ -60,11 +61,11 @@ const markup = (variant, head = HEAD[variant]) => `<div class="gpop abox" role="
     </form>
   </div>`;
 
-let ctx = { opener: null, stage: null, variant: 'full', landing: 'c' };
+let ctx = { opener: null, stage: null, variant: 'full', landing: 'road2' };
 function close() { $('#gate').hidden = true; if (ctx.opener) ctx.opener.focus(); }
 
 function wire(gate, variant, landing) {
-  gate.innerHTML = markup(variant, HEAD[variant === 'full' && landing === 'c' ? 'compass' : variant]);
+  gate.innerHTML = markup(variant, HEAD[variant === 'full' && landing === 'road2' ? 'compass' : variant]);
   gate.dataset.variant = variant + ' ' + landing;
   gate.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
   if (!gate.dataset.wired) {
@@ -93,7 +94,7 @@ function wire(gate, variant, landing) {
     err('');
     try {
       const A = await import('/account.js');
-      const source = ctx.landing === 'c' ? 'sales-page' : 'home';
+      const source = ctx.landing === 'road2' ? 'sales-page' : 'home';
       const out = A.joined() ? { token: A.token() } : await A.signup({ first, last, email, consent, source, stage: p.stage, type: variant,
         landing: ctx.landing, utm: utm(),
         ...(d ? { company: d.company, noCompany: d.noCompany, interest: d.interest, industry: d.industry, password: pw, confirm: pw2 } : {}) });
@@ -109,7 +110,7 @@ function wire(gate, variant, landing) {
 
 /** Open the box. A founder already signed in on this device goes straight to
  *  their Ground Plan. */
-export function open({ gate, opener, stage, variant = 'full', landing = variant === 'full' ? 'c' : 'a' }) {
+export function open({ gate, opener, stage, variant = 'full', landing = variant === 'full' ? 'road2' : 'road3' }) {
   ctx = { opener, stage, variant, landing };
   if (hasAccount()) {
     if (stage) { const p = known() || {}; p.stage = stage.id; try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* private mode */ } }

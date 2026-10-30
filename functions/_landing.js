@@ -1,12 +1,21 @@
-// The two short addresses that redirect. Both keep the query string (the utm_*
-// tags), so the sign-up on the page they land on still knows where the founder
-// came from.
+// The three sales pages live at /road1/, /road2/ and /road3/. Their old
+// addresses (and the short ones on ads and banners) are 302s that keep the
+// query string (the utm_* tags), so the sign-up on the road they land on still
+// knows where the founder came from.
 
-const to = (request, path) => new Response(null, { status: 302, headers: { location: `${path}${new URL(request.url).search}`, 'cache-control': 'no-store' } });
+/** Old address (no trailing slash; '' is /) → its road. */
+export const REDIRECTS = {
+  '': '/road1/',
+  '/b': '/road1/',
+  '/compass/welcome': '/road2/',
+  '/compass/welcome-a': '/road2/',
+  '/c': '/road2/',
+  '/a': '/road3/',
+};
 
-/** /b: sales page B is the home page, so /b is a 302 to /. */
-export const toB = (request) => to(request, '/');
-
-/** /c: sales page C is the Compass sales page; /c is its short address for
- *  ads and banners, a 302 to /compass/welcome/. */
-export const toC = (request) => to(request, '/compass/welcome/');
+/** The redirect for this request, or null when its address is not an old one. */
+export function redirect(request) {
+  const url = new URL(request.url);
+  const to = REDIRECTS[url.pathname.replace(/\/+$/, '')];
+  return to ? new Response(null, { status: 302, headers: { location: `${to}${url.search}`, 'cache-control': 'no-store' } }) : null;
+}

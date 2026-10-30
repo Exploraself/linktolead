@@ -7,8 +7,7 @@ pages beside it. Plain HTML, CSS and JavaScript; no build, no dependencies.
 | --- | --- |
 | `/compass` | The Compass: one continuous page; the menu scrolls to each section. |
 | `/compass/summit` | The Summit, the top of Link to Lead ($1,989). |
-| `/compass/welcome` | The Compass sales page, version B (main): “Your business, on paper. Not in your head.” |
-| `/compass/welcome-a` | Version A: “What is your business for?”. Same page, only the hero differs. Change both together. |
+| `/road2/` | Road 2, the Compass sales page: “Your business, on paper. Not in your head.” `/compass/welcome` and `/compass/welcome-a` redirect there. |
 
 ## Where the intelligence lives
 

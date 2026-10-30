@@ -24,7 +24,7 @@ import { profile, sendWelcome, SOURCES } from '../_account.js';
 import { allowed, logged, mailState, origin } from '../_mail.js';
 import { passwordProblem, setPassword } from '../_auth.js';
 import { syncFounder } from '../_mailchimp.js';
-import { details, LANDINGS, utmFrom } from '../_profile.js';
+import { details, landingOf, utmFrom } from '../_profile.js';
 
 /** Run after the reply when the platform allows it; never let it throw. */
 const later = (waitUntil, job) => {
@@ -52,7 +52,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const d = type === 'full' ? details(body) : null;
   if (d && d.problem) return bad(d.problem);
   const industry = d ? d.industry : body.industry;
-  const landing = LANDINGS.includes(body.landing) ? body.landing : null, utm = utmFrom(body.utm);
+  const landing = landingOf(body.landing), utm = utmFrom(body.utm);
   // The full form needs a password, sound before anything is made, so a
   // founder is never left half signed up. The simple form never sets one.
   const password = type === 'full' && typeof body.password === 'string' ? body.password : null;

@@ -86,6 +86,10 @@ export async function accountTables(D) {
   // An answer in "Ask Alexandru" is a message that points at the question
   // (a note) it answers.
   try { await D.prepare('ALTER TABLE message ADD COLUMN note_id TEXT').run(); } catch { /* already there */ }
+  // The sales pages became roads: landings stored as a, b or c move to the
+  // road their page became (functions/_profile.js OLD_LANDINGS).
+  await D.prepare(`UPDATE student_profile SET landing = CASE landing WHEN 'b' THEN 'road1' WHEN 'c' THEN 'road2' WHEN 'a' THEN 'road3' END
+    WHERE landing IN ('a', 'b', 'c')`).run();
   READY.add(D);
 }
 

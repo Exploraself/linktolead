@@ -1,7 +1,7 @@
-// "/a", sales page A (the 12 Scrolls design): the twelve levels for the stage
+// "/road3/", Road 3 (the 12 Scrolls design): the twelve levels for the stage
 // picked in the tabs (names from content.js), the ladder's bars, the bar for
 // founders who are already signed in, and every "Join" opening the simple
-// account form (landing "a").
+// account form (landing "road3").
 import { weekTitle, loadStage } from '../content.js';
 import { rememberUtm } from '../forms.js';
 
@@ -57,14 +57,14 @@ if (typeof document !== 'undefined' && $('#levels')) {
   // Already signed in on this device: a slim bar back to the Ground Plan.
   if (signedIn()) $('#backbar').hidden = false;
 
-  // Every "Join" opens the simple form; /#join opens it straight away.
+  // Every "Join" opens the simple form; /road3/#join opens it straight away.
   const gate = $('#gate');
   let box = null;
-  const loadBox = () => box || (box = import('/compass/welcome/account-box.js').catch(() => { box = null; }));
+  const loadBox = () => box || (box = import('/account-box.js').catch(() => { box = null; }));
   const join = (e) => {
     const opener = e && e.currentTarget;
     gate.hidden = false;
-    loadBox().then((m) => m && m.open({ gate, opener, stage: null, variant: 'simple', landing: 'a' }));
+    loadBox().then((m) => m && m.open({ gate, opener, stage: null, variant: 'simple', landing: 'road3' }));
   };
   document.querySelectorAll('[data-join]').forEach((b) => b.addEventListener('click', join));
   if (location.hash === '#join') join();

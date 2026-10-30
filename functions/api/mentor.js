@@ -67,7 +67,7 @@ async function roster(D) {
   return rows.results || [];
 }
 
-const LANDING_NAMES = { a: 'A', b: 'B', c: 'C', compass: 'Compass box' };
+const LANDING_NAMES = { road1: 'Road 1', road2: 'Road 2', road3: 'Road 3', compass: 'Compass box' };
 const CSV_COLS = [['name', 'Name'], ['email', 'Email'], ['joined_at', 'Joined'], ['last_seen_at', 'Last seen'], ['stage', 'Stage'], ['step', 'Step'],
   ['signup', 'Sign-up form'], ['landing_name', 'Landing'], ['utm_source', 'utm_source'], ['utm_medium', 'utm_medium'], ['utm_campaign', 'utm_campaign'], ['utm_content', 'utm_content'], ['company_name', 'Company'], ['interest', 'Interest'], ['industry', 'Industry'],
   ['compass', 'Compass done'], ['plan_ticks', 'Plan steps done'], ['library_names', 'Library'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp']];

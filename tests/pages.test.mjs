@@ -1,11 +1,11 @@
 // The ladder and the public pages say the same thing everywhere.
 //
 // Names (The Founder Launchpad, The Boardroom, The Summit), prices ($97, $397,
-// $1,989), the Summit tier key, and the two versions of the Compass sales page.
+// $1,989), the Summit tier key, and Road 2, the Compass sales page.
 
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { TIER_ORDER, holds, SECTIONS, LADDER, LIBRARY } from '../public/content.js';
-import { markup, items } from '../public/compass/welcome/kit.js';
+import { markup, items } from '../public/road2/kit.js';
 import { ALL_STEP_IDS } from '../functions/_plans.js';
 import { onRequestGet as plansGet } from '../functions/api/plans.js';
 
@@ -35,11 +35,10 @@ for (const f of files('public')) {
   ok(!/Cornerstone|Enter the Incubator|\+ 12 sessions/.test(s), `${f}: no retired names`);
 }
 
-// The sales page: B is the main one; A differs only in its hero and titles.
-const B = read('public/compass/welcome/index.html'), A = read('public/compass/welcome-a/index.html');
-ok(B.includes('Your business, on paper.') && A.includes('What is your business for?'), 'each version has its headline');
-const body = (s) => s.slice(s.indexOf('<!-- 1a · HANDSHAKE'));
-ok(body(A) === body(B), 'everything after the hero is the same in A and B');
+// Road 2, the Compass sales page (/compass/welcome-a, its old version A, is a
+// redirect to it now).
+const B = read('public/road2/index.html');
+ok(B.includes('Your business, on paper.'), 'Road 2 has its headline');
 ok(B.includes('[PHOTO OF ALEXANDRU]'), 'photo placeholder kept');
 
 // The Summit page keeps its placeholders until Alexandru fills them.
@@ -48,31 +47,31 @@ for (const ph of ['[YOUR BOOKING LINK]', '[SESSION LENGTH]', '[ONLINE OR IN PERS
 ok(read('public/compass/app.js').includes('[YOUR PRICE]'), 'Boardroom price placeholder kept');
 
 // Every Compass page carries the favicon and the share image.
-for (const f of ['public/compass/index.html', 'public/compass/summit/index.html', 'public/compass/welcome/index.html', 'public/compass/welcome-a/index.html']) {
+for (const f of ['public/compass/index.html', 'public/compass/summit/index.html', 'public/road2/index.html']) {
   const s = read(f);
   ok(s.includes('favicon.svg') && s.includes('og:image') && s.includes('twitter:card'), `${f}: favicon and share image`);
 }
 
 // The Link to Lead headline, with its alternate kept.
-const L = read('public/index.html');
+const L = read('public/road1/index.html');
 ok(L.includes('<h1>What is your business <em>for?</em></h1>') && L.includes('Your business, on paper. <em>Not in your head.</em>'), 'landing headline and alternate');
 
 // The four domains are always named in full on screen: no SELF / PEOPLE /
 // WORK / MARKET labels, and no Archivo or Libre Caslon left on the sales pages.
-for (const f of ['public/compass/index.html', 'public/compass/welcome/index.html', 'public/compass/welcome-a/index.html', 'public/index.html']) {
+for (const f of ['public/compass/index.html', 'public/road2/index.html', 'public/road1/index.html']) {
   const s = read(f);
   ok(!/>\s*(SELF|PEOPLE|WORK|MARKET|YOURSELF|BUSINESS)\s*</.test(s), `${f}: no short domain labels`);
   ok(!/LEAD YOURSELF<\/text>|LEAD THE MARKET<\/text>/.test(s), `${f}: no duplicate small domain lines`);
 }
-for (const f of ['public/compass/welcome/index.html', 'public/compass/welcome-a/index.html', 'public/compass/welcome/sales.css']) {
+for (const f of ['public/road2/index.html', 'public/road2/sales.css']) {
   ok(!/Archivo|Caslon/.test(read(f)), `${f}: Compass fonts only`);
 }
 // Fonts load once, from this site: no Google Fonts, no old .ttf files.
-for (const f of ['public/index.html', 'public/start/index.html', 'public/mentor/index.html', 'public/compass/index.html', 'public/compass/summit/index.html', 'public/compass/welcome/index.html', 'public/compass/welcome-a/index.html']) {
+for (const f of ['public/road1/index.html', 'public/start/index.html', 'public/mentor/index.html', 'public/compass/index.html', 'public/compass/summit/index.html', 'public/road2/index.html']) {
   const s = read(f);
   ok(s.includes('href="/assets/fonts.css"') && !s.includes('fonts.googleapis.com') && s.includes('rel="preload" href="/assets/fonts/fraunces.woff2"'), `${f}: fonts once, self-hosted, preloaded`);
 }
-for (const f of ['public/compass/style.css', 'public/compass/welcome/sales.css', 'public/style.css']) ok(!/\.ttf|googleapis/.test(read(f)), `${f}: no duplicate font source`);
+for (const f of ['public/compass/style.css', 'public/road2/sales.css', 'public/style.css']) ok(!/\.ttf|googleapis/.test(read(f)), `${f}: no duplicate font source`);
 for (const d of ['self', 'people', 'work', 'market']) ok(!/n: '(Self|People|Work|Market)'/.test(read('public/content.js')), 'programme domain names in full');
 
 // PR 3: breathing space, the lab, then the dawn before The Summit.
@@ -87,9 +86,9 @@ ok(!/\$250|price: 250|n: 20, price/.test(LAB), 'no example month shipped');
 for (const t of ['See your real situation, from left to right.', 'Take me there ↑', 'Give me back time', 'Give me more money', 'Fine-tune (optional)', 'Each sale takes fewer hours']) ok(LAB.includes(t), `lab copy: ${t}`);
 ok(read('public/compass/dawn.js').includes('prefers-reduced-motion'), 'dawn respects reduced motion');
 
-// PR 5: "What opens with your free account", on both sales pages, right after
+// PR 5: "What opens with your free account", on Road 2, right after
 // "A look inside" and right before "Decide what winning is for."
-for (const [name, P] of [['welcome', B], ['welcome-a', A]]) {
+for (const [name, P] of [['road2', B]]) {
   const look = P.indexOf('A LOOK INSIDE'), kit = P.indexOf('WHAT OPENS WITH YOUR FREE ACCOUNT'), fin = P.indexOf('Decide what winning is for.');
   ok(look > 0 && kit > look && fin > kit, `${name}: the section sits after A look inside, before the final band`);
   ok(P.indexOf('id="kit-body" data-lazy') > kit && P.indexOf('id="kit-body"') < fin, `${name}: its body is filled in place by kit.js`);
@@ -125,10 +124,10 @@ ok(items(LIBRARY, null).tools[2].desc.startsWith('Short steps in your own order'
 for (const b of LIBRARY.books) ok(K.includes(`src="${b.cover}"`) && /loading="lazy" decoding="async"/.test(K) && K.includes('width="480" height="480"'), `${b.n}: real cover, lazy, sized`);
 ok((K.match(/data-gate class="gold-btn">Create my free account →/g) || []).length === 1, 'the closing button opens the account box (data-gate)');
 ok(!/<a\s/i.test(K), 'no links to other offers in the section');
-const SJ = read('public/compass/welcome/sales.js');
+const SJ = read('public/road2/sales.js');
 ok(/kit\.querySelectorAll\('\[data-gate\]'\)\.forEach\(\(b\) => b\.addEventListener\('click', openGate\)\)/.test(SJ), 'the section’s buttons are wired to the same account box');
-ok(!/mailchimp/i.test(SJ + read('public/compass/welcome/kit.js') + read('public/compass/welcome/account-box.js') + read('public/compass/app.js')), 'no Mailchimp code on the sales pages or the Compass');
-ok(read('public/compass/welcome/kit.css').includes('prefers-reduced-motion') && read('public/compass/welcome/kit.css').includes('overflow-x:auto'), 'kit.css: reduced motion, the shelf scrolls inside itself');
+ok(!/mailchimp/i.test(SJ + read('public/road2/kit.js') + read('public/account-box.js') + read('public/compass/app.js')), 'no Mailchimp code on the sales pages or the Compass');
+ok(read('public/road2/kit.css').includes('prefers-reduced-motion') && read('public/road2/kit.css').includes('overflow-x:auto'), 'kit.css: reduced motion, the shelf scrolls inside itself');
 const T = await (await plansGet({ request: new Request('https://x/api/plans?total'), env: {} })).json();
 ok(T.ok && T.total === ALL_STEP_IDS.length, 'the step count comes from the live plans data');
 
