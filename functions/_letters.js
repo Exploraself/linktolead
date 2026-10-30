@@ -205,7 +205,7 @@ export function northStarWelcome(base, { first, to = '', tier, offer, ...o } = {
     'You’re in. Your Leader’s North Star is open, and I’m really glad you’re here.',
     'Eight plain questions and your rough numbers. You’ll see where you stand in all four domains, and which one needs you first.',
     button(`${base}/northstar/`, 'Open my North Star →'),
-    'When you’re ready to work on it, The Founder Launchpad is waiting in your Ground Plan, free.',
+    'When you’re ready to work on it, The Founder Launchpad is waiting at your Base Camp, free.',
   ], offerFor('launchpad-welcome', to, tier, offer), close('launchpad-welcome', { ...o, to })) };
 }
 
@@ -226,7 +226,7 @@ export function resultsLetter(base, { first, weakest, to = '', tier, offer, ...o
 export function signinLetter(base, url, { first, to = '', offer, reset = false, ...o } = {}) {
   if (reset) return { subject: 'Choose a new password', ...letter(base, [
     hi(first),
-    'No problem at all, it happens to all of us. Tap the button and you’ll land in your Ground Plan with the password box already open.',
+    'No problem at all, it happens to all of us. Tap the button and you’ll land at your Base Camp with the password box already open.',
     button(url, 'Choose my new password →'),
     'The button works once, for the next 30 minutes. If you didn’t ask for this, you can simply ignore it.',
   ], offerFor('signin', to, 'free', offer), close('signin', { ...o, to }, 'security')) };
@@ -261,7 +261,7 @@ export function answerLetter(base, { first, question, answer, to = '', tier, off
     hi(first),
     `You asked: “${q.length > 300 ? q.slice(0, 300).trimEnd() + '…' : q}”`,
     ...paras,
-    ['The whole conversation is waiting in ', link(`${base}/ground-plan/#ask`, 'your Ground Plan'), '.'],
+    ['The whole conversation is waiting in ', link(`${base}/ground-plan/#ask`, 'your Base Camp'), '.'],
   ], offerFor('mentor', to, tier, offer), close('answer', { ...o, to })) };
 }
 

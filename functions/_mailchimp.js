@@ -123,7 +123,7 @@ export function tagsFor({ source, stage, weakest, tier, signupType, interest, in
 }
 
 /** The weakest North Star domain as a tag: the lowest answered score, a tie going
- *  to the first in order (the same rule as the Ground Plan). Null until every
+ *  to the first in order (the same rule as the Base Camp). Null until every
  *  domain has an answer, which is when the North Star counts as done. */
 export function weakestTag(resultsJson) {
   let r;

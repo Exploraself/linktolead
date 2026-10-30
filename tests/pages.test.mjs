@@ -96,13 +96,13 @@ for (const [name, P] of [['road2', B]]) {
   ok(P.includes('<h2 class="h2">You practised with a few sliders. Here is the whole kit.</h2>'), `${name}: headline`);
   ok(P.includes('One free account opens everything below. Your answers save as you go, the books are yours to download and keep, and Alexandru and the team can see where you are stuck.'), `${name}: lede`);
   ok(P.includes('>Create my free account →</button>') && !P.includes('Start my North Star →'), `${name}: the final button reads Create my free account`);
-  ok(P.includes('Free · your North Star, your Ground Plan and your library'), `${name}: the line under it`);
+  ok(P.includes('Free · your North Star, your Base Camp and your library'), `${name}: the line under it`);
 }
 const K = markup(LIBRARY, ALL_STEP_IDS.length);
 const flat = K.replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/\s+/g, ' ');
 const COPY = [
   'The full Leader’s North Star, saved', '8 questions across the four domains, your North Star reading and the What-if lab. Change an answer any time.', 'Stop carrying the whole business in your head.', 'See which domain needs you first: Lead yourself, Lead your people, Lead your business or Lead the market.',
-  'Your Ground Plan', 'Your stage, your weakest domain, your goal and your first three moves, on one page.', 'Start Monday knowing what comes first.', 'Put your hours where they move the business.',
+  'Your Base Camp', 'Your stage, your weakest domain, your goal and your first three moves, on one page.', 'Start Monday knowing what comes first.', 'Put your hours where they move the business.',
   'Your Account Plans', `${ALL_STEP_IDS.length} short steps in your own order, weakest domain first. Tick them off as you go.`, 'Feel progress every week, instead of only pressure.', 'Small moves that add up to a business that runs.',
   'The Founder Launchpad', 'Three levels in all four domains. Each step names what to open, count and write. Free, and free to stay.', 'Rewrite your principles. Unlock your mind.', 'Lead your business instead of being its busiest employee.',
   'The Founder’s Blueprint for your stage', 'A manual for Building (79 pages), Growing (77) or Scaling (80). All three open with your account.', 'Advice for where you are, not for someone else’s business.', 'A clear road from your stage to the next one.',
@@ -111,7 +111,7 @@ const COPY = [
   'A New Way of Winning', 'coming soon', '12 principles. Four stages. Four domains. In your library the day it opens.', 'A win that counts at home as well as at work.', 'Decide what winning is for, then build toward it.',
   'Your tools · they work for you from day one', 'Your library · download and keep', 'WHAT YOU GET', 'IN YOUR LIFE', 'IN YOUR BUSINESS',
   '3 manuals, one for each stage · 99 practical tools · 32 leadership frameworks · 12 principles, coming soon',
-  'You don’t have to figure it out alone. Your mentor, and the whole team behind you.', 'Notes from Alexandru and the team arrive on your Ground Plan, and you can reply.',
+  'You don’t have to figure it out alone. Your mentor, and the whole team behind you.', 'Notes from Alexandru and the team arrive at your Base Camp, and you can reply.',
   'One question before you scroll on: what would one more free evening a week give your family?', '4 tools that work from day one', '3 manuals and 2 books to download, a third on the way', 'Alexandru and the team beside you',
   'Free and yours to keep', 'Create my free account →', 'Your name, your email, a password and three short questions about your business. No card.',
 ];

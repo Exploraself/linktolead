@@ -1,6 +1,6 @@
 // The Founder's Blueprint — the programme, and the founder's home base.
 //
-// /start is where a founder with an account comes home: their Ground Plan
+// /start is where a founder with an account comes home: their Base Camp
 // (built from their North Star), the map of twelve levels, and a level (four
 // domains, seven steps each). A locked level opens its gate instead of
 // nothing, and the gate says plainly what opens it. Without an account, /start
@@ -131,10 +131,10 @@ function levelDone(st, lv) {
 }
 // (level access now comes from levelState and the tier — see the workspace below)
 
-// ── The Ground Plan home base ───────────────────────────────────────────────
+// ── The Base Camp home base ───────────────────────────────────────────────
 // The front door is the North Star sales page; /start is where a founder with an
 // account comes home. Before the North Star: how this works, in three steps.
-// After it: their Ground Plan, from their own answers, then the programme.
+// After it: their Base Camp, from their own answers, then the programme.
 
 const eye = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>';
 /** A password box with its show / hide button. */
@@ -329,7 +329,7 @@ function homeView() {
 /** Signing in on this device: email and password, or a one-time email link. */
 function signinView() {
   return `<section class="band qband"><div class="wrap narrow">
-    <p class="eyebrow">${compass} Your Ground Plan</p>
+    <p class="eyebrow">${compass} Your Base Camp</p>
     <h1 class="qh">Sign in</h1>
     <p class="sec-lede">Your email and password. Signed up with your name and email only, or forgotten your password? We email you a link that signs you in on this device.</p>
     <form class="joinbox bare" id="signinform" novalidate>
@@ -718,7 +718,7 @@ function emphasisName(st, lv) {
 function drawNav() {
   const unread = inbox ? inbox.unread : 0, answers = askUnread();
   $('#tnav').innerHTML = account.joined() && !['signin', 'redirect', 'loading'].includes(view)
-    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Ground Plan${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button><button type="button" data-go="ask" ${view === 'ask' ? 'aria-current="page"' : ''}>Ask Alexandru${answers ? `<span class="tdot" aria-label="${answers} new ${answers === 1 ? 'answer' : 'answers'}"></span>` : ''}</button>${holds(state.tier, 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
+    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Base Camp${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button><button type="button" data-go="ask" ${view === 'ask' ? 'aria-current="page"' : ''}>Ask Alexandru${answers ? `<span class="tdot" aria-label="${answers} new ${answers === 1 ? 'answer' : 'answers'}"></span>` : ''}</button>${holds(state.tier, 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
     : '';
 }
 
@@ -732,7 +732,7 @@ function render() {
     loadStage(st).then(render).catch(() => { $('#main').innerHTML = '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="alert">We could not open your programme just now. Check your connection and reload.</p></div></section>'; });
     return;
   }
-  // The dashboard (Your Ground Plan, the programme, the Library, Ask
+  // The dashboard (Your Base Camp, the programme, the Library, Ask
   // Alexandru) keeps the music, the light and Focus mode.
   if (!DASHBOARD.includes(view)) cabinetHidden();
   $('#main').innerHTML = view === 'work'

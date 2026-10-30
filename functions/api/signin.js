@@ -23,9 +23,9 @@ export const TTL = 30 * 60_000;
 const SAME = { ok: true, message: 'If there is an account for that address, a sign-in link is on its way. It works once, for 30 minutes.' };
 
 /** Make a one-time code for this founder and email the link. The link always
- *  opens their Ground Plan (/ground-plan/), the dashboard. `reset` (a forgotten
+ *  opens their Base Camp (/ground-plan/), the dashboard. `reset` (a forgotten
  *  password, or the mentor's "Send a password reset link") adds &reset=1, so
- *  the Ground Plan opens the password box at once. Also used by /mentor. */
+ *  the Base Camp opens the password box at once. Also used by /mentor. */
 export async function sendLink(env, D, base, me, page = 'start', { reset = false, tz = '' } = {}) {
   const code = newToken() + newToken().slice(0, 16);
   await D.prepare('DELETE FROM signin_code WHERE expires_at < ?').bind(Date.now()).run();

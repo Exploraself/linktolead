@@ -1,5 +1,5 @@
 // /start as the home base: who lands where, which programme they walk, and a
-// Ground Plan that only ever says what the founder's own North Star supports.
+// Base Camp that only ever says what the founder's own North Star supports.
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { entry, programmeStage, groundPlan, PROGRAMME } from '../public/home.js';
@@ -18,7 +18,7 @@ ok(entry({ joined: false, old: false }) === 'redirect', '/start without an accou
 ok(entry({ joined: false, old: true }) === 'redirect', 'old local work without an account still redirects');
 ok(entry({ joined: false, old: false, hash: '#signin' }) === 'signin', '#signin shows the sign-in screen');
 ok(entry({ joined: true, old: true }) === 'work', 'an old founder opens on their programme');
-ok(entry({ joined: true, old: false }) === 'home', 'a new founder opens on the Ground Plan');
+ok(entry({ joined: true, old: false }) === 'home', 'a new founder opens on the Base Camp');
 ok(entry({ joined: true, old: true, hash: '#home' }) === 'home', '#home is honoured for an old founder');
 ok(entry({ joined: true, old: false, hash: '#programme' }) === 'work', '#programme is honoured');
 ok(entry({ joined: true, old: false, hash: '#library' }) === 'library', '#library is honoured');
@@ -38,8 +38,8 @@ ok(programmeStage({ compass: 'growing', account: 'build' }) === 'grow', 'the Nor
 ok(programmeStage({ account: 'scaling' }) === 'scale', 'the account stage is used last');
 ok(PROGRAMME.building === 'build' && PROGRAMME.scaling === 'scale', 'four North Star stages map to three programmes');
 
-// ── The Ground Plan before and after the North Star ────────────────────────────
-ok(groundPlan(null, E, C) === null, 'before the North Star there is no Ground Plan');
+// ── The Base Camp before and after the North Star ────────────────────────────
+ok(groundPlan(null, E, C) === null, 'before the North Star there is no Base Camp');
 
 const rec = (over = {}) => ({ stage: 'leading', results_json: JSON.stringify({ scores: [5, 2, 4, 2], answered: [2, 2, 2, 2] }),
   flags_json: JSON.stringify({ want: 'income', pains: ['cash', 'time'] }), ...over });

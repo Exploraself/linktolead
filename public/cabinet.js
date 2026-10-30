@@ -1,4 +1,4 @@
-/* The Cabinet: the top of Your Ground Plan. A small, quiet study: greeting
+/* The Cabinet: the top of Your Base Camp. A small, quiet study: greeting
  * and brass plate, the climb as a gold watch dial, a record player, a desk
  * with the founder's four working objects, and the library shelf.
  *
@@ -14,7 +14,7 @@
  * Static, always there, real data only.
  *
  * The music (music.js) plays live in the browser, only on the dashboard (Your
- * Ground Plan, the Library, Ask Alexandru), starts on the first click if the
+ * Base Camp, the Library, Ask Alexandru), starts on the first click if the
  * founder allows it, and fades out when the tab is hidden or the founder
  * moves to the programme. */
 import * as M from './music.js';
@@ -122,11 +122,11 @@ export function cabinetHTML(c) {
   const anyBand = bands.some(Boolean);
   const plate = [['Stage today', c.stageName], ['Aiming for', c.aimName], ['Start here', c.startHere], ['Your step', STEP_NAMES[c.tier] || STEP_NAMES.free]].filter(([, v]) => v);
   const p = c.plans, pr = c.prog;
-  return `<section class="cab" aria-label="Your Ground Plan">
+  return `<section class="cab" aria-label="Your Base Camp">
   <div class="cab-crown"></div>
   <div class="cab-wall">
     <div class="cab-panel cab-greet">
-      <div class="cab-row"><p class="cab-eb">Your Ground Plan</p>
+      <div class="cab-row"><p class="cab-eb">Your Base Camp</p>
         <button type="button" class="cab-theme" data-cab="theme" aria-label="${dark ? 'Evening light is on. Switch to morning' : 'Morning light is on. Switch to evening'}">${dark
           ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Evening'
           : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Morning'}</button></div>
@@ -142,7 +142,7 @@ export function cabinetHTML(c) {
       <div class="cab-ctrl"><button type="button" class="cab-play" data-cab="play" aria-label="Play music"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
         <div class="cab-now"><b id="cab-track">${esc(M.TRACKS[ms.track].n)}</b><span id="cab-status">${auto ? 'Starts with your first click' : 'Paused'}</span></div></div>
       <label class="cab-vol" for="cab-vol">Volume <input type="range" id="cab-vol" min="0" max="100" value="${ms.vol}"></label>
-      <label class="cab-auto" for="cab-auto"><input type="checkbox" id="cab-auto"${auto ? ' checked' : ''}> Play when I open Your Ground Plan</label>
+      <label class="cab-auto" for="cab-auto"><input type="checkbox" id="cab-auto"${auto ? ' checked' : ''}> Play when I open Your Base Camp</label>
     </div>
   </div>
   ${bandHTML(c.band)}
@@ -178,7 +178,7 @@ export function cabinetHTML(c) {
 
 /* ── The music ─────────────────────────────────────────────────────────────
  * The engine, the mini player, the light and Focus mode live in music.js,
- * shared by Your Ground Plan, the Library and Ask Alexandru. The record
+ * shared by Your Base Camp, the Library and Ask Alexandru. The record
  * player here drives the same engine. */
 function paint() {
   const pl = document.getElementById('cab-player'); if (!pl) return;

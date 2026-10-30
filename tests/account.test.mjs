@@ -70,7 +70,7 @@ const [s2, unknown] = await jsonOf(await ask('nobody@example.com', '9.9.9.2'));
 ok(s1 === 200 && s2 === 200 && JSON.stringify(known) === JSON.stringify(unknown), 'same reply for a known and an unknown email');
 ok(sent.length === 1 && sent[0].body.to[0] === 'ana@example.com', 'only the real account gets an email');
 const link = /https:\/\/linktolead\.exploraself\.com\/ground-plan\/\?signin=([0-9a-f]+)/.exec(sent[0].body.text);
-ok(link, 'the email carries /start?signin=<code>: every sign-in link opens the Ground Plan');
+ok(link, 'the email carries /start?signin=<code>: every sign-in link opens the Base Camp');
 const code = link[1];
 ok(sent[0].body.text.includes('Via Esempio 1') && sent[0].body.html.includes('/api/unsubscribe'), 'sign-in email has the footer');
 const stored = DB.raw.prepare('SELECT * FROM signin_code').all();

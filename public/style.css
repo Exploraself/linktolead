@@ -438,7 +438,7 @@ body.inwork .foot{display:none}
 .qdone .cta{margin-top:19px}
 @media(max-width:620px){.qband{padding-top:24px}.qdone{padding:20px 18px}}
 
-/* ── The Ground Plan (after the join) ──────────────────────────────────────── */
+/* ── The Base Camp (after the join) ──────────────────────────────────────── */
 .gp{background:var(--paper);color:var(--ink)}
 .gp-wrap{max-width:1080px;margin:0 auto;padding-inline:24px}
 .gp-top{padding-top:clamp(40px,7vw,64px);padding-bottom:28px}
@@ -623,7 +623,7 @@ body.inwork .foot{display:none}
 .pl-all{font-size:14px;color:var(--ok);font-weight:600}
 .pl-whatif{border-top-color:var(--ink)}
 
-/* ── The Ground Plan home base (PR 4) ── */
+/* ── The Base Camp home base (PR 4) ── */
 .gp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px}
 .gp-goalline{font-weight:600;color:var(--gold-ink)}
 .note-from{margin-top:20px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--gold);padding:18px 20px;display:flex;flex-direction:column;gap:8px}

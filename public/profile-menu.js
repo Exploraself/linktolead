@@ -4,7 +4,7 @@
  * device so the circle draws at once on the next page.
  *
  * Menu: name and step, the Leader’s North Star in its own highlighted row,
- * Your Ground Plan, Library, Ask
+ * Your Base Camp, Library, Ask
  * Alexandru, Password (full accounts only; simple accounts sign in by email
  * link), "Letters from your mentor: On/Off" (consent, synced to Mailchimp),
  * Sign out, and "Delete my account" (two steps: a plain warning, then the

@@ -18,7 +18,7 @@ export function items(L, steps) {
     tools: [
       { what: 'The full Leader’s North Star, saved', desc: '8 questions across the four domains, your North Star reading and the What-if lab. Change an answer any time.',
         life: 'Stop carrying the whole business in your head.', biz: 'See which domain needs you first: Lead yourself, Lead your people, Lead your business or Lead the market.' },
-      { what: 'Your Ground Plan', desc: 'Your stage, your weakest domain, your goal and your first three moves, on one page.',
+      { what: 'Your Base Camp', desc: 'Your stage, your weakest domain, your goal and your first three moves, on one page.',
         life: 'Start Monday knowing what comes first.', biz: 'Put your hours where they move the business.' },
       { what: 'Your Account Plans', desc: `${Number.isInteger(steps) && steps > 0 ? `${steps} short steps` : 'Short steps'} in your own order, weakest domain first. Tick them off as you go.`,
         life: 'Feel progress every week, instead of only pressure.', biz: 'Small moves that add up to a business that runs.' },
@@ -91,7 +91,7 @@ export function markup(L, steps) {
     <div class="kit-mentor">
       <span class="kit-ac" aria-hidden="true">AC</span>
       <div><h3 class="kit-mh">You don’t have to figure it out alone. Your mentor, and the whole team behind you.</h3>
-      <p>Notes from Alexandru and the team arrive on your Ground Plan, and you can reply.</p></div>
+      <p>Notes from Alexandru and the team arrive at your Base Camp, and you can reply.</p></div>
     </div>
     <div class="kit-close">
       <div><p class="serif kit-q">One question before you scroll on: what would one more free evening a week give your family?</p>
