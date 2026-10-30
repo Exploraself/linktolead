@@ -1,7 +1,7 @@
 /* The Leader’s North Star sales page (versions A and B share this file).
    Navy, cream and one gold; the North Star's own fonts: Newsreader for headings
    and the italic human lines, Inter for everything else. Loaded the
-   same way as /compass (style.css there). Motion stops under
+   same way as /northstar (style.css there). Motion stops under
    prefers-reduced-motion. */
 html{scroll-behavior:smooth}
 body{margin:0;background:#EEF2F7}

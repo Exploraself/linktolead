@@ -42,12 +42,12 @@ ok(B.includes('Your business, on paper.'), 'Road 2 has its headline');
 ok(B.includes('[PHOTO OF ALEXANDRU]'), 'photo placeholder kept');
 
 // The Summit page keeps its placeholders until Alexandru fills them.
-const Su = read('public/compass/summit/index.html');
+const Su = read('public/northstar/summit/index.html');
 for (const ph of ['[YOUR BOOKING LINK]', '[SESSION LENGTH]', '[ONLINE OR IN PERSON]']) ok(Su.includes(ph), `summit keeps ${ph}`);
-ok(read('public/compass/app.js').includes('[YOUR PRICE]'), 'Boardroom price placeholder kept');
+ok(read('public/northstar/app.js').includes('[YOUR PRICE]'), 'Boardroom price placeholder kept');
 
 // Every North Star page carries the favicon and the share image.
-for (const f of ['public/compass/index.html', 'public/compass/summit/index.html', 'public/road2/index.html']) {
+for (const f of ['public/northstar/index.html', 'public/northstar/summit/index.html', 'public/road2/index.html']) {
   const s = read(f);
   ok(s.includes('favicon.svg') && s.includes('og:image') && s.includes('twitter:card'), `${f}: favicon and share image`);
 }
@@ -58,7 +58,7 @@ ok(L.includes('<h1>What is your business <em>for?</em></h1>') && L.includes('You
 
 // The four domains are always named in full on screen: no SELF / PEOPLE /
 // WORK / MARKET labels, and no Archivo or Libre Caslon left on the sales pages.
-for (const f of ['public/compass/index.html', 'public/road2/index.html', 'public/road1/index.html']) {
+for (const f of ['public/northstar/index.html', 'public/road2/index.html', 'public/road1/index.html']) {
   const s = read(f);
   ok(!/>\s*(SELF|PEOPLE|WORK|MARKET|YOURSELF|BUSINESS)\s*</.test(s), `${f}: no short domain labels`);
   ok(!/LEAD YOURSELF<\/text>|LEAD THE MARKET<\/text>/.test(s), `${f}: no duplicate small domain lines`);
@@ -67,24 +67,24 @@ for (const f of ['public/road2/index.html', 'public/road2/sales.css']) {
   ok(!/Archivo|Caslon/.test(read(f)), `${f}: North Star fonts only`);
 }
 // Fonts load once, from this site: no Google Fonts, no old .ttf files.
-for (const f of ['public/road1/index.html', 'public/ground-plan/index.html', 'public/mentor/index.html', 'public/compass/index.html', 'public/compass/summit/index.html', 'public/road2/index.html']) {
+for (const f of ['public/road1/index.html', 'public/ground-plan/index.html', 'public/mentor/index.html', 'public/northstar/index.html', 'public/northstar/summit/index.html', 'public/road2/index.html']) {
   const s = read(f);
   ok(s.includes('href="/assets/fonts.css"') && !s.includes('fonts.googleapis.com') && s.includes('rel="preload" href="/assets/fonts/newsreader.woff2"'), `${f}: fonts once, self-hosted, preloaded`);
 }
-for (const f of ['public/compass/style.css', 'public/road2/sales.css', 'public/style.css']) ok(!/\.ttf|googleapis/.test(read(f)), `${f}: no duplicate font source`);
+for (const f of ['public/northstar/style.css', 'public/road2/sales.css', 'public/style.css']) ok(!/\.ttf|googleapis/.test(read(f)), `${f}: no duplicate font source`);
 for (const d of ['self', 'people', 'work', 'market']) ok(!/n: '(Self|People|Work|Market)'/.test(read('public/content.js')), 'programme domain names in full');
 
 // PR 3: breathing space, the lab, then the dawn before The Summit.
-const C = read('public/compass/index.html');
+const C = read('public/northstar/index.html');
 const at = (id) => C.indexOf(id);
 ok(at('id="s-climb"') < at('class="breath"') && at('class="breath"') < at('id="s-whatif"'), 'gold divider between your climb and the lab');
 ok(at('id="s-whatif"') < C.lastIndexOf('class="breath"') && C.lastIndexOf('class="breath"') < at('id="s-dawn"') && at('id="s-dawn"') < at('id="s-summit"'), 'divider, then the dawn, then The Summit');
 ok(C.includes('Move one of four levers and watch your cash, clients, time and people answer.'), 'lab header copy');
 ok(C.includes('<script src="dawn.js"></script>'), 'dawn script loaded');
-const LAB = read('public/compass/app.js') + read('public/compass/engine.js');
+const LAB = read('public/northstar/app.js') + read('public/northstar/engine.js');
 ok(!/\$250|price: 250|n: 20, price/.test(LAB), 'no example month shipped');
 for (const t of ['See your real situation, from left to right.', 'Take me there ↑', 'Give me back time', 'Give me more money', 'Fine-tune (optional)', 'Each sale takes fewer hours']) ok(LAB.includes(t), `lab copy: ${t}`);
-ok(read('public/compass/dawn.js').includes('prefers-reduced-motion'), 'dawn respects reduced motion');
+ok(read('public/northstar/dawn.js').includes('prefers-reduced-motion'), 'dawn respects reduced motion');
 
 // PR 5: "What opens with your free account", on Road 2, right after
 // "A look inside" and right before "Decide what winning is for."
@@ -126,13 +126,13 @@ ok((K.match(/data-gate class="gold-btn">Create my free account →/g) || []).len
 ok(!/<a\s/i.test(K), 'no links to other offers in the section');
 const SJ = read('public/road2/sales.js');
 ok(/kit\.querySelectorAll\('\[data-gate\]'\)\.forEach\(\(b\) => b\.addEventListener\('click', openGate\)\)/.test(SJ), 'the section’s buttons are wired to the same account box');
-ok(!/mailchimp/i.test(SJ + read('public/road2/kit.js') + read('public/account-box.js') + read('public/compass/app.js')), 'no Mailchimp code on the sales pages or the North Star');
+ok(!/mailchimp/i.test(SJ + read('public/road2/kit.js') + read('public/account-box.js') + read('public/northstar/app.js')), 'no Mailchimp code on the sales pages or the North Star');
 ok(read('public/road2/kit.css').includes('prefers-reduced-motion') && read('public/road2/kit.css').includes('overflow-x:auto'), 'kit.css: reduced motion, the shelf scrolls inside itself');
 const T = await (await plansGet({ request: new Request('https://x/api/plans?total'), env: {} })).json();
 ok(T.ok && T.total === ALL_STEP_IDS.length, 'the step count comes from the live plans data');
 
 // Light and dark on every page: theme.js loads first, before any style.
-for (const f of ['public/ground-plan/index.html', 'public/road1/index.html', 'public/road2/index.html', 'public/road3/index.html', 'public/compass/index.html', 'public/compass/summit/index.html', 'public/404.html', 'public/mentor/index.html']) {
+for (const f of ['public/ground-plan/index.html', 'public/road1/index.html', 'public/road2/index.html', 'public/road3/index.html', 'public/northstar/index.html', 'public/northstar/summit/index.html', 'public/404.html', 'public/mentor/index.html']) {
   const h = read(f);
   ok(h.indexOf('<script src="/theme.js"></script>') > 0 && h.indexOf('<script src="/theme.js"></script>') < h.indexOf('stylesheet'), `${f}: light and dark (theme.js before the styles)`);
 }

@@ -28,7 +28,7 @@ not_found_handling = "404-page"
 # is a 302 to its road, query string kept (functions/_landing.js): / and /b →
 # /road1/, /compass/welcome, /compass/welcome-a and /c → /road2/, /a → /road3/.
 # Every page and file is served as before.
-run_worker_first = ["/api/*", "/", "/b", "/b/", "/c", "/c/", "/a", "/a/", "/compass/welcome", "/compass/welcome/", "/compass/welcome-a", "/compass/welcome-a/"]
+run_worker_first = ["/api/*", "/", "/b", "/b/", "/c", "/c/", "/a", "/a/", "/compass/welcome", "/compass/welcome/", "/compass/welcome-a", "/compass/welcome-a/", "/compass", "/compass/*"]
 
 # The student record: programme answers, worksheet figures, North Star reports and
 # notes to the mentor. Free tier; see functions/_shared.js for how routes behave

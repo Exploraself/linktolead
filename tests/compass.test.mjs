@@ -6,8 +6,8 @@
 
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const E = require('../public/compass/engine.js');
-const M = require('../public/compass/model.js');
+const E = require('../public/northstar/engine.js');
+const M = require('../public/northstar/model.js');
 
 let passed = 0, failed = 0;
 const ok = (cond, msg) => { if (cond) passed++; else { failed++; console.error('FAIL:', msg); } };

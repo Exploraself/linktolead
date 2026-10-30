@@ -22,7 +22,7 @@ if (location.hash === '#join') join();
 const lab = document.getElementById('whatif-lab');
 if (lab) {
   const engine = () => (window.CompassEngine ? Promise.resolve(window.CompassEngine) : new Promise((ok, no) => {
-    const s = document.createElement('script'); s.src = '/compass/engine.js'; s.onload = () => ok(window.CompassEngine); s.onerror = no; document.head.appendChild(s);
+    const s = document.createElement('script'); s.src = '/northstar/engine.js'; s.onload = () => ok(window.CompassEngine); s.onerror = no; document.head.appendChild(s);
   }));
   const fill = () => Promise.all([engine(), import('/road1/lab.js')]).then(([E, m]) => m.fill(lab, { E, openGate: join })).catch(() => {});
   try {

@@ -173,7 +173,7 @@
   async function askLink(email, where) {
     const say = (m) => { if (where === 'note') UI.note = m; else UI.signin = m; render(); };
     if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email || '')) return say('Type your email first, then tap this again.');
-    if (!A) return say('Sign-in is not available here. Open linktolead.exploraself.com/compass.');
+    if (!A) return say('Sign-in is not available here. Open linktolead.exploraself.com/northstar.');
     UI.signinBusy = true; render();
     try {
       const r = await A.signinLink(email, 'start', where !== 'note');
@@ -716,7 +716,7 @@
     { n: '2', short: 'The Boardroom', name: 'The Boardroom', tag: 'Step 2 · you and Alexandru', line: 'Sit at the table with Alexandru.', modules: '04–05', sessions: '1 session', price: '[YOUR PRICE]', cta: 'Book the Boardroom', href: BOOKING, ext: true, x: 290, y: 300, lx: 306, ly: 304, anchor: 'start' },
     { n: '3', short: 'Leadership LAB', name: 'The Personal Leadership LAB', tag: 'Step 3', line: 'Lead yourself first.', modules: '06–09', sessions: '2 sessions', price: '$97', cta: 'Join the LAB', href: LAB_URL, ext: true, x: 175, y: 235, lx: 161, ly: 239, anchor: 'end' },
     { n: '4', short: 'Business HUB', name: 'The Business HUB', tag: 'Step 4', line: 'Build the business that carries it.', modules: '10–12', sessions: '3 in total (incl. 1 from the LAB)', price: '$397', cta: 'Join the HUB', href: HUB_URL, ext: true, x: 285, y: 160, lx: 301, ly: 164, anchor: 'start' },
-    { n: '5', short: 'The Summit', name: 'The Summit', tag: 'The top', line: 'The whole incubator, with Alexandru every week.', modules: 'All', sessions: 'Every week', price: '$1,989', cta: 'Talk about The Summit', href: '/compass/summit', x: 230, y: 58, lx: 258, ly: 62, anchor: 'start' },
+    { n: '5', short: 'The Summit', name: 'The Summit', tag: 'The top', line: 'The whole incubator, with Alexandru every week.', modules: 'All', sessions: 'Every week', price: '$1,989', cta: 'Talk about The Summit', href: '/northstar/summit', x: 230, y: 58, lx: 258, ly: 62, anchor: 'start' },
   ];
   function pClimb() {
     const si = S.stop, sv = STOPS[si];
@@ -1216,7 +1216,7 @@
       case 'download': {
         try {
           const url = URL.createObjectURL(new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' }));
-          const link = document.createElement('a'); link.href = url; link.download = 'leadership-compass.json'; link.click();
+          const link = document.createElement('a'); link.href = url; link.download = 'leaders-north-star.json'; link.click();
           setTimeout(() => URL.revokeObjectURL(url), 1000);
         } catch { toast('Your browser would not save the file.'); }
         return;

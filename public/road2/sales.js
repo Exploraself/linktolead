@@ -228,7 +228,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
    * near it, and follows the sliders from then on. */
   const vid = $('#vid');
   const engine = () => (window.CompassEngine ? Promise.resolve(window.CompassEngine) : new Promise((ok, no) => {
-    const s = document.createElement('script'); s.src = '/compass/engine.js'; s.onload = () => ok(window.CompassEngine); s.onerror = no; document.head.appendChild(s);
+    const s = document.createElement('script'); s.src = '/northstar/engine.js'; s.onload = () => ok(window.CompassEngine); s.onerror = no; document.head.appendChild(s);
   }));
   const fillVid = () => Promise.all([engine(), import('/road2/lab.js')])
     .then(([E, m]) => { labApi = m.fill(vid, { E, get: () => ({ ...val }), openGate }); }).catch(() => {});

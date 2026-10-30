@@ -112,7 +112,7 @@ ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id = ? AND kind IN
   const fs = await import('node:fs');
   const app = fs.readFileSync('public/app.js', 'utf8');
   ok(/get\('reset'\) === '1'/.test(app) && /function openReset\([\s\S]{0,300}box\.open = true/.test(app), 'the Ground Plan opens the password box after a reset link');
-  ok(/signinLink\(email, 'start', where !== 'note'\)/.test(fs.readFileSync('public/compass/app.js', 'utf8')), 'Compass: "Forgot your password?" asks for a reset to the Ground Plan');
+  ok(/signinLink\(email, 'start', where !== 'note'\)/.test(fs.readFileSync('public/northstar/app.js', 'utf8')), 'Compass: "Forgot your password?" asks for a reset to the Ground Plan');
   DB.raw.prepare('DELETE FROM mail_log').run();
 }
 // ── The email limit never blocks password sign-in ───────────────────────────
@@ -125,10 +125,10 @@ ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id = ? AND kind IN
   ok(LIMIT_MSG === "We've sent 3 emails to this address in the last hour. To keep your account safe, wait an hour, or sign in with your password.", 'limit message wording');
   const [s5] = await J(await L('ana@example.com', 'correct horse', '7.7.7.10'));
   ok(s5 === 200, 'password sign-in still works after the email limit is hit');
-  const src = ['functions/api/signin.js', 'functions/api/send-plan.js', 'public/account-box.js', 'public/compass/app.js', 'public/ground-plan/index.html'].map((f) => fs.readFileSync(f, 'utf8')).join('\n');
+  const src = ['functions/api/signin.js', 'functions/api/send-plan.js', 'public/account-box.js', 'public/northstar/app.js', 'public/ground-plan/index.html'].map((f) => fs.readFileSync(f, 'utf8')).join('\n');
   ok(!src.includes('That is a few already'), 'the old limit message is gone everywhere');
   ok(!fs.readFileSync('functions/api/login.js', 'utf8').includes('allowed('), 'login.js does not use the email limit');
-  const app = fs.readFileSync('public/compass/app.js', 'utf8');
+  const app = fs.readFileSync('public/northstar/app.js', 'utf8');
   ok(app.includes("'This email already has an account. Sign in to open your plans.'") && /UI\.signinFor === 'plans'[\s\S]{0,1200}pSignin\('gate'\)/.test(app), 'Compass: an existing email opens the sign-in box with password + email link');
   ok(/case 'account':[\s\S]{0,600}openSignin\(\)/.test(app) && !/case 'account':[\s\S]{0,600}askLink\(/.test(app), 'Compass: "Create my free account" no longer only emails a link');
   ok(fs.readFileSync('public/account-box.js', 'utf8').includes('Sign in to open your plans.'), 'road pages and /start: same line for an existing email');

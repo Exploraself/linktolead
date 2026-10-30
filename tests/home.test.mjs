@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { entry, programmeStage, groundPlan, PROGRAMME } from '../public/home.js';
 import { STAGES, LEVELS, weekTitle, loadStage } from '../public/content.js';
 const require = createRequire(import.meta.url);
-const E = require('../public/compass/engine.js');
+const E = require('../public/northstar/engine.js');
 await Promise.all(['build', 'grow', 'scale'].map(loadStage));
 
 let pass = 0, fail = 0;

@@ -14,7 +14,7 @@
  * utm_* tags the founder arrived with go with the sign-up. Loaded the first
  * time a box opens (/road1/, /road2/, /road3/), then open() each time.
  *
- * On /compass (landing "compass", `stay`): a visitor from outside makes the
+ * On /northstar (landing "compass", `stay`): a visitor from outside makes the
  * full account here, then stays on the North Star, signed in, with everything
  * open. An email that already has an account goes to `onExisting`. */
 import { detailFields, readDetails, CONSENT, utm } from '/forms.js';

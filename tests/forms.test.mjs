@@ -29,7 +29,7 @@ import { tagsFor, LANDING_TAGS } from '../functions/_mailchimp.js';
 import { fakeD1, fakeResend, post, get, tally } from './_d1.mjs';
 
 const require = createRequire(import.meta.url);
-const E = require('../public/compass/engine.js');
+const E = require('../public/northstar/engine.js');
 const SalesMath = require('../public/road2/sales.js');
 const read = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const { ok, done } = tally('forms');
@@ -37,7 +37,7 @@ const { ok, done } = tally('forms');
 // ── The lists ───────────────────────────────────────────────────────────────
 ok(JSON.stringify(F.INTERESTS) === JSON.stringify(INTERESTS) && JSON.stringify(F.INDUSTRIES) === JSON.stringify(INDUSTRIES) && JSON.stringify(F.UTM_KEYS) === JSON.stringify(Object.keys(utmFrom({}))), 'the forms and the server offer the same lists');
 ok(JSON.stringify(INTERESTS) === JSON.stringify(E.GOALS.map((g) => g[1])), 'interests are the North Star goals: More free time … A new market');
-const compassList = /const INDUSTRIES = (\[[^\]]+\]);/.exec(read('public/compass/app.js'))[1];
+const compassList = /const INDUSTRIES = (\[[^\]]+\]);/.exec(read('public/northstar/app.js'))[1];
 ok(JSON.stringify(INDUSTRIES) === JSON.stringify(JSON.parse(compassList.replace(/'/g, '"'))), 'industries are the North Star box’s own list');
 ok(details({}).problem === 'Your company’s name, or tick “No company yet”.' && details({ noCompany: true }).problem === 'Choose what you want most from the business.'
   && details({ company: 'Acme', interest: 'Higher income' }).problem === 'Choose your industry.' && details({ company: 'Acme', interest: 'Higher income', industry: 'Other' }).problem === '', 'full details: company or none, interest, industry, in that order');
@@ -121,7 +121,7 @@ for (const [from, to] of OLD) {
   ok(w.status === 302 && w.headers.get('location') === to + q && pg.status === 302 && pg.headers.get('location') === to + q, `${from} → ${to}, utm kept (Worker and Pages)`);
 }
 ok((await worker.fetch(get('/b'), assets, {})).headers.get('location') === '/road1/', 'no query string: none added');
-for (const p of ['/road1/', '/road2/', '/road3/', '/compass', '/compass/summit', '/ground-plan/']) ok(await (await worker.fetch(get(p), assets, {})).text() === 'asset' && await (await pagesRedirect({ request: get(p), next: () => new Response('asset') })).text() === 'asset', `${p} is served, not redirected`);
+for (const p of ['/road1/', '/road2/', '/road3/', '/northstar', '/northstar/summit', '/ground-plan/']) ok(await (await worker.fetch(get(p), assets, {})).text() === 'asset' && await (await pagesRedirect({ request: get(p), next: () => new Response('asset') })).text() === 'asset', `${p} is served, not redirected`);
 { const r = await pagesRedirect({ request: get('/start?signin=abc'), next: () => new Response('asset') }); ok(r.status === 302 && r.headers.get('location') === '/ground-plan/?signin=abc', '/start (old links, old emails) lands on /ground-plan/, sign-in code kept'); }
 for (const d of ['index.html', 'page.js', 'lab.js', 'a', 'b', 'compass/welcome', 'compass/welcome-a']) ok(!existsSync(new URL('../public/' + d, import.meta.url)), `public/${d}: no copy left at the old address`);
 const W = read('wrangler.toml');
@@ -141,7 +141,7 @@ ok(levelsHTML('build').includes(`<p>${weekTitle('build', 1)}</p>`) && (levelsHTM
 ok([1, 3, 4, 5, 6, 11, 12].map(band).join() === 'free,free,with,with,,,last', 'Road 3: the levels’ bands');
 const WB = read('public/road2/index.html');
 for (const W of [WB]) ok(W.includes('<button type="button" data-gate class="cta gold-btn" style="min-height: 56px; padding: 0 32px; font-size: 17px">Show me my road →</button>') && !W.includes('href="#dream"') && !/<a [^>]*href="\/(?!compass\/assets|assets)/.test(W), 'Road 2: "Show me my road" opens the full form; no link leaves the page');
-ok(read('public/road2/sales.js').includes("variant: 'full', landing: 'road2'") && WB.includes('src="/road2/sales.js"') && WB.includes('content="https://linktolead.exploraself.com/road2/"') && read('public/compass/app.js').includes("type: 'simple', landing: 'compass'"), 'Road 2 stays FULL, landing road2; the /compass box stays SIMPLE');
+ok(read('public/road2/sales.js').includes("variant: 'full', landing: 'road2'") && WB.includes('src="/road2/sales.js"') && WB.includes('content="https://linktolead.exploraself.com/road2/"') && read('public/northstar/app.js').includes("type: 'simple', landing: 'compass'"), 'Road 2 stays FULL, landing road2; the /northstar box stays SIMPLE');
 const box = read('public/account-box.js');
 ok(/id="j-pw"/.test(box) && /variant === 'full' \? detailFields/.test(box) && /landing: ctx\.landing, utm: utm\(\)/.test(box), 'the account box: a password on the full form only, landing and utm sent');
 

@@ -1,12 +1,12 @@
 # ExploraSelf Leader’s North Star
 
-The free Leader’s North Star at `/compass` (design: North Star flow v18), with its
+The free Leader’s North Star at `/northstar` (design: North Star flow v18), with its
 pages beside it. Plain HTML, CSS and JavaScript; no build, no dependencies.
 
 | Path | What it is |
 | --- | --- |
-| `/compass` | The North Star: one continuous page; the menu scrolls to each section. |
-| `/compass/summit` | The Summit, the top of Link to Lead ($1,989). |
+| `/northstar` | The North Star: one continuous page; the menu scrolls to each section. |
+| `/northstar/summit` | The Summit, the top of Link to Lead ($1,989). |
 | `/road2/` | Road 2, the North Star sales page: “Your business, on paper. Not in your head.” `/compass/welcome` and `/compass/welcome-a` redirect there. |
 
 ## Where the intelligence lives
