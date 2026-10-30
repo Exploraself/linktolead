@@ -178,7 +178,18 @@ const noRun = baseOf({ ...EXAMPLE, run: null, rate: null, hire: null }), nm = E.
 ok(noRun.fixed === 0 && nm.cash === null && nm.people === null && Number.isFinite(nm.mine), 'empty Fine-tune boxes: no money figure invented, the hours still move');
 
 // ── Mailchimp landing tags ──────────────────────────────────────────────────
-ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'salespageincubator1', road2: 'salespageincubator2', road3: 'salespageincubator3' }), 'landing tags: salespageincubator1, 2 and 3');
+ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'salespageincubator1', road2: 'salespageincubator2', road21: 'salespageincubator2.1', road3: 'salespageincubator3' }), 'landing tags: salespageincubator1, 2, 2.1 and 3');
+// Road 2.1 (30 Oct): its own tag, no empty old tag, the FULL form, and road2 untouched beside it.
+{
+  const { tagsFor } = await import('../functions/_mailchimp.js');
+  const t = tagsFor({ landing: 'road21', signupType: 'full' });
+  ok(t.some((x) => x.name === 'salespageincubator2.1' && x.status === 'active') && t.every((x) => typeof x.name === 'string' && x.name), 'road2.1: tagged salespageincubator2.1, no empty tag');
+  const R21 = read('public/road2.1/index.html'), J21 = read('public/road2.1/page.js');
+  ok(J21.includes("variant: 'full', landing: 'road21'") && R21.includes('src="/road2.1/page.js"') && !/PHOTO OF/.test(R21) && R21.includes('/cabinet/alexandru.jpg'), 'road2.1: full form, landing road21, the real photo');
+  const labels = new Set((R21.match(/<button type="button" data-gate[^>]*>([^<]+)/g) || []).map((m) => m.replace(/.*>/, '').trim()));
+  ok(labels.size === 1 && labels.has('Start my North Star →'), 'road2.1: one button label, everywhere');
+  ok(!/most founders|incubator/i.test(R21.replace(/<!--[\s\S]*?-->/g, '')), 'road2.1: no banned words on the page');
+}
 ok(tagsFor({ landing: 'road2' }).some((x) => x.name === 'Landing - Road 2' && x.status === 'inactive'), 'the old landing tag goes inactive');
 ok(!tagsFor({ landing: 'compass' }).some((x) => /^(Landing - |salespageincubator)/.test(x.name)) && !tagsFor({ landing: 'toString' }).some((x) => /^(Landing - |salespageincubator)/.test(x.name)), 'the North Star box and anything unknown get no landing tag');
 

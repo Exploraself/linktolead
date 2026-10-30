@@ -80,7 +80,7 @@ export function mailchimpState(env = {}) {
 /** Which sales page a founder signed up on (Alexandru, 30 Oct 2026). The old
  *  names ('Landing - Road 1' …) are sent as inactive, so a founder whose tags
  *  are sent again loses the old one (API mode). */
-export const LANDING_TAGS = { road1: 'salespageincubator1', road2: 'salespageincubator2', road3: 'salespageincubator3' };
+export const LANDING_TAGS = { road1: 'salespageincubator1', road2: 'salespageincubator2', road21: 'salespageincubator2.1', road3: 'salespageincubator3' };
 export const OLD_LANDING_TAGS = { road1: 'Landing - Road 1', road2: 'Landing - Road 2', road3: 'Landing - Road 3' };
 
 /** The tags for one founder. In API mode each stage and domain tag is sent as
@@ -95,7 +95,10 @@ export function tagsFor({ source, stage, weakest, tier, signupType, interest, in
   // Which form they signed up with.
   if (signupType === 'full' || signupType === 'simple') out.push({ name: signupType === 'full' ? 'Signup - Full' : 'Signup - Simple', status: 'active' });
   // The sales page they signed up on (the North Star box has none).
-  if (Object.hasOwn(LANDING_TAGS, landing)) out.push({ name: LANDING_TAGS[landing], status: 'active' }, { name: OLD_LANDING_TAGS[landing], status: 'inactive' });
+  if (Object.hasOwn(LANDING_TAGS, landing)) {
+    out.push({ name: LANDING_TAGS[landing], status: 'active' });
+    if (OLD_LANDING_TAGS[landing]) out.push({ name: OLD_LANDING_TAGS[landing], status: 'inactive' });
+  }
   // The audience has no merge fields for these, so they go as tags.
   if (interest) out.push({ name: `Interest - ${interest}`, status: 'active' });
   if (industry) out.push({ name: `Industry - ${industry}`, status: 'active' });
