@@ -345,7 +345,7 @@
     ['02', 'Lead your people', 'Know your people', D[1].icon, 'people'], ['03', 'Count what matters', 'Know your numbers', 'M4 20V10M10 20V4M16 20v-7M22 20H2', 'numbers'],
     ['04', 'Choose your next steps', 'Know your market', 'M6 21V4M6 4h11l-3 4 3 4H6', 'plan']];
   const pStepcards = () => STEP_CARDS.map(([n, t, k, icon, go], i) => `<button type="button" data-go="${go}" data-f="card-${go}" class="card lift stepc rise" style="animation-delay: ${(i + 1) / 10}s; text-align: left; padding: 18px; cursor: pointer; color: var(--ink); display: flex; flex-direction: column; gap: 8px; min-height: 150px">
-      <span style="display: flex; justify-content: space-between; align-items: center; width: 100%"><span style="font-size: 11px; letter-spacing: .14em; color: var(--goldink); font-weight: 600">STEP ${n}</span><svg class="sico" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="${icon}" fill="none" stroke="${CSSV[i]}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span style="display: flex; justify-content: space-between; align-items: center; width: 100%"><span style="font-size: 11px; letter-spacing: .14em; color: var(--goldink); font-weight: 520">STEP ${n}</span><svg class="sico" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="${icon}" fill="none" stroke="${CSSV[i]}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       <span class="sf" style="font-size: 21px; display: flex; align-items: center; gap: 8px">${t} <span class="sarr" aria-hidden="true">→</span></span>
       <span style="font-size: 13px; color: var(--muted)">${k}</span></button>`).join('');
 
@@ -358,9 +358,9 @@
       <div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 4px; min-width: 0">
         <span class="eb" style="color: #A9C0D9">Your launchpad · ${t} of 16 pieces in place</span>
         <span class="sf" style="font-size: 18px; line-height: 1.25">${line}</span>
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; font-weight: 600">${D.map((d, i) => `<span style="display: inline-flex; align-items: center; gap: 6px; color: ${LIGHT[i]}"><span style="width: 9px; height: 9px; border-radius: 50%; background: ${LIGHT[i]}"></span>${d.name} ${c.pc.per[i]}/4</span>`).join('')}</div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; font-weight: 520">${D.map((d, i) => `<span style="display: inline-flex; align-items: center; gap: 6px; color: ${LIGHT[i]}"><span style="width: 9px; height: 9px; border-radius: 50%; background: ${LIGHT[i]}"></span>${d.name} ${c.pc.per[i]}/4</span>`).join('')}</div>
       </div>
-      ${ready ? '<a class="pop cta" href="/ground-plan/#home" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 18px; border-radius: 5px; background: #6F93B8; color: #0E1C2B; font-weight: 600; text-decoration: none">You’re ready · Enter the Founder Launchpad →</a>' : ''}`;
+      ${ready ? '<a class="pop cta" href="/ground-plan/#home" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 18px; border-radius: 5px; background: #6F93B8; color: #0E1C2B; font-weight: 520; text-decoration: none">You’re ready · Enter the Founder Launchpad →</a>' : ''}`;
   }
 
   const pRing = (c) => `<svg width="74" height="74" viewBox="0 0 74 74" role="img" aria-label="${c.answered} of 8 answered">
@@ -375,7 +375,7 @@
   const pSkip = () => pNotice() + (S.skipped && !identified() ? `<div class="card pop" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-color: #6F93B8">
       <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="#6F93B8" stroke-width="1.8"/><path d="M12 7v6M12 16.5v.5" stroke="#6F93B8" stroke-width="2" stroke-linecap="round"/></svg>
       <span style="flex: 1; font-size: 14px">You are exploring. Add your email when you want your results sent to you.</span>
-      <button type="button" data-act="regate" data-f="regate" style="min-height: 40px; padding: 0 14px; border-radius: 4px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; cursor: pointer">Add my email</button></div>` : '');
+      <button type="button" data-act="regate" data-f="regate" style="min-height: 40px; padding: 0 14px; border-radius: 4px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; cursor: pointer">Add my email</button></div>` : '');
 
   /* Journey: Step 1 where you are today, Step 2 the road to where you want to get. */
   function pJourney(c) {
@@ -426,7 +426,7 @@
             <button type="button" data-act="goal" data-i="${x.i}" data-f="goal-${x.i}" ${x.can ? '' : 'disabled'} aria-label="Set ${x.s.name} as my goal"${x.isGoal || (x.isHere && hasGoal && gap === 0) ? ' aria-pressed="true"' : ''} class="${x.isGoal ? 'beacon' : ''}" style="position: absolute; left: 0; top: 50%; transform: translate(-50%,-50%); width: ${x.dotSize}px; height: ${x.dotSize}px; border-radius: 50%; background: ${x.dotBg}; border: 3px solid ${x.dotBorder}; cursor: ${x.can ? 'pointer' : 'default'}; padding: 0; transition: background .3s ease, width .3s ease, height .3s ease"></button>
             <div style="position: absolute; left: 0; bottom: 0; transform: translateX(-50%); width: 140px; max-width: 24vw; text-align: center; display: flex; flex-direction: column; gap: 2px">
               <span style="font-weight: 900; font-size: 15px; text-transform: uppercase; color: ${x.behind ? '#8A7A5E' : '#EEF2F7'}">${x.s.name}</span>
-              <span style="font-size: 11px; font-weight: 700; letter-spacing: .1em; color: ${x.isHere || x.isGoal ? '#6F93B8' : '#A9B6C6'}">${x.tag}</span>
+              <span style="font-size: 11px; font-weight: 600; letter-spacing: .1em; color: ${x.isHere || x.isGoal ? '#6F93B8' : '#A9B6C6'}">${x.tag}</span>
             </div></div>`).join('')}
         </div>
         ${hasGoal ? `<div class="rise" style="margin-top: 26px; border-top: 1px solid #3A2F20; padding-top: 20px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center">
@@ -436,7 +436,7 @@
       </div>
     </section>
     <section class="rise r3" style="display: flex; flex-direction: column; gap: 16px">
-      <span style="font-size: 12px; font-weight: 700; letter-spacing: .18em; color: var(--goldink)">WHAT HAPPENS NEXT</span>
+      <span style="font-size: 12px; font-weight: 600; letter-spacing: .18em; color: var(--goldink)">WHAT HAPPENS NEXT</span>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px">
         <a href="#s-questions" class="next1" style="text-decoration: none; color: #0E1C2B; background: #6F93B8; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 8px; min-height: 140px">
           <span style="font-weight: 900; font-size: 13px; letter-spacing: .14em">01 · YOU ARE GOING HERE NOW</span>
@@ -457,19 +457,19 @@
   const pHerebar = (c) => (c.goal >= 0 ? `<div id="s-questions" class="card" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
       <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="10" r="3" fill="none" stroke="var(--goldink)" stroke-width="1.8"/><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" fill="none" stroke="var(--goldink)" stroke-width="1.8"/></svg>
       <span><b>You are here:</b> ${E.STAGES[c.here].name}</span><span style="color: var(--muted)">→</span><span><b>Your goal:</b> ${c.goal === c.here ? 'go deeper' : E.STAGES[c.goal].name}</span>
-      <button type="button" data-go="journey" data-f="change-road" style="margin-left: auto; font-size: 13px; font-weight: 600; padding: 8px 0; background: none; border: 0; color: var(--goldink); cursor: pointer; text-decoration: underline">Change</button></div>`
+      <button type="button" data-go="journey" data-f="change-road" style="margin-left: auto; font-size: 13px; font-weight: 520; padding: 8px 0; background: none; border: 0; color: var(--goldink); cursor: pointer; text-decoration: underline">Change</button></div>`
     : '<div id="s-questions"></div>');
 
   const pModes = () => `<div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 10px">
-      <span style="font-weight: 600" id="modes-h">Do you have paying customers yet?</span>
+      <span style="font-weight: 520" id="modes-h">Do you have paying customers yet?</span>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px" role="group" aria-labelledby="modes-h">
-        ${E.MODES.map(([id, label, sub]) => `<button type="button" data-act="mode" data-v="${id}" data-f="mode-${id}" aria-pressed="${S.mode === id}" style="text-align: left; min-height: 56px; padding: 10px 12px; border-radius: 5px; border: 1.5px solid ${S.mode === id ? 'var(--ink)' : 'var(--line)'}; background: ${S.mode === id ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); cursor: pointer; display: flex; flex-direction: column; gap: 1px"><span style="font-weight: 600">${label}</span><span style="font-size: 12px; color: var(--muted)">${sub}</span></button>`).join('')}
+        ${E.MODES.map(([id, label, sub]) => `<button type="button" data-act="mode" data-v="${id}" data-f="mode-${id}" aria-pressed="${S.mode === id}" style="text-align: left; min-height: 56px; padding: 10px 12px; border-radius: 5px; border: 1.5px solid ${S.mode === id ? 'var(--ink)' : 'var(--line)'}; background: ${S.mode === id ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); cursor: pointer; display: flex; flex-direction: column; gap: 1px"><span style="font-weight: 520">${label}</span><span style="font-size: 12px; color: var(--muted)">${sub}</span></button>`).join('')}
       </div>
       <span style="font-size: 12px; color: var(--muted)">This changes the numbers we ask for and the feedback you get. No customers yet? We will not turn this into a sales calculator.</span></div>`;
 
   const pDombars = (c) => `<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px" aria-hidden="true">${D.map((d, i) => `<div style="display: flex; flex-direction: column; gap: 6px">
       <div style="height: 5px; border-radius: 3px; background: var(--cream); overflow: hidden"><div class="bar" style="height: 5px; background: ${CSSV[i]}; width: ${c.sc[i].answered * 50}%"></div></div>
-      <span style="font-size: 11px; font-weight: 600; letter-spacing: .08em; color: ${CSSV[i]}">${d.name} · ${c.sc[i].answered}/2</span></div>`).join('')}</div>`;
+      <span style="font-size: 11px; font-weight: 520; letter-spacing: .08em; color: ${CSSV[i]}">${d.name} · ${c.sc[i].answered}/2</span></div>`).join('')}</div>`;
 
   function pQuestions(c) {
     const firstOpen = c.qs.findIndex((q) => !Number.isInteger(S.ans[q.id]));
@@ -478,15 +478,15 @@
       return `<div style="display: flex; flex-direction: column; gap: 12px">
         ${i % 2 === 0 ? `<div style="display: flex; align-items: center; gap: 10px; margin-top: 12px">
           <span style="width: 34px; height: 34px; border-radius: 50%; background: ${TINT[di]}; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="${D[di].icon}" fill="none" stroke="${CSSV[di]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          <h3 class="sf" style="font-size: 20px; font-weight: 500">${D[di].name}</h3><span style="flex: 1; height: 1px; background: var(--line)"></span></div>` : ''}
+          <h3 class="sf" style="font-size: 20px; font-weight: 440">${D[di].name}</h3><span style="flex: 1; height: 1px; background: var(--line)"></span></div>` : ''}
         <div style="background: var(--paper); border: 1.5px solid ${i === firstOpen ? '#6F93B8' : done ? 'var(--line)' : 'var(--cream)'}; border-radius: 7px; padding: 18px; display: flex; flex-direction: column; gap: 12px; transition: border-color .3s ease">
           <div style="display: flex; gap: 12px; align-items: flex-start">
             <span style="font-family: Newsreader, serif; font-size: 15px; color: ${CSSV[di]}; flex: none; padding-top: 2px">0${i + 1}</span>
-            <div style="display: flex; flex-direction: column; gap: 4px; flex: 1"><span style="font-weight: 600; font-size: 16px; line-height: 1.35" id="qt-${q.id}">${esc(q.text)}</span><span style="font-size: 13px; color: var(--muted)">${esc(q.prompt)}</span></div>
+            <div style="display: flex; flex-direction: column; gap: 4px; flex: 1"><span style="font-weight: 520; font-size: 16px; line-height: 1.35" id="qt-${q.id}">${esc(q.text)}</span><span style="font-size: 13px; color: var(--muted)">${esc(q.prompt)}</span></div>
             ${done ? '<svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Answered" style="flex: none"><circle cx="12" cy="12" r="10" fill="#6F93B8"/><path d="M7 12.5l3.2 3L17 9" fill="none" stroke="#0E1C2B" stroke-width="2.2" stroke-linecap="round"/></svg>' : ''}
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px" role="group" aria-labelledby="qt-${q.id}">
-            ${E.ANSWERS.map(([label, sub], k) => { const on = S.ans[q.id] === k; return `<button type="button" data-act="ans" data-q="${q.id}" data-v="${k}" data-f="ans-${q.id}-${k}" aria-pressed="${on}" style="text-align: left; min-height: 52px; padding: 9px 12px; border-radius: 5px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); cursor: pointer; display: flex; flex-direction: column; gap: 1px"><span style="font-weight: 600; font-size: 14px">${label}</span><span style="font-size: 12px; color: var(--muted)">${sub}</span></button>`; }).join('')}
+            ${E.ANSWERS.map(([label, sub], k) => { const on = S.ans[q.id] === k; return `<button type="button" data-act="ans" data-q="${q.id}" data-v="${k}" data-f="ans-${q.id}-${k}" aria-pressed="${on}" style="text-align: left; min-height: 52px; padding: 9px 12px; border-radius: 5px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); cursor: pointer; display: flex; flex-direction: column; gap: 1px"><span style="font-weight: 520; font-size: 14px">${label}</span><span style="font-size: 12px; color: var(--muted)">${sub}</span></button>`; }).join('')}
           </div></div></div>`;
     }).join('');
   }
@@ -495,11 +495,11 @@
       <span class="eb">Two more taps · they shape your feedback</span>
       <h2 class="sf" style="font-size: 26px; line-height: 1.2" id="pains-h">What hurts most right now? <span class="sfi" style="color: var(--goldink)">Pick up to two.</span></h2></div>
     <div style="display: flex; flex-wrap: wrap; gap: 8px" role="group" aria-labelledby="pains-h">
-      ${E.PAINS.map(([id, t, di]) => { const on = S.pains.includes(id); return `<button type="button" data-act="pain" data-v="${id}" data-f="pain-${id}" aria-pressed="${on}" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px"><span style="width: 9px; height: 9px; border-radius: 50%; background: ${D[di].hex}"></span>${t}</button>`; }).join('')}
+      ${E.PAINS.map(([id, t, di]) => { const on = S.pains.includes(id); return `<button type="button" data-act="pain" data-v="${id}" data-f="pain-${id}" aria-pressed="${on}" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); font-size: 14px; font-weight: 520; cursor: pointer; display: inline-flex; align-items: center; gap: 8px"><span style="width: 9px; height: 9px; border-radius: 50%; background: ${D[di].hex}"></span>${t}</button>`; }).join('')}
     </div>
     <h2 class="sf" style="font-size: 22px; line-height: 1.2; margin-top: 4px" id="want-h">And what do you want most? <span class="sfi" style="color: var(--goldink)">Pick one.</span></h2>
     <div style="display: flex; flex-wrap: wrap; gap: 8px" role="group" aria-labelledby="want-h">
-      ${E.GOALS.map(([id, t]) => { const on = S.want === id; return `<button type="button" data-act="want" data-v="${id}" data-f="want-${id}" aria-pressed="${on}" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 4h11l-3 4 3 4H6" fill="none" stroke="#6F93B8" stroke-width="2" stroke-linejoin="round"/></svg>${t}</button>`; }).join('')}
+      ${E.GOALS.map(([id, t]) => { const on = S.want === id; return `<button type="button" data-act="want" data-v="${id}" data-f="want-${id}" aria-pressed="${on}" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); font-size: 14px; font-weight: 520; cursor: pointer; display: inline-flex; align-items: center; gap: 8px"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 4h11l-3 4 3 4H6" fill="none" stroke="#6F93B8" stroke-width="2" stroke-linejoin="round"/></svg>${t}</button>`; }).join('')}
     </div>`;
 
   function pReading(c) {
@@ -513,10 +513,10 @@
         <p style="color: var(--muted)">Rate four strengths honestly. Together with your answers, they draw your North Star.</p></div>
       <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
         <div class="card" style="flex: 1 1 340px; min-width: 0; padding: 18px; display: flex; flex-direction: column; gap: 14px">
-          <span style="font-weight: 600">How strong are you at…</span>
+          <span style="font-weight: 520">How strong are you at…</span>
           ${E.STRENGTHS.map((s, i) => `<div style="display: flex; flex-direction: column; gap: 6px">
-            <div style="display: flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="${s.icon}" fill="none" stroke="${CSSV[s.d]}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-weight: 600; font-size: 14px" id="st-${i}">${s.name}</span><span style="font-size: 12px; color: var(--muted)">· ${D[s.d].name}</span></div>
-            <div style="display: flex; gap: 6px" role="group" aria-labelledby="st-${i}">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-act="str" data-i="${i}" data-v="${n}" data-f="str-${i}-${n}" aria-label="${s.name}: ${n} of 5" aria-pressed="${str[i] === n}" style="flex: 1; min-height: 44px; border-radius: 5px; border: 1.5px solid ${str[i] >= n ? '#6F93B8' : 'var(--line)'}; background: ${str[i] >= n ? '#6F93B8' : 'var(--paper)'}; color: ${str[i] >= n ? '#0E1C2B' : 'var(--ink)'}; cursor: pointer; font-weight: 600">${n}</button>`).join('')}</div></div>`).join('')}
+            <div style="display: flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="${s.icon}" fill="none" stroke="${CSSV[s.d]}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-weight: 520; font-size: 14px" id="st-${i}">${s.name}</span><span style="font-size: 12px; color: var(--muted)">· ${D[s.d].name}</span></div>
+            <div style="display: flex; gap: 6px" role="group" aria-labelledby="st-${i}">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-act="str" data-i="${i}" data-v="${n}" data-f="str-${i}-${n}" aria-label="${s.name}: ${n} of 5" aria-pressed="${str[i] === n}" style="flex: 1; min-height: 44px; border-radius: 5px; border: 1.5px solid ${str[i] >= n ? '#6F93B8' : 'var(--line)'}; background: ${str[i] >= n ? '#6F93B8' : 'var(--paper)'}; color: ${str[i] >= n ? '#0E1C2B' : 'var(--ink)'}; cursor: pointer; font-weight: 520">${n}</button>`).join('')}</div></div>`).join('')}
           <span style="font-size: 12px; color: var(--muted)">1 = not yet · 5 = people come to me for this</span>
         </div>
         <div class="deep" style="flex: 1 1 420px; min-width: 0; border-radius: 9px; padding: 18px; display: flex; flex-wrap: wrap; gap: 18px; align-items: center">
@@ -529,10 +529,10 @@
             <circle cx="200" cy="${200 - rA[0]}" r="6" fill="#E0A282"/><circle cx="${200 + rA[1]}" cy="200" r="6" fill="#9BC0A1"/><circle cx="200" cy="${200 + rA[2]}" r="6" fill="#91B8D5"/><circle cx="${200 - rA[3]}" cy="200" r="6" fill="#DDBD69"/>
             <text x="200" y="30" fill="#E0A282" font-family="Inter" font-weight="800" font-size="11" text-anchor="middle" letter-spacing="1.2">LEAD YOURSELF · ${sc[0]}/6</text>
             <text x="372" y="196" fill="#9BC0A1" font-family="Inter" font-weight="800" font-size="11" text-anchor="end" letter-spacing="1.2">LEAD YOUR PEOPLE</text>
-            <text x="372" y="214" fill="#9BC0A1" font-family="Inter" font-weight="700" font-size="12" text-anchor="end">${sc[1]}/6</text>
+            <text x="372" y="214" fill="#9BC0A1" font-family="Inter" font-weight="600" font-size="12" text-anchor="end">${sc[1]}/6</text>
             <text x="200" y="384" fill="#91B8D5" font-family="Inter" font-weight="800" font-size="11" text-anchor="middle" letter-spacing="1.2">LEAD YOUR BUSINESS · ${sc[2]}/6</text>
             <text x="28" y="196" fill="#DDBD69" font-family="Inter" font-weight="800" font-size="11" letter-spacing="1.2">LEAD THE MARKET</text>
-            <text x="28" y="214" fill="#DDBD69" font-family="Inter" font-weight="700" font-size="12">${sc[3]}/6</text>
+            <text x="28" y="214" fill="#DDBD69" font-family="Inter" font-weight="600" font-size="12">${sc[3]}/6</text>
             <circle cx="200" cy="200" r="7" fill="#0E1C2B" stroke="#6F93B8" stroke-width="2"/>
           </svg>
           <div style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 10px">
@@ -546,7 +546,7 @@
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px">
         ${D.map((d, i) => `<div class="card" style="padding: 14px; display: flex; gap: 10px; align-items: flex-start; border-top: 3px solid ${CSSV[i]}">
           <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${d.icon}" fill="none" stroke="${CSSV[i]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600; font-size: 13px">${d.name} · next step</span><span style="font-size: 13px; color: var(--muted)">${i === lo && any ? 'Start here. ' : ''}${d.step}</span></div></div>`).join('')}
+          <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 520; font-size: 13px">${d.name} · next step</span><span style="font-size: 13px; color: var(--muted)">${i === lo && any ? 'Start here. ' : ''}${d.step}</span></div></div>`).join('')}
       </div>`;
   }
 
@@ -561,7 +561,7 @@
         const k = S.mode + '.' + key, cur = S.nums[k] || { pick: '', own: '' }, isText = typeof choices[0][1] === 'string';
         const opts = [['', 'Choose…'], ...choices.map((ch, j) => [String(j), ch[0]]), ['own', isText ? 'Somewhere else…' : 'Type my own…'], ['unsure', 'Not sure yet']];
         return `<div style="display: flex; flex-direction: column; gap: 6px">
-          <label for="f-${k}" style="font-size: 13px; font-weight: 600">${label}</label>
+          <label for="f-${k}" style="font-size: 13px; font-weight: 520">${label}</label>
           <select id="f-${k}" class="inp${UI.glow && UI.glow.keys.includes(k) && Date.now() < UI.glow.until ? ' glowbox' : ''}" data-num="${k}" data-f="num-${k}" style="border-color: ${cur.pick === 'own' ? '#6F93B8' : 'var(--line)'}">${opts.map(([v, t]) => `<option value="${v}"${cur.pick === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>
           ${cur.pick === 'own' ? `<input class="inp pop" type="text" ${isText ? '' : 'inputmode="decimal"'} data-own="${k}" data-f="own-${k}" value="${esc(cur.own)}" placeholder="${isText ? 'Where they gather' : 'Type the exact amount'}" aria-label="${esc(label)}, ${isText ? 'in your words' : 'exact amount'}" style="border-color: #6F93B8">` : ''}
         </div>`;
@@ -569,14 +569,14 @@
       return `<div style="background: var(--paper); border: 1.5px solid ${active ? '#6F93B8' : 'var(--line)'}; border-radius: 7px; overflow: hidden; transition: border-color .3s ease">
         <button type="button" data-act="grp" data-i="${i}" data-f="grp-${i}" aria-expanded="${active}" style="width: 100%; background: none; border: 0; padding: 16px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; text-align: left; color: var(--ink)">
           <span style="width: 38px; height: 38px; border-radius: 50%; background: ${i < gi ? '#6F93B8' : TINTG[g.d]}; display: inline-flex; align-items: center; justify-content: center; flex: none"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="${g.icon}" fill="none" stroke="${i < gi ? '#0E1C2B' : CSSV[g.d]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          <span style="display: flex; flex-direction: column; flex: 1; min-width: 0"><span style="font-weight: 600; font-size: 16px">0${i + 1} · ${g.title}</span><span style="font-size: 13px; color: var(--muted)">${esc(status)}</span></span>
-          <span style="font-size: 12px; font-weight: 600; color: var(--goldink)">${i < gi ? 'Done · edit' : active ? '' : 'Open'}</span></button>
+          <span style="display: flex; flex-direction: column; flex: 1; min-width: 0"><span style="font-weight: 520; font-size: 16px">0${i + 1} · ${g.title}</span><span style="font-size: 13px; color: var(--muted)">${esc(status)}</span></span>
+          <span style="font-size: 12px; font-weight: 520; color: var(--goldink)">${i < gi ? 'Done · edit' : active ? '' : 'Open'}</span></button>
         ${active ? `<div class="pop" style="padding: 0 18px 18px; display: flex; flex-direction: column; gap: 14px">
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">${fields}</div>
           <div class="pop deep" style="border-radius: 7px; padding: 16px 18px; display: flex; gap: 14px; align-items: center; animation-delay: .2s">
             <svg class="shim" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z" fill="none" stroke="#6F93B8" stroke-width="1.6" stroke-linejoin="round"/></svg>
-            <div style="display: flex; flex-direction: column; gap: 2px" aria-live="polite"><span class="eb" style="color: #A9C0D9">What this already tells you</span><span style="font-size: 16px; font-weight: 600">${esc(ins || 'Pick a range for each, or type your own. The answer appears here.')}</span></div></div>
-          <button type="button" data-act="grp" data-i="${i + 1}" data-f="grp-next-${i}" style="align-self: flex-end; min-height: 46px; padding: 0 20px; border-radius: 5px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 600; cursor: pointer">${i === G.length - 1 ? 'See what it all means →' : 'Next group →'}</button>
+            <div style="display: flex; flex-direction: column; gap: 2px" aria-live="polite"><span class="eb" style="color: #A9C0D9">What this already tells you</span><span style="font-size: 16px; font-weight: 520">${esc(ins || 'Pick a range for each, or type your own. The answer appears here.')}</span></div></div>
+          <button type="button" data-act="grp" data-i="${i + 1}" data-f="grp-next-${i}" style="align-self: flex-end; min-height: 46px; padding: 0 20px; border-radius: 5px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 520; cursor: pointer">${i === G.length - 1 ? 'See what it all means →' : 'Next group →'}</button>
         </div>` : ''}</div>`;
     }).join('');
     return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 720px">
@@ -619,7 +619,7 @@
     return `<span class="eb" style="color: #A9C0D9">${eyebrow} · in your free account</span>
       ${titles.map((t, k) => `<div style="display: flex; gap: 12px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Newsreader, serif; color: #6F93B8; width: 22px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #EEF2F7">${t}</span><span class="blurline" style="flex: 0 0 70px; height: 8px; border-radius: 4px; background: #2A3A50"></span>${lockIcon('#A9B6C6')}</div>`).join('')}
       <span style="font-size: 13px; color: #A9B6C6">Each step opens with what to do, about how long it takes and what “done” looks like.</span>
-      <button type="button" data-act="account" data-f="account-${eyebrow.length}" class="go" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; cursor: pointer">${cta} <span class="arr" aria-hidden="true">→</span></button>`;
+      <button type="button" data-act="account" data-f="account-${eyebrow.length}" class="go" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; cursor: pointer">${cta} <span class="arr" aria-hidden="true">→</span></button>`;
   }
 
   /* Step 03 part 2: one card per domain. "Got it" opens the next. */
@@ -632,8 +632,8 @@
     const open = !!S.more[i];
     return `<div style="display: flex; flex-direction: column; gap: 10px; opacity: ${locked ? '.45' : '1'}; transition: opacity .5s ease"${locked ? ' inert' : ''}>
       ${locked ? `<span style="font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 8px">${lockIcon('currentColor')}Tick “Got it” on the domain above to open this one.</span>` : ''}
-      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"><span style="width: 34px; height: 34px; border-radius: 50%; background: ${TINT[i]}; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="${D[i].icon}" fill="none" stroke="${CSSV[i]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h3 class="sf" style="font-size: 20px; font-weight: 500">${D[i].name}</h3>
-        <span style="font-size: 11px; font-weight: 600; letter-spacing: .12em; padding: 4px 10px; border-radius: 12px; background: ${f.bandIndex === null ? 'var(--cream)' : bg[f.bandIndex]}; color: ${f.bandIndex === null ? 'var(--muted)' : ink[f.bandIndex]}">${f.band}</span>
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"><span style="width: 34px; height: 34px; border-radius: 50%; background: ${TINT[i]}; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="${D[i].icon}" fill="none" stroke="${CSSV[i]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h3 class="sf" style="font-size: 20px; font-weight: 440">${D[i].name}</h3>
+        <span style="font-size: 11px; font-weight: 520; letter-spacing: .12em; padding: 4px 10px; border-radius: 12px; background: ${f.bandIndex === null ? 'var(--cream)' : bg[f.bandIndex]}; color: ${f.bandIndex === null ? 'var(--muted)' : ink[f.bandIndex]}">${f.band}</span>
         <span style="display: inline-flex; gap: 3px" role="img" aria-label="${s.score} of 6">${[0, 1, 2, 3, 4, 5].map((k) => `<span style="width: 14px; height: 6px; border-radius: 3px; background: ${k < s.score ? CSSV[i] : 'var(--cream)'}"></span>`).join('')}</span>
         <span style="flex: 1; height: 1px; background: var(--line); min-width: 40px"></span></div>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
@@ -641,22 +641,22 @@
           <span class="eb" style="color: ${CSSV[i]}">What it means for you now</span>
           <span class="sf" style="font-size: 21px; line-height: 1.25">${f.big}</span>
           <span style="font-size: 14px; color: var(--muted)">${f.why}</span>
-          ${f.goalLine ? `<span style="font-size: 13px; font-weight: 600; color: var(--goldink); display: inline-flex; gap: 6px; align-items: center"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 4h11l-3 4 3 4H6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>${f.goalLine}</span>` : ''}
+          ${f.goalLine ? `<span style="font-size: 13px; font-weight: 520; color: var(--goldink); display: inline-flex; gap: 6px; align-items: center"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 4h11l-3 4 3 4H6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>${f.goalLine}</span>` : ''}
           ${nums ? `<span style="font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 8px">Your numbers: ${esc(nums)}</span>` : ''}
         </div>
         <div class="card lift" style="padding: 18px; display: flex; flex-direction: column; gap: 10px">
           <span class="eb">What you may be feeling</span>
-          ${f.pains.length ? `<span style="font-size: 13px; font-weight: 600; padding: 6px 10px; border-radius: 6px; background: var(--cream); align-self: flex-start">You said: ${f.pains.join(' · ')}</span>` : ''}
+          ${f.pains.length ? `<span style="font-size: 13px; font-weight: 520; padding: 6px 10px; border-radius: 6px; background: var(--cream); align-self: flex-start">You said: ${f.pains.join(' · ')}</span>` : ''}
           ${f.feel.map((t) => `<span style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><circle cx="12" cy="12" r="8" fill="none" stroke="${CSSV[i]}" stroke-width="2"/><circle cx="12" cy="12" r="2.5" fill="${CSSV[i]}"/></svg>${t}</span>`).join('')}
         </div>
         <div class="deep" style="border-radius: 7px; padding: 18px; display: flex; flex-direction: column; gap: 8px"><span class="eb" style="color: #A9C0D9">Ask yourself</span><span class="sfi" style="font-size: 19px; line-height: 1.35">“${f.ask}”</span>
           <label style="display: flex; align-items: center; gap: 10px; margin-top: 6px; padding: 10px 12px; border: 1px solid #2A3A50; border-radius: 6px; cursor: pointer; font-size: 14px"><input type="checkbox" data-act="got" data-i="${i}" data-f="got-${i}"${S.got[i] ? ' checked' : ''} style="width: 20px; height: 20px; accent-color: #6F93B8">Got it, I’ve read this</label>
-          <button type="button" data-act="more" data-i="${i}" data-f="more-${i}" aria-expanded="${open}" class="no-print" style="align-self: flex-start; margin-top: 4px; background: none; border: 1px solid #2A3A50; color: #A9C0D9; border-radius: 5px; min-height: 40px; padding: 0 14px; font-weight: 600; cursor: pointer">${open ? 'Show less' : 'Show more'}</button>
+          <button type="button" data-act="more" data-i="${i}" data-f="more-${i}" aria-expanded="${open}" class="no-print" style="align-self: flex-start; margin-top: 4px; background: none; border: 1px solid #2A3A50; color: #A9C0D9; border-radius: 5px; min-height: 40px; padding: 0 14px; font-weight: 520; cursor: pointer">${open ? 'Show less' : 'Show more'}</button>
         </div>
       </div>
       ${open ? `<div class="pop" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px">
         <div class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 8px"><span class="eb" style="color: ${CSSV[i]}">Going deeper</span><span style="font-size: 15px; line-height: 1.6">${f.deep}</span>
-          <span style="font-size: 14px; font-weight: 600; margin-top: 4px">This week: ${f.week}</span></div>
+          <span style="font-size: 14px; font-weight: 520; margin-top: 4px">This week: ${f.week}</span></div>
         <div class="deep" style="border-radius: 7px; padding: 20px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #6F93B8">
           ${planBlock(f.steps, UI.plans && (UI.plans.domains.find((x) => x.id === D[i].id) || {}).steps, 'Your step-by-step plan', 'Create my free account')}
         </div></div>` : ''}
@@ -674,10 +674,10 @@
   }
   const WA = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.8 8.2c.2-.4.5-.4.8-.4h.5c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .5-.1.6l-.5.6c.6 1.2 1.6 2.1 2.8 2.7l.6-.6c.2-.2.4-.2.6-.1l1.6.7c.2.1.4.3.4.6v.5c0 .3-.1.6-.4.8-.6.4-1.4.5-2.2.2-2.3-.9-4.1-2.7-5-5-.3-.8-.2-1.6.2-2.2z" fill="currentColor"/></svg>';
   const LI = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4M12 10v7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
-  const shareRow = (c, what, label) => `<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .06em">${label}</span>
+  const shareRow = (c, what, label) => `<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 12px; font-weight: 520; color: var(--muted); letter-spacing: .06em">${label}</span>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
-        <a href="https://wa.me/?text=${encodeURIComponent(shareText(c, what, 'whatsapp'))}" target="_blank" rel="noopener" data-f="share-${what}-wa" style="min-height: 44px; border-radius: 5px; border: 1px solid #25D366; color: var(--ink); background: var(--paper); font-weight: 600; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><span style="color: #1DA851; display: inline-flex">${WA}</span>WhatsApp</a>
-        <a href="https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(shareText(c, what, 'linkedin'))}" target="_blank" rel="noopener" data-f="share-${what}-li" style="min-height: 44px; border-radius: 5px; border: 1px solid #0A66C2; color: var(--ink); background: var(--paper); font-weight: 600; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><span style="color: #0A66C2; display: inline-flex">${LI}</span>LinkedIn</a>
+        <a href="https://wa.me/?text=${encodeURIComponent(shareText(c, what, 'whatsapp'))}" target="_blank" rel="noopener" data-f="share-${what}-wa" style="min-height: 44px; border-radius: 5px; border: 1px solid #25D366; color: var(--ink); background: var(--paper); font-weight: 520; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><span style="color: #1DA851; display: inline-flex">${WA}</span>WhatsApp</a>
+        <a href="https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(shareText(c, what, 'linkedin'))}" target="_blank" rel="noopener" data-f="share-${what}-li" style="min-height: 44px; border-radius: 5px; border: 1px solid #0A66C2; color: var(--ink); background: var(--paper); font-weight: 520; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><span style="color: #0A66C2; display: inline-flex">${LI}</span>LinkedIn</a>
       </div></div>`;
 
   const pSave = (c) => `<div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 10px">
@@ -689,24 +689,24 @@
       <span style="font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px">${lockIcon('currentColor', 13)}The deeper “Show more” insights stay inside your account.</span>
     </div>
     <div style="flex: 0 1 280px; display: flex; flex-direction: column; gap: 8px; min-width: 240px">
-      <button type="button" data-act="email" data-f="email" ${UI.sending ? 'disabled' : ''} style="min-height: 50px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="#0E1C2B" stroke-width="1.8"/><path d="M3 7l9 6 9-6" fill="none" stroke="#0E1C2B" stroke-width="1.8"/></svg>${UI.sending ? 'Sending…' : 'Email me my results'}</button>
+      <button type="button" data-act="email" data-f="email" ${UI.sending ? 'disabled' : ''} style="min-height: 50px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="#0E1C2B" stroke-width="1.8"/><path d="M3 7l9 6 9-6" fill="none" stroke="#0E1C2B" stroke-width="1.8"/></svg>${UI.sending ? 'Sending…' : 'Email me my results'}</button>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
-        <button type="button" data-act="print" data-f="print" style="min-height: 46px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Print</button>
-        <button type="button" data-act="print" data-f="pdf" style="min-height: 46px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Save as PDF</button>
+        <button type="button" data-act="print" data-f="print" style="min-height: 46px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 520; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Print</button>
+        <button type="button" data-act="print" data-f="pdf" style="min-height: 46px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 520; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Save as PDF</button>
       </div>
       <div class="no-print" style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--line)">
         ${c && c.rd && c.rd.any ? shareRow(c, 'reading', 'SHARE YOUR READING') : ''}
         ${shareRow(c, 'invite', 'INVITE SOMEONE TO TAKE IT')}
       </div>
-      <span role="status" style="font-size: 13px; color: ${UI.mail.startsWith('Sent') ? 'var(--people)' : 'var(--muted)'}; font-weight: 600">${esc(UI.mail)}</span>
+      <span role="status" style="font-size: 13px; color: ${UI.mail.startsWith('Sent') ? 'var(--people)' : 'var(--muted)'}; font-weight: 520">${esc(UI.mail)}</span>
     </div>`;
 
   function pWeeks(c) {
     const WC = D.map((d) => d.hex), f = S.lean !== null ? S.lean : (c.rd.any ? c.rd.lo : null);
     const row = (d, i) => `<div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; align-items: center; padding: 4px 0; border-radius: 6px; outline: ${f === i ? '1px solid rgba(111,147,184,.55)' : '1px solid transparent'}; outline-offset: 3px; transition: outline-color .4s ease">
-        <span style="font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: ${f === i ? '#EEF2F7' : '#B8C6D6'}; display: inline-flex; align-items: center; gap: 8px">${d.name}${f === i ? '<span style="font-size: 10px; color: #0E1C2B; background: #6F93B8; border-radius: 3px; padding: 1px 5px">LEAN</span>' : ''}</span>
+        <span style="font-size: 12px; font-weight: 520; letter-spacing: .1em; text-transform: uppercase; color: ${f === i ? '#EEF2F7' : '#B8C6D6'}; display: inline-flex; align-items: center; gap: 8px">${d.name}${f === i ? '<span style="font-size: 10px; color: #0E1C2B; background: #6F93B8; border-radius: 3px; padding: 1px 5px">LEAN</span>' : ''}</span>
         ${Array.from({ length: 12 }, (_, k) => `<span class="cellin" style="height: 34px; border-radius: 3px; background: ${WC[i]}; opacity: ${Math.min(1, (0.28 + k * 0.055) * (f === null ? 1 : f === i ? 1.25 : 0.8)).toFixed(2)}; animation-delay: ${(k * 0.06 + i * 0.04).toFixed(2)}s; transition: opacity .5s ease"></span>`).join('')}</div>`;
-    const band = (span, text, on, br) => `<span style="grid-column: span ${span}; border-top: 2px solid ${br ? '#B4703F' : on ? '#6F93B8' : '#2A3A50'}; padding-top: 8px; text-align: center; font-size: 11px; font-weight: 600; letter-spacing: .1em; color: ${br ? '#D6BF8F' : on ? '#A9C0D9' : '#B8C6D6'}">${text}</span>`;
+    const band = (span, text, on, br) => `<span style="grid-column: span ${span}; border-top: 2px solid ${br ? '#B4703F' : on ? '#6F93B8' : '#2A3A50'}; padding-top: 8px; text-align: center; font-size: 11px; font-weight: 520; letter-spacing: .1em; color: ${br ? '#D6BF8F' : on ? '#A9C0D9' : '#B8C6D6'}">${text}</span>`;
     return `<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
         <div style="display: flex; flex-direction: column; gap: 8px; max-width: 680px">
           <span class="eb" style="color: #A9C0D9">How twelve weeks run · your version</span>
@@ -715,13 +715,13 @@
         </div>
         <div class="no-print" style="display: flex; flex-direction: column; gap: 6px">
           <span style="font-size: 11px; letter-spacing: .14em; color: #B8C6D6" id="lean-h">PREVIEW A DIFFERENT LEAN</span>
-          <div style="display: flex; gap: 6px; flex-wrap: wrap" role="group" aria-labelledby="lean-h">${D.map((d, i) => `<button type="button" data-act="lean" data-i="${i}" data-f="lean-${i}" aria-pressed="${f === i}" style="min-height: 40px; padding: 0 12px; border-radius: 4px; border: 1px solid ${f === i ? '#6F93B8' : '#2A3A50'}; background: ${f === i ? 'rgba(111,147,184,.18)' : 'transparent'}; color: #EEF2F7; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px"><span style="width: 9px; height: 9px; border-radius: 2px; background: ${WC[i]}"></span>${d.name}</button>`).join('')}</div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap" role="group" aria-labelledby="lean-h">${D.map((d, i) => `<button type="button" data-act="lean" data-i="${i}" data-f="lean-${i}" aria-pressed="${f === i}" style="min-height: 40px; padding: 0 12px; border-radius: 4px; border: 1px solid ${f === i ? '#6F93B8' : '#2A3A50'}; background: ${f === i ? 'rgba(111,147,184,.18)' : 'transparent'}; color: #EEF2F7; font-size: 12px; font-weight: 520; cursor: pointer; display: inline-flex; align-items: center; gap: 6px"><span style="width: 9px; height: 9px; border-radius: 2px; background: ${WC[i]}"></span>${d.name}</button>`).join('')}</div>
         </div>
       </div>
       <div style="overflow-x: auto" role="img" aria-label="Twelve weeks across, the four domains down. Every week works all four${f === null ? '' : ', with more weight on ' + D[f].name}.">
         <div style="min-width: 760px; display: flex; flex-direction: column; gap: 8px">
           <div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; align-items: end"><span></span>
-            ${Array.from({ length: 12 }, (_, k) => `<span style="text-align: center; font-size: 12px; font-weight: 600; color: ${k < 3 ? '#A9C0D9' : '#8A7A5E'}; display: flex; flex-direction: column; align-items: center; gap: 4px">${k + 1}${k === 0 ? '<span class="pinp" style="width: 8px; height: 8px; border-radius: 50%; background: #6F93B8"></span>' : ''}</span>`).join('')}</div>
+            ${Array.from({ length: 12 }, (_, k) => `<span style="text-align: center; font-size: 12px; font-weight: 520; color: ${k < 3 ? '#A9C0D9' : '#8A7A5E'}; display: flex; flex-direction: column; align-items: center; gap: 4px">${k + 1}${k === 0 ? '<span class="pinp" style="width: 8px; height: 8px; border-radius: 50%; background: #6F93B8"></span>' : ''}</span>`).join('')}</div>
           ${D.map(row).join('')}
           <div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; margin-top: 8px"><span></span>
             ${band(3, 'FOUNDER LAUNCHPAD · FREE', true)}${band(2, 'BOOK THE BOARDROOM · UNLOCKS 04–05', false, true)}${band(4, 'PERSONAL LEADERSHIP LAB · $97 · 2 SESSIONS')}${band(3, 'BUSINESS HUB · $397 · 3 SESSIONS IN TOTAL')}</div>
@@ -729,7 +729,7 @@
       </div>
       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; border-top: 1px solid #3A2F20; padding-top: 16px">
         <p style="flex: 1 1 360px; font-size: 14px; color: #B8C6D6; line-height: 1.7">Every column is one week, and every week works all four. The weight shifts toward ${f === null ? 'the domain that needs you most' : D[f].name}. The coverage never drops. You are at week 1. The Summit ($1,989): the whole incubator, with Alexandru every week.</p>
-        <a href="/ground-plan/#home" class="go no-print" style="display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 4px; background: #6F93B8; color: #0E1C2B; font-weight: 600; text-decoration: none">Start week 1 free · The Founder Launchpad <span class="arr" aria-hidden="true">→</span></a>
+        <a href="/ground-plan/#home" class="go no-print" style="display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 4px; background: #6F93B8; color: #0E1C2B; font-weight: 520; text-decoration: none">Start week 1 free · The Founder Launchpad <span class="arr" aria-hidden="true">→</span></a>
       </div>`;
   }
 
@@ -756,19 +756,19 @@
           <g class="flagw"><path d="M230 58V26" stroke="#EEF2F7" stroke-width="1.6"/><path d="M230 27h20l-6 6 6 6h-20z" fill="#6F93B8"/></g>
           ${STOPS.map((t, i) => `<g>${i === si ? `<circle class="halo" cx="${t.x}" cy="${t.y}" r="20" fill="none" stroke="#D6BF8F" stroke-width="1.5"/>` : ''}
             <circle class="stopc" cx="${t.x}" cy="${t.y}" r="${i === si ? 11 : 8}" fill="${i === si ? '#B4703F' : i === 4 ? '#A9C0D9' : '#0E1C2B'}" stroke="${i === si ? '#F6EEDD' : '#EEF2F7'}" stroke-width="1.5" style="animation-delay: ${(0.2 + i * 0.15).toFixed(2)}s"/>
-            <text x="${t.lx}" y="${t.ly}" text-anchor="${t.anchor}" fill="${i === si ? '#D6BF8F' : '#B8C6D6'}" font-family="Inter" font-weight="600" font-size="12.5">${t.short}</text>${i === 1 ? `<g transform="translate(${t.lx + 101} ${t.ly - 11})" aria-hidden="true"><rect x="1" y="5" width="10" height="8" rx="1.5" fill="#B4703F"/><path d="M3.5 5V3.5a2.5 2.5 0 0 1 5 0" fill="none" stroke="#D6BF8F" stroke-width="1.3"/></g>` : ''}</g>`).join('')}
+            <text x="${t.lx}" y="${t.ly}" text-anchor="${t.anchor}" fill="${i === si ? '#D6BF8F' : '#B8C6D6'}" font-family="Inter" font-weight="520" font-size="12.5">${t.short}</text>${i === 1 ? `<g transform="translate(${t.lx + 101} ${t.ly - 11})" aria-hidden="true"><rect x="1" y="5" width="10" height="8" rx="1.5" fill="#B4703F"/><path d="M3.5 5V3.5a2.5 2.5 0 0 1 5 0" fill="none" stroke="#D6BF8F" stroke-width="1.3"/></g>` : ''}</g>`).join('')}
         </svg>
         <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
-          <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 6px" role="group" aria-label="Stops on the climb">${STOPS.map((t, i) => `<button type="button" data-act="stop" data-i="${i}" data-f="stop-${i}" aria-pressed="${i === si}" style="min-height: 40px; padding: 0 12px; border-radius: 4px; border: 1px solid ${i === si ? '#D6BF8F' : '#2A3A50'}; background: ${i === si ? 'linear-gradient(120deg,#2B1B12,#1C1309)' : 'transparent'}; color: ${i === si ? '#F6EEDD' : '#EEF2F7'}; font-size: 12px; font-weight: 600; cursor: pointer">${t.n} · ${t.short}${i === 1 ? ' <span aria-hidden="true" style="color: #D6BF8F">· unlocks 04–05</span>' : ''}</button>`).join('')}</div>
+          <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 6px" role="group" aria-label="Stops on the climb">${STOPS.map((t, i) => `<button type="button" data-act="stop" data-i="${i}" data-f="stop-${i}" aria-pressed="${i === si}" style="min-height: 40px; padding: 0 12px; border-radius: 4px; border: 1px solid ${i === si ? '#D6BF8F' : '#2A3A50'}; background: ${i === si ? 'linear-gradient(120deg,#2B1B12,#1C1309)' : 'transparent'}; color: ${i === si ? '#F6EEDD' : '#EEF2F7'}; font-size: 12px; font-weight: 520; cursor: pointer">${t.n} · ${t.short}${i === 1 ? ' <span aria-hidden="true" style="color: #D6BF8F">· unlocks 04–05</span>' : ''}</button>`).join('')}</div>
           <div class="pop" style="background: linear-gradient(120deg, rgba(43,27,18,.85), rgba(28,19,9,.85)); border: 1px solid rgba(214,191,143,.5); border-radius: 9px; padding: 20px; display: flex; flex-direction: column; gap: 10px" aria-live="polite">
             <span class="eb" style="color: #D6BF8F">${sv.tag}</span>
             <span class="sf" style="font-size: 28px; color: #EEF2F7; line-height: 1.15">${sv.name}</span>
             <span class="sfi" style="font-size: 18px; color: #D6BF8F; line-height: 1.35">${sv.line}</span>
             <div style="display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 6px; background: ${si === 1 ? 'rgba(214,191,143,.16)' : 'rgba(214,191,143,.07)'}; border: 1px solid ${si === 1 ? '#D6BF8F' : 'rgba(214,191,143,.3)'}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px" fill="none" stroke="#D6BF8F" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="${si === 0 || si === 4 ? 'M8 11V8a4 4 0 0 1 7.5-2' : 'M8 11V8a4 4 0 0 1 8 0v3'}"/></svg><span style="font-size: 14.5px; font-weight: ${si === 1 ? 600 : 500}; color: #F6EEDD; line-height: 1.5">${sv.unlock}</span></div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-top: 4px">
-              ${[['MODULES', sv.modules], ['WITH ALEXANDRU', sv.sessions], ['PRICE', sv.price]].map(([k, v]) => `<div style="border: 1px solid rgba(214,191,143,.28); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #CDBB97; letter-spacing: .1em">${k}</span><span style="font-weight: 600; color: #EEF2F7">${v}</span></div>`).join('')}
+              ${[['MODULES', sv.modules], ['WITH ALEXANDRU', sv.sessions], ['PRICE', sv.price]].map(([k, v]) => `<div style="border: 1px solid rgba(214,191,143,.28); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #CDBB97; letter-spacing: .1em">${k}</span><span style="font-weight: 520; color: #EEF2F7">${v}</span></div>`).join('')}
             </div>
-            <a href="${sv.href}" class="go no-print"${sv.ext ? ' target="_blank" rel="noopener"' : ''} style="align-self: flex-start; margin-top: 6px; display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 4px; background: #D6BF8F; color: #1C1309; font-weight: 600; text-decoration: none">${sv.cta} <span class="arr" aria-hidden="true">${sv.ext ? '↗' : '→'}</span></a>
+            <a href="${sv.href}" class="go no-print"${sv.ext ? ' target="_blank" rel="noopener"' : ''} style="align-self: flex-start; margin-top: 6px; display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 4px; background: #D6BF8F; color: #1C1309; font-weight: 520; text-decoration: none">${sv.cta} <span class="arr" aria-hidden="true">${sv.ext ? '↗' : '→'}</span></a>
           </div>
         </div>
       </div>`;
@@ -818,7 +818,7 @@
    *  plan box, Fine-tune). Values are set by updateLab, so the answers glide. */
   function pLabIn() {
     const L = labCalc(), plan = S.mode !== 'yes', cur = S.profile.currency;
-    const input = (key, label, hint) => `<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #EEF2F7">${label}
+    const input = (key, label, hint) => `<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 520; color: #EEF2F7">${label}
         <input class="inp" type="text" inputmode="decimal" data-lab="${key}" data-f="lab-${key}" value="${esc(S.lab[key])}" placeholder="${hint}" style="background: #121E2D; color: #EEF2F7; border-color: #2A3A50"></label>`;
     const missing = L.locked ? L.need : [];
     const chips = [...missing.map((x) => x.label), ...(L.locked && L.planned ? ['Customers a month you plan for (below)'] : [])];
@@ -828,7 +828,7 @@
           <span>Fill ${NUMW[Math.min(4, chips.length)]} ${chips.length === 1 ? 'box' : 'boxes'} ${missing.length ? 'in Step 03 · Count what matters' : 'below'}. A range is enough. Then come back and every slider moves on your own month.</span>
           <div class="wchips">${chips.map((c) => `<span class="wchip"><i aria-hidden="true"></i>${esc(c)}</span>`).join('')}</div>
         </div>
-        ${missing.length ? '<button type="button" class="go" data-act="lab-take" data-f="lab-take" style="min-height: 48px; padding: 0 20px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; font-size: 15px; cursor: pointer">Take me there ↑</button>' : ''}
+        ${missing.length ? '<button type="button" class="go" data-act="lab-take" data-f="lab-take" style="min-height: 48px; padding: 0 20px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; font-size: 15px; cursor: pointer">Take me there ↑</button>' : ''}
       </div>` : '';
     const dis = L.locked ? ' disabled' : '';
     const rows = PAIRS.map((x) => `<div class="wpair">
@@ -879,7 +879,7 @@
     const all = improved.filter(Boolean).length;
     return `<circle cx="160" cy="85" r="62" fill="none" stroke="${all >= 3 ? '#6F93B8' : '#3A2F20'}" stroke-width="2" stroke-dasharray="4 5"/>
       <circle cx="160" cy="85" r="22" fill="#0E1C2B" stroke="#6F93B8" stroke-width="1.5"/><text x="160" y="90" text-anchor="middle" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="13">You</text>
-      ${NP.map((n, i) => `<line x1="160" y1="85" x2="${n[1]}" y2="${n[2]}" stroke="#3A2F20" stroke-width="1"/><circle class="node" cx="${n[1]}" cy="${n[2]}" r="14" fill="${improved[i] ? '#6F93B8' : '#0E1C2B'}" stroke="#6F93B8" stroke-width="1.5"/><text x="${n[3]}" y="${n[4]}" text-anchor="${n[5]}" fill="#EEF2F7" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="600">${n[0]}</text>`).join('')}`;
+      ${NP.map((n, i) => `<line x1="160" y1="85" x2="${n[1]}" y2="${n[2]}" stroke="#3A2F20" stroke-width="1"/><circle class="node" cx="${n[1]}" cy="${n[2]}" r="14" fill="${improved[i] ? '#6F93B8' : '#0E1C2B'}" stroke="#6F93B8" stroke-width="1.5"/><text x="${n[3]}" y="${n[4]}" text-anchor="${n[5]}" fill="#EEF2F7" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="520">${n[0]}</text>`).join('')}`;
   }
 
   /** Set every value in the lab without redrawing it, so handles glide. */
@@ -969,8 +969,8 @@
     return `<div class="pop" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px">
       <div style="background: rgba(247,242,231,.05); border: 1px solid #3A2F20; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
         <span class="eb" style="color: #A9C0D9">The chain reaction</span>
-        <span style="display: inline-flex; align-self: flex-start; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 16px; background: #6F93B8; color: #0E1C2B; font-weight: 600; font-size: 13px">${LV.name}</span>
-        ${chain.map(([nm, ar, v, col], k) => `<div class="itemin" style="display: flex; align-items: center; gap: 10px; font-size: 14px; animation-delay: ${(0.1 + k * 0.15).toFixed(2)}s"><svg width="22" height="14" viewBox="0 0 22 14" aria-hidden="true"><path d="M1 7h16M13 2l5 5-5 5" fill="none" stroke="#8A7A5E" stroke-width="1.6" stroke-linecap="round"/></svg><span style="flex: 1; color: #EEF2F7">${nm}</span><span style="font-weight: 600; color: ${col}">${ar} ${esc(v)}</span></div>`).join('')}
+        <span style="display: inline-flex; align-self: flex-start; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 16px; background: #6F93B8; color: #0E1C2B; font-weight: 520; font-size: 13px">${LV.name}</span>
+        ${chain.map(([nm, ar, v, col], k) => `<div class="itemin" style="display: flex; align-items: center; gap: 10px; font-size: 14px; animation-delay: ${(0.1 + k * 0.15).toFixed(2)}s"><svg width="22" height="14" viewBox="0 0 22 14" aria-hidden="true"><path d="M1 7h16M13 2l5 5-5 5" fill="none" stroke="#8A7A5E" stroke-width="1.6" stroke-linecap="round"/></svg><span style="flex: 1; color: #EEF2F7">${nm}</span><span style="font-weight: 520; color: ${col}">${ar} ${esc(v)}</span></div>`).join('')}
       </div>
       <div style="background: rgba(247,242,231,.05); border: 1px solid #3A2F20; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
         <span class="eb" style="color: #A9C0D9">What this means for you</span>
@@ -1018,17 +1018,17 @@
   const pMbar = (c) => `${emblem(c.pc.per, 40, { small: true })}
     <span style="flex: 1; font-size: 12px; color: #B8C6D6; line-height: 1.3"><b style="color: #EEF2F7">${c.pc.total}/16</b> pieces in place</span>
     <button type="button" data-act="print" data-f="m-print" aria-label="Print or save as PDF" style="width: 44px; height: 44px; border-radius: 50%; border: 1px solid #2A3A50; background: transparent; color: #EEF2F7; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
-    <button type="button" data-act="email" data-f="m-email" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; cursor: pointer">Email me</button>`;
+    <button type="button" data-act="email" data-f="m-email" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; cursor: pointer">Email me</button>`;
 
   const INDUSTRIES = ['Coaching & consulting', 'Creative & design', 'E-commerce & retail', 'Food & hospitality', 'Health & wellness', 'Beauty & personal care', 'Education & training', 'Professional services', 'Trades & construction', 'Technology & software', 'Real estate', 'Manufacturing', 'Nonprofit & social impact', 'Other'];
   const industrySelect = (id, extra = '') => `<select class="inp" id="${id}" ${extra}><option value="">Choose your industry…</option>${INDUSTRIES.map((x) => `<option${S.profile.industry === x ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select>`;
   function pGate() {
     if (!UI.gate) return '';
-    const P = S.profile, lab = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600';
+    const P = S.profile, lab = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 520';
     if (UI.signinFor === 'plans') return `<div style="position: fixed; inset: 0; z-index: 50; background: rgba(16,13,9,.6); display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto">
       <form class="card pop" id="signin-form" role="dialog" aria-modal="true" aria-labelledby="si-h" novalidate style="position: relative; width: 100%; max-width: 440px; padding: 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.35); margin: auto">
         <button type="button" data-act="si-x" data-f="si-x" aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer">×</button>
-        <h2 id="si-h" class="sf" style="font-size: 24px; font-weight: 500; padding-right: 44px">Sign in to open your plans</h2>
+        <h2 id="si-h" class="sf" style="font-size: 24px; font-weight: 440; padding-right: 44px">Sign in to open your plans</h2>
         <span id="si-line" style="font-size: 14px; color: var(--muted)">${SIGNIN_LINE}</span>
         <label style="${lab}">Email<input class="inp" id="g-email" type="email" autocomplete="email" value="${esc(P.email)}"></label>
         ${pSignin('gate')}
@@ -1044,25 +1044,25 @@
         </div>
         <label style="${lab}">Email<input class="inp" id="g-email" type="email" autocomplete="email" value="${esc(P.email)}"></label>
         <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: var(--muted)"><input type="checkbox" id="g-consent"${P.consent ? ' checked' : ''} style="width: 18px; height: 18px; margin-top: 1px; accent-color: #6F93B8; flex: none">I agree that ExploraSelf may email me my results and occasional guidance. I can unsubscribe any time.</label>
-        <span id="gate-err" role="alert" style="font-size: 13px; color: var(--self); font-weight: 600"></span>
-        <button type="submit" data-f="gate-go" style="min-height: 50px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; font-size: 15px; cursor: pointer">Start my North Star →</button>
-        <button type="button" data-act="gate-skip" data-f="gate-skip" style="min-height: 44px; border-radius: 5px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-weight: 600; cursor: pointer">Skip for now · keep exploring</button>
-        ${UI.signinOpen ? `<div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); padding-top: 12px"><span style="font-size: 13px; font-weight: 600">Already have an account? Sign in with the email above.</span>${pSignin('gate')}</div>`
-          : '<button type="button" data-act="signin-open" data-f="signin-open" style="border: 0; background: none; padding: 6px 0; color: var(--goldink); font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer">Already have an account? Sign in</button>'}
+        <span id="gate-err" role="alert" style="font-size: 13px; color: var(--self); font-weight: 520"></span>
+        <button type="submit" data-f="gate-go" style="min-height: 50px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; font-size: 15px; cursor: pointer">Start my North Star →</button>
+        <button type="button" data-act="gate-skip" data-f="gate-skip" style="min-height: 44px; border-radius: 5px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-weight: 520; cursor: pointer">Skip for now · keep exploring</button>
+        ${UI.signinOpen ? `<div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); padding-top: 12px"><span style="font-size: 13px; font-weight: 520">Already have an account? Sign in with the email above.</span>${pSignin('gate')}</div>`
+          : '<button type="button" data-act="signin-open" data-f="signin-open" style="border: 0; background: none; padding: 6px 0; color: var(--goldink); font-size: 13px; font-weight: 520; text-decoration: underline; text-underline-offset: 4px; cursor: pointer">Already have an account? Sign in</button>'}
         <span style="font-size: 12px; color: var(--muted); text-align: center">Until you add your email, your answers stay only in this browser. Came from our page? You will not see this box.</span>
       </form></div>`;
   }
   /* Password boxes, each with a show / hide button. */
-  const pwInput = (id, label, auto) => `<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">${label}<span style="display: flex; gap: 6px"><input class="inp" id="${id}" type="password" autocomplete="${auto}" style="flex: 1; min-width: 0"><button type="button" data-act="eye" data-v="${id}" data-f="eye-${id}" aria-label="Show ${label.toLowerCase()}" aria-pressed="false" style="width: 46px; border: 1px solid var(--line); border-radius: 5px; background: var(--paper); color: var(--ink); cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></button></span></label>`;
-  const linkBtn = (where, t) => `<button type="button" data-act="signin-${where}" data-f="signin-${where}-${t.length}" ${UI.signinBusy ? 'disabled' : ''} style="border: 0; background: none; padding: 6px 0; color: var(--goldink); font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer">${t}</button>`;
+  const pwInput = (id, label, auto) => `<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 520">${label}<span style="display: flex; gap: 6px"><input class="inp" id="${id}" type="password" autocomplete="${auto}" style="flex: 1; min-width: 0"><button type="button" data-act="eye" data-v="${id}" data-f="eye-${id}" aria-label="Show ${label.toLowerCase()}" aria-pressed="false" style="width: 46px; border: 1px solid var(--line); border-radius: 5px; background: var(--paper); color: var(--ink); cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></button></span></label>`;
+  const linkBtn = (where, t) => `<button type="button" data-act="signin-${where}" data-f="signin-${where}-${t.length}" ${UI.signinBusy ? 'disabled' : ''} style="border: 0; background: none; padding: 6px 0; color: var(--goldink); font-size: 13px; font-weight: 520; text-decoration: underline; text-underline-offset: 4px; cursor: pointer">${t}</button>`;
   /** Sign in: email and password; "Forgot your password? Email me a sign-in link" sends a one-time link. */
   const pSignin = (where) => `${pwInput('si-pw-' + where, 'Password', 'current-password')}
-    <button type="button" data-act="pw-in" data-v="${where}" data-f="pw-in-${where}" ${UI.signinBusy ? 'disabled' : ''} style="min-height: 46px; border-radius: 5px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 600; cursor: pointer">Sign in</button>
+    <button type="button" data-act="pw-in" data-v="${where}" data-f="pw-in-${where}" ${UI.signinBusy ? 'disabled' : ''} style="min-height: 46px; border-radius: 5px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 520; cursor: pointer">Sign in</button>
     <span style="display: flex; gap: 14px; flex-wrap: wrap">${linkBtn(where, 'Forgot your password? Email me a sign-in link')}</span>
     ${UI.signin ? `<span role="status" style="font-size: 13px; color: var(--ink)">${esc(UI.signin)}</span>` : ''}`;
-  const pPassword = () => `<details${UI.pwmsg ? ' open' : ''}><summary style="cursor: pointer; font-weight: 600; color: var(--goldink); min-height: 32px">${UI.hasPw ? 'Change your password' : 'Set a password (optional)'}</summary>
+  const pPassword = () => `<details${UI.pwmsg ? ' open' : ''}><summary style="cursor: pointer; font-weight: 520; color: var(--goldink); min-height: 32px">${UI.hasPw ? 'Change your password' : 'Set a password (optional)'}</summary>
     <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 8px; max-width: 420px">${pwInput('pw-1', 'Password', 'new-password')}${pwInput('pw-2', 'Confirm password', 'new-password')}
-    <button type="button" data-act="pw-save" data-f="pw-save" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; cursor: pointer">Save my password</button>
+    <button type="button" data-act="pw-save" data-f="pw-save" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; cursor: pointer">Save my password</button>
     ${UI.pwmsg ? `<span role="status" style="font-size: 13px; color: var(--ink)">${esc(UI.pwmsg)}</span>` : ''}</div></details>`;
   const pHow = () => (UI.how ? `<div class="card pop" style="padding: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 13px">
       <span style="display: flex; gap: 8px"><b style="color: var(--goldink)">1</b>Say where you are and where you want to get.</span>
@@ -1071,7 +1071,7 @@
       <span style="display: flex; gap: 8px"><b style="color: var(--goldink)">4</b>Read your North Star, ask “what if?”, tick “Got it”, choose your next steps.</span></div>` : '');
   function pWs() {
     if (!UI.ws) return '';
-    const P = S.profile, lab = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600';
+    const P = S.profile, lab = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 520';
     const TYPES = ['Solopreneur (just me)', 'Small business with a team', 'Growing company with managers', 'Not started yet (an idea)'];
     const CUR = [['USD', 'USD $'], ['EUR', 'EUR €'], ['GBP', 'GBP £'], ['CAD', 'CAD $'], ['AUD', 'AUD $']];
     return `<div class="card pop" style="padding: 22px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 24px 50px rgba(28,19,9,.14)">
@@ -1085,14 +1085,14 @@
         <label style="${lab}">Currency<select class="inp" id="ws-currency">${CUR.map(([v, t]) => `<option value="${v}"${P.currency === v ? ' selected' : ''}>${t}</option>`).join('')}</select></label>
       </div>
       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
-        <span style="font-size: 13px; font-weight: 600">Theme</span>
-        ${['light', 'dark'].map((t) => `<button type="button" data-act="theme" data-v="${t}" data-f="theme-${t}" aria-pressed="${siteTheme() === t}" style="min-height: 44px; padding: 0 16px; border-radius: 5px; border: 1.5px solid ${siteTheme() === t ? '#6F93B8' : 'var(--line)'}; background: var(--paper); color: var(--ink); cursor: pointer; font-weight: 600">${t === 'light' ? 'Light' : 'Dark'}</button>`).join('')}
-        <button type="button" data-act="ws-save" data-f="ws-save" style="margin-left: auto; min-height: 46px; padding: 0 20px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px">${lockIcon('#0E1C2B', 16)}Save &amp; lock my workspace</button>
+        <span style="font-size: 13px; font-weight: 520">Theme</span>
+        ${['light', 'dark'].map((t) => `<button type="button" data-act="theme" data-v="${t}" data-f="theme-${t}" aria-pressed="${siteTheme() === t}" style="min-height: 44px; padding: 0 16px; border-radius: 5px; border: 1.5px solid ${siteTheme() === t ? '#6F93B8' : 'var(--line)'}; background: var(--paper); color: var(--ink); cursor: pointer; font-weight: 520">${t === 'light' ? 'Light' : 'Dark'}</button>`).join('')}
+        <button type="button" data-act="ws-save" data-f="ws-save" style="margin-left: auto; min-height: 46px; padding: 0 20px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; cursor: pointer; display: inline-flex; align-items: center; gap: 8px">${lockIcon('#0E1C2B', 16)}Save &amp; lock my workspace</button>
       </div>
-      ${UI.saved ? `<span class="pop" role="status" style="font-size: 13px; color: ${UI.saved === true ? 'var(--people)' : 'var(--self)'}; font-weight: 600">${UI.saved === true ? (signedIn() ? 'Saved to your account. Your preferences and numbers are locked to this workspace.' : 'Saved. Your preferences and numbers are kept with this workspace on this browser.') : esc(UI.saved)}</span>` : ''}
+      ${UI.saved ? `<span class="pop" role="status" style="font-size: 13px; color: ${UI.saved === true ? 'var(--people)' : 'var(--self)'}; font-weight: 520">${UI.saved === true ? (signedIn() ? 'Saved to your account. Your preferences and numbers are locked to this workspace.' : 'Saved. Your preferences and numbers are kept with this workspace on this browser.') : esc(UI.saved)}</span>` : ''}
       <div style="border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 8px">
         ${signedIn() ? `<span style="font-size: 13px; color: var(--muted)">Signed in${P.email ? ' as <b style="color: var(--ink)">' + esc(P.email) + '</b>' : ''}. On another device, sign in with this address.</span>${pPassword()}`
-          : `<span style="font-size: 13px; font-weight: 600">Already have an account? Sign in</span><label style="${lab}">Email<input class="inp" id="ws-signin" type="email" autocomplete="email" value="${esc(P.email)}"></label>${pSignin('ws')}`}
+          : `<span style="font-size: 13px; font-weight: 520">Already have an account? Sign in</span><label style="${lab}">Email<input class="inp" id="ws-signin" type="email" autocomplete="email" value="${esc(P.email)}"></label>${pSignin('ws')}`}
       </div>
     </div>`;
   }
