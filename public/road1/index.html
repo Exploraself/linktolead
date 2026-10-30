@@ -170,8 +170,8 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offse
 .bk3-cover small{font:700 5.5px/1 var(--body);letter-spacing:1.2px;text-transform:uppercase;color:rgba(227,196,126,.9)}
 .bk3-cover b{font-family:var(--display);font-size:11px;font-weight:600;color:#F6EEDC;margin-top:auto;line-height:1.1}
 .bk3-man{--w:54px;--h:72px}
-.bk3-man .bk3-cover small{display:none}
-.bk3-b .bk3-cover{background:linear-gradient(160deg,#6E3C21,#3A1E10)}.bk3-g .bk3-cover{background:linear-gradient(160deg,#2F4D38,#16261B)}.bk3-s .bk3-cover{background:linear-gradient(160deg,#23455C,#0F2230)}
+.bk3-man .bk3-cover small{display:block;font-size:4.6px;letter-spacing:.8px;line-height:1.25}
+.bk3-b .bk3-cover{background:linear-gradient(160deg,#22325A,#15213B 55%,#0E1830)}.bk3-g .bk3-cover{background:linear-gradient(160deg,#2C6050,#1F4A3A 55%,#143128)}.bk3-s .bk3-cover{background:linear-gradient(160deg,#7A3046,#5E2335 55%,#41172A)}
 .bk3-blank{align-items:center;justify-content:center;text-align:center;background:#EFE6D3;border:1.5px dashed #C8B993;font:700 9.5px/1.3 var(--body);letter-spacing:1.2px;text-transform:uppercase;color:var(--gold-ink)}
 .lead-why{font-family:var(--display);font-size:clamp(17px,2.2vw,20px);line-height:1.5;max-width:56ch;margin-top:18px}
 .lead-why b{font-weight:600;color:var(--gold-ink)}
@@ -309,12 +309,20 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offse
   .shelf .bk h4{font-size:20px}.shelf .bk .bm{font-size:10px}}
 .bk{position:relative;aspect-ratio:3/4;padding:20px 18px 18px 26px;display:flex;flex-direction:column;
   border:1px solid rgba(227,196,126,.3);box-shadow:0 18px 36px -22px rgba(0,0,0,.9);overflow:hidden}
+@media(min-width:720px){.shelf{perspective:1400px}
+.shelf .bk{transform:rotateY(-16deg);transform-origin:left center;transform-style:preserve-3d;border-radius:2px 6px 6px 2px;
+  box-shadow:18px 26px 34px -18px rgba(0,0,0,.85),inset 4px 0 0 rgba(0,0,0,.25);transition:transform .45s cubic-bezier(.22,1,.36,1)}
+.shelf .bk::before{content:"";position:absolute;top:3px;bottom:3px;right:-1px;width:14px;transform:translateX(100%) rotateY(70deg);transform-origin:left;
+  background:repeating-linear-gradient(90deg,#FBF7EE 0 1px,#E2D7BF 1px 2px);border-radius:0 2px 2px 0}
+.shelf .bk:hover{transform:rotateY(-6deg) translateY(-6px)}
+.shelf .bk .bb{letter-spacing:2px}}
+@media(prefers-reduced-motion:reduce){.shelf .bk{transition:none}.shelf .bk:hover{transform:none}}
 .bk .spine{position:absolute;left:0;top:0;bottom:0;width:9px;background:rgba(0,0,0,.3);
   border-right:1px solid rgba(227,196,126,.28)}
 .bk::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.07),transparent 46%)}
-.bk.b1{background:linear-gradient(160deg,#6E3C21,#3A1E10)}
-.bk.b2{background:linear-gradient(160deg,#2F4D38,#16261B)}
-.bk.b3{background:linear-gradient(160deg,#23455C,#0F2230)}
+.bk.b1{background:linear-gradient(160deg,#22325A,#15213B 55%,#0E1830)}
+.bk.b2{background:linear-gradient(160deg,#2C6050,#1F4A3A 55%,#143128)}
+.bk.b3{background:linear-gradient(160deg,#7A3046,#5E2335 55%,#41172A)}
 .bk .bb{font:700 8px/1 var(--body);letter-spacing:2.6px;text-transform:uppercase;color:rgba(227,196,126,.9);position:relative;z-index:2}
 .bk h4{font-family:var(--display);font-size:clamp(22px,3.6vw,30px);font-weight:600;color:#F6EEDC;margin-top:10px;position:relative;z-index:2}
 .bk .bm{font-size:11px;line-height:1.4;color:rgba(246,238,220,.66);margin-top:7px;position:relative;z-index:2}
@@ -758,12 +766,12 @@ button.cta{border:0;cursor:pointer}
   <p class="lede" style="color:#DDD3BD">Not a course you watch. A workbook for your stage, and a worksheet every week that does the arithmetic while you fill it in.</p>
 
   <div class="shelf">
-    <div class="bk b1"><i class="spine"></i><p class="bb">ExploraSelf</p><h4>Building</h4>
-      <p class="bm">The Founder’s Blueprint</p><p class="bp">79 pages · A4</p></div>
-    <div class="bk b2"><i class="spine"></i><p class="bb">ExploraSelf</p><h4>Growing</h4>
-      <p class="bm">The Founder’s Blueprint</p><p class="bp">77 pages · A4</p></div>
-    <div class="bk b3"><i class="spine"></i><p class="bb">ExploraSelf</p><h4>Scaling</h4>
-      <p class="bm">The Founder’s Blueprint</p><p class="bp">80 pages · A4</p></div>
+    <div class="bk b1"><i class="spine"></i><p class="bb">The Founder’s Blueprint</p><h4>Building</h4>
+      <p class="bm">ExploraSelf · Link to Lead</p><p class="bp">79 pages · A4</p></div>
+    <div class="bk b2"><i class="spine"></i><p class="bb">The Founder’s Blueprint</p><h4>Growing</h4>
+      <p class="bm">ExploraSelf · Link to Lead</p><p class="bp">77 pages · A4</p></div>
+    <div class="bk b3"><i class="spine"></i><p class="bb">The Founder’s Blueprint</p><h4>Scaling</h4>
+      <p class="bm">ExploraSelf · Link to Lead</p><p class="bp">80 pages · A4</p></div>
 
   </div>
 
@@ -1020,9 +1028,9 @@ button.cta{border:0;cursor:pointer}
     <div class="libx-col">
       <p class="libx-k">The Founder’s Blueprint · three manuals</p>
       <ul class="libx-mans">
-        <li><span class="bk3 bk3-man bk3-b" aria-hidden="true"><span class="bk3-cover"><small>ExploraSelf</small><b>Building</b></span><i class="bk3-spine"></i></span><span><b>Building</b><small>Finding the offer and the first clients · 79 pages</small></span></li>
-        <li><span class="bk3 bk3-man bk3-g" aria-hidden="true"><span class="bk3-cover"><small>ExploraSelf</small><b>Growing</b></span><i class="bk3-spine"></i></span><span><b>Growing</b><small>Clients repeat, everything runs through you · 77 pages</small></span></li>
-        <li><span class="bk3 bk3-man bk3-s" aria-hidden="true"><span class="bk3-cover"><small>ExploraSelf</small><b>Scaling</b></span><i class="bk3-spine"></i></span><span><b>Scaling</b><small>There is a team, and your job has changed · 80 pages</small></span></li>
+        <li><span class="bk3 bk3-man bk3-b" aria-hidden="true"><span class="bk3-cover"><small>The Founder’s Blueprint</small><b>Building</b></span><i class="bk3-spine"></i></span><span><b>Building</b><small>Finding the offer and the first clients · 79 pages</small></span></li>
+        <li><span class="bk3 bk3-man bk3-g" aria-hidden="true"><span class="bk3-cover"><small>The Founder’s Blueprint</small><b>Growing</b></span><i class="bk3-spine"></i></span><span><b>Growing</b><small>Clients repeat, everything runs through you · 77 pages</small></span></li>
+        <li><span class="bk3 bk3-man bk3-s" aria-hidden="true"><span class="bk3-cover"><small>The Founder’s Blueprint</small><b>Scaling</b></span><i class="bk3-spine"></i></span><span><b>Scaling</b><small>There is a team, and your job has changed · 80 pages</small></span></li>
       </ul>
       <a class="libx-btn" href="#join" data-join>Join to download all three →</a>
       <div class="libx-lab"><b>Personal Leadership LAB · The Workbook</b><small>93 pages · opens with the LAB</small><a href="https://exploraself.com/lab" target="_blank" rel="noopener">See the LAB ↗</a></div>

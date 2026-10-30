@@ -372,6 +372,10 @@ const libIcons = () => `<div class="rlib"><p class="eyebrow">Your library · now
   `<button type="button" class="libi${t === 'Soon' ? ' soon' : ''}" data-go="library" aria-label="${esc(label)}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">${svg}</svg>${esc(t)}</button>`).join('')}</div></div>`;
 const bookIcon = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 
+/** The Leader’s North Star, always in the rail, just above The Boardroom. */
+const railStar = `<a class="rstar" href="/compass/" aria-label="Open your Leader’s North Star: where you stand in all four domains">
+  <svg class="rstar-i" width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="15.5" fill="none" stroke="#C9A24A" stroke-opacity=".55"/><path d="M17 4.5 19.6 14.4 29.5 17 19.6 19.6 17 29.5 14.4 19.6 4.5 17 14.4 14.4Z" fill="#E3C47E"/><circle cx="17" cy="17" r="2.2" fill="#14100B"/></svg>
+  <span><small>The Leader’s North Star</small><b>Where you stand, in all four domains</b><em>Open my North Star →</em></span></a>`;
 function railHTML(st) {
   const marks = { done: '✓', open: '', waiting: '·', locked: '🔒' };
   return `<nav class="rail" id="rail" aria-label="The twelve levels">
@@ -385,7 +389,7 @@ function railHTML(st) {
       const owned = holds(state.tier, sec.k);
       const rung = LADDER.find((r) => r.key === sec.k);
       const tag = sec.k === 'session' ? '1:1' : rung ? rung.price : '';
-      return `<section class="rsec${owned ? '' : ' shut'}">
+      return `${sec.k === 'session' ? railStar : ''}<section class="rsec${owned ? '' : ' shut'}">
         <header class="rsh">
           <div><p class="rsn">${esc(sec.n)}</p><p class="rss">${esc(sec.sub)}</p></div>
           ${owned ? '<span class="rtag open">Open</span>' : `<span class="rtag">${esc(tag)}</span>`}
@@ -571,7 +575,7 @@ function libraryView() {
   const hasLab = holds(state.tier, 'lab');
   const dl = '<svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const manuals = LIBRARY.manuals.map((m) => `<li class="lib-man${m.k === state.stage ? ' lib-yours' : ''}">
-      <span class="bk3 bk3-man bk3-${m.k}" aria-hidden="true"><span class="bk3-cover"><small>ExploraSelf</small><b>${esc(STAGES[m.k].n)}</b></span><i class="bk3-spine"></i></span>
+      <span class="bk3 bk3-man bk3-${m.k}" aria-hidden="true"><span class="bk3-cover"><small>The Founder’s Blueprint</small><b>${esc(STAGES[m.k].n)}</b></span><i class="bk3-spine"></i></span>
       <span class="lib-mtext"><b>${esc(m.n)}</b><small>${esc(m.sub)} · ${m.pages} pages${m.k === state.stage ? ' · your stage' : ''}</small></span>
       ${joined ? `<a class="lib-btn" href="${esc(account.libraryHref(m.k))}" download>${dl}Download PDF</a>` : `<a class="lib-btn" href="/road2/#join">Create a free account to download</a>`}
     </li>`).join('');
