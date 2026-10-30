@@ -14,13 +14,9 @@ export const REDIRECTS = {
   // Your Ground Plan moved to its own name (30 Oct); old links and emails still land.
   '/start': '/ground-plan/',
   // Short addresses (30 Oct): easy to say, type and put on ads.
-  '/summit': '/northstar/summit/',
-  '/north-star': '/northstar/',
-  // The North Star's old address (30 Oct): emails, ads and bookmarks still land.
-  '/compass': '/northstar/',
-  '/compass/index.html': '/northstar/',
-  '/compass/summit': '/northstar/summit/',
-  '/compass/summit/index.html': '/northstar/summit/',
+  '/summit': '/compass/summit/',
+  '/north-star': '/north1/',
+  '/northstar': '/north1/',
   '/blueprint': '/road1/',
 };
 

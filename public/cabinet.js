@@ -53,7 +53,7 @@ const DOT_NAMES = { done: 'finished', here: 'you are here', open: 'open', gate: 
 /** The Leader’s North Star, in its own small place under the Cabinet: one
  *  slim strip, always there. `read`: the founder has a reading. */
 export function compassStripHTML(read) {
-  return `<a class="cstrip" href="/northstar/" aria-label="${read ? 'Open your Leader’s North Star reading' : 'Take your Leader’s North Star'}">
+  return `<a class="cstrip" href="/compass/" aria-label="${read ? 'Open your Leader’s North Star reading' : 'Take your Leader’s North Star'}">
     <span class="cstrip-dial" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="none" stroke="#B4975F" stroke-width="1.4"/><circle cx="20" cy="7" r="2" fill="#A8623A"/><circle cx="33" cy="20" r="2" fill="#4C7355"/><circle cx="20" cy="33" r="2" fill="#36607F"/><circle cx="7" cy="20" r="2" fill="#9A7418"/><path d="M20 9l3 11-3 2-3-2z" fill="#D6BF8F"/><path d="M20 31l3-11-3-2-3 2z" fill="#6E5A36"/><circle cx="20" cy="20" r="2.2" fill="#B4975F"/></svg></span>
     <span class="cstrip-t"><span class="cstrip-k">Leader’s North Star</span><b>${read ? 'Your direction in all four domains, any time you need it.' : 'Find where you stand in all four domains. Eight plain questions.'}</b></span>
     <span class="cstrip-go">${read ? 'Open my North Star →' : 'Take my North Star →'}</span>
@@ -157,7 +157,7 @@ export function cabinetHTML(c) {
       <article class="cab-obj"><p class="cab-eb">Leader’s North Star</p>
         ${anyBand ? `<div class="cab-doms">${DOMAINS.map(([n, col], i) => bands[i] ? `<div><span class="cab-dot" style="background:${col}"></span>${n}<span class="cab-band ${BAND_CLASS[bands[i]] || 'mid'}">${esc(bands[i])}</span></div>` : '').join('')}</div>`
           : '<p>Eight plain questions and your rough numbers. Feedback in all four domains.</p>'}
-        <a class="cab-btn" href="/northstar/">${anyBand ? 'Open my reading →' : 'Take my North Star →'}</a></article>
+        <a class="cab-btn" href="/compass/">${anyBand ? 'Open my reading →' : 'Take my North Star →'}</a></article>
       <article class="cab-obj"><p class="cab-eb">The ledger · Account Plans</p>
         ${p && p.total ? `<div class="cab-ring"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="14" y="10" width="52" height="62" rx="4" fill="none" stroke="var(--gold)" stroke-width="2"/><path d="M24 26h32M24 36h32M24 46h20" stroke="var(--line)" stroke-width="2"/><path d="M24 56l5 5 9-10" fill="none" stroke="var(--gold)" stroke-width="2.4" stroke-linecap="round"/></svg><div><b>${p.count} of ${p.total}</b><small>steps ticked</small></div></div>
         ${p.next ? `<div class="cab-next"><span class="cab-k">Next · ${esc(p.next.domain)}</span>${esc(p.next.title)}</div>` : ''}` : '<p>Your step-by-step plans open from your North Star reading.</p>'}

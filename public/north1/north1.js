@@ -16,7 +16,7 @@
   var here = new URLSearchParams(location.search), keep = new URLSearchParams();
   here.forEach(function (v, k) { if (/^utm_[a-z]{1,20}$/.test(k) && v.length <= 120) keep.set(k, v); });
   if (!keep.has('utm_source')) keep.set('utm_source', 'north1');
-  var to = '/northstar/?' + keep.toString();
+  var to = '/compass/?' + keep.toString();
   document.querySelectorAll('a[data-cta]').forEach(function (a) { a.href = to; });
 
   /* 2 · The sample question */
