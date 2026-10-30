@@ -80,7 +80,9 @@ export async function accountTables(D) {
   // sign-up form asked (functions/_profile.js), on the profile. SQLite cannot add a column "if not exists", so an error here only
   // means it is already there.
   for (const col of ['mailchimp_status TEXT', 'mailchimp_at TEXT', 'mailchimp_steps TEXT', 'signup_type TEXT', 'company TEXT', 'interest TEXT', 'landing TEXT',
-      'utm_source TEXT', 'utm_medium TEXT', 'utm_campaign TEXT', 'utm_content TEXT', 'utm_term TEXT']) {
+      'utm_source TEXT', 'utm_medium TEXT', 'utm_campaign TEXT', 'utm_content TEXT', 'utm_term TEXT',
+      // The founder's mentor (functions/_mentor.js) and their time zone.
+      'mentor_id TEXT', 'tz TEXT']) {
     try { await D.prepare(`ALTER TABLE student_profile ADD COLUMN ${col}`).run(); } catch { /* already there */ }
   }
   // An answer in "Ask Alexandru" is a message that points at the question

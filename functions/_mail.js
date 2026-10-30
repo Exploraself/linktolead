@@ -58,18 +58,21 @@ export function footer(env, { why, unsubUrl }) {
 }
 
 /** Send one email. Resolves to { ok, why }. Never throws.
- *  `html` is a full document whose </body> receives the footer. */
-export async function send(env, { to, subject, html, text, why, unsubUrl }) {
+ *  `html` is a full document whose </body> receives the footer. A letter's
+ *  `replyTo` (the mentor's address) and `fromName` ("Alexandru at ExploraSelf")
+ *  go with it. */
+export async function send(env, { to, subject, html, text, why, unsubUrl, replyTo, fromName }) {
   const st = mailState(env);
   if (!st.ready) return { ok: false, why: st.reason };
   const apiKey = await key(env);
   if (!apiKey) return { ok: false, why: 'The email key could not be read.' };
   const f = footer(env, { why, unsubUrl });
   const body = {
-    from: env.MAIL_FROM || FROM, to: [to], subject,
+    from: env.MAIL_FROM || (fromName ? `${String(fromName).replace(/[<>"\r\n]/g, '')} <support@exploraself.com>` : FROM), to: [to], subject,
     html: html.includes('</body>') ? html.replace(/<\/div><\/body>/, `${f.html}</div></body>`) : html + f.html,
     text: text + '\n' + f.text,
   };
+  if (replyTo && /^[^@\s<>"]+@[^@\s<>"]+$/.test(replyTo)) body.reply_to = replyTo;
   if (unsubUrl) body.headers = { 'List-Unsubscribe': `<${unsubUrl}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' };
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',

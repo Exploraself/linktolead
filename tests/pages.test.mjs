@@ -69,7 +69,7 @@ for (const f of ['public/road2/index.html', 'public/road2/sales.css']) {
 // Fonts load once, from this site: no Google Fonts, no old .ttf files.
 for (const f of ['public/road1/index.html', 'public/ground-plan/index.html', 'public/mentor/index.html', 'public/compass/index.html', 'public/compass/summit/index.html', 'public/road2/index.html']) {
   const s = read(f);
-  ok(s.includes('href="/assets/fonts.css"') && !s.includes('fonts.googleapis.com') && s.includes('rel="preload" href="/assets/fonts/fraunces.woff2"'), `${f}: fonts once, self-hosted, preloaded`);
+  ok(s.includes('href="/assets/fonts.css"') && !s.includes('fonts.googleapis.com') && s.includes('rel="preload" href="/assets/fonts/newsreader.woff2"'), `${f}: fonts once, self-hosted, preloaded`);
 }
 for (const f of ['public/compass/style.css', 'public/road2/sales.css', 'public/style.css']) ok(!/\.ttf|googleapis/.test(read(f)), `${f}: no duplicate font source`);
 for (const d of ['self', 'people', 'work', 'market']) ok(!/n: '(Self|People|Work|Market)'/.test(read('public/content.js')), 'programme domain names in full');
@@ -130,6 +130,14 @@ ok(!/mailchimp/i.test(SJ + read('public/road2/kit.js') + read('public/account-bo
 ok(read('public/road2/kit.css').includes('prefers-reduced-motion') && read('public/road2/kit.css').includes('overflow-x:auto'), 'kit.css: reduced motion, the shelf scrolls inside itself');
 const T = await (await plansGet({ request: new Request('https://x/api/plans?total'), env: {} })).json();
 ok(T.ok && T.total === ALL_STEP_IDS.length, 'the step count comes from the live plans data');
+
+// Light and dark on every page: theme.js loads first, before any style.
+for (const f of ['public/ground-plan/index.html', 'public/road1/index.html', 'public/road2/index.html', 'public/road3/index.html', 'public/compass/index.html', 'public/compass/summit/index.html', 'public/404.html', 'public/mentor/index.html']) {
+  const h = read(f);
+  ok(h.indexOf('<script src="/theme.js"></script>') > 0 && h.indexOf('<script src="/theme.js"></script>') < h.indexOf('stylesheet'), `${f}: light and dark (theme.js before the styles)`);
+}
+const tj = read('public/theme.js');
+ok(tj.includes("'es-theme'") && tj.includes('prefers-color-scheme: dark') && tj.includes("'cab-theme'"), 'theme.js: kept per browser, follows the device, carries the old Cabinet pick');
 
 console.log(`pages: ${passed} passed, ${failed} failed`);
 if (failed) process.exit(1);

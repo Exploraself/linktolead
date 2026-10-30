@@ -77,7 +77,11 @@ export function mailchimpState(env = {}) {
 /** The Mailchimp tag for each sales page (the landing key stored on the
  *  profile): /road1/, /road2/ (the Compass sales page) and /road3/ (the 12
  *  Scrolls page). Founders tagged before the roads keep their old tags. */
-export const LANDING_TAGS = { road1: 'Landing - Road 1', road2: 'Landing - Road 2', road3: 'Landing - Road 3' };
+/** Which sales page a founder signed up on (Alexandru, 30 Oct 2026). The old
+ *  names ('Landing - Road 1' …) are sent as inactive, so a founder whose tags
+ *  are sent again loses the old one (API mode). */
+export const LANDING_TAGS = { road1: 'salespageincubator1', road2: 'salespageincubator2', road3: 'salespageincubator3' };
+export const OLD_LANDING_TAGS = { road1: 'Landing - Road 1', road2: 'Landing - Road 2', road3: 'Landing - Road 3' };
 
 /** The tags for one founder. In API mode each stage and domain tag is sent as
  *  active or inactive, so a founder who moves on loses the old one. Step tags
@@ -91,7 +95,7 @@ export function tagsFor({ source, stage, weakest, tier, signupType, interest, in
   // Which form they signed up with.
   if (signupType === 'full' || signupType === 'simple') out.push({ name: signupType === 'full' ? 'Signup - Full' : 'Signup - Simple', status: 'active' });
   // The sales page they signed up on (the Compass box has none).
-  if (Object.hasOwn(LANDING_TAGS, landing)) out.push({ name: LANDING_TAGS[landing], status: 'active' });
+  if (Object.hasOwn(LANDING_TAGS, landing)) out.push({ name: LANDING_TAGS[landing], status: 'active' }, { name: OLD_LANDING_TAGS[landing], status: 'inactive' });
   // The audience has no merge fields for these, so they go as tags.
   if (interest) out.push({ name: `Interest - ${interest}`, status: 'active' });
   if (industry) out.push({ name: `Industry - ${industry}`, status: 'active' });
@@ -129,8 +133,12 @@ export function buildRequest(st, member, action) {
     if (action === 'tag') return [{ method: 'POST', url: `${base}/tags`, body: { tags: [{ name: member.tag, status: 'active' }] } }];
     const tags = { method: 'POST', url: `${base}/tags`, body: { tags: tagsFor(member) } };
     if (action === 'tags') return [tags];
+    // 'resubscribe': the founder turned letters back on. Someone who once
+    // unsubscribed can only come back through Mailchimp's own confirmation
+    // email, so the status is 'pending'. setLetters sends it only for a
+    // founder who had unsubscribed.
     return [{ method: 'PUT', url: `${base}?skip_merge_validation=true`,
-      body: { email_address: email, status_if_new: st.optin ? 'pending' : 'subscribed',
+      body: { email_address: email, status_if_new: st.optin ? 'pending' : 'subscribed', ...(action === 'resubscribe' ? { status: 'pending' } : {}),
         // COMPANY is a field of the Link to Lead audience (its sign-up form asks for it).
         merge_fields: { FNAME: member.first || '', LNAME: member.last || '', ...(member.company ? { COMPANY: member.company } : {}) } } }, tags];
   }
@@ -185,7 +193,7 @@ export async function push(env, member, action = 'join') {
     return { status: 'test', detail: `Not sent (test mode): ${req.map((r) => `${r.method} ${r.url}${r.body ? ' ' + JSON.stringify(r.body) : ''}`).join(' · ')}`, request: req };
   }
   if (!st.ready) return { status: 'failed', detail: st.reason };
-  if (st.mode === 'form' && action !== 'join') {
+  if (st.mode === 'form' && action !== 'join' && action !== 'resubscribe') {
     return { status: 'failed', detail: action === 'unsubscribe'
       ? 'Not sent: the public form cannot unsubscribe anyone. Unsubscribe them in Mailchimp, or add the API key.'
       : 'Not sent: the public form cannot change tags. The API key can.' };
@@ -225,7 +233,8 @@ export async function record(D, { studentId, email, action, mode, status, detail
 }
 
 /**
- * Sync one founder: 'join' (new account, or consent given), 'tags' (Compass
+ * Sync one founder: 'join' (new account, or consent given), 'resubscribe'
+ * (letters turned back on: Mailchimp asks them to confirm), 'tags' (Compass
  * done, a step or stage changed; API mode only), 'tag' (one more tag, `tag`,
  * such as a library download; API mode only) or 'unsubscribe' (unsubscribed,
  * paused, deleted).
@@ -257,7 +266,7 @@ export async function syncFounder(env, D, studentId, action = 'join', { keepLog 
   // Which step's tags went with it, so the backfill knows who still needs
   // them. A test only marks it as tested ("test:<step>"), so going live
   // still sends them for real; it never overwrites a real send.
-  if ((action === 'join' || action === 'tags') && canTag(env) && (out.status === 'ok' || out.status === 'test')) {
+  if ((action === 'join' || action === 'resubscribe' || action === 'tags') && canTag(env) && (out.status === 'ok' || out.status === 'test')) {
     const tier = member.tier;
     await D.prepare(out.status === 'ok'
       ? 'UPDATE student_profile SET mailchimp_steps = ? WHERE student_id = ?'

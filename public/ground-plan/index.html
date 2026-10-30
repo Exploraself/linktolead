@@ -7,6 +7,8 @@
 <meta name="description" content="Your Ground Plan: where you stand, the domain the programme leans on, and your next steps in all four domains.">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#2B1B12">
+<meta name="color-scheme" content="light dark">
+<script src="/theme.js"></script>
 <link rel="icon" href="/compass/assets/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/compass/assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/compass/assets/apple-touch-icon.png">
@@ -25,11 +27,12 @@
 <meta name="twitter:image" content="https://linktolead.exploraself.com/compass/assets/og-image.png">
 <script>/* No account on this device: off to make one, before any of the programme loads. */
 try { if (!localStorage.getItem('ftb-token') && location.hash !== '#signin' && !/[?&]signin=/.test(location.search)) location.replace('/road2/#join'); } catch (e) { /* app.js decides */ }</script>
-<link rel="preload" href="/assets/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/assets/fonts/libre-franklin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/style.css">
 <link rel="stylesheet" href="/cabinet.css">
+<link rel="stylesheet" href="/music.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -43,7 +46,7 @@ try { if (!localStorage.getItem('ftb-token') && location.hash !== '#signin' && !
       <span class="btext"><span class="bsmall">EXPLORASELF</span><span class="bname">The Founder&rsquo;s Blueprint</span></span>
     </a>
     <nav class="tnav" id="tnav" aria-label="Programme"></nav>
-    <div id="pmhost"></div>
+    <div class="topend"><span id="themehost"></span><div id="pmhost"></div></div>
   </div>
 </header>
 

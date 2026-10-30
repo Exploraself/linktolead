@@ -21,6 +21,7 @@
 
 import { json, bad, db, now, newToken, clean, looksLikeEmail, accountTables } from '../_shared.js';
 import { profile, sendWelcome, SOURCES } from '../_account.js';
+import { keepTz } from '../_mentor.js';
 import { allowed, logged, mailState, origin } from '../_mail.js';
 import { passwordProblem, setPassword } from '../_auth.js';
 import { syncFounder } from '../_mailchimp.js';
@@ -81,6 +82,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
       VALUES (?,?,?,?,?,?,?,?,?)`)
     .bind(id, email, `${first} ${last}`.trim(), '', '', stage, 'free', now(), now()).run();
   const p = await profile(D, id, { industry, consent, source });
+  await keepTz(D, id, body.tz);
   await D.prepare(`UPDATE student_profile SET signup_type = ?, company = ?, interest = ?, landing = ?,
       utm_source = ?, utm_medium = ?, utm_campaign = ?, utm_content = ?, utm_term = ? WHERE student_id = ?`)
     .bind(type, d ? d.company : null, d ? d.interest : null, landing,
@@ -94,7 +96,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
     const go = (async () => {
       if (!(await allowed(D, email, ip))) return;
-      const r = await sendWelcome(env, origin(request), { email, first, p });
+      const r = await sendWelcome(env, origin(request), { email, first, p, D, tz: body.tz });
       if (r.ok) await logged(D, email, ip);
       await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)')
         .bind(id, r.ok ? 'launchpad-welcome' : 'launchpad-welcome-failed', now(), r.why || null).run();

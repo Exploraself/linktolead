@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<script src="/theme.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#1C1309">
 <script>/* Keep relative assets inside this tool at /compass without a redirect. */
@@ -25,8 +27,8 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
 <meta name="twitter:title" content="Leadership Compass · ExploraSelf">
 <meta name="twitter:description" content="From founder to intentional leader. Lead yourself, your people, your business and the market. Free.">
 <meta name="twitter:image" content="https://linktolead.exploraself.com/compass/assets/og-image.png">
-<link rel="preload" href="/assets/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/assets/fonts/libre-franklin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="style.css">
 <style>#acct-gate{position:fixed;inset:0;z-index:60;background:rgba(16,13,9,.65);display:flex;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}#acct-gate[hidden]{display:none}</style>
@@ -40,8 +42,9 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
     <a href="#s-overview" data-go="overview" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #F7F2E7"><img src="assets/logo.webp" alt="" style="width: 38px; height: auto"><span style="font-size: 12px; letter-spacing: .13em; font-weight: 600">EXPLORASELF<small style="display: block; font-size: 8px; letter-spacing: .16em; font-weight: 400; color: #D3C4A5; margin-top: 3px">LEADERSHIP COMPASS</small></span></a>
     <div class="side-extra" style="font-size: 9px; letter-spacing: .17em; color: #D3C4A5; margin: 44px 12px 12px">YOUR NEXT CHAPTER</div>
     <nav class="navl" aria-label="Main navigation" id="nav"></nav>
+    <a class="incub-link" href="/ground-plan/#programme"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12Z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m12 5.7 2 4.3 4.3 2-4.3 2-2 4.3-2-4.3-4.3-2 4.3-2Z" fill="currentColor"/></svg><span><small>The incubator</small><b>The Founder’s Blueprint</b></span><i aria-hidden="true">→</i></a>
     <div class="side-extra" style="margin-top: auto; padding: 30px 12px 0">
-      <p style="font-family: Fraunces, Georgia, serif; font-size: 22px; line-height: 1.4; color: #E3C47E">Lead yourself.<br>Build what matters.</p>
+      <p style="font-family: Newsreader, Georgia, serif; font-size: 22px; line-height: 1.4; color: #E3C47E">Lead yourself.<br>Build what matters.</p>
       <small style="font-size: 10px; color: #D3C4A5">Four domains. One whole picture.</small>
       <div style="font-size: 9px; margin-top: 26px; color: #D3C4A5" id="save-status">○ Saved on this browser</div>
     </div>
@@ -58,6 +61,7 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
         <div id="top-tools" style="display: flex; align-items: center; gap: 14px">
           <button type="button" data-act="how" data-f="how" id="how-btn" aria-expanded="false" style="border: 0; background: none; padding: 10px 0; color: var(--ink); font-size: 12px; text-decoration: underline; text-underline-offset: 5px; cursor: pointer">How to use this</button>
           <button type="button" data-act="download" aria-label="Download your progress" title="Download your progress" style="width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button type="button" data-theme-switch aria-label="Light and dark" style="width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0"></button>
           <button type="button" data-act="ws" data-f="ws" id="ws-btn" aria-expanded="false" aria-label="Your workspace" title="Your workspace" style="width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
       </header>
@@ -212,7 +216,7 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
             <p class="sfi" style="font-size: 22px; line-height: 1.4; color: #EFE4CC">The whole incubator. With Alexandru beside you, every week.</p>
             <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 6px">
               <a href="/compass/summit" class="go" style="min-height: 52px; padding: 0 26px; border-radius: 3px; border: 1px solid #E3C47E; background: #C9A24A; color: #14100B; font-weight: 600; font-size: 15px; letter-spacing: .04em; text-decoration: none; display: inline-flex; align-items: center; gap: 10px">Open The Summit <span class="arr" aria-hidden="true">→</span></a>
-              <span style="font-family: Fraunces, Georgia, serif; font-size: 26px; color: #F7F2E7">$1,989</span>
+              <span style="font-family: Newsreader, Georgia, serif; font-size: 26px; color: #F7F2E7">$1,989</span>
             </div>
           </div>
         </div>
@@ -226,7 +230,7 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
   </main>
 <div id="acct-gate" hidden></div>
 </div>
-<div id="toast" role="status" aria-live="polite" style="position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #1C1309; color: #F7F2E7; border: 1px solid #C9A24A; border-radius: 5px; padding: 12px 20px; font: 13px 'Libre Franklin', Arial, sans-serif; z-index: 90; max-width: 90vw; display: none"></div>
+<div id="toast" role="status" aria-live="polite" style="position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #1C1309; color: #F7F2E7; border: 1px solid #C9A24A; border-radius: 5px; padding: 12px 20px; font: 13px 'Inter', Arial, sans-serif; z-index: 90; max-width: 90vw; display: none"></div>
 <script src="model.js"></script>
 <script src="engine.js"></script>
 <script src="app.js"></script>

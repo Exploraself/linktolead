@@ -17,6 +17,7 @@ import { profile, unsubLink } from '../_account.js';
 import { allowed, logged, mailState, origin, send, LIMIT_MSG } from '../_mail.js';
 import { signinLetter } from '../_letters.js';
 import { PAUSED } from '../_auth.js';
+import { letterContext } from '../_mentor.js';
 
 export const TTL = 30 * 60_000;
 const SAME = { ok: true, message: 'If there is an account for that address, a sign-in link is on its way. It works once, for 30 minutes.' };
@@ -25,7 +26,7 @@ const SAME = { ok: true, message: 'If there is an account for that address, a si
  *  opens their Ground Plan (/ground-plan/), the dashboard. `reset` (a forgotten
  *  password, or the mentor's "Send a password reset link") adds &reset=1, so
  *  the Ground Plan opens the password box at once. Also used by /mentor. */
-export async function sendLink(env, D, base, me, page = 'start', { reset = false } = {}) {
+export async function sendLink(env, D, base, me, page = 'start', { reset = false, tz = '' } = {}) {
   const code = newToken() + newToken().slice(0, 16);
   await D.prepare('DELETE FROM signin_code WHERE expires_at < ?').bind(Date.now()).run();
   await D.prepare('INSERT INTO signin_code (code_hash, student_id, expires_at) VALUES (?,?,?)')
@@ -33,7 +34,8 @@ export async function sendLink(env, D, base, me, page = 'start', { reset = false
   const p = await profile(D, me.id);
   const who = me.name !== undefined ? me : await D.prepare('SELECT name FROM student WHERE id = ?').bind(me.id).first();
   const first = String((who && who.name) || '').split(' ')[0];
-  return send(env, { to: me.email, ...signinLetter(base, `${base}/ground-plan/?signin=${code}${reset ? '&reset=1' : ''}`, { first, to: me.email, reset }),
+  const ctx = await letterContext(D, me.id, tz);
+  return send(env, { to: me.email, ...signinLetter(base, `${base}/ground-plan/?signin=${code}${reset ? '&reset=1' : ''}`, { first, to: me.email, reset, ...ctx }),
     why: 'Someone asked for a sign-in link to this ExploraSelf account. If it was not you, nothing changes.', unsubUrl: unsubLink(base, p) });
 }
 
@@ -54,7 +56,7 @@ export async function onRequestPost({ request, env }) {
   const me = await D.prepare('SELECT id, email FROM student WHERE email = ?').bind(email).first();
   if (!me) return json(SAME);
 
-  const r = await sendLink(env, D, origin(request), me, 'start', { reset: body.reset === true });
+  const r = await sendLink(env, D, origin(request), me, 'start', { reset: body.reset === true, tz: body.tz });
   await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)')
     .bind(me.id, r.ok ? 'signin-link' : 'signin-link-failed', now(), r.why || null).run();
   return json(SAME);

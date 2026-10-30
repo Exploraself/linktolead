@@ -18,16 +18,39 @@ ok(C.handAngle('free') === -120 && C.handAngle('lab') === 0 && C.handAngle('prem
 ok(!/Elena|Marsh|example/i.test(full), 'no example founder anywhere');
 const empty = C.cabinetHTML({ first: '', tier: 'free', bands: [], plans: null, prog: null });
 ok(!empty.includes('<dt>Stage today</dt>') && !empty.includes('<dt>Start here</dt>') && empty.includes('Take my Compass →') && empty.includes('Good'), 'missing values are left out, never invented');
-ok(full.includes('data-cab-theme="light"') && read('public/cabinet.css').includes('.cab[data-cab-theme="dark"]'), 'Morning and Evening');
+ok(read('public/cabinet.css').includes(':root[data-theme="dark"] .cab{') && C.theme() === 'light', 'Morning and Evening follow the site light (theme.js)');
+localStorage.setItem('es-theme', 'dark');
+ok(C.theme() === 'dark', 'the founder’s pick is kept on this browser');
+localStorage.setItem('es-theme', '');
 localStorage.setItem('cab-theme', 'dark');
-ok(C.theme() === 'dark' && C.cabinetHTML({ tier: 'free' }).includes('data-cab-theme="dark"'), 'the founder’s pick is kept');
+ok(C.theme() === 'dark', 'the old Cabinet pick still counts');
 ok(full.includes('/cabinet/alexandru.jpg') && fs.existsSync('public/cabinet/alexandru.jpg'), 'Alexandru’s portrait in Ask Alexandru');
 for (const f of ['cover-built-to-lead.jpg', 'cover-worth-building.jpg', 'cover-a-new-way-of-winning.jpg']) ok(full.includes('/library/' + f) && fs.existsSync('public/library/' + f), `the real cover: ${f}`);
 
 const app = read('public/app.js'), js = read('public/cabinet.js');
-ok(/if \(view !== 'home'\) cabinetHidden\(\);/.test(app) && /if \(view === 'home'\) cabinetShown\(\);/.test(app), 'music only while Your Ground Plan is on screen');
-ok(/visibilitychange[\s\S]{0,120}document\.hidden[\s\S]{0,80}pause\(\)/.test(js), 'music fades out when the tab is hidden');
-ok(/pointerdown/.test(js) && !/\.start\(\);\s*\}\s*\)\(\);/.test(js), 'it starts only after a click, never on its own');
+const mu = read('public/music.js');
+ok(/const DASHBOARD = \['home', 'work', 'library', 'ask'\]/.test(app) && /if \(!DASHBOARD\.includes\(view\)\) cabinetHidden\(\);/.test(app) && /else if \(DASHBOARD\.includes\(view\)\) dashboardShown\(\);/.test(app), 'music on Your Ground Plan, the programme, the Library and Ask Alexandru');
+ok(/visibilitychange[\s\S]{0,120}document\.hidden[\s\S]{0,80}pause\(\)/.test(mu), 'music fades out when the tab is hidden');
+ok(/pointerdown/.test(mu) && !/\.start\(\);\s*\}\s*\)\(\);/.test(mu) && js.includes("import * as M from './music.js'"), 'it starts only after a click, never on its own');
 ok(read('public/cabinet.css').includes('@media(prefers-reduced-motion:reduce){.cab *{animation:none!important'), 'reduced motion: no spinning record');
 ok(read('public/ground-plan/index.html').includes('/cabinet.css') && read('functions/_landing.js').includes("'/start': '/ground-plan/'"), '/ground-plan/ with its styles; /start still lands there');
+
+// The incubator band: FULL accounts only, real data, static.
+const dots = C.levelDots(3, (n) => (n < 3 ? 28 : n === 3 ? 9 : 0), (n) => n <= 5);
+ok(dots.join() === 'done,done,here,open,open,gate,gate,gate,gate,gate,gate,gate', 'the twelve dots: done, here, open, behind a gate');
+const banded = C.cabinetHTML({ tier: 'session', band: { level: 3, title: 'Name the gap', done: 9, dots } });
+ok(banded.includes('class="incub"') && banded.includes('Level 03 of 12 · <b>Name the gap</b> · 9 of 28 answers') && banded.includes('data-level="3"') && banded.includes('Continue Level 03 →'), 'band: the founder’s level, its answers and Continue');
+ok(!full.includes('class="incub"') && !C.cabinetHTML({ tier: 'free', band: null }).includes('class="incub"'), 'no band without a FULL account');
+ok(!/animation/.test(read('public/cabinet.css').split('.incub{')[1].split('/* The Leadership Compass')[0]), 'the band is static');
+ok(/full = pulled && signupType !== 'simple'/.test(app), 'band only once the account is read, and never for simple accounts');
+// The Compass strip, and the music module.
+ok(C.compassStripHTML(true).includes('Open my Compass →') && C.compassStripHTML(false).includes('Take my Compass →') && app.includes('compassStripHTML(!!compassRec)'), 'the Leadership Compass has its own strip');
+const Mu = await import('../public/music.js');
+ok(Mu.shade(100) === 0 && Mu.shade(0) === 0.62 && Mu.shade(50) === 0.31, 'light: 100 is no shade, lower is dimmer');
+ok(Mu.tempo('trio', 0) < Mu.tempo('trio', 100) && Mu.tempo('ambient', 50) < Mu.tempo('trio', 50), 'energy moves the tempo');
+ok(Object.keys(Mu.TRACKS).length === 3 && Mu.MODES.focus.light < Mu.MODES.study.light && Mu.MODES.focus.lamp === true && Mu.MODES.study.lamp === false, 'three pieces; Focus mode = light, music and the Lamp');
+ok(/M\.answered\(answered\(st, level, dom\)\)/.test(app) && /chime\(\)/.test(mu) && read('public/music.css').includes('#mp-dim.lamp.aimed'), 'the Lamp: a pool of light on the question, a chord and a candle per answer');
+ok(Mu.mayAsk('2000-01-01') === true, 'the two-minute invitation may show');
+ok(/ASK_AFTER = 120/.test(mu) && /if \(!here \|\| isOn\(\) \|\| !mayAsk\(\)/.test(mu), 'after two minutes on the dashboard, once a day, never while music plays');
+ok(read('public/music.css').includes('@media(prefers-reduced-motion:reduce)'), 'reduced motion respected in the player');
 done();

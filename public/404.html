@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<script src="/theme.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Page not found | Link to Lead · ExploraSelf</title>
 <meta name="robots" content="noindex">
@@ -12,16 +14,21 @@
 <link rel="stylesheet" href="/assets/fonts.css">
 <style>
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 16px;background:radial-gradient(90% 90% at 20% 0%,#2A2014 0%,#14100B 60%);color:#F3EBDA;font-family:'Libre Franklin',Arial,sans-serif}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 16px;background:radial-gradient(90% 90% at 20% 0%,#2A2014 0%,#14100B 60%);color:#F3EBDA;font-family:'Inter',Arial,sans-serif}
 main{max-width:560px;display:flex;flex-direction:column;gap:18px}
-.k{font:700 11px/1.4 'Libre Franklin',Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#C9A24A}
-h1{margin:0;font:600 clamp(34px,6vw,52px)/1.05 Fraunces,Georgia,serif;letter-spacing:-.015em}
+.k{font:700 11px/1.4 'Inter',Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#C9A24A}
+h1{margin:0;font:500 clamp(34px,6vw,52px)/1.05 Newsreader,Georgia,serif;letter-spacing:-.015em}
 h1 em{font-style:italic;font-weight:500;color:#C9A24A}
 p{margin:0;font-size:17px;line-height:1.6;color:#C9BDA6}
 nav{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
 a{display:inline-flex;align-items:center;min-height:48px;padding:0 20px;border:1px solid #C9A24A;color:#E3C47E;text-decoration:none;font-weight:600}
 a.go{background:#C9A24A;color:#14100B}
 a:focus-visible{outline:3px solid #C9A24A;outline-offset:3px}
+
+:root[data-theme="light"] body{background:radial-gradient(90% 90% at 20% 0%,#FFF8EA 0%,#F1E8D6 60%);color:#1C1309}
+:root[data-theme="light"] .k,:root[data-theme="light"] h1 em{color:#7A5C16}
+:root[data-theme="light"] p{color:#5E5446}
+:root[data-theme="light"] a{color:#7A5C16;border-color:#B88F37}:root[data-theme="light"] a.go{background:#C9A24A;color:#14100B}
 </style>
 </head>
 <body>

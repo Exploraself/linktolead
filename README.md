@@ -100,7 +100,7 @@ what they want most, industry and a password (required, at least 10
 characters). Either way the founder is signed in at once and lands on `/start`.
 `student_profile` keeps `signup_type`, `landing` and the `utm_*` tags they
 arrived with. Mailchimp gets `Signup - Full` / `Signup - Simple`,
-`Landing - Road 1` / `Landing - Road 2` / `Landing - Road 3`,
+`salespageincubator1` / `salespageincubator2` / `salespageincubator3`,
 `Interest - <goal>`, `Industry - <name>` and
 COMPANY. `/mentor` shows all of it and a table of sign-ups per landing.
 Landings stored before the roads (`a`, `b`, `c`) are moved to `road3`, `road1`
@@ -133,3 +133,16 @@ lists them per founder, filters the roster by them and puts them in the CSV.
 To get an API key: Mailchimp → your profile → **Extras → API keys → Create A Key**. Copy it once and add it in Cloudflare as a **Secret** named `MAILCHIMP_API_KEY`. Never paste it into the code, a chat or an email.
 
 Nobody is sent to Mailchimp without consent. `/mentor` shows the mode, what is missing, the last 20 calls, a **Send a test join** button and **Send everyone with consent** for founders not yet in Mailchimp, which also sends the step tags to founders who joined before they existed. Each founder's page in `/mentor` shows their **Climb**: the step they started on and every change, with its date.
+
+## 9. Light and dark, music, mentors (30 Oct 2026)
+
+| What | Where |
+|---|---|
+| Light and dark on every page, kept per browser, following the device until picked (Device → Light → Dark) | `public/theme.js` (in every page's `<head>`), the switch in the header, the Compass top bar and the profile menu |
+| Fonts: Newsreader (headings) + Inter (text), self-hosted | `public/assets/fonts.css` |
+| The study room: music on Your Ground Plan, the programme, the Library and Ask Alexandru; the mini player (three pieces, light, energy, volume); Study and Focus mode; the Lamp (a pool of light on the question being written, a chord and a candle for each answer); the two-minute invitation | `public/music.js`, `public/music.css` |
+| The incubator band (FULL accounts) and the Leadership Compass strip | `public/cabinet.js` |
+| Letters from the founder's mentor: name, title, photo, signature and reply address, set in `/mentor` (Mentors) and per founder; every letter closes with a good word, reply-here shortcuts, "See you soon" and a wish for the founder's part of the day, the signature and photo, and a P.S. | `functions/_mentor.js`, `functions/_letters.js` |
+| Profile menu: Leadership Compass, Light/Dark, "Letters from your mentor: On/Off" (consent, synced to Mailchimp; turning back on asks Mailchimp to confirm), "Delete my account" (two steps; Mailchimp unsubscribed, never hard-deleted) | `public/profile-menu.js`, `/api/letters`, `/api/account-delete` |
+| Mailchimp landing tags | `salespageincubator1` / `2` / `3` (Road 1, 2, 3) |
+| The Compass sales page | `/north1/` |

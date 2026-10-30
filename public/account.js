@@ -16,8 +16,12 @@ export const token = () => { try { return localStorage.getItem(TOKEN_KEY) || '';
 const keep = (t) => { try { localStorage.setItem(TOKEN_KEY, t); } catch { /* private mode */ } };
 export const joined = () => !!token();
 
+/** The founder's time zone, so each letter wishes them the right part of
+ *  the day (morning, afternoon, evening, night). Sent with every request. */
+export const tz = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; } };
+
 async function post(path, body, keepalive = false) {
-  const r = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), keepalive });
+  const r = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...body, tz: tz() }), keepalive });
   const data = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(data.error || 'That did not go through.');
   return data;
@@ -29,7 +33,7 @@ export async function pull() {
   const t = token();
   if (!t) return null;
   try {
-    const r = await fetch(`/api/state?t=${encodeURIComponent(t)}`);
+    const r = await fetch(`/api/state?t=${encodeURIComponent(t)}&tz=${encodeURIComponent(tz())}`);
     if (r.status === 404) return { gone: true }; // the account no longer exists
     if (!r.ok) return null;
     return await r.json();
@@ -112,6 +116,20 @@ export const messageRead = (id) => post('/api/messages', { token: token(), id })
 
 /** Forget this device's token (sign out). The device copy of the work stays. */
 export const signOut = () => { try { localStorage.removeItem(TOKEN_KEY); } catch { /* private mode */ } };
+
+/** "Letters from your mentor": on or off (consent, synced to Mailchimp). */
+export const setLetters = (on) => post('/api/letters', { token: token(), on: !!on });
+
+/** Delete the account. `confirm` is the founder's email, typed. On success
+ *  this device forgets the account and the work kept on it too. */
+export async function deleteAccount(confirm) {
+  const out = await post('/api/account-delete', { token: token(), confirm });
+  try {
+    for (const k of Object.keys(localStorage)) if (/^(ftb-|exploraself-|es-compass|compass)/.test(k)) localStorage.removeItem(k);
+  } catch { /* private mode */ }
+  signOut();
+  return out;
+}
 
 /** Spend a sign-in code from the link; keeps the token it returns. */
 export async function signinWith(code) {

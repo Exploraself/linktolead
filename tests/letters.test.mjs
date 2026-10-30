@@ -24,7 +24,7 @@ let L = launchpadWelcome(B, { first: 'Maria', offer: 'boardroom' });
 ok(L.subject === 'Welcome to The Founder Launchpad', 'welcome: subject');
 ok(JSON.stringify(paras(L.text).slice(0, 4)) === JSON.stringify(['Hi Maria,', 'You’re in. Welcome to The Founder Launchpad. I’m really glad you’re here.',
   'Start with Level 01 tonight. In about an hour you’ll have your business on paper, not only in your head.',
-  'Alexandru and the team read what you write in there. If something lands, or doesn’t, reply to this email. It comes to me.']), 'welcome: the four paragraphs');
+  'Alexandru and the team read every word you write in there, and we’re cheering you on.']), 'welcome: the four paragraphs');
 ok(L.text.includes('\n\nAlexandru\nAlexandru Cojocari · ExploraSelf\n\nP.S. Want to look at your answers together? Book a 1:1 with me in The Boardroom: ' + BOOKING), 'welcome: signed, then the Boardroom P.S. with the booking link');
 ok(LETTER_BOOKING === BOOKING, 'the booking link is the one in content.js');
 
@@ -49,7 +49,7 @@ ok(launchpadWelcome(B, { offer: null }).text.startsWith('Hi,\n\n'), 'no first na
 // ── The look ────────────────────────────────────────────────────────────────
 L = mentorLetter(B, { subject: 'A <test>', body: 'First <b>line</b> & more.\n\nSecond paragraph.', offer: 'play' });
 ok(/font:16px\/1\.7 Georgia/.test(L.html) && L.html.includes('max-width:560px') && /background:#FFFDF8/.test(L.html), 'look: Georgia 16px, 560px, paper');
-ok(L.html.includes(`<img src="${B}/mail/signature.png" width="150"`) && L.html.includes('alt="Alexandru"') && L.html.includes('Alexandru Cojocari · ExploraSelf'), 'look: the signature image and the line under it');
+ok(L.html.includes(`<img src="${B}/mail/signature.png" width="190"`) && L.html.includes('alt="Alexandru"') && L.html.includes('Alexandru Cojocari · ExploraSelf'), 'look: the handwritten signature and the line under it');
 ok(L.html.includes(`<img src="${B}/mail/alexandru.jpg" width="64" height="64"`) && L.html.includes('border-radius:50%'), 'look: Alexandru’s round photo beside the signature');
 ok(!/inline-block|<button|letter-spacing:3px/.test(L.html), 'look: no buttons, no banner');
 ok(L.html.includes('First &lt;b&gt;line&lt;/b&gt; &amp; more.') && !L.html.includes('<b>line'), 'mentor letter: his text escaped');
@@ -59,6 +59,26 @@ L = answerLetter(B, { first: 'Ana', question: 'Where do I start?', answer: 'With
 ok(L.subject === 'An answer to your question' && L.text.includes('You asked: “Where do I start?”') && L.text.includes('With level 01.') && L.text.includes(`${B}/ground-plan/#ask`), 'answer letter: the question, the answer, the thread');
 L = questionNotice(B, { name: 'Ana Pop', email: 'ana@example.com', question: 'Where do I start?', level: 2, domain: 'Lead yourself' });
 ok(L.subject === 'New question from Ana Pop' && L.text.includes('Level 02 · Lead yourself') && !L.text.includes('P.S.') && !L.html.includes('signature.png'), 'notice to Alexandru: plain, no offer, not signed');
+
+// ── The close of every letter (Alexandru, 30 Oct 2026) ──────────────────────
+import { farewell, partOfDay, GOOD_WORDS, SHORTCUTS } from '../functions/_letters.js';
+const noon = new Date('2026-10-30T11:00:00Z'); // 12:00 in Rome, 07:00 in New York, 20:00 in Tokyo, midnight in Auckland
+ok(partOfDay('Europe/Rome', noon) === 'afternoon' && partOfDay('America/New_York', noon) === 'morning' && partOfDay('Asia/Tokyo', noon) === 'evening' && partOfDay('Pacific/Auckland', noon) === 'night' && partOfDay('', noon) === '', 'the part of the day comes from the founder’s own clock');
+ok(farewell('Europe/Rome', noon) === 'See you soon. Have a good afternoon.' && farewell('Pacific/Auckland', noon) === 'See you soon. Have a restful night.' && farewell('', noon) === 'See you soon. Have a good day.', 'See you soon, with the wish for their part of the day');
+for (const [name, l] of [['welcome', launchpadWelcome(B, { first: 'Ana', tz: 'Europe/Rome', at: noon })], ['results', resultsLetter(B, { first: 'Ana', at: noon })],
+  ['sign-in', signinLetter(B, `${B}/x`, { first: 'Ana', at: noon })], ['password', passwordChangedLetter(B, { first: 'Ana', at: noon })],
+  ['mentor', mentorLetter(B, { subject: 'Hi', body: 'A word.', at: noon })], ['answer', answerLetter(B, { first: 'Ana', question: 'Q?', answer: 'A.', at: noon })]]) {
+  ok(GOOD_WORDS.some((g) => l.text.includes(g)), `${name}: a good word and encouragement`);
+  ok(l.text.includes('Just reply to this email. It comes straight to me') && /mailto:support@exploraself\.com\?subject=/.test(l.html), `${name}: reply here, with one-tap questions`);
+  ok(/See you soon\. Have a (good|restful) /.test(l.text), `${name}: see you soon and a wish for the day`);
+  ok(l.html.includes('/mail/signature.png') && l.html.includes('/mail/alexandru.jpg'), `${name}: the signature and the photo`);
+  ok(/\n\nP\.S\. /.test(l.text), `${name}: a promotion in the P.S.`);
+  ok(l.replyTo === 'support@exploraself.com' && l.fromName === 'Alexandru at ExploraSelf', `${name}: from and reply to the mentor`);
+}
+ok(signinLetter(B, `${B}/x`, {}).text.includes(SHORTCUTS.security[0]) && resultsLetter(B, {}).text.includes(SHORTCUTS.results[0]), 'the questions fit the letter');
+L = launchpadWelcome(B, { first: 'Ana', mentor: { id: 'maria', name: 'Maria Rossi', photo: '/mail/maria.jpg', signature: 'https://cdn.example.com/m.png', email: 'maria@exploraself.com' } });
+ok(L.text.includes('Maria and the team read every word') && L.html.includes(`${B}/mail/maria.jpg`) && L.html.includes('src="https://cdn.example.com/m.png"') && L.replyTo === 'maria@exploraself.com' && L.fromName === 'Maria at ExploraSelf' && L.text.includes('Maria\nMaria Rossi · ExploraSelf'), 'another mentor: their name, photo, signature and reply address');
+ok(!questionNotice(B, { name: 'A', email: 'a@b.co', question: 'Q' }).text.includes('See you soon'), 'the notice to the mentor has no close');
 
 // ── The P.S. rotation ───────────────────────────────────────────────────────
 const seen = (kind, tier) => new Set(Array.from({ length: 60 }, (_, seed) => pickOffer(kind, { seed, tier })));

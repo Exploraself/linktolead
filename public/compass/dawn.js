@@ -71,7 +71,7 @@
         ctx.moveTo(x, y - 38); ctx.lineTo(x + 20, y - 34 + wv); ctx.lineTo(x + 15, y - 29 + wv * 0.5); ctx.lineTo(x + 20, y - 24 + wv); ctx.lineTo(x, y - 25); ctx.fill();
       }
       if (W > 560 || last || i === 0) {
-        ctx.font = `${last ? '600 13px' : '500 11px'} "Libre Franklin", Arial, sans-serif`;
+        ctx.font = `${last ? '600 13px' : '500 11px'} "Inter", Arial, sans-serif`;
         ctx.fillStyle = last ? '#F3DE9A' : '#D3C4A5';
         // Keep every label inside the picture.
         const w = ctx.measureText(name).width;
