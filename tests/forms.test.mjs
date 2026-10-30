@@ -64,19 +64,19 @@ ok(env.DB.raw.prepare("SELECT COUNT(*) n FROM student WHERE email = 'fay@example
 const fay = out.token;
 ok(st === 200 && fay && hasPw(fay), 'full form: one record, signed in, with its password');
 ok(JSON.stringify(prof(fay)) === JSON.stringify({ signup_type: 'full', company: 'Fay & Co', interest: 'Higher income', industry: 'Real estate', landing: 'road2', utm_source: 'meta', utm_content: 'home-c' }), 'full form: company, interest, industry, landing Road 2 and the utm tags stored');
-ok(/"Signup - Full".*"Landing - Road 2".*"Interest - Higher income".*"Industry - Real estate"/.test(mcLog(fay)) && /"COMPANY":"Fay & Co"/.test(mcLog(fay)), 'Mailchimp (TEST): "Signup - Full", "Landing - Road 2", interest and industry tags, COMPANY');
+ok(/"Signup - Full".*"salespageincubator2".*"Interest - Higher income".*"Industry - Real estate"/.test(mcLog(fay)) && /"COMPANY":"Fay & Co"/.test(mcLog(fay)), 'Mailchimp (TEST): "Signup - Full", "salespageincubator2", interest and industry tags, COMPANY');
 
 [st, out] = await S({ first: 'Sam', last: 'Simple', email: 'sam@example.com', consent: true, source: 'home', type: 'simple', landing: 'road3', password: 'a-long-password', confirm: 'a-long-password', utm: { utm_source: 'exploraself', utm_medium: 'banner' } });
 const sam = out.token;
 ok(st === 200 && sam && !hasPw(sam), 'simple form: one record, signed in, and no password even if one is sent');
 ok(JSON.stringify(prof(sam)) === JSON.stringify({ signup_type: 'simple', company: null, interest: null, industry: null, landing: 'road3', utm_source: 'exploraself', utm_content: null }), 'simple form: landing Road 3 and its utm tags');
-ok(/"Signup - Simple".*"Landing - Road 3"/.test(mcLog(sam)) && !/Signup - Full/.test(mcLog(sam)), 'Mailchimp (TEST): "Signup - Simple" and "Landing - Road 3"');
+ok(/"Signup - Simple".*"salespageincubator3"/.test(mcLog(sam)) && !/Signup - Full/.test(mcLog(sam)), 'Mailchimp (TEST): "Signup - Simple" and "salespageincubator3"');
 [st, out] = await S({ ...FULL, first: 'Bea', last: 'Bee', email: 'bea@example.com', source: 'home', landing: 'road1', password: 'a-long-password', confirm: 'a-long-password', utm: {} });
 const bea = out.token;
-ok(st === 200 && hasPw(bea) && prof(bea).signup_type === 'full' && prof(bea).landing === 'road1' && /"Signup - Full".*"Landing - Road 1"/.test(mcLog(bea)), 'full form on Road 1: a password, landing road1, "Landing - Road 1"');
+ok(st === 200 && hasPw(bea) && prof(bea).signup_type === 'full' && prof(bea).landing === 'road1' && /"Signup - Full".*"salespageincubator1"/.test(mcLog(bea)), 'full form on Road 1: a password, landing road1, "salespageincubator1"');
 [st, out] = await S({ first: 'Cora', last: 'Box', email: 'cora@example.com', consent: true, source: 'compass', type: 'simple', landing: 'compass' });
 const cora = out.token;
-ok(st === 200 && prof(cora).landing === 'compass' && !/Landing - /.test(mcLog(cora)), 'the Compass box: landing "compass", no landing tag');
+ok(st === 200 && prof(cora).landing === 'compass' && !/salespageincubator/.test(mcLog(cora)), 'the Compass box: landing "compass", no landing tag');
 [st, out] = await S({ first: 'Olly', last: 'Old', email: 'olly@example.com', consent: false, type: 'simple', landing: 'a' });
 ok(st === 200 && prof(out.token).landing === 'road3', 'a page loaded before the rename sends "a": stored as road3');
 // Landings stored before the roads move to the road their page became, once.
@@ -175,8 +175,9 @@ const noRun = baseOf({ ...EXAMPLE, run: null, rate: null, hire: null }), nm = E.
 ok(noRun.fixed === 0 && nm.cash === null && nm.people === null && Number.isFinite(nm.mine), 'empty Fine-tune boxes: no money figure invented, the hours still move');
 
 // ── Mailchimp landing tags ──────────────────────────────────────────────────
-ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'Landing - Road 1', road2: 'Landing - Road 2', road3: 'Landing - Road 3' }), 'landing tags: Road 1, Road 2, Road 3');
-ok(!tagsFor({ landing: 'compass' }).some((x) => /^Landing - /.test(x.name)) && !tagsFor({ landing: 'toString' }).some((x) => /^Landing - /.test(x.name)), 'the Compass box and anything unknown get no landing tag');
+ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'salespageincubator1', road2: 'salespageincubator2', road3: 'salespageincubator3' }), 'landing tags: salespageincubator1, 2 and 3');
+ok(tagsFor({ landing: 'road2' }).some((x) => x.name === 'Landing - Road 2' && x.status === 'inactive'), 'the old landing tag goes inactive');
+ok(!tagsFor({ landing: 'compass' }).some((x) => /^(Landing - |salespageincubator)/.test(x.name)) && !tagsFor({ landing: 'toString' }).some((x) => /^(Landing - |salespageincubator)/.test(x.name)), 'the Compass box and anything unknown get no landing tag');
 
 // ── /start: the greeting ────────────────────────────────────────────────────
 const APP = read('public/app.js');

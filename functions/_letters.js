@@ -1,18 +1,22 @@
-// Every email is a short letter from Alexandru: paper background, Georgia,
-// 16px, no banner, no buttons, plain links, his signature, a P.S. Sent by
-// Resend through _mail.js, which adds the footer (why it came, unsubscribe,
-// postal address). Mailchimp sends nothing.
+// Every email is a short letter from the founder's mentor (Alexandru today;
+// functions/_mentor.js): paper background, Georgia, 16px, no banner, plain
+// links, one gold button at most. Sent by Resend through _mail.js, which adds
+// the footer (why it came, unsubscribe, postal address). Mailchimp sends
+// nothing.
 //
-// The signature is an image (/mail/signature.png, "Alexandru" in a handwriting
-// font, to be replaced by a scan of his real one): inbox apps do not load
-// handwriting fonts. Every letter has a plain-text part.
-//
-// Alexandru's photo sits beside the signature (/mail/alexandru.jpg).
+// Every letter to a founder closes the same way (Alexandru, 30 Oct 2026):
+// a good word and some encouragement, "reply here" with a few one-tap
+// questions, "See you soon" with a wish for the founder's own part of the day
+// (morning, afternoon, evening or night, from their time zone), the mentor's
+// handwritten signature (/mail/signature.png, a scan of the real one) beside
+// their round photo, then a P.S. with one promotion. Every letter has a
+// plain-text part.
 // The P.S. is always the Unshakeable assessment (Alexandru, 30 Oct 2026),
 // unless a caller passes another offer or null. No countdowns, no invented
 // scarcity.
 
 import { esc } from './_mail.js';
+import { asMentor } from './_mentor.js';
 
 /** The same link as BOOKING in public/content.js (a test holds them equal). */
 export const BOOKING = 'https://forms.gle/opnxfhFTJJg69Qy77';
@@ -69,44 +73,104 @@ function parts(p) {
   return { html, text };
 }
 
+/** The part of the day for a founder, from their time zone: 'morning',
+ *  'afternoon', 'evening' or 'night'; '' when the zone is not known. */
+export function partOfDay(tz, at = new Date()) {
+  if (!tz) return '';
+  let h;
+  try { h = Number(new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: 'numeric', hourCycle: 'h23' }).format(at)); } catch { return ''; }
+  if (!Number.isFinite(h)) return '';
+  return h >= 5 && h < 12 ? 'morning' : h >= 12 && h < 17 ? 'afternoon' : h >= 17 && h < 22 ? 'evening' : 'night';
+}
+/** "See you soon", with the wish for their part of the day. */
+export function farewell(tz, at = new Date()) {
+  const p = partOfDay(tz, at);
+  return `See you soon. ${p === 'night' ? 'Have a restful night.' : p ? `Have a good ${p}.` : 'Have a good day.'}`;
+}
+
+/** A good word and some encouragement. Several, so two letters in a row do
+ *  not repeat; the same letter to the same founder always says the same. */
+export const GOOD_WORDS = [
+  'You showed up for your business today, and that is how every real change begins. I’m proud of the work you’re doing.',
+  'Every honest answer you write makes the next decision lighter. Keep going, you’re further along than you feel.',
+  'Building something that matters takes courage, and you have more of it than you think. One step this week is enough.',
+  'Small steps, taken every week, build a business that runs and a life worth living. You’re on that road now.',
+  'You don’t have to carry all of it alone anymore. We’re right here with you, and we believe in what you’re building.',
+];
+
+/** One-tap questions under "reply here": each opens a reply to the mentor
+ *  with the question already written in the subject. */
+export const SHORTCUTS = {
+  start: ['Where should I start this week?', 'Which level fits my stage?', 'What happens in a 1:1 in The Boardroom?', 'I’m stuck on a step. Can you help?'],
+  security: ['I didn’t ask for this email', 'I can’t sign in', 'Can you help me with my password?'],
+  results: ['What does my Compass reading mean?', 'Which domain should I start with?', 'What happens in a 1:1 in The Boardroom?', 'I’m stuck on a step. Can you help?'],
+};
+const mailto = (to, q) => `mailto:${to}?subject=${encodeURIComponent(q)}`;
+
 /**
  * One letter. `paras` is a list of paragraphs, each a string or a list of
- * strings and link()s. `offer` is an OFFERS key or null. `sign` false leaves
- * out the signature (the notice to Alexandru himself). Returns { html, text }
- * for send().
+ * strings and link()s. `offer` is an OFFERS key or null. Options:
+ *   mentor  who it is from (functions/_mentor.js); Alexandru when missing
+ *   tz      the founder's time zone, for the wish at the end
+ *   ask     the one-tap questions: a SHORTCUTS key or a list; null for none
+ *   seed    keeps the good word the same for the same letter
+ *   sign    false leaves out the whole close (the notice to the mentor)
+ * Returns { html, text, replyTo, fromName } for send().
  */
-export function letter(base, paras, offer = null, { sign = true } = {}) {
+export function letter(base, paras, offer = null, { sign = true, mentor, tz = '', at, ask = 'start', seed = 0 } = {}) {
+  const M = asMentor(mentor);
+  const pic = (u) => (/^https:\/\//.test(u) ? u : `${base}${u}`);
   const P = paras.map(parts);
   const ps = offer && OFFERS[offer] ? parts(['P.S. ', ...OFFERS[offer].line(base)]) : null;
+  const good = sign ? GOOD_WORDS[seed % GOOD_WORDS.length] : '';
+  const qs = !sign || ask === null ? [] : Array.isArray(ask) ? ask : (SHORTCUTS[ask] || SHORTCUTS.start);
+  const bye = sign ? farewell(tz, at) : '';
+  const replyLine = 'Any question at all, big or small? Just reply to this email. It comes straight to me, and I read every one.';
   const html = `<!doctype html><html><body style="margin:0;background:${PAPER}"><div style="max-width:560px;margin:0 auto;padding:32px 22px;background:${PAPER};font:16px/1.7 Georgia,'Times New Roman',serif;color:${INK}">
     ${P.map((p) => (p.button ? p.html : `<p style="margin:0 0 16px;white-space:pre-wrap">${p.html}</p>`)).join('\n    ')}
-    ${sign ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0 22px"><tr>
-      <td style="vertical-align:middle;padding-right:14px"><img src="${esc(base)}${PORTRAIT}" width="64" height="64" alt="Alexandru Cojocari" style="display:block;width:64px;height:64px;border-radius:50%;border:2px solid #C9A24A"></td>
-      <td style="vertical-align:middle"><img src="${esc(base)}${SIGNATURE}" width="150" height="60" alt="Alexandru" style="display:block;margin:0 0 2px;border:0">
-      <p style="margin:0;font:13px/1.5 Arial,sans-serif;color:${MUTED}">Alexandru Cojocari · ExploraSelf</p></td></tr></table>` : ''}
+    ${good ? `<p style="margin:0 0 16px">${esc(good)}</p>` : ''}
+    ${sign ? `<p style="margin:0 0 ${qs.length ? 10 : 16}px">${esc(replyLine)}</p>` : ''}
+    ${qs.length ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 18px;border-left:2px solid #C9A24A"><tr><td style="padding:2px 0 2px 14px;font:14px/1.5 Arial,sans-serif;color:${MUTED}">
+      <p style="margin:0 0 6px;font:bold 11px/1.4 Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:${GOLD_INK}">One tap to ask</p>
+      ${qs.map((q) => `<p style="margin:0 0 6px"><a href="${esc(mailto(M.email, q))}" style="color:${GOLD_INK};text-decoration:underline">${esc(q)}</a></p>`).join('')}
+    </td></tr></table>` : ''}
+    ${bye ? `<p style="margin:0 0 6px">${esc(bye)}</p>` : ''}
+    ${sign ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 22px"><tr>
+      <td style="vertical-align:middle;padding-right:14px"><img src="${esc(pic(M.photo))}" width="64" height="64" alt="${esc(M.name)}" style="display:block;width:64px;height:64px;border-radius:50%;border:2px solid #C9A24A"></td>
+      <td style="vertical-align:middle"><img src="${esc(pic(M.signature))}" width="190" height="53" alt="${esc(M.first)}" style="display:block;margin:0 0 2px;border:0;width:190px;height:auto">
+      <p style="margin:0;font:13px/1.5 Arial,sans-serif;color:${MUTED}">${esc(M.name)} · ${esc(M.title)}</p></td></tr></table>` : ''}
     ${ps ? `<p style="margin:0;padding-top:14px;border-top:1px dashed #D6C9AC;font-style:italic">${ps.html}</p>` : ''}
   </div></body></html>`;
-  const text = [P.map((p) => p.text).join('\n\n'), sign ? 'Alexandru\nAlexandru Cojocari · ExploraSelf' : '', ps ? ps.text : ''].filter(Boolean).join('\n\n');
-  return { html, text };
+  const text = [
+    P.map((p) => p.text).join('\n\n'),
+    good,
+    sign ? replyLine + (qs.length ? '\n' + qs.map((q) => `· ${q}`).join('\n') : '') : '',
+    bye,
+    sign ? `${M.first}\n${M.name} · ${M.title}` : '',
+    ps ? ps.text : '',
+  ].filter(Boolean).join('\n\n');
+  return { html, text, replyTo: M.email, fromName: `${M.first} at ExploraSelf` };
 }
 
 const hi = (first) => (first ? `Hi ${first},` : 'Hi,');
 /** The offer for one letter to one address, unless the caller chose one. */
 const offerFor = (kind, to, tier, offer) => (offer !== undefined ? offer : 'unshakeable');
+/** The close of a letter: who it is from, their time, which good word. */
+const close = (kind, { mentor, tz, at, to = '' } = {}, ask = 'start') => ({ mentor, tz, at, ask, seed: seedOf(`${kind}|${to}|${new Date(at || Date.now()).toISOString().slice(0, 10)}`) });
 
 /** "launchpad-welcome": sent once, when the account is made. */
-export function launchpadWelcome(base, { first, to = '', tier, offer } = {}) {
+export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {}) {
   return { subject: 'Welcome to The Founder Launchpad', ...letter(base, [
     hi(first),
     'You’re in. Welcome to The Founder Launchpad. I’m really glad you’re here.',
     'Start with Level 01 tonight. In about an hour you’ll have your business on paper, not only in your head.',
-    'Alexandru and the team read what you write in there. If something lands, or doesn’t, reply to this email. It comes to me.',
-  ], offerFor('launchpad-welcome', to, tier, offer)) };
+    `${asMentor(o.mentor).first} and the team read every word you write in there, and we’re cheering you on.`,
+  ], offerFor('launchpad-welcome', to, tier, offer), close('launchpad-welcome', { ...o, to })) };
 }
 
 /** The Compass results, as a letter. `weakest` is the full domain name, or
  *  empty when it is not known yet. */
-export function resultsLetter(base, { first, weakest, to = '', tier, offer } = {}) {
+export function resultsLetter(base, { first, weakest, to = '', tier, offer, ...o } = {}) {
   return { subject: 'Your Leadership Compass', ...letter(base, [
     hi(first),
     'Here is your Leadership Compass, ready whenever you are.',
@@ -114,42 +178,42 @@ export function resultsLetter(base, { first, weakest, to = '', tier, offer } = {
     weakest
       ? `Start with the domain that needs you most. For you that’s ${weakest}. One honest hour there changes more than a week anywhere else.`
       : 'Start with the domain that needs you most. One honest hour there changes more than a week anywhere else.',
-  ], offerFor('results', to, tier, offer)) };
+  ], offerFor('results', to, tier, offer), close('results', { ...o, to }, 'results')) };
 }
 
 /** The one-time sign-in link. `reset`: the founder forgot their password. */
-export function signinLetter(base, url, { first, to = '', offer, reset = false } = {}) {
+export function signinLetter(base, url, { first, to = '', offer, reset = false, ...o } = {}) {
   if (reset) return { subject: 'Choose a new password', ...letter(base, [
     hi(first),
     'No problem at all, it happens to all of us. Tap the button and you’ll land in your Ground Plan with the password box already open.',
     button(url, 'Choose my new password →'),
     'The button works once, for the next 30 minutes. If you didn’t ask for this, you can simply ignore it.',
-  ], offerFor('signin', to, 'free', offer)) };
+  ], offerFor('signin', to, 'free', offer), close('signin', { ...o, to }, 'security')) };
   return { subject: 'Your link to get back in', ...letter(base, [
     hi(first),
     'Good to see you again. Everything you wrote is right where you left it.',
     button(url, 'Sign me back in →'),
     'The button works once, for the next 30 minutes.',
-  ], offerFor('signin', to, 'free', offer)) };
+  ], offerFor('signin', to, 'free', offer), close('signin', { ...o, to }, 'security')) };
 }
 
 /** After a password is set, changed or reset. A security letter. */
-export function passwordChangedLetter(base, { first, to = '', offer } = {}) {
+export function passwordChangedLetter(base, { first, to = '', offer, ...o } = {}) {
   return { subject: 'Your password was changed', ...letter(base, [
     hi(first),
     'Your password was just changed. If that was you, all is well and there’s nothing else to do.',
     'If it wasn’t, just reply to this email and we’ll lock the account straight away. Your work is safe with us.',
-  ], offerFor('password', to, 'free', offer)) };
+  ], offerFor('password', to, 'free', offer), close('password', { ...o, to }, 'security')) };
 }
 
-/** A note from Alexandru: his own words, one paragraph per blank line. */
-export function mentorLetter(base, { subject, body, to = '', tier, offer } = {}) {
+/** A letter from the mentor: their own words, one paragraph per blank line. */
+export function mentorLetter(base, { subject, body, to = '', tier, offer, ...o } = {}) {
   const paras = String(body || '').split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
-  return { subject, ...letter(base, paras, offerFor('mentor', to, tier, offer)) };
+  return { subject, ...letter(base, paras, offerFor('mentor', to, tier, offer), close('mentor', { ...o, to })) };
 }
 
-/** Alexandru's answer in "Ask Alexandru", with the question it answers. */
-export function answerLetter(base, { first, question, answer, to = '', tier, offer } = {}) {
+/** The mentor's answer in "Ask Alexandru", with the question it answers. */
+export function answerLetter(base, { first, question, answer, to = '', tier, offer, ...o } = {}) {
   const q = String(question || '').trim();
   const paras = String(answer || '').split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
   return { subject: 'An answer to your question', ...letter(base, [
@@ -157,7 +221,7 @@ export function answerLetter(base, { first, question, answer, to = '', tier, off
     `You asked: “${q.length > 300 ? q.slice(0, 300).trimEnd() + '…' : q}”`,
     ...paras,
     ['The whole conversation is waiting in ', link(`${base}/ground-plan/#ask`, 'your Ground Plan'), '.'],
-  ], offerFor('mentor', to, tier, offer)) };
+  ], offerFor('mentor', to, tier, offer), close('answer', { ...o, to })) };
 }
 
 /** To Alexandru: a founder asked a question. Plain, no offer. */

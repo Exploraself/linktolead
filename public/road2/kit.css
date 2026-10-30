@@ -7,7 +7,7 @@
 .kit-shelf > *{flex:none;scroll-snap-align:start}
 .kit-book{width:150px;height:212px;border-radius:3px 8px 8px 3px;background:linear-gradient(90deg,rgba(0,0,0,.28) 0 9px,rgba(255,255,255,.08) 9px 11px,transparent 11px),var(--spine);color:#F3EFEA;padding:20px 16px 16px 24px;display:flex;flex-direction:column;gap:6px;box-shadow:0 18px 34px rgba(21,33,59,.22);transition:transform .25s ease}
 .kit-book-k{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#E2C47E}
-.kit-book-n{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:24px;line-height:1.1;margin-top:auto}
+.kit-book-n{font-family:Newsreader,Georgia,serif;font-weight:500;font-size:24px;line-height:1.1;margin-top:auto}
 .kit-book-p{font-size:12px;color:#C9CFDB}
 .kit-cover{position:relative;margin:0;width:190px;height:190px;border-radius:6px;overflow:hidden;box-shadow:0 18px 34px rgba(21,33,59,.22);background:#E6DCCB;transition:transform .25s ease}
 .kit-cover img{display:block;width:100%;height:100%;object-fit:cover}

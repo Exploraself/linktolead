@@ -365,7 +365,7 @@
   const pRing = (c) => `<svg width="74" height="74" viewBox="0 0 74 74" role="img" aria-label="${c.answered} of 8 answered">
       <circle cx="37" cy="37" r="31" fill="none" stroke="var(--cream)" stroke-width="7"/>
       <circle class="ringp" cx="37" cy="37" r="31" fill="none" stroke="#C9A24A" stroke-width="7" stroke-linecap="round" stroke-dasharray="194.8" style="stroke-dashoffset: ${(194.8 * (1 - c.answered / 8)).toFixed(1)}" transform="rotate(-90 37 37)"/>
-      <text x="37" y="43" text-anchor="middle" font-family="Fraunces" font-size="19" fill="currentColor">${c.answered}/8</text></svg>`;
+      <text x="37" y="43" text-anchor="middle" font-family="Newsreader" font-size="19" fill="currentColor">${c.answered}/8</text></svg>`;
 
   const pNotice = () => (UI.note ? `<div class="card pop" role="status" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-color: #C9A24A">
       <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="#C9A24A" stroke-width="1.8"/><path d="M3 7l9 6 9-6" fill="none" stroke="#C9A24A" stroke-width="1.8"/></svg>
@@ -480,7 +480,7 @@
           <h3 class="sf" style="font-size: 20px; font-weight: 500">${D[di].name}</h3><span style="flex: 1; height: 1px; background: var(--line)"></span></div>` : ''}
         <div style="background: var(--paper); border: 1.5px solid ${i === firstOpen ? '#C9A24A' : done ? 'var(--line)' : 'var(--cream)'}; border-radius: 7px; padding: 18px; display: flex; flex-direction: column; gap: 12px; transition: border-color .3s ease">
           <div style="display: flex; gap: 12px; align-items: flex-start">
-            <span style="font-family: Fraunces, serif; font-size: 15px; color: ${CSSV[di]}; flex: none; padding-top: 2px">0${i + 1}</span>
+            <span style="font-family: Newsreader, serif; font-size: 15px; color: ${CSSV[di]}; flex: none; padding-top: 2px">0${i + 1}</span>
             <div style="display: flex; flex-direction: column; gap: 4px; flex: 1"><span style="font-weight: 600; font-size: 16px; line-height: 1.35" id="qt-${q.id}">${esc(q.text)}</span><span style="font-size: 13px; color: var(--muted)">${esc(q.prompt)}</span></div>
             ${done ? '<svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Answered" style="flex: none"><circle cx="12" cy="12" r="10" fill="#C9A24A"/><path d="M7 12.5l3.2 3L17 9" fill="none" stroke="#14100B" stroke-width="2.2" stroke-linecap="round"/></svg>' : ''}
           </div>
@@ -526,12 +526,12 @@
             <polygon points="${pts(rS)}" fill="none" stroke="#F7F2E7" stroke-width="1.5" stroke-dasharray="5 4" opacity=".75"/>
             <polygon points="${pts(rA)}" fill="rgba(201,162,74,.35)" stroke="#C9A24A" stroke-width="2.5" stroke-linejoin="round"/>
             <circle cx="200" cy="${200 - rA[0]}" r="6" fill="#E0A282"/><circle cx="${200 + rA[1]}" cy="200" r="6" fill="#9BC0A1"/><circle cx="200" cy="${200 + rA[2]}" r="6" fill="#91B8D5"/><circle cx="${200 - rA[3]}" cy="200" r="6" fill="#DDBD69"/>
-            <text x="200" y="30" fill="#E0A282" font-family="Libre Franklin" font-weight="800" font-size="11" text-anchor="middle" letter-spacing="1.2">LEAD YOURSELF · ${sc[0]}/6</text>
-            <text x="372" y="196" fill="#9BC0A1" font-family="Libre Franklin" font-weight="800" font-size="11" text-anchor="end" letter-spacing="1.2">LEAD YOUR PEOPLE</text>
-            <text x="372" y="214" fill="#9BC0A1" font-family="Libre Franklin" font-weight="700" font-size="12" text-anchor="end">${sc[1]}/6</text>
-            <text x="200" y="384" fill="#91B8D5" font-family="Libre Franklin" font-weight="800" font-size="11" text-anchor="middle" letter-spacing="1.2">LEAD YOUR BUSINESS · ${sc[2]}/6</text>
-            <text x="28" y="196" fill="#DDBD69" font-family="Libre Franklin" font-weight="800" font-size="11" letter-spacing="1.2">LEAD THE MARKET</text>
-            <text x="28" y="214" fill="#DDBD69" font-family="Libre Franklin" font-weight="700" font-size="12">${sc[3]}/6</text>
+            <text x="200" y="30" fill="#E0A282" font-family="Inter" font-weight="800" font-size="11" text-anchor="middle" letter-spacing="1.2">LEAD YOURSELF · ${sc[0]}/6</text>
+            <text x="372" y="196" fill="#9BC0A1" font-family="Inter" font-weight="800" font-size="11" text-anchor="end" letter-spacing="1.2">LEAD YOUR PEOPLE</text>
+            <text x="372" y="214" fill="#9BC0A1" font-family="Inter" font-weight="700" font-size="12" text-anchor="end">${sc[1]}/6</text>
+            <text x="200" y="384" fill="#91B8D5" font-family="Inter" font-weight="800" font-size="11" text-anchor="middle" letter-spacing="1.2">LEAD YOUR BUSINESS · ${sc[2]}/6</text>
+            <text x="28" y="196" fill="#DDBD69" font-family="Inter" font-weight="800" font-size="11" letter-spacing="1.2">LEAD THE MARKET</text>
+            <text x="28" y="214" fill="#DDBD69" font-family="Inter" font-weight="700" font-size="12">${sc[3]}/6</text>
             <circle cx="200" cy="200" r="7" fill="#1C1309" stroke="#C9A24A" stroke-width="2"/>
           </svg>
           <div style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 10px">
@@ -597,7 +597,7 @@
     const done = !!(UI.plans && UI.plans.done[st.id]);
     const row = (label, v) => (v ? `<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #F7F2E7"><b style="color: #E3C47E">${label}</b> ${esc(v)}</p>` : '');
     return `<details data-step="${esc(st.id)}"${OPEN.has(st.id) ? ' open' : ''} style="border-top: 1px solid #3A2F20; padding-top: 8px">
-      <summary style="display: flex; gap: 12px; align-items: center; cursor: pointer; list-style: none; min-height: 40px"><span style="font-family: Fraunces, serif; color: #C9A24A; width: 22px">${done ? '✓' : k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7${done ? '; text-decoration: line-through; text-decoration-color: #8A7A5E' : ''}">${esc(st.title)}${st.domainName ? ` <span style="color: #C4B69D; font-size: 12px">· ${esc(st.domainName)}</span>` : ''}</span><span class="st-open" aria-hidden="true" style="color: #E3C47E; font-size: 12px">Open</span></summary>
+      <summary style="display: flex; gap: 12px; align-items: center; cursor: pointer; list-style: none; min-height: 40px"><span style="font-family: Newsreader, serif; color: #C9A24A; width: 22px">${done ? '✓' : k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7${done ? '; text-decoration: line-through; text-decoration-color: #8A7A5E' : ''}">${esc(st.title)}${st.domainName ? ` <span style="color: #C4B69D; font-size: 12px">· ${esc(st.domainName)}</span>` : ''}</span><span class="st-open" aria-hidden="true" style="color: #E3C47E; font-size: 12px">Open</span></summary>
       <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px 0 6px 34px">
         ${row('Why it matters:', st.why)}${row('What to do:', st.what)}${row('About:', st.about)}${row('Done looks like:', st.done)}
         ${st.ask ? `<p class="sfi" style="margin: 0; font-size: 16px; color: #F7F2E7">“${esc(st.ask)}”</p>` : ''}
@@ -613,10 +613,10 @@
       ${steps.map(stepOpen).join('')}
       <span style="font-size: 13px; color: #C4B69D">Times are about, not promises. Tick a step when it is done; the count is your plans’ own.</span>`;
     if (signedIn()) return `<span class="eb" style="color: #E3C47E">${eyebrow}</span>
-      ${titles.map((t, k) => `<div style="display: flex; gap: 12px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Fraunces, serif; color: #C9A24A; width: 22px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7">${t}</span></div>`).join('')}
+      ${titles.map((t, k) => `<div style="display: flex; gap: 12px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Newsreader, serif; color: #C9A24A; width: 22px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7">${t}</span></div>`).join('')}
       <span style="font-size: 13px; color: #C4B69D">Opening in your account…</span>`;
     return `<span class="eb" style="color: #E3C47E">${eyebrow} · in your free account</span>
-      ${titles.map((t, k) => `<div style="display: flex; gap: 12px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Fraunces, serif; color: #C9A24A; width: 22px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7">${t}</span><span class="blurline" style="flex: 0 0 70px; height: 8px; border-radius: 4px; background: #594A32"></span>${lockIcon('#C4B69D')}</div>`).join('')}
+      ${titles.map((t, k) => `<div style="display: flex; gap: 12px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Newsreader, serif; color: #C9A24A; width: 22px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7">${t}</span><span class="blurline" style="flex: 0 0 70px; height: 8px; border-radius: 4px; background: #594A32"></span>${lockIcon('#C4B69D')}</div>`).join('')}
       <span style="font-size: 13px; color: #C4B69D">Each step opens with what to do, about how long it takes and what “done” looks like.</span>
       <button type="button" data-act="account" data-f="account-${eyebrow.length}" class="go" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 5px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; cursor: pointer">${cta} <span class="arr" aria-hidden="true">→</span></button>`;
   }
@@ -734,7 +734,7 @@
           <g class="flagw"><path d="M230 58V26" stroke="#F7F2E7" stroke-width="1.6"/><path d="M230 27h20l-6 6 6 6h-20z" fill="#C9A24A"/></g>
           ${STOPS.map((t, i) => `<g>${i === si ? `<circle class="halo" cx="${t.x}" cy="${t.y}" r="20" fill="none" stroke="#C9A24A" stroke-width="1.5"/>` : ''}
             <circle class="stopc" cx="${t.x}" cy="${t.y}" r="${i === si ? 11 : 8}" fill="${i === si ? '#C9A24A' : i === 4 ? '#E3C47E' : '#1C1309'}" stroke="#F7F2E7" stroke-width="1.5" style="animation-delay: ${(0.2 + i * 0.15).toFixed(2)}s"/>
-            <text x="${t.lx}" y="${t.ly}" text-anchor="${t.anchor}" fill="${i === si ? '#E3C47E' : '#D3C4A5'}" font-family="Libre Franklin" font-weight="600" font-size="12.5">${t.short}</text></g>`).join('')}
+            <text x="${t.lx}" y="${t.ly}" text-anchor="${t.anchor}" fill="${i === si ? '#E3C47E' : '#D3C4A5'}" font-family="Inter" font-weight="600" font-size="12.5">${t.short}</text></g>`).join('')}
         </svg>
         <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
           <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 6px" role="group" aria-label="Stops on the climb">${STOPS.map((t, i) => `<button type="button" data-act="stop" data-i="${i}" data-f="stop-${i}" aria-pressed="${i === si}" style="min-height: 40px; padding: 0 12px; border-radius: 4px; border: 1px solid ${i === si ? '#C9A24A' : '#594A32'}; background: ${i === si ? 'rgba(201,162,74,.18)' : 'transparent'}; color: #F7F2E7; font-size: 12px; font-weight: 600; cursor: pointer">${t.n} · ${t.short}</button>`).join('')}</div>
@@ -836,7 +836,6 @@
           ${input('rate', `Helper rate per hour (${cur})`, 'What you would pay')}
           ${input('hire', `Monthly cost of one more person (${cur})`, 'Your estimate')}
         </div>
-        <span class="wnote" style="display: block; margin-top: 8px">Optional. They let the lab say what help costs and how many people the extra money could pay.</span>
       </details>`;
   }
 
@@ -856,8 +855,8 @@
     const NP = [['Cash', 160, 23, 160, 12, 'middle'], ['Clients', 222, 85, 244, 89, 'start'], ['Time', 160, 147, 160, 168, 'middle'], ['People', 98, 85, 76, 89, 'end']];
     const all = improved.filter(Boolean).length;
     return `<circle cx="160" cy="85" r="62" fill="none" stroke="${all >= 3 ? '#C9A24A' : '#3A2F20'}" stroke-width="2" stroke-dasharray="4 5"/>
-      <circle cx="160" cy="85" r="22" fill="#1C1309" stroke="#C9A24A" stroke-width="1.5"/><text x="160" y="90" text-anchor="middle" fill="#F7F2E7" font-family="Fraunces, Georgia, serif" font-size="13">You</text>
-      ${NP.map((n, i) => `<line x1="160" y1="85" x2="${n[1]}" y2="${n[2]}" stroke="#3A2F20" stroke-width="1"/><circle class="node" cx="${n[1]}" cy="${n[2]}" r="14" fill="${improved[i] ? '#C9A24A' : '#1C1309'}" stroke="#C9A24A" stroke-width="1.5"/><text x="${n[3]}" y="${n[4]}" text-anchor="${n[5]}" fill="#F7F2E7" font-family="Libre Franklin, Arial, sans-serif" font-size="11" font-weight="600">${n[0]}</text>`).join('')}`;
+      <circle cx="160" cy="85" r="22" fill="#1C1309" stroke="#C9A24A" stroke-width="1.5"/><text x="160" y="90" text-anchor="middle" fill="#F7F2E7" font-family="Newsreader, Georgia, serif" font-size="13">You</text>
+      ${NP.map((n, i) => `<line x1="160" y1="85" x2="${n[1]}" y2="${n[2]}" stroke="#3A2F20" stroke-width="1"/><circle class="node" cx="${n[1]}" cy="${n[2]}" r="14" fill="${improved[i] ? '#C9A24A' : '#1C1309'}" stroke="#C9A24A" stroke-width="1.5"/><text x="${n[3]}" y="${n[4]}" text-anchor="${n[5]}" fill="#F7F2E7" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="600">${n[0]}</text>`).join('')}`;
   }
 
   /** Set every value in the lab without redrawing it, so handles glide. */
@@ -1064,7 +1063,7 @@
       </div>
       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
         <span style="font-size: 13px; font-weight: 600">Theme</span>
-        ${['light', 'dark'].map((t) => `<button type="button" data-act="theme" data-v="${t}" data-f="theme-${t}" aria-pressed="${S.theme === t}" style="min-height: 44px; padding: 0 16px; border-radius: 5px; border: 1.5px solid ${S.theme === t ? '#C9A24A' : 'var(--line)'}; background: var(--paper); color: var(--ink); cursor: pointer; font-weight: 600">${t === 'light' ? 'Light' : 'Dark'}</button>`).join('')}
+        ${['light', 'dark'].map((t) => `<button type="button" data-act="theme" data-v="${t}" data-f="theme-${t}" aria-pressed="${siteTheme() === t}" style="min-height: 44px; padding: 0 16px; border-radius: 5px; border: 1.5px solid ${siteTheme() === t ? '#C9A24A' : 'var(--line)'}; background: var(--paper); color: var(--ink); cursor: pointer; font-weight: 600">${t === 'light' ? 'Light' : 'Dark'}</button>`).join('')}
         <button type="button" data-act="ws-save" data-f="ws-save" style="margin-left: auto; min-height: 46px; padding: 0 20px; border-radius: 5px; border: 0; background: #C9A24A; color: #14100B; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px">${lockIcon('#14100B', 16)}Save &amp; lock my workspace</button>
       </div>
       ${UI.saved ? `<span class="pop" role="status" style="font-size: 13px; color: ${UI.saved === true ? 'var(--people)' : 'var(--self)'}; font-weight: 600">${UI.saved === true ? (signedIn() ? 'Saved to your account. Your preferences and numbers are locked to this workspace.' : 'Saved. Your preferences and numbers are kept with this workspace on this browser.') : esc(UI.saved)}</span>` : ''}
@@ -1087,12 +1086,20 @@
     cache[id] = html;
     for (const child of INSIDE[id] || []) delete cache[child];
   }
+  function siteTheme() {
+    const t = document.documentElement.getAttribute('data-theme');
+    return t === 'dark' || t === 'light' ? t : S.theme;
+  }
+  window.addEventListener('es-theme', () => { const cf = $('#cf'); if (!cf) return; const th = siteTheme(); cf.dataset.theme = th; document.body.classList.toggle('dark', th === 'dark'); });
   function render() {
     const keep = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.f : null;
     const c = context(), L = labCalc();
     const cf = $('#cf');
-    cf.dataset.theme = S.theme;
-    document.body.classList.toggle('dark', S.theme === 'dark');
+    // The site's light (public/theme.js) decides: the device until the
+    // founder picks, kept on this browser.
+    const th = siteTheme();
+    cf.dataset.theme = th;
+    document.body.classList.toggle('dark', th === 'dark');
     put('nav', pNav(c));
     put('stepcards', pStepcards());
     const cont = $('#continue'); if (cont) cont.innerHTML = `${c.answered > 0 ? 'Continue my assessment' : 'Show me my road'} <span class="arr" aria-hidden="true">↓</span>`;
@@ -1252,7 +1259,7 @@
       case 'pw-save': savePassword(); return;
       case 'eye': { const el = $('#' + v), show = el && el.type === 'password'; if (el) el.type = show ? 'text' : 'password'; t.setAttribute('aria-pressed', String(!!show)); return; }
       case 'gate-skip': UI.after = null; S.skipped = true; save(); closeGate(); return;
-      case 'theme': S.theme = v; save(); render(); return;
+      case 'theme': if (window.ESTheme) window.ESTheme.set(v); else S.theme = v; save(); render(); return;
       case 'ws-save': {
         const val = (id) => { const el = $('#' + id); return el ? el.value.trim() : ''; };
         const ind = val('ws-industry');

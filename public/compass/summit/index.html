@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<script src="/theme.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0E0A05">
 <title>The Summit · Link to Lead · ExploraSelf</title>
@@ -17,8 +19,8 @@
 <meta property="og:image" content="https://linktolead.exploraself.com/compass/assets/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://linktolead.exploraself.com/compass/assets/og-image.png">
-<link rel="preload" href="/assets/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/assets/fonts/libre-franklin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <style>
 /* The Summit: black and gold, a double frame, gold-foil titles. Same palette
@@ -29,9 +31,9 @@ a{color:#E3C47E}a:hover{color:#F7F2E7}
 :focus-visible{outline:3px solid #E3C47E;outline-offset:3px}
 .su *{box-sizing:border-box}
 .su h1,.su h2,.su h3,.su p{margin:0}
-.su{font-family:'Libre Franklin',Arial,sans-serif;color:#F7F2E7;font-size:15px;line-height:1.65;min-height:100vh}
-.sf{font-family:Fraunces,Georgia,serif;font-weight:500;letter-spacing:-.02em}
-.sfi{font-family:Fraunces,Georgia,serif;font-style:italic;font-weight:400}
+.su{font-family:'Inter',Arial,sans-serif;color:#F7F2E7;font-size:15px;line-height:1.65;min-height:100vh}
+.sf{font-family:Newsreader,Georgia,serif;font-weight:500;letter-spacing:-.02em}
+.sfi{font-family:Newsreader,Georgia,serif;font-style:italic;font-weight:400}
 .k{font-size:11px;letter-spacing:.32em;color:#E3C47E;text-transform:uppercase}
 .lux{background-color:#0E0A05;background-image:radial-gradient(ellipse 60% 45% at 72% 12%,rgba(201,162,74,.22),transparent 70%),radial-gradient(ellipse 40% 30% at 8% 70%,rgba(201,162,74,.10),transparent 70%),repeating-radial-gradient(circle at 72% 12%,rgba(201,162,74,.06) 0 1px,transparent 1px 64px)}
 .wrap{max-width:1180px;margin:0 auto;padding:40px 24px}
@@ -60,6 +62,22 @@ a{color:#E3C47E}a:hover{color:#F7F2E7}
 .dom{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media (max-width:520px){.dom{grid-template-columns:1fr}.hero{padding:40px 22px !important}.wrap{padding:28px 16px}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.foil,.tw,.glow,.draw,.flag,.rise,.reveal{animation:none !important}.step{transition:none}}
+
+/* Light (public/theme.js): ivory and gold, the same double frame. */
+:root[data-theme="light"] body{background:#F6EFE2}
+:root[data-theme="light"] a{color:#7A5C16}:root[data-theme="light"] a:hover{color:#1C1309}
+:root[data-theme="light"] .su{color:#1C1309}
+:root[data-theme="light"] .lux{background-color:#F6EFE2;background-image:radial-gradient(ellipse 60% 45% at 72% 12%,rgba(201,162,74,.26),transparent 70%),radial-gradient(ellipse 40% 30% at 8% 70%,rgba(201,162,74,.12),transparent 70%),repeating-radial-gradient(circle at 72% 12%,rgba(156,122,53,.08) 0 1px,transparent 1px 64px)}
+:root[data-theme="light"] .k{color:#7A5C16}
+:root[data-theme="light"] .foil{background-image:linear-gradient(100deg,#7A5C16 0%,#B88F37 25%,#6E5213 45%,#9C7726 60%,#7A5C16 80%,#6E5213 100%)}
+:root[data-theme="light"] .muted{color:#5E5446}
+:root[data-theme="light"] .ghost{color:#1C1309;border-color:rgba(156,122,53,.6)}
+:root[data-theme="light"] .step{background:rgba(255,253,247,.7);border-color:rgba(156,122,53,.35)}
+:root[data-theme="light"] .frame{border-color:rgba(156,122,53,.55)}:root[data-theme="light"] .frame2{border-color:rgba(156,122,53,.28)}
+:root[data-theme="light"] [style*="color: #F7F2E7"],:root[data-theme="light"] [style*="color:#F7F2E7"],:root[data-theme="light"] [style*="color: #EFE4CC"]{color:#1C1309!important}
+:root[data-theme="light"] [style*="color: #D3C4A5"],:root[data-theme="light"] [style*="color:#D3C4A5"],:root[data-theme="light"] [style*="color: #C4B69D"]{color:#5E5446!important}
+:root[data-theme="light"] [style*="color: #E3C47E"],:root[data-theme="light"] [style*="color:#E3C47E"]{color:#7A5C16!important}
+:root[data-theme="light"] [style*="background: #0E0A05"],:root[data-theme="light"] [style*="background:#0E0A05"],:root[data-theme="light"] [style*="background: #14100B"],:root[data-theme="light"] [style*="background: #1C1309"]{background:#FFFDF7!important}
 </style>
 </head>
 <body>
@@ -119,10 +137,10 @@ a{color:#E3C47E}a:hover{color:#F7F2E7}
       <p class="muted">Session length: [SESSION LENGTH] · Format: [ONLINE OR IN PERSON]</p>
     </div>
     <div class="dom" style="flex: 1 1 420px; min-width: 0">
-      <div class="step reveal" style="border-top: 3px solid #E0A282; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: Fraunces, serif; color: #E0A282; font-size: 15px">I</span><span class="sf" style="font-size: 19px">Lead yourself</span><span class="muted" style="font-size: 13px">What you want this business to give your life.</span></div>
-      <div class="step reveal" style="border-top: 3px solid #9BC0A1; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: Fraunces, serif; color: #9BC0A1; font-size: 15px">II</span><span class="sf" style="font-size: 19px">Lead your people</span><span class="muted" style="font-size: 13px">Who carries the work, and how they grow.</span></div>
-      <div class="step reveal" style="border-top: 3px solid #91B8D5; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: Fraunces, serif; color: #91B8D5; font-size: 15px">III</span><span class="sf" style="font-size: 19px">Lead your business</span><span class="muted" style="font-size: 13px">The numbers behind your decisions.</span></div>
-      <div class="step reveal" style="border-top: 3px solid #DDBD69; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: Fraunces, serif; color: #DDBD69; font-size: 15px">IV</span><span class="sf" style="font-size: 19px">Lead the market</span><span class="muted" style="font-size: 13px">Who you serve, and why they choose you.</span></div>
+      <div class="step reveal" style="border-top: 3px solid #E0A282; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: Newsreader, serif; color: #E0A282; font-size: 15px">I</span><span class="sf" style="font-size: 19px">Lead yourself</span><span class="muted" style="font-size: 13px">What you want this business to give your life.</span></div>
+      <div class="step reveal" style="border-top: 3px solid #9BC0A1; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: Newsreader, serif; color: #9BC0A1; font-size: 15px">II</span><span class="sf" style="font-size: 19px">Lead your people</span><span class="muted" style="font-size: 13px">Who carries the work, and how they grow.</span></div>
+      <div class="step reveal" style="border-top: 3px solid #91B8D5; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: Newsreader, serif; color: #91B8D5; font-size: 15px">III</span><span class="sf" style="font-size: 19px">Lead your business</span><span class="muted" style="font-size: 13px">The numbers behind your decisions.</span></div>
+      <div class="step reveal" style="border-top: 3px solid #DDBD69; padding: 18px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: Newsreader, serif; color: #DDBD69; font-size: 15px">IV</span><span class="sf" style="font-size: 19px">Lead the market</span><span class="muted" style="font-size: 13px">Who you serve, and why they choose you.</span></div>
     </div>
   </section>
 

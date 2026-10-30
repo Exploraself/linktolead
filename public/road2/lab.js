@@ -29,7 +29,7 @@ const SIGN = { p: '+', m: '+', f: '−', d: '' };
 const CSS = `.wl{background:#15213B;color:#F3EFEA;border-radius:12px;padding:clamp(18px,3vw,30px);display:flex;flex-direction:column;gap:22px}
 .wl *{box-sizing:border-box}
 .wl .wl-switch{display:inline-flex;flex-wrap:wrap;gap:4px;border:1px solid #3B4A6B;border-radius:999px;padding:4px;align-self:flex-start}
-.wl .wl-switch button{min-height:44px;padding:0 18px;border-radius:999px;border:0;background:transparent;color:#F3EFEA;font:600 14px 'Libre Franklin',Arial,sans-serif;cursor:pointer}
+.wl .wl-switch button{min-height:44px;padding:0 18px;border-radius:999px;border:0;background:transparent;color:#F3EFEA;font:600 14px 'Inter',Arial,sans-serif;cursor:pointer}
 .wl .wl-switch button[aria-pressed="true"]{background:#C9A24A;color:#15213B}
 .wl .wl-heads,.wl .wl-pair{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);gap:0 12px}
 .wl .wl-heads{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A9B2C4;font-weight:700}
@@ -37,7 +37,7 @@ const CSS = `.wl{background:#15213B;color:#F3EFEA;border-radius:12px;padding:cla
 .wl .wl-card{background:rgba(243,239,234,.05);border:1px solid #3B4A6B;border-radius:9px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
 .wl .wl-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .wl .wl-name{font-weight:700;font-size:15px;display:inline-flex;gap:10px;align-items:center}
-.wl .wl-big{font:600 24px/1.1 Fraunces,Georgia,serif;color:#E3C47E;white-space:nowrap;font-variant-numeric:tabular-nums}
+.wl .wl-big{font:500 24px/1.1 Newsreader,Georgia,serif;color:#E3C47E;white-space:nowrap;font-variant-numeric:tabular-nums}
 .wl .wl-note{font-size:13px;color:#C4CCDA}
 .wl .wl-dom{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
 .wl input[type=range]{width:100%;accent-color:#C9A24A;height:28px;margin:0;cursor:pointer}
@@ -53,7 +53,7 @@ const CSS = `.wl{background:#15213B;color:#F3EFEA;border-radius:12px;padding:cla
 .wl .wl-plan>div{flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:6px}
 .wl .wl-fine summary{cursor:pointer;font-weight:700;color:#E3C47E;min-height:32px}
 .wl .wl-fine label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700}
-.wl .wl-fine input{min-height:44px;border:1px solid #3B4A6B;border-radius:5px;background:#1E2C4C;color:#F3EFEA;padding:0 12px;font:15px 'Libre Franklin',Arial,sans-serif;width:100%}
+.wl .wl-fine input{min-height:44px;border:1px solid #3B4A6B;border-radius:5px;background:#1E2C4C;color:#F3EFEA;padding:0 12px;font:15px 'Inter',Arial,sans-serif;width:100%}
 @media(max-width:760px){.wl .wl-heads{display:none}.wl .wl-pair{grid-template-columns:1fr;gap:6px}.wl .wl-arrow{transform:rotate(90deg);height:26px}.wl .wl-rows{gap:22px}}
 @media(prefers-reduced-motion:reduce){.wl .wl-fill{transition:none}}`;
 
@@ -97,7 +97,7 @@ export function fill(host, { E, get, openGate }) {
     </details>
     <div class="wl-plan">
       <div><span style="font-size: 12px; font-weight: 700; letter-spacing: .14em; color: #E3C47E">YOUR PLAN FOR THIS CHANGE</span>
-        <span id="wl-plan" style="font: 600 20px/1.3 Fraunces, Georgia, serif">Move a lever, and your four-step plan for it waits here.</span>
+        <span id="wl-plan" style="font: 500 20px/1.3 Newsreader, Georgia, serif">Move a lever, and your four-step plan for it waits here.</span>
         <span style="font-size: 13px; color: #C4CCDA">Four steps, each with what to do, about how long, and what done looks like.</span></div>
       <button type="button" class="gold-btn" data-wlgate>Opens with your free account →</button>
     </div>

@@ -13,10 +13,11 @@ import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, SHEETS, SECTIONS, loadSt
   gateFor, levelFor, isWritten, weekTitle, videoFor, nextGain, holds,
   LEAD, BOOKING, LIBRARY } from './content.js';
 import { entry, programmeStage, groundPlan, stageNudge } from './home.js';
-import { cabinetHTML, cabinetShown, cabinetHidden, cabinetClick } from './cabinet.js';
+import { cabinetHTML, cabinetShown, cabinetHidden, cabinetClick, dashboardShown, levelDots, compassStripHTML } from './cabinet.js';
 import { result as fwResult } from './frameworks.js';
 import { report } from './feedback.js';
 import * as account from './account.js';
+import * as M from './music.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -45,6 +46,8 @@ let ask = null, changingStage = false;
  *  name cached on this device is never shown for someone else), and which
  *  form the founder signed up with ('simple' founders have no password). */
 let pulled = false, signupType = null;
+/** The founder's mentor, from the account: the letters and notes come from them. */
+let mentor = { name: 'Alexandru Cojocari', first: 'Alexandru' };
 
 const compass = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12 12 2.5Z"/><path d="m12 5.7 2 4.3 4.3 2-4.3 2-2 4.3-2-4.3-4.3-2 4.3-2 2-4.3Z" fill="currentColor" stroke="none"/></svg>';
 
@@ -151,7 +154,7 @@ function notesHTML() {
   const list = (inbox && inbox.messages || []).filter((m) => !m.read_at).slice(0, 3);
   if (!list.length) return '';
   return list.map((m) => `<section class="gp-wrap"><div class="note-from" role="status">
-      <p class="eyebrow">A note from Alexandru and the team · ${esc(new Date(m.sent_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }))}</p>
+      <p class="eyebrow">Letters from your mentor · ${esc(mentor.first)} · ${esc(new Date(m.sent_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }))}</p>
       <h2>${esc(m.subject)}</h2>
       <p class="note-body">${esc(m.body)}</p>
       <div class="note-acts"><button type="button" class="cta" data-gotit="${esc(m.id)}">Got it</button><button type="button" class="ghost" data-replyto="${esc(m.id)}">Reply</button></div>
@@ -294,12 +297,16 @@ function cabinetData(st, gp, first) {
   if (P) for (const d of P.domains) { const x = d.steps.find((y) => !P.done[y.id]); if (x) { next = { title: x.title, domain: d.name }; break; } }
   let lv = 1;
   while (lv < 12 && levelDone(st, lv) === 28) lv++;
+  // The incubator band: FULL accounts only, once the account has been read.
+  const full = pulled && signupType !== 'simple';
+  const band = full ? { level: lv, title: weekTitle(st, lv), done: levelDone(st, lv),
+    dots: levelDots(lv, (n) => levelDone(st, n), (n) => holds(state.tier || 'free', gateFor(n))) } : null;
   return {
     first, name: state.me && state.me.name, tier: state.tier || 'free',
     stageName: STAGES[st] && STAGES[st].n, aimName: null, startHere: gp && gp.weakest ? gp.weakest.name : null,
     bands, plans: P ? { count: P.count, total: P.total, next } : null,
     prog: { level: lv, title: weekTitle(st, lv), done: levelDone(st, lv) },
-    askUnread: askUnread(),
+    askUnread: askUnread(), band,
   };
 }
 
@@ -309,6 +316,7 @@ function homeView() {
   const first = firstName();
   return `<div class="gp">
     ${cabinetHTML(cabinetData(st, gp, first))}
+    ${compassStripHTML(!!compassRec)}
     ${notesHTML()}
     ${nudgeHTML(st)}
     ${gp ? planHTML(gp, st) : `<section class="gp-wrap gp-two gp-grid">${standHTML(st)}</section>${howItWorks(st)}`}
@@ -500,7 +508,8 @@ function domFoot(st, full, gain) {
   if (next) {
     return `<div class="donext">
       <p>${full ? `All seven written. ${DOMAINS.find((d) => d.k === dom).n} is done.` : `${answered(st, level, dom)} of 7 written in ${DOMAINS.find((d) => d.k === dom).n}.`}</p>
-      <button class="ghost" type="button" data-dom="${next.k}">Next: ${next.n} →</button></div>`;
+      <button class="ghost" type="button" data-dom="${next.k}">Next: ${next.n} →</button>
+      ${level > 1 && !holds(state.tier, 'session') ? `<p class="hardline">Hard going? <a href="${esc(BOOKING)}" target="_blank" rel="noopener">A 1:1 session with ${esc(mentor.first)}</a> is always there.</p>` : ''}</div>`;
   }
   return `<div class="donext"><p>${28 - levelDone(st, level)} answers left in this level. It closes when all twenty-eight are written.</p>
     <button class="ghost" type="button" data-dom="self">Back to Lead yourself</button></div>`;
@@ -600,6 +609,18 @@ function libBanner() {
     <button type="button" class="cta" data-go="library">Open my library →</button>
     <button type="button" class="x" data-banner="close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
   </div>`;
+}
+
+/** At the top of the programme, quietly: if a step is hard, a 1:1 is
+ *  always there. Founders who already have The Boardroom see the line about
+ *  their session; nobody is told it is urgent. */
+function helpNote() {
+  const have = holds(state.tier, 'session');
+  return `<aside class="helpnote" aria-label="Help with a step">
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="#C9A24A" stroke-width="1.5"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6" fill="none" stroke="#C9A24A" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#C9A24A"/></svg>
+    <p><b>Finding a step hard?</b> That is where the work is. ${have ? `Bring it to your next session with ${esc(mentor.first)}, or` : `You can always book a 1:1 session with ${esc(mentor.first)}, or`} ask in <button type="button" class="linkish" data-go="ask">Ask Alexandru</button>.</p>
+    ${have ? '' : `<a class="helpgo" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book a 1:1 ↗</a>`}
+  </aside>`;
 }
 
 /** The Compass, inside the programme: for the founder's first five visits to
@@ -702,16 +723,22 @@ function render() {
     loadStage(st).then(render).catch(() => { $('#main').innerHTML = '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="alert">We could not open your programme just now. Check your connection and reload.</p></div></section>'; });
     return;
   }
-  if (view !== 'home') cabinetHidden();
+  // The dashboard (Your Ground Plan, the programme, the Library, Ask
+  // Alexandru) keeps the music, the light and Focus mode.
+  if (!DASHBOARD.includes(view)) cabinetHidden();
   $('#main').innerHTML = view === 'work'
-    ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work"><div id="cban" class="cbanwrap">${compassBanner()}</div><div id="libban">${libBanner()}</div><div id="mod">${moduleHTML(st)}</div></div></div>`
+    ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work"><div id="cban" class="cbanwrap">${compassBanner()}</div><div id="libban">${libBanner()}</div>${helpNote()}<div id="mod">${moduleHTML(st)}</div></div></div>`
     : view === 'home' ? homeView()
     : view === 'library' ? libraryView()
     : view === 'ask' ? askView()
     : view === 'signin' ? signinView()
     : '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="status">One moment…</p></div></section>';
   if (view === 'home') cabinetShown();
+  else if (DASHBOARD.includes(view)) dashboardShown();
+  // The Lamp's candles count the domain on screen, in the programme only.
+  M.setCandles(view === 'work' ? answered(st, level, dom) : -1);
 }
+const DASHBOARD = ['home', 'work', 'library', 'ask'];
 
 /** Redraw only the module, so the rail does not flicker and its scroll holds. */
 function redrawModule() {
@@ -722,6 +749,7 @@ function redrawModule() {
   if (m) m.innerHTML = moduleHTML(state.stage || 'build'); else w.innerHTML = moduleHTML(state.stage || 'build');
   w.scrollTo ? w.scrollTo({ top: 0, behavior: 'instant' }) : null;
   const r = $('#rail'); if (r) refreshRail();
+  M.setCandles(answered(state.stage || 'build', level, dom));
 }
 function refreshRail() {
   const st = state.stage || 'build';
@@ -852,10 +880,13 @@ document.addEventListener('input', (e) => {
   if (!a) return;
   const st = state.stage || 'build';
   const was = levelDone(st, level);
+  const hadIt = !!(state.answers[a.dataset.k] || '').trim();
   state.answers[a.dataset.k] = a.value;
   save();
   account.touch('answers', a.dataset.k, a.value);
   a.closest('.step').classList.toggle('done', !!a.value.trim());
+  // The Lamp: a newly written answer plays a chord and lights a candle.
+  if (!hadIt && a.value.trim()) M.answered(answered(st, level, dom)); else if (hadIt && !a.value.trim()) M.setCandles(answered(st, level, dom));
 
   const n = levelDone(st, level);
   const c = $('#lvcount'), f = document.querySelector('.lvtrack i');
@@ -904,6 +935,7 @@ async function comeHome() {
       if (r.me.tier) state.tier = r.me.tier;
       hasPassword = !!r.me.hasPassword;
       signupType = r.me.signupType || null;
+      if (r.me.mentor && r.me.mentor.first) mentor = r.me.mentor;
       pulled = true;
     }
     let sales = '';

@@ -1,6 +1,6 @@
 /* The Leadership Compass sales page (versions A and B share this file).
-   Navy, cream and one gold; the Compass's own fonts: Fraunces for headings
-   and the italic human lines, Libre Franklin for everything else. Loaded the
+   Navy, cream and one gold; the Compass's own fonts: Newsreader for headings
+   and the italic human lines, Inter for everything else. Loaded the
    same way as /compass (style.css there). Motion stops under
    prefers-reduced-motion. */
 html{scroll-behavior:smooth}
@@ -9,13 +9,13 @@ a{color:#7A5E26}a:hover{color:#15213B}
 :focus-visible{outline:3px solid #C9A24A;outline-offset:3px}
 .fc *{box-sizing:border-box}
 .fc h1,.fc h2,.fc h3,.fc p{margin:0}
-.fc{font-family:'Libre Franklin',Arial,sans-serif;color:#15213B;background:#F3EFEA;overflow:hidden}
+.fc{font-family:'Inter',Arial,sans-serif;color:#15213B;background:#F3EFEA;overflow:hidden}
 .fc button{font-family:inherit}
-.serif{font-family:Fraunces,Georgia,serif;font-style:italic;font-weight:400}
-/* Headings in Fraunces. It is a serif with a lighter top weight than the old
-   sans, so the 900 of the old headings becomes Fraunces's 600, with the
+.serif{font-family:Newsreader,Georgia,serif;font-style:italic;font-weight:400}
+/* Headings in Newsreader. It is a serif with a lighter top weight than the old
+   sans, so the 900 of the old headings becomes Newsreader's 600, with the
    Compass's slight negative tracking. */
-.fc h1,.fc h2,.fc h3,.h2{font-family:Fraunces,Georgia,serif;font-weight:600 !important;letter-spacing:-.015em !important}
+.fc h1,.fc h2,.fc h3,.h2{font-family:Newsreader,Georgia,serif;font-weight:500 !important;letter-spacing:-.015em !important}
 .fc h1 .serif,.fc h2 .serif,.fc h3 .serif{font-weight:400 !important}
 .wrap{max-width:1160px;margin:0 auto}
 .kick{font-size:13px;font-weight:700;letter-spacing:.16em;color:#7A5E26}
@@ -149,9 +149,9 @@ input.now{accent-color:#5A6580}
 .win4-box[data-active="self"] .w4-self .w4in,.win4-box[data-active="people"] .w4-people .w4in,.win4-box[data-active="business"] .w4-business .w4in,.win4-box[data-active="market"] .w4-market .w4in{background:rgba(var(--rgb),.55);border-color:rgba(var(--rgb),.9)}
 .win4-box[data-active="self"] .w4-self span,.win4-box[data-active="people"] .w4-people span,.win4-box[data-active="business"] .w4-business span,.win4-box[data-active="market"] .w4-market span{opacity:1}
 .w4disc,.w4ring{position:absolute;left:50%;top:50%;width:17.2%;height:17.2%;border-radius:50%;transform:translate(-50%,-50%)}
-.w4disc{background:#1C1309;color:#C9A24A;display:flex;align-items:center;justify-content:center;font:italic 400 clamp(14px,3.6vw,20px)/1 Fraunces,Georgia,serif;box-shadow:0 12px 30px rgba(28,19,9,.25)}
+.w4disc{background:#1C1309;color:#C9A24A;display:flex;align-items:center;justify-content:center;font:italic 400 clamp(14px,3.6vw,20px)/1 Newsreader,Georgia,serif;box-shadow:0 12px 30px rgba(28,19,9,.25)}
 .w4ring{border:2px solid #C9A24A;opacity:0}
-.win4-cap{font:italic 400 20px/1.4 Fraunces,Georgia,serif;color:#4A4238;text-align:center;min-height:1.4em}
+.win4-cap{font:italic 400 20px/1.4 Newsreader,Georgia,serif;color:#4A4238;text-align:center;min-height:1.4em}
 @keyframes w4TL{from{opacity:0;transform:translate(-18%,-18%)}to{opacity:1;transform:none}}
 @keyframes w4TR{from{opacity:0;transform:translate(18%,-18%)}to{opacity:1;transform:none}}
 @keyframes w4BL{from{opacity:0;transform:translate(-18%,18%)}to{opacity:1;transform:none}}

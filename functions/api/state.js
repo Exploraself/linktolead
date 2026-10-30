@@ -3,6 +3,7 @@
 // inside D1's free daily allowance even with a few hundred students.
 
 import { json, bad, db, now, clean, accountTables } from '../_shared.js';
+import { mentorFor, keepTz } from '../_mentor.js';
 
 async function student(D, token) {
   if (!token || token.length < 20) return null;
@@ -23,9 +24,11 @@ export async function onRequestGet({ request, env }) {
     D.prepare('SELECT stage,results_json,flags_json,updated_at FROM compass WHERE student_id = ?').bind(me.id).first(),
     D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(me.id).first(),
     D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'stage-change' LIMIT 1").bind(me.id).first(),
-    D.prepare('SELECT signup_type FROM student_profile WHERE student_id = ?').bind(me.id).first(),
+    D.prepare('SELECT signup_type, consent, unsubscribed FROM student_profile WHERE student_id = ?').bind(me.id).first(),
   ]);
   await D.prepare('UPDATE student SET last_seen_at=? WHERE id=?').bind(now(), me.id).run();
+  await keepTz(D, me.id, new URL(request.url).searchParams.get('tz'));
+  const mentor = await mentorFor(D, me.id);
 
   const a = {};
   for (const r of answers.results || []) a[`${r.stage}.${r.level}.${r.domain}.${r.step}`] = r.body;
@@ -36,7 +39,10 @@ export async function onRequestGet({ request, env }) {
   // stand"), so it wins over the Compass's on every device. signupType:
   // 'simple' founders never have a password, so /start offers none.
   return json({ ok: true, me: { name: me.name, email: me.email, stage: me.stage, stageChosen: !!chose, tier: me.tier, thin: me.thin_domain, hasPassword: !!(auth && auth.pass_hash),
-    signupType: (prof && prof.signup_type) || null },
+    signupType: (prof && prof.signup_type) || null,
+    // "Letters from your mentor": on when they gave consent and did not unsubscribe.
+    letters: !!(prof && prof.consent && !prof.unsubscribed),
+    mentor: { name: mentor.name, first: mentor.first, photo: mentor.photo } },
     answers: a, work: w, compass: compass || null });
 }
 

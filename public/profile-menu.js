@@ -3,9 +3,12 @@
  * device holds an account. Name and step come from /api/state, kept on the
  * device so the circle draws at once on the next page.
  *
- * Menu: name and step, Your Ground Plan, Leadership Compass, Library, Ask
+ * Menu: name and step, the Leadership Compass in its own highlighted row,
+ * Your Ground Plan, Library, Ask
  * Alexandru, Password (full accounts only; simple accounts sign in by email
- * link), Sign out. Escape and a click outside close it. */
+ * link), "Letters from your mentor: On/Off" (consent, synced to Mailchimp),
+ * Sign out, and "Delete my account" (two steps: a plain warning, then the
+ * founder types their email). Escape and a click outside close it. */
 import * as A from '/account.js';
 
 const ME_KEY = 'ftb-me';
@@ -25,7 +28,6 @@ export function initials(name) {
 export function items(me) {
   const list = [
     ['/ground-plan/#home', 'Your Ground Plan', 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'],
-    ['/compass/', 'Leadership Compass', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm3.5 5.5-2 5-5 2 2-5z'],
     ['/ground-plan/#library', 'Library', 'M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zm0 0a2 2 0 0 1 2-2h12'],
     ['/ground-plan/#ask', 'Ask Alexandru', 'M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z'],
   ];
@@ -33,19 +35,111 @@ export function items(me) {
   return list;
 }
 
-const STYLE = `.pm{position:relative;font-family:'Libre Franklin',Arial,sans-serif}
+const STYLE = `.pm{position:relative;font-family:'Inter',Arial,sans-serif}
 .pm.fixed{position:fixed;top:14px;right:16px;z-index:55}
-.pm-b{width:44px;height:44px;border-radius:50%;border:1px solid #C9A24A;background:radial-gradient(circle at 35% 30%,#EDD592,#C49A3E 55%,#7C5B1C);color:#1C1309;font:600 15px/1 Fraunces,Georgia,serif;letter-spacing:.04em;cursor:pointer;box-shadow:0 0 0 3px rgba(201,162,74,.22),0 6px 16px -8px rgba(0,0,0,.6)}
+.pm-b{width:44px;height:44px;border-radius:50%;border:1px solid #C9A24A;background:radial-gradient(circle at 35% 30%,#EDD592,#C49A3E 55%,#7C5B1C);color:#1C1309;font:500 15px/1 Newsreader,Georgia,serif;letter-spacing:.04em;cursor:pointer;box-shadow:0 0 0 3px rgba(201,162,74,.22),0 6px 16px -8px rgba(0,0,0,.6)}
 .pm-b:focus-visible{outline:2px solid #C9A24A;outline-offset:3px}
-.pm-m{position:absolute;right:0;top:54px;width:270px;background:#FFFDF8;color:#14100B;border:1px solid #D6C9AC;border-radius:14px;box-shadow:0 24px 50px -20px rgba(20,16,11,.55);padding:8px;display:none}
+.pm-m{position:absolute;right:0;top:54px;width:min(290px,calc(100vw - 24px));max-height:calc(100vh - 90px);overflow:auto;z-index:60;background:#FFFDF8;color:#14100B;border:1px solid #D6C9AC;border-radius:14px;box-shadow:0 24px 50px -20px rgba(20,16,11,.55);padding:8px;display:none}
 .pm.open .pm-m{display:block}
 .pm-who{padding:10px 12px;border-bottom:1px solid #D6C9AC;margin-bottom:6px}
-.pm-who b{display:block;font:500 17px/1.3 Fraunces,Georgia,serif}
+.pm-who b{display:block;font:500 17px/1.3 Newsreader,Georgia,serif}
 .pm-who span{font-size:12px;color:#6E5213;font-weight:600;letter-spacing:.04em}
-.pm-m a,.pm-m button.pm-i{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:0 12px;border:0;background:none;border-radius:10px;text-decoration:none;color:#14100B;font:500 14px 'Libre Franklin',Arial,sans-serif;cursor:pointer;text-align:left;box-sizing:border-box}
+.pm-m a,.pm-m button.pm-i{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:0 12px;border:0;background:none;border-radius:10px;text-decoration:none;color:#14100B;font:500 14px 'Inter',Arial,sans-serif;cursor:pointer;text-align:left;box-sizing:border-box}
 .pm-m a:hover,.pm-m button.pm-i:hover,.pm-m a:focus-visible,.pm-m button.pm-i:focus-visible{background:rgba(201,162,74,.16);outline:none}
 .pm-m svg{width:18px;height:18px;flex:none;stroke:#6E5213;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.pm-sep{height:1px;background:#D6C9AC;margin:6px 4px}`;
+.pm-sep{height:1px;background:#D6C9AC;margin:6px 4px}
+.pm-m a.pm-compass{min-height:56px;margin:4px 0 8px;padding:8px 12px;border-radius:12px;background:linear-gradient(120deg,#1C1309,#2B1B12);color:#F7F2E7;border:1px solid rgba(201,162,74,.6)}
+.pm-m a.pm-compass:hover,.pm-m a.pm-compass:focus-visible{background:linear-gradient(120deg,#2B1B12,#3A2618)}
+.pm-m a.pm-compass svg{width:24px;height:24px;stroke:#E3C47E;color:#E3C47E}
+.pm-compass b{display:block;font:500 15px/1.25 Newsreader,Georgia,serif}.pm-compass small{display:block;font-size:11.5px;color:#D3C4A5}
+.pm-sw{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#6E5213}
+.pm-sw i{position:relative;width:34px;height:20px;border-radius:999px;background:#D6C9AC;transition:background .2s}
+.pm-sw i::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#FFFDF8;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+[aria-checked="true"] .pm-sw i{background:#C9A24A}[aria-checked="true"] .pm-sw i::after{transform:translateX(14px)}
+.pm-m .pm-del{color:#8E2F1F}.pm-m .pm-del svg{stroke:#8E2F1F}
+.pm-look{display:flex;align-items:center;gap:4px;padding:4px 8px 4px 12px;font-size:14px;font-weight:500}
+.pm-look span{margin-right:auto}
+.pm-look button{min-height:34px;padding:0 10px;border-radius:999px;border:1px solid #D6C9AC;background:transparent;color:inherit;font:600 12px 'Inter',Arial,sans-serif;cursor:pointer}
+.pm-look button[aria-pressed="true"]{background:#C9A24A;border-color:#C9A24A;color:#14100B}
+:root[data-theme="dark"] .pm-look button{border-color:#3A2E1F}
+.pm-note{margin:2px 12px 6px;font-size:11.5px;line-height:1.45;color:#5F5648}
+:root[data-theme="dark"] .pm-m{background:#1C150E;color:#F1E8D6;border-color:#3A2E1F}
+:root[data-theme="dark"] .pm-m a,:root[data-theme="dark"] .pm-m button.pm-i{color:#F1E8D6}
+:root[data-theme="dark"] .pm-who,:root[data-theme="dark"] .pm-sep{border-color:#3A2E1F;background-color:transparent}
+:root[data-theme="dark"] .pm-sep{background:#3A2E1F}
+:root[data-theme="dark"] .pm-who span,:root[data-theme="dark"] .pm-sw{color:#E3C47E}
+:root[data-theme="dark"] .pm-m svg{stroke:#E3C47E}
+:root[data-theme="dark"] .pm-note{color:#BDB094}
+:root[data-theme="dark"] .pm-m .pm-del{color:#F0A08E}:root[data-theme="dark"] .pm-m .pm-del svg{stroke:#F0A08E}
+.pm-dlg{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(12,9,6,.62)}
+.pm-box{width:100%;max-width:440px;background:#FFFDF8;color:#14100B;border-radius:16px;border:1px solid #D6C9AC;padding:26px 24px;box-shadow:0 30px 70px -20px rgba(0,0,0,.7);font-family:'Inter',Arial,sans-serif}
+.pm-box h2{margin:0 0 10px;font:500 24px/1.2 Newsreader,Georgia,serif}
+.pm-box p{margin:0 0 12px;font-size:14.5px;line-height:1.6;color:#4A3F33}
+.pm-box ul{margin:0 0 14px;padding-left:18px;font-size:14px;line-height:1.6;color:#4A3F33}
+.pm-box label{display:grid;gap:6px;font-size:13px;font-weight:600;margin-bottom:14px}
+.pm-box input{font:inherit;font-size:16px;min-height:46px;padding:0 12px;border:1px solid #D6C9AC;border-radius:8px;background:#fff;color:#14100B}
+.pm-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.pm-acts button{min-height:46px;padding:0 18px;border-radius:999px;font:600 14px 'Inter',Arial,sans-serif;cursor:pointer;border:1px solid #D6C9AC;background:transparent;color:#14100B}
+.pm-acts .pm-danger{background:#8E2F1F;border-color:#8E2F1F;color:#FFF7EE}
+.pm-acts .pm-danger:disabled{opacity:.5;cursor:not-allowed}
+.pm-err{min-height:1.4em;font-size:13px;color:#8E2F1F}
+:root[data-theme="dark"] .pm-box{background:#1C150E;color:#F1E8D6;border-color:#3A2E1F}
+:root[data-theme="dark"] .pm-box p,:root[data-theme="dark"] .pm-box ul{color:#CFC3AA}
+:root[data-theme="dark"] .pm-box input{background:#0E0A06;color:#F1E8D6;border-color:#3A2E1F}
+:root[data-theme="dark"] .pm-acts button{color:#F1E8D6;border-color:#3A2E1F}
+:root[data-theme="dark"] .pm-err{color:#F0A08E}`;
+
+/** 'true' or 'false' for the switch. Unknown (an old cached record) is on,
+ *  because every account starts with letters. */
+const themePick = () => { try { return window.ESTheme ? window.ESTheme.pick() : 'device'; } catch { return 'device'; } };
+const letterState = (me) => String(!(me && me.letters === false));
+let lettersNote = '';
+
+/** "Delete my account": step one says plainly what goes, step two asks for
+ *  the email. Nothing is deleted before the second button. */
+function deleteDialog(me) {
+  const d = document.createElement('div');
+  d.className = 'pm-dlg';
+  d.innerHTML = `<div class="pm-box" role="dialog" aria-modal="true" aria-labelledby="pm-dh">
+    <h2 id="pm-dh">Delete your account?</h2>
+    <p>This removes everything kept for you, for good:</p>
+    <ul><li>your answers and worksheets in every level</li><li>your Compass, your plans and your questions to your mentor</li><li>your letters and your library</li></ul>
+    <p>You will stop getting letters. Nothing you paid for is refunded by this. If you only want fewer emails, turn off <b>Letters from your mentor</b> instead.</p>
+    <div class="pm-acts"><button type="button" data-d="keep">Keep my account</button><button type="button" class="pm-danger" data-d="next">Continue</button></div>
+  </div>`;
+  const close = () => { d.remove(); document.removeEventListener('keydown', onKey); };
+  const onKey = (e) => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  d.addEventListener('click', async (e) => {
+    if (e.target === d) { close(); return; }
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.d === 'keep') { close(); return; }
+    if (b.dataset.d === 'next') {
+      d.querySelector('.pm-box').innerHTML = `<h2 id="pm-dh">One last step</h2>
+        <p>Type the email you signed up with. Then the account and everything in it is deleted.</p>
+        <label>Your email<input type="email" id="pm-dconfirm" autocomplete="off" inputmode="email"></label>
+        <p class="pm-err" id="pm-derr" role="alert"></p>
+        <div class="pm-acts"><button type="button" data-d="keep">Keep my account</button><button type="button" class="pm-danger" data-d="go" disabled>Delete my account for good</button></div>`;
+      const inp = d.querySelector('#pm-dconfirm'), go = d.querySelector('[data-d="go"]');
+      inp.addEventListener('input', () => { go.disabled = !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(inp.value.trim()); });
+      inp.focus();
+      return;
+    }
+    if (b.dataset.d === 'go') {
+      const err = d.querySelector('#pm-derr'), inp = d.querySelector('#pm-dconfirm');
+      b.disabled = true; b.textContent = 'Deleting…';
+      try {
+        await A.deleteAccount(inp.value.trim());
+        try { localStorage.removeItem(ME_KEY); } catch { /* private mode */ }
+        d.querySelector('.pm-box').innerHTML = '<h2 id="pm-dh">Your account is deleted</h2><p>Everything we kept for you is gone. Thank you for the time you gave your business here. The door stays open whenever you want to come back.</p><div class="pm-acts"><button type="button" class="pm-danger" data-d="home">Close</button></div>';
+      } catch (ex) { err.textContent = (ex && ex.message) || 'It did not go through. Try again in a minute.'; b.disabled = false; b.textContent = 'Delete my account for good'; }
+      return;
+    }
+    if (b.dataset.d === 'home') { location.href = '/road1/'; }
+  });
+  document.body.appendChild(d);
+  const first = d.querySelector('[data-d="keep"]'); if (first) first.focus();
+}
 
 function draw(root, me) {
   const name = (me && me.name) || '';
@@ -53,9 +147,15 @@ function draw(root, me) {
   root.innerHTML = `<button type="button" class="pm-b" aria-haspopup="menu" aria-expanded="false" aria-label="Your profile menu${name ? ', ' + esc(name) : ''}">${esc(initials(name))}</button>
     <div class="pm-m" role="menu" aria-label="Your profile">
       <div class="pm-who"><b>${esc(name || 'Your account')}</b><span>${esc(step)}</span></div>
+      <a role="menuitem" class="pm-compass" href="/compass/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 5.5l2 6.5-2 1.2-2-1.2z" fill="currentColor" stroke="none"/><path d="M12 18.5l2-6.5-2-1.2-2 1.2z"/></svg><span><b>Leadership Compass</b><small>Your direction in all four domains</small></span></a>
       ${items(me).map(([href, label, d]) => `<a role="menuitem" href="${href}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>${esc(label)}</a>`).join('')}
       <div class="pm-sep" role="separator"></div>
+      <div class="pm-look" role="group" aria-label="Light and dark"><span>Light</span>${[['device', 'Device'], ['light', 'Light'], ['dark', 'Dark']].map(([k, n]) => `<button type="button" data-theme-set="${k}" aria-pressed="${themePick() === k}">${n}</button>`).join('')}</div>
+      <button type="button" role="menuitemcheckbox" class="pm-i" data-pm="letters" aria-checked="${letterState(me)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM3 7l9 6 9-6"/></svg>Letters from your mentor<span class="pm-sw"><span>${letterState(me) === 'true' ? 'On' : 'Off'}</span><i></i></span></button>
+      <p class="pm-note" id="pm-lnote" role="status">${esc(lettersNote)}</p>
+      <div class="pm-sep" role="separator"></div>
       <button type="button" role="menuitem" class="pm-i" data-pm="out"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>Sign out</button>
+      <button type="button" role="menuitem" class="pm-i pm-del" data-pm="delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Delete my account</button>
     </div>`;
 }
 
@@ -68,11 +168,28 @@ export async function mount(host, { fixed = false } = {}) {
   root.className = 'pm' + (fixed ? ' fixed' : '');
   host.appendChild(root);
   draw(root, cached());
-  const set = (open) => { root.classList.toggle('open', open); const b = root.querySelector('.pm-b'); if (b) b.setAttribute('aria-expanded', String(open)); };
+  const set = (open) => {
+    root.classList.toggle('open', open); const b = root.querySelector('.pm-b'); if (b) b.setAttribute('aria-expanded', String(open));
+    // On a phone the circle can sit at the left of the header: open the menu
+    // towards the screen, never off it.
+    const m = root.querySelector('.pm-m');
+    if (open && m) { m.style.left = ''; m.style.right = ''; const r = m.getBoundingClientRect(); if (r.left < 8) { m.style.right = 'auto'; m.style.left = '0'; } }
+  };
   root.addEventListener('click', (e) => {
     const t = e.target.closest('button, a');
     if (!t) return;
     if (t.classList.contains('pm-b')) { e.stopPropagation(); set(!root.classList.contains('open')); return; }
+    if (t.dataset.pm === 'letters') {
+      e.stopPropagation();
+      const me = cached() || {}, on = letterState(me) !== 'true';
+      const was = me.letters;
+      me.letters = on; keep(me); lettersNote = on ? 'On. Letters come by email again.' : 'Off. You won’t get letters, only the emails you ask for (sign-in links).'; draw(root, me); root.classList.add('open');
+      A.setLetters(on).catch(() => { me.letters = was; keep(me); lettersNote = 'That did not save. Try again in a minute.'; draw(root, me); root.classList.add('open'); });
+      const again = root.querySelector('[data-pm="letters"]'); if (again) again.focus();
+      return;
+    }
+    if (t.hasAttribute('data-theme-set')) { e.stopPropagation(); if (window.ESTheme) window.ESTheme.set(t.getAttribute('data-theme-set')); return; }
+    if (t.dataset.pm === 'delete') { root.classList.remove('open'); deleteDialog(cached()); return; }
     if (t.dataset.pm === 'out') { A.signOut(); try { localStorage.removeItem(ME_KEY); } catch { /* private mode */ } location.href = '/ground-plan/#signin'; return; }
     // A link to this same page: the page reads its #place on load.
     const u = new URL(t.href, location.href);
@@ -81,5 +198,5 @@ export async function mount(host, { fixed = false } = {}) {
   document.addEventListener('click', (e) => { if (!root.contains(e.target)) set(false); });
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { set(false); const b = root.querySelector('.pm-b'); if (b) b.focus(); } });
   const r = await A.pull();
-  if (r && r.me) { const me = { name: r.me.name, tier: r.me.tier, signupType: r.me.signupType, hasPassword: r.me.hasPassword }; keep(me); draw(root, me); }
+  if (r && r.me) { const me = { name: r.me.name, tier: r.me.tier, signupType: r.me.signupType, hasPassword: r.me.hasPassword, letters: r.me.letters }; keep(me); draw(root, me); }
 }

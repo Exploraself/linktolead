@@ -1,5 +1,5 @@
 /* ExploraSelf Leadership Compass · v18.
-   The live Compass palette and fonts (Fraunces + Libre Franklin), more
+   The live Compass palette and fonts (Newsreader + Inter), more
    atmosphere and motion, small line icons. Every colour is a token on .cf;
    the dark workspace theme redefines them. Motion stops under
    prefers-reduced-motion. */
@@ -12,14 +12,14 @@ a{color:#6E5213}a:hover{color:#14100B}
 .cf[data-theme="dark"] a{color:#E3C47E}
 .cf *{box-sizing:border-box}
 .cf h1,.cf h2,.cf h3,.cf p{margin:0}
-.cf{font-family:'Libre Franklin',Arial,sans-serif;color:var(--ink);font-size:14px;line-height:1.6;display:flex;flex-wrap:wrap;align-items:flex-start;min-height:100vh}
-.cf button,.cf input,.cf select{font-family:'Libre Franklin',Arial,sans-serif}
+.cf{font-family:'Inter',Arial,sans-serif;color:var(--ink);font-size:14px;line-height:1.6;display:flex;flex-wrap:wrap;align-items:flex-start;min-height:100vh}
+.cf button,.cf input,.cf select{font-family:'Inter',Arial,sans-serif}
 .cf :focus-visible{outline:3px solid #C9A24A;outline-offset:3px}
 .skip{position:fixed;top:-60px;left:8px;background:#C9A24A;color:#14100B;padding:12px;z-index:100}.skip:focus{top:8px}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.sf{font-family:Fraunces,Georgia,serif;font-weight:500}
-.sfi{font-family:Fraunces,Georgia,serif;font-style:italic;font-weight:400}
-.serif{font-family:Fraunces,Georgia,serif;font-style:italic;font-weight:400}
+.sf{font-family:Newsreader,Georgia,serif;font-weight:500}
+.sfi{font-family:Newsreader,Georgia,serif;font-style:italic;font-weight:400}
+.serif{font-family:Newsreader,Georgia,serif;font-style:italic;font-weight:400}
 .eb{font-size:10px;font-weight:600;letter-spacing:.18em;color:var(--goldink);text-transform:uppercase}
 .atmo{background-color:var(--panel);background-image:radial-gradient(ellipse 55% 30% at 85% 4%,var(--glow),transparent 70%),radial-gradient(ellipse 45% 25% at 10% 50%,var(--glow),transparent 70%),repeating-radial-gradient(circle at 85% 4%,var(--ring) 0 1px,transparent 1px 52px)}
 .deep{background:var(--deep);color:#F7F2E7;background-image:radial-gradient(ellipse 60% 70% at 80% 0%,rgba(201,162,74,.18),transparent 70%),repeating-radial-gradient(circle at 80% 0%,rgba(201,162,74,.07) 0 1px,transparent 1px 40px)}
@@ -91,7 +91,7 @@ input[type=range]{width:100%;accent-color:#C9A24A;height:44px}
 .next1{animation:nextGlow 2.4s ease-out infinite}
 .flag{animation:flag 3s ease-in-out infinite;transform-origin:bottom center;transform:translateX(-50%)}
 .fill{transition:left .8s cubic-bezier(.2,.7,.2,1),width .9s cubic-bezier(.2,.7,.2,1)}
-.j h1,.j h2,.j .stname{font-family:Fraunces,Georgia,serif !important;font-weight:500 !important;text-transform:none !important;letter-spacing:-.02em !important}
+.j h1,.j h2,.j .stname{font-family:Newsreader,Georgia,serif !important;font-weight:500 !important;text-transform:none !important;letter-spacing:-.02em !important}
 .cellin{animation:cellIn .6s cubic-bezier(.2,.7,.2,1) both}
 .pinp{animation:pinPulse 2s ease-out infinite}
 .trail{animation:march 3s linear infinite}
@@ -175,7 +175,7 @@ details[data-step] summary::-webkit-details-marker{display:none}
 .wcard{background:rgba(247,242,231,.05);border:1px solid #3A2F20;border-radius:9px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
 .wrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .wname{font-weight:600;font-size:15px;display:inline-flex;gap:10px;align-items:center;color:#F7F2E7}
-.wbig{font-family:Fraunces,Georgia,serif;font-size:25px;color:#E3C47E;font-variant-numeric:tabular-nums;white-space:nowrap}
+.wbig{font-family:Newsreader,Georgia,serif;font-size:25px;color:#E3C47E;font-variant-numeric:tabular-nums;white-space:nowrap}
 .wnote{font-size:13px;color:#C4B69D}
 .wdom{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
 .wcard input[type=range]{width:100%;accent-color:#C9A24A;height:28px;margin:0;cursor:pointer}
@@ -201,7 +201,7 @@ details[data-step] summary::-webkit-details-marker{display:none}
 .dawn canvas{display:block;width:100%;height:360px}
 .dawn-cap{position:absolute;left:0;right:0;top:26px;text-align:center;padding-inline:16px;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
 .dawn-cap span{font-size:11px;letter-spacing:.32em;color:#E3C47E}
-.dawn-cap strong{font-family:Fraunces,Georgia,serif;font-weight:400;font-style:italic;font-size:clamp(22px,3.4vw,34px);line-height:1.2}
+.dawn-cap strong{font-family:Newsreader,Georgia,serif;font-weight:400;font-style:italic;font-size:clamp(22px,3.4vw,34px);line-height:1.2}
 
 @media (max-width:860px){
   .breath{margin-block:-19px}
@@ -235,3 +235,13 @@ details[data-step] summary::-webkit-details-marker{display:none}
   #s-overview .deep-hero{padding:18px 20px 24px !important}
 }
 [data-off],[data-off] *{animation-play-state:paused !important}
+/* The way into the incubator, in its own place under the Compass menu. */
+.incub-link{display:flex;align-items:center;gap:10px;margin:16px 0 0;padding:12px;border-radius:10px;text-decoration:none;color:#F7F2E7;background:linear-gradient(120deg,#01233B,#0B3350);border:1px solid rgba(227,196,126,.6);box-shadow:inset 0 0 0 3px #01233B,inset 0 0 0 4px rgba(227,196,126,.25)}
+.incub-link:hover{border-color:#E3C47E}
+.incub-link:focus-visible{outline:2px solid #C9A24A;outline-offset:3px}
+.incub-link svg{width:26px;height:26px;flex:none;color:#E3C47E}
+.incub-link span{flex:1;min-width:0;line-height:1.25}
+.incub-link small{display:block;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#E3C47E;font-weight:600}
+.incub-link b{display:block;font:500 14.5px/1.25 Newsreader,Georgia,serif}
+.incub-link i{font-style:normal;color:#E3C47E}
+@media (max-width:860px){.incub-link{margin:8px 0 10px;padding:10px 12px}}

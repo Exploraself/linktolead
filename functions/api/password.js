@@ -12,6 +12,7 @@ import { passwordProblem, setPassword } from '../_auth.js';
 import { allowed, logged, mailState, origin, send } from '../_mail.js';
 import { profile, unsubLink } from '../_account.js';
 import { passwordChangedLetter } from '../_letters.js';
+import { letterContext } from '../_mentor.js';
 
 export async function onRequestPost({ request, env, waitUntil }) {
   const D = db(env);
@@ -36,7 +37,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const go = (async () => {
       if (!(await allowed(D, me.email, ip))) return;
       const p = await profile(D, me.id);
-      const r = await send(env, { to: me.email, ...passwordChangedLetter(base, { first: String(me.name || '').split(' ')[0], to: me.email }),
+      const ctx = await letterContext(D, me.id, body.tz);
+      const r = await send(env, { to: me.email, ...passwordChangedLetter(base, { first: String(me.name || '').split(' ')[0], to: me.email, ...ctx }),
         why: 'The password on your ExploraSelf account was set or changed.', unsubUrl: unsubLink(base, p) });
       if (r.ok) await logged(D, me.email, ip);
       await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)')

@@ -123,9 +123,32 @@ function tableHTML() {
     : '<div class="empty">Nobody here yet. The roster fills as founders sign up.</div>'}`;
 }
 
+/** Mentors: who the letters come from. Everyone's mentor (the default), and
+ *  others a founder can be given on their own page. */
+function mentorsHTML() {
+  const L = data.mentors || [];
+  const row = (m) => `<li><img src="${esc(m.photo)}" alt="" width="40" height="40" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid var(--gold)">
+    <div><b>${esc(m.name)}</b>${m.isDefault ? ' <span class="pill premium">Everyone’s mentor</span>' : ''}<span class="em">${esc(m.title)} · replies to ${esc(m.email)}</span></div>
+    <img src="${esc(m.signature)}" alt="" height="28" style="height:28px;width:auto;margin-left:auto;background:#fff;padding:2px 6px">
+    <button class="ghost" data-medit="${esc(m.id)}">Edit</button></li>`;
+  return `<details class="panel mentors"><summary><h2 style="display:inline">Mentors · ${L.length}</h2> <span class="tiny">Letters come from the founder’s mentor: name, photo and signature.</span></summary>
+    <ul class="mlist">${L.map(row).join('')}</ul>
+    <form id="mform" class="mform">
+      <input type="hidden" id="m-id">
+      <label>Name<input id="m-name" required placeholder="Maria Rossi"></label>
+      <label>Title<input id="m-title" placeholder="ExploraSelf"></label>
+      <label>Photo<input id="m-photo" placeholder="/mail/maria.jpg or https://…"></label>
+      <label>Signature<input id="m-sig" placeholder="/mail/maria-signature.png or https://…"></label>
+      <label>Replies go to<input id="m-email" type="email" placeholder="support@exploraself.com"></label>
+      <label class="mchk"><input type="checkbox" id="m-def" style="width:auto"> Everyone’s mentor</label>
+      <button type="submit">Save mentor</button>
+      <p class="tiny">A photo or signature is a file on this site (put it in public/mail/) or an https address. Founders without their own mentor get everyone’s mentor.</p>
+    </form></details>`;
+}
+
 function draw() {
   const S = summary(data.students, data.waiting);
-  $('#main').innerHTML = `${tilesHTML(S)}${landingHTML()}${needsHTML()}${mailchimpHTML()}<h2 style="margin-top:28px">Account manager</h2>${tableHTML()}<div id="dlg"></div>`;
+  $('#main').innerHTML = `${tilesHTML(S)}${landingHTML()}${needsHTML()}${mailchimpHTML()}${mentorsHTML()}<h2 style="margin-top:28px">Account manager</h2>${tableHTML()}<div id="dlg"></div>`;
   const qi = $('#q');
   qi.oninput = () => { q = qi.value; const pos = qi.selectionStart; draw(); const n = $('#q'); n.focus(); n.setSelectionRange(pos, pos); };
 }
@@ -219,7 +242,9 @@ async function one(id) {
         <div class="k"><b>Industry</b><span>${esc(P.industry || '—')}</span></div>
         <div class="k"><b>Came from</b><span>${esc(P.source || 'programme')}</span></div>
         <div class="k"><b>Consent</b><span>${P.consent ? 'yes' + (P.consent_at ? ' · ' + when(P.consent_at) : '') : 'no'}</span></div>
-        <div class="k"><b>Unsubscribed</b><span>${P.unsubscribed ? 'yes' : 'no'}</span></div>
+        <div class="k"><b>Letters from mentor</b><span>${P.consent && !P.unsubscribed ? 'on' : 'off'}</span></div>
+        <div class="k"><b>Mentor</b><span><select data-mentorof="${esc(id)}" aria-label="This founder’s mentor"><option value="">Everyone’s mentor</option>${(d.mentors || []).map((m) => `<option value="${esc(m.id)}"${P.mentor_id === m.id ? ' selected' : ''}>${esc(m.name)}</option>`).join('')}</select></span></div>
+        <div class="k"><b>Time zone</b><span>${esc(P.tz || '—')}</span></div>
         <div class="k"><b>Password</b><span>${d.auth && d.auth.has_password ? 'yes' : P.signup_type === 'simple' ? 'none (signs in by email link)' : 'no'}${d.auth && d.auth.paused ? ' · paused' : ''}</span></div>
       </div></div>
     <div class="panel"><h2>Climb</h2>
@@ -266,6 +291,11 @@ document.addEventListener('click', async (e) => {
   if (d.tile) { tile = d.tile; flash = ''; return draw(); }
   if (d.open) return one(d.open);
   if (d.msg) return messageBox(d.msg);
+  if (d.medit) {
+    const m = (data.mentors || []).find((x) => x.id === d.medit); if (!m) return;
+    $('#m-id').value = m.id; $('#m-name').value = m.name; $('#m-title').value = m.title; $('#m-photo').value = m.photo; $('#m-sig').value = m.signature; $('#m-email').value = m.email; $('#m-def').checked = !!m.isDefault;
+    $('#m-name').focus(); return;
+  }
   if (d.del) return deleteBox(d.del);
   if ('close' in d) { $('#dlg').innerHTML = ''; return; }
   if (b.id === 'csv') return csv();
@@ -301,7 +331,21 @@ document.addEventListener('click', async (e) => {
     return load();
   }
 });
+document.addEventListener('submit', async (e) => {
+  if (e.target.id !== 'mform') return;
+  e.preventDefault();
+  const v = (id) => ($('#' + id).value || '').trim();
+  const r = await act({ action: 'mentor-save', id: v('m-id'), name: v('m-name'), title: v('m-title'), photo: v('m-photo'), signature: v('m-sig'), email: v('m-email'), isDefault: $('#m-def').checked });
+  flash = r.ok ? `Mentor saved: ${r.data.mentor.name}.` : (r.data.error || 'That did not save.');
+  return load();
+});
 document.addEventListener('change', async (e) => {
+  const mo = e.target.closest('select[data-mentorof]');
+  if (mo) {
+    const r = await act({ action: 'mentor-assign', student: mo.dataset.mentorof, mentor: mo.value });
+    flash = r.ok ? `Letters to ${person(mo.dataset.mentorof).email || 'this founder'} now come from ${mo.value ? mo.options[mo.selectedIndex].text : 'everyone’s mentor'}.` : (r.data.error || 'That did not save.');
+    return one(mo.dataset.mentorof);
+  }
   const s = e.target.closest('select[data-step]');
   if (!s) return;
   const r = await act({ action: 'tier', student: s.dataset.step, tier: s.value });

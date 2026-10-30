@@ -1,0 +1,86 @@
+/* The study room (public/music.js): the mini player, the light and the
+   two-minute invitation. Walnut glass, a gold hairline, ivory type: the same
+   room as the Cabinet, at the size of a card. Nothing moves under
+   prefers-reduced-motion. */
+.mp{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:80;font-family:'Inter',Arial,sans-serif;color:#F3EAD7}
+.mp[hidden]{display:none}
+.mp button{font:inherit;color:inherit;cursor:pointer}
+.mp-pill{display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 16px 6px 6px;border-radius:999px;border:1px solid rgba(212,175,90,.6);
+  background:linear-gradient(135deg,rgba(43,27,18,.94),rgba(14,10,6,.94));box-shadow:0 18px 36px -18px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,236,190,.08);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.mp-pill:hover{border-color:#E3C47E}
+.mp-disc svg{display:block;width:40px;height:40px}
+.mp.playing .mp-disc svg{animation:mpSpin 3.2s linear infinite}
+.mp-disc.big svg{width:56px;height:56px}
+.mp-pt{display:flex;flex-direction:column;align-items:flex-start;line-height:1.2;text-align:left}
+.mp-pt b{font:500 14.5px/1.2 Newsreader,Georgia,serif}
+.mp-pt small{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#D4AF5A;font-weight:600}
+.mp-eq{display:flex;align-items:flex-end;gap:2px;height:14px;margin-left:2px}
+.mp-eq i{width:3px;height:4px;background:#D4AF5A;border-radius:1px;opacity:.5}
+.mp.playing .mp-eq i{opacity:1;animation:mpEq 1s ease-in-out infinite}
+.mp.playing .mp-eq i:nth-child(2){animation-delay:.25s}.mp.playing .mp-eq i:nth-child(3){animation-delay:.5s}
+.mp-win{position:absolute;right:0;bottom:64px;width:min(340px,calc(100vw - 32px));max-height:calc(100vh - 110px);overflow:auto;padding:20px 20px 16px;border-radius:18px;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(255,196,110,.16),transparent 70%),linear-gradient(180deg,#22170D,#120C07);
+  border:1px solid rgba(212,175,90,.55);box-shadow:0 30px 60px -24px rgba(0,0,0,.85),inset 0 0 0 5px rgba(18,12,7,.9),inset 0 0 0 6px rgba(212,175,90,.22)}
+.mp-win[hidden]{display:none}
+.mp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
+.mp-k{margin:0;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#D4AF5A}
+.mp-head h2{margin:2px 0 0;font:500 22px/1.15 Newsreader,Georgia,serif;color:#F7F2E7}
+.mp-x{width:40px;height:40px;flex:none;border-radius:50%;border:1px solid #4A3A26;background:transparent;display:grid;place-items:center}
+.mp-x svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.mp-now{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;background:rgba(255,236,190,.05);border:1px solid #3A2E1F;margin-bottom:12px}
+.mp-now b{display:block;font:500 16px/1.2 Newsreader,Georgia,serif}.mp-now span{font-size:12.5px;color:#BFB194}
+.mp-play{width:48px;height:48px;flex:none;border-radius:50%;border:0;background:linear-gradient(135deg,#E9CB7C,#C9A24A 60%,#9C7726);color:#14100B!important;display:grid;place-items:center;box-shadow:0 8px 18px -8px rgba(201,162,74,.7)}
+.mp-play svg{width:18px;height:18px;fill:currentColor}
+.mp-tracks{border:0;margin:0 0 12px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.mp-tracks legend{width:100%;margin-bottom:6px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:#BFB194;padding:0}
+.mp-tracks label{position:relative;cursor:pointer}
+.mp-tracks input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.mp-tracks span{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid #4A3A26;font-size:12.5px;font-weight:600;color:#E7DCC7}
+.mp-tracks input:checked+span{background:rgba(212,175,90,.18);border-color:#D4AF5A;color:#F7F2E7}
+.mp-tracks input:focus-visible+span{outline:2px solid #D4AF5A;outline-offset:2px}
+.mp-sl{display:grid;gap:4px;margin-bottom:10px}
+.mp-sk{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:#BFB194}
+.mp-ends{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;font-size:11.5px;color:#BFB194}
+.mp-ends em{font-style:italic;font-family:Newsreader,Georgia,serif;font-size:12.5px}
+.mp-ends input{width:100%;accent-color:#D4AF5A;min-height:28px}
+.mp-vol .mp-ends{grid-template-columns:1fr}.mp-vol .mp-ends em{display:none}
+.mp-modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 8px}
+.mp-mode{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-height:64px;padding:10px 12px;border-radius:12px;border:1px solid #4A3A26;background:rgba(255,236,190,.03);text-align:left}
+.mp-mode b{font:500 15px/1.15 Newsreader,Georgia,serif;color:#F7F2E7}.mp-mode small{font-size:11px;line-height:1.35;color:#BFB194}
+.mp-mode[aria-pressed="true"]{border-color:#D4AF5A;background:linear-gradient(135deg,rgba(212,175,90,.25),rgba(212,175,90,.08));box-shadow:inset 0 0 0 1px rgba(212,175,90,.4)}
+.mp-fine{margin:6px 0 0;font-size:11px;color:#8C7F68}
+.mp button:focus-visible{outline:2px solid #D4AF5A;outline-offset:2px}
+/* The light: a warm shade over the whole page. Focus mode adds a soft
+   vignette, as if only the desk lamp were on. */
+#mp-dim{position:fixed;inset:0;z-index:75;pointer-events:none;background:#0A0603;opacity:0;transition:opacity .8s ease}
+#mp-dim.focus{background:radial-gradient(ellipse 70% 65% at 50% 45%,rgba(10,6,3,.55),#050302 100%)}
+/* The Lamp: the shade becomes the dark around a pool of warm light. */
+#mp-dim.lamp{background:radial-gradient(ellipse 60% 55% at 50% 45%,rgba(10,6,3,.2),#060302 100%)}
+#mp-dim.lamp.aimed{background:radial-gradient(ellipse var(--lw,320px) var(--lh,220px) at var(--lx,50%) var(--ly,45%),rgba(255,200,120,.06) 0%,rgba(10,6,3,.08) 55%,rgba(6,3,2,.97) 100%);transition:opacity .8s ease,background-position .4s ease}
+.mp-lamp{display:flex;gap:10px;align-items:flex-start;margin:6px 0 4px;padding:10px 12px;border-radius:12px;border:1px solid #4A3A26;background:rgba(255,236,190,.03);cursor:pointer}
+.mp-lamp input{width:18px;height:18px;margin-top:2px;accent-color:#D4AF5A;flex:none}
+.mp-lamp b{display:block;font:500 15px/1.2 Newsreader,Georgia,serif;color:#F7F2E7}.mp-lamp small{display:block;font-size:11.5px;line-height:1.4;color:#BFB194}
+.mp-candles{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:79;display:flex;gap:10px;padding:10px 16px;border-radius:999px;background:rgba(14,10,6,.85);border:1px solid rgba(212,175,90,.45);pointer-events:none}
+.mp-candles[hidden]{display:none}
+.mp-candles i{position:relative;width:8px;height:22px;border-radius:2px;background:linear-gradient(180deg,#EFE4CC,#BFB194)}
+.mp-candles i::before{content:"";position:absolute;left:50%;top:-11px;width:8px;height:11px;margin-left:-4px;border-radius:50% 50% 45% 45%;background:radial-gradient(circle at 50% 70%,#FFF3C4,#F2B444 55%,transparent 70%);opacity:0;transition:opacity .6s}
+.mp-candles i.on::before{opacity:1;animation:mpFlame 2.4s ease-in-out infinite}
+.mp-candles i.new::before{animation:mpLight .9s ease-out,mpFlame 2.4s ease-in-out .9s infinite}
+@keyframes mpFlame{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.15) translateY(-1px)}}
+@keyframes mpLight{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+/* The invitation, after two minutes on the dashboard. */
+.mp-ask{position:fixed;left:50%;bottom:max(84px,calc(env(safe-area-inset-bottom,0px) + 84px));transform:translateX(-50%);z-index:85;width:min(520px,calc(100vw - 28px));display:flex;gap:16px;align-items:center;padding:18px 20px;border-radius:18px;color:#F3EAD7;font-family:'Inter',Arial,sans-serif;
+  background:radial-gradient(ellipse 70% 80% at 0% 50%,rgba(255,196,110,.18),transparent 70%),linear-gradient(135deg,#2B1B12,#120C07);border:1px solid rgba(212,175,90,.6);box-shadow:0 30px 60px -20px rgba(0,0,0,.8);animation:mpRise .6s cubic-bezier(.2,.7,.2,1)}
+.mp-ask .mp-disc svg{animation:mpSpin 3.2s linear infinite}
+.mp-ask-h{margin:4px 0 12px;font:500 18px/1.35 Newsreader,Georgia,serif;color:#F7F2E7}
+.mp-ask-b{display:flex;flex-wrap:wrap;gap:8px}
+.mp-ask-b button{min-height:44px;padding:0 18px;border-radius:999px;font:600 14px 'Inter',Arial,sans-serif;cursor:pointer}
+.mp-yes{border:0;background:linear-gradient(135deg,#E9CB7C,#C9A24A 60%,#9C7726);color:#14100B}
+.mp-no{border:1px solid #4A3A26;background:transparent;color:#E7DCC7}
+.mp-ask button:focus-visible{outline:2px solid #D4AF5A;outline-offset:2px}
+@keyframes mpSpin{to{transform:rotate(360deg)}}
+@keyframes mpEq{0%,100%{height:4px}50%{height:14px}}
+@keyframes mpRise{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+@media(max-width:520px){.mp-pt small{display:none}.mp-pill{padding-right:12px}.mp-ask{flex-direction:column;align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){.mp *,.mp-ask,.mp-ask *,.mp-candles i::before{animation:none!important;transition:none!important}#mp-dim{transition:none!important}}
+@media print{.mp,#mp-dim,.mp-ask,.mp-candles{display:none!important}}

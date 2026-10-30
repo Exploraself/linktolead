@@ -12,14 +12,15 @@
 //                  mc-backfill. Every action is logged as an event; every
 //                  Mailchimp call also in mailchimp_log.
 
-import { json, bad, db, now, mentorOk, clean, looksLikeEmail, accountTables, newToken, STUDENT_TABLES } from '../_shared.js';
+import { json, bad, db, now, mentorOk, clean, looksLikeEmail, accountTables, newToken } from '../_shared.js';
 import { DOMAIN_STEPS, WHATIF_STEPS, ALL_STEP_IDS } from '../_plans.js';
 import { sendLink } from './signin.js';
 import { send, origin, mailState } from '../_mail.js';
 import { mentorLetter, answerLetter } from '../_letters.js';
+import { letterContext, mentors, saveMentor } from '../_mentor.js';
 import { LIBRARY_ITEMS } from './library.js';
 import { thread } from './thread.js';
-import { profile, unsubLink } from '../_account.js';
+import { profile, unsubLink, deleteFounder } from '../_account.js';
 import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER } from '../_mailchimp.js';
 
 /** Each plan step's domain and title, so ticks can be read by domain. */
@@ -97,7 +98,7 @@ export async function onRequestGet({ request, env }) {
       D.prepare('SELECT key,value FROM sheet WHERE student_id=?').bind(one).all(),
       D.prepare('SELECT * FROM compass WHERE student_id=?').bind(one).first(),
       D.prepare('SELECT id,level,domain,body,status,reply,created_at FROM note WHERE student_id=? ORDER BY created_at DESC').bind(one).all(),
-      D.prepare('SELECT industry,consent,consent_at,source,unsubscribed,unsub_at,signup_type,company,interest,landing,utm_source,utm_medium,utm_campaign,utm_content,utm_term FROM student_profile WHERE student_id=?').bind(one).first(),
+      D.prepare('SELECT industry,consent,consent_at,source,unsubscribed,unsub_at,signup_type,company,interest,landing,utm_source,utm_medium,utm_campaign,utm_content,utm_term,mentor_id,tz FROM student_profile WHERE student_id=?').bind(one).first(),
       D.prepare('SELECT step_id,done_at FROM plan_tick WHERE student_id=? ORDER BY done_at').bind(one).all(),
       D.prepare('SELECT pass_hash IS NOT NULL AS has_password, paused, set_at FROM account_auth WHERE student_id=?').bind(one).first(),
       D.prepare('SELECT subject,body,channel,sent_at,read_at FROM message WHERE student_id=? AND note_id IS NULL ORDER BY sent_at DESC LIMIT 20').bind(one).all(),
@@ -111,7 +112,8 @@ export async function onRequestGet({ request, env }) {
       compass: compass || null, notes: notes.results || [], profile: prof || null, auth: auth || null, messages: messages.results || [],
       climb: climbOf(me, steps.results || []), stages: stageChanges(stages.results || []), thread: asked.items,
       library: (library.results || []).filter((r) => LIBRARY_ITEMS[r.item]).map((r) => ({ item: r.item, name: LIBRARY_ITEMS[r.item].name, at: r.at })),
-      ticks: (ticks.results || []).map((t) => ({ ...t, domain: STEP[t.step_id] ? STEP[t.step_id].domain : null, title: STEP[t.step_id] ? STEP[t.step_id].title : t.step_id })) });
+      ticks: (ticks.results || []).map((t) => ({ ...t, domain: STEP[t.step_id] ? STEP[t.step_id].domain : null, title: STEP[t.step_id] ? STEP[t.step_id].title : t.step_id })),
+      mentors: await mentors(D) });
   }
 
   const students = await roster(D);
@@ -124,7 +126,7 @@ export async function onRequestGet({ request, env }) {
   const mcLog = await D.prepare('SELECT student_id, email, action, mode, status, detail, at FROM mailchimp_log ORDER BY id DESC LIMIT 20').all();
   const waitingJoin = (await backfillList(D, 5000, mc.mode)).length;
   const waitingTags = canTag(env) ? (await stepsBackfillList(D, 5000, mc.mode)).length : 0;
-  return json({ ok: true, students, waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, mailReady: mailState(env).ready,
+  return json({ ok: true, students, waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
     mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags } });
 }
 
@@ -151,8 +153,9 @@ export async function onRequestPost({ request, env }) {
     let emailed = false;
     if (!p.unsubscribed && mailState(env).ready) {
       const base = origin(request);
-      const r = await send(env, { to: n.email, ...answerLetter(base, { first: String(n.name || '').split(' ')[0], question: n.body, answer, to: n.email, tier: n.tier }),
-        why: 'You asked Alexandru a question in your free ExploraSelf account.', unsubUrl: unsubLink(base, p) });
+      const ctx = await letterContext(D, n.student_id);
+      const r = await send(env, { to: n.email, ...answerLetter(base, { first: String(n.name || '').split(' ')[0], question: n.body, answer, to: n.email, tier: n.tier, ...ctx }),
+        why: `You asked ${ctx.mentor.first} a question in your free ExploraSelf account.`, unsubUrl: unsubLink(base, p) });
       emailed = r.ok;
     }
     await D.prepare('INSERT INTO message (id, student_id, subject, body, channel, sent_at, note_id) VALUES (?,?,?,?,?,?,?)')
@@ -191,10 +194,27 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: true, done: ids.length, ...tally, tagged: tagIds.length, tags, left });
   }
 
+  if (body.action === 'mentor-save') {
+    // A mentor the letters can come from: name, title, photo, signature and
+    // reply address. "Everyone's mentor" makes them the default.
+    const out = await saveMentor(D, { id: body.id, name: body.name, title: body.title, photo: body.photo, signature: body.signature, email: body.email, isDefault: !!body.isDefault });
+    if (out.error) return bad(out.error);
+    await log('mentor', 'mentor-save', out.mentor.id);
+    return json({ ok: true, mentor: out.mentor, mentors: await mentors(D) });
+  }
+
   const id = clean(body.student, 80);
   const me = id ? await D.prepare('SELECT id, email, name, tier FROM student WHERE id = ?').bind(id).first() : null;
   if (!me) return bad('Unknown founder.', 404);
 
+  if (body.action === 'mentor-assign') {
+    // This founder's letters come from this mentor; empty = everyone's mentor.
+    const list = await mentors(D), want = clean(body.mentor, 40);
+    if (want && !list.some((m) => m.id === want)) return bad('Unknown mentor.');
+    await D.prepare('UPDATE student_profile SET mentor_id = ? WHERE student_id = ?').bind(want || null, me.id).run();
+    await log(me.id, 'mentor-assign', want || 'default');
+    return json({ ok: true, mentor: want || '' });
+  }
   if (body.action === 'tier') {
     const tier = ['free', 'session', 'lab', 'hub', 'premium'].includes(body.tier) ? body.tier : null;
     if (!tier) return bad('Unknown step.');
@@ -216,15 +236,7 @@ export async function onRequestPost({ request, env }) {
   if (body.action === 'delete') {
     // Typing the founder's email is the confirmation.
     if (clean(body.confirm, 200).toLowerCase() !== me.email) return bad('Type the founder’s email exactly to confirm.');
-    // Out of Mailchimp first: unsubscribed, never a hard delete. The log row
-    // goes with everything else below, so the address is not kept here.
-    const mcOut = await syncFounder(env, D, me.id, 'unsubscribe', { keepLog: false });
-    await D.batch([
-      ...STUDENT_TABLES.map((t) => D.prepare(`DELETE FROM ${t} WHERE student_id = ?`).bind(me.id)),
-      D.prepare('DELETE FROM mail_log WHERE email = ?').bind(me.email),
-      D.prepare('DELETE FROM auth_log WHERE email = ?').bind(me.email),
-      D.prepare('DELETE FROM student WHERE id = ?').bind(me.id),
-    ]);
+    const mcOut = await deleteFounder(env, D, me);
     // Logged without the founder's details, which are gone.
     await log('mentor', 'mentor-delete', `one founder deleted · mailchimp ${mcOut.status}`);
     return json({ ok: true, mailchimp: mcOut.status, mailchimpDetail: mcOut.detail });
@@ -247,8 +259,9 @@ export async function onRequestPost({ request, env }) {
     let emailed = false;
     if (emailWanted && canEmail) {
       const base = origin(request);
-      const r = await send(env, { to: me.email, ...mentorLetter(base, { subject, body: text, to: me.email, tier: me.tier }),
-        why: 'Alexandru and the team wrote to you about your free ExploraSelf account.', unsubUrl: unsubLink(base, p) });
+      const ctx = await letterContext(D, me.id);
+      const r = await send(env, { to: me.email, ...mentorLetter(base, { subject, body: text, to: me.email, tier: me.tier, ...ctx }),
+        why: `${ctx.mentor.first} and the team wrote to you about your free ExploraSelf account.`, unsubUrl: unsubLink(base, p) });
       if (!r.ok && channel === 'email') return bad('The email did not send. Nothing was saved; try again in a minute.', 502);
       emailed = r.ok;
       if (!r.ok) channel = 'plan';
