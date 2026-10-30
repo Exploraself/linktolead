@@ -990,3 +990,15 @@ function openReset(say = 'Choose your new password here. At least 10 characters.
   const f = $('#pw1'); if (f) f.focus({ preventScroll: true });
 }
 comeHome();
+
+/* The rail sticks just under the header, never beneath it: the header's
+ * height (it wraps on narrower screens) is kept in --toph. */
+(() => {
+  try {
+    const set = () => { const t = document.querySelector('.top'); if (t) document.documentElement.style.setProperty('--toph', t.offsetHeight + 'px'); };
+    set();
+    window.addEventListener('resize', set);
+    const t = document.querySelector('.top');
+    if (t && window.ResizeObserver) new ResizeObserver(set).observe(t);
+  } catch { /* old browser: the rail sticks at the top */ }
+})();
