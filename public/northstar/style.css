@@ -227,12 +227,7 @@ details[data-step] summary::-webkit-details-marker{display:none}
 @media (max-width:520px){
   .cf main{padding-top:8px}
   #s-overview{gap:16px !important;margin-top:-28px}
-  #s-overview .hero-badge{display:none}
-  #s-overview h1{font-size:38px !important}
   #s-overview p{line-height:1.6 !important}
-  #s-overview .hero-cmp{order:-1;padding:16px 16px 0 !important}
-  #s-overview .hero-cmp>div{max-width:230px !important}
-  #s-overview .deep-hero{padding:18px 20px 24px !important}
 }
 [data-off],[data-off] *{animation-play-state:paused !important}
 /* The way into the incubator, in its own place under the North Star menu. */
@@ -267,3 +262,36 @@ details[data-step] summary::-webkit-details-marker{display:none}
 .nav-prog i{position:absolute;inset:0;background:linear-gradient(#6F93B8,#A9C0D9);transform-origin:top;transform:scaleY(0);transition:transform .25s linear}
 @media(max-width:860px){.nav-prog{display:none}.nl-glow::before{left:18%;right:18%;top:auto;bottom:0;width:auto;height:2px}}
 @media(prefers-reduced-motion:reduce){.nl-glow,.nav-prog i{transition:none}}
+
+/* ── Hero · The Horizon (30 Oct) ──────────────────────────────────────
+   "From founder" · the dial · "to intentional leader." The dial sits on a
+   thin horizon line under a quiet star sky (horizon.js). One centred button.
+   Phones stack the three parts, so the dial is still on the first screen. */
+.cf main>#how:empty,.cf main>#ws:empty{display:none} /* empty helper boxes no longer push the hero down */
+.hz{position:relative;overflow:hidden;border-radius:14px;padding:46px 40px 44px;display:flex;flex-direction:column;align-items:center;gap:26px;color:#EEF2F7;background:#0A1522;
+ background-image:linear-gradient(180deg,transparent 45%,rgba(111,147,184,.10) 75%,rgba(111,147,184,.18)),radial-gradient(ellipse 60% 55% at 50% 48%,rgba(111,147,184,.16),transparent 70%)}
+.hz::after{content:"";position:absolute;inset:10px;border:1px solid rgba(111,147,184,.2);border-radius:9px;pointer-events:none}
+.hz>*{position:relative;z-index:1}
+.hz .hz-sky{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.hz-eb{color:#A9C0D9;font-size:11px;letter-spacing:.2em;text-align:center}
+.hz-row{position:relative;display:grid;grid-template-columns:1fr minmax(240px,360px) 1fr;align-items:center;gap:28px;width:100%;margin:0;font-size:inherit}
+.hz-row::before{content:"";position:absolute;left:-60px;right:-60px;top:50%;height:1px;background:linear-gradient(90deg,transparent,rgba(169,192,217,.55) 18%,rgba(169,192,217,.55) 82%,transparent);z-index:-1}
+.hz-w{font-size:clamp(40px,4.4vw,66px);line-height:1.02;letter-spacing:-.03em;text-wrap:balance}
+.hz-l{text-align:right;color:#EEF2F7}
+.hz-r{text-align:left;color:#A9C0D9}
+.hz-mid{display:block;color:#EEF2F7;filter:drop-shadow(0 0 40px rgba(111,147,184,.28))}
+.hz-mid svg{display:block;width:100%;height:auto}
+.hz-sub{color:#B8C6D6;font-size:16px;line-height:1.75;max-width:60ch;text-align:center}
+.hz-cta{display:flex;flex-direction:column;align-items:center;gap:10px}
+.hz-go{min-height:52px;min-width:260px;padding:0 24px;border-radius:4px;border:1px solid #A9C0D9;background:#6F93B8;color:#0E1C2B;font-weight:600;font-size:15px;letter-spacing:.02em;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 10px 30px -12px rgba(111,147,184,.7);transition:background .25s,box-shadow .25s,transform .25s}
+.hz-go:hover{background:#86A6C7;transform:translateY(-1px);box-shadow:0 16px 36px -12px rgba(111,147,184,.85)}
+.hz-meta{font-size:12px;letter-spacing:.06em;color:#A9B6C6;text-align:center}
+@media (max-width:860px){
+  .hz{padding:30px 20px 32px;gap:18px}
+  .hz-row{grid-template-columns:1fr;gap:6px}
+  .hz-row::before{display:none}
+  .hz-l,.hz-r{text-align:center;font-size:40px}
+  .hz-mid{width:min(250px,70vw);margin:6px auto}
+  .hz-go{min-width:0;width:100%}
+}
+@media (prefers-reduced-motion:reduce){.hz-go{transition:none}}
