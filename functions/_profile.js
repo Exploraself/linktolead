@@ -2,7 +2,7 @@
 // (the full form), and where they came from.
 //
 // Two forms make the same student record:
-//   FULL   (/road1/, landing "road1"; /road2/, the Compass sales page,
+//   FULL   (/road1/, landing "road1"; /road4/, landing "road4"; /road2/, the Compass sales page,
 //          landing "road2"): first name, surname, email, company (or "No
 //          company yet"), interest, industry, a password (required), consent.
 //   SIMPLE (/road3/, the 12 Scrolls page, landing "road3", and the Compass's
@@ -10,7 +10,7 @@
 //          surname, email, consent. No password, ever: these founders sign
 //          in by email link.
 // signup_type says which; landing says which sales page ('road1', 'road2',
-// 'road3' or 'compass'), and utm_* the tags the founder arrived with.
+// 'road3', 'road4' or 'compass'), and utm_* the tags the founder arrived with.
 //
 // Stored on student_profile: company '' means "No company yet"; NULL means it
 // was never asked.
@@ -24,7 +24,7 @@ export const INDUSTRIES = ['Coaching & consulting', 'Creative & design', 'E-comm
   'Beauty & personal care', 'Education & training', 'Professional services', 'Trades & construction', 'Technology & software',
   'Real estate', 'Manufacturing', 'Nonprofit & social impact', 'Other'];
 export const SIGNUP_TYPES = ['full', 'simple'];
-export const LANDINGS = ['road1', 'road2', 'road3', 'compass'];
+export const LANDINGS = ['road1', 'road2', 'road3', 'road4', 'compass'];
 /** The landing keys before the roads, each to the road its page became. A
  *  page loaded before the rename still sends one; stored ones are moved
  *  over once (functions/_shared.js). */

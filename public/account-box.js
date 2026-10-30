@@ -2,7 +2,7 @@
  * founder's Ground Plan at /start, signed in at once.
  *
  *   'full'   (/road2/, the Compass sales page, landing "road2"; /road1/,
- *            landing "road1"): first name, surname, email, company (or "No
+ *            landing "road1"; /road4/, landing "road4"): first name, surname, email, company (or "No
  *            company yet"), interest, industry, a password (required: at
  *            least 10 characters, typed twice), consent.
  *   'simple' (/road3/, the 12 Scrolls page, landing "road3"): first name,
@@ -12,7 +12,7 @@
  * The consent box starts unticked; without it the account is still made, and
  * nothing is emailed but what the founder asks for. The landing page and the
  * utm_* tags the founder arrived with go with the sign-up. Loaded the first
- * time a box opens (/road1/, /road2/, /road3/), then open() each time. */
+ * time a box opens (/road1/, /road2/, /road3/, /road4/), then open() each time. */
 import { detailFields, readDetails, CONSENT, utm } from '/forms.js';
 
 const $ = (s) => document.querySelector(s);

@@ -75,9 +75,9 @@ export function mailchimpState(env = {}) {
 }
 
 /** The Mailchimp tag for each sales page (the landing key stored on the
- *  profile): /road1/, /road2/ (the Compass sales page) and /road3/ (the 12
- *  Scrolls page). Founders tagged before the roads keep their old tags. */
-export const LANDING_TAGS = { road1: 'Landing - Road 1', road2: 'Landing - Road 2', road3: 'Landing - Road 3' };
+ *  profile): /road1/, /road2/ (the Compass sales page), /road3/ (the 12
+ *  Scrolls page) and /road4/ (the page that starts from what a founder feels). Founders tagged before the roads keep their old tags. */
+export const LANDING_TAGS = { road1: 'Landing - Road 1', road2: 'Landing - Road 2', road3: 'Landing - Road 3', road4: 'Landing - Road 4' };
 
 /** The tags for one founder. In API mode each stage and domain tag is sent as
  *  active or inactive, so a founder who moves on loses the old one. Step tags

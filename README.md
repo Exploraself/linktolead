@@ -79,20 +79,21 @@ so a deploy never removes them.
 | `MAILCHIMP_API_KEY` | **Secret** | Switches Mailchimp to API mode: tags, updates and unsubscribes, and no form fields to satisfy. |
 | `MAILCHIMP_DOUBLE_OPTIN` | Text, optional | `yes` makes Mailchimp send its own confirmation email before someone joins (API mode). |
 
-### Three roads, two forms, one account
+### Four roads, two forms, one account
 
-Three sales pages, the roads, all ending at `/start`:
+Four sales pages, the roads, all ending at `/start`:
 
 | Road | Address | Old addresses (302 here, query string kept) | Account form | Landing |
 |---|---|---|---|---|
 | Road 1 | `/road1/` (the long page, with the What-if Lab before the close) | `/`, `/b` | FULL | `road1` |
 | Road 2 | `/road2/` (the Compass sales page) | `/compass/welcome`, `/compass/welcome-a`, `/c` | FULL | `road2` |
 | Road 3 | `/road3/` (the 12 Scrolls page) | `/a` | SIMPLE | `road3` |
+| Road 4 | `/road4/` (starts from what a founder feels: eight symptoms, what usually sits underneath, the call only they can make, and the real first steps of week one) | — | FULL | `road4` |
 
 The redirects live in `functions/_landing.js` (the Worker and Pages both use
 it), and every old address is in `run_worker_first` in `wrangler.toml`.
 
-Every call to action on the three roads opens that page's form; none of them sends
+Every call to action on the four roads opens that page's form; none of them sends
 a visitor to another page. The Compass's own "Who is this compass for?" box is
 the SIMPLE form (landing `compass`, no landing tag). SIMPLE: first name, surname, email, consent — no password, ever;
 these founders sign in by email link. FULL: also company (or "No company yet"),
@@ -100,13 +101,19 @@ what they want most, industry and a password (required, at least 10
 characters). Either way the founder is signed in at once and lands on `/start`.
 `student_profile` keeps `signup_type`, `landing` and the `utm_*` tags they
 arrived with. Mailchimp gets `Signup - Full` / `Signup - Simple`,
-`Landing - Road 1` / `Landing - Road 2` / `Landing - Road 3`,
+`Landing - Road 1` / `Landing - Road 2` / `Landing - Road 3` / `Landing - Road 4`,
 `Interest - <goal>`, `Industry - <name>` and
 COMPANY. `/mentor` shows all of it and a table of sign-ups per landing.
 Landings stored before the roads (`a`, `b`, `c`) are moved to `road3`, `road1`
 and `road2` the first time the database is opened; founders tagged before keep
 their old Mailchimp landing tags, and get the new one at their next sync.
 Unknown addresses get `public/404.html` with a 404 status.
+
+Road 4's week-one sample saves the founder's notes to the device as they type
+(`ftb-sample`, keyed like the programme's answers). The first time they come
+home to `/start` signed in, `app.js` moves those notes into week one and the
+account, never over an answer already written. Its motion stops under
+`prefers-reduced-motion` and with the **Pause motion** button in its footer.
 
 ### Emails: letters from Alexandru
 

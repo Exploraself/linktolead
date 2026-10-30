@@ -108,6 +108,9 @@ ok(BL.road3.total === 2 && BL.road1.total === 1 && BL.road1.full === 1 && BL.roa
 const Sm = summary(L.students, []);
 ok(Sm.full === 2 && Sm.simple === 4 && filter(L.students, { tile: 'full' }).length === 2, '/mentor: Full / Simple filters');
 const csv = await (await mGet({ request: new Request('https://x/api/mentor?csv=1', { headers: { 'x-mentor-key': 'mentor-key-123' } }), env })).text();
+ok(BL.road4 && BL.road4.total === 0, '/mentor: Road 4 has its own row');
+[st, out] = await S({ ...FULL, first: 'Rui', last: 'Four', email: 'rui@example.com', source: 'home', landing: 'road4', stage: 'grow', password: 'a-long-password', confirm: 'a-long-password', utm: { utm_source: 'linkedin' } });
+ok(st === 200 && hasPw(out.token) && prof(out.token).signup_type === 'full' && prof(out.token).landing === 'road4' && prof(out.token).utm_source === 'linkedin' && /"Landing - Road 4"/.test(mcLog(out.token)), 'full form on Road 4: a password, landing road4, "Landing - Road 4"');
 ok(/"Sign-up form","Landing","utm_source"/.test(csv) && csv.includes('"Fay & Co"') && csv.includes('"meta"'), 'CSV: form, landing and utm columns');
 
 // ── The three roads, the old addresses and the 404 ─────────────────────────
@@ -174,11 +177,22 @@ const noRun = baseOf({ ...EXAMPLE, run: null, rate: null, hire: null }), nm = E.
 ok(noRun.fixed === 0 && nm.cash === null && nm.people === null && Number.isFinite(nm.mine), 'empty Fine-tune boxes: no money figure invented, the hours still move');
 
 // ── Mailchimp landing tags ──────────────────────────────────────────────────
-ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'Landing - Road 1', road2: 'Landing - Road 2', road3: 'Landing - Road 3' }), 'landing tags: Road 1, Road 2, Road 3');
+ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'Landing - Road 1', road2: 'Landing - Road 2', road3: 'Landing - Road 3', road4: 'Landing - Road 4' }), 'landing tags: Road 1, Road 2, Road 3, Road 4');
 ok(!tagsFor({ landing: 'compass' }).some((x) => /^Landing - /.test(x.name)) && !tagsFor({ landing: 'toString' }).some((x) => /^Landing - /.test(x.name)), 'the Compass box and anything unknown get no landing tag');
+
+// ── Road 4: the page that starts from what a founder feels ─────────────────
+const R4 = read('public/road4/index.html'), R4J = read('public/road4/page.js'), R4C = read('public/road4/road4.css');
+ok(R4J.includes("variant: 'full', landing: 'road4'") && R4.includes('<script type="module" src="/road4/page.js"></script>') && (R4.match(/<a [^>]*class="cta"[^>]*>/g) || []).every((a) => a.includes('data-join')), 'Road 4: every call to action opens the FULL form, landing road4');
+for (const [n, p] of [['The Founder Launchpad', 'Free'], ['The Boardroom — an hour with Alexandru', 'No cost'], ['Personal Leadership LAB', '$97'], ['Business Growth HUB', '$397'], ['The Summit', '$1,989']]) ok(R4.includes(`<b>${n}</b><span class="pr">${p}</span>`), `Road 4: ${n} · ${p}`);
+ok(R4C.includes('prefers-reduced-motion') && R4C.includes('html.still') && R4.includes('id="still"'), 'Road 4: motion stops for reduced motion and for the Pause button');
+ok(!/\b(99|32) (tools|frameworks)\b|P\.A\.C\.E/i.test(R4 + R4J), 'Road 4: no tool or framework names on the surface');
+ok(/import\('\/levels-build\.js'|'\/levels-build\.js'/.test(R4J) && R4J.includes('lv[f.k].steps.slice(0, 2)'), 'Road 4: week one comes from the level files, Name it and Evidence under each symptom');
+ok(R4J.includes("const NOTES = 'ftb-sample'") && /localStorage\.setItem\(NOTES/.test(R4J) && /try \{ localStorage\.setItem\(NOTES/.test(R4J), 'Road 4: sample notes save to this device, in try/catch');
+ok((R4J.match(/\{ k: '(self|people|work|market)', feel: /g) || []).length === 8 && ['self', 'people', 'work', 'market'].every((k) => (R4J.match(new RegExp(`\\{ k: '${k}', feel: `, 'g')) || []).length === 2), 'Road 4: eight symptoms, two in each domain');
 
 // ── /start: the greeting ────────────────────────────────────────────────────
 const APP = read('public/app.js');
 ok(/const firstName = \(\) => \(pulled && state\.me/.test(APP) && /if \(r && r\.gone\) \{ account\.signOut\(\); state\.me = null/.test(APP), '/start greets with the first name of the account read on this visit, never a cached one');
+ok(/adoptSample\(\);\n    compassRec/.test(APP) && APP.includes("const SAMPLE_KEY = 'ftb-sample'") && /account\.touch\('answers', k, state\.answers\[k\]\)/.test(APP) && /\|\| \(state\.answers\[k\] \|\| ''\)\.trim\(\)\) continue/.test(APP), '/start: notes from the Road 4 sample move into the account on coming home, never over an answer');
 
 done();
