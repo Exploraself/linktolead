@@ -737,11 +737,11 @@ body.inwork .foot{display:none}
   .tnav a.tbook svg{width:13px;height:13px}
 }
 @media(min-width:1280px){
-  html{zoom:1.25}
-  .railwrap{max-height:calc(100vh / 1.25 - var(--toph,0px))}
-  /* panels sized to the screen: at 125% the screen is 1/1.25 as tall in page units */
-  .mp .mp-win{max-height:calc(100vh / 1.25 - 170px)}
-  .top .pm-m{max-height:calc(100vh / 1.25 - 90px)}
+  html{zoom:1.1}
+  .railwrap{max-height:calc(100vh / 1.1 - var(--toph,0px))}
+  /* panels sized to the screen: at 110% the screen is 1/1.1 as tall in page units */
+  .mp .mp-win{max-height:calc(100vh / 1.1 - 170px)}
+  .top .pm-m{max-height:calc(100vh / 1.1 - 90px)}
   .top .wrap{max-width:1180px}
   .topin{flex-wrap:nowrap;gap:16px}
   .tnav{flex-wrap:nowrap;gap:6px}
