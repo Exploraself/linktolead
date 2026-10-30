@@ -50,7 +50,7 @@ const SalesMath = (() => {
     // Time per client, today and wanted. Without a client or an hour there is
     // nothing to divide, and the page says what to do instead.
     if (cNow === 0 || hNow === 0 || cWant === 0) {
-      o.cutTxt = '—'; o.cutColor = '#C9A24A';
+      o.cutTxt = '—'; o.cutColor = '#B4975F';
       if (cNow === 0) Object.assign(o, { cutCaption: 'time per client starts with your first client', verdictTitle: 'Start with your first client.', verdictText: 'Before time per client means anything, one person has to pay you. The North Star shows what to work on first at your stage.' });
       else if (hNow === 0) Object.assign(o, { cutCaption: 'add the hours you work today', verdictTitle: 'Count your hours first.', verdictText: 'Slide in the hours you really work in a week. Time per client is the number that says whether growth will cost you your life.' });
       else Object.assign(o, { cutCaption: 'add the clients you want', verdictTitle: 'Decide who you want to serve.', verdictText: 'Growth starts with a number of clients you actually want. Slide it in, and the road shows what it asks of you.' });
@@ -60,7 +60,7 @@ const SalesMath = (() => {
     if (cut >= 50) Object.assign(o, { cutTxt: cut + '%', cutColor: '#FF8A6B', cutCaption: 'less of your time per client',
       verdictTitle: 'This is not a sales problem. It is a leadership one.',
       verdictText: 'More clients with less of you only works when the business stops running through you: a clear offer, simple systems, people you trust with real decisions. That is the road the North Star maps, step by step, for your stage.' });
-    else if (cut > 0) Object.assign(o, { cutTxt: cut + '%', cutColor: '#C9A24A', cutCaption: 'less of your time per client',
+    else if (cut > 0) Object.assign(o, { cutTxt: cut + '%', cutColor: '#B4975F', cutCaption: 'less of your time per client',
       verdictTitle: 'Doable — if you change how the work gets done, not how hard you work.',
       verdictText: 'Working harder will not close this gap. Better systems, a sharper offer and one or two decisions given away will. The North Star shows you which ones come first.' });
     else Object.assign(o, { cutTxt: 'On track', cutColor: '#7FD1A8', cutCaption: 'your time per client can stay the same',
@@ -133,7 +133,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
     const v = val, o = SalesMath.plan(v);
     out('goalTxt', money(v.goal)); out('priceTxt', money(v.price)); out('keep', v.keep); out('hps', v.hps); out('avail', money(v.avail));
     out('sales', money(o.sales)); out('perSaleTxt', money(o.perSale)); out('need', money(o.need));
-    const look = { red: ['#C8432B', '#FFFFFF'], tight: ['#C9A24A', '#15213B'], fits: ['#2F7D5B', '#FFFFFF'] }[o.level];
+    const look = { red: ['#C8432B', '#FFFFFF'], tight: ['#B4975F', '#121C2D'], fits: ['#2F7D5B', '#FFFFFF'] }[o.level];
     out('fbTitle', o.title); out('fbText', o.text); out('fbAsk', o.ask);
     const st = $('#status'); st.textContent = o.badge; st.style.background = look[0]; st.style.color = look[1];
     $('#plan-card').style.borderTopColor = look[0];
@@ -141,7 +141,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
     // sits past its end, in red.
     const total = Math.max(o.need, v.avail) || 1;
     $('#hbar-track').style.width = (v.avail / total * 100) + '%';
-    const bar = $('#needbar'); bar.style.width = (v.avail > 0 ? Math.min(100, o.need / v.avail * 100) : 0) + '%'; bar.style.background = o.over > 0 ? '#C9A24A' : look[0];
+    const bar = $('#needbar'); bar.style.width = (v.avail > 0 ? Math.min(100, o.need / v.avail * 100) : 0) + '%'; bar.style.background = o.over > 0 ? '#B4975F' : look[0];
     const ov = $('#hbar-over'); ov.style.width = (o.over / total * 100) + '%'; ov.hidden = !(o.over > 0);
     out('overTxt', o.over > 0 ? `${money(o.over)} h over` : '');
     out('paysAtHours', money(o.paysAtHours));
@@ -183,7 +183,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
     document.querySelectorAll('.yn').forEach((b) => b.setAttribute('aria-pressed', String(a[b.dataset.q] === b.dataset.v)));
     $('#stages').innerHTML = STAGES.map((s, i) => {
       const here = stage === i, done = stage !== null && i < stage;
-      return `<div role="listitem" style="background: ${here ? '#C9A24A' : done ? '#15213B' : '#F3EFEA'}; color: ${done ? '#F3EFEA' : '#15213B'}; border-radius: 6px; padding: 20px; display: flex; flex-direction: column; gap: 8px; transition: background .3s ease; border: 2px solid ${here ? '#15213B' : 'transparent'}">
+      return `<div role="listitem" style="background: ${here ? '#B4975F' : done ? '#121C2D' : '#F3EFEA'}; color: ${done ? '#F3EFEA' : '#121C2D'}; border-radius: 6px; padding: 20px; display: flex; flex-direction: column; gap: 8px; transition: background .3s ease; border: 2px solid ${here ? '#121C2D' : 'transparent'}">
         <div style="display: flex; justify-content: space-between; align-items: center"><span style="font-weight: 900; font-size: 13px; letter-spacing: .12em">0${i + 1}</span><span style="font-weight: 900; font-size: 11px; letter-spacing: .14em">${here ? 'YOU ARE HERE' : done ? 'BEHIND YOU' : ''}</span></div>
         <span style="font-weight: 900; font-size: 22px; text-transform: uppercase">${s.name}</span>
         <span class="serif" style="font-size: 15px; line-height: 1.4">${s.focus}</span></div>`;

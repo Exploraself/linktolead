@@ -2,11 +2,11 @@
    Morning (cream study) and Evening (dark walnut, lamp glow), following the
    site's light and dark (public/theme.js). All colour comes from the tokens
    below. */
-.cab{--bg:#F4EDE0;--wall:#EFE4CC;--wall2:#E4D3B0;--panel:#FFFDF8;--ink:#14100B;--muted:#5F5648;--line:#D6C9AC;--gold:#C9A24A;--gold-ink:#6E5213;
+.cab{--bg:#F4EDE0;--wall:#EFE4CC;--wall2:#E4D3B0;--panel:#FFFDF8;--ink:#14100B;--muted:#5F5648;--line:#D6C9AC;--gold:#B4975F;--gold-ink:#6E5213;
   --wood:#5E3B20;--wood2:#7A4E2C;--woodhi:#A3734A;--leather:#2C4334;--leather2:#223528;--glow:rgba(255,214,150,.45);
   --dial:#F4EEE1;--dial-hi:#FFFDF7;--dial-line:#B8A27A;--dial-ink:#2A2016;--shadow:0 18px 40px -22px rgba(40,24,8,.45);
   color:var(--ink);font-family:'Inter',Arial,sans-serif;margin:28px auto 8px;max-width:1240px;padding:0 20px;transition:color .6s}
-:root[data-theme="dark"] .cab{--bg:#0D0906;--wall:#1C1309;--wall2:#150E07;--panel:#1E160D;--ink:#F3EAD7;--muted:#BFB194;--line:#3B2F1F;--gold:#D4AF5A;--gold-ink:#E3C47E;
+:root[data-theme="dark"] .cab{--bg:#0D0906;--wall:#1C1309;--wall2:#150E07;--panel:#1E160D;--ink:#F3EAD7;--muted:#BFB194;--line:#3B2F1F;--gold:#D4AF5A;--gold-ink:#D6BF8F;
   --wood:#2E1D0F;--wood2:#3F2814;--woodhi:#6A4526;--leather:#1A2A1F;--leather2:#132018;--glow:rgba(255,184,96,.30);
   --dial:#0C0A08;--dial-hi:#1E1913;--dial-line:#6E5A36;--dial-ink:#E9DDC0;--shadow:0 22px 50px -20px rgba(0,0,0,.8)}
 .cab h1,.cab h2{font-family:Newsreader,Georgia,serif;font-weight:500;margin:0;letter-spacing:-.01em}
@@ -22,7 +22,7 @@
 .cab-h1{font-size:clamp(30px,3.2vw,42px);line-height:1.08}
 .cab-h1 i{font-weight:300}
 .cab-lede{color:var(--muted);max-width:34ch}
-.cab-plate{border-radius:10px;padding:16px 18px;background:linear-gradient(135deg,#E8CD86,#C49A3E 45%,#9C7726 70%,#D9B866);color:#20160A;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(0,0,0,.25),0 8px 16px -10px rgba(0,0,0,.6)}
+.cab-plate{border-radius:10px;padding:16px 18px;background:linear-gradient(135deg,#E8CD86,#A88B55 45%,#9C7726 70%,#D9B866);color:#20160A;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(0,0,0,.25),0 8px 16px -10px rgba(0,0,0,.6)}
 .cab-pname{font:500 20px Newsreader,Georgia,serif}
 .cab-plate dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:8px 0 0;font-size:13px}
 .cab-plate dt{opacity:.75}.cab-plate dd{margin:0;font-weight:600}
@@ -66,7 +66,7 @@
 [data-theme="dark"] .cab-sig{filter:invert(1) sepia(1) saturate(2.4) hue-rotate(5deg) brightness(.95)}
 .cab-lib{margin-top:28px;background:var(--bg);border-radius:18px;padding:28px 24px 20px;transition:background .6s}
 .cab-libhead h2{font-size:clamp(26px,3vw,36px);margin:4px 0 6px}.cab-libhead p:last-child{color:var(--muted)}
-.cab-shelf{position:relative;margin-top:18px;border-radius:18px 18px 8px 8px;padding:40px 30px 0;background:radial-gradient(ellipse 70% 55% at 50% 0%,rgba(255,206,130,.28),transparent 70%),linear-gradient(180deg,#3A2212,#2A170B 70%,#1E1007);box-shadow:inset 0 0 0 1px rgba(201,162,74,.35),inset 0 10px 30px rgba(0,0,0,.5),var(--shadow);overflow:hidden}
+.cab-shelf{position:relative;margin-top:18px;border-radius:18px 18px 8px 8px;padding:40px 30px 0;background:radial-gradient(ellipse 70% 55% at 50% 0%,rgba(255,206,130,.28),transparent 70%),linear-gradient(180deg,#3A2212,#2A170B 70%,#1E1007);box-shadow:inset 0 0 0 1px rgba(180,151,95,.35),inset 0 10px 30px rgba(0,0,0,.5),var(--shadow);overflow:hidden}
 .cab-lamp{position:absolute;top:0;left:50%;transform:translateX(-50%);width:62%;height:6px;border-radius:0 0 6px 6px;background:linear-gradient(90deg,#8E6A22,#F0D488,#8E6A22);box-shadow:0 4px 30px 6px rgba(255,214,140,.35)}
 .cab-books{display:flex;gap:24px;justify-content:center;align-items:flex-end;overflow-x:auto;scroll-snap-type:x mandatory;padding-top:8px}
 .cab-book{--cloth:#5A1E1B;position:relative;flex:none;width:150px;aspect-ratio:2/3;border:0;padding:0;cursor:pointer;scroll-snap-align:center;border-radius:2px 6px 6px 2px;background-color:var(--cloth);color:#D9B65E;overflow:hidden;
@@ -97,35 +97,35 @@
 @media(prefers-reduced-motion:reduce){.cab *{animation:none!important;transition:none!important}}
 /* The incubator band: FULL accounts, always there, static. Navy and ivory:
    the one thing in the room that is not wood or leather. */
-.incub{position:relative;display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;margin:0;padding:26px 34px;background:linear-gradient(120deg,#01233B,#0B3350 55%,#01233B);color:#F7F2E7;border-top:2px solid #C9A24A;border-bottom:2px solid #C9A24A;border-inline:1px solid var(--line)}
-.incub::before{content:"";position:absolute;inset:6px 10px;border:1px solid rgba(227,196,126,.35);pointer-events:none}
-.incub-mark{width:64px;height:64px;border-radius:50%;border:1px solid rgba(227,196,126,.6);display:grid;place-items:center;background:rgba(227,196,126,.08)}
+.incub{position:relative;display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;margin:0;padding:26px 34px;background:linear-gradient(120deg,#0E1C2B,#172A3F 55%,#0E1C2B);color:#F7F2E7;border-top:2px solid #B4975F;border-bottom:2px solid #B4975F;border-inline:1px solid var(--line)}
+.incub::before{content:"";position:absolute;inset:6px 10px;border:1px solid rgba(214,191,143,.35);pointer-events:none}
+.incub-mark{width:64px;height:64px;border-radius:50%;border:1px solid rgba(214,191,143,.6);display:grid;place-items:center;background:rgba(214,191,143,.08)}
 .incub-mark svg{width:34px;height:34px}
-.incub-eb{margin:0;font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#E3C47E}
+.incub-eb{margin:0;font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#D6BF8F}
 .incub h2{font-size:28px;margin:4px 0 2px;color:#F7F2E7}
 .incub-now{margin:0 0 12px!important;color:#CDBFA8;font-size:14px}.incub-now b{color:#F7F2E7}
 .incub-levels{list-style:none;display:flex;gap:6px;margin:0;padding:0;flex-wrap:wrap}
-.incub-levels li{box-sizing:border-box;width:34px;height:34px;padding:0;margin:0;border-radius:50%;display:grid;place-items:center;background:transparent;font-size:11px;font-weight:600;border:1px solid rgba(227,196,126,.55);color:#E3C47E}
-.incub-levels li.lv-here{background:#C9A24A;color:#01233B;border-color:#C9A24A;box-shadow:0 0 0 4px rgba(201,162,74,.25)}
-.incub-levels li.lv-done{background:rgba(201,162,74,.22);color:#F7F2E7;border-color:#C9A24A}
+.incub-levels li{box-sizing:border-box;width:34px;height:34px;padding:0;margin:0;border-radius:50%;display:grid;place-items:center;background:transparent;font-size:11px;font-weight:600;border:1px solid rgba(214,191,143,.55);color:#D6BF8F}
+.incub-levels li.lv-here{background:#B4975F;color:#0E1C2B;border-color:#B4975F;box-shadow:0 0 0 4px rgba(180,151,95,.25)}
+.incub-levels li.lv-done{background:rgba(180,151,95,.22);color:#F7F2E7;border-color:#B4975F}
 .incub-levels li.lv-gate{opacity:.55;border-style:dashed}
 .incub-levels li:nth-child(4),.incub-levels li:nth-child(6),.incub-levels li:nth-child(10){margin-left:10px}
 .incub-key{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0 0!important;font-size:12px;color:#CDBFA8}
 .incub-key span{display:inline-flex;align-items:center;gap:6px}.incub-key i{width:8px;height:8px;border-radius:50%;display:inline-block}
-.k-free{background:#C9A24A}.k-board{background:#A8623A}.k-lab{background:#4C7355}.k-hub{background:#36607F}
-.incub-go{display:inline-flex;align-items:center;min-height:52px;padding:0 24px;border-radius:999px;border:0;background:#C9A24A;color:#01233B;font:700 15px 'Inter',Arial,sans-serif;cursor:pointer;white-space:nowrap}
-.incub-go:hover{background:#E3C47E}
+.k-free{background:#B4975F}.k-board{background:#A8623A}.k-lab{background:#4C7355}.k-hub{background:#36607F}
+.incub-go{display:inline-flex;align-items:center;min-height:52px;padding:0 24px;border-radius:999px;border:0;background:#B4975F;color:#0E1C2B;font:700 15px 'Inter',Arial,sans-serif;cursor:pointer;white-space:nowrap}
+.incub-go:hover{background:#D6BF8F}
 .incub .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media(max-width:820px){.incub{grid-template-columns:1fr;padding:24px 20px}.incub-mark{display:none}.incub-go{justify-self:start}}
 @media(max-width:640px){.incub-levels li{width:30px;height:30px;font-size:10.5px}.incub-levels li:nth-child(4),.incub-levels li:nth-child(6),.incub-levels li:nth-child(10){margin-left:4px}}
 /* The Leader’s North Star: its own slim strip under the Cabinet. */
 .cstrip{display:flex;align-items:center;gap:16px;max-width:1200px;margin:14px auto 0;padding:12px 18px;border-radius:14px;text-decoration:none;color:#F7F2E7;
-  background:radial-gradient(ellipse 50% 140% at 0% 50%,rgba(201,162,74,.25),transparent 60%),linear-gradient(120deg,#1C1309,#2B1B12 60%,#1C1309);border:1px solid rgba(201,162,74,.55);box-shadow:0 12px 24px -18px rgba(0,0,0,.6)}
-.cstrip:hover{border-color:#E3C47E}
-.cstrip:focus-visible{outline:2px solid #C9A24A;outline-offset:3px}
+  background:radial-gradient(ellipse 50% 140% at 0% 50%,rgba(180,151,95,.25),transparent 60%),linear-gradient(120deg,#1C1309,#2B1B12 60%,#1C1309);border:1px solid rgba(180,151,95,.55);box-shadow:0 12px 24px -18px rgba(0,0,0,.6)}
+.cstrip:hover{border-color:#D6BF8F}
+.cstrip:focus-visible{outline:2px solid #B4975F;outline-offset:3px}
 .cstrip-dial svg{width:40px;height:40px;display:block}
 .cstrip-t{flex:1;min-width:0}
-.cstrip-k{display:block;font:600 10.5px/1.4 'Inter',Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#E3C47E}
+.cstrip-k{display:block;font:600 10.5px/1.4 'Inter',Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#D6BF8F}
 .cstrip-t b{display:block;font:500 16px/1.35 Newsreader,Georgia,serif}
-.cstrip-go{flex:none;display:inline-flex;align-items:center;min-height:42px;padding:0 18px;border-radius:999px;background:#C9A24A;color:#14100B;font:700 13.5px 'Inter',Arial,sans-serif}
+.cstrip-go{flex:none;display:inline-flex;align-items:center;min-height:42px;padding:0 18px;border-radius:999px;background:#B4975F;color:#14100B;font:700 13.5px 'Inter',Arial,sans-serif}
 @media(max-width:640px){.cstrip{margin:12px 12px 0;flex-wrap:wrap}.cstrip-go{width:100%;justify-content:center}}

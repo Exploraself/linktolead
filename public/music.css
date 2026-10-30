@@ -7,7 +7,7 @@
 .mp button{font:inherit;color:inherit;cursor:pointer}
 .mp-pill{display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 16px 6px 6px;border-radius:999px;border:1px solid rgba(212,175,90,.6);
   background:linear-gradient(135deg,rgba(43,27,18,.94),rgba(14,10,6,.94));box-shadow:0 18px 36px -18px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,236,190,.08);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.mp-pill:hover{border-color:#E3C47E}
+.mp-pill:hover{border-color:#D6BF8F}
 .mp-disc svg{display:block;width:40px;height:40px}
 .mp.playing .mp-disc svg{animation:mpSpin 3.2s linear infinite}
 .mp-disc.big svg{width:56px;height:56px}
@@ -29,7 +29,7 @@
 .mp-x svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .mp-now{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;background:rgba(255,236,190,.05);border:1px solid #3A2E1F;margin-bottom:12px}
 .mp-now b{display:block;font:500 16px/1.2 Newsreader,Georgia,serif}.mp-now span{font-size:12.5px;color:#BFB194}
-.mp-play{width:48px;height:48px;flex:none;border-radius:50%;border:0;background:linear-gradient(135deg,#E9CB7C,#C9A24A 60%,#9C7726);color:#14100B!important;display:grid;place-items:center;box-shadow:0 8px 18px -8px rgba(201,162,74,.7)}
+.mp-play{width:48px;height:48px;flex:none;border-radius:50%;border:0;background:linear-gradient(135deg,#E9CB7C,#B4975F 60%,#9C7726);color:#14100B!important;display:grid;place-items:center;box-shadow:0 8px 18px -8px rgba(180,151,95,.7)}
 .mp-play svg{width:18px;height:18px;fill:currentColor}
 .mp-tracks{border:0;margin:0 0 12px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
 .mp-tracks legend{width:100%;margin-bottom:6px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:#BFB194;padding:0}
@@ -75,7 +75,7 @@
 .mp-ask-h{margin:4px 0 12px;font:500 18px/1.35 Newsreader,Georgia,serif;color:#F7F2E7}
 .mp-ask-b{display:flex;flex-wrap:wrap;gap:8px}
 .mp-ask-b button{min-height:44px;padding:0 18px;border-radius:999px;font:600 14px 'Inter',Arial,sans-serif;cursor:pointer}
-.mp-yes{border:0;background:linear-gradient(135deg,#E9CB7C,#C9A24A 60%,#9C7726);color:#14100B}
+.mp-yes{border:0;background:linear-gradient(135deg,#E9CB7C,#B4975F 60%,#9C7726);color:#14100B}
 .mp-no{border:1px solid #4A3A26;background:transparent;color:#E7DCC7}
 .mp-ask button:focus-visible{outline:2px solid #D4AF5A;outline-offset:2px}
 @keyframes mpSpin{to{transform:rotate(360deg)}}

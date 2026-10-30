@@ -266,7 +266,7 @@ async function one(id) {
         <p class="meta">They asked · ${esc(day(x.at))}${x.level ? ' · Level ' + String(x.level).padStart(2, '0') : ''}${x.domain ? ' · ' + esc(LEADN[x.domain] || x.domain) : ''}</p>
         <p>${esc(x.body)}</p>
         ${answered.has(x.id) ? '' : `<textarea data-note="${esc(x.id)}" placeholder="Your answer… It shows in their Ground Plan and goes by email as a letter."></textarea><p style="margin-top:8px"><button class="ghost reply" data-note="${esc(x.id)}">Send answer</button></p>`}
-      </div>` : `<div class="note" style="border-left:3px solid #C9A24A"><p class="meta">You answered · ${esc(day(x.at))} · ${x.read ? 'read' : 'not read yet'}</p><p>${esc(x.body)}</p></div>`).join('')
+      </div>` : `<div class="note" style="border-left:3px solid #B4975F"><p class="meta">You answered · ${esc(day(x.at))} · ${x.read ? 'read' : 'not read yet'}</p><p>${esc(x.body)}</p></div>`).join('')
         : '<p class="tiny" style="margin-top:8px">No questions yet.</p>'}</div>
     <div class="panel"><h2>Their work</h2>
       ${levels.length ? levels.map((l) => `<div class="dom"><h3>Level ${l}</h3>${DOMS.map(([k, label]) => { const rows = byLevel[l].filter((a) => a.domain === k); return rows.length ? `<div class="dom ${k}" style="border-top:0;padding-top:10px"><h3>${label}</h3>${rows.sort((a, b) => a.step - b.step).map((a) => `<div class="ans"><em>Step ${a.step + 1}</em><p>${esc(a.body)}</p></div>`).join('')}</div>` : ''; }).join('')}</div>`).join('')

@@ -363,10 +363,10 @@ function reachable(st, n) {
 
 /** The library at the top of the rail: four doors into the Library view. */
 const LIB_ICONS = [
-  ['3 manuals', 'The three manuals', '<path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z" fill="none" stroke="#C9A24A" stroke-width="1.6" stroke-linejoin="round"/>'],
-  ['99 tools', 'Built to Lead, 99 tools', '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-.5-.5-2.5z" fill="none" stroke="#C9A24A" stroke-width="1.6" stroke-linejoin="round"/>'],
-  ['32 frameworks', 'Worth Building, 32 frameworks', '<rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="#C9A24A" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="#C9A24A" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="#C9A24A" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="#C9A24A" stroke-width="1.6"/>'],
-  ['Soon', 'A New Way of Winning, coming soon', '<circle cx="12" cy="12" r="9" fill="none" stroke="#C9A24A" stroke-width="1.6"/><path d="M12 6l2 6-2 1.5-2-1.5z" fill="#C9A24A"/>'],
+  ['3 manuals', 'The three manuals', '<path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/>'],
+  ['99 tools', 'Built to Lead, 99 tools', '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-.5-.5-2.5z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/>'],
+  ['32 frameworks', 'Worth Building, 32 frameworks', '<rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/>'],
+  ['Soon', 'A New Way of Winning, coming soon', '<circle cx="12" cy="12" r="9" fill="none" stroke="#B4975F" stroke-width="1.6"/><path d="M12 6l2 6-2 1.5-2-1.5z" fill="#B4975F"/>'],
 ];
 const libIcons = () => `<div class="rlib"><p class="eyebrow">Your library · now open</p><div class="rlibrow">${LIB_ICONS.map(([t, label, svg]) =>
   `<button type="button" class="libi${t === 'Soon' ? ' soon' : ''}" data-go="library" aria-label="${esc(label)}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">${svg}</svg>${esc(t)}</button>`).join('')}</div></div>`;
@@ -374,10 +374,10 @@ const bookIcon = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="t
 
 /** The Leader’s North Star, always in the rail, just above The Boardroom. */
 const railStar = `<a class="rstar" href="/compass/" aria-label="Open your Leader’s North Star: where you stand in all four domains">
-  <svg class="rstar-i" width="40" height="40" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="#C9A24A" stroke-width="1.6"/><circle cx="32" cy="32" r="23" fill="none" stroke="#3B4C70"/>
-    <g stroke="#C9A24A" stroke-width="1.4"><line x1="32" y1="3" x2="32" y2="9"/><line x1="32" y1="55" x2="32" y2="61"/><line x1="3" y1="32" x2="9" y2="32"/><line x1="55" y1="32" x2="61" y2="32"/></g>
+  <svg class="rstar-i" width="40" height="40" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="#B4975F" stroke-width="1.6"/><circle cx="32" cy="32" r="23" fill="none" stroke="#3B4C70"/>
+    <g stroke="#B4975F" stroke-width="1.4"><line x1="32" y1="3" x2="32" y2="9"/><line x1="32" y1="55" x2="32" y2="61"/><line x1="3" y1="32" x2="9" y2="32"/><line x1="55" y1="32" x2="61" y2="32"/></g>
     <circle cx="32" cy="11" r="2.6" fill="#A8623A"/><circle cx="53" cy="32" r="2.6" fill="#4C7355"/><circle cx="32" cy="53" r="2.6" fill="#36607F"/><circle cx="11" cy="32" r="2.6" fill="#9A7418"/>
-    <g class="cban-needle"><path d="M32 14 L36 32 L32 35 L28 32Z" fill="#E3C47E"/><path d="M32 50 L36 32 L32 29 L28 32Z" fill="#3B4C70"/></g><circle cx="32" cy="32" r="3" fill="#C9A24A"/></svg>
+    <g class="cban-needle"><path d="M32 14 L36 32 L32 35 L28 32Z" fill="#D6BF8F"/><path d="M32 50 L36 32 L32 29 L28 32Z" fill="#3B4C70"/></g><circle cx="32" cy="32" r="3" fill="#B4975F"/></svg>
   <span><small>The Leader’s North Star</small><b>Where you stand, in all four domains</b><em>Open my North Star →</em></span></a>`;
 function railHTML(st) {
   const marks = { done: '✓', open: '', waiting: '·', locked: '🔒' };
@@ -611,7 +611,7 @@ const bannerDone = () => { try { localStorage.setItem(BANNER_KEY, 'seen'); } cat
 function libBanner() {
   if (bannerSeen() || !(state.me || account.joined())) return '';
   return `<div class="libban" role="status">
-    <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z" fill="none" stroke="#C9A24A" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/></svg>
     <div><b>Your library just got fuller.</b><p>With your free account: the three Founder’s Blueprint manuals, Built to Lead (99 practical tools) and Worth Building (32 leadership frameworks). A New Way of Winning is on its way.</p></div>
     <button type="button" class="cta" data-go="library">Open my library →</button>
     <button type="button" class="x" data-banner="close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
@@ -624,7 +624,7 @@ function libBanner() {
 function helpNote() {
   const have = holds(state.tier, 'session');
   return `<aside class="helpnote" aria-label="Help with a step">
-    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="#C9A24A" stroke-width="1.5"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6" fill="none" stroke="#C9A24A" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#C9A24A"/></svg>
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="#B4975F" stroke-width="1.5"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#B4975F"/></svg>
     <p><b>Finding a step hard?</b> That is where the work is. ${have ? `Bring it to your next session with ${esc(mentor.first)}, or` : `You can always book a 1:1 session with ${esc(mentor.first)}, or`} ask in <button type="button" class="linkish" data-go="ask">Ask Alexandru</button>.</p>
     ${have ? '' : `<a class="helpgo" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book a 1:1 ↗</a>`}
   </aside>`;
@@ -643,10 +643,10 @@ function compassBanner() {
   if (n >= CB_TIMES) return '';
   if (!cbCounted) { cbCounted = true; cbSet(++n); }
   return `<a class="cban" href="/compass/" aria-label="Open your Leader’s North Star: feedback in all four domains, your plans and your numbers">
-    <span class="cban-dial" aria-hidden="true"><svg viewBox="0 0 64 64" width="64" height="64"><circle cx="32" cy="32" r="29" fill="none" stroke="#C9A24A" stroke-width="1.6"/><circle cx="32" cy="32" r="23" fill="none" stroke="#594A32"/>
-      <g stroke="#C9A24A" stroke-width="1.4"><line x1="32" y1="3" x2="32" y2="9"/><line x1="32" y1="55" x2="32" y2="61"/><line x1="3" y1="32" x2="9" y2="32"/><line x1="55" y1="32" x2="61" y2="32"/></g>
+    <span class="cban-dial" aria-hidden="true"><svg viewBox="0 0 64 64" width="64" height="64"><circle cx="32" cy="32" r="29" fill="none" stroke="#B4975F" stroke-width="1.6"/><circle cx="32" cy="32" r="23" fill="none" stroke="#594A32"/>
+      <g stroke="#B4975F" stroke-width="1.4"><line x1="32" y1="3" x2="32" y2="9"/><line x1="32" y1="55" x2="32" y2="61"/><line x1="3" y1="32" x2="9" y2="32"/><line x1="55" y1="32" x2="61" y2="32"/></g>
       <circle cx="32" cy="11" r="2.6" fill="#A8623A"/><circle cx="53" cy="32" r="2.6" fill="#4C7355"/><circle cx="32" cy="53" r="2.6" fill="#36607F"/><circle cx="11" cy="32" r="2.6" fill="#9A7418"/>
-      <g class="cban-needle"><path d="M32 14 L36 32 L32 35 L28 32Z" fill="#E3C47E"/><path d="M32 50 L36 32 L32 29 L28 32Z" fill="#594A32"/></g><circle cx="32" cy="32" r="3" fill="#C9A24A"/></svg></span>
+      <g class="cban-needle"><path d="M32 14 L36 32 L32 35 L28 32Z" fill="#D6BF8F"/><path d="M32 50 L36 32 L32 29 L28 32Z" fill="#594A32"/></g><circle cx="32" cy="32" r="3" fill="#B4975F"/></svg></span>
     <span class="cban-txt"><span class="cban-k">Your Leader’s North Star</span><b>Lost on a level? Your North Star knows the way.</b>
       <span class="cban-p">Feedback in all four domains, your step-by-step plans and your numbers, all in one place. Come back whenever you need direction.</span></span>
     <span class="cban-go">Open my North Star →</span>

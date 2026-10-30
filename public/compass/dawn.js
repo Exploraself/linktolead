@@ -39,7 +39,7 @@
     const peakX = W * 0.86, peakY = yAt(0.86);
     const g = Math.min(1, T / 4.5);
     const glow = ctx.createRadialGradient(peakX, peakY + 30, 0, peakX, peakY + 30, H * (0.35 + 0.4 * g));
-    glow.addColorStop(0, `rgba(243,222,154,${0.35 * g})`); glow.addColorStop(0.4, `rgba(201,162,74,${0.18 * g})`); glow.addColorStop(1, 'rgba(201,162,74,0)');
+    glow.addColorStop(0, `rgba(243,222,154,${0.35 * g})`); glow.addColorStop(0.4, `rgba(180,151,95,${0.18 * g})`); glow.addColorStop(1, 'rgba(180,151,95,0)');
     ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
     for (const s of stars) {
       ctx.globalAlpha = still ? 0.55 : 0.35 + 0.35 * Math.sin(T * 1.6 + s.ph);
@@ -51,7 +51,7 @@
     ridge.forEach(([x, y], i) => ctx.lineTo(x, y + 26 + Math.sin(i * 0.3) * 6)); ctx.lineTo(W, H); ctx.fill();
     const prog = Math.min(1, T / 3), upto = Math.floor(prog * N);
     ctx.fillStyle = '#140E09'; ctx.beginPath(); ctx.moveTo(0, H); ridge.forEach(([x, y]) => ctx.lineTo(x, y)); ctx.lineTo(W, H); ctx.fill();
-    ctx.strokeStyle = '#C9A24A'; ctx.lineWidth = 2; ctx.beginPath();
+    ctx.strokeStyle = '#B4975F'; ctx.lineWidth = 2; ctx.beginPath();
     for (let i = 0; i <= upto; i++) { const [x, y] = ridge[i]; if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }
     ctx.stroke();
     if (!still && prog >= 1) {
@@ -62,12 +62,12 @@
       if (prog < fx - 0.02) return;
       const x = fx * W, y = yAt(fx), last = i === STOPS.length - 1;
       const pulse = still ? 0.5 : (Math.sin(T * 2.4 - i) + 1) / 2;
-      ctx.fillStyle = `rgba(227,196,126,${0.15 + 0.2 * pulse})`; ctx.beginPath(); ctx.arc(x, y, last ? 16 : 10, 0, 6.283); ctx.fill();
-      ctx.fillStyle = last ? '#F3DE9A' : '#C9A24A'; ctx.beginPath(); ctx.arc(x, y, last ? 6 : 4.5, 0, 6.283); ctx.fill();
+      ctx.fillStyle = `rgba(214,191,143,${0.15 + 0.2 * pulse})`; ctx.beginPath(); ctx.arc(x, y, last ? 16 : 10, 0, 6.283); ctx.fill();
+      ctx.fillStyle = last ? '#F3DE9A' : '#B4975F'; ctx.beginPath(); ctx.arc(x, y, last ? 6 : 4.5, 0, 6.283); ctx.fill();
       if (last) {
         ctx.strokeStyle = '#F7F2E7'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(x, y - 6); ctx.lineTo(x, y - 38); ctx.stroke();
         const wv = still ? 0 : Math.sin(T * 3) * 2.5;
-        ctx.fillStyle = '#C9A24A'; ctx.beginPath();
+        ctx.fillStyle = '#B4975F'; ctx.beginPath();
         ctx.moveTo(x, y - 38); ctx.lineTo(x + 20, y - 34 + wv); ctx.lineTo(x + 15, y - 29 + wv * 0.5); ctx.lineTo(x + 20, y - 24 + wv); ctx.lineTo(x, y - 25); ctx.fill();
       }
       if (W > 560 || last || i === 0) {

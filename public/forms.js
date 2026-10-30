@@ -15,7 +15,7 @@ export function detailFields(p, lab = '', need = ['company', 'interest', 'indust
   const opt = (list, ph) => `<option value="">${ph}</option>${list.map((x) => `<option>${esc(x)}</option>`).join('')}`;
   return [
     need.includes('company') ? `<label style="${lab}">Company<input class="inp" id="${p}-company" type="text" autocomplete="organization" maxlength="120"></label>
-      <label style="display: flex; gap: 10px; align-items: center; font-size: 13px; min-height: 32px"><input type="checkbox" id="${p}-nocompany" style="width: 18px; height: 18px; accent-color: #C9A24A; flex: none">No company yet</label>` : '',
+      <label style="display: flex; gap: 10px; align-items: center; font-size: 13px; min-height: 32px"><input type="checkbox" id="${p}-nocompany" style="width: 18px; height: 18px; accent-color: #B4975F; flex: none">No company yet</label>` : '',
     need.includes('interest') ? `<label style="${lab}">What do you want most from the business?<select class="inp" id="${p}-interest">${opt(INTERESTS, 'Choose one…')}</select></label>` : '',
     need.includes('industry') ? `<label style="${lab}">Industry<select class="inp" id="${p}-industry">${opt(INDUSTRIES, 'Choose your industry…')}</select></label>` : '',
   ].filter(Boolean).join('\n      ');

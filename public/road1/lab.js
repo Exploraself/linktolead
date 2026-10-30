@@ -31,7 +31,7 @@ const PAIRS = [
 ];
 const SIGN = { p: '+', m: '+', f: '−', d: '' };
 
-const CSS = `.hl{--hl-ink:#F7F2E7;--hl-muted:#C4B69D;--hl-line:#3A2F20;--hl-gold:#C9A24A;--hl-gold-hi:#E3C47E;color:var(--hl-ink);display:flex;flex-direction:column;gap:22px;margin-top:26px}
+const CSS = `.hl{--hl-ink:#F7F2E7;--hl-muted:#C4B69D;--hl-line:#3A2F20;--hl-gold:#B4975F;--hl-gold-hi:#D6BF8F;color:var(--hl-ink);display:flex;flex-direction:column;gap:22px;margin-top:26px}
 .hl *{box-sizing:border-box}
 .hl .hl-ex{border:1px dashed #594A32;border-radius:9px;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
 .hl .hl-tag{align-self:flex-start;font-size:11px;letter-spacing:.12em;font-weight:700;color:#1C1309;background:var(--hl-gold-hi);border-radius:4px;padding:4px 8px;text-transform:uppercase}
@@ -61,7 +61,7 @@ const CSS = `.hl{--hl-ink:#F7F2E7;--hl-muted:#C4B69D;--hl-line:#3A2F20;--hl-gold
 .hl .hl-today span{position:absolute;top:-17px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--hl-muted);white-space:nowrap}
 .hl .hl-limit{position:absolute;top:-6px;bottom:-6px;border-left:2px dashed #DDBD69}
 .hl .hl-limit span{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);font-size:10px;color:#DDBD69;white-space:nowrap}
-.hl .hl-verdict{background:rgba(201,162,74,.14);border-radius:9px;padding:14px 16px;font-weight:700;font-size:16px;line-height:1.45}
+.hl .hl-verdict{background:rgba(180,151,95,.14);border-radius:9px;padding:14px 16px;font-weight:700;font-size:16px;line-height:1.45}
 .hl details{border:1px solid var(--hl-line);border-radius:9px;padding:12px 16px}
 .hl summary{cursor:pointer;font-weight:700;color:var(--hl-gold-hi);min-height:32px;display:flex;align-items:center}
 .hl .hl-fine{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding-top:12px}
@@ -104,7 +104,7 @@ export function fill(host, { E, openGate }) {
       <div class="hl-heads" aria-hidden="true"><span>You move</span><span></span><span>Moves by itself</span></div>
       <div class="hl-rows">${PAIRS.map((x) => `<div class="hl-pair">
         <div class="hl-card">
-          <div class="hl-row"><label for="hl-lv-${x.k}" class="hl-name"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${x.icon}" fill="none" stroke="#C9A24A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>${x.name}</label><span class="hl-big" id="hl-v-${x.k}">0%</span></div>
+          <div class="hl-row"><label for="hl-lv-${x.k}" class="hl-name"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${x.icon}" fill="none" stroke="#B4975F" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>${x.name}</label><span class="hl-big" id="hl-v-${x.k}">0%</span></div>
           <input id="hl-lv-${x.k}" type="range" min="0" max="${E.LEVER_RANGE[x.k]}" step="5" value="0" data-lv="${x.k}">
           <span class="hl-note" id="hl-n-${x.k}"></span>
         </div>

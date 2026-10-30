@@ -3,8 +3,8 @@
    the navy bands and the gold stay as they are. The page's inline colours
    are matched here, so the page itself is untouched. */
 :root[data-theme="dark"] body,:root[data-theme="dark"] .fc{background:#0B1222;color:#E9ECF3}
-:root[data-theme="dark"] a{color:#E2C47E}:root[data-theme="dark"] a:hover{color:#FFFFFF}
-:root[data-theme="dark"] .kick{color:#E2C47E}
+:root[data-theme="dark"] a{color:#D6BF8F}:root[data-theme="dark"] a:hover{color:#FFFFFF}
+:root[data-theme="dark"] .kick{color:#D6BF8F}
 :root[data-theme="dark"] .lede{color:#B9C1D3}
 :root[data-theme="dark"] .yn{background:#141E36;color:#E9ECF3;border-color:#E9ECF3}
 :root[data-theme="dark"] .yn[aria-pressed="true"]{background:#E9ECF3;color:#0B1222}
@@ -12,21 +12,21 @@
 :root[data-theme="dark"] .pweye[aria-pressed="true"]{background:#1E2A46}
 :root[data-theme="dark"] .slide-card{background:#141E36;box-shadow:0 18px 40px rgba(0,0,0,.35)}
 :root[data-theme="dark"] .msg{background:#0F1830}
-:root[data-theme="dark"] .pwopt summary{color:#E2C47E}:root[data-theme="dark"] .pwhint{color:#A9B2C4}
+:root[data-theme="dark"] .pwopt summary{color:#D6BF8F}:root[data-theme="dark"] .pwhint{color:#A9B2C4}
 :root[data-theme="dark"] .win4-list{border-color:#2B3A5C}:root[data-theme="dark"] .win4-list button{color:#E9ECF3;border-color:#2B3A5C}:root[data-theme="dark"] .win4-list span,:root[data-theme="dark"] .win4-cap{color:#B9C1D3}
 :root[data-theme="dark"] .kit-item,:root[data-theme="dark"] .kit-close{background:#141E36;box-shadow:0 12px 30px rgba(0,0,0,.3)}
 :root[data-theme="dark"] .kit-what p,:root[data-theme="dark"] .kit-shelf-line,:root[data-theme="dark"] .kit-small{color:#B9C1D3}
 :root[data-theme="dark"] .kit-cell p,:root[data-theme="dark"] .kit-q{color:#E9ECF3}
-:root[data-theme="dark"] .kit-heads,:root[data-theme="dark"] .kit-lab{color:#E2C47E}
-:root[data-theme="dark"] .kit-tag{background:#0F1830;color:#E2C47E}
+:root[data-theme="dark"] .kit-heads,:root[data-theme="dark"] .kit-lab{color:#D6BF8F}
+:root[data-theme="dark"] .kit-tag{background:#0F1830;color:#D6BF8F}
 :root[data-theme="dark"] .kit-cover{background:#1E2A46}
 :root[data-theme="dark"] [style*="background: #F3EFEA"],:root[data-theme="dark"] [style*="background:#F3EFEA"]{background:#0F1830!important}
 :root[data-theme="dark"] [style*="background: #F4F0E8"],:root[data-theme="dark"] [style*="background:#F4F0E8"]{background:#0F1830!important}
 :root[data-theme="dark"] [style*="background: #FFFFFF"],:root[data-theme="dark"] [style*="background:#FFFFFF"]{background:#141E36!important}
 :root[data-theme="dark"] [style*="background: #E6DCCB"],:root[data-theme="dark"] [style*="background:#E6DCCB"]{background:#1E2A46!important}
 :root[data-theme="dark"] [style*="background: #EFDCAF"],:root[data-theme="dark"] [style*="background:#EFDCAF"]{background:#3A3220!important}
-:root[data-theme="dark"] [style*="color: #15213B"]:not([style*="background: #C9A24A"]):not([style*="background:#C9A24A"]):not([style*="background: #E2C47E"]):not([style*="background: #EFDCAF"]),:root[data-theme="dark"] [style*="color:#15213B"]:not([style*="background: #C9A24A"]):not([style*="background:#C9A24A"]):not([style*="background: #E2C47E"]):not([style*="background: #EFDCAF"]){color:#E9ECF3!important}
+:root[data-theme="dark"] [style*="color: #121C2D"]:not([style*="background: #B4975F"]):not([style*="background:#B4975F"]):not([style*="background: #D6BF8F"]):not([style*="background: #EFDCAF"]),:root[data-theme="dark"] [style*="color:#121C2D"]:not([style*="background: #B4975F"]):not([style*="background:#B4975F"]):not([style*="background: #D6BF8F"]):not([style*="background: #EFDCAF"]){color:#E9ECF3!important}
 :root[data-theme="dark"] [style*="color: #3D4966"],:root[data-theme="dark"] [style*="color:#3D4966"]{color:#B9C1D3!important}
 :root[data-theme="dark"] [style*="color: #5A6580"],:root[data-theme="dark"] [style*="color:#5A6580"]{color:#A9B2C4!important}
-:root[data-theme="dark"] [style*="color: #7A5E26"],:root[data-theme="dark"] [style*="color:#7A5E26"]{color:#E2C47E!important}
+:root[data-theme="dark"] [style*="color: #7A5E26"],:root[data-theme="dark"] [style*="color:#7A5E26"]{color:#D6BF8F!important}
 :root[data-theme="dark"] [style*="#D8CDBB"]{border-color:#2B3A5C!important}
