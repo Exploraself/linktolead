@@ -20,40 +20,40 @@ export function baseFrom({ goal, price, keep, hps, avail }, rate = null, hire = 
 
 const PAIRS = [
   { k: 'p', name: 'Raise your price', icon: 'M12 2v20M17 6.5C17 4.6 14.8 3.5 12 3.5S7 4.6 7 6.5s2 2.8 5 3.5 5 1.7 5 3.8-2.2 3.2-5 3.2-5-1.2-5-3.2', out: { k: 'cash', name: 'Pay · left for you each month', dom: 'Lead your business', col: '#91B8D5' } },
-  { k: 'm', name: 'Make your message clearer', icon: 'M4 5h16v10H9l-5 4z', out: { k: 'clients', name: 'Sales · each month', dom: 'Lead the market', col: '#DDBD69' } },
+  { k: 'm', name: 'Make your message clearer', icon: 'M4 5h16v10H9l-5 4z', out: { k: 'clients', name: 'Sales · each month', dom: 'Lead the market', col: '#D9B865' } },
   { k: 'f', name: 'Each sale takes fewer hours', icon: 'M12 22a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 8v5l3 2M9 2h6', out: { k: 'time', name: 'Time · your hours a month', dom: 'Lead yourself', col: '#E0A282', lower: true } },
   { k: 'd', name: 'Someone else does part of the work', icon: 'M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM17 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM2 20c0-3 3-5 6-5s6 2 6 5M13 20c0-2.4 1.8-4.4 4-4.9 2.6.3 5 2.2 5 4.9', out: { k: 'people', name: 'People · help you can afford', dom: 'Lead your people', col: '#9BC0A1' } },
 ];
 const SIGN = { p: '+', m: '+', f: '−', d: '' };
 
-const CSS = `.wl{background:#121C2D;color:#F3EFEA;border-radius:12px;padding:clamp(18px,3vw,30px);display:flex;flex-direction:column;gap:22px}
+const CSS = `.wl{background:#121C2D;color:#EEF2F7;border-radius:12px;padding:clamp(18px,3vw,30px);display:flex;flex-direction:column;gap:22px}
 .wl *{box-sizing:border-box}
 .wl .wl-switch{display:inline-flex;flex-wrap:wrap;gap:4px;border:1px solid #3B4A6B;border-radius:999px;padding:4px;align-self:flex-start}
-.wl .wl-switch button{min-height:44px;padding:0 18px;border-radius:999px;border:0;background:transparent;color:#F3EFEA;font:600 14px 'Inter',Arial,sans-serif;cursor:pointer}
-.wl .wl-switch button[aria-pressed="true"]{background:#B4975F;color:#121C2D}
+.wl .wl-switch button{min-height:44px;padding:0 18px;border-radius:999px;border:0;background:transparent;color:#EEF2F7;font:600 14px 'Inter',Arial,sans-serif;cursor:pointer}
+.wl .wl-switch button[aria-pressed="true"]{background:#6F93B8;color:#121C2D}
 .wl .wl-heads,.wl .wl-pair{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);gap:0 12px}
 .wl .wl-heads{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A9B2C4;font-weight:700}
 .wl .wl-rows{display:flex;flex-direction:column;gap:14px}
 .wl .wl-card{background:rgba(243,239,234,.05);border:1px solid #3B4A6B;border-radius:9px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
 .wl .wl-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .wl .wl-name{font-weight:700;font-size:15px;display:inline-flex;gap:10px;align-items:center}
-.wl .wl-big{font:500 24px/1.1 Newsreader,Georgia,serif;color:#D6BF8F;white-space:nowrap;font-variant-numeric:tabular-nums}
+.wl .wl-big{font:500 24px/1.1 Newsreader,Georgia,serif;color:#A9C0D9;white-space:nowrap;font-variant-numeric:tabular-nums}
 .wl .wl-note{font-size:13px;color:#C4CCDA}
 .wl .wl-dom{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
-.wl input[type=range]{width:100%;accent-color:#B4975F;height:28px;margin:0;cursor:pointer}
-.wl .wl-arrow{display:flex;align-items:center;justify-content:center;color:#B4975F}
+.wl input[type=range]{width:100%;accent-color:#6F93B8;height:28px;margin:0;cursor:pointer}
+.wl .wl-arrow{display:flex;align-items:center;justify-content:center;color:#6F93B8}
 .wl .wl-track{position:relative;height:10px;border-radius:5px;background:#3B4A6B;margin:18px 0 22px}
 .wl .wl-fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;transition:width .6s cubic-bezier(.2,.8,.2,1),background-color .4s}
-.wl .wl-today{position:absolute;top:-6px;bottom:-6px;width:2px;background:#F3EFEA;opacity:.45}
+.wl .wl-today{position:absolute;top:-6px;bottom:-6px;width:2px;background:#EEF2F7;opacity:.45}
 .wl .wl-today span{position:absolute;top:-17px;left:50%;transform:translateX(-50%);font-size:10px;color:#A9B2C4;white-space:nowrap}
-.wl .wl-limit{position:absolute;top:-6px;bottom:-6px;border-left:2px dashed #DDBD69}
-.wl .wl-limit span{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);font-size:10px;color:#DDBD69;white-space:nowrap}
-.wl .wl-verdict{background:rgba(180,151,95,.14);border-radius:9px;padding:14px 16px;font-weight:700;font-size:16px;line-height:1.45}
-.wl .wl-plan{border:1.5px solid #B4975F;border-radius:10px;padding:18px;display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;background:rgba(180,151,95,.08)}
+.wl .wl-limit{position:absolute;top:-6px;bottom:-6px;border-left:2px dashed #D9B865}
+.wl .wl-limit span{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);font-size:10px;color:#D9B865;white-space:nowrap}
+.wl .wl-verdict{background:rgba(111,147,184,.14);border-radius:9px;padding:14px 16px;font-weight:700;font-size:16px;line-height:1.45}
+.wl .wl-plan{border:1.5px solid #6F93B8;border-radius:10px;padding:18px;display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;background:rgba(111,147,184,.08)}
 .wl .wl-plan>div{flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:6px}
-.wl .wl-fine summary{cursor:pointer;font-weight:700;color:#D6BF8F;min-height:32px}
+.wl .wl-fine summary{cursor:pointer;font-weight:700;color:#A9C0D9;min-height:32px}
 .wl .wl-fine label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700}
-.wl .wl-fine input{min-height:44px;border:1px solid #3B4A6B;border-radius:5px;background:#1E2C4C;color:#F3EFEA;padding:0 12px;font:15px 'Inter',Arial,sans-serif;width:100%}
+.wl .wl-fine input{min-height:44px;border:1px solid #3B4A6B;border-radius:5px;background:#1E2C4C;color:#EEF2F7;padding:0 12px;font:15px 'Inter',Arial,sans-serif;width:100%}
 @media(max-width:760px){.wl .wl-heads{display:none}.wl .wl-pair{grid-template-columns:1fr;gap:6px}.wl .wl-arrow{transform:rotate(90deg);height:26px}.wl .wl-rows{gap:22px}}
 @media(prefers-reduced-motion:reduce){.wl .wl-fill{transition:none}}`;
 
@@ -76,7 +76,7 @@ export function fill(host, { E, get, openGate }) {
       <div class="wl-heads" aria-hidden="true"><span>You move</span><span></span><span>Moves by itself</span></div>
       <div class="wl-rows">${PAIRS.map((x) => `<div class="wl-pair">
         <div class="wl-card">
-          <div class="wl-row"><label for="wl-${x.k}" class="wl-name"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${x.icon}" fill="none" stroke="#B4975F" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>${x.name}</label><span class="wl-big" id="wl-v-${x.k}">0%</span></div>
+          <div class="wl-row"><label for="wl-${x.k}" class="wl-name"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${x.icon}" fill="none" stroke="#6F93B8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>${x.name}</label><span class="wl-big" id="wl-v-${x.k}">0%</span></div>
           <input id="wl-${x.k}" type="range" min="0" max="${E.LEVER_RANGE[x.k]}" step="5" value="0" data-wl="${x.k}">
           <span class="wl-note" id="wl-n-${x.k}"></span>
         </div>
@@ -96,7 +96,7 @@ export function fill(host, { E, get, openGate }) {
       </div>
     </details>
     <div class="wl-plan">
-      <div><span style="font-size: 12px; font-weight: 700; letter-spacing: .14em; color: #D6BF8F">YOUR PLAN FOR THIS CHANGE</span>
+      <div><span style="font-size: 12px; font-weight: 700; letter-spacing: .14em; color: #A9C0D9">YOUR PLAN FOR THIS CHANGE</span>
         <span id="wl-plan" style="font: 500 20px/1.3 Newsreader, Georgia, serif">Move a lever, and your four-step plan for it waits here.</span>
         <span style="font-size: 13px; color: #C4CCDA">Four steps, each with what to do, about how long, and what done looks like.</span></div>
       <button type="button" class="gold-btn" data-wlgate>Opens with your free account →</button>
