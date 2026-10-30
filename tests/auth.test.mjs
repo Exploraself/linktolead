@@ -102,6 +102,19 @@ ok(st === 200 && j.changed === true && DB.raw.prepare('SELECT salt FROM account_
 ok((await L('bo@example.com', 'first password')).status === 401 && (await L('bo@example.com', 'second password')).status === 200, 'the old password stops working, the new one works');
 ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id = ? AND kind IN ('password-set','password-changed')").get(bo).n === 2, 'set and change are logged');
 
+// ── Forgot password: the reset letter, to the Ground Plan with the box open ──
+{
+  DB.raw.prepare('DELETE FROM mail_log').run();
+  sent = fakeResend();
+  await askLink({ request: post('/api/signin', { email: 'ana@example.com', reset: true }, '8.8.8.1'), env });
+  const m = sent.at(-1).body;
+  ok(m.subject === 'Choose a new password' && /Choose my new password →: \S+\/start\?signin=[0-9a-f]+&reset=1/.test(m.text), 'forgot password: a reset letter to /start?…&reset=1');
+  const fs = await import('node:fs');
+  const app = fs.readFileSync('public/app.js', 'utf8');
+  ok(/get\('reset'\) === '1'/.test(app) && /function openReset\([\s\S]{0,300}box\.open = true/.test(app), 'the Ground Plan opens the password box after a reset link');
+  ok(/signinLink\(email, 'start', where !== 'note'\)/.test(fs.readFileSync('public/compass/app.js', 'utf8')), 'Compass: "Forgot your password?" asks for a reset to the Ground Plan');
+  DB.raw.prepare('DELETE FROM mail_log').run();
+}
 // ── The email limit never blocks password sign-in ───────────────────────────
 {
   const { LIMIT_MSG } = await import('../functions/_mail.js');

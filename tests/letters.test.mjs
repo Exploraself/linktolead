@@ -29,13 +29,14 @@ ok(L.text.includes('\n\nAlexandru\nAlexandru Cojocari · ExploraSelf\n\nP.S. Wan
 ok(LETTER_BOOKING === BOOKING, 'the booking link is the one in content.js');
 
 L = resultsLetter(B, { first: 'Maria', weakest: 'Lead your people', offer: 'unshakeable' });
-ok(L.subject === 'Your Leadership Compass' && paras(L.text)[1] === `Here is your Leadership Compass: ${B}/compass.`, 'results: subject and the link');
-ok(paras(L.text)[2] === 'Start with the domain that needs you most. For you that’s Lead your people. One honest hour there changes more than a week anywhere else.', 'results: the weakest domain, in full');
-ok(L.text.includes('P.S. One thing I’d love you to try: the Unshakeable assessment. It shows how steady you stay when the pressure comes, and where to start building. It’s $9.99 (valued at $199): https://exploraself.com/unshakeable'), 'results: the Unshakeable P.S.');
+ok(L.subject === 'Your Leadership Compass' && paras(L.text)[1] === 'Here is your Leadership Compass, ready whenever you are.' && paras(L.text)[2] === `Open my Compass →: ${B}/compass`, 'results: subject and the button');
+ok(L.html.includes(`<a href="${B}/compass" style="display:block;padding:14px 26px`) && L.html.includes('background:#C9A24A'), 'results: a gold button in the html');
+ok(paras(L.text)[3] === 'Start with the domain that needs you most. For you that’s Lead your people. One honest hour there changes more than a week anywhere else.', 'results: the weakest domain, in full');
+ok(L.text.includes('P.S. One thing I’d love you to try: the Unshakeable assessment. It shows how steady you stay when the pressure comes, and where to start building. It’s $9.99 (valued at $199). https://exploraself.com/unshakeable') && L.html.includes('>Take the Unshakeable assessment →</a>'), 'results: the Unshakeable P.S., with a readable link');
 ok(!resultsLetter(B, { first: 'Maria', offer: null }).text.includes('For you that’s'), 'results: no domain named when none is known');
 
 L = signinLetter(B, `${B}/start?signin=abc`, { first: 'Maria', offer: 'play' });
-ok(L.subject === 'Your link to get back in' && paras(L.text)[1] === `Here’s your way back in: ${B}/start?signin=abc. It works once, for the next 30 minutes.` && paras(L.text)[2] === 'Good to see you again. Everything you wrote is right where you left it.', 'sign-in: subject and words');
+ok(L.subject === 'Your link to get back in' && paras(L.text)[1] === 'Good to see you again. Everything you wrote is right where you left it.' && paras(L.text)[2] === `Sign me back in →: ${B}/start?signin=abc` && paras(L.text)[3] === 'The button works once, for the next 30 minutes.', 'sign-in: subject, words and the button');
 ok(L.text.includes('P.S. Got ten minutes? Play Leadionaire: fifteen decisions, thirty seconds each. It shows how you choose under pressure: https://exploraself.com/play'), 'sign-in: the game P.S.');
 
 L = passwordChangedLetter(B, { first: 'Maria', offer: 'first100' });
@@ -78,7 +79,7 @@ ok(sent[0].body.text.includes('Unsubscribe:') && sent[0].body.text.includes('Via
 sent = fakeResend();
 await signinPost({ request: post('/api/signin', { email: 'ana@example.com', to: 'start' }, '9.9.9.1'), env });
 const s1 = sent[0].body;
-ok(s1.subject === 'Your link to get back in' && /^Hi Ana,/.test(s1.text) && /\/start\?signin=[\w-]{40,}\. It works once, for the next 30 minutes\./.test(s1.text), 'sign-in route: the letter with a fresh link');
+ok(s1.subject === 'Your link to get back in' && /^Hi Ana,/.test(s1.text) && /Sign me back in →: \S+\/start\?signin=[\w-]{40,}\n/.test(s1.text), 'sign-in route: the letter with a fresh link');
 ok(s1.text.includes('P.S. One thing I’d love you to try: the Unshakeable assessment.') && !/Boardroom/.test(s1.text), 'sign-in route: the Unshakeable P.S., always');
 
 sent = fakeResend();

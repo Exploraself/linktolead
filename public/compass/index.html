@@ -29,6 +29,7 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
 <link rel="preload" href="/assets/fonts/libre-franklin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="style.css">
+<style>#acct-gate{position:fixed;inset:0;z-index:60;background:rgba(16,13,9,.65);display:flex;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}#acct-gate[hidden]{display:none}</style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -54,7 +55,7 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
     <div style="display: flex; flex-direction: column; gap: 12px">
       <header class="topbar" style="min-height: 64px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: -20px -22px 0; padding: 10px 28px">
         <span style="font-size: 9px; letter-spacing: .16em; color: var(--muted)">A BUSINESS THAT WORKS. A LIFE THAT MATTERS.</span>
-        <div style="display: flex; align-items: center; gap: 14px">
+        <div id="top-tools" style="display: flex; align-items: center; gap: 14px">
           <button type="button" data-act="how" data-f="how" id="how-btn" aria-expanded="false" style="border: 0; background: none; padding: 10px 0; color: var(--ink); font-size: 12px; text-decoration: underline; text-underline-offset: 5px; cursor: pointer">How to use this</button>
           <button type="button" data-act="download" aria-label="Download your progress" title="Download your progress" style="width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <button type="button" data-act="ws" data-f="ws" id="ws-btn" aria-expanded="false" aria-label="Your workspace" title="Your workspace" style="width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
@@ -223,6 +224,7 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
     <!-- ===== MOBILE SAVE BAR ===== -->
     <div class="mbar deep no-print" id="mbar" style="position: sticky; bottom: 0; z-index: 25; margin: 0 -16px -80px; padding: 10px 14px; gap: 8px; align-items: center; box-shadow: 0 -10px 24px rgba(16,13,9,.25)"></div>
   </main>
+<div id="acct-gate" hidden></div>
 </div>
 <div id="toast" role="status" aria-live="polite" style="position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #1C1309; color: #F7F2E7; border: 1px solid #C9A24A; border-radius: 5px; padding: 12px 20px; font: 13px 'Libre Franklin', Arial, sans-serif; z-index: 90; max-width: 90vw; display: none"></div>
 <script src="model.js"></script>

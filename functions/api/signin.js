@@ -21,10 +21,11 @@ import { PAUSED } from '../_auth.js';
 export const TTL = 30 * 60_000;
 const SAME = { ok: true, message: 'If there is an account for that address, a sign-in link is on its way. It works once, for 30 minutes.' };
 
-/** Make a one-time code for this founder and email the link. The link opens
- *  where the founder asked from: the Compass or their Ground Plan. Also used
- *  by /mentor ("Send sign-in link", "Send a password reset link"). */
-export async function sendLink(env, D, base, me, page = 'compass') {
+/** Make a one-time code for this founder and email the link. The link always
+ *  opens their Ground Plan (/start), the dashboard. `reset` (a forgotten
+ *  password, or the mentor's "Send a password reset link") adds &reset=1, so
+ *  the Ground Plan opens the password box at once. Also used by /mentor. */
+export async function sendLink(env, D, base, me, page = 'start', { reset = false } = {}) {
   const code = newToken() + newToken().slice(0, 16);
   await D.prepare('DELETE FROM signin_code WHERE expires_at < ?').bind(Date.now()).run();
   await D.prepare('INSERT INTO signin_code (code_hash, student_id, expires_at) VALUES (?,?,?)')
@@ -32,7 +33,7 @@ export async function sendLink(env, D, base, me, page = 'compass') {
   const p = await profile(D, me.id);
   const who = me.name !== undefined ? me : await D.prepare('SELECT name FROM student WHERE id = ?').bind(me.id).first();
   const first = String((who && who.name) || '').split(' ')[0];
-  return send(env, { to: me.email, ...signinLetter(base, `${base}/${page === 'start' ? 'start' : 'compass'}?signin=${code}`, { first, to: me.email }),
+  return send(env, { to: me.email, ...signinLetter(base, `${base}/start?signin=${code}${reset ? '&reset=1' : ''}`, { first, to: me.email, reset }),
     why: 'Someone asked for a sign-in link to this ExploraSelf account. If it was not you, nothing changes.', unsubUrl: unsubLink(base, p) });
 }
 
@@ -53,7 +54,7 @@ export async function onRequestPost({ request, env }) {
   const me = await D.prepare('SELECT id, email FROM student WHERE email = ?').bind(email).first();
   if (!me) return json(SAME);
 
-  const r = await sendLink(env, D, origin(request), me, body.to === 'start' ? 'start' : 'compass');
+  const r = await sendLink(env, D, origin(request), me, 'start', { reset: body.reset === true });
   await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)')
     .bind(me.id, r.ok ? 'signin-link' : 'signin-link-failed', now(), r.why || null).run();
   return json(SAME);
