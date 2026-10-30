@@ -327,16 +327,16 @@
       segs += `<path class="band" d="${bandPath(ri, ro, a0, a1)}" fill="${on ? LIGHT[i] : 'none'}" stroke="${on ? LIGHT[i] : '#8A7A5E'}" stroke-width="${opts.small ? 2 : 1}" stroke-dasharray="${on ? '0' : '2 3'}" style="opacity: ${on ? 1 : .55}; transition: fill .5s ease, opacity .5s ease"/>`; } });
     const coreR = (3 + total / 16 * 7).toFixed(1), coreOp = (0.3 + total / 16 * 0.7).toFixed(2);
     return `<svg class="${opts.cls || ''}" width="${size}" height="${size}" viewBox="0 0 120 120" role="img" aria-label="Your launchpad: ${total} of 16 pieces in place" style="flex: none">
-      ${opts.small ? '' : '<g class="spin"><circle cx="60" cy="60" r="59" fill="none" stroke="#B4975F" stroke-width=".8" stroke-dasharray="1.5 5" opacity=".7"/></g>'}
+      ${opts.small ? '' : '<g class="spin"><circle cx="60" cy="60" r="59" fill="none" stroke="#6F93B8" stroke-width=".8" stroke-dasharray="1.5 5" opacity=".7"/></g>'}
       ${segs}
-      ${opts.small ? '' : '<line x1="60" y1="2" x2="60" y2="118" stroke="#1C1309" stroke-width="2"/><line x1="2" y1="60" x2="118" y2="60" stroke="#1C1309" stroke-width="2"/>'}
-      <circle cx="60" cy="60" r="${coreR}" fill="#B4975F" style="opacity: ${coreOp}; transition: r .6s ease, opacity .6s ease"/>
-      ${opts.small ? '' : '<circle cx="60" cy="60" r="11" fill="none" stroke="#F7F2E7" stroke-width=".8" opacity=".5"/><g class="orbit2"><circle cx="60" cy="3" r="2.5" fill="#F7F2E7"/></g>'}
+      ${opts.small ? '' : '<line x1="60" y1="2" x2="60" y2="118" stroke="#0E1C2B" stroke-width="2"/><line x1="2" y1="60" x2="118" y2="60" stroke="#0E1C2B" stroke-width="2"/>'}
+      <circle cx="60" cy="60" r="${coreR}" fill="#6F93B8" style="opacity: ${coreOp}; transition: r .6s ease, opacity .6s ease"/>
+      ${opts.small ? '' : '<circle cx="60" cy="60" r="11" fill="none" stroke="#EEF2F7" stroke-width=".8" opacity=".5"/><g class="orbit2"><circle cx="60" cy="3" r="2.5" fill="#EEF2F7"/></g>'}
     </svg>`;
   }
 
   /* ── Parts ──────────────────────────────────────────────────────────────── */
-  const NAV = [['overview', '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><g><polygon points="12,4 14,12 12,13.5 10,12" fill="#B4975F"/><polygon points="12,20 14,12 12,10.5 10,12" fill="currentColor" opacity=".5"/><animateTransform attributeName="transform" type="rotate" values="20 12 12;34 12 12;20 12 12" dur="7s" repeatCount="indefinite"/></g></svg>', 'Your compass'],
+  const NAV = [['overview', '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><g><polygon points="12,4 14,12 12,13.5 10,12" fill="#6F93B8"/><polygon points="12,20 14,12 12,10.5 10,12" fill="currentColor" opacity=".5"/><animateTransform attributeName="transform" type="rotate" values="20 12 12;34 12 12;20 12 12" dur="7s" repeatCount="indefinite"/></g></svg>', 'Your North Star'],
     ['clear', '01', 'Get clear'], ['people', '02', 'Lead your people'], ['numbers', '03', 'Count what matters'], ['plan', '04', 'Choose your next steps'], ['method', '⌘', 'How it works']];
   const pNav = (c) => NAV.map(([id, ni, t]) => `<button type="button" class="nl ${UI.page === id ? 'on' : ''}" data-go="${id}" data-f="nav-${id}"${UI.page === id ? ' aria-current="true"' : ''}><span class="ni">${ni}</span>${t}${id === 'clear' ? `<small style="margin-left: auto; font-size: 9px">${c.answered}/8</small>` : ''}</button>`).join('');
 
@@ -355,26 +355,26 @@
     const line = t === 16 ? LINES[4] : t === 0 ? LINES[0] : t < 8 ? LINES[1] : t < 12 ? LINES[2] : LINES[3];
     return `${emblem(c.pc.per, 124, { cls: 'lp-emb' })}
       <div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 4px; min-width: 0">
-        <span class="eb" style="color: #D6BF8F">Your launchpad · ${t} of 16 pieces in place</span>
+        <span class="eb" style="color: #A9C0D9">Your launchpad · ${t} of 16 pieces in place</span>
         <span class="sf" style="font-size: 18px; line-height: 1.25">${line}</span>
         <div style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; font-weight: 600">${D.map((d, i) => `<span style="display: inline-flex; align-items: center; gap: 6px; color: ${LIGHT[i]}"><span style="width: 9px; height: 9px; border-radius: 50%; background: ${LIGHT[i]}"></span>${d.name} ${c.pc.per[i]}/4</span>`).join('')}</div>
       </div>
-      ${ready ? '<a class="pop cta" href="/ground-plan/#home" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 18px; border-radius: 5px; background: #B4975F; color: #14100B; font-weight: 600; text-decoration: none">You’re ready · Enter the Founder Launchpad →</a>' : ''}`;
+      ${ready ? '<a class="pop cta" href="/ground-plan/#home" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 18px; border-radius: 5px; background: #6F93B8; color: #0E1C2B; font-weight: 600; text-decoration: none">You’re ready · Enter the Founder Launchpad →</a>' : ''}`;
   }
 
   const pRing = (c) => `<svg width="74" height="74" viewBox="0 0 74 74" role="img" aria-label="${c.answered} of 8 answered">
       <circle cx="37" cy="37" r="31" fill="none" stroke="var(--cream)" stroke-width="7"/>
-      <circle class="ringp" cx="37" cy="37" r="31" fill="none" stroke="#B4975F" stroke-width="7" stroke-linecap="round" stroke-dasharray="194.8" style="stroke-dashoffset: ${(194.8 * (1 - c.answered / 8)).toFixed(1)}" transform="rotate(-90 37 37)"/>
+      <circle class="ringp" cx="37" cy="37" r="31" fill="none" stroke="#6F93B8" stroke-width="7" stroke-linecap="round" stroke-dasharray="194.8" style="stroke-dashoffset: ${(194.8 * (1 - c.answered / 8)).toFixed(1)}" transform="rotate(-90 37 37)"/>
       <text x="37" y="43" text-anchor="middle" font-family="Newsreader" font-size="19" fill="currentColor">${c.answered}/8</text></svg>`;
 
-  const pNotice = () => (UI.note ? `<div class="card pop" role="status" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-color: #B4975F">
-      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="#B4975F" stroke-width="1.8"/><path d="M3 7l9 6 9-6" fill="none" stroke="#B4975F" stroke-width="1.8"/></svg>
+  const pNotice = () => (UI.note ? `<div class="card pop" role="status" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-color: #6F93B8">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="#6F93B8" stroke-width="1.8"/><path d="M3 7l9 6 9-6" fill="none" stroke="#6F93B8" stroke-width="1.8"/></svg>
       <span style="flex: 1; font-size: 14px">${esc(UI.note)}</span>
       <button type="button" data-act="note-x" data-f="note-x" aria-label="Close" style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer">×</button></div>` : '');
-  const pSkip = () => pNotice() + (S.skipped && !identified() ? `<div class="card pop" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-color: #B4975F">
-      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="#B4975F" stroke-width="1.8"/><path d="M12 7v6M12 16.5v.5" stroke="#B4975F" stroke-width="2" stroke-linecap="round"/></svg>
+  const pSkip = () => pNotice() + (S.skipped && !identified() ? `<div class="card pop" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-color: #6F93B8">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="#6F93B8" stroke-width="1.8"/><path d="M12 7v6M12 16.5v.5" stroke="#6F93B8" stroke-width="2" stroke-linecap="round"/></svg>
       <span style="flex: 1; font-size: 14px">You are exploring. Add your email when you want your results sent to you.</span>
-      <button type="button" data-act="regate" data-f="regate" style="min-height: 40px; padding: 0 14px; border-radius: 4px; border: 0; background: #B4975F; color: #14100B; font-weight: 600; cursor: pointer">Add my email</button></div>` : '');
+      <button type="button" data-act="regate" data-f="regate" style="min-height: 40px; padding: 0 14px; border-radius: 4px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; cursor: pointer">Add my email</button></div>` : '');
 
   /* Journey: Step 1 where you are today, Step 2 the road to where you want to get. */
   function pJourney(c) {
@@ -385,68 +385,68 @@
       const behind = i < here, can = i > here || (top && isHere);
       return { s, i, isHere, isGoal, isWay, behind, can,
         dotSize: isHere ? 26 : isGoal ? 30 : isWay ? 18 : 20,
-        dotBg: isHere || isGoal ? '#B4975F' : isWay ? '#D6BF8F' : behind ? '#3A2F20' : '#1C1309',
-        dotBorder: isHere || isGoal ? '#F7F2E7' : isWay ? '#B4975F' : behind ? '#3A2F20' : '#8A7A5E',
+        dotBg: isHere || isGoal ? '#6F93B8' : isWay ? '#A9C0D9' : behind ? '#3A2F20' : '#0E1C2B',
+        dotBorder: isHere || isGoal ? '#EEF2F7' : isWay ? '#6F93B8' : behind ? '#3A2F20' : '#8A7A5E',
         tag: isHere ? (top ? 'YOU ARE HERE · GO DEEPER' : 'YOU ARE HERE') : isGoal ? 'YOUR GOAL' : isWay ? 'ON THE WAY' : behind ? 'BEHIND YOU' : 'TAP TO AIM' };
     });
     const gi = hasGoal ? goal : here, gap = gi - here;
     const words = ['', 'one stage to go, the next one', 'two stages to go — one at a time', 'three stages to go — one at a time'];
     const path = S4.slice(here, gi + 1).map((s) => s.name);
     const roadText = gap === 0 ? 'deeper into ' + S4[here].name : 'first finish ' + S4[here].name + ', then ' + path.slice(1).join(', then ');
-    const chips = (hasGoal ? path : [S4[here].name]).map((nm, k, arr) => `<span style="padding: 5px 9px; border-radius: 12px; background: ${k === 0 ? '#B4975F' : k === arr.length - 1 ? '#1C1309' : '#EFE4CC'}; color: ${k === arr.length - 1 && k !== 0 ? '#F7F2E7' : '#1C1309'}">${nm}</span>`).join('');
+    const chips = (hasGoal ? path : [S4[here].name]).map((nm, k, arr) => `<span style="padding: 5px 9px; border-radius: 12px; background: ${k === 0 ? '#6F93B8' : k === arr.length - 1 ? '#0E1C2B' : '#E3EAF2'}; color: ${k === arr.length - 1 && k !== 0 ? '#EEF2F7' : '#0E1C2B'}">${nm}</span>`).join('');
     return `<section class="rise r1" style="display: flex; flex-direction: column; gap: 18px">
       <div style="display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap">
-        <span style="background: #B4975F; color: #1C1309; font-weight: 900; font-size: 13px; padding: 6px 10px; border-radius: 3px; letter-spacing: .08em">STEP 1</span>
+        <span style="background: #6F93B8; color: #0E1C2B; font-weight: 900; font-size: 13px; padding: 6px 10px; border-radius: 3px; letter-spacing: .08em">STEP 1</span>
         <h2 style="font-weight: 900; font-size: 28px">Where are you <span class="serif" style="color: var(--goldink); font-weight: 400">today?</span></h2>
       </div>
       <p style="color: var(--muted); font-size: 16px">Tap the stage that is true now, not the one that would look best on a business card.</p>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px" role="group" aria-label="Where are you today?">
-        ${stages.map((x) => `<button type="button" data-act="here" data-i="${x.i}" data-f="here-${x.i}" aria-pressed="${x.isHere}" style="text-align: left; cursor: pointer; color: #1C1309; background: ${x.isHere ? '#EFE4CC' : '#FFFFFF'}; border: 2px solid ${x.isHere ? '#6E5213' : '#D6C9AC'}; border-radius: 8px; padding: 18px; min-height: 120px; display: flex; flex-direction: column; gap: 8px; transition: background .3s ease, border-color .3s ease">
-          <span style="display: flex; justify-content: space-between; align-items: center; width: 100%"><span style="font-weight: 900; font-size: 12px; letter-spacing: .14em; color: #6E5213">0${x.i + 1}</span><span style="font-size: 11px; font-weight: 900; letter-spacing: .12em; color: #6E5213">${x.isHere ? 'YOU ARE HERE' : ''}</span></span>
+        ${stages.map((x) => `<button type="button" data-act="here" data-i="${x.i}" data-f="here-${x.i}" aria-pressed="${x.isHere}" style="text-align: left; cursor: pointer; color: #0E1C2B; background: ${x.isHere ? '#E3EAF2' : '#FFFFFF'}; border: 2px solid ${x.isHere ? '#3E6A94' : '#CBD5E1'}; border-radius: 8px; padding: 18px; min-height: 120px; display: flex; flex-direction: column; gap: 8px; transition: background .3s ease, border-color .3s ease">
+          <span style="display: flex; justify-content: space-between; align-items: center; width: 100%"><span style="font-weight: 900; font-size: 12px; letter-spacing: .14em; color: #3E6A94">0${x.i + 1}</span><span style="font-size: 11px; font-weight: 900; letter-spacing: .12em; color: #3E6A94">${x.isHere ? 'YOU ARE HERE' : ''}</span></span>
           <span class="stname" style="font-size: 23px">${x.s.name}</span>
-          <span class="serif" style="font-size: 14px; line-height: 1.4; color: #6A6052">${x.s.focus}</span></button>`).join('')}
+          <span class="serif" style="font-size: 14px; line-height: 1.4; color: #56647A">${x.s.focus}</span></button>`).join('')}
       </div>
     </section>
     <section class="rise r2" style="display: flex; flex-direction: column; gap: 18px">
       <div style="display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap">
-        <span style="background: #B4975F; color: #1C1309; font-weight: 900; font-size: 13px; padding: 6px 10px; border-radius: 3px; letter-spacing: .08em">STEP 2</span>
+        <span style="background: #6F93B8; color: #0E1C2B; font-weight: 900; font-size: 13px; padding: 6px 10px; border-radius: 3px; letter-spacing: .08em">STEP 2</span>
         <h2 style="font-weight: 900; font-size: 28px">Where do you want <span class="serif" style="color: var(--goldink); font-weight: 400">to get?</span></h2>
       </div>
       <p style="color: var(--muted); font-size: 16px">Now tap the stage you want to reach on your road.</p>
-      <div style="background: #1C1309; color: #F7F2E7; border-radius: 12px; padding: 34px 18px 22px; box-shadow: 0 30px 60px rgba(28,19,9,.18)">
+      <div style="background: #0E1C2B; color: #EEF2F7; border-radius: 12px; padding: 34px 18px 22px; box-shadow: 0 30px 60px rgba(28,19,9,.18)">
         <div style="position: relative; height: 150px">
-          <div style="position: absolute; left: 12.5%; right: 12.5%; top: 50%; height: 4px; margin-top: -2px; background: repeating-linear-gradient(90deg, #594A32 0 10px, transparent 10px 18px); border-radius: 2px"></div>
-          <div class="fill" style="position: absolute; top: 50%; height: 6px; margin-top: -3px; border-radius: 3px; background: #B4975F; box-shadow: 0 0 14px rgba(180,151,95,.7); left: ${pos(here)}%; width: ${hasGoal ? 25 * gap : 0}%"></div>
+          <div style="position: absolute; left: 12.5%; right: 12.5%; top: 50%; height: 4px; margin-top: -2px; background: repeating-linear-gradient(90deg, #2A3A50 0 10px, transparent 10px 18px); border-radius: 2px"></div>
+          <div class="fill" style="position: absolute; top: 50%; height: 6px; margin-top: -3px; border-radius: 3px; background: #6F93B8; box-shadow: 0 0 14px rgba(111,147,184,.7); left: ${pos(here)}%; width: ${hasGoal ? 25 * gap : 0}%"></div>
           ${hasGoal && gap > 0 ? `<span class="trav" style="--from: ${pos(here)}%; --to: ${pos(gi)}%"></span>` : ''}
           ${stages.map((x) => `<div style="position: absolute; top: 0; bottom: 0; left: ${pos(x.i)}%; width: 0">
-            ${x.isGoal ? '<svg class="flag" width="28" height="34" viewBox="0 0 28 34" aria-hidden="true" style="position: absolute; left: 0; top: 8px"><path d="M6 32V3" stroke="#F7F2E7" stroke-width="2"/><path d="M6 4h18l-5 6 5 6H6z" fill="#B4975F"/></svg>' : ''}
+            ${x.isGoal ? '<svg class="flag" width="28" height="34" viewBox="0 0 28 34" aria-hidden="true" style="position: absolute; left: 0; top: 8px"><path d="M6 32V3" stroke="#EEF2F7" stroke-width="2"/><path d="M6 4h18l-5 6 5 6H6z" fill="#6F93B8"/></svg>' : ''}
             ${x.isHere ? '<span class="jring"></span><span class="jring ring2"></span>' : ''}
-            ${x.isWay ? `<span class="way" style="position: absolute; left: 0; top: 50%; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #B4975F; transform: translate(-50%,-50%); animation-delay: ${(0.35 * (x.i - here)).toFixed(2)}s"></span>` : ''}
+            ${x.isWay ? `<span class="way" style="position: absolute; left: 0; top: 50%; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #6F93B8; transform: translate(-50%,-50%); animation-delay: ${(0.35 * (x.i - here)).toFixed(2)}s"></span>` : ''}
             <button type="button" data-act="goal" data-i="${x.i}" data-f="goal-${x.i}" ${x.can ? '' : 'disabled'} aria-label="Set ${x.s.name} as my goal"${x.isGoal || (x.isHere && hasGoal && gap === 0) ? ' aria-pressed="true"' : ''} class="${x.isGoal ? 'beacon' : ''}" style="position: absolute; left: 0; top: 50%; transform: translate(-50%,-50%); width: ${x.dotSize}px; height: ${x.dotSize}px; border-radius: 50%; background: ${x.dotBg}; border: 3px solid ${x.dotBorder}; cursor: ${x.can ? 'pointer' : 'default'}; padding: 0; transition: background .3s ease, width .3s ease, height .3s ease"></button>
             <div style="position: absolute; left: 0; bottom: 0; transform: translateX(-50%); width: 140px; max-width: 24vw; text-align: center; display: flex; flex-direction: column; gap: 2px">
-              <span style="font-weight: 900; font-size: 15px; text-transform: uppercase; color: ${x.behind ? '#8A7A5E' : '#F7F2E7'}">${x.s.name}</span>
-              <span style="font-size: 11px; font-weight: 700; letter-spacing: .1em; color: ${x.isHere || x.isGoal ? '#B4975F' : '#C4B69D'}">${x.tag}</span>
+              <span style="font-weight: 900; font-size: 15px; text-transform: uppercase; color: ${x.behind ? '#8A7A5E' : '#EEF2F7'}">${x.s.name}</span>
+              <span style="font-size: 11px; font-weight: 700; letter-spacing: .1em; color: ${x.isHere || x.isGoal ? '#6F93B8' : '#A9B6C6'}">${x.tag}</span>
             </div></div>`).join('')}
         </div>
         ${hasGoal ? `<div class="rise" style="margin-top: 26px; border-top: 1px solid #3A2F20; padding-top: 20px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center">
-            <span style="font-size: 20px; line-height: 1.4"><b style="color: #B4975F">You are here:</b> ${S4[here].name} <span style="color: #C4B69D">→</span> <b style="color: #B4975F">Your goal:</b> ${gap === 0 ? 'go deeper' : S4[gi].name} · ${gap === 0 ? 'we sharpen what you already do' : words[gap]}</span>
-            <span class="serif" style="font-size: 16px; color: #EFE4CC; max-width: 680px; line-height: 1.45">Your questions stay about where you are today. Your goal shapes your road in Step 04 — ${roadText}.</span></div>`
-        : '<p style="margin-top: 22px; text-align: center; color: #C4B69D; font-size: 15px">Tap a stage ahead of you. Your road will draw itself.</p>'}
+            <span style="font-size: 20px; line-height: 1.4"><b style="color: #6F93B8">You are here:</b> ${S4[here].name} <span style="color: #A9B6C6">→</span> <b style="color: #6F93B8">Your goal:</b> ${gap === 0 ? 'go deeper' : S4[gi].name} · ${gap === 0 ? 'we sharpen what you already do' : words[gap]}</span>
+            <span class="serif" style="font-size: 16px; color: #E3EAF2; max-width: 680px; line-height: 1.45">Your questions stay about where you are today. Your goal shapes your road in Step 04 — ${roadText}.</span></div>`
+        : '<p style="margin-top: 22px; text-align: center; color: #A9B6C6; font-size: 15px">Tap a stage ahead of you. Your road will draw itself.</p>'}
       </div>
     </section>
     <section class="rise r3" style="display: flex; flex-direction: column; gap: 16px">
       <span style="font-size: 12px; font-weight: 700; letter-spacing: .18em; color: var(--goldink)">WHAT HAPPENS NEXT</span>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px">
-        <a href="#s-questions" class="next1" style="text-decoration: none; color: #1C1309; background: #B4975F; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 8px; min-height: 140px">
+        <a href="#s-questions" class="next1" style="text-decoration: none; color: #0E1C2B; background: #6F93B8; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 8px; min-height: 140px">
           <span style="font-weight: 900; font-size: 13px; letter-spacing: .14em">01 · YOU ARE GOING HERE NOW</span>
           <span style="font-weight: 900; font-size: 20px">Answer 8 questions about today</span>
           <span style="font-size: 14px">About ${S4[here].name} — across all four domains. Start →</span></a>
-        <div style="background: #1C1309; color: #F7F2E7; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 8px; min-height: 140px">
-          <span style="font-weight: 900; font-size: 13px; letter-spacing: .14em; color: #C4B69D">02 · THEN</span>
+        <div style="background: #0E1C2B; color: #EEF2F7; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 8px; min-height: 140px">
+          <span style="font-weight: 900; font-size: 13px; letter-spacing: .14em; color: #A9B6C6">02 · THEN</span>
           <span style="font-weight: 900; font-size: 20px">Add your numbers</span>
-          <span style="font-size: 14px; color: #D3C4A5">One month. A range is enough.</span></div>
-        <div style="background: #FFFFFF; border: 1.5px solid #D6C9AC; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 10px; min-height: 140px; color: #1C1309">
-          <span style="font-weight: 900; font-size: 13px; letter-spacing: .14em; color: #6E5213">03 · AND YOU GET</span>
+          <span style="font-size: 14px; color: #B8C6D6">One month. A range is enough.</span></div>
+        <div style="background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 10px; min-height: 140px; color: #0E1C2B">
+          <span style="font-weight: 900; font-size: 13px; letter-spacing: .14em; color: #3E6A94">03 · AND YOU GET</span>
           <span style="font-weight: 900; font-size: 20px">Your road, step by step</span>
           <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; font-weight: 900">${chips}</div></div>
       </div>
@@ -478,11 +478,11 @@
         ${i % 2 === 0 ? `<div style="display: flex; align-items: center; gap: 10px; margin-top: 12px">
           <span style="width: 34px; height: 34px; border-radius: 50%; background: ${TINT[di]}; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="${D[di].icon}" fill="none" stroke="${CSSV[di]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           <h3 class="sf" style="font-size: 20px; font-weight: 500">${D[di].name}</h3><span style="flex: 1; height: 1px; background: var(--line)"></span></div>` : ''}
-        <div style="background: var(--paper); border: 1.5px solid ${i === firstOpen ? '#B4975F' : done ? 'var(--line)' : 'var(--cream)'}; border-radius: 7px; padding: 18px; display: flex; flex-direction: column; gap: 12px; transition: border-color .3s ease">
+        <div style="background: var(--paper); border: 1.5px solid ${i === firstOpen ? '#6F93B8' : done ? 'var(--line)' : 'var(--cream)'}; border-radius: 7px; padding: 18px; display: flex; flex-direction: column; gap: 12px; transition: border-color .3s ease">
           <div style="display: flex; gap: 12px; align-items: flex-start">
             <span style="font-family: Newsreader, serif; font-size: 15px; color: ${CSSV[di]}; flex: none; padding-top: 2px">0${i + 1}</span>
             <div style="display: flex; flex-direction: column; gap: 4px; flex: 1"><span style="font-weight: 600; font-size: 16px; line-height: 1.35" id="qt-${q.id}">${esc(q.text)}</span><span style="font-size: 13px; color: var(--muted)">${esc(q.prompt)}</span></div>
-            ${done ? '<svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Answered" style="flex: none"><circle cx="12" cy="12" r="10" fill="#B4975F"/><path d="M7 12.5l3.2 3L17 9" fill="none" stroke="#14100B" stroke-width="2.2" stroke-linecap="round"/></svg>' : ''}
+            ${done ? '<svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Answered" style="flex: none"><circle cx="12" cy="12" r="10" fill="#6F93B8"/><path d="M7 12.5l3.2 3L17 9" fill="none" stroke="#0E1C2B" stroke-width="2.2" stroke-linecap="round"/></svg>' : ''}
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px" role="group" aria-labelledby="qt-${q.id}">
             ${E.ANSWERS.map(([label, sub], k) => { const on = S.ans[q.id] === k; return `<button type="button" data-act="ans" data-q="${q.id}" data-v="${k}" data-f="ans-${q.id}-${k}" aria-pressed="${on}" style="text-align: left; min-height: 52px; padding: 9px 12px; border-radius: 5px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); cursor: pointer; display: flex; flex-direction: column; gap: 1px"><span style="font-weight: 600; font-size: 14px">${label}</span><span style="font-size: 12px; color: var(--muted)">${sub}</span></button>`; }).join('')}
@@ -498,7 +498,7 @@
     </div>
     <h2 class="sf" style="font-size: 22px; line-height: 1.2; margin-top: 4px" id="want-h">And what do you want most? <span class="sfi" style="color: var(--goldink)">Pick one.</span></h2>
     <div style="display: flex; flex-wrap: wrap; gap: 8px" role="group" aria-labelledby="want-h">
-      ${E.GOALS.map(([id, t]) => { const on = S.want === id; return `<button type="button" data-act="want" data-v="${id}" data-f="want-${id}" aria-pressed="${on}" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 4h11l-3 4 3 4H6" fill="none" stroke="#B4975F" stroke-width="2" stroke-linejoin="round"/></svg>${t}</button>`; }).join('')}
+      ${E.GOALS.map(([id, t]) => { const on = S.want === id; return `<button type="button" data-act="want" data-v="${id}" data-f="want-${id}" aria-pressed="${on}" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 4h11l-3 4 3 4H6" fill="none" stroke="#6F93B8" stroke-width="2" stroke-linejoin="round"/></svg>${t}</button>`; }).join('')}
     </div>`;
 
   function pReading(c) {
@@ -515,16 +515,16 @@
           <span style="font-weight: 600">How strong are you at…</span>
           ${E.STRENGTHS.map((s, i) => `<div style="display: flex; flex-direction: column; gap: 6px">
             <div style="display: flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="${s.icon}" fill="none" stroke="${CSSV[s.d]}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-weight: 600; font-size: 14px" id="st-${i}">${s.name}</span><span style="font-size: 12px; color: var(--muted)">· ${D[s.d].name}</span></div>
-            <div style="display: flex; gap: 6px" role="group" aria-labelledby="st-${i}">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-act="str" data-i="${i}" data-v="${n}" data-f="str-${i}-${n}" aria-label="${s.name}: ${n} of 5" aria-pressed="${str[i] === n}" style="flex: 1; min-height: 44px; border-radius: 5px; border: 1.5px solid ${str[i] >= n ? '#B4975F' : 'var(--line)'}; background: ${str[i] >= n ? '#B4975F' : 'var(--paper)'}; color: ${str[i] >= n ? '#14100B' : 'var(--ink)'}; cursor: pointer; font-weight: 600">${n}</button>`).join('')}</div></div>`).join('')}
+            <div style="display: flex; gap: 6px" role="group" aria-labelledby="st-${i}">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-act="str" data-i="${i}" data-v="${n}" data-f="str-${i}-${n}" aria-label="${s.name}: ${n} of 5" aria-pressed="${str[i] === n}" style="flex: 1; min-height: 44px; border-radius: 5px; border: 1.5px solid ${str[i] >= n ? '#6F93B8' : 'var(--line)'}; background: ${str[i] >= n ? '#6F93B8' : 'var(--paper)'}; color: ${str[i] >= n ? '#0E1C2B' : 'var(--ink)'}; cursor: pointer; font-weight: 600">${n}</button>`).join('')}</div></div>`).join('')}
           <span style="font-size: 12px; color: var(--muted)">1 = not yet · 5 = people come to me for this</span>
         </div>
         <div class="deep" style="flex: 1 1 420px; min-width: 0; border-radius: 9px; padding: 18px; display: flex; flex-wrap: wrap; gap: 18px; align-items: center">
-          <svg viewBox="0 0 400 400" style="flex: 1 1 260px; max-width: 340px; height: auto" role="img" aria-label="Your compass: Lead yourself ${sc[0]}, Lead your people ${sc[1]}, Lead your business ${sc[2]}, Lead the market ${sc[3]}, each out of 6">
-            <g class="spin"><circle cx="200" cy="200" r="186" fill="none" stroke="#B4975F" stroke-width="1" stroke-dasharray="2 8" opacity=".6"/></g>
+          <svg viewBox="0 0 400 400" style="flex: 1 1 260px; max-width: 340px; height: auto" role="img" aria-label="Your North Star: Lead yourself ${sc[0]}, Lead your people ${sc[1]}, Lead your business ${sc[2]}, Lead the market ${sc[3]}, each out of 6">
+            <g class="spin"><circle cx="200" cy="200" r="186" fill="none" stroke="#6F93B8" stroke-width="1" stroke-dasharray="2 8" opacity=".6"/></g>
             <circle cx="200" cy="200" r="150" fill="none" stroke="#3A2F20"/><circle cx="200" cy="200" r="100" fill="none" stroke="#3A2F20"/><circle cx="200" cy="200" r="50" fill="none" stroke="#3A2F20"/>
             <line x1="200" y1="44" x2="200" y2="356" stroke="#3A2F20"/><line x1="44" y1="200" x2="356" y2="200" stroke="#3A2F20"/>
-            <polygon points="${pts(rS)}" fill="none" stroke="#F7F2E7" stroke-width="1.5" stroke-dasharray="5 4" opacity=".75"/>
-            <polygon points="${pts(rA)}" fill="rgba(180,151,95,.35)" stroke="#B4975F" stroke-width="2.5" stroke-linejoin="round"/>
+            <polygon points="${pts(rS)}" fill="none" stroke="#EEF2F7" stroke-width="1.5" stroke-dasharray="5 4" opacity=".75"/>
+            <polygon points="${pts(rA)}" fill="rgba(111,147,184,.35)" stroke="#6F93B8" stroke-width="2.5" stroke-linejoin="round"/>
             <circle cx="200" cy="${200 - rA[0]}" r="6" fill="#E0A282"/><circle cx="${200 + rA[1]}" cy="200" r="6" fill="#9BC0A1"/><circle cx="200" cy="${200 + rA[2]}" r="6" fill="#91B8D5"/><circle cx="${200 - rA[3]}" cy="200" r="6" fill="#DDBD69"/>
             <text x="200" y="30" fill="#E0A282" font-family="Inter" font-weight="800" font-size="11" text-anchor="middle" letter-spacing="1.2">LEAD YOURSELF · ${sc[0]}/6</text>
             <text x="372" y="196" fill="#9BC0A1" font-family="Inter" font-weight="800" font-size="11" text-anchor="end" letter-spacing="1.2">LEAD YOUR PEOPLE</text>
@@ -532,13 +532,13 @@
             <text x="200" y="384" fill="#91B8D5" font-family="Inter" font-weight="800" font-size="11" text-anchor="middle" letter-spacing="1.2">LEAD YOUR BUSINESS · ${sc[2]}/6</text>
             <text x="28" y="196" fill="#DDBD69" font-family="Inter" font-weight="800" font-size="11" letter-spacing="1.2">LEAD THE MARKET</text>
             <text x="28" y="214" fill="#DDBD69" font-family="Inter" font-weight="700" font-size="12">${sc[3]}/6</text>
-            <circle cx="200" cy="200" r="7" fill="#1C1309" stroke="#B4975F" stroke-width="2"/>
+            <circle cx="200" cy="200" r="7" fill="#0E1C2B" stroke="#6F93B8" stroke-width="2"/>
           </svg>
           <div style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 10px">
-            <div style="display: flex; gap: 14px; font-size: 12px; color: #C4B69D; flex-wrap: wrap"><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 10px; background: rgba(180,151,95,.5); border: 2px solid #B4975F"></span>Your answers</span><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 0; border-top: 2px dashed #F7F2E7"></span>Your strengths</span></div>
+            <div style="display: flex; gap: 14px; font-size: 12px; color: #A9B6C6; flex-wrap: wrap"><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 10px; background: rgba(111,147,184,.5); border: 2px solid #6F93B8"></span>Your answers</span><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 0; border-top: 2px dashed #EEF2F7"></span>Your strengths</span></div>
             <div style="display: flex; flex-direction: column; gap: 2px"><span class="eb" style="color: #9BC0A1">Your strength</span><span class="sf" style="font-size: 20px">${any ? D[hi].name : 'Answer and rate to see it'}</span></div>
             <div style="display: flex; flex-direction: column; gap: 2px"><span class="eb" style="color: #E0A282">Lowest right now</span><span class="sf" style="font-size: 20px">${any ? D[lo].name : '—'}</span></div>
-            <div style="display: flex; flex-direction: column; gap: 2px"><span class="eb" style="color: #D6BF8F">Start here</span><span style="font-size: 14px">${any ? D[lo].step : 'Your first step appears here.'}</span></div>
+            <div style="display: flex; flex-direction: column; gap: 2px"><span class="eb" style="color: #A9C0D9">Start here</span><span style="font-size: 14px">${any ? D[lo].step : 'Your first step appears here.'}</span></div>
           </div>
         </div>
       </div>
@@ -561,21 +561,21 @@
         const opts = [['', 'Choose…'], ...choices.map((ch, j) => [String(j), ch[0]]), ['own', isText ? 'Somewhere else…' : 'Type my own…'], ['unsure', 'Not sure yet']];
         return `<div style="display: flex; flex-direction: column; gap: 6px">
           <label for="f-${k}" style="font-size: 13px; font-weight: 600">${label}</label>
-          <select id="f-${k}" class="inp${UI.glow && UI.glow.keys.includes(k) && Date.now() < UI.glow.until ? ' glowbox' : ''}" data-num="${k}" data-f="num-${k}" style="border-color: ${cur.pick === 'own' ? '#B4975F' : 'var(--line)'}">${opts.map(([v, t]) => `<option value="${v}"${cur.pick === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>
-          ${cur.pick === 'own' ? `<input class="inp pop" type="text" ${isText ? '' : 'inputmode="decimal"'} data-own="${k}" data-f="own-${k}" value="${esc(cur.own)}" placeholder="${isText ? 'Where they gather' : 'Type the exact amount'}" aria-label="${esc(label)}, ${isText ? 'in your words' : 'exact amount'}" style="border-color: #B4975F">` : ''}
+          <select id="f-${k}" class="inp${UI.glow && UI.glow.keys.includes(k) && Date.now() < UI.glow.until ? ' glowbox' : ''}" data-num="${k}" data-f="num-${k}" style="border-color: ${cur.pick === 'own' ? '#6F93B8' : 'var(--line)'}">${opts.map(([v, t]) => `<option value="${v}"${cur.pick === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>
+          ${cur.pick === 'own' ? `<input class="inp pop" type="text" ${isText ? '' : 'inputmode="decimal"'} data-own="${k}" data-f="own-${k}" value="${esc(cur.own)}" placeholder="${isText ? 'Where they gather' : 'Type the exact amount'}" aria-label="${esc(label)}, ${isText ? 'in your words' : 'exact amount'}" style="border-color: #6F93B8">` : ''}
         </div>`;
       }).join('');
-      return `<div style="background: var(--paper); border: 1.5px solid ${active ? '#B4975F' : 'var(--line)'}; border-radius: 7px; overflow: hidden; transition: border-color .3s ease">
+      return `<div style="background: var(--paper); border: 1.5px solid ${active ? '#6F93B8' : 'var(--line)'}; border-radius: 7px; overflow: hidden; transition: border-color .3s ease">
         <button type="button" data-act="grp" data-i="${i}" data-f="grp-${i}" aria-expanded="${active}" style="width: 100%; background: none; border: 0; padding: 16px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; text-align: left; color: var(--ink)">
-          <span style="width: 38px; height: 38px; border-radius: 50%; background: ${i < gi ? '#B4975F' : TINTG[g.d]}; display: inline-flex; align-items: center; justify-content: center; flex: none"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="${g.icon}" fill="none" stroke="${i < gi ? '#14100B' : CSSV[g.d]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span style="width: 38px; height: 38px; border-radius: 50%; background: ${i < gi ? '#6F93B8' : TINTG[g.d]}; display: inline-flex; align-items: center; justify-content: center; flex: none"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="${g.icon}" fill="none" stroke="${i < gi ? '#0E1C2B' : CSSV[g.d]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           <span style="display: flex; flex-direction: column; flex: 1; min-width: 0"><span style="font-weight: 600; font-size: 16px">0${i + 1} · ${g.title}</span><span style="font-size: 13px; color: var(--muted)">${esc(status)}</span></span>
           <span style="font-size: 12px; font-weight: 600; color: var(--goldink)">${i < gi ? 'Done · edit' : active ? '' : 'Open'}</span></button>
         ${active ? `<div class="pop" style="padding: 0 18px 18px; display: flex; flex-direction: column; gap: 14px">
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">${fields}</div>
           <div class="pop deep" style="border-radius: 7px; padding: 16px 18px; display: flex; gap: 14px; align-items: center; animation-delay: .2s">
-            <svg class="shim" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/></svg>
-            <div style="display: flex; flex-direction: column; gap: 2px" aria-live="polite"><span class="eb" style="color: #D6BF8F">What this already tells you</span><span style="font-size: 16px; font-weight: 600">${esc(ins || 'Pick a range for each, or type your own. The answer appears here.')}</span></div></div>
-          <button type="button" data-act="grp" data-i="${i + 1}" data-f="grp-next-${i}" style="align-self: flex-end; min-height: 46px; padding: 0 20px; border-radius: 5px; border: 0; background: var(--deep); color: #F7F2E7; font-weight: 600; cursor: pointer">${i === G.length - 1 ? 'See what it all means →' : 'Next group →'}</button>
+            <svg class="shim" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z" fill="none" stroke="#6F93B8" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            <div style="display: flex; flex-direction: column; gap: 2px" aria-live="polite"><span class="eb" style="color: #A9C0D9">What this already tells you</span><span style="font-size: 16px; font-weight: 600">${esc(ins || 'Pick a range for each, or type your own. The answer appears here.')}</span></div></div>
+          <button type="button" data-act="grp" data-i="${i + 1}" data-f="grp-next-${i}" style="align-self: flex-end; min-height: 46px; padding: 0 20px; border-radius: 5px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 600; cursor: pointer">${i === G.length - 1 ? 'See what it all means →' : 'Next group →'}</button>
         </div>` : ''}</div>`;
     }).join('');
     return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 720px">
@@ -595,30 +595,30 @@
   document.addEventListener('toggle', (e) => { const d = e.target; if (d.dataset && d.dataset.step) { if (d.open) OPEN.add(d.dataset.step); else OPEN.delete(d.dataset.step); } }, true);
   function stepOpen(st, k) {
     const done = !!(UI.plans && UI.plans.done[st.id]);
-    const row = (label, v) => (v ? `<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #F7F2E7"><b style="color: #D6BF8F">${label}</b> ${esc(v)}</p>` : '');
+    const row = (label, v) => (v ? `<p style="margin: 0; font-size: 14px; line-height: 1.55; color: #EEF2F7"><b style="color: #A9C0D9">${label}</b> ${esc(v)}</p>` : '');
     return `<details data-step="${esc(st.id)}"${OPEN.has(st.id) ? ' open' : ''} style="border-top: 1px solid #3A2F20; padding-top: 8px">
-      <summary style="display: flex; gap: 12px; align-items: center; cursor: pointer; list-style: none; min-height: 40px"><span style="font-family: Newsreader, serif; color: #B4975F; width: 22px">${done ? '✓' : k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7${done ? '; text-decoration: line-through; text-decoration-color: #8A7A5E' : ''}">${esc(st.title)}${st.domainName ? ` <span style="color: #C4B69D; font-size: 12px">· ${esc(st.domainName)}</span>` : ''}</span><span class="st-open" aria-hidden="true" style="color: #D6BF8F; font-size: 12px">Open</span></summary>
+      <summary style="display: flex; gap: 12px; align-items: center; cursor: pointer; list-style: none; min-height: 40px"><span style="font-family: Newsreader, serif; color: #6F93B8; width: 22px">${done ? '✓' : k + 1}</span><span style="flex: 1; font-size: 14px; color: #EEF2F7${done ? '; text-decoration: line-through; text-decoration-color: #8A7A5E' : ''}">${esc(st.title)}${st.domainName ? ` <span style="color: #A9B6C6; font-size: 12px">· ${esc(st.domainName)}</span>` : ''}</span><span class="st-open" aria-hidden="true" style="color: #A9C0D9; font-size: 12px">Open</span></summary>
       <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px 0 6px 34px">
         ${row('Why it matters:', st.why)}${row('What to do:', st.what)}${row('About:', st.about)}${row('Done looks like:', st.done)}
-        ${st.ask ? `<p class="sfi" style="margin: 0; font-size: 16px; color: #F7F2E7">“${esc(st.ask)}”</p>` : ''}
+        ${st.ask ? `<p class="sfi" style="margin: 0; font-size: 16px; color: #EEF2F7">“${esc(st.ask)}”</p>` : ''}
         ${st.note ? row(`${BAND_LABEL[UI.plans && UI.plans.domains.find((d) => d.id === st.domain)?.band] || ''}${st.noteFor ? ' (' + esc(st.noteFor) + ')' : ''}:`, st.note) : ''}
-        <label style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid #594A32; border-radius: 6px; cursor: pointer; font-size: 14px; align-self: flex-start"><input type="checkbox" data-tick="${esc(st.id)}" data-f="tick-${esc(st.id)}"${done ? ' checked' : ''} style="width: 20px; height: 20px; accent-color: #B4975F">Done</label>
+        <label style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid #2A3A50; border-radius: 6px; cursor: pointer; font-size: 14px; align-self: flex-start"><input type="checkbox" data-tick="${esc(st.id)}" data-f="tick-${esc(st.id)}"${done ? ' checked' : ''} style="width: 20px; height: 20px; accent-color: #6F93B8">Done</label>
       </div></details>`;
   }
   const planCount = () => (UI.plans ? `${UI.plans.count} of ${UI.plans.total} steps done` : '');
   /** The four steps for a domain card, or a What-if lever: open when signed
    *  in and loaded, the locked titles otherwise. */
   function planBlock(titles, steps, eyebrow, cta) {
-    if (signedIn() && steps) return `<span class="eb" style="color: #D6BF8F">${eyebrow} · ${planCount()}</span>
+    if (signedIn() && steps) return `<span class="eb" style="color: #A9C0D9">${eyebrow} · ${planCount()}</span>
       ${steps.map(stepOpen).join('')}
-      <span style="font-size: 13px; color: #C4B69D">Times are about, not promises. Tick a step when it is done; the count is your plans’ own.</span>`;
-    if (signedIn()) return `<span class="eb" style="color: #D6BF8F">${eyebrow}</span>
-      ${titles.map((t, k) => `<div style="display: flex; gap: 12px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Newsreader, serif; color: #B4975F; width: 22px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7">${t}</span></div>`).join('')}
-      <span style="font-size: 13px; color: #C4B69D">Opening in your account…</span>`;
-    return `<span class="eb" style="color: #D6BF8F">${eyebrow} · in your free account</span>
-      ${titles.map((t, k) => `<div style="display: flex; gap: 12px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Newsreader, serif; color: #B4975F; width: 22px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #F7F2E7">${t}</span><span class="blurline" style="flex: 0 0 70px; height: 8px; border-radius: 4px; background: #594A32"></span>${lockIcon('#C4B69D')}</div>`).join('')}
-      <span style="font-size: 13px; color: #C4B69D">Each step opens with what to do, about how long it takes and what “done” looks like.</span>
-      <button type="button" data-act="account" data-f="account-${eyebrow.length}" class="go" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 5px; border: 0; background: #B4975F; color: #14100B; font-weight: 600; cursor: pointer">${cta} <span class="arr" aria-hidden="true">→</span></button>`;
+      <span style="font-size: 13px; color: #A9B6C6">Times are about, not promises. Tick a step when it is done; the count is your plans’ own.</span>`;
+    if (signedIn()) return `<span class="eb" style="color: #A9C0D9">${eyebrow}</span>
+      ${titles.map((t, k) => `<div style="display: flex; gap: 12px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Newsreader, serif; color: #6F93B8; width: 22px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #EEF2F7">${t}</span></div>`).join('')}
+      <span style="font-size: 13px; color: #A9B6C6">Opening in your account…</span>`;
+    return `<span class="eb" style="color: #A9C0D9">${eyebrow} · in your free account</span>
+      ${titles.map((t, k) => `<div style="display: flex; gap: 12px; align-items: center; border-top: 1px solid #3A2F20; padding-top: 8px"><span style="font-family: Newsreader, serif; color: #6F93B8; width: 22px">${k + 1}</span><span style="flex: 1; font-size: 14px; color: #EEF2F7">${t}</span><span class="blurline" style="flex: 0 0 70px; height: 8px; border-radius: 4px; background: #2A3A50"></span>${lockIcon('#A9B6C6')}</div>`).join('')}
+      <span style="font-size: 13px; color: #A9B6C6">Each step opens with what to do, about how long it takes and what “done” looks like.</span>
+      <button type="button" data-act="account" data-f="account-${eyebrow.length}" class="go" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; cursor: pointer">${cta} <span class="arr" aria-hidden="true">→</span></button>`;
   }
 
   /* Step 03 part 2: one card per domain. "Got it" opens the next. */
@@ -627,7 +627,7 @@
     // Before either question is answered there is nothing to read back yet.
     if (!s.answered) Object.assign(f, { big: `Answer the two ${D[i].name.toLowerCase()} questions in Step 01, and this card fills in.`, why: 'Nothing here is said about you before you have said it yourself.', feel: [] });
     const nums = S.mode === 'yes' ? E.numberLines(c.n, money)[i] : '';
-    const bg = ['#F4E1D6', '#F3EAD3', '#E3ECE4'], ink = ['#8A4524', '#6E5213', '#35593D'];
+    const bg = ['#F4E1D6', '#F3EAD3', '#E3ECE4'], ink = ['#8A4524', '#3E6A94', '#35593D'];
     const open = !!S.more[i];
     return `<div style="display: flex; flex-direction: column; gap: 10px; opacity: ${locked ? '.45' : '1'}; transition: opacity .5s ease"${locked ? ' inert' : ''}>
       ${locked ? `<span style="font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 8px">${lockIcon('currentColor')}Tick “Got it” on the domain above to open this one.</span>` : ''}
@@ -648,15 +648,15 @@
           ${f.pains.length ? `<span style="font-size: 13px; font-weight: 600; padding: 6px 10px; border-radius: 6px; background: var(--cream); align-self: flex-start">You said: ${f.pains.join(' · ')}</span>` : ''}
           ${f.feel.map((t) => `<span style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><circle cx="12" cy="12" r="8" fill="none" stroke="${CSSV[i]}" stroke-width="2"/><circle cx="12" cy="12" r="2.5" fill="${CSSV[i]}"/></svg>${t}</span>`).join('')}
         </div>
-        <div class="deep" style="border-radius: 7px; padding: 18px; display: flex; flex-direction: column; gap: 8px"><span class="eb" style="color: #D6BF8F">Ask yourself</span><span class="sfi" style="font-size: 19px; line-height: 1.35">“${f.ask}”</span>
-          <label style="display: flex; align-items: center; gap: 10px; margin-top: 6px; padding: 10px 12px; border: 1px solid #594A32; border-radius: 6px; cursor: pointer; font-size: 14px"><input type="checkbox" data-act="got" data-i="${i}" data-f="got-${i}"${S.got[i] ? ' checked' : ''} style="width: 20px; height: 20px; accent-color: #B4975F">Got it, I’ve read this</label>
-          <button type="button" data-act="more" data-i="${i}" data-f="more-${i}" aria-expanded="${open}" class="no-print" style="align-self: flex-start; margin-top: 4px; background: none; border: 1px solid #594A32; color: #D6BF8F; border-radius: 5px; min-height: 40px; padding: 0 14px; font-weight: 600; cursor: pointer">${open ? 'Show less' : 'Show more'}</button>
+        <div class="deep" style="border-radius: 7px; padding: 18px; display: flex; flex-direction: column; gap: 8px"><span class="eb" style="color: #A9C0D9">Ask yourself</span><span class="sfi" style="font-size: 19px; line-height: 1.35">“${f.ask}”</span>
+          <label style="display: flex; align-items: center; gap: 10px; margin-top: 6px; padding: 10px 12px; border: 1px solid #2A3A50; border-radius: 6px; cursor: pointer; font-size: 14px"><input type="checkbox" data-act="got" data-i="${i}" data-f="got-${i}"${S.got[i] ? ' checked' : ''} style="width: 20px; height: 20px; accent-color: #6F93B8">Got it, I’ve read this</label>
+          <button type="button" data-act="more" data-i="${i}" data-f="more-${i}" aria-expanded="${open}" class="no-print" style="align-self: flex-start; margin-top: 4px; background: none; border: 1px solid #2A3A50; color: #A9C0D9; border-radius: 5px; min-height: 40px; padding: 0 14px; font-weight: 600; cursor: pointer">${open ? 'Show less' : 'Show more'}</button>
         </div>
       </div>
       ${open ? `<div class="pop" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px">
         <div class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 8px"><span class="eb" style="color: ${CSSV[i]}">Going deeper</span><span style="font-size: 15px; line-height: 1.6">${f.deep}</span>
           <span style="font-size: 14px; font-weight: 600; margin-top: 4px">This week: ${f.week}</span></div>
-        <div class="deep" style="border-radius: 7px; padding: 20px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #B4975F">
+        <div class="deep" style="border-radius: 7px; padding: 20px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #6F93B8">
           ${planBlock(f.steps, UI.plans && (UI.plans.domains.find((x) => x.id === D[i].id) || {}).steps, 'Your step-by-step plan', 'Create my free account')}
         </div></div>` : ''}
     </div>`;
@@ -666,12 +666,12 @@
       <span class="eb">Save your results</span>
       <h2 class="sf" style="font-size: 26px; line-height: 1.2">Keep what you found. <span class="sfi" style="color: var(--goldink)">Print it or send it to yourself.</span></h2>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 14px; font-size: 14px">
-        ${['Your first insight', 'Your North Star reading', 'Your feedback in all four domains', 'A next step for each domain', 'Your twelve weeks'].map((t) => `<span style="display: inline-flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#B4975F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>${t}</span>`).join('')}
+        ${['Your first insight', 'Your North Star reading', 'Your feedback in all four domains', 'A next step for each domain', 'Your twelve weeks'].map((t) => `<span style="display: inline-flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#6F93B8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>${t}</span>`).join('')}
       </div>
       <span style="font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px">${lockIcon('currentColor', 13)}The deeper “Show more” insights stay inside your account.</span>
     </div>
     <div style="flex: 0 1 280px; display: flex; flex-direction: column; gap: 8px; min-width: 240px">
-      <button type="button" data-act="email" data-f="email" ${UI.sending ? 'disabled' : ''} style="min-height: 50px; border-radius: 5px; border: 0; background: #B4975F; color: #14100B; font-weight: 600; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="#14100B" stroke-width="1.8"/><path d="M3 7l9 6 9-6" fill="none" stroke="#14100B" stroke-width="1.8"/></svg>${UI.sending ? 'Sending…' : 'Email me my results'}</button>
+      <button type="button" data-act="email" data-f="email" ${UI.sending ? 'disabled' : ''} style="min-height: 50px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="#0E1C2B" stroke-width="1.8"/><path d="M3 7l9 6 9-6" fill="none" stroke="#0E1C2B" stroke-width="1.8"/></svg>${UI.sending ? 'Sending…' : 'Email me my results'}</button>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
         <button type="button" data-act="print" data-f="print" style="min-height: 46px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Print</button>
         <button type="button" data-act="print" data-f="pdf" style="min-height: 46px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Save as PDF</button>
@@ -681,33 +681,33 @@
 
   function pWeeks(c) {
     const WC = D.map((d) => d.hex), f = S.lean !== null ? S.lean : (c.rd.any ? c.rd.lo : null);
-    const row = (d, i) => `<div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; align-items: center; padding: 4px 0; border-radius: 6px; outline: ${f === i ? '1px solid rgba(180,151,95,.55)' : '1px solid transparent'}; outline-offset: 3px; transition: outline-color .4s ease">
-        <span style="font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: ${f === i ? '#F7F2E7' : '#D3C4A5'}; display: inline-flex; align-items: center; gap: 8px">${d.name}${f === i ? '<span style="font-size: 10px; color: #14100B; background: #B4975F; border-radius: 3px; padding: 1px 5px">LEAN</span>' : ''}</span>
+    const row = (d, i) => `<div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; align-items: center; padding: 4px 0; border-radius: 6px; outline: ${f === i ? '1px solid rgba(111,147,184,.55)' : '1px solid transparent'}; outline-offset: 3px; transition: outline-color .4s ease">
+        <span style="font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: ${f === i ? '#EEF2F7' : '#B8C6D6'}; display: inline-flex; align-items: center; gap: 8px">${d.name}${f === i ? '<span style="font-size: 10px; color: #0E1C2B; background: #6F93B8; border-radius: 3px; padding: 1px 5px">LEAN</span>' : ''}</span>
         ${Array.from({ length: 12 }, (_, k) => `<span class="cellin" style="height: 34px; border-radius: 3px; background: ${WC[i]}; opacity: ${Math.min(1, (0.28 + k * 0.055) * (f === null ? 1 : f === i ? 1.25 : 0.8)).toFixed(2)}; animation-delay: ${(k * 0.06 + i * 0.04).toFixed(2)}s; transition: opacity .5s ease"></span>`).join('')}</div>`;
-    const band = (span, text, on) => `<span style="grid-column: span ${span}; border-top: 2px solid ${on ? '#B4975F' : '#594A32'}; padding-top: 8px; text-align: center; font-size: 11px; font-weight: 600; letter-spacing: .1em; color: ${on ? '#D6BF8F' : '#D3C4A5'}">${text}</span>`;
+    const band = (span, text, on) => `<span style="grid-column: span ${span}; border-top: 2px solid ${on ? '#6F93B8' : '#2A3A50'}; padding-top: 8px; text-align: center; font-size: 11px; font-weight: 600; letter-spacing: .1em; color: ${on ? '#A9C0D9' : '#B8C6D6'}">${text}</span>`;
     return `<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
         <div style="display: flex; flex-direction: column; gap: 8px; max-width: 680px">
-          <span class="eb" style="color: #D6BF8F">How twelve weeks run · your version</span>
-          <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; color: #F7F2E7">All four, every week. <span class="sfi" style="color: #D6BF8F">${f === null ? 'Leaning where you need it.' : 'Leaning on ' + D[f].name.toLowerCase() + '.'}</span></h2>
-          <p style="color: #D3C4A5; font-size: 15px; line-height: 1.7">Not a module on mindset, then a module on sales. Every week works all four and leans on the one you are thinnest in.</p>
+          <span class="eb" style="color: #A9C0D9">How twelve weeks run · your version</span>
+          <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; color: #EEF2F7">All four, every week. <span class="sfi" style="color: #A9C0D9">${f === null ? 'Leaning where you need it.' : 'Leaning on ' + D[f].name.toLowerCase() + '.'}</span></h2>
+          <p style="color: #B8C6D6; font-size: 15px; line-height: 1.7">Not a module on mindset, then a module on sales. Every week works all four and leans on the one you are thinnest in.</p>
         </div>
         <div class="no-print" style="display: flex; flex-direction: column; gap: 6px">
-          <span style="font-size: 11px; letter-spacing: .14em; color: #D3C4A5" id="lean-h">PREVIEW A DIFFERENT LEAN</span>
-          <div style="display: flex; gap: 6px; flex-wrap: wrap" role="group" aria-labelledby="lean-h">${D.map((d, i) => `<button type="button" data-act="lean" data-i="${i}" data-f="lean-${i}" aria-pressed="${f === i}" style="min-height: 40px; padding: 0 12px; border-radius: 4px; border: 1px solid ${f === i ? '#B4975F' : '#594A32'}; background: ${f === i ? 'rgba(180,151,95,.18)' : 'transparent'}; color: #F7F2E7; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px"><span style="width: 9px; height: 9px; border-radius: 2px; background: ${WC[i]}"></span>${d.name}</button>`).join('')}</div>
+          <span style="font-size: 11px; letter-spacing: .14em; color: #B8C6D6" id="lean-h">PREVIEW A DIFFERENT LEAN</span>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap" role="group" aria-labelledby="lean-h">${D.map((d, i) => `<button type="button" data-act="lean" data-i="${i}" data-f="lean-${i}" aria-pressed="${f === i}" style="min-height: 40px; padding: 0 12px; border-radius: 4px; border: 1px solid ${f === i ? '#6F93B8' : '#2A3A50'}; background: ${f === i ? 'rgba(111,147,184,.18)' : 'transparent'}; color: #EEF2F7; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px"><span style="width: 9px; height: 9px; border-radius: 2px; background: ${WC[i]}"></span>${d.name}</button>`).join('')}</div>
         </div>
       </div>
       <div style="overflow-x: auto" role="img" aria-label="Twelve weeks across, the four domains down. Every week works all four${f === null ? '' : ', with more weight on ' + D[f].name}.">
         <div style="min-width: 760px; display: flex; flex-direction: column; gap: 8px">
           <div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; align-items: end"><span></span>
-            ${Array.from({ length: 12 }, (_, k) => `<span style="text-align: center; font-size: 12px; font-weight: 600; color: ${k < 3 ? '#D6BF8F' : '#8A7A5E'}; display: flex; flex-direction: column; align-items: center; gap: 4px">${k + 1}${k === 0 ? '<span class="pinp" style="width: 8px; height: 8px; border-radius: 50%; background: #B4975F"></span>' : ''}</span>`).join('')}</div>
+            ${Array.from({ length: 12 }, (_, k) => `<span style="text-align: center; font-size: 12px; font-weight: 600; color: ${k < 3 ? '#A9C0D9' : '#8A7A5E'}; display: flex; flex-direction: column; align-items: center; gap: 4px">${k + 1}${k === 0 ? '<span class="pinp" style="width: 8px; height: 8px; border-radius: 50%; background: #6F93B8"></span>' : ''}</span>`).join('')}</div>
           ${D.map(row).join('')}
           <div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; margin-top: 8px"><span></span>
             ${band(3, 'FOUNDER LAUNCHPAD · FREE', true)}${band(2, 'THE 1:1 · FULL NORTH STAR')}${band(4, 'PERSONAL LEADERSHIP LAB · $97 · 2 SESSIONS')}${band(3, 'BUSINESS HUB · $397 · 3 SESSIONS IN TOTAL')}</div>
         </div>
       </div>
       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; border-top: 1px solid #3A2F20; padding-top: 16px">
-        <p style="flex: 1 1 360px; font-size: 14px; color: #D3C4A5; line-height: 1.7">Every column is one week, and every week works all four. The weight shifts toward ${f === null ? 'the domain that needs you most' : D[f].name}. The coverage never drops. You are at week 1. The Summit ($1,989): the whole incubator, with Alexandru every week.</p>
-        <a href="/ground-plan/#home" class="go no-print" style="display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 4px; background: #B4975F; color: #14100B; font-weight: 600; text-decoration: none">Start week 1 free · The Founder Launchpad <span class="arr" aria-hidden="true">→</span></a>
+        <p style="flex: 1 1 360px; font-size: 14px; color: #B8C6D6; line-height: 1.7">Every column is one week, and every week works all four. The weight shifts toward ${f === null ? 'the domain that needs you most' : D[f].name}. The coverage never drops. You are at week 1. The Summit ($1,989): the whole incubator, with Alexandru every week.</p>
+        <a href="/ground-plan/#home" class="go no-print" style="display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 4px; background: #6F93B8; color: #0E1C2B; font-weight: 600; text-decoration: none">Start week 1 free · The Founder Launchpad <span class="arr" aria-hidden="true">→</span></a>
       </div>`;
   }
 
@@ -721,31 +721,31 @@
   function pClimb() {
     const si = S.stop, sv = STOPS[si];
     return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 720px">
-        <span class="eb" style="color: #D6BF8F">Link to Lead · the incubator</span>
-        <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; color: #F7F2E7">Your climb. <span class="sfi" style="color: #D6BF8F">One step at a time.</span></h2>
-        <p style="color: #D3C4A5; font-size: 15px; line-height: 1.7">Tap a stop on the trail to see what opens there.</p></div>
+        <span class="eb" style="color: #A9C0D9">Link to Lead · the incubator</span>
+        <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; color: #EEF2F7">Your climb. <span class="sfi" style="color: #A9C0D9">One step at a time.</span></h2>
+        <p style="color: #B8C6D6; font-size: 15px; line-height: 1.7">Tap a stop on the trail to see what opens there.</p></div>
       <div style="display: flex; flex-wrap: wrap; gap: 26px; align-items: center">
         <svg viewBox="0 0 460 420" style="flex: 1 1 340px; max-width: 520px; height: auto" role="img" aria-label="A mountain trail from The Founder Launchpad at the bottom to The Summit at the top">
-          <circle cx="60" cy="60" r="1.5" fill="#D6BF8F" opacity=".7"/><circle cx="400" cy="90" r="1.2" fill="#D6BF8F" opacity=".6"/><circle cx="350" cy="40" r="1" fill="#F7F2E7" opacity=".5"/><circle cx="110" cy="130" r="1" fill="#F7F2E7" opacity=".4"/>
-          <polygon points="20,395 230,40 440,395" fill="rgba(180,151,95,.08)" stroke="#8A7A5E" stroke-width="1.2"/>
-          <polyline points="140,395 230,40 320,395" fill="none" stroke="#594A32" stroke-width="1"/>
-          <polyline points="200,96 230,40 262,96" fill="none" stroke="#F7F2E7" stroke-width="1.6" opacity=".6"/>
-          <polyline class="trail" points="190,395 150,360 290,300 175,235 285,160 230,58" fill="none" stroke="#B4975F" stroke-width="2.2" stroke-dasharray="6 6" stroke-linecap="round"/>
-          <g class="flagw"><path d="M230 58V26" stroke="#F7F2E7" stroke-width="1.6"/><path d="M230 27h20l-6 6 6 6h-20z" fill="#B4975F"/></g>
-          ${STOPS.map((t, i) => `<g>${i === si ? `<circle class="halo" cx="${t.x}" cy="${t.y}" r="20" fill="none" stroke="#B4975F" stroke-width="1.5"/>` : ''}
-            <circle class="stopc" cx="${t.x}" cy="${t.y}" r="${i === si ? 11 : 8}" fill="${i === si ? '#B4975F' : i === 4 ? '#D6BF8F' : '#1C1309'}" stroke="#F7F2E7" stroke-width="1.5" style="animation-delay: ${(0.2 + i * 0.15).toFixed(2)}s"/>
-            <text x="${t.lx}" y="${t.ly}" text-anchor="${t.anchor}" fill="${i === si ? '#D6BF8F' : '#D3C4A5'}" font-family="Inter" font-weight="600" font-size="12.5">${t.short}</text></g>`).join('')}
+          <circle cx="60" cy="60" r="1.5" fill="#A9C0D9" opacity=".7"/><circle cx="400" cy="90" r="1.2" fill="#A9C0D9" opacity=".6"/><circle cx="350" cy="40" r="1" fill="#EEF2F7" opacity=".5"/><circle cx="110" cy="130" r="1" fill="#EEF2F7" opacity=".4"/>
+          <polygon points="20,395 230,40 440,395" fill="rgba(111,147,184,.08)" stroke="#8A7A5E" stroke-width="1.2"/>
+          <polyline points="140,395 230,40 320,395" fill="none" stroke="#2A3A50" stroke-width="1"/>
+          <polyline points="200,96 230,40 262,96" fill="none" stroke="#EEF2F7" stroke-width="1.6" opacity=".6"/>
+          <polyline class="trail" points="190,395 150,360 290,300 175,235 285,160 230,58" fill="none" stroke="#6F93B8" stroke-width="2.2" stroke-dasharray="6 6" stroke-linecap="round"/>
+          <g class="flagw"><path d="M230 58V26" stroke="#EEF2F7" stroke-width="1.6"/><path d="M230 27h20l-6 6 6 6h-20z" fill="#6F93B8"/></g>
+          ${STOPS.map((t, i) => `<g>${i === si ? `<circle class="halo" cx="${t.x}" cy="${t.y}" r="20" fill="none" stroke="#6F93B8" stroke-width="1.5"/>` : ''}
+            <circle class="stopc" cx="${t.x}" cy="${t.y}" r="${i === si ? 11 : 8}" fill="${i === si ? '#6F93B8' : i === 4 ? '#A9C0D9' : '#0E1C2B'}" stroke="#EEF2F7" stroke-width="1.5" style="animation-delay: ${(0.2 + i * 0.15).toFixed(2)}s"/>
+            <text x="${t.lx}" y="${t.ly}" text-anchor="${t.anchor}" fill="${i === si ? '#A9C0D9' : '#B8C6D6'}" font-family="Inter" font-weight="600" font-size="12.5">${t.short}</text></g>`).join('')}
         </svg>
         <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
-          <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 6px" role="group" aria-label="Stops on the climb">${STOPS.map((t, i) => `<button type="button" data-act="stop" data-i="${i}" data-f="stop-${i}" aria-pressed="${i === si}" style="min-height: 40px; padding: 0 12px; border-radius: 4px; border: 1px solid ${i === si ? '#B4975F' : '#594A32'}; background: ${i === si ? 'rgba(180,151,95,.18)' : 'transparent'}; color: #F7F2E7; font-size: 12px; font-weight: 600; cursor: pointer">${t.n} · ${t.short}</button>`).join('')}</div>
-          <div class="pop" style="background: rgba(247,242,231,.05); border: 1px solid #594A32; border-radius: 9px; padding: 20px; display: flex; flex-direction: column; gap: 10px" aria-live="polite">
-            <span class="eb" style="color: #D6BF8F">${sv.tag}</span>
-            <span class="sf" style="font-size: 28px; color: #F7F2E7; line-height: 1.15">${sv.name}</span>
-            <span class="sfi" style="font-size: 18px; color: #D6BF8F; line-height: 1.35">${sv.line}</span>
+          <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 6px" role="group" aria-label="Stops on the climb">${STOPS.map((t, i) => `<button type="button" data-act="stop" data-i="${i}" data-f="stop-${i}" aria-pressed="${i === si}" style="min-height: 40px; padding: 0 12px; border-radius: 4px; border: 1px solid ${i === si ? '#6F93B8' : '#2A3A50'}; background: ${i === si ? 'rgba(111,147,184,.18)' : 'transparent'}; color: #EEF2F7; font-size: 12px; font-weight: 600; cursor: pointer">${t.n} · ${t.short}</button>`).join('')}</div>
+          <div class="pop" style="background: rgba(247,242,231,.05); border: 1px solid #2A3A50; border-radius: 9px; padding: 20px; display: flex; flex-direction: column; gap: 10px" aria-live="polite">
+            <span class="eb" style="color: #A9C0D9">${sv.tag}</span>
+            <span class="sf" style="font-size: 28px; color: #EEF2F7; line-height: 1.15">${sv.name}</span>
+            <span class="sfi" style="font-size: 18px; color: #A9C0D9; line-height: 1.35">${sv.line}</span>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-top: 4px">
-              ${[['MODULES', sv.modules], ['WITH ALEXANDRU', sv.sessions], ['PRICE', sv.price]].map(([k, v]) => `<div style="border: 1px solid #3A2F20; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #D3C4A5; letter-spacing: .1em">${k}</span><span style="font-weight: 600; color: #F7F2E7">${v}</span></div>`).join('')}
+              ${[['MODULES', sv.modules], ['WITH ALEXANDRU', sv.sessions], ['PRICE', sv.price]].map(([k, v]) => `<div style="border: 1px solid #3A2F20; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #B8C6D6; letter-spacing: .1em">${k}</span><span style="font-weight: 600; color: #EEF2F7">${v}</span></div>`).join('')}
             </div>
-            <a href="${sv.href}" class="go no-print"${sv.ext ? ' target="_blank" rel="noopener"' : ''} style="align-self: flex-start; margin-top: 6px; display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 4px; background: #B4975F; color: #14100B; font-weight: 600; text-decoration: none">${sv.cta} <span class="arr" aria-hidden="true">${sv.ext ? '↗' : '→'}</span></a>
+            <a href="${sv.href}" class="go no-print"${sv.ext ? ' target="_blank" rel="noopener"' : ''} style="align-self: flex-start; margin-top: 6px; display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 4px; background: #6F93B8; color: #0E1C2B; font-weight: 600; text-decoration: none">${sv.cta} <span class="arr" aria-hidden="true">${sv.ext ? '↗' : '→'}</span></a>
           </div>
         </div>
       </div>`;
@@ -795,8 +795,8 @@
    *  plan box, Fine-tune). Values are set by updateLab, so the answers glide. */
   function pLabIn() {
     const L = labCalc(), plan = S.mode !== 'yes', cur = S.profile.currency;
-    const input = (key, label, hint) => `<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #F7F2E7">${label}
-        <input class="inp" type="text" inputmode="decimal" data-lab="${key}" data-f="lab-${key}" value="${esc(S.lab[key])}" placeholder="${hint}" style="background: #231D15; color: #F7F2E7; border-color: #594A32"></label>`;
+    const input = (key, label, hint) => `<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: #EEF2F7">${label}
+        <input class="inp" type="text" inputmode="decimal" data-lab="${key}" data-f="lab-${key}" value="${esc(S.lab[key])}" placeholder="${hint}" style="background: #121E2D; color: #EEF2F7; border-color: #2A3A50"></label>`;
     const missing = L.locked ? L.need : [];
     const chips = [...missing.map((x) => x.label), ...(L.locked && L.planned ? ['Customers a month you plan for (below)'] : [])];
     const lock = L.locked ? `<div class="wlock" role="status">
@@ -805,12 +805,12 @@
           <span>Fill ${NUMW[Math.min(4, chips.length)]} ${chips.length === 1 ? 'box' : 'boxes'} ${missing.length ? 'in Step 03 · Count what matters' : 'below'}. A range is enough. Then come back and every slider moves on your own month.</span>
           <div class="wchips">${chips.map((c) => `<span class="wchip"><i aria-hidden="true"></i>${esc(c)}</span>`).join('')}</div>
         </div>
-        ${missing.length ? '<button type="button" class="go" data-act="lab-take" data-f="lab-take" style="min-height: 48px; padding: 0 20px; border-radius: 5px; border: 0; background: #B4975F; color: #1C1309; font-weight: 600; font-size: 15px; cursor: pointer">Take me there ↑</button>' : ''}
+        ${missing.length ? '<button type="button" class="go" data-act="lab-take" data-f="lab-take" style="min-height: 48px; padding: 0 20px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; font-size: 15px; cursor: pointer">Take me there ↑</button>' : ''}
       </div>` : '';
     const dis = L.locked ? ' disabled' : '';
     const rows = PAIRS.map((x) => `<div class="wpair">
         <div class="wcard">
-          <div class="wrow"><label for="w-${x.k}" class="wname"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${x.icon}" fill="none" stroke="#B4975F" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>${x.name}</label><span class="wbig" id="lv-val-${x.k}">—</span></div>
+          <div class="wrow"><label for="w-${x.k}" class="wname"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${x.icon}" fill="none" stroke="#6F93B8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>${x.name}</label><span class="wbig" id="lv-val-${x.k}">—</span></div>
           <input id="w-${x.k}" type="range" min="0" max="${E.LEVER_RANGE[x.k]}" step="5" value="${L.locked ? 0 : S.lab[x.k] || 0}" data-lever="${x.k}" data-f="w-${x.k}"${dis}>
           <span class="wnote" id="lv-note-${x.k}"></span>
         </div>
@@ -854,9 +854,9 @@
   function hubSVG(improved) {
     const NP = [['Cash', 160, 23, 160, 12, 'middle'], ['Clients', 222, 85, 244, 89, 'start'], ['Time', 160, 147, 160, 168, 'middle'], ['People', 98, 85, 76, 89, 'end']];
     const all = improved.filter(Boolean).length;
-    return `<circle cx="160" cy="85" r="62" fill="none" stroke="${all >= 3 ? '#B4975F' : '#3A2F20'}" stroke-width="2" stroke-dasharray="4 5"/>
-      <circle cx="160" cy="85" r="22" fill="#1C1309" stroke="#B4975F" stroke-width="1.5"/><text x="160" y="90" text-anchor="middle" fill="#F7F2E7" font-family="Newsreader, Georgia, serif" font-size="13">You</text>
-      ${NP.map((n, i) => `<line x1="160" y1="85" x2="${n[1]}" y2="${n[2]}" stroke="#3A2F20" stroke-width="1"/><circle class="node" cx="${n[1]}" cy="${n[2]}" r="14" fill="${improved[i] ? '#B4975F' : '#1C1309'}" stroke="#B4975F" stroke-width="1.5"/><text x="${n[3]}" y="${n[4]}" text-anchor="${n[5]}" fill="#F7F2E7" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="600">${n[0]}</text>`).join('')}`;
+    return `<circle cx="160" cy="85" r="62" fill="none" stroke="${all >= 3 ? '#6F93B8' : '#3A2F20'}" stroke-width="2" stroke-dasharray="4 5"/>
+      <circle cx="160" cy="85" r="22" fill="#0E1C2B" stroke="#6F93B8" stroke-width="1.5"/><text x="160" y="90" text-anchor="middle" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="13">You</text>
+      ${NP.map((n, i) => `<line x1="160" y1="85" x2="${n[1]}" y2="${n[2]}" stroke="#3A2F20" stroke-width="1"/><circle class="node" cx="${n[1]}" cy="${n[2]}" r="14" fill="${improved[i] ? '#6F93B8' : '#0E1C2B'}" stroke="#6F93B8" stroke-width="1.5"/><text x="${n[3]}" y="${n[4]}" text-anchor="${n[5]}" fill="#EEF2F7" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="600">${n[0]}</text>`).join('')}`;
   }
 
   /** Set every value in the lab without redrawing it, so handles glide. */
@@ -892,7 +892,7 @@
       const good = L.improved[i], bad = L.worsened[i], col = good ? '#9BC0A1' : bad ? '#E0A282' : null;
       const fl = document.getElementById('fill-' + o.k), th = document.getElementById('thumb-' + o.k), td = document.getElementById('today-' + o.k), card = document.getElementById('out-' + o.k);
       if (fl) { fl.style.width = (v === null ? 0 : pct(v)) + '%'; fl.style.background = col || '#8A7A5E'; }
-      if (th) { th.style.left = (v === null ? 50 : pct(v)) + '%'; th.style.color = col || '#F7F2E7'; }
+      if (th) { th.style.left = (v === null ? 50 : pct(v)) + '%'; th.style.color = col || '#EEF2F7'; }
       if (td) { td.style.left = (w === null ? 50 : pct(w)) + '%'; td.hidden = w === null; }
       if (card) { card.setAttribute('aria-valuemax', String(Math.round(max))); if (v !== null) card.setAttribute('aria-valuenow', String(Math.round(v))); }
     });
@@ -931,9 +931,9 @@
     const fmtS = (x) => (x > 0 ? '+' : x < 0 ? '−' : '') + whole(Math.abs(x));
     const chain = [
       ['Cash, each month', delta === null ? '?' : delta >= 0 ? '↑' : '↓', delta === null ? 'set a helper rate' : signed(delta), delta === null || delta >= 0 ? '#9BC0A1' : '#E0A282'],
-      [plan ? 'Customers, each month' : 'Clients, each month', s.clients !== null && s.clients > t.clients + 0.05 ? '↑' : s.clients !== null && s.clients < t.clients - 0.05 ? '↓' : '→', s.clients === null ? '—' : fmtS(s.clients - t.clients), s.clients !== null && s.clients > t.clients ? '#9BC0A1' : '#D3C4A5'],
+      [plan ? 'Customers, each month' : 'Clients, each month', s.clients !== null && s.clients > t.clients + 0.05 ? '↑' : s.clients !== null && s.clients < t.clients - 0.05 ? '↓' : '→', s.clients === null ? '—' : fmtS(s.clients - t.clients), s.clients !== null && s.clients > t.clients ? '#9BC0A1' : '#B8C6D6'],
       ['Your hours, each month', s.mine < t.mine - 0.5 ? '↓' : s.mine > t.mine + 0.5 ? '↑' : '→', fmtS(s.mine - t.mine) + ' h', s.mine <= t.mine + 0.5 ? '#9BC0A1' : lim && s.mine > lim ? '#E0A282' : '#DDBD69'],
-      ['People you could afford', s.people ? '↑' : '→', s.people === null ? '—' : (Math.round(s.people * 10) / 10).toFixed(1), s.people ? '#9BC0A1' : '#D3C4A5'],
+      ['People you could afford', s.people ? '↑' : '→', s.people === null ? '—' : (Math.round(s.people * 10) / 10).toFixed(1), s.people ? '#9BC0A1' : '#B8C6D6'],
     ];
     const meaning = [
       labMode() === 'time' ? 'A fairer price keeps your money with fewer hours. That is the quietest lever you have.' : 'A fairer price gives you money without taking more of your life.',
@@ -945,18 +945,18 @@
     const goalLine = g ? 'Your goal, ' + g[1].toLowerCase() + ': ' + (E.goalHelped(g[0], t, s, d) ? 'this change moves you toward it.' : 'this change alone does not get you there. Try another lever with it.') : '';
     return `<div class="pop" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px">
       <div style="background: rgba(247,242,231,.05); border: 1px solid #3A2F20; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
-        <span class="eb" style="color: #D6BF8F">The chain reaction</span>
-        <span style="display: inline-flex; align-self: flex-start; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 16px; background: #B4975F; color: #14100B; font-weight: 600; font-size: 13px">${LV.name}</span>
-        ${chain.map(([nm, ar, v, col], k) => `<div class="itemin" style="display: flex; align-items: center; gap: 10px; font-size: 14px; animation-delay: ${(0.1 + k * 0.15).toFixed(2)}s"><svg width="22" height="14" viewBox="0 0 22 14" aria-hidden="true"><path d="M1 7h16M13 2l5 5-5 5" fill="none" stroke="#8A7A5E" stroke-width="1.6" stroke-linecap="round"/></svg><span style="flex: 1; color: #F7F2E7">${nm}</span><span style="font-weight: 600; color: ${col}">${ar} ${esc(v)}</span></div>`).join('')}
+        <span class="eb" style="color: #A9C0D9">The chain reaction</span>
+        <span style="display: inline-flex; align-self: flex-start; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 16px; background: #6F93B8; color: #0E1C2B; font-weight: 600; font-size: 13px">${LV.name}</span>
+        ${chain.map(([nm, ar, v, col], k) => `<div class="itemin" style="display: flex; align-items: center; gap: 10px; font-size: 14px; animation-delay: ${(0.1 + k * 0.15).toFixed(2)}s"><svg width="22" height="14" viewBox="0 0 22 14" aria-hidden="true"><path d="M1 7h16M13 2l5 5-5 5" fill="none" stroke="#8A7A5E" stroke-width="1.6" stroke-linecap="round"/></svg><span style="flex: 1; color: #EEF2F7">${nm}</span><span style="font-weight: 600; color: ${col}">${ar} ${esc(v)}</span></div>`).join('')}
       </div>
       <div style="background: rgba(247,242,231,.05); border: 1px solid #3A2F20; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
-        <span class="eb" style="color: #D6BF8F">What this means for you</span>
-        <span class="sf" style="font-size: 20px; line-height: 1.3; color: #F7F2E7">${meaning}</span>
-        ${goalLine ? `<span style="font-size: 14px; color: #D6BF8F">${goalLine}</span>` : ''}
-        <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: #D3C4A5; border-top: 1px solid #3A2F20; padding-top: 10px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M12 3l9 16H3z" fill="none" stroke="#DDBD69" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4M12 16.5v.5" stroke="#DDBD69" stroke-width="2" stroke-linecap="round"/></svg><span><b style="color: #F7F2E7">Watch out:</b> ${LV.watch}</span></div>
-        <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: #D3C4A5"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#9BC0A1" stroke-width="2.2" stroke-linecap="round"/></svg><span><b style="color: #F7F2E7">First step this week:</b> ${LV.first}</span></div>
+        <span class="eb" style="color: #A9C0D9">What this means for you</span>
+        <span class="sf" style="font-size: 20px; line-height: 1.3; color: #EEF2F7">${meaning}</span>
+        ${goalLine ? `<span style="font-size: 14px; color: #A9C0D9">${goalLine}</span>` : ''}
+        <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: #B8C6D6; border-top: 1px solid #3A2F20; padding-top: 10px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M12 3l9 16H3z" fill="none" stroke="#DDBD69" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4M12 16.5v.5" stroke="#DDBD69" stroke-width="2" stroke-linecap="round"/></svg><span><b style="color: #EEF2F7">Watch out:</b> ${LV.watch}</span></div>
+        <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: #B8C6D6"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#9BC0A1" stroke-width="2.2" stroke-linecap="round"/></svg><span><b style="color: #EEF2F7">First step this week:</b> ${LV.first}</span></div>
       </div>
-      <div style="border: 1px solid #B4975F; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 10px; background: rgba(180,151,95,.08)">
+      <div style="border: 1px solid #6F93B8; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 10px; background: rgba(111,147,184,.08)">
         ${planBlock(LV.steps, UI.plans && UI.plans.whatif && UI.plans.whatif.id === WHATIF_IDS[dom] ? UI.plans.whatif.steps : null, 'Your plan for this change', 'Open my step-by-step plan')}
       </div></div>`;
   }
@@ -993,9 +993,9 @@
   }
 
   const pMbar = (c) => `${emblem(c.pc.per, 40, { small: true })}
-    <span style="flex: 1; font-size: 12px; color: #D3C4A5; line-height: 1.3"><b style="color: #F7F2E7">${c.pc.total}/16</b> pieces in place</span>
-    <button type="button" data-act="print" data-f="m-print" aria-label="Print or save as PDF" style="width: 44px; height: 44px; border-radius: 50%; border: 1px solid #594A32; background: transparent; color: #F7F2E7; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
-    <button type="button" data-act="email" data-f="m-email" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 0; background: #B4975F; color: #14100B; font-weight: 600; cursor: pointer">Email me</button>`;
+    <span style="flex: 1; font-size: 12px; color: #B8C6D6; line-height: 1.3"><b style="color: #EEF2F7">${c.pc.total}/16</b> pieces in place</span>
+    <button type="button" data-act="print" data-f="m-print" aria-label="Print or save as PDF" style="width: 44px; height: 44px; border-radius: 50%; border: 1px solid #2A3A50; background: transparent; color: #EEF2F7; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+    <button type="button" data-act="email" data-f="m-email" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; cursor: pointer">Email me</button>`;
 
   const INDUSTRIES = ['Coaching & consulting', 'Creative & design', 'E-commerce & retail', 'Food & hospitality', 'Health & wellness', 'Beauty & personal care', 'Education & training', 'Professional services', 'Trades & construction', 'Technology & software', 'Real estate', 'Manufacturing', 'Nonprofit & social impact', 'Other'];
   const industrySelect = (id, extra = '') => `<select class="inp" id="${id}" ${extra}><option value="">Choose your industry…</option>${INDUSTRIES.map((x) => `<option${S.profile.industry === x ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select>`;
@@ -1013,16 +1013,16 @@
     return `<div style="position: fixed; inset: 0; z-index: 50; background: rgba(16,13,9,.6); display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto">
       <form class="card pop" id="gate-form" role="dialog" aria-modal="true" aria-labelledby="gate-h" novalidate style="position: relative; width: 100%; max-width: 480px; padding: 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.35); margin: auto">
         <button type="button" data-act="gate-skip" data-f="gate-x" aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-        <div style="display: flex; align-items: center; gap: 12px; padding-right: 44px"><svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10" fill="none" stroke="#B4975F" stroke-width="1.4"/><polygon points="12,4 14,12 12,13.5 10,12" fill="#B4975F"/></svg><div style="display: flex; flex-direction: column"><span class="eb">Before your first answer</span><span class="sf" style="font-size: 22px" id="gate-h">Who is this compass for?</span></div></div>
+        <div style="display: flex; align-items: center; gap: 12px; padding-right: 44px"><svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10" fill="none" stroke="#6F93B8" stroke-width="1.4"/><polygon points="12,4 14,12 12,13.5 10,12" fill="#6F93B8"/></svg><div style="display: flex; flex-direction: column"><span class="eb">Before your first answer</span><span class="sf" style="font-size: 22px" id="gate-h">Who is this compass for?</span></div></div>
         <span style="font-size: 14px; color: var(--muted)">We keep your answers with your name, so your feedback and your launchpad are yours.</span>
         <div class="gate-two" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
           <label style="${lab}">First name<input class="inp" id="g-first" type="text" autocomplete="given-name" value="${esc(P.first)}" data-f="g-first"></label>
           <label style="${lab}">Surname<input class="inp" id="g-last" type="text" autocomplete="family-name" value="${esc(P.last)}"></label>
         </div>
         <label style="${lab}">Email<input class="inp" id="g-email" type="email" autocomplete="email" value="${esc(P.email)}"></label>
-        <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: var(--muted)"><input type="checkbox" id="g-consent"${P.consent ? ' checked' : ''} style="width: 18px; height: 18px; margin-top: 1px; accent-color: #B4975F; flex: none">I agree that ExploraSelf may email me my results and occasional guidance. I can unsubscribe any time.</label>
+        <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: var(--muted)"><input type="checkbox" id="g-consent"${P.consent ? ' checked' : ''} style="width: 18px; height: 18px; margin-top: 1px; accent-color: #6F93B8; flex: none">I agree that ExploraSelf may email me my results and occasional guidance. I can unsubscribe any time.</label>
         <span id="gate-err" role="alert" style="font-size: 13px; color: var(--self); font-weight: 600"></span>
-        <button type="submit" data-f="gate-go" style="min-height: 50px; border-radius: 5px; border: 0; background: #B4975F; color: #14100B; font-weight: 600; font-size: 15px; cursor: pointer">Start my compass →</button>
+        <button type="submit" data-f="gate-go" style="min-height: 50px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; font-size: 15px; cursor: pointer">Start my compass →</button>
         <button type="button" data-act="gate-skip" data-f="gate-skip" style="min-height: 44px; border-radius: 5px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-weight: 600; cursor: pointer">Skip for now · keep exploring</button>
         ${UI.signinOpen ? `<div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); padding-top: 12px"><span style="font-size: 13px; font-weight: 600">Already have an account? Sign in with the email above.</span>${pSignin('gate')}</div>`
           : '<button type="button" data-act="signin-open" data-f="signin-open" style="border: 0; background: none; padding: 6px 0; color: var(--goldink); font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer">Already have an account? Sign in</button>'}
@@ -1034,12 +1034,12 @@
   const linkBtn = (where, t) => `<button type="button" data-act="signin-${where}" data-f="signin-${where}-${t.length}" ${UI.signinBusy ? 'disabled' : ''} style="border: 0; background: none; padding: 6px 0; color: var(--goldink); font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer">${t}</button>`;
   /** Sign in: email and password; "Forgot your password? Email me a sign-in link" sends a one-time link. */
   const pSignin = (where) => `${pwInput('si-pw-' + where, 'Password', 'current-password')}
-    <button type="button" data-act="pw-in" data-v="${where}" data-f="pw-in-${where}" ${UI.signinBusy ? 'disabled' : ''} style="min-height: 46px; border-radius: 5px; border: 0; background: var(--deep); color: #F7F2E7; font-weight: 600; cursor: pointer">Sign in</button>
+    <button type="button" data-act="pw-in" data-v="${where}" data-f="pw-in-${where}" ${UI.signinBusy ? 'disabled' : ''} style="min-height: 46px; border-radius: 5px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 600; cursor: pointer">Sign in</button>
     <span style="display: flex; gap: 14px; flex-wrap: wrap">${linkBtn(where, 'Forgot your password? Email me a sign-in link')}</span>
     ${UI.signin ? `<span role="status" style="font-size: 13px; color: var(--ink)">${esc(UI.signin)}</span>` : ''}`;
   const pPassword = () => `<details${UI.pwmsg ? ' open' : ''}><summary style="cursor: pointer; font-weight: 600; color: var(--goldink); min-height: 32px">${UI.hasPw ? 'Change your password' : 'Set a password (optional)'}</summary>
     <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 8px; max-width: 420px">${pwInput('pw-1', 'Password', 'new-password')}${pwInput('pw-2', 'Confirm password', 'new-password')}
-    <button type="button" data-act="pw-save" data-f="pw-save" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border-radius: 5px; border: 0; background: #B4975F; color: #14100B; font-weight: 600; cursor: pointer">Save my password</button>
+    <button type="button" data-act="pw-save" data-f="pw-save" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; cursor: pointer">Save my password</button>
     ${UI.pwmsg ? `<span role="status" style="font-size: 13px; color: var(--ink)">${esc(UI.pwmsg)}</span>` : ''}</div></details>`;
   const pHow = () => (UI.how ? `<div class="card pop" style="padding: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 13px">
       <span style="display: flex; gap: 8px"><b style="color: var(--goldink)">1</b>Say where you are and where you want to get.</span>
@@ -1063,8 +1063,8 @@
       </div>
       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
         <span style="font-size: 13px; font-weight: 600">Theme</span>
-        ${['light', 'dark'].map((t) => `<button type="button" data-act="theme" data-v="${t}" data-f="theme-${t}" aria-pressed="${siteTheme() === t}" style="min-height: 44px; padding: 0 16px; border-radius: 5px; border: 1.5px solid ${siteTheme() === t ? '#B4975F' : 'var(--line)'}; background: var(--paper); color: var(--ink); cursor: pointer; font-weight: 600">${t === 'light' ? 'Light' : 'Dark'}</button>`).join('')}
-        <button type="button" data-act="ws-save" data-f="ws-save" style="margin-left: auto; min-height: 46px; padding: 0 20px; border-radius: 5px; border: 0; background: #B4975F; color: #14100B; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px">${lockIcon('#14100B', 16)}Save &amp; lock my workspace</button>
+        ${['light', 'dark'].map((t) => `<button type="button" data-act="theme" data-v="${t}" data-f="theme-${t}" aria-pressed="${siteTheme() === t}" style="min-height: 44px; padding: 0 16px; border-radius: 5px; border: 1.5px solid ${siteTheme() === t ? '#6F93B8' : 'var(--line)'}; background: var(--paper); color: var(--ink); cursor: pointer; font-weight: 600">${t === 'light' ? 'Light' : 'Dark'}</button>`).join('')}
+        <button type="button" data-act="ws-save" data-f="ws-save" style="margin-left: auto; min-height: 46px; padding: 0 20px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px">${lockIcon('#0E1C2B', 16)}Save &amp; lock my workspace</button>
       </div>
       ${UI.saved ? `<span class="pop" role="status" style="font-size: 13px; color: ${UI.saved === true ? 'var(--people)' : 'var(--self)'}; font-weight: 600">${UI.saved === true ? (signedIn() ? 'Saved to your account. Your preferences and numbers are locked to this workspace.' : 'Saved. Your preferences and numbers are kept with this workspace on this browser.') : esc(UI.saved)}</span>` : ''}
       <div style="border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 8px">
