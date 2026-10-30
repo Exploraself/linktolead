@@ -117,8 +117,14 @@ export function resultsLetter(base, { first, weakest, to = '', tier, offer } = {
   ], offerFor('results', to, tier, offer)) };
 }
 
-/** The one-time sign-in link. */
-export function signinLetter(base, url, { first, to = '', offer } = {}) {
+/** The one-time sign-in link. `reset`: the founder forgot their password. */
+export function signinLetter(base, url, { first, to = '', offer, reset = false } = {}) {
+  if (reset) return { subject: 'Choose a new password', ...letter(base, [
+    hi(first),
+    'No problem at all, it happens to all of us. Tap the button and you’ll land in your Ground Plan with the password box already open.',
+    button(url, 'Choose my new password →'),
+    'The button works once, for the next 30 minutes. If you didn’t ask for this, you can simply ignore it.',
+  ], offerFor('signin', to, 'free', offer)) };
   return { subject: 'Your link to get back in', ...letter(base, [
     hi(first),
     'Good to see you again. Everything you wrote is right where you left it.',
