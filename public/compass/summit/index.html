@@ -78,39 +78,117 @@ a{color:#D6BF8F}a:hover{color:#F7F2E7}
 :root[data-theme="light"] [style*="color: #D3C4A5"],:root[data-theme="light"] [style*="color:#D3C4A5"],:root[data-theme="light"] [style*="color: #C4B69D"]{color:#5E5446!important}
 :root[data-theme="light"] [style*="color: #D6BF8F"],:root[data-theme="light"] [style*="color:#D6BF8F"]{color:#7A5C16!important}
 :root[data-theme="light"] [style*="background: #0E0A05"],:root[data-theme="light"] [style*="background:#0E0A05"],:root[data-theme="light"] [style*="background: #14100B"],:root[data-theme="light"] [style*="background: #1C1309"]{background:#FFFDF7!important}
+
+/* ── The Summit, jewellery box (30 Oct): the top bar and the banner stay black and gold in both themes ── */
+.sx-top{position:sticky;top:0;z-index:40;background:rgba(12,8,5,.82);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid rgba(180,151,95,.35)}
+.sx-top::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:1px;background:linear-gradient(90deg,transparent,rgba(214,191,143,.35),transparent)}
+.sx-top-in{max-width:1180px;margin:0 auto;padding:12px 24px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px}
+.sx-back{justify-self:start;display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#D6BF8F !important;text-decoration:none;letter-spacing:.02em}
+.sx-back:hover{color:#F3E5BF !important}
+.sx-crest{display:inline-flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.32em;color:#E6D3A3;white-space:nowrap}
+.sx-crest img{width:26px;height:auto}
+.sx-crest i{font-style:normal;font-size:8px;color:#B4975F}
+.sx-top-cta{justify-self:end;min-height:36px;padding:0 16px;display:inline-flex;align-items:center;border:1px solid rgba(214,191,143,.6);border-radius:2px;font-size:12px;font-weight:600;letter-spacing:.08em;color:#F3E5BF !important;text-decoration:none;text-transform:uppercase}
+.sx-top-cta:hover{background:rgba(214,191,143,.12)}
+.sx{position:relative;border-radius:12px;padding:10px;background:linear-gradient(135deg,#8E7440,#E6D3A3 30%,#B4975F 55%,#F3E5BF 75%,#8E7440);box-shadow:0 50px 90px -50px rgba(12,8,5,.9)}
+.sx-in{position:relative;overflow:hidden;border-radius:6px;padding:clamp(36px,6vw,70px) clamp(24px,5vw,60px);display:flex;flex-wrap:wrap;align-items:center;gap:36px;
+  background:radial-gradient(70% 90% at 75% 10%,#2A1D10 0%,#120C07 55%,#0A0704 100%);box-shadow:inset 0 0 0 1px rgba(214,191,143,.35),inset 0 0 0 7px #0C0805,inset 0 0 0 8px rgba(214,191,143,.18)}
+.sx-copy{flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.sx-k{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:#D6BF8F}
+.sx-orn{display:flex;align-items:center;gap:10px;width:140px}
+.sx-orn i{flex:1;height:1px;background:linear-gradient(90deg,transparent,#B4975F)}.sx-orn i:last-child{background:linear-gradient(90deg,#B4975F,transparent)}
+.sx-orn b{width:7px;height:7px;transform:rotate(45deg);background:#D6BF8F}
+.su .sx-h{font-size:clamp(64px,9vw,128px);line-height:.92;background-image:linear-gradient(100deg,#B4975F 0%,#F3E5BF 25%,#B4975F 45%,#8E7440 60%,#E6D3A3 80%,#B4975F 100%) !important}
+.sx-sub{font-size:clamp(22px,2.4vw,30px);line-height:1.35;color:#EFE4CC !important}
+.sx-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:10px}
+.sx-btn{position:relative;overflow:hidden;min-height:56px;padding:0 28px;border-radius:2px;display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:.03em;text-decoration:none;color:#1C1309 !important;
+  background:linear-gradient(135deg,#F3E5BF,#C9A96E 45%,#E9D7A8 70%,#A88B55);box-shadow:0 14px 34px -14px rgba(201,169,110,.8),inset 0 0 0 1px rgba(255,255,255,.35)}
+.sx-btn::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);transform:translateX(-100%);animation:sxShine 6s ease-in-out 1.2s infinite}
+@keyframes sxShine{0%,70%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.sx-btn .arr{transition:transform .25s ease}.sx-btn:hover .arr{transform:translateX(5px)}
+.sx-plaque{display:inline-flex;flex-direction:column;align-items:center;padding:8px 18px 6px;border:1px solid rgba(214,191,143,.55);box-shadow:inset 0 0 0 3px #0C0805,inset 0 0 0 4px rgba(214,191,143,.25);border-radius:2px}
+.sx-plaque small{font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:#C9B07A}
+.sx-plaque b{font-size:30px;line-height:1.1;color:#F3E5BF;font-weight:500}
+.sx-art{flex:0 1 420px;width:100%;max-width:440px;height:auto}
+.sx-sun{transform-box:fill-box;transform-origin:center;animation:sxSun 7s ease-in-out infinite}
+@keyframes sxSun{0%,100%{opacity:.7;transform:scale(.95)}50%{opacity:1;transform:scale(1.05)}}
+.sx-sweep{animation:sxSweep 8s ease-in-out infinite}
+@keyframes sxSweep{0%,60%{transform:translateX(-120px) skewX(-18deg)}85%,100%{transform:translateX(260px) skewX(-18deg)}}
+@media (max-width:640px){.sx-top-in{grid-template-columns:auto 1fr;padding:10px 16px}.sx-crest{display:none}.sx-in{padding:34px 20px}.sx-btn{width:100%;justify-content:center}}
+
+.sx-mentor{margin:0;display:grid;grid-template-columns:minmax(220px,340px) 1fr;gap:clamp(24px,5vw,60px);align-items:center;padding:clamp(24px,4vw,44px);border-radius:10px;
+  background:radial-gradient(70% 90% at 20% 30%,#2A1D10 0%,#120C07 60%,#0A0704 100%);box-shadow:0 40px 80px -50px rgba(12,8,5,.9),inset 0 0 0 1px rgba(214,191,143,.35),inset 0 0 0 7px #0C0805,inset 0 0 0 8px rgba(214,191,143,.16)}
+.sx-portrait{position:relative;padding:8px;border-radius:4px;background:linear-gradient(135deg,#8E7440,#E6D3A3 30%,#B4975F 55%,#F3E5BF 75%,#8E7440)}
+.sx-portrait img{display:block;width:100%;height:auto;aspect-ratio:5/4;object-fit:cover;border-radius:2px;filter:sepia(.18) contrast(1.05);box-shadow:inset 0 0 0 1px rgba(0,0,0,.5)}
+.sx-mentor blockquote{margin:0;position:relative;color:#F3EAD7}
+.sx-q{position:absolute;left:-6px;top:-54px;font:400 120px/1 Newsreader,Georgia,serif;color:#B4975F;opacity:.55}
+.sx-mentor blockquote p{font-size:clamp(24px,2.8vw,36px);line-height:1.3;color:#F3EAD7 !important;max-width:24ch}
+.sx-mentor footer{margin-top:22px;display:flex;align-items:center;gap:16px;padding-top:18px;border-top:1px solid rgba(214,191,143,.3)}
+.sx-sig{height:46px;width:auto;filter:invert(1) sepia(.6) saturate(2) hue-rotate(5deg) brightness(.95)}
+.sx-mentor footer b{display:block;font:500 18px/1.2 Newsreader,Georgia,serif;color:#F3E5BF}
+.sx-mentor footer small{display:block;font-size:12px;letter-spacing:.08em;color:#C9B07A;margin-top:3px}
+@media (max-width:720px){.sx-mentor{grid-template-columns:1fr}.sx-q{top:-40px;font-size:90px}}
+@media (prefers-reduced-motion:reduce){.sx-btn::after,.sx-sun,.sx-sweep{animation:none}}
 </style>
 </head>
 <body>
 <div class="su lux">
-  <header class="wrap" style="padding-top: 22px; padding-bottom: 22px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap">
-    <a href="/compass" class="ghost"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Back to your North Star</a>
-    <span style="flex: 1"></span>
-    <img src="/compass/assets/logo.webp" alt="" style="width: 32px; height: auto"><span style="font-size: 11px; letter-spacing: .28em; color: #D6BF8F">EXPLORASELF · LINK TO LEAD</span>
+  <header class="sx-top">
+    <div class="sx-top-in">
+      <a href="/compass" class="sx-back"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Your North Star</a>
+      <span class="sx-crest"><img src="/compass/assets/logo.webp" alt="" width="26" height="26"><span>EXPLORASELF</span><i aria-hidden="true">◆</i><span>THE SUMMIT</span></span>
+      <a href="#talk" class="sx-top-cta">Talk with Alexandru</a>
+    </div>
   </header>
 
   <main>
-  <!-- HERO -->
-  <section class="wrap" style="padding-top: 20px; padding-bottom: 60px">
-    <div class="frame"><div class="frame2 hero" style="padding: 60px 44px; display: flex; flex-wrap: wrap; align-items: center; gap: 40px">
-      <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 20px; min-width: 0">
-        <span class="k rise">The top of Link to Lead</span>
-        <h1 class="sf foil rise r1" style="font-size: clamp(64px, 9vw, 128px); line-height: .92">The Summit</h1>
-        <p class="sfi rise r2" style="font-size: clamp(22px, 2.4vw, 30px); line-height: 1.35; color: #EFE4CC">The whole incubator. With Alexandru beside you, every week.</p>
-        <div class="rise r3" style="display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: 8px">
-          <a href="#talk" class="btn">Talk with Alexandru about The Summit <span class="arr" aria-hidden="true">→</span></a>
-          <span class="sf" style="font-size: 32px">$1,989</span>
+  <!-- HERO · the jewellery box (30 Oct): black lacquer and gold in both themes -->
+  <section class="wrap" style="padding-top: 8px; padding-bottom: 60px">
+    <div class="sx"><div class="sx-in">
+      <div class="sx-copy">
+        <span class="sx-k rise">The top of Link to Lead</span>
+        <span class="sx-orn rise" aria-hidden="true"><i></i><b></b><i></i></span>
+        <h1 class="sf foil rise r1 sx-h">The Summit</h1>
+        <p class="sfi rise r2 sx-sub">The whole incubator. With Alexandru beside you, every week.</p>
+        <div class="rise r3 sx-row">
+          <a href="#talk" class="sx-btn">Talk with Alexandru about The Summit <span class="arr" aria-hidden="true">→</span></a>
+          <span class="sx-plaque"><small>The Summit</small><b class="sf">$1,989</b></span>
         </div>
       </div>
-      <svg viewBox="0 0 320 280" style="flex: 0 1 380px; width: 100%; max-width: 380px; height: auto" aria-hidden="true">
-        <circle class="tw" cx="40" cy="36" r="1.6" fill="#D6BF8F"/><circle class="tw tw2" cx="280" cy="26" r="1.2" fill="#F7F2E7"/><circle class="tw tw3" cx="220" cy="78" r="1" fill="#D6BF8F"/><circle class="tw" cx="96" cy="96" r="1" fill="#F7F2E7"/><circle class="tw tw2" cx="300" cy="120" r="1.3" fill="#D6BF8F"/>
-        <circle class="glow" cx="160" cy="62" r="44" fill="rgba(180,151,95,.2)"/>
-        <polyline class="draw" points="8,272 160,62 312,272" fill="none" stroke="#B4975F" stroke-width="1.8"/>
-        <polyline points="80,272 160,62 240,272" fill="none" stroke="#594A32" stroke-width="1.1"/>
-        <polyline points="134,96 160,62 188,98" fill="none" stroke="#F7F2E7" stroke-width="1.6" opacity=".7"/>
-        <path d="M160 62V26" stroke="#F7F2E7" stroke-width="1.4"/><path class="flag" d="M160 27h24l-7 7 7 7h-24z" fill="#B4975F"/>
-        <polyline points="96,272 120,228 150,232 132,188 168,170 150,130 160,96" fill="none" stroke="#D6BF8F" stroke-width="1.4" stroke-dasharray="3 5" opacity=".8"/>
+      <svg class="sx-art" viewBox="0 0 420 340" aria-hidden="true">
+        <defs>
+          <linearGradient id="sxFoil" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3E5BF"/><stop offset=".45" stop-color="#C9A96E"/><stop offset=".7" stop-color="#E9D7A8"/><stop offset="1" stop-color="#8E7440"/></linearGradient>
+          <linearGradient id="sxLine" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8E7440"/><stop offset=".5" stop-color="#E6D3A3"/><stop offset="1" stop-color="#8E7440"/></linearGradient>
+          <linearGradient id="sxRange1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2C2014"/><stop offset="1" stop-color="#0C0805"/></linearGradient>
+          <linearGradient id="sxRange2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1E160D"/><stop offset="1" stop-color="#0C0805"/></linearGradient>
+          <radialGradient id="sxSun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#F3E5BF" stop-opacity=".55"/><stop offset=".45" stop-color="#C9A96E" stop-opacity=".18"/><stop offset="1" stop-color="#C9A96E" stop-opacity="0"/></radialGradient>
+          <linearGradient id="sxSheen" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+          <clipPath id="sxPeak"><path d="M120 300 L250 70 L380 300Z"/></clipPath>
+        </defs>
+        <g fill="#E6D3A3"><circle class="tw" cx="40" cy="40" r="1.4"/><circle class="tw tw2" cx="372" cy="30" r="1.2"/><circle class="tw tw3" cx="320" cy="86" r="1"/><circle class="tw" cx="104" cy="92" r="1"/><circle class="tw tw2" cx="180" cy="24" r="1.3"/><circle class="tw tw3" cx="404" cy="140" r="1"/><circle class="tw" cx="22" cy="150" r="1"/></g>
+        <circle class="sx-sun" cx="250" cy="96" r="120" fill="url(#sxSun)"/>
+        <path d="M0 300 L70 196 L118 236 L176 150 L214 196 L250 70 L292 160 L326 128 L420 260 L420 340 L0 340Z" fill="url(#sxRange2)" stroke="url(#sxLine)" stroke-width=".8" stroke-opacity=".5"/>
+        <path d="M120 300 L250 70 L380 300Z" fill="url(#sxRange1)"/>
+        <path class="draw" d="M120 300 L250 70 L380 300" fill="none" stroke="url(#sxLine)" stroke-width="1.8"/>
+        <path d="M250 70 L228 110 L240 106 L250 118 L261 105 L272 110Z" fill="url(#sxFoil)" opacity=".9"/>
+        <g clip-path="url(#sxPeak)"><rect class="sx-sweep" x="150" y="40" width="40" height="280" fill="url(#sxSheen)"/></g>
+        <path d="M168 300 L198 262 L186 236 L214 214 L204 190 L230 166 L240 130" fill="none" stroke="#D6BF8F" stroke-width="1.2" stroke-dasharray="2 5" opacity=".75"/>
+        <path d="M250 72 V30" stroke="#F3E5BF" stroke-width="1.4"/><path class="flag" d="M250 31h28l-8 8 8 8h-28z" fill="url(#sxFoil)"/>
+        <path d="M0 300 H420" stroke="url(#sxLine)" stroke-width="1"/><path d="M40 310 H380" stroke="url(#sxLine)" stroke-width=".6" opacity=".55"/>
       </svg>
     </div></div>
+  </section>
+
+  <!-- THE MENTOR (30 Oct): Alexandru's photo and a quote. The quote is a first draft; Alexandru will choose the final words. -->
+  <section class="wrap" style="padding-top: 0; padding-bottom: 50px">
+    <figure class="sx-mentor reveal">
+      <div class="sx-portrait"><img src="/cabinet/alexandru.jpg" alt="Alexandru Cojocari" width="640" height="512" loading="lazy"></div>
+      <blockquote>
+        <span class="sx-q" aria-hidden="true">“</span>
+        <p class="sfi">Business is life, and life is business. At the top, you stop choosing between them.</p>
+        <footer><img class="sx-sig" src="/mail/signature.png" alt="" loading="lazy"><span><b>Alexandru Cojocari</b><small>Founder, ExploraSelf · your mentor at The Summit</small></span></footer>
+      </blockquote>
+    </figure>
   </section>
 
   <!-- EVERYTHING OPENED -->
