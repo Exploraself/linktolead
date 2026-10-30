@@ -38,8 +38,8 @@ const events = (env, id, kind) => env.DB.raw.prepare('SELECT detail FROM event W
 
 // ── The library ─────────────────────────────────────────────────────────────
 const fromContent = Object.fromEntries([...LIBRARY.manuals, ...LIBRARY.books].filter((b) => b.file).map((b) => [b.k, { name: b.n, file: b.file }]));
-ok(JSON.stringify(LIBRARY_ITEMS) === JSON.stringify(fromContent), 'the library items match LIBRARY in content.js');
-ok(libraryTag('btl') === 'Library - Built to Lead', 'the tag: "Library - <name>"');
+ok(JSON.stringify(Object.fromEntries(Object.entries(LIBRARY_ITEMS).map(([k, v]) => [k, { name: v.name, file: v.file }]))) === JSON.stringify(fromContent) && Object.values(LIBRARY_ITEMS).every((v) => /^[a-z-]+$/.test(v.slug)), 'the library items match LIBRARY in content.js, each with a tag slug');
+ok(libraryTag('btl') === 'linktolead-library-built-to-lead', 'the tag: "linktolead-library-<book>"');
 
 let env = fresh({ MAILCHIMP_API_KEY: 'key-us19' });
 const ana = await join(env, {});
@@ -54,11 +54,11 @@ ok(mc.length === 0, 'nothing tagged without an account');
 r = await library({ request: get('/api/library?item=btl&t=' + ana), env });
 ok(r.status === 302 && r.headers.get('location') === 'https://linktolead.exploraself.com/library/built-to-lead.pdf', 'signed in: on to the file');
 ok(JSON.stringify(events(env, ana, 'library-download')) === '["btl"]', "event 'library-download' with the key");
-ok(mc.length === 1 && mc[0].method === 'POST' && /\/tags$/.test(mc[0].url) && JSON.stringify(mc[0].body) === JSON.stringify({ tags: [{ name: 'Library - Built to Lead', status: 'active' }] }), 'Mailchimp: the one library tag, active');
+ok(mc.length === 1 && mc[0].method === 'POST' && /\/tags$/.test(mc[0].url) && JSON.stringify(mc[0].body) === JSON.stringify({ tags: [{ name: 'linktolead-library-built-to-lead', status: 'active' }] }), 'Mailchimp: the one library tag, active');
 await library({ request: get('/api/library?item=btl&t=' + ana), env });
 ok(mc.length === 1 && events(env, ana, 'library-download').length === 2, 'the same book again: logged, not tagged twice');
 await library({ request: get('/api/library?item=grow&t=' + ana), env });
-ok(mc.length === 2 && mc[1].body.tags[0].name === 'Library - The Founder’s Blueprint · Growing', 'another book: its own tag');
+ok(mc.length === 2 && mc[1].body.tags[0].name === 'linktolead-library-blueprint-growing', 'another book: its own tag');
 const one = await mOne(env, ana);
 ok(JSON.stringify(one.library.map((x) => x.name)) === JSON.stringify(['Built to Lead', 'The Founder’s Blueprint · Growing']) && one.library.every((x) => x.at), '/mentor: each book once, with its date');
 const roster = (await (await mGet({ request: new Request('https://x/api/mentor', { headers: K }), env })).json()).students;
@@ -84,8 +84,8 @@ mc = [];
 r = await stagePost({ request: post('/api/stage', { token: cy, stage: 'build', from: 'scale' }), env });
 ok(r.status === 200 && env.DB.raw.prepare('SELECT stage FROM student WHERE id = ?').get(cy).stage === 'build', 'saved to student.stage');
 ok(JSON.stringify(JSON.parse(events(env, cy, 'stage-change')[0])) === '{"from":"scale","to":"build"}', "event 'stage-change' with from and to");
-const stageTags = (mc[0] && mc[0].body.tags || []).filter((t) => ['build', 'grow', 'scale'].includes(t.name));
-ok(mc.length === 1 && stageTags.find((t) => t.name === 'build').status === 'active' && stageTags.filter((t) => t.status === 'active').length === 1, 'Mailchimp: the stage tags follow the chosen stage, over the North Star');
+const stageTags = (mc[0] && mc[0].body.tags || []).filter((t) => t.name.startsWith('linktolead-stage-'));
+ok(mc.length === 1 && stageTags.find((t) => t.name === 'linktolead-stage-building').status === 'active' && stageTags.filter((t) => t.status === 'active').length === 1, 'Mailchimp: the stage tags follow the chosen stage, over the North Star');
 const st = await (await stateGet({ request: get('/api/state?t=' + cy), env })).json();
 ok(st.me.stage === 'build' && st.me.stageChosen === true, 'state: the chosen stage, marked as chosen');
 ok(programmeStage({ chosen: 'build', local: 'scale', compass: 'scaling' }) === 'build', 'a chosen stage wins over the device and the North Star');

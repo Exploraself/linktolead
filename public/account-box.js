@@ -72,7 +72,7 @@ let ctx = { opener: null, stage: null, variant: 'full', landing: 'road2', stay: 
 function close() { if (ctx.gate) ctx.gate.hidden = true; if (ctx.opener && ctx.opener.focus) ctx.opener.focus(); }
 
 function wire(gate, variant, landing) {
-  gate.innerHTML = markup(variant, HEAD[ctx.stay ? 'stay' : landing === 'summit' ? 'summit' : variant === 'full' && landing === 'road2' ? 'compass' : variant], ctx.stay);
+  gate.innerHTML = markup(variant, HEAD[ctx.stay ? 'stay' : landing === 'summit' ? 'summit' : variant === 'full' && (landing === 'road2' || landing === 'road21') ? 'compass' : variant], ctx.stay);
   gate.dataset.variant = variant + ' ' + landing;
   gate.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
   if (!gate.dataset.wired) {
@@ -101,7 +101,7 @@ function wire(gate, variant, landing) {
     err('');
     try {
       const A = await import('/account.js');
-      const source = ctx.landing === 'compass' ? 'compass' : ctx.landing === 'road2' ? 'sales-page' : 'home';
+      const source = ctx.landing === 'compass' ? 'compass' : (ctx.landing === 'road2' || ctx.landing === 'road21') ? 'sales-page' : 'home';
       const out = A.joined() ? { token: A.token() } : await A.signup({ first, last, email, consent, source, stage: p.stage, type: variant,
         landing: ctx.landing, utm: utm(),
         ...(d ? { company: d.company, noCompany: d.noCompany, interest: d.interest, industry: d.industry, password: pw, confirm: pw2 } : {}) });

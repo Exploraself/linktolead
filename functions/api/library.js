@@ -1,7 +1,7 @@
 // A download from the library, for signed-in founders only.
 //
 // GET ?item=<key>&t=<token> logs a 'library-download' event with the key,
-// tags the founder in Mailchimp "Library - <name>" the first time they take
+// tags the founder in Mailchimp "linktolead-library-<book>" the first time they take
 // that item (API mode, after the reply; tags only accumulate), then sends the
 // browser on to the file. Without an account it goes to the page that makes
 // one. The tag shows on the founder's Mailchimp profile; /mentor lists what
@@ -13,13 +13,14 @@ import { syncFounder } from '../_mailchimp.js';
 /** The downloads: the same keys, names and files as LIBRARY in
  *  public/content.js (a test holds them equal). */
 export const LIBRARY_ITEMS = {
-  build: { name: 'The Founder’s Blueprint · Building', file: '/library/blueprint-building.pdf' },
-  grow: { name: 'The Founder’s Blueprint · Growing', file: '/library/blueprint-growing.pdf' },
-  scale: { name: 'The Founder’s Blueprint · Scaling', file: '/library/blueprint-scaling.pdf' },
-  btl: { name: 'Built to Lead', file: '/library/built-to-lead.pdf' },
-  wb: { name: 'Worth Building', file: '/library/worth-building.pdf' },
+  build: { name: 'The Founder’s Blueprint · Building', slug: 'blueprint-building', file: '/library/blueprint-building.pdf' },
+  grow: { name: 'The Founder’s Blueprint · Growing', slug: 'blueprint-growing', file: '/library/blueprint-growing.pdf' },
+  scale: { name: 'The Founder’s Blueprint · Scaling', slug: 'blueprint-scaling', file: '/library/blueprint-scaling.pdf' },
+  btl: { name: 'Built to Lead', slug: 'built-to-lead', file: '/library/built-to-lead.pdf' },
+  wb: { name: 'Worth Building', slug: 'worth-building', file: '/library/worth-building.pdf' },
 };
-export const libraryTag = (key) => `Library - ${LIBRARY_ITEMS[key].name}`;
+/** The tag system (functions/_mailchimp.js): linktolead-library-<book>. */
+export const libraryTag = (key) => `linktolead-library-${LIBRARY_ITEMS[key].slug}`;
 
 const go = (request, path) => new Response(null, { status: 302, headers: { location: new URL(path, request.url).toString(), 'cache-control': 'no-store' } });
 
