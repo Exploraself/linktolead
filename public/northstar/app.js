@@ -173,7 +173,7 @@
   async function askLink(email, where) {
     const say = (m) => { if (where === 'note') UI.note = m; else UI.signin = m; render(); };
     if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email || '')) return say('Type your email first, then tap this again.');
-    if (!A) return say('Sign-in is not available here. Open linktolead.exploraself.com/compass.');
+    if (!A) return say('Sign-in is not available here. Open linktolead.exploraself.com/northstar.');
     UI.signinBusy = true; render();
     try {
       const r = await A.signinLink(email, 'start', where !== 'note');
@@ -338,7 +338,8 @@
   /* ── Parts ──────────────────────────────────────────────────────────────── */
   const NAV = [['overview', '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><g><polygon points="12,4 14,12 12,13.5 10,12" fill="#6F93B8"/><polygon points="12,20 14,12 12,10.5 10,12" fill="currentColor" opacity=".5"/><animateTransform attributeName="transform" type="rotate" values="20 12 12;34 12 12;20 12 12" dur="7s" repeatCount="indefinite"/></g></svg>', 'Your North Star'],
     ['clear', '01', 'Get clear'], ['people', '02', 'Lead your people'], ['numbers', '03', 'Count what matters'], ['plan', '04', 'Choose your next steps'], ['method', '⌘', 'How it works']];
-  const pNav = (c) => NAV.map(([id, ni, t]) => `<button type="button" class="nl ${UI.page === id ? 'on' : ''}" data-go="${id}" data-f="nav-${id}"${UI.page === id ? ' aria-current="true"' : ''}><span class="ni">${ni}</span>${t}${id === 'clear' ? `<small style="margin-left: auto; font-size: 9px">${c.answered}/8</small>` : ''}</button>`).join('');
+  const navOn = () => (typeof window !== 'undefined' && window.__nsSpy) || UI.page; // spy.js: the section on screen
+  const pNav = (c) => NAV.map(([id, ni, t]) => `<button type="button" class="nl ${navOn() === id ? 'on' : ''}" data-go="${id}" data-f="nav-${id}"${navOn() === id ? ' aria-current="true"' : ''}><span class="ni">${ni}</span>${t}${id === 'clear' ? `<small style="margin-left: auto; font-size: 9px">${c.answered}/8</small>` : ''}</button>`).join('');
 
   const STEP_CARDS = [['01', 'Get clear', 'Know yourself', 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'clear'],
     ['02', 'Lead your people', 'Know your people', D[1].icon, 'people'], ['03', 'Count what matters', 'Know your numbers', 'M4 20V10M10 20V4M16 20v-7M22 20H2', 'numbers'],
@@ -716,7 +717,7 @@
     { n: '2', short: 'The Boardroom', name: 'The Boardroom', tag: 'Step 2 · you and Alexandru', line: 'Sit at the table with Alexandru.', modules: '04–05', sessions: '1 session', price: '[YOUR PRICE]', cta: 'Book the Boardroom', href: BOOKING, ext: true, x: 290, y: 300, lx: 306, ly: 304, anchor: 'start' },
     { n: '3', short: 'Leadership LAB', name: 'The Personal Leadership LAB', tag: 'Step 3', line: 'Lead yourself first.', modules: '06–09', sessions: '2 sessions', price: '$97', cta: 'Join the LAB', href: LAB_URL, ext: true, x: 175, y: 235, lx: 161, ly: 239, anchor: 'end' },
     { n: '4', short: 'Business HUB', name: 'The Business HUB', tag: 'Step 4', line: 'Build the business that carries it.', modules: '10–12', sessions: '3 in total (incl. 1 from the LAB)', price: '$397', cta: 'Join the HUB', href: HUB_URL, ext: true, x: 285, y: 160, lx: 301, ly: 164, anchor: 'start' },
-    { n: '5', short: 'The Summit', name: 'The Summit', tag: 'The top', line: 'The whole incubator, with Alexandru every week.', modules: 'All', sessions: 'Every week', price: '$1,989', cta: 'Talk about The Summit', href: '/compass/summit', x: 230, y: 58, lx: 258, ly: 62, anchor: 'start' },
+    { n: '5', short: 'The Summit', name: 'The Summit', tag: 'The top', line: 'The whole incubator, with Alexandru every week.', modules: 'All', sessions: 'Every week', price: '$1,989', cta: 'Talk about The Summit', href: '/northstar/summit', x: 230, y: 58, lx: 258, ly: 62, anchor: 'start' },
   ];
   function pClimb() {
     const si = S.stop, sv = STOPS[si];
@@ -1216,7 +1217,7 @@
       case 'download': {
         try {
           const url = URL.createObjectURL(new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' }));
-          const link = document.createElement('a'); link.href = url; link.download = 'leadership-compass.json'; link.click();
+          const link = document.createElement('a'); link.href = url; link.download = 'leaders-north-star.json'; link.click();
           setTimeout(() => URL.revokeObjectURL(url), 1000);
         } catch { toast('Your browser would not save the file.'); }
         return;

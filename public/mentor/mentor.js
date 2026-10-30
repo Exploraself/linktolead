@@ -48,7 +48,7 @@ async function load() {
 function tilesHTML(S) {
   const t = (k, n, label) => `<button type="button" class="tile${tile === k ? ' on' : ''}" data-tile="${k}" aria-pressed="${tile === k}"><b>${n}</b><span>${label}</span></button>`;
   return `<div class="tiles">
-    ${t('all', S.total, 'Founders in total')}${t('new', S.newWeek, 'New this week')}${t('compass', S.compass, 'Compass done')}
+    ${t('all', S.total, 'Founders in total')}${t('new', S.newWeek, 'New this week')}${t('compass', S.compass, 'North Star done')}
     ${STEP_KEYS.map((k) => t(k, S.steps[k], 'In ' + STEP_NAMES[k])).join('')}
     ${t('notes', S.notes, 'Questions waiting for an answer')}${t('quiet', S.quiet, 'Quiet for 14+ days')}${t('library', S.library, 'Downloaded from the library')}${t('full', S.full, 'Signed up · full form')}${t('simple', S.simple, 'Signed up · simple form')}
   </div>`;

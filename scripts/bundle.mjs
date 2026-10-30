@@ -85,7 +85,7 @@ const html = (await readFile(here('start/index.html'), 'utf8'))
   .replace('<link rel="stylesheet" href="/style.css">', `<style>\n${await readFile(here('style.css'), 'utf8')}\n</style>`)
   .replace('<script src="/app.js" type="module"></script>', `<script type="module">\n${parts.join('\n\n')}\n</script>`)
   .replace('<link rel="icon" href="/assets/icon.svg">', '')
-  .replace('<script src="/compass/engine.js" defer></script>', `<script>\n${await readFile(here('compass/engine.js'), 'utf8')}\n</script>`);
+  .replace('<script src="/northstar/engine.js" defer></script>', `<script>\n${await readFile(here('compass/engine.js'), 'utf8')}\n</script>`);
 
 const out = process.argv[2] || 'preview.html';
 await writeFile(out, html);

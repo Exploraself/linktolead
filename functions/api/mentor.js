@@ -68,10 +68,10 @@ async function roster(D) {
   return rows.results || [];
 }
 
-const LANDING_NAMES = { road1: 'Road 1', road2: 'Road 2', road3: 'Road 3', compass: 'Compass box' };
+const LANDING_NAMES = { road1: 'Road 1', road2: 'Road 2', road3: 'Road 3', compass: 'North Star box', summit: 'The Summit' };
 const CSV_COLS = [['name', 'Name'], ['email', 'Email'], ['joined_at', 'Joined'], ['last_seen_at', 'Last seen'], ['stage', 'Stage'], ['step', 'Step'],
   ['signup', 'Sign-up form'], ['landing_name', 'Landing'], ['utm_source', 'utm_source'], ['utm_medium', 'utm_medium'], ['utm_campaign', 'utm_campaign'], ['utm_content', 'utm_content'], ['company_name', 'Company'], ['interest', 'Interest'], ['industry', 'Industry'],
-  ['compass', 'Compass done'], ['plan_ticks', 'Plan steps done'], ['library_names', 'Library'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp']];
+  ['compass', 'North Star done'], ['plan_ticks', 'Plan steps done'], ['library_names', 'Library'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp']];
 export function toCSV(list) {
   // Quoted, and a leading = + - @ is defused so a spreadsheet never runs it.
   const cell = (v) => { let s = String(v ?? ''); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };

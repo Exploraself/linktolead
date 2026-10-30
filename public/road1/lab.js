@@ -5,7 +5,7 @@
  * sits right above the answer it moves most.
  *
  * All the arithmetic is the North Star's own (CompassEngine.month in
- * /compass/engine.js); this file only lays it out. Nothing typed here is saved
+ * /northstar/engine.js); this file only lays it out. Nothing typed here is saved
  * or sent. "Create my free account →" opens the FULL account form (page.js). */
 
 /** The example founder: 20 clients a month at $250, 8 hours each. Delivery

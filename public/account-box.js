@@ -14,7 +14,7 @@
  * utm_* tags the founder arrived with go with the sign-up. Loaded the first
  * time a box opens (/road1/, /road2/, /road3/), then open() each time.
  *
- * On /compass (landing "compass", `stay`): a visitor from outside makes the
+ * On /northstar (landing "compass", `stay`): a visitor from outside makes the
  * full account here, then stays on the North Star, signed in, with everything
  * open. An email that already has an account goes to `onExisting`. */
 import { detailFields, readDetails, CONSENT, utm } from '/forms.js';
@@ -40,6 +40,7 @@ const HEAD = {
   compass: ['YOUR FULL ROAD IS ONE STEP AWAY', 'Where should we send your North Star?', 'Your answers from this page come with you. Free.'],
   full: ['START FREE', 'Your free account', 'Free. You sign in with your email and a password.'],
   simple: ['START FREE', 'Your free account', 'One minute. Name and email. Free.'],
+  summit: ['YOUR PLACE AT THE SUMMIT', 'Your account', 'Start now. You sign in with your email and a password.'],
   stay: ['YOUR NORTH STAR, IN FULL', 'Your free account', 'Your answers come with you, and the whole North Star opens: your feedback, your plans and your library. Free.'],
 };
 
@@ -71,7 +72,7 @@ let ctx = { opener: null, stage: null, variant: 'full', landing: 'road2', stay: 
 function close() { if (ctx.gate) ctx.gate.hidden = true; if (ctx.opener && ctx.opener.focus) ctx.opener.focus(); }
 
 function wire(gate, variant, landing) {
-  gate.innerHTML = markup(variant, HEAD[ctx.stay ? 'stay' : variant === 'full' && landing === 'road2' ? 'compass' : variant], ctx.stay);
+  gate.innerHTML = markup(variant, HEAD[ctx.stay ? 'stay' : landing === 'summit' ? 'summit' : variant === 'full' && landing === 'road2' ? 'compass' : variant], ctx.stay);
   gate.dataset.variant = variant + ' ' + landing;
   gate.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
   if (!gate.dataset.wired) {

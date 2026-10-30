@@ -1,4 +1,5 @@
-// The three sales pages live at /road1/, /road2/ and /road3/. Their old
+// The three sales pages live at /road1/, /road2/ and /road3/; The Leader’s
+// North Star at /northstar/ (it was /compass until 30 Oct). Their old
 // addresses (and the short ones on ads and banners) are 302s that keep the
 // query string (the utm_* tags), so the sign-up on the road they land on still
 // knows where the founder came from.
@@ -14,15 +15,17 @@ export const REDIRECTS = {
   // Your Ground Plan moved to its own name (30 Oct); old links and emails still land.
   '/start': '/ground-plan/',
   // Short addresses (30 Oct): easy to say, type and put on ads.
-  '/summit': '/compass/summit/',
-  '/north-star': '/north1/',
-  '/northstar': '/north1/',
+  '/summit': '/northstar/summit/',
+  '/north-star': '/northstar/',
   '/blueprint': '/road1/',
 };
 
 /** The redirect for this request, or null when its address is not an old one. */
 export function redirect(request) {
   const url = new URL(request.url);
-  const to = REDIRECTS[url.pathname.replace(/\/+$/, '')];
+  let to = REDIRECTS[url.pathname.replace(/\/+$/, '')];
+  // The Leader’s North Star moved from /compass to /northstar (30 Oct): every
+  // old address under /compass lands on the same place under /northstar.
+  if (!to && /^\/compass(\/|$)/.test(url.pathname)) to = url.pathname.replace(/^\/compass(\/|$)/, '/northstar/').replace(/\/\/+/g, '/');
   return to ? new Response(null, { status: 302, headers: { location: `${to}${url.search}`, 'cache-control': 'no-store' } }) : null;
 }

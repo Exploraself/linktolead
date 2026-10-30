@@ -1,6 +1,6 @@
 /* /north1/, the Leader’s North Star sales page.
  *
- * 1. Every "Start" link goes to /compass/ with this visitor's own utm_* tags;
+ * 1. Every "Start" link goes to /northstar/ with this visitor's own utm_* tags;
  *    with none, utm_source=north1, so sign-ups from this page can be told
  *    apart.
  * 2. The sample question answers on the page only: nothing is saved or sent.
@@ -16,7 +16,7 @@
   var here = new URLSearchParams(location.search), keep = new URLSearchParams();
   here.forEach(function (v, k) { if (/^utm_[a-z]{1,20}$/.test(k) && v.length <= 120) keep.set(k, v); });
   if (!keep.has('utm_source')) keep.set('utm_source', 'north1');
-  var to = '/compass/?' + keep.toString();
+  var to = '/northstar/?' + keep.toString();
   document.querySelectorAll('a[data-cta]').forEach(function (a) { a.href = to; });
 
   /* 2 · The sample question */

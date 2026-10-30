@@ -166,7 +166,7 @@ function howItWorks(st) {
   return `<section class="gp-wrap gp-moves">
     <p class="eyebrow">How this works</p>
     <ol class="gp-mlist">
-      <li class="gp-move"><span class="gp-mn">01</span><b>Find where you stand</b><p>Eight plain questions, rough numbers, and feedback in all four domains. Free.</p><a class="cta" href="/compass">Open the North Star →</a></li>
+      <li class="gp-move"><span class="gp-mn">01</span><b>Find where you stand</b><p>Eight plain questions, rough numbers, and feedback in all four domains. Free.</p><a class="cta" href="/northstar">Open the North Star →</a></li>
       <li class="gp-move"><span class="gp-mn">02</span><b>Walk the Founder Launchpad</b><p>Levels 01–03, free. Know yourself before you build.</p><button class="cta" type="button" data-level="1">Start level 01 →</button></li>
       <li class="gp-move"><span class="gp-mn">03</span><b>Book The Boardroom</b><p>Sit at the table. Unlock the full North Star.</p><a class="cta" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my 1:1 with Alexandru ↗</a></li>
     </ol>
@@ -373,7 +373,7 @@ const libIcons = () => `<div class="rlib"><p class="eyebrow">Your library · now
 const bookIcon = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 
 /** The Leader’s North Star, always in the rail, just above The Boardroom. */
-const railStar = `<a class="rstar" href="/compass/" aria-label="Open your Leader’s North Star: where you stand in all four domains">
+const railStar = `<a class="rstar" href="/northstar/" aria-label="Open your Leader’s North Star: where you stand in all four domains">
   <svg class="rstar-i" width="40" height="40" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="#B4975F" stroke-width="1.6"/><circle cx="32" cy="32" r="23" fill="none" stroke="#3B4C70"/>
     <g stroke="#B4975F" stroke-width="1.4"><line x1="32" y1="3" x2="32" y2="9"/><line x1="32" y1="55" x2="32" y2="61"/><line x1="3" y1="32" x2="9" y2="32"/><line x1="55" y1="32" x2="61" y2="32"/></g>
     <circle cx="32" cy="11" r="2.6" fill="#A8623A"/><circle cx="53" cy="32" r="2.6" fill="#4C7355"/><circle cx="32" cy="53" r="2.6" fill="#36607F"/><circle cx="11" cy="32" r="2.6" fill="#9A7418"/>
@@ -414,7 +414,7 @@ function railHTML(st) {
         ${sec.k === 'session' && !owned ? `<a class="rbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>` : ''}
       </section>`;
     }).join('')}
-    <a class="rsummit" href="/compass/summit">
+    <a class="rsummit" href="/northstar/summit">
       <small>THE TOP</small>
       <b>The Summit</b>
       <span>Everything, and Alexandru every week · $1,989</span>
@@ -642,7 +642,7 @@ function compassBanner() {
   let n = cbSeen();
   if (n >= CB_TIMES) return '';
   if (!cbCounted) { cbCounted = true; cbSet(++n); }
-  return `<a class="cban" href="/compass/" aria-label="Open your Leader’s North Star: feedback in all four domains, your plans and your numbers">
+  return `<a class="cban" href="/northstar/" aria-label="Open your Leader’s North Star: feedback in all four domains, your plans and your numbers">
     <span class="cban-dial" aria-hidden="true"><svg viewBox="0 0 64 64" width="64" height="64"><circle cx="32" cy="32" r="29" fill="none" stroke="#B4975F" stroke-width="1.6"/><circle cx="32" cy="32" r="23" fill="none" stroke="#594A32"/>
       <g stroke="#B4975F" stroke-width="1.4"><line x1="32" y1="3" x2="32" y2="9"/><line x1="32" y1="55" x2="32" y2="61"/><line x1="3" y1="32" x2="9" y2="32"/><line x1="55" y1="32" x2="61" y2="32"/></g>
       <circle cx="32" cy="11" r="2.6" fill="#A8623A"/><circle cx="53" cy="32" r="2.6" fill="#4C7355"/><circle cx="32" cy="53" r="2.6" fill="#36607F"/><circle cx="11" cy="32" r="2.6" fill="#9A7418"/>
@@ -694,7 +694,7 @@ function plansCard() {
     <p class="eyebrow">Your account plans · ${P.count} of ${P.total} steps done</p>
     <h2 class="gp-h" id="pl-h">${P.compass ? `${esc(first.name)} opens first` : 'Your four domains, one step each week'}</h2>
     <p class="gp-lede">${P.compass ? 'Your lowest domain from the North Star leads. One step per domain this week.' : 'Take the North Star and your lowest domain moves to the front. One step per domain each week.'}
-      ${P.compass ? '' : ' <a href="/compass">Open the North Star →</a>'}</p>
+      ${P.compass ? '' : ' <a href="/northstar">Open the North Star →</a>'}</p>
     <div class="pl-grid">${rows}</div>
     ${w ? `<div class="pl-dom pl-whatif"><p class="pl-dn">Your plan for this change · ${esc(w.name)}</p>${wNext ? planStep(wNext, null) : '<p class="pl-all">All four steps done.</p>'}</div>` : ''}
     <p class="savenote">Times are about, not promises.</p>
@@ -771,7 +771,7 @@ document.addEventListener('click', (e) => {
   if (b.dataset.cab) {
     if (cabinetClick(b)) return;
     if (b.dataset.cab === 'stand') { changingStage = true; render(); const c = document.querySelector('.gp-stand'); if (c) c.scrollIntoView({ block: 'center' }); const p = document.querySelector('.stand-pick button'); if (p) p.focus({ preventScroll: true }); return; }
-    if (b.dataset.cab === 'plans') { const c = document.getElementById('plans'); if (c) c.scrollIntoView({ block: 'start' }); else location.href = '/compass/'; return; }
+    if (b.dataset.cab === 'plans') { const c = document.getElementById('plans'); if (c) c.scrollIntoView({ block: 'start' }); else location.href = '/northstar/'; return; }
   }
   if (b.dataset.cban === 'close') { cbSet(CB_TIMES); const h = $('#cban'); if (h) h.innerHTML = ''; return; }
   if (b.dataset.banner === 'close') { bannerDone(); const h = $('#libban'); if (h) h.innerHTML = ''; return; }

@@ -27,8 +27,9 @@ not_found_handling = "404-page"
 # The API and the old sales-page addresses reach worker.js. Each old address
 # is a 302 to its road, query string kept (functions/_landing.js): / and /b →
 # /road1/, /compass/welcome, /compass/welcome-a and /c → /road2/, /a → /road3/.
-# Every page and file is served as before.
-run_worker_first = ["/api/*", "/", "/b", "/b/", "/c", "/c/", "/a", "/a/", "/compass/welcome", "/compass/welcome/", "/compass/welcome-a", "/compass/welcome-a/"]
+# /compass/* covers /compass/welcome and /compass/welcome-a (Wrangler refuses
+# a rule that another rule already covers). Every page and file is served as before.
+run_worker_first = ["/api/*", "/", "/b", "/b/", "/c", "/c/", "/a", "/a/", "/compass", "/compass/*"]
 
 # The student record: programme answers, worksheet figures, North Star reports and
 # notes to the mentor. Free tier; see functions/_shared.js for how routes behave
