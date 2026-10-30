@@ -250,3 +250,20 @@ details[data-step] summary::-webkit-details-marker{display:none}
 /* The top bar stays at the top while you scroll (30 Oct). */
 .topwrap{position:sticky;top:20px;z-index:25}
 .topwrap .topbar{background:var(--panel);box-shadow:0 10px 24px -20px rgba(14,28,43,.5)}
+
+/* The menu follows the reading (spy.js, 30 Oct): a soft light glides to the
+   section on screen; a thin line fills with how far through the page you are. */
+.navl{position:relative}
+.nl{z-index:1;transition:color .5s ease,background-color .5s ease,border-color .5s ease}
+.nl.on{background:transparent;border-color:transparent}
+.nl.on .ni{transition:color .5s ease}
+.nl-glow{position:absolute;left:0;top:0;z-index:0;border-radius:6px;pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,rgba(111,147,184,.28),rgba(111,147,184,.08) 70%,transparent);box-shadow:inset 0 0 0 1px rgba(169,192,217,.22),0 0 22px -6px rgba(111,147,184,.55);
+  transition:transform .7s cubic-bezier(.22,1,.36,1),width .7s cubic-bezier(.22,1,.36,1),height .7s cubic-bezier(.22,1,.36,1),opacity .5s ease}
+.nl-glow.show{opacity:1}
+.nl-glow::before{content:"";position:absolute;left:0;top:18%;bottom:18%;width:2px;border-radius:2px;background:#A9C0D9;box-shadow:0 0 10px 1px rgba(169,192,217,.8)}
+.nl.on::before,.nl:hover::before{transform:scaleY(0)}
+.nav-prog{position:absolute;left:-10px;top:4px;bottom:4px;width:1px;background:rgba(169,192,217,.14);pointer-events:none}
+.nav-prog i{position:absolute;inset:0;background:linear-gradient(#6F93B8,#A9C0D9);transform-origin:top;transform:scaleY(0);transition:transform .25s linear}
+@media(max-width:860px){.nav-prog{display:none}.nl-glow::before{left:18%;right:18%;top:auto;bottom:0;width:auto;height:2px}}
+@media(prefers-reduced-motion:reduce){.nl-glow,.nav-prog i{transition:none}}
