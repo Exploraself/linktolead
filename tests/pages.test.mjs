@@ -43,7 +43,8 @@ ok(B.includes('[PHOTO OF ALEXANDRU]'), 'photo placeholder kept');
 
 // The Summit page keeps its placeholders until Alexandru fills them.
 const Su = read('public/northstar/summit/index.html');
-for (const ph of ['[YOUR BOOKING LINK]', '[SESSION LENGTH]', '[ONLINE OR IN PERSON]']) ok(Su.includes(ph), `summit keeps ${ph}`);
+for (const ph of ['[SESSION LENGTH]', '[ONLINE OR IN PERSON]']) ok(Su.includes(ph), `summit keeps ${ph}`);
+ok(!Su.includes('[YOUR BOOKING LINK]') && (Su.match(/data-join/g) || []).length >= 3 && /landing: 'summit'/.test(Su) && /variant: 'full'/.test(Su), 'summit: every call to action opens the full account form (landing summit)');
 ok(read('public/northstar/app.js').includes('[YOUR PRICE]'), 'Boardroom price placeholder kept');
 
 // Every North Star page carries the favicon and the share image.

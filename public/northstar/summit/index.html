@@ -129,6 +129,8 @@ a{color:#D6BF8F}a:hover{color:#F7F2E7}
 .sx-mentor footer small{display:block;font-size:12px;letter-spacing:.08em;color:#C9B07A;margin-top:3px}
 @media (max-width:720px){.sx-mentor{grid-template-columns:1fr}.sx-q{top:-40px;font-size:90px}}
 @media (prefers-reduced-motion:reduce){.sx-btn::after,.sx-sun,.sx-sweep{animation:none}}
+#gate{position:fixed;inset:0;z-index:60;background:rgba(16,13,9,.65);display:flex;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}
+#gate[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -137,7 +139,7 @@ a{color:#D6BF8F}a:hover{color:#F7F2E7}
     <div class="sx-top-in">
       <a href="/northstar" class="sx-back"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Your North Star</a>
       <span class="sx-crest"><img src="/northstar/assets/logo.webp" alt="" width="26" height="26"><span>EXPLORASELF</span><i aria-hidden="true">◆</i><span>THE SUMMIT</span></span>
-      <a href="#talk" class="sx-top-cta">Talk with Alexandru</a>
+      <a href="#join" class="sx-top-cta" data-join>Claim my place</a>
     </div>
   </header>
 
@@ -151,7 +153,7 @@ a{color:#D6BF8F}a:hover{color:#F7F2E7}
         <h1 class="sf foil rise r1 sx-h">The Summit</h1>
         <p class="sfi rise r2 sx-sub">The whole incubator. With Alexandru beside you, every week.</p>
         <div class="rise r3 sx-row">
-          <a href="#talk" class="sx-btn">Talk with Alexandru about The Summit <span class="arr" aria-hidden="true">→</span></a>
+          <a href="#join" class="sx-btn" data-join>Claim my place at The Summit <span class="arr" aria-hidden="true">→</span></a>
           <span class="sx-plaque"><small>The Summit</small><b class="sf">$1,989</b></span>
         </div>
       </div>
@@ -256,23 +258,29 @@ a{color:#D6BF8F}a:hover{color:#F7F2E7}
       <span class="k">Your place at The Summit</span>
       <h2 class="sf foil" style="font-size: clamp(44px, 6vw, 76px); line-height: 1">Reach the top. Together.</h2>
       <p class="sfi" style="font-size: 22px; color: #EFE4CC">$1,989 · Everything in Link to Lead, and Alexandru every week.</p>
-      <a href="[YOUR BOOKING LINK]" class="btn" data-booking>Talk with Alexandru about The Summit <span class="arr" aria-hidden="true">→</span></a>
-      <p id="booking-note" class="muted" role="status" style="font-size: 13px"></p>
+      <a href="#join" class="btn" data-join>Claim my place at The Summit <span class="arr" aria-hidden="true">→</span></a>
       <a href="/ground-plan/#home" style="font-size: 14px; padding: 10px 0">Not yet? Start with the Founder Launchpad, free.</a>
     </div></div>
   </section>
   </main>
 </div>
-<script>
-/* Until the booking link replaces its [PLACEHOLDER], the button says so
-   instead of opening a page that does not exist. */
-document.querySelectorAll('a[data-booking]').forEach(function (a) {
-  if (a.getAttribute('href').charAt(0) !== '[') return;
-  a.addEventListener('click', function (e) {
-    e.preventDefault();
-    document.getElementById('booking-note').textContent = 'Booking opens soon: [YOUR BOOKING LINK]';
-  });
-});
+<!-- Every call to action opens the FULL account form (/account-box.js, with a
+     password), landing "summit". How The Summit is paid for comes later. -->
+<div id="gate" hidden></div>
+<script type="module">
+import { rememberUtm } from '/forms.js';
+rememberUtm();
+const gate = document.getElementById('gate');
+let box = null;
+const loadBox = () => box || (box = import('/account-box.js').catch(() => { box = null; }));
+function join(e) {
+  if (e) e.preventDefault();
+  const opener = e && e.currentTarget;
+  gate.hidden = false;
+  loadBox().then((m) => m && m.open({ gate, opener, stage: null, variant: 'full', landing: 'summit' }));
+}
+document.querySelectorAll('[data-join]').forEach((a) => a.addEventListener('click', join));
+if (location.hash === '#join') join();
 </script>
 </body>
 </html>
