@@ -64,19 +64,19 @@ ok(env.DB.raw.prepare("SELECT COUNT(*) n FROM student WHERE email = 'fay@example
 const fay = out.token;
 ok(st === 200 && fay && hasPw(fay), 'full form: one record, signed in, with its password');
 ok(JSON.stringify(prof(fay)) === JSON.stringify({ signup_type: 'full', company: 'Fay & Co', interest: 'Higher income', industry: 'Real estate', landing: 'road2', utm_source: 'meta', utm_content: 'home-c' }), 'full form: company, interest, industry, landing Road 2 and the utm tags stored');
-ok(/"Signup - Full".*"salespageincubator2".*"Interest - Higher income".*"Industry - Real estate"/.test(mcLog(fay)) && /"COMPANY":"Fay & Co"/.test(mcLog(fay)), 'Mailchimp (TEST): "Signup - Full", "salespageincubator2", interest and industry tags, COMPANY');
+ok(/"linktolead-road2"/.test(mcLog(fay)) && /"COMPANY":"Fay & Co"/.test(mcLog(fay)) && /"INDUSTRY":"Real estate"/.test(mcLog(fay)) && /"INTEREST":"Higher income"/.test(mcLog(fay)) && !/Industry - |Interest - |Signup - |salespageincubator/.test(mcLog(fay)), 'Mailchimp (TEST): tag linktolead-road2; company, industry and interest as contact fields, not tags');
 
 [st, out] = await S({ first: 'Sam', last: 'Simple', email: 'sam@example.com', consent: true, source: 'home', type: 'simple', landing: 'road3', password: 'a-long-password', confirm: 'a-long-password', utm: { utm_source: 'exploraself', utm_medium: 'banner' } });
 const sam = out.token;
 ok(st === 200 && sam && !hasPw(sam), 'simple form: one record, signed in, and no password even if one is sent');
 ok(JSON.stringify(prof(sam)) === JSON.stringify({ signup_type: 'simple', company: null, interest: null, industry: null, landing: 'road3', utm_source: 'exploraself', utm_content: null }), 'simple form: landing Road 3 and its utm tags');
-ok(/"Signup - Simple".*"salespageincubator3"/.test(mcLog(sam)) && !/Signup - Full/.test(mcLog(sam)), 'Mailchimp (TEST): "Signup - Simple" and "salespageincubator3"');
+ok(/"linktolead-road3"/.test(mcLog(sam)) && !/Signup - /.test(mcLog(sam)), 'Mailchimp (TEST): "linktolead-road3", no form tag');
 [st, out] = await S({ ...FULL, first: 'Bea', last: 'Bee', email: 'bea@example.com', source: 'home', landing: 'road1', password: 'a-long-password', confirm: 'a-long-password', utm: {} });
 const bea = out.token;
-ok(st === 200 && hasPw(bea) && prof(bea).signup_type === 'full' && prof(bea).landing === 'road1' && /"Signup - Full".*"salespageincubator1"/.test(mcLog(bea)), 'full form on Road 1: a password, landing road1, "salespageincubator1"');
+ok(st === 200 && hasPw(bea) && prof(bea).signup_type === 'full' && prof(bea).landing === 'road1' && /"linktolead-road1"/.test(mcLog(bea)), 'full form on Road 1: a password, landing road1, "linktolead-road1"');
 [st, out] = await S({ first: 'Cora', last: 'Box', email: 'cora@example.com', consent: true, source: 'compass', type: 'simple', landing: 'compass' });
 const cora = out.token;
-ok(st === 200 && prof(cora).landing === 'compass' && !/salespageincubator/.test(mcLog(cora)), 'the North Star box: landing "compass", no landing tag');
+ok(st === 200 && prof(cora).landing === 'compass' && /"linktolead-northstar"/.test(mcLog(cora)), 'the North Star box: landing "compass", tag "linktolead-northstar"');
 [st, out] = await S({ first: 'Olly', last: 'Old', email: 'olly@example.com', consent: false, type: 'simple', landing: 'a' });
 ok(st === 200 && prof(out.token).landing === 'road3', 'a page loaded before the rename sends "a": stored as road3');
 // Landings stored before the roads move to the road their page became, once.
@@ -178,9 +178,25 @@ const noRun = baseOf({ ...EXAMPLE, run: null, rate: null, hire: null }), nm = E.
 ok(noRun.fixed === 0 && nm.cash === null && nm.people === null && Number.isFinite(nm.mine), 'empty Fine-tune boxes: no money figure invented, the hours still move');
 
 // ── Mailchimp landing tags ──────────────────────────────────────────────────
-ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'salespageincubator1', road2: 'salespageincubator2', road3: 'salespageincubator3' }), 'landing tags: salespageincubator1, 2 and 3');
-ok(tagsFor({ landing: 'road2' }).some((x) => x.name === 'Landing - Road 2' && x.status === 'inactive'), 'the old landing tag goes inactive');
-ok(!tagsFor({ landing: 'compass' }).some((x) => /^(Landing - |salespageincubator)/.test(x.name)) && !tagsFor({ landing: 'toString' }).some((x) => /^(Landing - |salespageincubator)/.test(x.name)), 'the North Star box and anything unknown get no landing tag');
+ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', compass: 'linktolead-northstar', summit: 'linktolead-summitpage' }), 'landing tags: the linktolead-… system');
+// Road 2.1 (30 Oct): its own tag, no empty old tag, the FULL form, and road2 untouched beside it.
+{
+  const { tagsFor } = await import('../functions/_mailchimp.js');
+  const t = tagsFor({ landing: 'road21', signupType: 'full' });
+  ok(t.some((x) => x.name === 'linktolead-road2.1' && x.status === 'active') && t.every((x) => typeof x.name === 'string' && x.name), 'road2.1: tagged linktolead-road2.1, no empty tag');
+  const R21 = read('public/road2.1/index.html'), J21 = read('public/road2.1/page.js');
+  ok(J21.includes("variant: 'full', landing: 'road21'") && R21.includes('src="/road2.1/page.js"') && !/PHOTO OF/.test(R21) && R21.includes('/cabinet/alexandru.jpg'), 'road2.1: full form, landing road21, the real photo');
+  const labels = new Set((R21.match(/<button type="button" data-gate[^>]*>([^<]+)/g) || []).map((m) => m.replace(/.*>/, '').trim()));
+  ok(labels.size === 1 && labels.has('Start my North Star →'), 'road2.1: one button label, everywhere');
+  ok(!/most founders|incubator/i.test(R21.replace(/<!--[\s\S]*?-->/g, '')), 'road2.1: no banned words on the page');
+}
+// The tag system (30 Oct): every tag is "linktolead" or "linktolead-<group>-<value>", lowercase, no spaces.
+{
+  const all = tagsFor({ landing: 'road21', tier: 'premium', stage: 'growing', weakest: 'lead-your-people', interest: 'Higher income', industry: 'Real estate', source: 'sales-page', signupType: 'full' });
+  ok(all.every((x) => /^linktolead(-[a-z0-9.]+)*$/.test(x.name)), 'every tag follows linktolead-<group>-<value>');
+  ok(!all.some((x) => /Industry|Interest|Signup|sales-page/.test(x.name)), 'industry, interest, form and source are not tags');
+}
+ok(!tagsFor({ landing: 'toString' }).some((x) => /road|northstar|summitpage/.test(x.name)), 'an unknown landing gets no landing tag');
 
 // ── /start: the greeting ────────────────────────────────────────────────────
 const APP = read('public/app.js');
