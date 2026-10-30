@@ -1,5 +1,5 @@
 /* The profile circle and its menu: the founder's initials in gold, the same on
- * the North Star (/compass) and in the incubator (/ground-plan/). Shown only when this
+ * the North Star (/northstar/) and in the incubator (/ground-plan/). Shown only when this
  * device holds an account. Name and step come from /api/state, kept on the
  * device so the circle draws at once on the next page.
  *
@@ -147,7 +147,7 @@ function draw(root, me) {
   root.innerHTML = `<button type="button" class="pm-b" aria-haspopup="menu" aria-expanded="false" aria-label="Your profile menu${name ? ', ' + esc(name) : ''}">${esc(initials(name))}</button>
     <div class="pm-m" role="menu" aria-label="Your profile">
       <div class="pm-who"><b>${esc(name || 'Your account')}</b><span>${esc(step)}</span></div>
-      <a role="menuitem" class="pm-compass" href="/compass/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 5.5l2 6.5-2 1.2-2-1.2z" fill="currentColor" stroke="none"/><path d="M12 18.5l2-6.5-2-1.2-2 1.2z"/></svg><span><b>Leader’s North Star</b><small>Your direction in all four domains</small></span></a>
+      <a role="menuitem" class="pm-compass" href="/northstar/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 5.5l2 6.5-2 1.2-2-1.2z" fill="currentColor" stroke="none"/><path d="M12 18.5l2-6.5-2-1.2-2 1.2z"/></svg><span><b>Leader’s North Star</b><small>Your direction in all four domains</small></span></a>
       ${items(me).map(([href, label, d]) => `<a role="menuitem" href="${href}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>${esc(label)}</a>`).join('')}
       <div class="pm-sep" role="separator"></div>
       <div class="pm-look" role="group" aria-label="Light and dark"><span>Light</span>${[['device', 'Device'], ['light', 'Light'], ['dark', 'Dark']].map(([k, n]) => `<button type="button" data-theme-set="${k}" aria-pressed="${themePick() === k}">${n}</button>`).join('')}</div>

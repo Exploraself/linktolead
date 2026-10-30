@@ -67,7 +67,7 @@ export const LADDER = [
   // The internal key stays 'premium'; founders see The Summit.
   { from: 0, to: 0, key: 'premium', n: 'The Summit — the whole thing, with Alexandru every week', price: '$1,989',
     what: 'All twelve levels, the LAB, the HUB, every resource — and Alexandru mentoring you every week, not three times.',
-    url: '/compass/summit' },
+    url: '/northstar/summit/' },
 ];
 
 export function gateFor(level) {

@@ -55,7 +55,19 @@ export const ROUTES = {
 
 export default {
   async fetch(request, env, ctx) {
-    const path = new URL(request.url).pathname.replace(/\/+$/, '');
+    const url = new URL(request.url);
+    // The Leader’s North Star lives at /northstar/ (30 Oct). Its files stay in
+    // public/compass/; this serves them under the new address. Old /compass
+    // pages are 302s to here (functions/_landing.js).
+    if (/^\/northstar(\/|$)/.test(url.pathname)) {
+      if (url.pathname === '/northstar' || url.pathname === '/northstar/summit') {
+        return new Response(null, { status: 301, headers: { location: `${url.pathname}/${url.search}` } });
+      }
+      const inner = new URL(url);
+      inner.pathname = url.pathname.replace(/^\/northstar/, '/compass');
+      return env.ASSETS.fetch(new Request(inner, request));
+    }
+    const path = url.pathname.replace(/\/+$/, '');
     // The old sales-page addresses: a 302 to their road, query string kept.
     const moved = redirect(request);
     if (moved) return moved;
