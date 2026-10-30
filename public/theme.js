@@ -8,7 +8,11 @@
  * pick ('cab-theme') is carried over once.
  *
  * Sets <html data-theme="light|dark"> and data-theme-pick="device|light|dark",
- * and fires 'es-theme' on window whenever the light changes. */
+ * and fires 'es-theme' on window whenever the light changes.
+ *
+ * Changing the light is never abrupt (30 Oct): the whole page cross-fades over
+ * about a second (View Transitions), or, where that is missing, every colour
+ * eases across. Under prefers-reduced-motion it changes at once. */
 (function () {
   var K = 'es-theme', root = document.documentElement, mq = null;
   function read() { try { return localStorage.getItem(K); } catch (e) { return null; } }
@@ -36,7 +40,19 @@
       b[i].title = NAME[p];
     }
   }
-  function apply() {
+  var FADE = 1100, ready = false;
+  function still() { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+  /* Run a change of light slowly: a cross-fade of the whole page where the
+   * browser can, else a class that eases every colour for FADE ms. */
+  function slowly(fn) {
+    if (!ready || still()) { fn(); return; }
+    if (document.startViewTransition) { try { document.startViewTransition(fn); return; } catch (e) { /* fall through */ } }
+    root.classList.add('es-fading');
+    fn();
+    clearTimeout(slowly.t); slowly.t = setTimeout(function () { root.classList.remove('es-fading'); }, FADE + 100);
+  }
+  function apply() { slowly(paint); }
+  function paint() {
     var t = current();
     root.setAttribute('data-theme', t);
     root.setAttribute('data-theme-pick', pick());
@@ -48,7 +64,7 @@
   }
   function set(v) { write(v === 'light' || v === 'dark' ? v : null); apply(); }
   function cycle() { var p = pick(); set(p === 'device' ? 'light' : p === 'light' ? 'dark' : 'device'); }
-  apply();
+  apply(); ready = true;
   if (mq) { var on = function () { if (pick() === 'device') apply(); }; if (mq.addEventListener) mq.addEventListener('change', on); else if (mq.addListener) mq.addListener(on); }
   window.ESTheme = { get: current, pick: pick, set: set, cycle: cycle };
 
@@ -56,7 +72,11 @@
     + '.es-ts:hover{background:rgba(20,16,11,.8)}.es-ts:focus-visible{outline:2px solid #B4975F;outline-offset:3px}'
     + '[data-theme-switch] svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}'
     + '.es-ts.float{position:fixed;left:max(14px,env(safe-area-inset-left,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));z-index:70;box-shadow:0 10px 24px -12px rgba(0,0,0,.6)}'
-    + '@media print{.es-ts{display:none}}@media (prefers-reduced-motion:reduce){.es-ts{transition:none}}';
+    + '@media print{.es-ts{display:none}}@media (prefers-reduced-motion:reduce){.es-ts{transition:none}}'
+    // the slow change of light
+    + '::view-transition-old(root),::view-transition-new(root){animation-duration:1.1s;animation-timing-function:cubic-bezier(.4,0,.2,1)}'
+    + 'html.es-fading,html.es-fading *,html.es-fading *::before,html.es-fading *::after{transition:background-color 1.1s ease,color 1.1s ease,border-color 1.1s ease,fill 1.1s ease,stroke 1.1s ease,box-shadow 1.1s ease,outline-color 1.1s ease !important}'
+    + '@media (prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}}';
   /* The switch: in <span id="themehost"> when the page has one, else a small
    * round button floating bottom-left. */
   function mount() {
