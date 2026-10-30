@@ -5,7 +5,7 @@
 // the sign-in link, the password letter and the mentor's notes. No network:
 // Resend is faked.
 
-import { launchpadWelcome, resultsLetter, signinLetter, passwordChangedLetter, mentorLetter, answerLetter, questionNotice,
+import { launchpadWelcome, northStarWelcome, NORTH_STAR_LANDINGS, resultsLetter, signinLetter, passwordChangedLetter, mentorLetter, answerLetter, questionNotice,
   pickOffer, OFFERS, PAID_KINDS, BOOKING as LETTER_BOOKING, seedOf } from '../functions/_letters.js';
 import { BOOKING } from '../public/content.js';
 import { onRequestPost as signup } from '../functions/api/signup.js';
@@ -121,5 +121,13 @@ await compassPost({ request: post('/api/compass', { token: ana, stage: 'growing'
 sent = fakeResend();
 r = await sendPlan({ request: post('/api/send-plan', { token: ana, plan: { name: 'Someone', domains: [{ know: 'Lead yourself', lead: 'Needs you now' }] } }, '9.9.9.4'), env });
 ok(r.status === 200 && sent[0].body.text.includes('For you that’s Lead your business.'), 'results route: the weakest domain from the saved North Star, not the page');
+
+
+// A North Star sign-up is welcomed to the North Star, not the Launchpad (30 Oct).
+{
+  const N = northStarWelcome(B, { first: 'Ana' });
+  ok(N.subject === 'Your Leader’s North Star is open' && N.text.includes('/northstar/') && !/Level 01/.test(N.text) && /P\.S\./.test(N.text), 'North Star welcome: opens the North Star, carries the P.S.');
+  ok(['road2', 'road21', 'compass'].every((k) => NORTH_STAR_LANDINGS.includes(k)) && !NORTH_STAR_LANDINGS.includes('road1') && !NORTH_STAR_LANDINGS.includes('road3'), 'North Star welcome: road2, road2.1 and the North Star box only');
+}
 
 done();

@@ -168,6 +168,22 @@ export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {
   ], offerFor('launchpad-welcome', to, tier, offer), close('launchpad-welcome', { ...o, to })) };
 }
 
+/** Sign-ups from a North Star page (road2, road2.1, the North Star box) came
+ *  for the North Star, so their welcome opens it; the Launchpad is the next
+ *  step, not the subject (Alexandru, 30 Oct). */
+export const NORTH_STAR_LANDINGS = ['road2', 'road21', 'compass'];
+
+/** "northstar-welcome": sent once, when an account is made on a North Star page. */
+export function northStarWelcome(base, { first, to = '', tier, offer, ...o } = {}) {
+  return { subject: 'Your Leader’s North Star is open', ...letter(base, [
+    hi(first),
+    'You’re in. Your Leader’s North Star is open, and I’m really glad you’re here.',
+    'Eight plain questions and your rough numbers. You’ll see where you stand in all four domains, and which one needs you first.',
+    button(`${base}/northstar/`, 'Open my North Star →'),
+    'When you’re ready to work on it, The Founder Launchpad is waiting in your Ground Plan, free.',
+  ], offerFor('launchpad-welcome', to, tier, offer), close('launchpad-welcome', { ...o, to })) };
+}
+
 /** The North Star results, as a letter. `weakest` is the full domain name, or
  *  empty when it is not known yet. */
 export function resultsLetter(base, { first, weakest, to = '', tier, offer, ...o } = {}) {

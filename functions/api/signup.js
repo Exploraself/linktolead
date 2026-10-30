@@ -96,7 +96,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
     const go = (async () => {
       if (!(await allowed(D, email, ip))) return;
-      const r = await sendWelcome(env, origin(request), { email, first, p, D, tz: body.tz });
+      const r = await sendWelcome(env, origin(request), { email, first, p, D, tz: body.tz, landing });
       if (r.ok) await logged(D, email, ip);
       await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)')
         .bind(id, r.ok ? 'launchpad-welcome' : 'launchpad-welcome-failed', now(), r.why || null).run();
