@@ -33,6 +33,13 @@
     });
   });
 
+  /* 5 · The four sides scan only while they are on screen. */
+  var four = document.querySelector('.four');
+  if (four) {
+    try { new IntersectionObserver(function (es) { four.classList.toggle('run', es[0].isIntersecting); }).observe(four); }
+    catch (e) { four.classList.add('run'); }
+  }
+
   /* The account box: the FULL form, landing "road21". /road2.1/#join opens it. */
   var gate = $('#gate'), box = null;
   try { import('/forms.js').then(function (m) { m.rememberUtm(); }).catch(function () {}); } catch (e) { /* old browser */ }
