@@ -110,7 +110,7 @@ env = fresh({ MAILCHIMP_API_KEY: 'secretkey-us19', MAILCHIMP_DOUBLE_OPTIN: 'yes'
 await join(env, {});
 ok(mcCalls()[0].body.status_if_new === 'pending', 'API: double opt-in sends "pending"');
 
-// The Compass, finished: the tags update once, with the weakest domain.
+// The North Star, finished: the tags update once, with the weakest domain.
 env = fresh({ MAILCHIMP_API_KEY: 'secretkey-us19' });
 j = await join(env, {});
 calls = [];
@@ -120,14 +120,14 @@ c = mcCalls();
 ok(c.length === 1 && c[0].url.endsWith('/tags') && active(c[0]) === 'Link to Lead - The Founder Launchpad,Signup - Simple,lead-your-people,linktolead,sales-page,scale', 'Compass done: stage (Leading → scale) and weakest domain');
 calls = [];
 await compassPost({ request: post('/api/compass', done4), env });
-ok(mcCalls().length === 0, 'the same Compass again: no new call');
+ok(mcCalls().length === 0, 'the same North Star again: no new call');
 await compassPost({ request: post('/api/compass', { token: j.token, results: { scores: [1, 1, 3, 4], answered: [2, 2, 0, 2] } }), env });
-ok(mcCalls().length === 0, 'an unfinished Compass: no tags');
+ok(mcCalls().length === 0, 'an unfinished North Star: no tags');
 env = fresh();
 j = await join(env, {});
 calls = [];
 await compassPost({ request: post('/api/compass', { ...done4, token: j.token }), env });
-ok(mcCalls().length === 0, 'FORM mode: the Compass sends no tags');
+ok(mcCalls().length === 0, 'FORM mode: the North Star sends no tags');
 
 // ── Consent ──────────────────────────────────────────────────────────────────
 env = fresh({ MAILCHIMP_API_KEY: 'secretkey-us19' });

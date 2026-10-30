@@ -1,6 +1,6 @@
 // The lists the sign-up forms and the password gate offer. The same as
 // functions/_profile.js (a test holds them equal); the industries are the
-// Compass box's own list.
+// North Star box's own list.
 export const INTERESTS = ['More free time', 'Higher income', 'Steady clients', 'A team I trust', 'Clarity on direction', 'A new market'];
 export const INDUSTRIES = ['Coaching & consulting', 'Creative & design', 'E-commerce & retail', 'Food & hospitality', 'Health & wellness',
   'Beauty & personal care', 'Education & training', 'Professional services', 'Trades & construction', 'Technology & software',

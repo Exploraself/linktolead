@@ -1,11 +1,11 @@
-/* The Leadership Compass sales page: three now-and-want sliders, the stage
+/* The Leader’s North Star sales page: three now-and-want sliders, the stage
  * finder, the life-first calculator and the account box.
  *
  * Every number shown is arithmetic on what the visitor slid; nothing is a
  * benchmark. The name, email and stage are kept in this browser and picked up
- * by the Compass (same site), so they are never asked twice. The account box
+ * by the North Star (same site), so they are never asked twice. The account box
  * makes the free account (/api/signup, through /account.js, the same token the
- * Compass and /start use) and opens the founder's Ground Plan. Nothing else is
+ * North Star and /start use) and opens the founder's Ground Plan. Nothing else is
  * sent from this page. */
 'use strict';
 /* The arithmetic and the sentences, with no page attached, so the tests can
@@ -51,7 +51,7 @@ const SalesMath = (() => {
     // nothing to divide, and the page says what to do instead.
     if (cNow === 0 || hNow === 0 || cWant === 0) {
       o.cutTxt = '—'; o.cutColor = '#C9A24A';
-      if (cNow === 0) Object.assign(o, { cutCaption: 'time per client starts with your first client', verdictTitle: 'Start with your first client.', verdictText: 'Before time per client means anything, one person has to pay you. The Compass shows what to work on first at your stage.' });
+      if (cNow === 0) Object.assign(o, { cutCaption: 'time per client starts with your first client', verdictTitle: 'Start with your first client.', verdictText: 'Before time per client means anything, one person has to pay you. The North Star shows what to work on first at your stage.' });
       else if (hNow === 0) Object.assign(o, { cutCaption: 'add the hours you work today', verdictTitle: 'Count your hours first.', verdictText: 'Slide in the hours you really work in a week. Time per client is the number that says whether growth will cost you your life.' });
       else Object.assign(o, { cutCaption: 'add the clients you want', verdictTitle: 'Decide who you want to serve.', verdictText: 'Growth starts with a number of clients you actually want. Slide it in, and the road shows what it asks of you.' });
       return o;
@@ -59,13 +59,13 @@ const SalesMath = (() => {
     const cut = Math.round((1 - (hWant / cWant) / (hNow / cNow)) * 100);
     if (cut >= 50) Object.assign(o, { cutTxt: cut + '%', cutColor: '#FF8A6B', cutCaption: 'less of your time per client',
       verdictTitle: 'This is not a sales problem. It is a leadership one.',
-      verdictText: 'More clients with less of you only works when the business stops running through you: a clear offer, simple systems, people you trust with real decisions. That is the road the Compass maps, step by step, for your stage.' });
+      verdictText: 'More clients with less of you only works when the business stops running through you: a clear offer, simple systems, people you trust with real decisions. That is the road the North Star maps, step by step, for your stage.' });
     else if (cut > 0) Object.assign(o, { cutTxt: cut + '%', cutColor: '#C9A24A', cutCaption: 'less of your time per client',
       verdictTitle: 'Doable — if you change how the work gets done, not how hard you work.',
-      verdictText: 'Working harder will not close this gap. Better systems, a sharper offer and one or two decisions given away will. The Compass shows you which ones come first.' });
+      verdictText: 'Working harder will not close this gap. Better systems, a sharper offer and one or two decisions given away will. The North Star shows you which ones come first.' });
     else Object.assign(o, { cutTxt: 'On track', cutColor: '#7FD1A8', cutCaption: 'your time per client can stay the same',
       verdictTitle: 'The road is reaching the clients, not surviving them.',
-      verdictText: 'Your hours can carry this. The question moves to the market: who exactly you serve, and how they find you. The Compass helps you get that clear.' });
+      verdictText: 'Your hours can carry this. The question moves to the market: who exactly you serve, and how they find you. The North Star helps you get that clear.' });
     return o;
   }
 
@@ -223,7 +223,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
     } catch { w4box.classList.remove('wait'); w4box.classList.add('go'); }
   }
 
-  /* "A look inside": the Compass's What-if lab (lab.js, on the Compass's own
+  /* "A look inside": the North Star's What-if lab (lab.js, on the North Star's own
    * engine.js), live on the five numbers above. Loads as the visitor scrolls
    * near it, and follows the sliders from then on. */
   const vid = $('#vid');

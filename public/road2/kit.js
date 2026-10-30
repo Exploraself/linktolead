@@ -16,7 +16,7 @@ export function items(L, steps) {
   const head = (s) => String(s).split(/\.\s/)[0];
   return {
     tools: [
-      { what: 'The full Leadership Compass, saved', desc: '8 questions across the four domains, your compass reading and the What-if lab. Change an answer any time.',
+      { what: 'The full Leader’s North Star, saved', desc: '8 questions across the four domains, your compass reading and the What-if lab. Change an answer any time.',
         life: 'Stop carrying the whole business in your head.', biz: 'See which domain needs you first: Lead yourself, Lead your people, Lead your business or Lead the market.' },
       { what: 'Your Ground Plan', desc: 'Your stage, your weakest domain, your goal and your first three moves, on one page.',
         life: 'Start Monday knowing what comes first.', biz: 'Put your hours where they move the business.' },

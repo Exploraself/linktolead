@@ -1,10 +1,10 @@
 // The Founder's Blueprint — the programme, and the founder's home base.
 //
 // /start is where a founder with an account comes home: their Ground Plan
-// (built from their Compass), the map of twelve levels, and a level (four
+// (built from their North Star), the map of twelve levels, and a level (four
 // domains, seven steps each). A locked level opens its gate instead of
 // nothing, and the gate says plainly what opens it. Without an account, /start
-// sends the visitor to the Compass sales page to make one, or shows sign-in.
+// sends the visitor to the North Star sales page to make one, or shows sign-in.
 //
 // Answers save to the device first, and to the account when the founder has
 // one. Nothing is asserted about a payment or a subscription.
@@ -38,7 +38,7 @@ let resetAsk = (() => { try { return new URLSearchParams(location.search).get('r
 let view = linkCode ? 'loading' : entry({ joined: account.joined(), old: oldEntrance, hash: hashNow });
 if (view === 'redirect') { try { location.replace('/road2/#join'); } catch { /* no location */ } }
 let level = 1, dom = 'self';
-/** The Compass record from the account, the notes, and whether a password is set. */
+/** The North Star record from the account, the notes, and whether a password is set. */
 let compassRec = null, inbox = null, hasPassword = false, replyTo = null;
 /** The "Ask Alexandru" thread (null until loaded), and the stage picker. */
 let ask = null, changingStage = false;
@@ -130,8 +130,8 @@ function levelDone(st, lv) {
 // (level access now comes from levelState and the tier — see the workspace below)
 
 // ── The Ground Plan home base ───────────────────────────────────────────────
-// The front door is the Compass sales page; /start is where a founder with an
-// account comes home. Before the Compass: how this works, in three steps.
+// The front door is the North Star sales page; /start is where a founder with an
+// account comes home. Before the North Star: how this works, in three steps.
 // After it: their Ground Plan, from their own answers, then the programme.
 
 const eye = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>';
@@ -166,9 +166,9 @@ function howItWorks(st) {
   return `<section class="gp-wrap gp-moves">
     <p class="eyebrow">How this works</p>
     <ol class="gp-mlist">
-      <li class="gp-move"><span class="gp-mn">01</span><b>Find where you stand</b><p>Eight plain questions, rough numbers, and feedback in all four domains. Free.</p><a class="cta" href="/compass">Open the Compass →</a></li>
+      <li class="gp-move"><span class="gp-mn">01</span><b>Find where you stand</b><p>Eight plain questions, rough numbers, and feedback in all four domains. Free.</p><a class="cta" href="/compass">Open the North Star →</a></li>
       <li class="gp-move"><span class="gp-mn">02</span><b>Walk the Founder Launchpad</b><p>Levels 01–03, free. Know yourself before you build.</p><button class="cta" type="button" data-level="1">Start level 01 →</button></li>
-      <li class="gp-move"><span class="gp-mn">03</span><b>Book The Boardroom</b><p>Sit at the table. Unlock the full Compass.</p><a class="cta" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my 1:1 with Alexandru ↗</a></li>
+      <li class="gp-move"><span class="gp-mn">03</span><b>Book The Boardroom</b><p>Sit at the table. Unlock the full North Star.</p><a class="cta" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my 1:1 with Alexandru ↗</a></li>
     </ol>
   </section>`;
 }
@@ -179,7 +179,7 @@ function planHTML(gp, st) {
   return `<section class="gp-wrap gp-two gp-grid">
       ${standHTML(st)}
       ${gp.weakest ? card('Where the programme leans', `<h2 style="color:var(--${esc(gp.weakest.id)})">${esc(gp.weakest.name)} · ${esc(gp.weakest.band)}</h2><p>${esc(gp.weakest.big)} ${esc(gp.weakest.why)}</p><p><b>This week:</b> ${esc(gp.weakest.week)}</p>`) : ''}
-      ${gp.goal || gp.pains.length ? card('What you told the Compass', `${gp.goal ? `<p class="gp-goalline">⚑ ${esc(gp.goal.line)}</p>` : ''}${gp.pains.map((p) => `<p class="gp-said">You said: ${esc(p.label)} · ${esc(p.domain)}</p>`).join('')}`) : ''}
+      ${gp.goal || gp.pains.length ? card('What you told the North Star', `${gp.goal ? `<p class="gp-goalline">⚑ ${esc(gp.goal.line)}</p>` : ''}${gp.pains.map((p) => `<p class="gp-said">You said: ${esc(p.label)} · ${esc(p.domain)}</p>`).join('')}`) : ''}
     </section>
     <section class="gp-wrap gp-moves">
       <p class="eyebrow">Your first three moves · free</p>
@@ -208,12 +208,12 @@ function standHTML(st) {
     <p class="gp-said">${esc(STAGES[st].lede)}</p></div>`;
 }
 
-/** Once, when the Compass placed the founder in another stage. */
+/** Once, when the North Star placed the founder in another stage. */
 function nudgeHTML(st) {
   const to = compassRec ? stageNudge({ compass: compassRec.stage, current: st, seen: nudgeSeen() }) : null;
   if (!to) return '';
   return `<section class="gp-wrap"><div class="note-from stand-nudge" role="status">
-    <p>Your Compass placed you in ${esc(STAGES[to].n)}. Not sure? Starting one stage earlier settles what the later one assumes.</p>
+    <p>Your North Star placed you in ${esc(STAGES[to].n)}. Not sure? Starting one stage earlier settles what the later one assumes.</p>
     <div class="note-acts"><button type="button" class="cta" data-setstage="${to}" data-nudge="${to}|${st}">Switch to ${esc(STAGES[to].n)}</button><button type="button" class="ghost" data-keepstage="${to}|${st}">Keep ${esc(STAGES[st].n)}</button></div>
   </div></section>`;
 }
@@ -623,8 +623,8 @@ function helpNote() {
   </aside>`;
 }
 
-/** The Compass, inside the programme: for the founder's first five visits to
- *  the programme, a banner that sends them back to the Compass for feedback
+/** The North Star, inside the programme: for the founder's first five visits to
+ *  the programme, a banner that sends them back to the North Star for feedback
  *  and material. Closing it ends it early. Counted once per page load. */
 const CB_KEY = 'ftb-compass-banner', CB_TIMES = 5;
 const cbSeen = () => { try { return Number(localStorage.getItem(CB_KEY) || 0); } catch { return CB_TIMES; } };
@@ -635,22 +635,22 @@ function compassBanner() {
   let n = cbSeen();
   if (n >= CB_TIMES) return '';
   if (!cbCounted) { cbCounted = true; cbSet(++n); }
-  return `<a class="cban" href="/compass/" aria-label="Open your Leadership Compass: feedback in all four domains, your plans and your numbers">
+  return `<a class="cban" href="/compass/" aria-label="Open your Leader’s North Star: feedback in all four domains, your plans and your numbers">
     <span class="cban-dial" aria-hidden="true"><svg viewBox="0 0 64 64" width="64" height="64"><circle cx="32" cy="32" r="29" fill="none" stroke="#C9A24A" stroke-width="1.6"/><circle cx="32" cy="32" r="23" fill="none" stroke="#594A32"/>
       <g stroke="#C9A24A" stroke-width="1.4"><line x1="32" y1="3" x2="32" y2="9"/><line x1="32" y1="55" x2="32" y2="61"/><line x1="3" y1="32" x2="9" y2="32"/><line x1="55" y1="32" x2="61" y2="32"/></g>
       <circle cx="32" cy="11" r="2.6" fill="#A8623A"/><circle cx="53" cy="32" r="2.6" fill="#4C7355"/><circle cx="32" cy="53" r="2.6" fill="#36607F"/><circle cx="11" cy="32" r="2.6" fill="#9A7418"/>
       <g class="cban-needle"><path d="M32 14 L36 32 L32 35 L28 32Z" fill="#E3C47E"/><path d="M32 50 L36 32 L32 29 L28 32Z" fill="#594A32"/></g><circle cx="32" cy="32" r="3" fill="#C9A24A"/></svg></span>
-    <span class="cban-txt"><span class="cban-k">Your Leadership Compass</span><b>Lost on a level? Your Compass knows the way.</b>
+    <span class="cban-txt"><span class="cban-k">Your Leader’s North Star</span><b>Lost on a level? Your North Star knows the way.</b>
       <span class="cban-p">Feedback in all four domains, your step-by-step plans and your numbers, all in one place. Come back whenever you need direction.</span></span>
-    <span class="cban-go">Open my Compass →</span>
+    <span class="cban-go">Open my North Star →</span>
   </a>
-  <button type="button" class="cban-x" data-cban="close" aria-label="Hide the Compass banner"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>`;
+  <button type="button" class="cban-x" data-cban="close" aria-label="Hide the North Star banner"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>`;
 }
 
 // ── Your account plans ──────────────────────────────────────────────────────
-// From the Compass, in this founder's order (GET /api/plans). One step per
+// From the North Star, in this founder's order (GET /api/plans). One step per
 // domain this week: the first one not yet done. Each opens to its full text
-// and can be ticked. The count is the plans' own; it is not the Compass
+// and can be ticked. The count is the plans' own; it is not the North Star
 // launchpad.
 let acctPlans = null;
 const BANDS = { now: 'Needs you now', shape: 'Taking shape', strength: 'A strength' };
@@ -686,8 +686,8 @@ function plansCard() {
   return `<section class="gp-wrap pl" id="plans" aria-labelledby="pl-h">
     <p class="eyebrow">Your account plans · ${P.count} of ${P.total} steps done</p>
     <h2 class="gp-h" id="pl-h">${P.compass ? `${esc(first.name)} opens first` : 'Your four domains, one step each week'}</h2>
-    <p class="gp-lede">${P.compass ? 'Your lowest domain from the Compass leads. One step per domain this week.' : 'Take the Compass and your lowest domain moves to the front. One step per domain each week.'}
-      ${P.compass ? '' : ' <a href="/compass">Open the Compass →</a>'}</p>
+    <p class="gp-lede">${P.compass ? 'Your lowest domain from the North Star leads. One step per domain this week.' : 'Take the North Star and your lowest domain moves to the front. One step per domain each week.'}
+      ${P.compass ? '' : ' <a href="/compass">Open the North Star →</a>'}</p>
     <div class="pl-grid">${rows}</div>
     ${w ? `<div class="pl-dom pl-whatif"><p class="pl-dn">Your plan for this change · ${esc(w.name)}</p>${wNext ? planStep(wNext, null) : '<p class="pl-all">All four steps done.</p>'}</div>` : ''}
     <p class="savenote">Times are about, not promises.</p>
@@ -908,7 +908,7 @@ document.addEventListener('input', (e) => {
 });
 
 /* Coming home: spend a sign-in link if there is one, then bring the account's
- * work, Compass, notes and plans here. The device copy wins on conflict — it
+ * work, North Star, notes and plans here. The device copy wins on conflict — it
  * is the one the founder was just typing into. */
 async function comeHome() {
   if (linkCode && view === 'loading') {

@@ -1,4 +1,4 @@
-// The parts of an account the Compass added: the profile row beside each
+// The parts of an account the North Star added: the profile row beside each
 // student (industry, consent, where they came from, unsubscribe), and the
 // welcome letter.
 

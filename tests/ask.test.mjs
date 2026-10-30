@@ -85,17 +85,17 @@ r = await stagePost({ request: post('/api/stage', { token: cy, stage: 'build', f
 ok(r.status === 200 && env.DB.raw.prepare('SELECT stage FROM student WHERE id = ?').get(cy).stage === 'build', 'saved to student.stage');
 ok(JSON.stringify(JSON.parse(events(env, cy, 'stage-change')[0])) === '{"from":"scale","to":"build"}', "event 'stage-change' with from and to");
 const stageTags = (mc[0] && mc[0].body.tags || []).filter((t) => ['build', 'grow', 'scale'].includes(t.name));
-ok(mc.length === 1 && stageTags.find((t) => t.name === 'build').status === 'active' && stageTags.filter((t) => t.status === 'active').length === 1, 'Mailchimp: the stage tags follow the chosen stage, over the Compass');
+ok(mc.length === 1 && stageTags.find((t) => t.name === 'build').status === 'active' && stageTags.filter((t) => t.status === 'active').length === 1, 'Mailchimp: the stage tags follow the chosen stage, over the North Star');
 const st = await (await stateGet({ request: get('/api/state?t=' + cy), env })).json();
 ok(st.me.stage === 'build' && st.me.stageChosen === true, 'state: the chosen stage, marked as chosen');
-ok(programmeStage({ chosen: 'build', local: 'scale', compass: 'scaling' }) === 'build', 'a chosen stage wins over the device and the Compass');
+ok(programmeStage({ chosen: 'build', local: 'scale', compass: 'scaling' }) === 'build', 'a chosen stage wins over the device and the North Star');
 ok(programmeStage({ chosen: '', local: 'grow', compass: 'scaling' }) === 'grow', 'no choice made: the device still keeps its place');
 const hist = (await mOne(env, cy)).stages;
 ok(hist.length === 1 && hist[0].from === 'Scaling' && hist[0].to === 'Building' && hist[0].at, '/mentor: the stage change in their history');
 
-ok(stageNudge({ compass: 'scaling', current: 'build' }) === 'scale', 'nudge: the Compass placed them elsewhere');
+ok(stageNudge({ compass: 'scaling', current: 'build' }) === 'scale', 'nudge: the North Star placed them elsewhere');
 ok(stageNudge({ compass: 'leading', current: 'grow' }) === 'scale' && stageNudge({ compass: 'leading', current: 'scale' }) === null, 'nudge: Leading counts as Scaling');
-ok(stageNudge({ compass: 'growing', current: 'grow' }) === null && stageNudge({ compass: null, current: 'grow' }) === null, 'nudge: none when they agree, or without a Compass');
+ok(stageNudge({ compass: 'growing', current: 'grow' }) === null && stageNudge({ compass: null, current: 'grow' }) === null, 'nudge: none when they agree, or without a North Star');
 ok(stageNudge({ compass: 'scaling', current: 'build', seen: 'scale|build' }) === null && stageNudge({ compass: 'scaling', current: 'grow', seen: 'scale|build' }) === 'scale', 'nudge: once per pair');
 
 // ── Ask Alexandru ───────────────────────────────────────────────────────────

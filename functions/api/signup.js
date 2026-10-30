@@ -1,4 +1,4 @@
-// A free account from the Compass or a sales page: first name, surname,
+// A free account from the North Star or a sales page: first name, surname,
 // email, consent, where they came from and their stage. Two forms
 // (functions/_profile.js): FULL also gives company (or "No company yet"),
 // interest, industry and a password (required); SIMPLE gives none of these and
@@ -33,7 +33,7 @@ const later = (waitUntil, job) => {
   return typeof waitUntil === 'function' ? (waitUntil(go), null) : go;
 };
 
-/** The Compass's four stages, as the programme names its three. */
+/** The North Star's four stages, as the programme names its three. */
 const STAGE = { building: 'build', growing: 'grow', scaling: 'scale', build: 'build', grow: 'grow', scale: 'scale' };
 
 export async function onRequestPost({ request, env, waitUntil }) {
@@ -45,7 +45,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const email = clean(body.email, 200).toLowerCase();
   const first = clean(body.first, 60), last = clean(body.last, 60);
   if (!looksLikeEmail(email)) return bad('That email does not look complete.');
-  if (!first) return bad('Your first name, so the Compass is yours.');
+  if (!first) return bad('Your first name, so the North Star is yours.');
   const consent = body.consent === true;
   const source = SOURCES.includes(body.source) ? body.source : 'compass';
   const stage = STAGE[body.stage] || null;

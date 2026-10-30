@@ -1,5 +1,5 @@
-/* ExploraSelf Leadership Compass · v18.
-   The live Compass palette and fonts (Newsreader + Inter), more
+/* ExploraSelf Leader’s North Star · v18.
+   The live North Star palette and fonts (Newsreader + Inter), more
    atmosphere and motion, small line icons. Every colour is a token on .cf;
    the dark workspace theme redefines them. Motion stops under
    prefers-reduced-motion. */
@@ -235,7 +235,7 @@ details[data-step] summary::-webkit-details-marker{display:none}
   #s-overview .deep-hero{padding:18px 20px 24px !important}
 }
 [data-off],[data-off] *{animation-play-state:paused !important}
-/* The way into the incubator, in its own place under the Compass menu. */
+/* The way into the incubator, in its own place under the North Star menu. */
 .incub-link{display:flex;align-items:center;gap:10px;margin:16px 0 0;padding:12px;border-radius:10px;text-decoration:none;color:#F7F2E7;background:linear-gradient(120deg,#01233B,#0B3350);border:1px solid rgba(227,196,126,.6);box-shadow:inset 0 0 0 3px #01233B,inset 0 0 0 4px rgba(227,196,126,.25)}
 .incub-link:hover{border-color:#E3C47E}
 .incub-link:focus-visible{outline:2px solid #C9A24A;outline-offset:3px}

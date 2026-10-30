@@ -674,7 +674,7 @@ body.inwork .foot{display:none}
 .stand-nudge{margin-bottom:20px}
 
 
-/* The Compass banner in the programme: first five visits */
+/* The North Star banner in the programme: first five visits */
 .cbanwrap{position:relative;margin-bottom:18px}
 .cbanwrap:empty{display:none}
 .cban{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:16px 20px;padding:20px 64px 20px 22px;border-radius:12px;text-decoration:none;color:#F7F2E7;
@@ -713,3 +713,42 @@ body.inwork .foot{display:none}
 .helpgo{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border:1px solid var(--gold);color:var(--gold-ink);font:600 13px/1 var(--body);border-radius:999px}
 .helpgo:hover{background:var(--gold);color:#14100B}
 .hardline{flex-basis:100%;margin-top:8px!important;font-size:13px;color:var(--muted)}.hardline a{color:var(--gold-ink);text-decoration:underline;text-underline-offset:3px}
+
+/* ── Header size (30 Oct) ──────────────────────────────────────────────────
+   Phone: the bar stays at the top while you scroll, but takes one slim row
+   (name, light switch, profile) and one row of menu pills that scrolls
+   sideways, instead of a third of the screen.
+   Desktop: the whole dashboard reads at 125%, as if the browser were zoomed;
+   everything sits on one header row. */
+@media(max-width:819px){
+  .topin{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 10px;padding-block:8px 9px}
+  .brand{grid-column:1;grid-row:1;gap:9px;min-width:0}
+  .bmark svg{width:22px;height:22px}
+  .bsmall{display:none}
+  .bname{font-size:17px;margin-top:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topend{grid-column:2;grid-row:1;gap:8px}
+  .top .es-ts{width:34px;height:34px}
+  .top .pm-b{width:34px;height:34px;font-size:12px;box-shadow:0 0 0 2px rgba(201,162,74,.22)}
+  .top .pm-m{top:44px}
+  .tnav{grid-column:1/-1;grid-row:2;flex-wrap:nowrap;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
+    margin-inline:calc(-1 * max(18px,env(safe-area-inset-left,0px)));padding-inline:max(18px,env(safe-area-inset-left,0px))}
+  .tnav::-webkit-scrollbar{display:none}
+  .tnav button,.tnav a.tbook{flex:none;white-space:nowrap;padding:6px 12px;font-size:11px}
+  .tnav a.tbook svg{width:13px;height:13px}
+}
+@media(min-width:1280px){
+  html{zoom:1.25}
+  .railwrap{max-height:calc(100vh / 1.25)}
+  .top .wrap{max-width:1180px}
+  .topin{flex-wrap:nowrap;gap:16px}
+  .tnav{flex-wrap:nowrap;gap:6px}
+  .tnav button,.tnav a.tbook{white-space:nowrap;padding:8px 13px}
+}
+@media(min-width:1280px) and (max-width:1499px){
+  .topin{gap:12px}
+  .bname{font-size:20px;white-space:nowrap}
+  .bmark svg{width:24px;height:24px}
+  .tnav{gap:5px}
+  .tnav button,.tnav a.tbook{padding:7px 10px;font-size:11px}
+}
+@media(min-width:1280px){.bname{white-space:nowrap}}

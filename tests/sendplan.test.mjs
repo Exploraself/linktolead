@@ -63,17 +63,17 @@ ok(m && m.url === 'https://api.resend.com/emails', 'uses the email service');
 ok(m.body.to.length === 1 && m.body.to[0] === 'ana@example.com', 'sends only to the account');
 ok(m.body.from === 'Alexandru at ExploraSelf <support@exploraself.com>', 'sends from the verified exploraself.com address');
 ok(!m.body.html.includes('<script>') && !m.body.text.includes('<script>'), 'nothing the page sent is pasted into the letter');
-ok(m.body.subject === 'Your Leadership Compass' && /^Hi Ana,/.test(m.body.text) && m.body.text.includes('For you that’s Lead yourself.'), 'results letter: first name from the account, the domain that needs them most');
+ok(m.body.subject === 'Your Leader’s North Star' && /^Hi Ana,/.test(m.body.text) && m.body.text.includes('For you that’s Lead yourself.'), 'results letter: first name from the account, the domain that needs them most');
 ok(!m.body.html.includes('<b>Ana</b>'), 'escapes the name');
 ok(!JSON.stringify(m.body).includes('dropped'), 'drops unknown fields');
-ok(m.body.html.includes('https://linktolead.exploraself.com/compass') && m.body.text.includes('Open my Compass →: https://linktolead.exploraself.com/compass'), 'links to the results');
+ok(m.body.html.includes('https://linktolead.exploraself.com/compass') && m.body.text.includes('Open my North Star →: https://linktolead.exploraself.com/compass'), 'links to the results');
 ok(typeof m.body.text === 'string' && m.body.text.includes('Lead yourself'), 'has a plain-text version');
 ok(m.body.html.includes('/api/unsubscribe?u=') && m.body.html.includes(ADDR), 'html footer: unsubscribe + address');
 ok(m.body.text.includes('/api/unsubscribe?u=') && m.body.text.includes(ADDR), 'text footer: unsubscribe + address');
 ok(/^<https:\/\/.+\/api\/unsubscribe\?u=\w+>$/.test(m.body.headers['List-Unsubscribe']), 'List-Unsubscribe header');
 ok(m.body.headers['List-Unsubscribe-Post'] === 'List-Unsubscribe=One-Click', 'List-Unsubscribe-Post header');
 
-// Typing the account's address also works (the Compass creates the account first).
+// Typing the account's address also works (the North Star creates the account first).
 r = await onRequestPost({ request: req({ email: 'ANA@example.com', plan }), env });
 ok(r.status === 200, 'the account address, typed, also works');
 r = await onRequestPost({ request: req({ token, plan }), env });

@@ -1,11 +1,11 @@
 // The Ground Plan home base at /start: where a founder opens, which programme
-// they walk, and their Ground Plan, built from their own Compass.
+// they walk, and their Ground Plan, built from their own North Star.
 //
-// Every line traces to something the founder chose in the Compass, or to copy
-// that already exists (content.js, and the Compass's own feedback in
+// Every line traces to something the founder chose in the North Star, or to copy
+// that already exists (content.js, and the North Star's own feedback in
 // compass/engine.js, from "The Intelligence"). Nothing is filled in for them.
 
-/** The Compass's four stages, as the programme's three. Leading walks the
+/** The North Star's four stages, as the programme's three. Leading walks the
  *  Scaling programme: it is the top of the road. */
 export const PROGRAMME = { building: 'build', growing: 'grow', scaling: 'scale', leading: 'scale', build: 'build', grow: 'grow', scale: 'scale' };
 const COMPASS_STAGE_NAME = { building: 'Building', growing: 'Growing', scaling: 'Scaling', leading: 'Leading' };
@@ -29,16 +29,16 @@ export function entry({ joined, old, hash = '' }) {
 /** Which programme to walk: a stage the founder chose on /start ("Change
  *  where I stand", kept on the account) wins everywhere; then a stage already
  *  in use on this device (a founder never loses their place); then the
- *  Compass; then the stage on the account (from the sales page); then
+ *  North Star; then the stage on the account (from the sales page); then
  *  Building, where the programme starts. */
 export function programmeStage({ chosen, local, compass, account } = {}) {
   return PROGRAMME[chosen] || PROGRAMME[local] || PROGRAMME[compass] || PROGRAMME[account] || 'build';
 }
 
-/** The once-only nudge when the Compass placed the founder in another stage
+/** The once-only nudge when the North Star placed the founder in another stage
  *  than the one they walk (Leading counts as Scaling). `seen` is what was
  *  answered last ("<compass>|<current>"), so it shows once per pair. Returns
- *  the programme stage the Compass suggests, or null. */
+ *  the programme stage the North Star suggests, or null. */
 export function stageNudge({ compass, current, seen = '' } = {}) {
   const to = PROGRAMME[compass], now = PROGRAMME[current];
   if (!to || !now || to === now || seen === `${to}|${now}`) return null;
@@ -48,10 +48,10 @@ export function stageNudge({ compass, current, seen = '' } = {}) {
 const parse = (s) => { if (s && typeof s === 'object') return s; try { return s ? JSON.parse(s) : null; } catch { return null; } };
 
 /**
- * The Ground Plan, from the Compass record ({ stage, results_json, flags_json }
- * as /api/state returns it). `E` is the Compass engine; `C` gives the
+ * The Ground Plan, from the North Star record ({ stage, results_json, flags_json }
+ * as /api/state returns it). `E` is the North Star engine; `C` gives the
  * programme's own copy: STAGES, weekTitle(stage, n) and promise(stage, n).
- * Returns null before the Compass is done.
+ * Returns null before the North Star is done.
  */
 export function groundPlan(record, E, C) {
   if (!record) return null;

@@ -1,9 +1,9 @@
 /* The profile circle and its menu: the founder's initials in gold, the same on
- * the Compass (/compass) and in the incubator (/ground-plan/). Shown only when this
+ * the North Star (/compass) and in the incubator (/ground-plan/). Shown only when this
  * device holds an account. Name and step come from /api/state, kept on the
  * device so the circle draws at once on the next page.
  *
- * Menu: name and step, the Leadership Compass in its own highlighted row,
+ * Menu: name and step, the Leader’s North Star in its own highlighted row,
  * Your Ground Plan, Library, Ask
  * Alexandru, Password (full accounts only; simple accounts sign in by email
  * link), "Letters from your mentor: On/Off" (consent, synced to Mailchimp),
@@ -103,7 +103,7 @@ function deleteDialog(me) {
   d.innerHTML = `<div class="pm-box" role="dialog" aria-modal="true" aria-labelledby="pm-dh">
     <h2 id="pm-dh">Delete your account?</h2>
     <p>This removes everything kept for you, for good:</p>
-    <ul><li>your answers and worksheets in every level</li><li>your Compass, your plans and your questions to your mentor</li><li>your letters and your library</li></ul>
+    <ul><li>your answers and worksheets in every level</li><li>your North Star, your plans and your questions to your mentor</li><li>your letters and your library</li></ul>
     <p>You will stop getting letters. Nothing you paid for is refunded by this. If you only want fewer emails, turn off <b>Letters from your mentor</b> instead.</p>
     <div class="pm-acts"><button type="button" data-d="keep">Keep my account</button><button type="button" class="pm-danger" data-d="next">Continue</button></div>
   </div>`;
@@ -147,7 +147,7 @@ function draw(root, me) {
   root.innerHTML = `<button type="button" class="pm-b" aria-haspopup="menu" aria-expanded="false" aria-label="Your profile menu${name ? ', ' + esc(name) : ''}">${esc(initials(name))}</button>
     <div class="pm-m" role="menu" aria-label="Your profile">
       <div class="pm-who"><b>${esc(name || 'Your account')}</b><span>${esc(step)}</span></div>
-      <a role="menuitem" class="pm-compass" href="/compass/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 5.5l2 6.5-2 1.2-2-1.2z" fill="currentColor" stroke="none"/><path d="M12 18.5l2-6.5-2-1.2-2 1.2z"/></svg><span><b>Leadership Compass</b><small>Your direction in all four domains</small></span></a>
+      <a role="menuitem" class="pm-compass" href="/compass/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 5.5l2 6.5-2 1.2-2-1.2z" fill="currentColor" stroke="none"/><path d="M12 18.5l2-6.5-2-1.2-2 1.2z"/></svg><span><b>Leader’s North Star</b><small>Your direction in all four domains</small></span></a>
       ${items(me).map(([href, label, d]) => `<a role="menuitem" href="${href}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>${esc(label)}</a>`).join('')}
       <div class="pm-sep" role="separator"></div>
       <div class="pm-look" role="group" aria-label="Light and dark"><span>Light</span>${[['device', 'Device'], ['light', 'Light'], ['dark', 'Dark']].map(([k, n]) => `<button type="button" data-theme-set="${k}" aria-pressed="${themePick() === k}">${n}</button>`).join('')}</div>

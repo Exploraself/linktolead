@@ -4,7 +4,7 @@
  * they can afford answer on the right, one row each, so on a phone each lever
  * sits right above the answer it moves most.
  *
- * All the arithmetic is the Compass's own (CompassEngine.month in
+ * All the arithmetic is the North Star's own (CompassEngine.month in
  * /compass/engine.js); this file only lays it out. Nothing typed here is saved
  * or sent. "Create my free account →" opens the FULL account form (page.js). */
 

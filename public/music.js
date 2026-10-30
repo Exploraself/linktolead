@@ -3,10 +3,14 @@
  * dashboard; the Cabinet's record player and the mini player both drive it.
  *
  * The music is played live by the browser (Web Audio, no file), so nothing
- * is downloaded and nothing is licensed. Three pieces:
+ * is downloaded and nothing is licensed. Clean sound, no vinyl crackle.
+ * Six pieces:
  *   trio    Late-night trio: piano, double bass, brushes
  *   piano   Quiet piano: slow chords, a few high notes
  *   ambient Warm room: long pads and soft bells
+ *   road    Open road: driving guitar, bass and drums (rock)
+ *   burn    Slow burn: half-time drums, heavy chords (rock)
+ *   riff    Steady riff: one riff, bass and drums (rock)
  * Energy (calmer ↔ more energy) moves the tempo and which instruments play:
  * calm drops the brushes and walks the bass less; more energy adds them back.
  *
@@ -31,6 +35,9 @@ export const TRACKS = {
   trio: { n: 'Late-night trio', d: 'Piano, double bass, brushes' },
   piano: { n: 'Quiet piano', d: 'Slow chords, room to think' },
   ambient: { n: 'Warm room', d: 'Long pads, soft bells' },
+  road: { n: 'Open road', d: 'Driving guitar, bass and drums' },
+  burn: { n: 'Slow burn', d: 'Half-time drums, heavy chords' },
+  riff: { n: 'Steady riff', d: 'One riff, bass and drums' },
 };
 export const MODES = {
   study: { n: 'Study mode', d: 'Quiet piano, calm, the light softened', track: 'piano', energy: 30, light: 82, lamp: false },
@@ -58,14 +65,14 @@ const keep = () => put(KEY, JSON.stringify(S));
 /** How dark the shade is for a light setting: 100 = none, 0 = deep dusk. */
 export const shade = (light) => Math.round((1 - clamp(light, 0, 100) / 100) * 0.62 * 100) / 100;
 /** Beats per minute for a piece at an energy (0–100). */
-export const tempo = (track, energy) => Math.round(({ trio: 62, piano: 54, ambient: 48 }[track] || 62) + clamp(energy, 0, 100) * 0.36);
+export const tempo = (track, energy) => Math.round(({ trio: 62, piano: 54, ambient: 48, road: 92, burn: 58, riff: 80 }[track] || 62) + clamp(energy, 0, 100) * 0.36);
 
 /* ── The engine ──────────────────────────────────────────────────────────── */
 let E = null;
 function engine() {
   if (E) return E;
   E = (function () {
-    var ctx, master, out, verb, ep, noise, crackleG, timer = null, playing = false, nextT = 0, beatN = 0, vol = .55, stopTok = 0;
+    var ctx, master, out, verb, ep, gtr, noise, timer = null, playing = false, nextT = 0, beatN = 0, vol = .55, stopTok = 0;
     var track = 'trio', energy = .45;
     function bpm() { return tempo(track, energy * 100); }
     function mtof(m) { return 440 * Math.pow(2, (m - 69) / 12); }
@@ -82,11 +89,11 @@ function engine() {
       ep = ctx.createGain(); ep.gain.value = .85; var lfo = ctx.createOscillator(), ld = ctx.createGain(); lfo.frequency.value = 4.2; ld.gain.value = .18; lfo.connect(ld); ld.connect(ep.gain); lfo.start();
       ep.connect(lp); lp.connect(out);
       var n = ctx.sampleRate * 2; noise = ctx.createBuffer(1, n, ctx.sampleRate); var d = noise.getChannelData(0); for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-      var cn = ctx.sampleRate * 4, cb = ctx.createBuffer(1, cn, ctx.sampleRate), cd = cb.getChannelData(0);
-      for (var j = 0; j < cn; j++) { cd[j] = (Math.random() * 2 - 1) * .006; if (Math.random() < .00035) { var a = (Math.random() * .5 + .2) * (Math.random() < .5 ? -1 : 1); for (var k = 0; k < 6 && j + k < cn; k++) cd[j + k] += a * Math.pow(.5, k); } }
-      var cs = ctx.createBufferSource(); cs.buffer = cb; cs.loop = true; var hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 900; crackleG = ctx.createGain(); crackleG.gain.value = crackleFor(); cs.connect(hp); hp.connect(crackleG); crackleG.connect(master); cs.start();
+      // The guitar: two detuned saws into a soft clip and a speaker-like low pass.
+      var sh = ctx.createWaveShaper(), cv = new Float32Array(1024); for (var q = 0; q < 1024; q++) { var x = q / 511.5 - 1; cv[q] = Math.tanh(x * 6) / Math.tanh(6); }
+      sh.curve = cv; sh.oversample = '2x'; gtr = ctx.createGain(); gtr.gain.value = 1; var cab = ctx.createBiquadFilter(); cab.type = 'lowpass'; cab.frequency.value = 2600; cab.Q.value = .7;
+      var gOut = ctx.createGain(); gOut.gain.value = .085; gtr.connect(sh); sh.connect(cab); cab.connect(gOut); gOut.connect(out);
     }
-    function crackleFor() { return track === 'trio' ? .5 : track === 'piano' ? .18 : 0; }
     function key(m, t, dur, vel, dest) {
       var f = mtof(m), g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.1 * vel, t + .006); g.gain.exponentialRampToValueAtTime(.035 * vel, t + .55); g.gain.exponentialRampToValueAtTime(.0005, t + dur);
       var o1 = ctx.createOscillator(); o1.frequency.value = f; var o2 = ctx.createOscillator(); o2.frequency.value = f * 2.003; var g2 = ctx.createGain(); g2.gain.value = .22;
@@ -115,7 +122,60 @@ function engine() {
         });
       });
     }
+    function kick(t, g) {
+      var o = ctx.createOscillator(); o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(42, t + .12);
+      var v = ctx.createGain(); v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(.55 * g, t + .004); v.gain.exponentialRampToValueAtTime(.001, t + .32);
+      o.connect(v); v.connect(out); o.start(t); o.stop(t + .35);
+    }
+    function snareHit(t, g) {
+      hiss(t, .2, .07 * g, 1900);
+      var o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = 185; var v = ctx.createGain(); v.gain.setValueAtTime(.12 * g, t); v.gain.exponentialRampToValueAtTime(.001, t + .09);
+      o.connect(v); v.connect(out); o.start(t); o.stop(t + .1);
+    }
+    function hat(t, g) { hiss(t, .045, .02 * g, 8200, 'highpass'); }
+    /** A power chord (or one note): root, fifth, octave. `mute` = palm-muted chug. */
+    function power(r, t, dur, vel, mute, single) {
+      (single ? [r] : [r, r + 7, r + 12]).forEach(function (m) {
+        [-6, 6].forEach(function (cent) {
+          var o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m) * Math.pow(2, cent / 1200);
+          var v = ctx.createGain(), pk = .5 * vel, len = mute ? Math.min(dur, .16) : dur;
+          v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(pk, t + .005); v.gain.exponentialRampToValueAtTime(pk * (mute ? .15 : .55), t + (mute ? .08 : .4)); v.gain.exponentialRampToValueAtTime(.0005, t + len);
+          if (mute) { var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; o.connect(lp); lp.connect(v); } else o.connect(v);
+          v.connect(gtr); o.start(t); o.stop(t + len + .05);
+        });
+      });
+    }
+    var RK = { road: [40, 36, 43, 38], burn: [45, 41, 36, 43], riff: [40, 40, 43, 38] };
+    var RIFF = [0, 0, 3, 0, 5, 0, 3, -2];
+    function rock(n, t) {
+      var BEAT = 60 / bpm(), H = BEAT / 2, bar = Math.floor(n / 4) % 4, b = n % 4, r = RK[track][bar];
+      if (track === 'road') {
+        for (var e = 0; e < 2; e++) { var te = t + e * H;
+          if (b === 0 && e === 0 && energy >= .4) power(r, te, BEAT * 1.9, .9); else power(r, te, H, .55, true);
+          bass(r - 12, te, H * .9, .5);
+          if (energy >= .3 || e === 0) hat(te, e ? .7 : 1); }
+        if (b === 0 || b === 2) kick(t, 1); if (b === 2 && energy >= .55) kick(t + H, .8);
+        if (b === 1 || b === 3) snareHit(t, 1);
+        return;
+      }
+      if (track === 'burn') {
+        if (b === 0) { power(r, t, BEAT * 3.8, .85); bass(r - 12, t, BEAT * 3.6, .7); kick(t, 1); }
+        if (b === 2) snareHit(t, 1.1);
+        if (b === 3 && energy >= .5) kick(t + H, .7);
+        hat(t, .8); if (energy >= .45) hat(t + H, .5);
+        if (b === 2 && Math.random() < .25 + energy * .3) power(r + 24 + [0, 3, 5, 7][Math.floor(Math.random() * 4)], t + H, BEAT * 1.4, .45, false, true);
+        return;
+      }
+      // riff: the same eight notes over the bar's root, bass doubling, a plain backbeat.
+      for (var k = 0; k < 2; k++) { var tk = t + k * H, m = r + RIFF[b * 2 + k];
+        if (b === 0 && k === 0) power(m, tk, H * 1.6, .8); else power(m, tk, H * .9, .6, energy < .6, true);
+        bass(m - 12, tk, H * .85, .45);
+        if (energy >= .35 || k === 0) hat(tk, k ? .6 : .9); }
+      if (b === 0 || (b === 2 && energy >= .4)) kick(t, 1); if (b === 1 && energy >= .6) kick(t + H, .7);
+      if (b === 1 || b === 3) snareHit(t, .9);
+    }
     function beat(n, t) {
+      if (RK[track]) { rock(n, t); return; }
       var BEAT = 60 / bpm(), bar = Math.floor(n / 4) % CH.length, b = n % 4, c = CH[bar], nx = CH[(bar + 1) % CH.length], sw = BEAT * .66;
       if (track === 'ambient') {
         if (b === 0 && bar % 2 === 0) { pad(c, t, BEAT * 8.4); bass(c.r, t, BEAT * 7.5, .45); }
@@ -168,7 +228,7 @@ function engine() {
       c.v.forEach(function (m, i) { key(m + 12, t + i * .09, 2.6, .5); });
       key(c.v[c.v.length - 1] + 24, t + c.v.length * .09 + .05, 2.2, .35);
     }
-    function setTrack(t) { if (TRACKS[t]) { track = t; beatN = 0; if (crackleG) crackleG.gain.setTargetAtTime(crackleFor(), ctx.currentTime, .3); } }
+    function setTrack(t) { if (TRACKS[t]) { track = t; beatN = 0; } }
     return { start: start, stop: stop, setVol: setVol, setEnergy: setEnergy, setTrack: setTrack, chime: chime, isPlaying: function () { return playing; } };
   })();
   return E;

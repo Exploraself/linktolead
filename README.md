@@ -20,7 +20,7 @@ spreads across all four.
 | Levels | Opens with |
 | --- | --- |
 | 1–3 | The Founder Launchpad. Free. |
-| 4–5 | The Boardroom: one session with Alexandru, and the full Compass. |
+| 4–5 | The Boardroom: one session with Alexandru, and the full North Star. |
 | 1–9 | Personal Leadership LAB, self-paced, two sessions. $97. |
 | All 12 | Business HUB, three sessions in total and the LAB included. $397. |
 | Everything | The Summit, with Alexandru every week. $1,989. (Internal tier key: `premium`.) |
@@ -86,14 +86,14 @@ Three sales pages, the roads, all ending at `/start`:
 | Road | Address | Old addresses (302 here, query string kept) | Account form | Landing |
 |---|---|---|---|---|
 | Road 1 | `/road1/` (the long page, with the What-if Lab before the close) | `/`, `/b` | FULL | `road1` |
-| Road 2 | `/road2/` (the Compass sales page) | `/compass/welcome`, `/compass/welcome-a`, `/c` | FULL | `road2` |
+| Road 2 | `/road2/` (the North Star sales page) | `/compass/welcome`, `/compass/welcome-a`, `/c` | FULL | `road2` |
 | Road 3 | `/road3/` (the 12 Scrolls page) | `/a` | SIMPLE | `road3` |
 
 The redirects live in `functions/_landing.js` (the Worker and Pages both use
 it), and every old address is in `run_worker_first` in `wrangler.toml`.
 
 Every call to action on the three roads opens that page's form; none of them sends
-a visitor to another page. The Compass's own "Who is this compass for?" box is
+a visitor to another page. The North Star's own "Who is this compass for?" box is
 the SIMPLE form (landing `compass`, no landing tag). SIMPLE: first name, surname, email, consent — no password, ever;
 these founders sign in by email link. FULL: also company (or "No company yet"),
 what they want most, industry and a password (required, at least 10
@@ -115,7 +115,7 @@ Every email goes by Resend (Mailchimp sends none) as a short letter from Alexand
 links, the signature image `/mail/signature.png` ("Alexandru" in a handwriting
 font until a scan of the real one replaces the file), a plain-text part, and a
 P.S. offer. The welcome (`launchpad-welcome`, once, on account creation), the
-Compass results, Alexandru's notes and his answers in **Ask Alexandru** may carry
+North Star results, Alexandru's notes and his answers in **Ask Alexandru** may carry
 a paid offer (The Boardroom, Unshakeable); the sign-in link and **Your password was
 changed** carry free ones only (Leadionaire, First 100 Clients, Built to Lead).
 The footer (why it came, unsubscribe, postal address) is on every one.
@@ -128,7 +128,7 @@ lists them per founder, filters the roster by them and puts them in the CSV.
 
 - **Test** (`MAILCHIMP_MODE` = `test`): nothing leaves; `/mentor` shows what would have been sent.
 - **Form** (the default): new founders with consent go through the public Link to Lead sign-up form. It cannot tag or unsubscribe, and Mailchimp refuses the join while the form marks a field as required that the account box does not ask for (Company and Phone). Fix that in Mailchimp: **Audience → Settings → Audience fields and \*|MERGE|\* tags**, untick **Required** for Company and Phone. Or add the API key.
-- **Live API** (`MAILCHIMP_API_KEY` set): the founder is added or updated with tags `linktolead`, where they came from (`compass` / `sales-page`), their stage (`build` / `grow` / `scale`), once the Compass is done their weakest domain, and one tag per programme step reached: `Link to Lead - The Founder Launchpad`, `- The Boardroom`, `- The LAB`, `- The HUB`, `- The Summit`. Step tags accumulate: a founder in The LAB carries the Launchpad, Boardroom and LAB tags, and lowering a step in `/mentor` removes none. A step change in `/mentor` sends the tags at once. Unsubscribing, a pause or a delete marks them unsubscribed in Mailchimp (never a hard delete).
+- **Live API** (`MAILCHIMP_API_KEY` set): the founder is added or updated with tags `linktolead`, where they came from (`compass` / `sales-page`), their stage (`build` / `grow` / `scale`), once the North Star is done their weakest domain, and one tag per programme step reached: `Link to Lead - The Founder Launchpad`, `- The Boardroom`, `- The LAB`, `- The HUB`, `- The Summit`. Step tags accumulate: a founder in The LAB carries the Launchpad, Boardroom and LAB tags, and lowering a step in `/mentor` removes none. A step change in `/mentor` sends the tags at once. Unsubscribing, a pause or a delete marks them unsubscribed in Mailchimp (never a hard delete).
 
 To get an API key: Mailchimp → your profile → **Extras → API keys → Create A Key**. Copy it once and add it in Cloudflare as a **Secret** named `MAILCHIMP_API_KEY`. Never paste it into the code, a chat or an email.
 
@@ -138,11 +138,11 @@ Nobody is sent to Mailchimp without consent. `/mentor` shows the mode, what is m
 
 | What | Where |
 |---|---|
-| Light and dark on every page, kept per browser, following the device until picked (Device → Light → Dark) | `public/theme.js` (in every page's `<head>`), the switch in the header, the Compass top bar and the profile menu |
+| Light and dark on every page, kept per browser, following the device until picked (Device → Light → Dark) | `public/theme.js` (in every page's `<head>`), the switch in the header, the North Star top bar and the profile menu |
 | Fonts: Newsreader (headings) + Inter (text), self-hosted | `public/assets/fonts.css` |
 | The study room: music on Your Ground Plan, the programme, the Library and Ask Alexandru; the mini player (three pieces, light, energy, volume); Study and Focus mode; the Lamp (a pool of light on the question being written, a chord and a candle for each answer); the two-minute invitation | `public/music.js`, `public/music.css` |
-| The incubator band (FULL accounts) and the Leadership Compass strip | `public/cabinet.js` |
+| The incubator band (FULL accounts) and the Leader’s North Star strip | `public/cabinet.js` |
 | Letters from the founder's mentor: name, title, photo, signature and reply address, set in `/mentor` (Mentors) and per founder; every letter closes with a good word, reply-here shortcuts, "See you soon" and a wish for the founder's part of the day, the signature and photo, and a P.S. | `functions/_mentor.js`, `functions/_letters.js` |
-| Profile menu: Leadership Compass, Light/Dark, "Letters from your mentor: On/Off" (consent, synced to Mailchimp; turning back on asks Mailchimp to confirm), "Delete my account" (two steps; Mailchimp unsubscribed, never hard-deleted) | `public/profile-menu.js`, `/api/letters`, `/api/account-delete` |
+| Profile menu: Leader’s North Star, Light/Dark, "Letters from your mentor: On/Off" (consent, synced to Mailchimp; turning back on asks Mailchimp to confirm), "Delete my account" (two steps; Mailchimp unsubscribed, never hard-deleted) | `public/profile-menu.js`, `/api/letters`, `/api/account-delete` |
 | Mailchimp landing tags | `salespageincubator1` / `2` / `3` (Road 1, 2, 3) |
-| The Compass sales page | `/north1/` |
+| The North Star sales page | `/north1/` |

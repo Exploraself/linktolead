@@ -3,9 +3,9 @@
 // ?total, the number of steps (the same for everyone), which the sales pages
 // show so that number is never typed twice.
 //
-// The order comes from what the Compass saved (functions/_plans.js, planFor).
+// The order comes from what the North Star saved (functions/_plans.js, planFor).
 // Ticks are the plans' own: "x of 32 steps done". They do not add to the
-// Compass's 16-piece launchpad.
+// North Star's 16-piece launchpad.
 
 import { json, bad, db, accountTables, studentBy } from '../_shared.js';
 import { planFor, ALL_STEP_IDS } from '../_plans.js';

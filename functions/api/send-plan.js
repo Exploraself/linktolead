@@ -1,13 +1,13 @@
-// "Email me my results" on the Compass: a short letter from Alexandru with the
+// "Email me my results" on the North Star: a short letter from Alexandru with the
 // link to the results and the domain to start with (functions/_letters.js).
 //
 // Off until the mail is ready: the Resend key AND the postal address for the
-// footer (see functions/_mail.js). GET says { ready, reason } and the Compass
+// footer (see functions/_mail.js). GET says { ready, reason } and the North Star
 // shows plainly when it cannot send.
 //
 // The results go to the account. A signed-in founder sends with their token
 // and the email goes to the account address, without asking. Otherwise the
-// address typed must belong to an account (the Compass creates the free
+// address typed must belong to an account (the North Star creates the free
 // account first), and it goes to that address. Results are something the
 // founder asked for in the moment, so they arrive even after an unsubscribe.
 // Everything visitor-written is escaped and capped, and each address and
@@ -42,7 +42,7 @@ function shape(p) {
 const DOMAIN_NAMES = { 'lead-yourself': 'Lead yourself', 'lead-your-people': 'Lead your people', 'lead-your-business': 'Lead your business', 'lead-the-market': 'Lead the market' };
 const BANDS = ['Needs you now', 'Taking shape', 'A strength'];
 
-/** The domain that needs the founder most, in full: from the Compass saved
+/** The domain that needs the founder most, in full: from the North Star saved
  *  in the account (the lowest score, a tie to the first); else from the
  *  bands in the plan the page sent. Empty when neither says. */
 export function weakestName(record, plan) {

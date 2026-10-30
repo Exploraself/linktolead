@@ -103,7 +103,7 @@ export const GOOD_WORDS = [
 export const SHORTCUTS = {
   start: ['Where should I start this week?', 'Which level fits my stage?', 'What happens in a 1:1 in The Boardroom?', 'I’m stuck on a step. Can you help?'],
   security: ['I didn’t ask for this email', 'I can’t sign in', 'Can you help me with my password?'],
-  results: ['What does my Compass reading mean?', 'Which domain should I start with?', 'What happens in a 1:1 in The Boardroom?', 'I’m stuck on a step. Can you help?'],
+  results: ['What does my North Star reading mean?', 'Which domain should I start with?', 'What happens in a 1:1 in The Boardroom?', 'I’m stuck on a step. Can you help?'],
 };
 const mailto = (to, q) => `mailto:${to}?subject=${encodeURIComponent(q)}`;
 
@@ -168,13 +168,13 @@ export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {
   ], offerFor('launchpad-welcome', to, tier, offer), close('launchpad-welcome', { ...o, to })) };
 }
 
-/** The Compass results, as a letter. `weakest` is the full domain name, or
+/** The North Star results, as a letter. `weakest` is the full domain name, or
  *  empty when it is not known yet. */
 export function resultsLetter(base, { first, weakest, to = '', tier, offer, ...o } = {}) {
-  return { subject: 'Your Leadership Compass', ...letter(base, [
+  return { subject: 'Your Leader’s North Star', ...letter(base, [
     hi(first),
-    'Here is your Leadership Compass, ready whenever you are.',
-    button(`${base}/compass`, 'Open my Compass →'),
+    'Here is your Leader’s North Star, ready whenever you are.',
+    button(`${base}/compass`, 'Open my North Star →'),
     weakest
       ? `Start with the domain that needs you most. For you that’s ${weakest}. One honest hour there changes more than a week anywhere else.`
       : 'Start with the domain that needs you most. One honest hour there changes more than a week anywhere else.',

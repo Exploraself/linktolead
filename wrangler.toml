@@ -30,7 +30,7 @@ not_found_handling = "404-page"
 # Every page and file is served as before.
 run_worker_first = ["/api/*", "/", "/b", "/b/", "/c", "/c/", "/a", "/a/", "/compass/welcome", "/compass/welcome/", "/compass/welcome-a", "/compass/welcome-a/"]
 
-# The student record: programme answers, worksheet figures, Compass reports and
+# The student record: programme answers, worksheet figures, North Star reports and
 # notes to the mentor. Free tier; see functions/_shared.js for how routes behave
 # when this binding is absent (they refuse politely, the site keeps serving).
 [[d1_databases]]

@@ -1,5 +1,5 @@
 // /start as the home base: who lands where, which programme they walk, and a
-// Ground Plan that only ever says what the founder's own Compass supports.
+// Ground Plan that only ever says what the founder's own North Star supports.
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { entry, programmeStage, groundPlan, PROGRAMME } from '../public/home.js';
@@ -34,12 +34,12 @@ ok(/location\.hash !== '#signin'/.test(html) && /signin=/.test(html), 'the early
 ok(programmeStage({}) === 'build', 'nothing known: Building, where the programme starts');
 ok(programmeStage({ local: 'grow', compass: 'leading' }) === 'grow', 'a stage in use on this device stays');
 ok(programmeStage({ compass: 'leading' }) === 'scale', 'Leading walks the Scaling programme');
-ok(programmeStage({ compass: 'growing', account: 'build' }) === 'grow', 'the Compass beats the account stage');
+ok(programmeStage({ compass: 'growing', account: 'build' }) === 'grow', 'the North Star beats the account stage');
 ok(programmeStage({ account: 'scaling' }) === 'scale', 'the account stage is used last');
-ok(PROGRAMME.building === 'build' && PROGRAMME.scaling === 'scale', 'four Compass stages map to three programmes');
+ok(PROGRAMME.building === 'build' && PROGRAMME.scaling === 'scale', 'four North Star stages map to three programmes');
 
-// ── The Ground Plan before and after the Compass ────────────────────────────
-ok(groundPlan(null, E, C) === null, 'before the Compass there is no Ground Plan');
+// ── The Ground Plan before and after the North Star ────────────────────────────
+ok(groundPlan(null, E, C) === null, 'before the North Star there is no Ground Plan');
 
 const rec = (over = {}) => ({ stage: 'leading', results_json: JSON.stringify({ scores: [5, 2, 4, 2], answered: [2, 2, 2, 2] }),
   flags_json: JSON.stringify({ want: 'income', pains: ['cash', 'time'] }), ...over });
@@ -48,7 +48,7 @@ ok(gp.programme === 'scale', 'Leading → the Scaling programme');
 ok(gp.stage.line === 'You chose Leading; your programme is Scaling, the top of the road.', 'the Leading line, exactly');
 ok(gp.stage.programme === STAGES.scale.n, 'the programme name comes from content.js');
 ok(gp.weakest.name === E.DOMAINS[1].name, 'a tie on the lowest score goes to the first domain in order');
-ok(gp.weakest.big === E.FEEDBACK[1][0].big && gp.weakest.week === E.FEEDBACK[1][0].week, 'the weakest domain uses the Compass’s own feedback');
+ok(gp.weakest.big === E.FEEDBACK[1][0].big && gp.weakest.week === E.FEEDBACK[1][0].week, 'the weakest domain uses the North Star’s own feedback');
 ok(gp.weakest.band === E.BANDS[0], 'band from the score');
 ok(gp.goal.label === 'Higher income' && gp.goal.domain === E.DOMAINS[2].name, 'the goal and its domain');
 ok(gp.pains.map((p) => p.label).join() === 'Cash is tight,No time for myself', 'only the pains the founder ticked');

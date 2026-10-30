@@ -1,7 +1,7 @@
 // The ladder and the public pages say the same thing everywhere.
 //
 // Names (The Founder Launchpad, The Boardroom, The Summit), prices ($97, $397,
-// $1,989), the Summit tier key, and Road 2, the Compass sales page.
+// $1,989), the Summit tier key, and Road 2, the North Star sales page.
 
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { TIER_ORDER, holds, SECTIONS, LADDER, LIBRARY } from '../public/content.js';
@@ -35,7 +35,7 @@ for (const f of files('public')) {
   ok(!/Cornerstone|Enter the Incubator|\+ 12 sessions/.test(s), `${f}: no retired names`);
 }
 
-// Road 2, the Compass sales page (/compass/welcome-a, its old version A, is a
+// Road 2, the North Star sales page (/compass/welcome-a, its old version A, is a
 // redirect to it now).
 const B = read('public/road2/index.html');
 ok(B.includes('Your business, on paper.'), 'Road 2 has its headline');
@@ -46,7 +46,7 @@ const Su = read('public/compass/summit/index.html');
 for (const ph of ['[YOUR BOOKING LINK]', '[SESSION LENGTH]', '[ONLINE OR IN PERSON]']) ok(Su.includes(ph), `summit keeps ${ph}`);
 ok(read('public/compass/app.js').includes('[YOUR PRICE]'), 'Boardroom price placeholder kept');
 
-// Every Compass page carries the favicon and the share image.
+// Every North Star page carries the favicon and the share image.
 for (const f of ['public/compass/index.html', 'public/compass/summit/index.html', 'public/road2/index.html']) {
   const s = read(f);
   ok(s.includes('favicon.svg') && s.includes('og:image') && s.includes('twitter:card'), `${f}: favicon and share image`);
@@ -64,7 +64,7 @@ for (const f of ['public/compass/index.html', 'public/road2/index.html', 'public
   ok(!/LEAD YOURSELF<\/text>|LEAD THE MARKET<\/text>/.test(s), `${f}: no duplicate small domain lines`);
 }
 for (const f of ['public/road2/index.html', 'public/road2/sales.css']) {
-  ok(!/Archivo|Caslon/.test(read(f)), `${f}: Compass fonts only`);
+  ok(!/Archivo|Caslon/.test(read(f)), `${f}: North Star fonts only`);
 }
 // Fonts load once, from this site: no Google Fonts, no old .ttf files.
 for (const f of ['public/road1/index.html', 'public/ground-plan/index.html', 'public/mentor/index.html', 'public/compass/index.html', 'public/compass/summit/index.html', 'public/road2/index.html']) {
@@ -94,13 +94,13 @@ for (const [name, P] of [['road2', B]]) {
   ok(P.indexOf('id="kit-body" data-lazy') > kit && P.indexOf('id="kit-body"') < fin, `${name}: its body is filled in place by kit.js`);
   ok(P.includes('<h2 class="h2">You practised with a few sliders. Here is the whole kit.</h2>'), `${name}: headline`);
   ok(P.includes('One free account opens everything below. Your answers save as you go, the books are yours to download and keep, and Alexandru and the team can see where you are stuck.'), `${name}: lede`);
-  ok(P.includes('>Create my free account →</button>') && !P.includes('Start my Compass →'), `${name}: the final button reads Create my free account`);
-  ok(P.includes('Free · your Compass, your Ground Plan and your library'), `${name}: the line under it`);
+  ok(P.includes('>Create my free account →</button>') && !P.includes('Start my North Star →'), `${name}: the final button reads Create my free account`);
+  ok(P.includes('Free · your North Star, your Ground Plan and your library'), `${name}: the line under it`);
 }
 const K = markup(LIBRARY, ALL_STEP_IDS.length);
 const flat = K.replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/\s+/g, ' ');
 const COPY = [
-  'The full Leadership Compass, saved', '8 questions across the four domains, your compass reading and the What-if lab. Change an answer any time.', 'Stop carrying the whole business in your head.', 'See which domain needs you first: Lead yourself, Lead your people, Lead your business or Lead the market.',
+  'The full Leader’s North Star, saved', '8 questions across the four domains, your compass reading and the What-if lab. Change an answer any time.', 'Stop carrying the whole business in your head.', 'See which domain needs you first: Lead yourself, Lead your people, Lead your business or Lead the market.',
   'Your Ground Plan', 'Your stage, your weakest domain, your goal and your first three moves, on one page.', 'Start Monday knowing what comes first.', 'Put your hours where they move the business.',
   'Your Account Plans', `${ALL_STEP_IDS.length} short steps in your own order, weakest domain first. Tick them off as you go.`, 'Feel progress every week, instead of only pressure.', 'Small moves that add up to a business that runs.',
   'The Founder Launchpad', 'Three levels in all four domains. Each step names what to open, count and write. Free, and free to stay.', 'Rewrite your principles. Unlock your mind.', 'Lead your business instead of being its busiest employee.',
@@ -126,7 +126,7 @@ ok((K.match(/data-gate class="gold-btn">Create my free account →/g) || []).len
 ok(!/<a\s/i.test(K), 'no links to other offers in the section');
 const SJ = read('public/road2/sales.js');
 ok(/kit\.querySelectorAll\('\[data-gate\]'\)\.forEach\(\(b\) => b\.addEventListener\('click', openGate\)\)/.test(SJ), 'the section’s buttons are wired to the same account box');
-ok(!/mailchimp/i.test(SJ + read('public/road2/kit.js') + read('public/account-box.js') + read('public/compass/app.js')), 'no Mailchimp code on the sales pages or the Compass');
+ok(!/mailchimp/i.test(SJ + read('public/road2/kit.js') + read('public/account-box.js') + read('public/compass/app.js')), 'no Mailchimp code on the sales pages or the North Star');
 ok(read('public/road2/kit.css').includes('prefers-reduced-motion') && read('public/road2/kit.css').includes('overflow-x:auto'), 'kit.css: reduced motion, the shelf scrolls inside itself');
 const T = await (await plansGet({ request: new Request('https://x/api/plans?total'), env: {} })).json();
 ok(T.ok && T.total === ALL_STEP_IDS.length, 'the step count comes from the live plans data');

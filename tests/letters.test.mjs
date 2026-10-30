@@ -29,7 +29,7 @@ ok(L.text.includes('\n\nAlexandru\nAlexandru Cojocari · ExploraSelf\n\nP.S. Wan
 ok(LETTER_BOOKING === BOOKING, 'the booking link is the one in content.js');
 
 L = resultsLetter(B, { first: 'Maria', weakest: 'Lead your people', offer: 'unshakeable' });
-ok(L.subject === 'Your Leadership Compass' && paras(L.text)[1] === 'Here is your Leadership Compass, ready whenever you are.' && paras(L.text)[2] === `Open my Compass →: ${B}/compass`, 'results: subject and the button');
+ok(L.subject === 'Your Leader’s North Star' && paras(L.text)[1] === 'Here is your Leader’s North Star, ready whenever you are.' && paras(L.text)[2] === `Open my North Star →: ${B}/compass`, 'results: subject and the button');
 ok(L.html.includes(`<a href="${B}/compass" style="display:block;padding:14px 26px`) && L.html.includes('background:#C9A24A'), 'results: a gold button in the html');
 ok(paras(L.text)[3] === 'Start with the domain that needs you most. For you that’s Lead your people. One honest hour there changes more than a week anywhere else.', 'results: the weakest domain, in full');
 ok(L.text.includes('P.S. One thing I’d love you to try: the Unshakeable assessment. It shows how steady you stay when the pressure comes, and where to start building. It’s $9.99 (valued at $199). https://exploraself.com/unshakeable') && L.html.includes('>Take the Unshakeable assessment →</a>'), 'results: the Unshakeable P.S., with a readable link');
@@ -120,6 +120,6 @@ env.DB.raw.prepare('DELETE FROM mail_log').run();
 await compassPost({ request: post('/api/compass', { token: ana, stage: 'growing', results: { scores: [5, 4, 1, 6], answered: [2, 2, 2, 2] } }), env });
 sent = fakeResend();
 r = await sendPlan({ request: post('/api/send-plan', { token: ana, plan: { name: 'Someone', domains: [{ know: 'Lead yourself', lead: 'Needs you now' }] } }, '9.9.9.4'), env });
-ok(r.status === 200 && sent[0].body.text.includes('For you that’s Lead your business.'), 'results route: the weakest domain from the saved Compass, not the page');
+ok(r.status === 200 && sent[0].body.text.includes('For you that’s Lead your business.'), 'results route: the weakest domain from the saved North Star, not the page');
 
 done();

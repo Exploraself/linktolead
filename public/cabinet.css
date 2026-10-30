@@ -118,7 +118,7 @@
 .incub .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media(max-width:820px){.incub{grid-template-columns:1fr;padding:24px 20px}.incub-mark{display:none}.incub-go{justify-self:start}}
 @media(max-width:640px){.incub-levels li{width:30px;height:30px;font-size:10.5px}.incub-levels li:nth-child(4),.incub-levels li:nth-child(6),.incub-levels li:nth-child(10){margin-left:4px}}
-/* The Leadership Compass: its own slim strip under the Cabinet. */
+/* The Leader’s North Star: its own slim strip under the Cabinet. */
 .cstrip{display:flex;align-items:center;gap:16px;max-width:1200px;margin:14px auto 0;padding:12px 18px;border-radius:14px;text-decoration:none;color:#F7F2E7;
   background:radial-gradient(ellipse 50% 140% at 0% 50%,rgba(201,162,74,.25),transparent 60%),linear-gradient(120deg,#1C1309,#2B1B12 60%,#1C1309);border:1px solid rgba(201,162,74,.55);box-shadow:0 12px 24px -18px rgba(0,0,0,.6)}
 .cstrip:hover{border-color:#E3C47E}

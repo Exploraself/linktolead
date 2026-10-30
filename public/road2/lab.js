@@ -1,6 +1,6 @@
-/* "A look inside": the What-if lab v2 from inside the Compass (Step 04), live
+/* "A look inside": the What-if lab v2 from inside the North Star (Step 04), live
  * on the sales page and started from the five numbers the visitor just slid.
- * All the arithmetic is the Compass's own (CompassEngine.month in
+ * All the arithmetic is the North Star's own (CompassEngine.month in
  * /compass/engine.js); this file only lays it out. Four levers, four answers,
  * "Give me back time / more money". The plan for the change stays locked: it
  * opens with the free account (the full form).

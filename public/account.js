@@ -1,4 +1,4 @@
-// The account: one record for the programme and the Compass together.
+// The account: one record for the programme and the North Star together.
 //
 // Everything still works without it. The page saves to the device first and
 // always; the account is a copy that follows the founder between devices and
@@ -6,7 +6,7 @@
 // missing or refuses, nothing breaks and nothing is lost — the device copy
 // stands.
 //
-// The Compass (a plain script) and its sales page load this file with
+// The North Star (a plain script) and its sales page load this file with
 // import('/account.js'), so there is one token, under one key, for both.
 
 const TOKEN_KEY = 'ftb-token';
@@ -79,7 +79,7 @@ export async function note({ body, level, domain }) {
   return post('/api/note', { token: token(), body, level, domain });
 }
 
-// ── The free account from the Compass ────────────────────────────────────────
+// ── The free account from the North Star ────────────────────────────────────────
 
 /** Create the free account, or find it. `type` is 'full' (company, interest,
  *  industry and a password) or 'simple' (no password, ever). `landing` is the
@@ -140,7 +140,7 @@ export async function signinWith(code) {
   return data;
 }
 
-/** The Compass's copy in the account. `keepalive` lets it go as the page closes. */
+/** The North Star's copy in the account. `keepalive` lets it go as the page closes. */
 export const saveCompass = (payload, keepalive = false) => post('/api/compass', { token: token(), ...payload }, keepalive);
 export async function loadCompass() {
   const t = token();

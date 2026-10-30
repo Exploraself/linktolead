@@ -1,11 +1,11 @@
-// The Compass posts its finished report here, so it lands beside the founder's
+// The North Star posts its finished report here, so it lands beside the founder's
 // programme work and Alexandru can read it before the session.
 //
-// The Compass saves to the browser first, always. This adds a copy to the
-// account, only when a token exists, and in batches (the Compass sends on a
+// The North Star saves to the browser first, always. This adds a copy to the
+// account, only when a token exists, and in batches (the North Star sends on a
 // "Got it" tick, at the end of each section and when the page is hidden).
 // GET hands the copy back, so a founder who signs in on another device finds
-// their Compass there.
+// their North Star there.
 
 import { json, bad, db, now, clean, studentBy, accountTables } from '../_shared.js';
 import { mailchimpState, syncFounder, weakestTag } from '../_mailchimp.js';
@@ -25,7 +25,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
 
   const stage = ['build', 'grow', 'scale', 'lead', 'building', 'growing', 'scaling', 'leading'].includes(body.stage) ? body.stage : null;
   const before = await D.prepare('SELECT stage, results_json FROM compass WHERE student_id = ?').bind(me.id).first();
-  // An empty Compass (nothing answered) never replaces one with answers: a
+  // An empty North Star (nothing answered) never replaces one with answers: a
   // fresh browser opened while signed in must not wipe the founder's work.
   const count = (j) => { try { const r = typeof j === 'string' ? JSON.parse(j) : j; return (r && Array.isArray(r.answered) ? r.answered : []).reduce((a, b) => a + (Number(b) || 0), 0); } catch { return 0; } };
   if (before && count(before.results_json) > 0 && count(body.results) === 0) return json({ ok: true, kept: true });
@@ -40,7 +40,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
           cap(body.results, 8000), cap(body.flags, 2000), now()).run();
   await D.prepare('INSERT INTO event (student_id,kind,at) VALUES (?,?,?)').bind(me.id, 'compass', now()).run();
 
-  // A finished Compass updates the founder's Mailchimp tags (stage and weakest
+  // A finished North Star updates the founder's Mailchimp tags (stage and weakest
   // domain), in API mode only and only when one of them changed, after the reply.
   if (mailchimpState(env).mode === 'api') {
     const after = await D.prepare('SELECT stage, results_json FROM compass WHERE student_id = ?').bind(me.id).first();

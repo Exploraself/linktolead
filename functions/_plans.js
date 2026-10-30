@@ -1,13 +1,13 @@
 // The Account Plans: what a founder opens with a free account.
 //
-// Copied word for word from "00 Leadership Compass · The Account Plans"
+// Copied word for word from "00 Leader’s North Star · The Account Plans"
 // (Drive). Sixteen domain steps (four per domain) and the What-if steps
 // (four per lever). Nothing here is written by the code; where the document
 // does not give a part (the What-if steps have no "why", "ask" or band notes),
 // the part is null and the page leaves it out.
 //
 // These live on the server and are only ever returned to a signed-in founder
-// (GET /api/plans). The free Compass shows the titles, locked.
+// (GET /api/plans). The free North Star shows the titles, locked.
 //
 // The four steps for "Each sale takes fewer hours" (hours-1 to hours-4) are a
 // DRAFT from PR 3, written in the same style, waiting for Alexandru's wording.
@@ -189,7 +189,7 @@ export const WHATIF_STEPS = [
 
 export const ALL_STEP_IDS = [...DOMAIN_STEPS, ...WHATIF_STEPS].map((s) => s.id);
 
-/** Pains and goals, by the Compass's own ids, and the domain each runs through
+/** Pains and goals, by the North Star's own ids, and the domain each runs through
  *  ("The Intelligence", section 3). */
 export const PAIN = {
   clients: ['Not enough clients', 'market'], cash: ['Cash is tight', 'work'], time: ['No time for myself', 'self'],
@@ -213,7 +213,7 @@ export function leverMoved(lab) {
 /**
  * One founder's plans, in their order.
  *
- * `c` is what the Compass saved: scores[4] (0–6 per domain, in DOMAIN_ORDER),
+ * `c` is what the North Star saved: scores[4] (0–6 per domain, in DOMAIN_ORDER),
  * answered[4] (0–2), pains (ids), want (goal id) and lab { p, m, d }.
  *
  * The lowest answered domain opens first. The other three follow in the fixed

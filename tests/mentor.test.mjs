@@ -41,7 +41,7 @@ ok((await mGet({ request: req('GET'), env: { ...env, MENTOR_KEY: '' } })).status
 let L = await list();
 const A = L.students.find((s) => s.id === ana);
 ok(L.students.length === 2 && A.compass_at && A.plan_ticks === 1 && A.has_password === 0 && A.consent === 1 && A.paused === 0 && L.waiting.length === 1, 'roster: compass, ticks, password, consent, paused, notes waiting');
-ok(A.stage === 'growing', 'roster: the stage is the one chosen in the Compass');
+ok(A.stage === 'growing', 'roster: the stage is the one chosen in the North Star');
 
 // ── Change step ──────────────────────────────────────────────────────────────
 let [st] = await M({ action: 'tier', student: ana, tier: 'lab' });
@@ -125,7 +125,7 @@ const F = [
 ];
 const W = [{ student_id: 'a', name: 'Ana', email: 'a@x.co', body: 'Help', created_at: iso(0.5) }];
 const S = summary(F, W, now);
-ok(S.total === 4 && S.newWeek === 2 && S.compass === 2 && S.notes === 1 && S.quiet === 2, 'tiles: total, new this week, Compass done, notes waiting, quiet 14+ days');
+ok(S.total === 4 && S.newWeek === 2 && S.compass === 2 && S.notes === 1 && S.quiet === 2, 'tiles: total, new this week, North Star done, notes waiting, quiet 14+ days');
 ok(S.steps.free === 2 && S.steps.session === 1 && S.steps.lab === 0 && S.steps.hub === 0 && S.steps.premium === 1, 'counts per step; an empty step is 0');
 ok(JSON.stringify(summary([], [], now)) === JSON.stringify({ total: 0, newWeek: 0, compass: 0, steps: { free: 0, session: 0, lab: 0, hub: 0, premium: 0 }, notes: 0, quiet: 0, library: 0, full: 0, simple: 0 }), 'no founders: every tile 0');
 ok(filter(F, { tile: 'quiet' }, now).map((s) => s.id).join() === 'b,c' && filter(F, { tile: 'premium' }, now).map((s) => s.id).join() === 'c', 'tiles filter the table');

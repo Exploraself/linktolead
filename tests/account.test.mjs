@@ -1,4 +1,4 @@
-// Free accounts from the Compass: signup, the welcome email, sign-in by a
+// Free accounts from the North Star: signup, the welcome email, sign-in by a
 // one-time link, and unsubscribe. Runs the real routes against Node's own
 // SQLite with the live tables, and a stand-in for the email service.
 
@@ -21,7 +21,7 @@ ok(st === 200 && j.ok && /^[0-9a-f]{48}$/.test(j.token) && j.existing === false,
 const token = j.token;
 const row = DB.raw.prepare('SELECT * FROM student WHERE id = ?').get(token);
 ok(row && row.email === 'ana@example.com' && row.name === 'Ana Pop' && row.tier === 'free', 'student row: email, name, tier free');
-ok(row.stage === 'grow', 'the Compass stage is stored in the programme\'s words');
+ok(row.stage === 'grow', 'the North Star stage is stored in the programme\'s words');
 const prof = DB.raw.prepare('SELECT * FROM student_profile WHERE student_id = ?').get(token);
 ok(prof && prof.industry === 'Coaching & consulting' && prof.consent === 1 && prof.consent_at && prof.source === 'compass', 'profile: industry, consent, consent_at, source');
 ok(prof.unsub_id && prof.unsub_id.length >= 40 && prof.unsubscribed === 0, 'profile: an unsubscribe id, subscribed');

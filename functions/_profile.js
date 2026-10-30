@@ -2,10 +2,10 @@
 // (the full form), and where they came from.
 //
 // Two forms make the same student record:
-//   FULL   (/road1/, landing "road1"; /road2/, the Compass sales page,
+//   FULL   (/road1/, landing "road1"; /road2/, the North Star sales page,
 //          landing "road2"): first name, surname, email, company (or "No
 //          company yet"), interest, industry, a password (required), consent.
-//   SIMPLE (/road3/, the 12 Scrolls page, landing "road3", and the Compass's
+//   SIMPLE (/road3/, the 12 Scrolls page, landing "road3", and the North Star's
 //          "Who is this compass for?" box, landing "compass"): first name,
 //          surname, email, consent. No password, ever: these founders sign
 //          in by email link.
@@ -17,9 +17,9 @@
 
 import { clean } from './_shared.js';
 
-/** One of these, as the Compass names its goals (engine.js GOALS). */
+/** One of these, as the North Star names its goals (engine.js GOALS). */
 export const INTERESTS = ['More free time', 'Higher income', 'Steady clients', 'A team I trust', 'Clarity on direction', 'A new market'];
-/** The same list as the Compass box (compass/app.js INDUSTRIES). */
+/** The same list as the North Star box (compass/app.js INDUSTRIES). */
 export const INDUSTRIES = ['Coaching & consulting', 'Creative & design', 'E-commerce & retail', 'Food & hospitality', 'Health & wellness',
   'Beauty & personal care', 'Education & training', 'Professional services', 'Trades & construction', 'Technology & software',
   'Real estate', 'Manufacturing', 'Nonprofit & social impact', 'Other'];
