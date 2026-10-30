@@ -103,8 +103,8 @@ ok(c[0].method === 'PUT' && c[0].url === `https://us19.api.mailchimp.com/3.0/lis
 ok(c[0].body.status_if_new === 'subscribed' && c[0].body.email_address === 'ana@example.com' && c[0].body.merge_fields.FNAME === 'Ana' && c[0].body.merge_fields.LNAME === 'Pop', 'API: status and merge fields');
 ok(c[0].auth === 'Basic ' + btoa('linktolead:secretkey-us19'), 'API: the key as basic auth, never in the URL');
 const active = (call) => call.body.tags.filter((t) => t.status === 'active').map((t) => t.name).sort().join(',');
-ok(c[1].method === 'POST' && c[1].url.endsWith(`/members/${hash}/tags`) && active(c[1]) === 'Link to Lead - The Founder Launchpad,Signup - Simple,grow,linktolead,sales-page', 'API: tags linktolead, source, stage and the first step');
-ok(c[1].body.tags.some((t) => t.name === 'build' && t.status === 'inactive'), 'API: the other stages are switched off');
+ok(c[1].method === 'POST' && c[1].url.endsWith(`/members/${hash}/tags`) && active(c[1]) === 'linktolead,linktolead-stage-growing,linktolead-step-launchpad', 'API: tags linktolead, stage and the first step (no source or form tag)');
+ok(c[1].body.tags.some((t) => t.name === 'linktolead-stage-building' && t.status === 'inactive'), 'API: the other stages are switched off');
 ok(logOf(env)[0].status === 'ok' && logOf(env)[0].mode === 'api', 'API: logged ok');
 env = fresh({ MAILCHIMP_API_KEY: 'secretkey-us19', MAILCHIMP_DOUBLE_OPTIN: 'yes' });
 await join(env, {});
@@ -117,7 +117,7 @@ calls = [];
 const done4 = { token: j.token, stage: 'leading', results: { scores: [5, 1, 3, 4], answered: [2, 2, 2, 2] } };
 await compassPost({ request: post('/api/compass', done4), env });
 c = mcCalls();
-ok(c.length === 1 && c[0].url.endsWith('/tags') && active(c[0]) === 'Link to Lead - The Founder Launchpad,Signup - Simple,lead-your-people,linktolead,sales-page,scale', 'Compass done: stage (Leading → scale) and weakest domain');
+ok(c.length === 1 && c[0].url.endsWith('/tags') && active(c[0]) === 'linktolead,linktolead-stage-scaling,linktolead-step-launchpad,linktolead-weakest-people', 'Compass done: stage (Leading → scaling) and the weakest side');
 calls = [];
 await compassPost({ request: post('/api/compass', done4), env });
 ok(mcCalls().length === 0, 'the same North Star again: no new call');
@@ -213,18 +213,18 @@ ok(G.students.find((s) => s.id === failedBefore).mailchimp_status === 'test', 't
 ok((await mPost({ request: new Request('https://x/api/mentor', { method: 'POST', body: JSON.stringify({ action: 'mc-backfill' }) }), env })).status === 401, 'backfill needs the mentor key');
 
 // ── Step tags: one per step reached, cumulative, never inactive ──────────────
-const NAMES = ['Link to Lead - The Founder Launchpad', 'Link to Lead - The Boardroom', 'Link to Lead - The LAB', 'Link to Lead - The HUB', 'Link to Lead - The Summit'];
+const NAMES = ['linktolead-step-launchpad', 'linktolead-step-boardroom', 'linktolead-step-lab', 'linktolead-step-hub', 'linktolead-step-summit'];
 ok(JSON.stringify(TIER_ORDER) === JSON.stringify(SITE_TIERS) && JSON.stringify(TIER_ORDER.map((t) => STEP_TAGS[t])) === JSON.stringify(NAMES), 'STEP_TAGS: the five steps, in the site’s TIER_ORDER');
-const stepTags = (tags) => tags.filter((t) => t.name.startsWith('Link to Lead - '));
+const stepTags = (tags) => tags.filter((t) => t.name.startsWith('linktolead-step-'));
 for (const [i, tier] of TIER_ORDER.entries()) {
   const tg = tagsFor({ source: 'compass', stage: 'growing', weakest: 'lead-the-market', tier });
   const st = stepTags(tg);
   ok(JSON.stringify(st.map((t) => t.name)) === JSON.stringify(NAMES.slice(0, i + 1)) && st.every((t) => t.status === 'active'), `tagsFor ${tier}: its step and every step before it, all active`);
-  ok(['linktolead', 'compass', 'grow', 'lead-the-market'].every((n) => tg.some((t) => t.name === n && t.status === 'active')), `tagsFor ${tier}: the existing tags stay`);
+  ok(['linktolead', 'linktolead-northstar', 'linktolead-stage-growing', 'linktolead-weakest-market'].every((n) => tg.some((t) => t.name === n && t.status === 'active')), `tagsFor ${tier}: the existing tags stay`);
 }
 ok(JSON.stringify(stepTags(tagsFor({})).map((t) => t.name)) === JSON.stringify(NAMES.slice(0, 1)), 'no step yet: The Founder Launchpad');
 ok(!TIER_ORDER.some((tier) => stepTags(tagsFor({ tier })).some((t) => t.status !== 'active')), 'a step tag is never sent as inactive');
-ok(stepName('premium') === 'The Summit' && stepName('free') === 'The Founder Launchpad', 'display names: the tag without "Link to Lead - "');
+ok(stepName('premium') === 'The Summit' && stepName('free') === 'The Founder Launchpad', 'display names for people, apart from the tags');
 
 // The mentor changes a step: tags at once in API mode, from and to logged.
 mc = () => ({ status: 200, body: '{}' });
@@ -239,7 +239,7 @@ calls = [];
 [st, out] = await M(env, { action: 'tier', student: ana, tier: 'session' });
 tagCall = mcCalls().at(-1);
 ok(st === 200 && JSON.stringify(stepTags(tagCall.body.tags).map((t) => t.name)) === JSON.stringify(NAMES.slice(0, 2)), 'lowered to The Boardroom: its two tags are sent');
-ok(!tagCall.body.tags.some((t) => t.status === 'inactive' && t.name.startsWith('Link to Lead - ')), 'lowered: the LAB and HUB tags are not removed (nothing inactive)');
+ok(!tagCall.body.tags.some((t) => t.status === 'inactive' && t.name.startsWith('linktolead-step-')), 'lowered: the LAB and HUB tags are not removed (nothing inactive)');
 const evs = env.DB.raw.prepare("SELECT detail FROM event WHERE student_id = ? AND kind = 'mentor-step' ORDER BY id").all(ana).map((e) => JSON.parse(e.detail));
 ok(evs.length === 2 && evs[0].from === 'free' && evs[0].to === 'hub' && evs[1].from === 'hub' && evs[1].to === 'session', 'mentor-step event: from and to');
 ok(logOf(env).at(-1).action === 'tags' && logOf(env).at(-1).status === 'ok', 'the tags call is in the Mailchimp log');

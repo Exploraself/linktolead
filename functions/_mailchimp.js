@@ -21,24 +21,46 @@ import { now } from './_shared.js';
 
 export const DEFAULT_FORM = { host: 'exploraselfmba.us8.list-manage.com', server: 'us8', u: 'ab5e056ba759e867cde44f4da', id: '41448b6750', f_id: '005a1ae1f0', tag: '3359661' };
 
-/** The four domains, as tags, in the North Star's own order. */
+/* ── The tag system (Alexandru, 30 Oct 2026) ─────────────────────────────
+ * Every Link to Lead tag is lowercase "linktolead-<group>-<value>", joined
+ * with dashes, so a tag says what it is without explaining:
+ *   linktolead                        every Link to Lead founder
+ *   linktolead-road1 … -northstar     where they signed up (LANDING_TAGS)
+ *   linktolead-step-launchpad …       each step reached; they add up (STEP_TAGS)
+ *   linktolead-stage-building …       their stage now (STAGE_TAGS)
+ *   linktolead-weakest-people …       the North Star side that needs them first
+ *   linktolead-library-built-to-lead  a book taken from the library
+ * Facts about the person (industry, interest, company) are contact fields,
+ * never tags. Change a name here only with Alexandru: he keeps a system. */
+
+/** The four domains in the North Star's own order: the keys the code uses. */
 export const DOMAIN_TAGS = ['lead-yourself', 'lead-your-people', 'lead-your-business', 'lead-the-market'];
-const STAGE_TAGS = ['build', 'grow', 'scale'];
+/** …and the Mailchimp tag for each, as the side that needs them first. */
+export const WEAKEST_TAGS = {
+  'lead-yourself': 'linktolead-weakest-yourself', 'lead-your-people': 'linktolead-weakest-people',
+  'lead-your-business': 'linktolead-weakest-business', 'lead-the-market': 'linktolead-weakest-market',
+};
+export const STAGE_TAGS = { build: 'linktolead-stage-building', grow: 'linktolead-stage-growing', scale: 'linktolead-stage-scaling' };
 
 /** One tag per programme step, keyed by the tier values the site already
  *  uses ('premium' is The Summit). In the ladder's order: a founder carries
  *  the tag of their step and of every step before it. */
 export const STEP_TAGS = {
-  free: 'Link to Lead - The Founder Launchpad',
-  session: 'Link to Lead - The Boardroom',
-  lab: 'Link to Lead - The LAB',
-  hub: 'Link to Lead - The HUB',
-  premium: 'Link to Lead - The Summit',
+  free: 'linktolead-step-launchpad',
+  session: 'linktolead-step-boardroom',
+  lab: 'linktolead-step-lab',
+  hub: 'linktolead-step-hub',
+  premium: 'linktolead-step-summit',
 };
+/** Each step's name for people (the mentor page, letters). */
+export const STEP_NAMES = { free: 'The Founder Launchpad', session: 'The Boardroom', lab: 'The LAB', hub: 'The HUB', premium: 'The Summit' };
+/** Bumped when the tag system changes, so the mentor page's "send the tags"
+ *  button moves every founder onto the new names once. */
+export const TAGS_VERSION = 'v2';
 /** The same order as TIER_ORDER in public/content.js (a test holds them equal). */
 export const TIER_ORDER = Object.keys(STEP_TAGS);
-/** A step's name for people: its tag without the "Link to Lead - " prefix. */
-export const stepName = (tier) => (STEP_TAGS[tier] || STEP_TAGS.free).replace(/^Link to Lead - /, '');
+/** A step's name for people. */
+export const stepName = (tier) => STEP_NAMES[tier] || STEP_NAMES.free;
 const PROGRAMME = { building: 'build', growing: 'grow', scaling: 'scale', leading: 'scale', build: 'build', grow: 'grow', scale: 'scale', lead: 'scale' };
 
 const text = (v) => (typeof v === 'string' ? v.trim() : '');
@@ -80,8 +102,7 @@ export function mailchimpState(env = {}) {
 /** Which sales page a founder signed up on (Alexandru, 30 Oct 2026). The old
  *  names ('Landing - Road 1' …) are sent as inactive, so a founder whose tags
  *  are sent again loses the old one (API mode). */
-export const LANDING_TAGS = { road1: 'salespageincubator1', road2: 'salespageincubator2', road21: 'salespageincubator2.1', road3: 'salespageincubator3' };
-export const OLD_LANDING_TAGS = { road1: 'Landing - Road 1', road2: 'Landing - Road 2', road3: 'Landing - Road 3' };
+export const LANDING_TAGS = { road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', compass: 'linktolead-northstar', summit: 'linktolead-summitpage' };
 
 /** The tags for one founder. In API mode each stage and domain tag is sent as
  *  active or inactive, so a founder who moves on loses the old one. Step tags
@@ -91,21 +112,13 @@ export const OLD_LANDING_TAGS = { road1: 'Landing - Road 1', road2: 'Landing - R
 export function tagsFor({ source, stage, weakest, tier, signupType, interest, industry, landing }) {
   const st = PROGRAMME[stage] || null;
   const out = [{ name: 'linktolead', status: 'active' }];
-  if (source) out.push({ name: source, status: 'active' });
-  // Which form they signed up with.
-  if (signupType === 'full' || signupType === 'simple') out.push({ name: signupType === 'full' ? 'Signup - Full' : 'Signup - Simple', status: 'active' });
-  // The sales page they signed up on (the North Star box has none).
-  if (Object.hasOwn(LANDING_TAGS, landing)) {
-    out.push({ name: LANDING_TAGS[landing], status: 'active' });
-    if (OLD_LANDING_TAGS[landing]) out.push({ name: OLD_LANDING_TAGS[landing], status: 'inactive' });
-  }
-  // The audience has no merge fields for these, so they go as tags.
-  if (interest) out.push({ name: `Interest - ${interest}`, status: 'active' });
-  if (industry) out.push({ name: `Industry - ${industry}`, status: 'active' });
+  // Where they signed up: the page they used, or the North Star box.
+  const door = Object.hasOwn(LANDING_TAGS, landing) ? landing : !landing && source === 'compass' ? 'compass' : null;
+  if (door) out.push({ name: LANDING_TAGS[door], status: 'active' });
   const reached = Math.max(0, TIER_ORDER.indexOf(tier || 'free'));
   for (const t of TIER_ORDER.slice(0, reached + 1)) out.push({ name: STEP_TAGS[t], status: 'active' });
-  if (st) for (const s of STAGE_TAGS) out.push({ name: s, status: s === st ? 'active' : 'inactive' });
-  if (weakest) for (const d of DOMAIN_TAGS) out.push({ name: d, status: d === weakest ? 'active' : 'inactive' });
+  if (st) for (const [k, name] of Object.entries(STAGE_TAGS)) out.push({ name, status: k === st ? 'active' : 'inactive' });
+  if (weakest) for (const d of DOMAIN_TAGS) out.push({ name: WEAKEST_TAGS[d], status: d === weakest ? 'active' : 'inactive' });
   return out;
 }
 
@@ -135,7 +148,12 @@ export function buildRequest(st, member, action) {
     // One tag on its own ('tag': a library download), or the founder's whole set.
     if (action === 'tag') return [{ method: 'POST', url: `${base}/tags`, body: { tags: [{ name: member.tag, status: 'active' }] } }];
     const tags = { method: 'POST', url: `${base}/tags`, body: { tags: tagsFor(member) } };
-    if (action === 'tags') return [tags];
+    // 'tags' also refreshes the contact fields, so moving everyone onto the
+    // tag system fills Industry and Interest for founders who joined before.
+    if (action === 'tags') {
+      const f = fieldsFor(member);
+      return Object.keys(f).length ? [{ method: 'PATCH', url: `${base}?skip_merge_validation=true`, body: { merge_fields: f } }, tags] : [tags];
+    }
     // 'resubscribe': the founder turned letters back on. Someone who once
     // unsubscribed can only come back through Mailchimp's own confirmation
     // email, so the status is 'pending'. setLetters sends it only for a
@@ -143,13 +161,43 @@ export function buildRequest(st, member, action) {
     return [{ method: 'PUT', url: `${base}?skip_merge_validation=true`,
       body: { email_address: email, status_if_new: st.optin ? 'pending' : 'subscribed', ...(action === 'resubscribe' ? { status: 'pending' } : {}),
         // COMPANY is a field of the Link to Lead audience (its sign-up form asks for it).
-        merge_fields: { FNAME: member.first || '', LNAME: member.last || '', ...(member.company ? { COMPANY: member.company } : {}) } } }, tags];
+        merge_fields: { FNAME: member.first || '', LNAME: member.last || '', ...fieldsFor(member) } } }, tags];
   }
   const f = st.form || DEFAULT_FORM;
   const q = new URLSearchParams({ u: f.u, id: f.id, EMAIL: email, FNAME: member.first || '', LNAME: member.last || '', tags: f.tag || DEFAULT_FORM.tag });
   if (f.f_id) q.set('f_id', f.f_id);
   q.set(`b_${f.u}_${f.id}`, ''); // the form's honeypot: present and empty
   return [{ method: 'GET', url: `https://${f.host}/subscribe/post-json?${q}` }];
+}
+
+/** Facts about the founder, as contact fields (never tags). COMPANY is
+ *  already a field of the audience; INDUSTRY and INTEREST are made by
+ *  ensureFields the first time they are needed. */
+export const EXTRA_FIELDS = [{ tag: 'INDUSTRY', name: 'Industry' }, { tag: 'INTEREST', name: 'Interest' }];
+export function fieldsFor(member) {
+  return { ...(member.company ? { COMPANY: member.company } : {}), ...(member.industry ? { INDUSTRY: member.industry } : {}), ...(member.interest ? { INTEREST: member.interest } : {}) };
+}
+
+/** Make sure the audience has the INDUSTRY and INTEREST fields: one look,
+ *  then one creation per missing field, once per running copy of the site.
+ *  Never throws; a field it could not make is simply left out of the send. */
+let fieldsReady = null;
+async function ensureFields(st, key) {
+  if (fieldsReady) return fieldsReady;
+  const server = apiServer(key, st), list = `https://${server}.api.mailchimp.com/3.0/lists/${st.audience}/merge-fields`;
+  const headers = { authorization: 'Basic ' + btoa('linktolead:' + key), 'content-type': 'application/json', 'user-agent': 'exploraself-linktolead' };
+  const have = new Set();
+  try {
+    const r = await fetch(`${list}?count=100&fields=merge_fields.tag`, { headers });
+    if (r.ok) for (const f of ((await r.json()).merge_fields || [])) have.add(f.tag);
+    for (const f of EXTRA_FIELDS) {
+      if (have.has(f.tag)) continue;
+      const c = await fetch(list, { method: 'POST', headers, body: JSON.stringify({ tag: f.tag, name: f.name, type: 'text', public: false, required: false }) });
+      if (c.ok) have.add(f.tag);
+    }
+  } catch { /* Mailchimp unreachable: send without the new fields */ }
+  if (EXTRA_FIELDS.every((f) => have.has(f.tag))) fieldsReady = have;
+  return have;
 }
 
 /** API keys end in -usX: that is the server. */
@@ -202,7 +250,12 @@ export async function push(env, member, action = 'join') {
       : 'Not sent: the public form cannot change tags. The API key can.' };
   }
   if (st.mode === 'api' && !key) return { status: 'failed', detail: 'The API key (MAILCHIMP_API_KEY) could not be read.' };
-  const req = buildRequest(st, { ...member, key }, action);
+  let req = buildRequest(st, { ...member, key }, action);
+  // INDUSTRY and INTEREST must exist in the audience before a contact can carry them.
+  if (st.mode === 'api' && (member.industry || member.interest) && action !== 'unsubscribe' && action !== 'tag') {
+    const have = await ensureFields(st, key);
+    req = req.map((r) => (r.body && r.body.merge_fields ? { ...r, body: { ...r.body, merge_fields: Object.fromEntries(Object.entries(r.body.merge_fields).filter(([k]) => !EXTRA_FIELDS.some((f) => f.tag === k) || have.has(k))) } } : r));
+  }
   try {
     for (const r of req) {
       const headers = { 'user-agent': 'exploraself-linktolead' };
@@ -270,7 +323,7 @@ export async function syncFounder(env, D, studentId, action = 'join', { keepLog 
   // them. A test only marks it as tested ("test:<step>"), so going live
   // still sends them for real; it never overwrites a real send.
   if ((action === 'join' || action === 'resubscribe' || action === 'tags') && canTag(env) && (out.status === 'ok' || out.status === 'test')) {
-    const tier = member.tier;
+    const tier = `${TAGS_VERSION}:${member.tier}`;
     await D.prepare(out.status === 'ok'
       ? 'UPDATE student_profile SET mailchimp_steps = ? WHERE student_id = ?'
       : "UPDATE student_profile SET mailchimp_steps = CASE WHEN mailchimp_steps = ?1 THEN mailchimp_steps ELSE 'test:' || ?1 END WHERE student_id = ?2")
@@ -313,9 +366,11 @@ export async function backfillList(D, limit = 50, mode = 'form') {
  *  unsubscribe and pause rules as backfillList. */
 export async function stepsBackfillList(D, limit = 50, mode = 'api') {
   const inAudience = mode === 'test' ? "('ok','test')" : "('ok')";
+  // Done means: sent for this step, in the current tag system (TAGS_VERSION).
+  const now_ = `'${TAGS_VERSION}:' || COALESCE(s.tier, 'free')`;
   const done = mode === 'test'
-    ? "(p.mailchimp_steps = COALESCE(s.tier, 'free') OR p.mailchimp_steps = 'test:' || COALESCE(s.tier, 'free'))"
-    : "p.mailchimp_steps = COALESCE(s.tier, 'free')";
+    ? `(p.mailchimp_steps = ${now_} OR p.mailchimp_steps = 'test:' || ${now_})`
+    : `p.mailchimp_steps = ${now_}`;
   const rows = await D.prepare(`SELECT s.id FROM student s JOIN student_profile p ON p.student_id = s.id
       LEFT JOIN account_auth au ON au.student_id = s.id
     WHERE p.consent = 1 AND COALESCE(p.unsubscribed, 0) = 0 AND COALESCE(au.paused, 0) = 0
