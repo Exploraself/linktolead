@@ -163,16 +163,16 @@ const person = (id) => data.students.find((s) => s.id === id) || { id };
 
 function messageBox(id) {
   const s = person(id);
-  const note = s.unsubscribed ? '<p class="tiny warn">Unsubscribed: this goes to their Ground Plan only, never by email.</p>'
-    : !data.mailReady ? '<p class="tiny warn">Email is not switched on yet: this goes to their Ground Plan only.</p>' : '';
+  const note = s.unsubscribed ? '<p class="tiny warn">Unsubscribed: this goes to their Base Camp only, never by email.</p>'
+    : !data.mailReady ? '<p class="tiny warn">Email is not switched on yet: this goes to their Base Camp only.</p>' : '';
   $('#dlg').innerHTML = `<div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlg-h"><form class="dlgbox" id="msgform">
     <h2 id="dlg-h">A note to ${esc(s.name || s.email)}</h2>
     <label>Subject<input id="m-subj" maxlength="160" required></label>
     <label>Message<textarea id="m-body" rows="6" maxlength="4000" required></textarea></label>
     <fieldset><legend>Where it goes</legend>
-      <label class="rad"><input type="radio" name="ch" value="both" checked> Email and their Ground Plan</label>
+      <label class="rad"><input type="radio" name="ch" value="both" checked> Email and their Base Camp</label>
       <label class="rad"><input type="radio" name="ch" value="email"> Email only</label>
-      <label class="rad"><input type="radio" name="ch" value="plan"> Their Ground Plan only</label></fieldset>
+      <label class="rad"><input type="radio" name="ch" value="plan"> Their Base Camp only</label></fieldset>
     ${note}
     <p class="err" id="m-err" role="status"></p>
     <div class="acts"><button type="submit">Send</button><button type="button" class="ghost" data-close>Cancel</button></div>
@@ -182,8 +182,8 @@ function messageBox(id) {
     e.preventDefault();
     const r = await act({ action: 'message', student: id, subject: $('#m-subj').value, body: $('#m-body').value, channel: document.querySelector('input[name=ch]:checked').value });
     if (!r.ok) { $('#m-err').textContent = r.data.error || 'It did not send.'; return; }
-    flash = r.data.channel === 'plan' ? `Sent to ${s.name || s.email}'s Ground Plan${r.data.unsubscribed ? ' (unsubscribed, so no email)' : ''}.`
-      : r.data.channel === 'email' ? `Emailed to ${s.email}.` : `Emailed to ${s.email} and in their Ground Plan.`;
+    flash = r.data.channel === 'plan' ? `Sent to ${s.name || s.email}'s Base Camp${r.data.unsubscribed ? ' (unsubscribed, so no email)' : ''}.`
+      : r.data.channel === 'email' ? `Emailed to ${s.email}.` : `Emailed to ${s.email} and at their Base Camp.`;
     load();
   };
 }
@@ -265,7 +265,7 @@ async function one(id) {
       ${TH.length ? TH.map((x) => x.from === 'founder' ? `<div class="note">
         <p class="meta">They asked · ${esc(day(x.at))}${x.level ? ' · Level ' + String(x.level).padStart(2, '0') : ''}${x.domain ? ' · ' + esc(LEADN[x.domain] || x.domain) : ''}</p>
         <p>${esc(x.body)}</p>
-        ${answered.has(x.id) ? '' : `<textarea data-note="${esc(x.id)}" placeholder="Your answer… It shows in their Ground Plan and goes by email as a letter."></textarea><p style="margin-top:8px"><button class="ghost reply" data-note="${esc(x.id)}">Send answer</button></p>`}
+        ${answered.has(x.id) ? '' : `<textarea data-note="${esc(x.id)}" placeholder="Your answer… It shows at their Base Camp and goes by email as a letter."></textarea><p style="margin-top:8px"><button class="ghost reply" data-note="${esc(x.id)}">Send answer</button></p>`}
       </div>` : `<div class="note" style="border-left:3px solid #B4975F"><p class="meta">You answered · ${esc(day(x.at))} · ${x.read ? 'read' : 'not read yet'}</p><p>${esc(x.body)}</p></div>`).join('')
         : '<p class="tiny" style="margin-top:8px">No questions yet.</p>'}</div>
     <div class="panel"><h2>Their work</h2>
@@ -278,8 +278,8 @@ async function one(id) {
     if (!t || !t.value.trim()) return;
     b.disabled = true;
     const r = await act({ action: 'reply', note: b.dataset.note, reply: t.value });
-    flash = !r.ok ? (r.data.error || 'The answer did not save.') : r.data.emailed ? 'Answered: in their Ground Plan and emailed as a letter.'
-      : `Answered: in their Ground Plan${r.data.unsubscribed ? ' only (they unsubscribed, so no email)' : ' only (email is not switched on)'}.`;
+    flash = !r.ok ? (r.data.error || 'The answer did not save.') : r.data.emailed ? 'Answered: at their Base Camp and emailed as a letter.'
+      : `Answered: at their Base Camp${r.data.unsubscribed ? ' only (they unsubscribed, so no email)' : ' only (email is not switched on)'}.`;
     one(id);
   });
 }

@@ -1,5 +1,5 @@
 /* The account box on the sales pages: makes the free account and opens the
- * founder's Ground Plan at /start, signed in at once.
+ * founder's Base Camp at /start, signed in at once.
  *
  *   'full'   (/road2/, the North Star sales page, landing "road2"; /road1/,
  *            landing "road1"): first name, surname, email, company (or "No
@@ -87,7 +87,7 @@ function wire(gate, variant, landing) {
     e.preventDefault();
     const first = $('#j-first').value.trim(), last = $('#j-last').value.trim(), email = $('#j-email').value.trim(), consent = $('#j-consent').checked;
     const err = (m) => { $('#gate-err').textContent = m; };
-    if (!first) return err('Your first name, so the Ground Plan is yours.');
+    if (!first) return err('Your first name, so the Base Camp is yours.');
     if (!last) return err('Your surname, please.');
     if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return err('That email does not look complete.');
     const d = variant === 'full' ? readDetails('j') : null;
@@ -117,7 +117,7 @@ function wire(gate, variant, landing) {
 }
 
 /** Open the box. A founder already signed in on this device goes straight to
- *  their Ground Plan. */
+ *  their Base Camp. */
 export function open({ gate, opener, stage, variant = 'full', landing = variant === 'full' ? 'road2' : 'road3', stay = false, onExisting = null }) {
   ctx = { gate, opener, stage, variant, landing, stay, onExisting };
   if (hasAccount() && stay) return;

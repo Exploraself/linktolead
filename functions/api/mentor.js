@@ -141,7 +141,7 @@ export async function onRequestPost({ request, env }) {
 
   if (body.action === 'reply' && body.note) {
     // An answer in "Ask Alexandru": kept on the question, added to the
-    // founder's thread as a message, and emailed as a letter (Ground Plan
+    // founder's thread as a message, and emailed as a letter (Base Camp
     // only for a founder who unsubscribed, or when email is off).
     const n = await D.prepare('SELECT n.id, n.student_id, n.body, s.email, s.name, s.tier FROM note n JOIN student s ON s.id = n.student_id WHERE n.id = ?').bind(clean(body.note, 80)).first();
     const answer = clean(body.reply, 3000);
@@ -252,7 +252,7 @@ export async function onRequestPost({ request, env }) {
     if (!subject || !text) return bad('A subject and a message, please.');
     let channel = ['email', 'plan', 'both'].includes(body.channel) ? body.channel : 'plan';
     const p = await profile(D, me.id);
-    // Unsubscribed founders get it in their Ground Plan only.
+    // Unsubscribed founders get it at their Base Camp only.
     const emailWanted = channel !== 'plan';
     const canEmail = !p.unsubscribed && mailState(env).ready;
     if (emailWanted && !canEmail) channel = 'plan';

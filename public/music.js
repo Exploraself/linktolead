@@ -1,4 +1,4 @@
-/* The study room: music, light and Focus mode for Your Ground Plan, the
+/* The study room: music, light and Focus mode for Your Base Camp, the
  * Library and Ask Alexandru (the dashboard). One engine for the whole
  * dashboard; the Cabinet's record player and the mini player both drive it.
  *
@@ -22,7 +22,7 @@
  * presets of music, energy, light and the Lamp together.
  *
  * Never plays before a click: the browser forbids it and so do we. Two
- * minutes on the dashboard (Your Ground Plan, the programme, the Library,
+ * minutes on the dashboard (Your Base Camp, the programme, the Library,
  * Ask Alexandru) brings one quiet invitation (once a day at most).
  * Under prefers-reduced-motion nothing spins or slides. Settings are kept on
  * this browser only (localStorage 'es-music'). */
@@ -449,7 +449,7 @@ function startClock() {
 }
 
 /* ── Entering and leaving the dashboard ──────────────────────────────────── */
-/** The founder is on a dashboard view (Your Ground Plan, Library, Ask). */
+/** The founder is on a dashboard view (Your Base Camp, Library, Ask). */
 export function enter() {
   mount();
   here = true;

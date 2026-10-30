@@ -127,7 +127,7 @@ T = await (await threadGet({ request: get('/api/thread?t=' + di), env })).json()
 ok(T.items.length === 2 && T.items[1].from === 'mentor' && T.items[1].note === q && T.items[1].read === false && T.unread === 1, 'thread: the answer, newest last, unread');
 ok(env.DB.raw.prepare('SELECT status, reply FROM note WHERE id = ?').get(q).status === 'answered', 'the question is marked answered');
 const inbox = await (await msgGet({ request: get('/api/messages?t=' + di), env })).json();
-ok(inbox.messages.length === 0 && inbox.unread === 0, 'answers stay in the thread, not in the Ground Plan notes');
+ok(inbox.messages.length === 0 && inbox.unread === 0, 'answers stay in the thread, not in the Base Camp notes');
 r = await threadRead({ request: post('/api/thread', { token: di }), env });
 T = await (await threadGet({ request: get('/api/thread?t=' + di), env })).json();
 ok(r.status === 200 && T.unread === 0 && T.items[1].read === true, 'opening the thread marks the answers read');

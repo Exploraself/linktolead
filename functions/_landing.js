@@ -12,7 +12,7 @@ export const REDIRECTS = {
   '/compass/welcome-a': '/road2/',
   '/c': '/road2/',
   '/a': '/road3/',
-  // Your Ground Plan moved to its own name (30 Oct); old links and emails still land.
+  // Your Base Camp moved to its own name (30 Oct); old links and emails still land.
   '/start': '/ground-plan/',
   // Short addresses (30 Oct): easy to say, type and put on ads.
   '/summit': '/northstar/summit/',

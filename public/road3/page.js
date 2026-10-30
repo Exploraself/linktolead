@@ -54,7 +54,7 @@ if (typeof document !== 'undefined' && $('#levels')) {
     b.innerHTML = Array.from({ length: 12 }, (_, i) => `<i${i < on ? ' class="on"' : ''}></i>`).join('');
   });
 
-  // Already signed in on this device: a slim bar back to the Ground Plan.
+  // Already signed in on this device: a slim bar back to the Base Camp.
   if (signedIn()) $('#backbar').hidden = false;
 
   // Every "Join" opens the simple form; /road3/#join opens it straight away.

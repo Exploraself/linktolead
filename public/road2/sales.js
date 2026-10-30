@@ -5,7 +5,7 @@
  * benchmark. The name, email and stage are kept in this browser and picked up
  * by the North Star (same site), so they are never asked twice. The account box
  * makes the free account (/api/signup, through /account.js, the same token the
- * North Star and /start use) and opens the founder's Ground Plan. Nothing else is
+ * North Star and /start use) and opens the founder's Base Camp. Nothing else is
  * sent from this page. */
 'use strict';
 /* The arithmetic and the sentences, with no page attached, so the tests can

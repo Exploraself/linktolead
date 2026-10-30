@@ -1,5 +1,5 @@
-// The Ground Plan home base at /start: where a founder opens, which programme
-// they walk, and their Ground Plan, built from their own North Star.
+// The Base Camp home base at /start: where a founder opens, which programme
+// they walk, and their Base Camp, built from their own North Star.
 //
 // Every line traces to something the founder chose in the North Star, or to copy
 // that already exists (content.js, and the North Star's own feedback in
@@ -14,7 +14,7 @@ const COMPASS_STAGE_NAME = { building: 'Building', growing: 'Growing', scaling: 
  * Where /start opens. Without an account: the sign-in screen when asked for
  * (#signin), otherwise off to the sales page to make one. With an account: a
  * founder from the old entrance opens on their programme, as before; everyone
- * else on their Ground Plan. #home, #programme, #library and #ask are
+ * else at their Base Camp. #home, #programme, #library and #ask are
  * honoured.
  */
 export function entry({ joined, old, hash = '' }) {
@@ -48,7 +48,7 @@ export function stageNudge({ compass, current, seen = '' } = {}) {
 const parse = (s) => { if (s && typeof s === 'object') return s; try { return s ? JSON.parse(s) : null; } catch { return null; } };
 
 /**
- * The Ground Plan, from the North Star record ({ stage, results_json, flags_json }
+ * The Base Camp, from the North Star record ({ stage, results_json, flags_json }
  * as /api/state returns it). `E` is the North Star engine; `C` gives the
  * programme's own copy: STAGES, weekTitle(stage, n) and promise(stage, n).
  * Returns null before the North Star is done.

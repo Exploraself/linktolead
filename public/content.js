@@ -55,7 +55,7 @@ export const WEEKS = {
 // The ladder. What opens, and on what.
 export const LADDER = [
   { from: 1, to: 3, key: 'free', n: 'Free, and free to stay', price: 'Free',
-    what: 'All four domains at levels one to three. No payment, now or later — an account, so your Ground Plan and your answers are kept and follow you.' },
+    what: 'All four domains at levels one to three. No payment, now or later — an account, so your Base Camp and your answers are kept and follow you.' },
   { from: 4, to: 5, key: 'session', n: 'The Boardroom — one session with Alexandru', price: 'Book a 1:1',
     what: 'Alexandru and the team read your first three levels before you speak. You leave knowing which of the four domains is costing you most, why it is that one, and with levels four and five opened and walked through. These two are not handed over cold.' },
   { from: 6, to: 9, key: 'lab', n: 'Personal Leadership LAB', price: '$97',

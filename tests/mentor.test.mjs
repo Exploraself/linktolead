@@ -1,5 +1,5 @@
 // The mentor's account manager and dashboard: the key, changing step, pausing,
-// deleting every row, the CSV, messages to email / Ground Plan / both, the
+// deleting every row, the CSV, messages to email / Base Camp / both, the
 // unsubscribed rule, dismissing a note, and the dashboard counts.
 
 import { onRequestGet as mGet, onRequestPost as mPost, toCSV } from '../functions/api/mentor.js';
@@ -60,7 +60,7 @@ ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id=? AND kind IN (
 // ── Sign-in and reset links ─────────────────────────────────────────────────
 sent = fakeResend();
 [st] = await M({ action: 'reset-link', student: bo });
-ok(st === 200 && sent.length === 1 && sent[0].body.to[0] === 'bo@example.com' && /\/ground-plan\/\?signin=/.test(sent[0].body.text), 'a password reset link is the one-time sign-in link, to their Ground Plan');
+ok(st === 200 && sent.length === 1 && sent[0].body.to[0] === 'bo@example.com' && /\/ground-plan\/\?signin=/.test(sent[0].body.text), 'a password reset link is the one-time sign-in link, to their Base Camp');
 
 // ── Messages ────────────────────────────────────────────────────────────────
 sent = fakeResend();
@@ -69,14 +69,14 @@ ok(st === 200 && r.channel === 'email' && sent.length === 1, 'email only: sent b
 ok(sent[0].body.subject === 'Your <first> step' && sent[0].body.html.includes('&amp; bring') && sent[0].body.text.includes('Via Esempio 1') && sent[0].body.html.includes('/api/unsubscribe?u='), 'a letter: his text escaped, with the footer and unsubscribe');
 ok(sent[0].body.html.includes('/mail/signature.png') && sent[0].body.text.includes('Book the Boardroom & bring level 03.') && /\nP\.S\. /.test(sent[0].body.text), 'mentor letter: his own words, signed, with a P.S.');
 let mine = await (await msgGet({ request: get('/api/messages?t=' + ana), env })).json();
-ok(mine.messages.length === 0, 'email only: not in the Ground Plan');
+ok(mine.messages.length === 0, 'email only: not in the Base Camp');
 sent = fakeResend();
 [st, r] = await M({ action: 'message', student: ana, subject: 'In your plan', body: 'A note just for here.', channel: 'plan' });
-ok(st === 200 && sent.length === 0, 'Ground Plan only: no email');
+ok(st === 200 && sent.length === 0, 'Base Camp only: no email');
 [st, r] = await M({ action: 'message', student: ana, subject: 'Both', body: 'Everywhere.', channel: 'both' });
 ok(st === 200 && sent.length === 1 && r.emailed, 'both: emailed');
 mine = await (await msgGet({ request: get('/api/messages?t=' + ana), env })).json();
-ok(mine.messages.length === 2 && mine.unread === 2 && mine.messages.some((m) => m.subject === 'Both'), 'Ground Plan and both: in the Ground Plan, unread');
+ok(mine.messages.length === 2 && mine.unread === 2 && mine.messages.some((m) => m.subject === 'Both'), 'Base Camp and both: in the Base Camp, unread');
 // Dismiss with "Got it".
 await msgRead({ request: post('/api/messages', { token: ana, id: mine.messages[0].id }), env });
 mine = await (await msgGet({ request: get('/api/messages?t=' + ana), env })).json();
@@ -85,12 +85,12 @@ await msgRead({ request: post('/api/messages', { token: bo, id: mine.messages[1]
 ok((await (await msgGet({ request: get('/api/messages?t=' + ana), env })).json()).unread === 1, 'another founder cannot mark it read');
 ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id=? AND kind='mentor-message'").get(ana).n === 3, 'each send is logged');
 
-// Unsubscribed: never an email, the Ground Plan instead.
+// Unsubscribed: never an email, the Base Camp instead.
 const u = DB.raw.prepare('SELECT unsub_id FROM student_profile WHERE student_id=?').get(bo).unsub_id;
 await unsub({ request: get('/api/unsubscribe?u=' + u), env });
 sent = fakeResend();
 [st, r] = await M({ action: 'message', student: bo, subject: 'Hello', body: 'Checking in.', channel: 'both' });
-ok(st === 200 && sent.length === 0 && r.channel === 'plan' && r.unsubscribed, 'unsubscribed: no email, Ground Plan only');
+ok(st === 200 && sent.length === 0 && r.channel === 'plan' && r.unsubscribed, 'unsubscribed: no email, Base Camp only');
 [st, r] = await M({ action: 'message', student: bo, subject: 'Hello', body: 'Email only?', channel: 'email' });
 ok(st === 200 && sent.length === 0 && r.channel === 'plan', 'unsubscribed, email only: still no email');
 [st] = await M({ action: 'message', student: bo, subject: '', body: 'x', channel: 'plan' });
