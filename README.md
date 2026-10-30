@@ -86,8 +86,8 @@ Three sales pages, all ending at `/start`:
 | Page | Address | Account form | Landing |
 |---|---|---|---|
 | A | `/a` (the 12 Scrolls page) | SIMPLE | `a` |
-| B | `/` and `/b` (the long page, with the What-if Lab before the close; `/b/index.html` is a copy of `/index.html`) | FULL | `b` |
-| C | `/c` → 302 to `/compass/welcome` (query string kept), and `/compass/welcome-a` | FULL | `c` |
+| B | `/` (the long page, with the What-if Lab before the close); `/b` → 302 to `/` (query string kept) | FULL | `b` |
+| C | `/compass/welcome/`; `/c` → 302 to `/compass/welcome/` (query string kept); and `/compass/welcome-a` | FULL | `c` |
 
 Every call to action on A, B and C opens that page's form; none of them sends
 a visitor to another page. The Compass's own "Who is this compass for?" box is

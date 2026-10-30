@@ -1,9 +1,9 @@
 // Three sales pages, one account, all ending at /start: A (/a, the 12 Scrolls
-// page) with the SIMPLE form, B (/ and /b, the long page, with the What-if
-// Lab) and C (/c → the Compass sales page) with the FULL form. The forms (POST /api/signup): no
+// page) with the SIMPLE form, B (/, the long page, with the What-if Lab;
+// /b → /) and C (/c → the Compass sales page) with the FULL form. The forms (POST /api/signup): no
 // password on simple, ever; a password required on full; the landing and the
-// utm_* tags stored; the Mailchimp tags in TEST mode; /mentor's view; /c, the
-// 404 page; and on the Compass sales page the "Your plan, live" badge, the
+// utm_* tags stored; the Mailchimp tags in TEST mode; /mentor's view; /b, /c,
+// the 404 page; and on the Compass sales page the "Your plan, live" badge, the
 // lever-1 figure and the live lab. No network: Mailchimp is in TEST mode and
 // Resend is faked.
 
@@ -14,6 +14,7 @@ import { onRequestPost as password } from '../functions/api/password.js';
 import { onRequestGet as stateGet } from '../functions/api/state.js';
 import { onRequestPost as login } from '../functions/api/login.js';
 import { onRequestGet as mGet } from '../functions/api/mentor.js';
+import { onRequest as pagesB } from '../functions/b.js';
 import { onRequest as pagesC } from '../functions/c.js';
 import worker from '../worker.js';
 import { INTERESTS, INDUSTRIES, details, utmFrom } from '../functions/_profile.js';
@@ -22,7 +23,7 @@ import { summary, filter, byLanding } from '../public/mentor/dash.js';
 import { levelsHTML, band } from '../public/a/page.js';
 import { weekTitle } from '../public/content.js';
 import { baseFrom } from '../public/compass/welcome/lab.js';
-import { baseOf, EXAMPLE, num } from '../public/b/lab.js';
+import { baseOf, EXAMPLE, num } from '../public/lab.js';
 import { tagsFor, LANDING_TAGS } from '../functions/_mailchimp.js';
 import { fakeD1, fakeResend, post, get, tally } from './_d1.mjs';
 
@@ -100,19 +101,24 @@ ok(Sm.full === 2 && Sm.simple === 3 && filter(L.students, { tile: 'full' }).leng
 const csv = await (await mGet({ request: new Request('https://x/api/mentor?csv=1', { headers: { 'x-mentor-key': 'mentor-key-123' } }), env })).text();
 ok(/"Sign-up form","Landing","utm_source"/.test(csv) && csv.includes('"Fay & Co"') && csv.includes('"meta"'), 'CSV: form, landing and utm columns');
 
-// ── The three sales pages, /c and the 404 ───────────────────────────────────
+// ── The three sales pages, /b, /c and the 404 ───────────────────────────────
+const assets = { ASSETS: { fetch: () => new Response('asset') } };
 let c = pagesC({ request: get('/c?utm_source=exploraself&utm_content=home-c') });
-ok(c.status === 302 && c.headers.get('location') === '/compass/welcome?utm_source=exploraself&utm_content=home-c', '/c (Pages): 302 to /compass/welcome, query string kept');
-c = await worker.fetch(get('/c/?utm_medium=banner'), { ASSETS: { fetch: () => new Response('asset') } }, {});
-ok(c.status === 302 && c.headers.get('location') === '/compass/welcome?utm_medium=banner', '/c (Worker): the same');
+ok(c.status === 302 && c.headers.get('location') === '/compass/welcome/?utm_source=exploraself&utm_content=home-c', '/c (Pages): 302 to /compass/welcome/, query string kept');
+c = await worker.fetch(get('/c/?utm_medium=banner'), assets, {});
+ok(c.status === 302 && c.headers.get('location') === '/compass/welcome/?utm_medium=banner', '/c (Worker): the same');
+let r = pagesB({ request: get('/b?utm_source=exploraself&utm_content=home-b') });
+ok(r.status === 302 && r.headers.get('location') === '/?utm_source=exploraself&utm_content=home-b', '/b (Pages): 302 to /, query string kept');
+r = await worker.fetch(get('/b/'), assets, {});
+ok(r.status === 302 && r.headers.get('location') === '/', '/b (Worker): the same');
+ok(!existsSync(new URL('../public/b', import.meta.url)), '/b keeps no copy of the page');
 const W = read('wrangler.toml');
-ok(/not_found_handling = "404-page"/.test(W) && /run_worker_first = \["\/api\/\*", "\/c", "\/c\/"\]/.test(W), 'Worker: unknown addresses get the 404 page; /c reaches the Worker');
+ok(/not_found_handling = "404-page"/.test(W) && /run_worker_first = \["\/api\/\*", "\/b", "\/b\/", "\/c", "\/c\/"\]/.test(W), 'Worker: unknown addresses get the 404 page; /b and /c reach the Worker');
 const NF = read('public/404.html');
 ok(existsSync(new URL('../public/404.html', import.meta.url)) && /noindex/.test(NF) && NF.includes('This page does not exist.') && !NF.includes('Link to Lead — The Founder'), 'a real 404 page (not the home page)');
-ok(read('public/b/index.html') === read('public/index.html'), '/b is the same page as /');
 const B = read('public/index.html');
 ok(!/ten questions|10 questions/i.test(B) && !B.includes('Mockup at real size') && B.includes('Start tonight, free. <em>By Tuesday, you’ll be ahead.</em>') && B.includes('<button type="button" class="cta" data-join>Create my free account →</button>') && B.includes('Levels 01–03 free · Instant access'), 'B: no "ten questions", no mockup line; the close is "Start tonight, free…" with "Create my free account →"');
-ok(!B.includes('href="/compass/welcome') && (B.match(/<a [^>]*class="cta"[^>]*>/g) || []).every((a) => a.includes('data-join')) && read('public/b/page.js').includes("variant: 'full', landing: 'b'"), 'B: every call to action opens the FULL form (landing B), none goes to /compass/welcome');
+ok(!B.includes('href="/compass/welcome') && (B.match(/<a [^>]*class="cta"[^>]*>/g) || []).every((a) => a.includes('data-join')) && read('public/page.js').includes("variant: 'full', landing: 'b'") && B.includes('<script type="module" src="/page.js"></script>'), 'B: every call to action opens the FULL form (landing B), none goes to /compass/welcome');
 ok(B.indexOf('<h2 class="sectitle">Move one lever. Watch the four answer.</h2>') > B.indexOf('id="library"') && B.indexOf('id="whatif-lab"') < B.indexOf('id="start"'), 'B: the What-if Lab, after the library and before the close');
 const A = read('public/a/index.html');
 ok(A.includes('The Leadership Compass shows which one you are in.') && A.includes('<b>Your free account</b><span>One minute. Name and email.</span>') && A.includes('<b>Your Ground Plan</b><span>Your stage and your first three moves.</span>'), 'A: the Compass line and the three steps');
@@ -143,10 +149,11 @@ ok(b.clients === 25 && t.cash === 6000 && t.mine === 200 && b.limit === 140, 'th
 ok(E.month(b, { p: 50 }, 'time').mine < t.mine && E.month(b, { p: 50 }, 'money').cash > t.cash, 'the levers move it through the Compass engine');
 ok(/E\.month\(/.test(read('public/compass/welcome/lab.js')) && !/function month\(/.test(read('public/compass/welcome/lab.js')), 'the lab reuses engine.js, it does not copy the logic');
 
-// ── The What-if Lab on / and /b ────────────────────────────────────────────
-const LB = read('public/b/lab.js');
+// ── The What-if Lab on / ───────────────────────────────────────────────────
+const LB = read('public/lab.js');
 ok(/E\.month\(/.test(LB) && !/function month\(/.test(LB), 'the home lab reuses engine.js, it does not copy the logic');
 ok(LB.includes('An example founder') && LB.includes("box('price', 'Price per client ($)'") && LB.includes("box('clients', 'Clients a month'") && LB.includes("box('hours', 'Hours per client'") && LB.includes('>Create my free account →</button>') && LB.includes('openGate'), 'the home lab: "An example founder", three boxes to type into, "Create my free account →" opens the form');
+ok(read('public/page.js').includes("import('/lab.js')") && LB.includes('limit ${n0(b.limit)} h a month') && LB.includes('hours beyond the limit of ${n0(b.limit)} a month.') && LB.includes('Within the limit of ${n0(b.limit)} hours a month.') && LB.includes('within the limit of ${n0(b.limit)} a month') && LB.includes('Still beyond the limit of ${n0(b.limit)} hours a month.') && !/limit of \$\{n0\(b\.limit\)\}[.`]/.test(LB), 'the home lab: the hours limit always reads "a month"');
 const hb = baseOf(EXAMPLE), ht = E.month(hb, {}, 'time');
 ok(hb.ready && hb.clients === 20 && ht.mine === 160 && ht.cash === 20 * 200 - 1500, 'the example founder: 20 clients, 160 hours, $2,500 left');
 ok(Math.round(E.month(hb, { p: 60 }, 'time').mine) === 91 && E.month(hb, { p: 60 }, 'time').cash === ht.cash && E.month(hb, { p: 60 }, 'money').cash > ht.cash, 'the levers move it: +60% price keeps the money in about 91 hours instead of 160 (time), more cash (money)');

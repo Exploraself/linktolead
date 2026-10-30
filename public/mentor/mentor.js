@@ -213,7 +213,7 @@ async function one(id) {
         <div class="k"><b>Step</b><span>${esc(STEP_NAMES[s.tier || 'free'] || s.tier)}</span></div>
         <div class="k"><b>Answers written</b><span>${A.filter((a) => a.body).length}</span></div>
         <div class="k"><b>Signed up with</b><span>${esc(P.signup_type ? P.signup_type + ' form' : '—')}</span></div>
-        <div class="k"><b>Landing</b><span>${esc(({ a: 'Sales page A (/a)', b: 'Sales page B (/ or /b)', c: 'Sales page C (/compass/welcome)', compass: 'The Compass box' })[P.landing] || '—')}${P.utm_source ? ' · ' + esc([P.utm_source, P.utm_medium, P.utm_campaign, P.utm_content, P.utm_term].filter(Boolean).join(' / ')) : ''}</span></div>
+        <div class="k"><b>Landing</b><span>${esc(({ a: 'Sales page A (/a)', b: 'Sales page B (/)', c: 'Sales page C (/compass/welcome)', compass: 'The Compass box' })[P.landing] || '—')}${P.utm_source ? ' · ' + esc([P.utm_source, P.utm_medium, P.utm_campaign, P.utm_content, P.utm_term].filter(Boolean).join(' / ')) : ''}</span></div>
         <div class="k"><b>Company</b><span>${P.company === '' ? 'No company yet' : esc(P.company || '—')}</span></div>
         <div class="k"><b>Interest</b><span>${esc(P.interest || '—')}</span></div>
         <div class="k"><b>Industry</b><span>${esc(P.industry || '—')}</span></div>

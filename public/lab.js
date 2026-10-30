@@ -1,4 +1,4 @@
-/* The What-if Lab v1 on "/" and "/b", just before the close. It starts on an
+/* The What-if Lab v1 on "/", just before the close. It starts on an
  * example founder, labelled as one, and the visitor can type their own price,
  * clients and hours. Four levers on the left; cash, clients, time and the help
  * they can afford answer on the right, one row each, so on a phone each lever
@@ -167,18 +167,18 @@ export function fill(host, { E, openGate }) {
       const card = $('hl-o-' + o.k); card.setAttribute('aria-valuemax', String(Math.round(max))); if (now !== null) card.setAttribute('aria-valuenow', String(Math.round(now)));
     }
     const lim = $('hl-limit');
-    lim.hidden = !b.limit; if (b.limit) { lim.style.left = Math.min(100, b.limit / scale.time * 100) + '%'; set('hl-limit-l', `limit ${n0(b.limit)} h`); }
+    lim.hidden = !b.limit; if (b.limit) { lim.style.left = Math.min(100, b.limit / scale.time * 100) + '%'; set('hl-limit-l', `limit ${n0(b.limit)} h a month`); }
     set('hl-ov-cash', s.cash === null ? '—' : usd(s.cash)); set('hl-ov-clients', n0(s.clients)); set('hl-ov-time', n0(s.mine) + ' h');
     set('hl-ov-people', s.people === null ? '—' : (Math.round(s.people * 10) / 10).toFixed(1));
     const dc = s.cash === null ? null : s.cash - t.cash;
     set('hl-on2-cash', s.cash === null ? 'Set a helper rate in Fine-tune to see what the help costs.' : Math.abs(dc) < 1 ? 'Same money as today.' : `${dc > 0 ? '+' : '−'}${usd(Math.abs(dc))} a month compared with today.`);
     set('hl-on2-clients', s.clients < s.clientsWanted - 0.05 ? `You serve ${n0(s.clients)}. ${n0(s.clientsWanted)} want you, so you can choose the best fit.` : s.clients > t.clients + 0.05 ? `+${n0(s.clients - t.clients)} a month compared with today.` : 'Same as today.');
     const back = t.mine - s.mine;
-    set('hl-on2-time', b.limit ? (s.mine > b.limit + 0.5 ? `${n0(s.mine - b.limit)} hours beyond the limit of ${n0(b.limit)}.` : `Within the limit of ${n0(b.limit)}.${back > 0.5 ? ` ${n0(back)} hours a month back.` : ''}`) : (back > 0.5 ? `${n0(back)} hours a month back.` : 'Same hours as today.'));
+    set('hl-on2-time', b.limit ? (s.mine > b.limit + 0.5 ? `${n0(s.mine - b.limit)} hours beyond the limit of ${n0(b.limit)} a month.` : `Within the limit of ${n0(b.limit)} hours a month.${back > 0.5 ? ` ${n0(back)} hours a month back.` : ''}`) : (back > 0.5 ? `${n0(back)} hours a month back.` : 'Same hours as today.'));
     set('hl-on2-people', s.people === null ? 'Set the monthly cost of one more person in Fine-tune to see this.' : s.people >= 0.1 ? `About ${(Math.round(s.people * 10) / 10).toFixed(1)} people at ${usd(b.hire)} a month each.` : 'No room to pay for help yet.');
     let verdict;
-    if (!L.p && !L.m && !L.f && !L.d) verdict = `Today: ${n0(t.mine)} hours a month${b.limit ? (t.mine > b.limit + 0.5 ? `, beyond the limit of ${n0(b.limit)}` : `, within the limit of ${n0(b.limit)}`) : ''}. Move one lever and watch the four answer.`;
-    else if (b.limit && s.mine > b.limit + 0.5) verdict = 'Still beyond the limit. Try a fairer price, fewer hours for each client, or hand part of the work to someone else.';
+    if (!L.p && !L.m && !L.f && !L.d) verdict = `Today: ${n0(t.mine)} hours a month${b.limit ? (t.mine > b.limit + 0.5 ? `, beyond the limit of ${n0(b.limit)} a month` : `, within the limit of ${n0(b.limit)} a month`) : ''}. Move one lever and watch the four answer.`;
+    else if (b.limit && s.mine > b.limit + 0.5) verdict = `Still beyond the limit of ${n0(b.limit)} hours a month. Try a fairer price, fewer hours for each client, or hand part of the work to someone else.`;
     else if (improved >= 3) verdict = 'This is leadership: one change, and most of the four answer at once.';
     else if (L.mode === 'time' && back > 0.5 && dc !== null && dc > -1) verdict = 'Same money, fewer hours. The price you charge decides how much of your life the business needs.';
     else if (L.mode === 'money' && dc !== null && dc > 1) verdict = 'More money for the same work. Now ask what that money is for.';

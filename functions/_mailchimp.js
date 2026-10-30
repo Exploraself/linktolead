@@ -75,7 +75,7 @@ export function mailchimpState(env = {}) {
 }
 
 /** The Mailchimp tag for each sales page (the landing key stored on the
- *  profile): / and /b, /compass/welcome (and /c, /compass/welcome-a), and
+ *  profile): /, /compass/welcome (and /c, /compass/welcome-a), and
  *  /a, the 12 Scrolls page. */
 export const LANDING_TAGS = { b: 'Landing - Home', c: 'Landing - Compass welcome', a: 'Landing - 12 Scrolls' };
 
