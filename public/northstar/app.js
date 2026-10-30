@@ -338,7 +338,8 @@
   /* ── Parts ──────────────────────────────────────────────────────────────── */
   const NAV = [['overview', '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><g><polygon points="12,4 14,12 12,13.5 10,12" fill="#6F93B8"/><polygon points="12,20 14,12 12,10.5 10,12" fill="currentColor" opacity=".5"/><animateTransform attributeName="transform" type="rotate" values="20 12 12;34 12 12;20 12 12" dur="7s" repeatCount="indefinite"/></g></svg>', 'Your North Star'],
     ['clear', '01', 'Get clear'], ['people', '02', 'Lead your people'], ['numbers', '03', 'Count what matters'], ['plan', '04', 'Choose your next steps'], ['method', '⌘', 'How it works']];
-  const pNav = (c) => NAV.map(([id, ni, t]) => `<button type="button" class="nl ${UI.page === id ? 'on' : ''}" data-go="${id}" data-f="nav-${id}"${UI.page === id ? ' aria-current="true"' : ''}><span class="ni">${ni}</span>${t}${id === 'clear' ? `<small style="margin-left: auto; font-size: 9px">${c.answered}/8</small>` : ''}</button>`).join('');
+  const navOn = () => (typeof window !== 'undefined' && window.__nsSpy) || UI.page; // spy.js: the section on screen
+  const pNav = (c) => NAV.map(([id, ni, t]) => `<button type="button" class="nl ${navOn() === id ? 'on' : ''}" data-go="${id}" data-f="nav-${id}"${navOn() === id ? ' aria-current="true"' : ''}><span class="ni">${ni}</span>${t}${id === 'clear' ? `<small style="margin-left: auto; font-size: 9px">${c.answered}/8</small>` : ''}</button>`).join('');
 
   const STEP_CARDS = [['01', 'Get clear', 'Know yourself', 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'clear'],
     ['02', 'Lead your people', 'Know your people', D[1].icon, 'people'], ['03', 'Count what matters', 'Know your numbers', 'M4 20V10M10 20V4M16 20v-7M22 20H2', 'numbers'],
