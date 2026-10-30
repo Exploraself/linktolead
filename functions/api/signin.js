@@ -14,7 +14,7 @@
 
 import { json, bad, db, now, clean, looksLikeEmail, accountTables, newToken, sha256 } from '../_shared.js';
 import { profile, unsubLink } from '../_account.js';
-import { allowed, logged, mailState, origin, send } from '../_mail.js';
+import { allowed, logged, mailState, origin, send, LIMIT_MSG } from '../_mail.js';
 import { signinLetter } from '../_letters.js';
 import { PAUSED } from '../_auth.js';
 
@@ -47,7 +47,7 @@ export async function onRequestPost({ request, env }) {
 
   await accountTables(D);
   const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-  if (!(await allowed(D, email, ip))) return bad('That is a few already. Try again in an hour.', 429);
+  if (!(await allowed(D, email, ip))) return bad(LIMIT_MSG, 429);
   await logged(D, email, ip);
 
   const me = await D.prepare('SELECT id, email FROM student WHERE email = ?').bind(email).first();

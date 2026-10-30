@@ -122,7 +122,8 @@
     if (el) el.textContent = !stored ? '○ This session only · download a backup' : signedIn() ? '○ Saved to your account' : '○ Saved on this browser';
   }
   const UI = { page: 'overview', gate: false, after: null, how: false, ws: false, saved: false, mail: '', mailReady: false, mailWhy: '', sending: false,
-    plans: null, note: '', signin: '', signinBusy: false, fine: false, glow: null, signinOpen: false, pwmsg: '', hasPw: null };
+    plans: null, note: '', signin: '', signinBusy: false, fine: false, glow: null, signinOpen: false, pwmsg: '', hasPw: null, signinFor: null };
+  const SIGNIN_LINE = 'This email already has an account. Sign in to open your plans.';
   const identified = () => !!S.profile.email;
 
   /* ── The account ─────────────────────────────────────────────────────────── */
@@ -213,7 +214,7 @@
     if (!A) return;
     if (!pw) { UI.signin = 'Type your password, or use “Email me a sign-in link”.'; render(); return; }
     UI.signinBusy = true; render();
-    try { const out = await A.login(email, pw); UI.gate = false; UI.signin = ''; await afterSignIn(out.me || {}); }
+    try { const out = await A.login(email, pw); UI.gate = false; UI.signin = ''; UI.signinFor = null; await afterSignIn(out.me || {}); }
     catch (e) { UI.signin = e && e.message && !/fetch|network|load failed/i.test(e.message) ? e.message : 'We could not reach the account service just now.'; }
     UI.signinBusy = false; render();
   }
@@ -254,6 +255,11 @@
     UI.returnF = a && a.dataset ? a.dataset.f : null;
     UI.gate = true; UI.after = after || null;
     setTimeout(() => { const f = $('#g-first'); if (f) f.focus(); }, 0);
+  }
+  /** The sign-in box for an email that already has an account. */
+  function openSignin() {
+    UI.signinFor = 'plans'; UI.signin = ''; openGate('account'); render();
+    setTimeout(() => { const f = $('#si-pw-gate'); if (f) f.focus(); }, 0);
   }
   function closeGate() {
     UI.gate = false; render();
@@ -963,6 +969,14 @@
   function pGate() {
     if (!UI.gate) return '';
     const P = S.profile, lab = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600';
+    if (UI.signinFor === 'plans') return `<div style="position: fixed; inset: 0; z-index: 50; background: rgba(16,13,9,.6); display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto">
+      <form class="card pop" id="signin-form" role="dialog" aria-modal="true" aria-labelledby="si-h" novalidate style="position: relative; width: 100%; max-width: 440px; padding: 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.35); margin: auto">
+        <button type="button" data-act="si-x" data-f="si-x" aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer">×</button>
+        <h2 id="si-h" class="sf" style="font-size: 24px; font-weight: 500; padding-right: 44px">Sign in to open your plans</h2>
+        <span id="si-line" style="font-size: 14px; color: var(--muted)">${SIGNIN_LINE}</span>
+        <label style="${lab}">Email<input class="inp" id="g-email" type="email" autocomplete="email" value="${esc(P.email)}"></label>
+        ${pSignin('gate')}
+      </form></div>`;
     return `<div style="position: fixed; inset: 0; z-index: 50; background: rgba(16,13,9,.6); display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto">
       <form class="card pop" id="gate-form" role="dialog" aria-modal="true" aria-labelledby="gate-h" novalidate style="position: relative; width: 100%; max-width: 480px; padding: 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.35); margin: auto">
         <button type="button" data-act="gate-skip" data-f="gate-x" aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
@@ -1190,10 +1204,14 @@
         // Locked plans: make the free account, or sign in to the one there is.
         if (signedIn()) return;
         if (!identified()) { openGate('account'); render(); return; }
-        if (S.acct.email === S.profile.email && S.acct.state === 'existing') { askLink(S.profile.email, 'note'); return; }
-        createAccount('compass', false);
+        // An email that already has an account signs in right here: password,
+        // or "Email me a sign-in link". Never only a link that may be held up.
+        const there = () => S.acct.email === S.profile.email && S.acct.state === 'existing';
+        if (there()) { openSignin(); return; }
+        createAccount('compass', true).then(() => { if (there()) openSignin(); });
         return;
       }
+      case 'si-x': UI.signinFor = null; UI.signin = ''; closeGate(); return;
       case 'note-x': UI.note = ''; render(); return;
       case 'signin-gate': { const el = $('#g-email'); askLink(el ? el.value.trim() : '', 'gate'); return; }
       case 'signin-ws': { const el = $('#ws-signin'); askLink(el ? el.value.trim() : '', 'ws'); return; }

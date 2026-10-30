@@ -14,7 +14,7 @@
 // connection is rate-limited.
 
 import { json, bad, db, clean, looksLikeEmail, accountTables, studentBy } from '../_shared.js';
-import { mailState, allowed, logged, send, origin } from '../_mail.js';
+import { mailState, allowed, logged, send, origin, LIMIT_MSG } from '../_mail.js';
 import { profile, unsubLink } from '../_account.js';
 import { resultsLetter } from '../_letters.js';
 import { weakestTag } from '../_mailchimp.js';
@@ -76,7 +76,7 @@ export async function onRequestPost({ request, env }) {
   const email = me.email;
 
   const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-  if (!(await allowed(D, email, ip))) return bad('That is a few already. Try again in an hour.', 429);
+  if (!(await allowed(D, email, ip))) return bad(LIMIT_MSG, 429);
 
   const plan = shape(body.plan);
   const p = await profile(D, me.id);

@@ -33,6 +33,9 @@ export const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&a
 
 /** Three per address and ten per connection, per hour, across every kind of
  *  email. Returns true when this one may go. */
+/** What a founder reads when the mail limit stops a request. Password
+ *  sign-in has its own counter (login.js) and is never stopped by this one. */
+export const LIMIT_MSG = "We've sent 3 emails to this address in the last hour. To keep your account safe, wait an hour, or sign in with your password.";
 export async function allowed(D, email, ip) {
   const hourAgo = Date.now() - 3600_000;
   const seen = await D.prepare('SELECT SUM(email = ?) AS e, SUM(ip = ?) AS i FROM mail_log WHERE at > ?').bind(email, ip, hourAgo).first();
