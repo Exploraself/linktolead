@@ -507,9 +507,9 @@
     const pts = (r) => `200,${200 - r[0]} ${200 + r[1]},200 200,${200 + r[2]} ${200 - r[3]},200`;
     const any = c.rd.any, hi = c.rd.hi, lo = c.rd.lo;
     return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 700px">
-        <span class="eb">Your compass reading</span>
+        <span class="eb">Your North Star reading</span>
         <h2 class="sf" style="font-size: clamp(28px, 3.6vw, 40px); line-height: 1.05">Where you are strong. <span class="sfi" style="color: var(--goldink)">Where you are low.</span></h2>
-        <p style="color: var(--muted)">Rate four strengths honestly. Together with your answers, they draw your compass.</p></div>
+        <p style="color: var(--muted)">Rate four strengths honestly. Together with your answers, they draw your North Star.</p></div>
       <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
         <div class="card" style="flex: 1 1 340px; min-width: 0; padding: 18px; display: flex; flex-direction: column; gap: 14px">
           <span style="font-weight: 600">How strong are you at…</span>
@@ -666,7 +666,7 @@
       <span class="eb">Save your results</span>
       <h2 class="sf" style="font-size: 26px; line-height: 1.2">Keep what you found. <span class="sfi" style="color: var(--goldink)">Print it or send it to yourself.</span></h2>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 14px; font-size: 14px">
-        ${['Your first insight', 'Your compass reading', 'Your feedback in all four domains', 'A next step for each domain', 'Your twelve weeks'].map((t) => `<span style="display: inline-flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#C9A24A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>${t}</span>`).join('')}
+        ${['Your first insight', 'Your North Star reading', 'Your feedback in all four domains', 'A next step for each domain', 'Your twelve weeks'].map((t) => `<span style="display: inline-flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#C9A24A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>${t}</span>`).join('')}
       </div>
       <span style="font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px">${lockIcon('currentColor', 13)}The deeper “Show more” insights stay inside your account.</span>
     </div>
@@ -1045,7 +1045,7 @@
       <span style="display: flex; gap: 8px"><b style="color: var(--goldink)">1</b>Say where you are and where you want to get.</span>
       <span style="display: flex; gap: 8px"><b style="color: var(--goldink)">2</b>Answer 8 questions from real life.</span>
       <span style="display: flex; gap: 8px"><b style="color: var(--goldink)">3</b>Add rough numbers. A range is enough.</span>
-      <span style="display: flex; gap: 8px"><b style="color: var(--goldink)">4</b>Read your compass, ask “what if?”, tick “Got it”, choose your next steps.</span></div>` : '');
+      <span style="display: flex; gap: 8px"><b style="color: var(--goldink)">4</b>Read your North Star, ask “what if?”, tick “Got it”, choose your next steps.</span></div>` : '');
   function pWs() {
     if (!UI.ws) return '';
     const P = S.profile, lab = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600';

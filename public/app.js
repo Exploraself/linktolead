@@ -374,7 +374,10 @@ const bookIcon = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="t
 
 /** The Leader’s North Star, always in the rail, just above The Boardroom. */
 const railStar = `<a class="rstar" href="/compass/" aria-label="Open your Leader’s North Star: where you stand in all four domains">
-  <svg class="rstar-i" width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="15.5" fill="none" stroke="#C9A24A" stroke-opacity=".55"/><path d="M17 4.5 19.6 14.4 29.5 17 19.6 19.6 17 29.5 14.4 19.6 4.5 17 14.4 14.4Z" fill="#E3C47E"/><circle cx="17" cy="17" r="2.2" fill="#14100B"/></svg>
+  <svg class="rstar-i" width="40" height="40" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="#C9A24A" stroke-width="1.6"/><circle cx="32" cy="32" r="23" fill="none" stroke="#3B4C70"/>
+    <g stroke="#C9A24A" stroke-width="1.4"><line x1="32" y1="3" x2="32" y2="9"/><line x1="32" y1="55" x2="32" y2="61"/><line x1="3" y1="32" x2="9" y2="32"/><line x1="55" y1="32" x2="61" y2="32"/></g>
+    <circle cx="32" cy="11" r="2.6" fill="#A8623A"/><circle cx="53" cy="32" r="2.6" fill="#4C7355"/><circle cx="32" cy="53" r="2.6" fill="#36607F"/><circle cx="11" cy="32" r="2.6" fill="#9A7418"/>
+    <g class="cban-needle"><path d="M32 14 L36 32 L32 35 L28 32Z" fill="#E3C47E"/><path d="M32 50 L36 32 L32 29 L28 32Z" fill="#3B4C70"/></g><circle cx="32" cy="32" r="3" fill="#C9A24A"/></svg>
   <span><small>The Leader’s North Star</small><b>Where you stand, in all four domains</b><em>Open my North Star →</em></span></a>`;
 function railHTML(st) {
   const marks = { done: '✓', open: '', waiting: '·', locked: '🔒' };

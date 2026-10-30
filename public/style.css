@@ -754,11 +754,11 @@ body.inwork .foot{display:none}
 @media(min-width:1280px){.bname{white-space:nowrap}}
 
 /* The Leader’s North Star in the rail (30 Oct): always there, above The Boardroom. */
-.rstar{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:center;margin:4px 0 14px;padding:14px;border:1px solid rgba(201,162,74,.55);border-radius:8px;background:linear-gradient(135deg,#2A1E10,#16100A);color:#F6EEDD;transition:border-color .2s,transform .2s}
+.rstar{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;align-items:center;margin:4px 0 14px;padding:14px;border:1px solid rgba(201,162,74,.55);border-radius:8px;background:linear-gradient(135deg,#22325A,#15213B 60%,#0E1830);color:#F6EEDD;transition:border-color .2s,transform .2s}
 .rstar:hover{border-color:#E3C47E;transform:translateX(2px)}
 .rstar small{display:block;font:700 9.5px/1.2 var(--body);letter-spacing:1.8px;text-transform:uppercase;color:#E3C47E}
 .rstar b{display:block;font-family:var(--display);font-weight:500;font-size:16px;line-height:1.2;margin-top:4px}
 .rstar em{display:block;font-style:normal;font:600 12px/1 var(--body);color:#C9A24A;margin-top:7px}
-.rstar-i{animation:rstarGlow 3.2s ease-in-out infinite}
-@keyframes rstarGlow{50%{filter:drop-shadow(0 0 6px rgba(227,196,126,.75))}}
-@media(prefers-reduced-motion:reduce){.rstar-i{animation:none}.rstar:hover{transform:none}}
+.rstar .cban-needle{transform-origin:32px 32px;animation:rstarNeedle 7s ease-in-out infinite}
+@keyframes rstarNeedle{0%,100%{transform:rotate(-18deg)}50%{transform:rotate(24deg)}}
+@media(prefers-reduced-motion:reduce){.rstar .cban-needle{animation:none}.rstar:hover{transform:none}}
