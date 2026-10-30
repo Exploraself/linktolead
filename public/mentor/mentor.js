@@ -110,7 +110,7 @@ function tableHTML() {
       <td>${esc(s.stage || '—')}</td>
       <td><select data-step="${esc(s.id)}" aria-label="Step for ${esc(s.name || s.email)}">${STEP_KEYS.map((k) => `<option value="${k}"${(s.tier || 'free') === k ? ' selected' : ''}>${STEP_NAMES[k]}</option>`).join('')}</select></td>
       <td>${s.compass_at ? 'done' : '—'}</td><td class="tiny">${s.plan_ticks || 0} of ${total}</td>
-      <td class="tiny">${esc(s.signup_type || '—')}</td><td class="tiny">${esc(({ road1: 'Road 1', road2: 'Road 2', road21: 'Road 2.1', road3: 'Road 3', compass: 'Compass box' })[s.landing] || '—')}${s.utm_source ? `<span class="em">${esc(s.utm_source)}${s.utm_content ? ' · ' + esc(s.utm_content) : ''}</span>` : ''}</td><td class="tiny">${s.company === '' ? 'No company yet' : esc(s.company || '—')}</td><td class="tiny">${esc(s.interest || '—')}</td><td class="tiny">${esc(s.industry || '—')}</td>
+      <td class="tiny">${esc(s.signup_type || '—')}</td><td class="tiny">${esc(({ road1: 'Road 1', road2: 'Road 2', road21: 'Road 2.1', road3: 'Road 3', compass: 'North Star box' })[s.landing] || '—')}${s.utm_source ? `<span class="em">${esc(s.utm_source)}${s.utm_content ? ' · ' + esc(s.utm_content) : ''}</span>` : ''}</td><td class="tiny">${s.company === '' ? 'No company yet' : esc(s.company || '—')}</td><td class="tiny">${esc(s.interest || '—')}</td><td class="tiny">${esc(s.industry || '—')}</td>
       <td>${yes(s.has_password)}</td><td>${yes(s.consent)}</td><td>${s.unsubscribed ? '<b class="warn">yes</b>' : '—'}</td><td>${s.paused ? '<b class="warn">paused</b>' : '—'}</td>
       <td class="tiny">${s.mailchimp_status ? (s.mailchimp_status === 'failed' ? '<b class="warn">failed</b>' : esc(MC_STATUS[s.mailchimp_status] || s.mailchimp_status)) + ' · ' + when(s.mailchimp_at) : (s.consent && !s.unsubscribed ? 'not sent yet' : '—')}</td>
       <td class="acts">
@@ -147,9 +147,25 @@ function mentorsHTML() {
     </form></details>`;
 }
 
+/** Comments founders left under the level videos, newest first; hide or show. */
+async function loadComments() {
+  const box = $('#vcom');
+  if (!box) return;
+  let d = {};
+  try { const r = await fetch('/api/comments?all=1', { headers: { 'x-mentor-key': key } }); d = await r.json().catch(() => ({})); } catch { /* offline */ }
+  const items = (d && d.items) || [];
+  box.innerHTML = `<h2 style="margin-top:28px">Video comments</h2>
+    ${items.length ? `<div class="tw"><table><thead><tr><th>When</th><th>Founder</th><th>Video</th><th>Comment</th><th></th></tr></thead><tbody>
+      ${items.map((c) => `<tr${c.hidden ? ' style="opacity:.5"' : ''}><td class="tiny">${esc(when(c.at))}</td><td class="tiny">${esc(c.name || '—')}<span class="em">${esc(c.email || '')}</span></td>
+        <td class="tiny">Level ${String(c.level).padStart(2, '0')} · ${esc(c.stage)}</td><td>${esc(c.body)}</td>
+        <td><button class="ghost" data-vhide="${esc(c.id)}" data-hidden="${c.hidden ? 1 : 0}">${c.hidden ? 'Show again' : 'Hide'}</button></td></tr>`).join('')}
+      </tbody></table></div>` : '<p class="tiny">No comments yet. They appear here, and in your inbox, as founders leave them under the level videos.</p>'}`;
+}
+
 function draw() {
   const S = summary(data.students, data.waiting);
-  $('#main').innerHTML = `${tilesHTML(S)}${landingHTML()}${needsHTML()}${mailchimpHTML()}${mentorsHTML()}<h2 style="margin-top:28px">Account manager</h2>${tableHTML()}<div id="dlg"></div>`;
+  $('#main').innerHTML = `${tilesHTML(S)}${landingHTML()}${needsHTML()}${mailchimpHTML()}${mentorsHTML()}<section id="vcom"></section><h2 style="margin-top:28px">Account manager</h2>${tableHTML()}<div id="dlg"></div>`;
+  loadComments();
   const qi = $('#q');
   qi.oninput = () => { q = qi.value; const pos = qi.selectionStart; draw(); const n = $('#q'); n.focus(); n.setSelectionRange(pos, pos); };
 }
@@ -286,6 +302,13 @@ async function one(id) {
 }
 
 document.addEventListener('click', async (e) => {
+  const vh = e.target.closest('[data-vhide]');
+  if (vh) {
+    vh.disabled = true;
+    await fetch('/api/comments', { method: 'POST', headers: { 'x-mentor-key': key, 'content-type': 'application/json' }, body: JSON.stringify({ hide: vh.dataset.vhide, hidden: vh.dataset.hidden !== '1' }) }).catch(() => {});
+    loadComments();
+    return;
+  }
   const b = e.target.closest('button, .nm');
   if (!b) return;
   const d = b.dataset;

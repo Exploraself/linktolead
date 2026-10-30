@@ -73,6 +73,8 @@ export async function accountTables(D) {
     D.prepare('CREATE TABLE IF NOT EXISTS auth_log (email TEXT, ip TEXT, at INTEGER)'),
     D.prepare(`CREATE TABLE IF NOT EXISTS message (id TEXT PRIMARY KEY, student_id TEXT NOT NULL, subject TEXT,
       body TEXT NOT NULL, channel TEXT NOT NULL, sent_at TEXT NOT NULL, read_at TEXT)`),
+    D.prepare(`CREATE TABLE IF NOT EXISTS video_comment (id TEXT PRIMARY KEY, student_id TEXT NOT NULL, stage TEXT NOT NULL,
+      level INTEGER NOT NULL, body TEXT NOT NULL, created_at TEXT NOT NULL, hidden INTEGER DEFAULT 0)`),
     D.prepare(`CREATE TABLE IF NOT EXISTS mailchimp_log (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id TEXT NOT NULL,
       email TEXT, action TEXT NOT NULL, mode TEXT NOT NULL, status TEXT NOT NULL, detail TEXT, at TEXT NOT NULL)`),
   ]);
@@ -103,4 +105,4 @@ export async function studentBy(D, token) {
 }
 
 /** Every table that holds a row for a student, for a full delete. */
-export const STUDENT_TABLES = ['answer', 'sheet', 'compass', 'note', 'event', 'student_profile', 'signin_code', 'plan_tick', 'account_auth', 'message', 'mailchimp_log'];
+export const STUDENT_TABLES = ['answer', 'sheet', 'compass', 'note', 'event', 'student_profile', 'signin_code', 'plan_tick', 'account_auth', 'message', 'mailchimp_log', 'video_comment'];

@@ -228,13 +228,13 @@ export function signinLetter(base, url, { first, to = '', offer, reset = false, 
     hi(first),
     'No problem at all, it happens to all of us. Tap the button and you’ll land at your Base Camp with the password box already open.',
     button(url, 'Choose my new password →'),
-    'The button works once, for the next 30 minutes. If you didn’t ask for this, you can simply ignore it.',
+    'The button works for the next 30 minutes, on your phone or your computer, until you save the new password. If you didn’t ask for this, you can simply ignore it.',
   ], offerFor('signin', to, 'free', offer), close('signin', { ...o, to }, 'security')) };
   return { subject: 'Your link to get back in', ...letter(base, [
     hi(first),
     'Good to see you again. Everything you wrote is right where you left it.',
     button(url, 'Sign me back in →'),
-    'The button works once, for the next 30 minutes.',
+    'The button works for the next 30 minutes, on your phone or your computer.',
   ], offerFor('signin', to, 'free', offer), close('signin', { ...o, to }, 'security')) };
 }
 
@@ -266,6 +266,15 @@ export function answerLetter(base, { first, question, answer, to = '', tier, off
 }
 
 /** To Alexandru: a founder asked a question. Plain, no offer. */
+/** A plain notice to Alexandru: a founder commented on a level's video. */
+export function commentNotice(base, { name, email, comment, stage, level }) {
+  return { subject: `New comment from ${name || email}`, ...letter(base, [
+    `${name || 'A founder'} (${email}) commented on the video of level ${String(level).padStart(2, '0')} (${stage}):`,
+    String(comment || ''),
+    ['Read or hide comments in /mentor: ', link(`${base}/mentor`), '.'],
+  ], null, { sign: false }) };
+}
+
 export function questionNotice(base, { name, email, question, level, domain }) {
   const where = [level ? `Level ${String(level).padStart(2, '0')}` : '', domain || ''].filter(Boolean).join(' · ');
   return { subject: `New question from ${name || email}`, ...letter(base, [

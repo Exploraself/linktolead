@@ -4,7 +4,7 @@
  * Everything a founder enters saves to this browser first (localStorage,
  * guarded). With a free account it is also copied to the account
  * (/api/compass), in batches: on a "Got it" tick, at the end of each section
- * and when the page is hidden, never on every tap. "Who is this compass for?"
+ * and when the page is hidden, never on every tap. "Who is this North Star for?"
  * creates the account; a visitor who already gave their name and email on the
  * sales page gets one without being asked again. Answers given before the
  * account existed are moved into it, never discarded. Older North Star entries
@@ -663,9 +663,26 @@
     </div>`;
   }
 
-  const pSave = () => `<div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 10px">
+  /* Sharing: their reading, or an invitation to take it. WhatsApp and LinkedIn
+   * open with the words already written; the founder still presses send. */
+  const SHARE_URL = 'https://linktolead.exploraself.com/northstar';
+  const shareLink = (src, what) => `${SHARE_URL}?utm_source=${src}&utm_medium=share&utm_content=${what}`;
+  function shareText(c, what, src) {
+    const url = shareLink(src, what);
+    if (what === 'reading' && c && c.rd && c.rd.any) return `I just took The Leader’s North Star. My strongest side: ${D[c.rd.hi].name}. The one that needs me first: ${D[c.rd.lo].name}. Eight honest questions, free. Take yours: ${url}`;
+    return `Eight honest questions about how you lead yourself, your people, your business and the market. Free, about 10 minutes. Take The Leader’s North Star: ${url}`;
+  }
+  const WA = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.8 8.2c.2-.4.5-.4.8-.4h.5c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .5-.1.6l-.5.6c.6 1.2 1.6 2.1 2.8 2.7l.6-.6c.2-.2.4-.2.6-.1l1.6.7c.2.1.4.3.4.6v.5c0 .3-.1.6-.4.8-.6.4-1.4.5-2.2.2-2.3-.9-4.1-2.7-5-5-.3-.8-.2-1.6.2-2.2z" fill="currentColor"/></svg>';
+  const LI = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4M12 10v7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  const shareRow = (c, what, label) => `<div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .06em">${label}</span>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+        <a href="https://wa.me/?text=${encodeURIComponent(shareText(c, what, 'whatsapp'))}" target="_blank" rel="noopener" data-f="share-${what}-wa" style="min-height: 44px; border-radius: 5px; border: 1px solid #25D366; color: var(--ink); background: var(--paper); font-weight: 600; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><span style="color: #1DA851; display: inline-flex">${WA}</span>WhatsApp</a>
+        <a href="https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(shareText(c, what, 'linkedin'))}" target="_blank" rel="noopener" data-f="share-${what}-li" style="min-height: 44px; border-radius: 5px; border: 1px solid #0A66C2; color: var(--ink); background: var(--paper); font-weight: 600; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><span style="color: #0A66C2; display: inline-flex">${LI}</span>LinkedIn</a>
+      </div></div>`;
+
+  const pSave = (c) => `<div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 10px">
       <span class="eb">Save your results</span>
-      <h2 class="sf" style="font-size: 26px; line-height: 1.2">Keep what you found. <span class="sfi" style="color: var(--goldink)">Print it or send it to yourself.</span></h2>
+      <h2 class="sf" style="font-size: 26px; line-height: 1.2">Keep what you found. <span class="sfi" style="color: var(--goldink)">Print it, send it, share it.</span></h2>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 14px; font-size: 14px">
         ${['Your first insight', 'Your North Star reading', 'Your feedback in all four domains', 'A next step for each domain', 'Your twelve weeks'].map((t) => `<span style="display: inline-flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#6F93B8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>${t}</span>`).join('')}
       </div>
@@ -677,6 +694,10 @@
         <button type="button" data-act="print" data-f="print" style="min-height: 46px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Print</button>
         <button type="button" data-act="print" data-f="pdf" style="min-height: 46px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Save as PDF</button>
       </div>
+      <div class="no-print" style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--line)">
+        ${c && c.rd && c.rd.any ? shareRow(c, 'reading', 'SHARE YOUR READING') : ''}
+        ${shareRow(c, 'invite', 'INVITE SOMEONE TO TAKE IT')}
+      </div>
       <span role="status" style="font-size: 13px; color: ${UI.mail.startsWith('Sent') ? 'var(--people)' : 'var(--muted)'}; font-weight: 600">${esc(UI.mail)}</span>
     </div>`;
 
@@ -685,7 +706,7 @@
     const row = (d, i) => `<div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; align-items: center; padding: 4px 0; border-radius: 6px; outline: ${f === i ? '1px solid rgba(111,147,184,.55)' : '1px solid transparent'}; outline-offset: 3px; transition: outline-color .4s ease">
         <span style="font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: ${f === i ? '#EEF2F7' : '#B8C6D6'}; display: inline-flex; align-items: center; gap: 8px">${d.name}${f === i ? '<span style="font-size: 10px; color: #0E1C2B; background: #6F93B8; border-radius: 3px; padding: 1px 5px">LEAN</span>' : ''}</span>
         ${Array.from({ length: 12 }, (_, k) => `<span class="cellin" style="height: 34px; border-radius: 3px; background: ${WC[i]}; opacity: ${Math.min(1, (0.28 + k * 0.055) * (f === null ? 1 : f === i ? 1.25 : 0.8)).toFixed(2)}; animation-delay: ${(k * 0.06 + i * 0.04).toFixed(2)}s; transition: opacity .5s ease"></span>`).join('')}</div>`;
-    const band = (span, text, on) => `<span style="grid-column: span ${span}; border-top: 2px solid ${on ? '#6F93B8' : '#2A3A50'}; padding-top: 8px; text-align: center; font-size: 11px; font-weight: 600; letter-spacing: .1em; color: ${on ? '#A9C0D9' : '#B8C6D6'}">${text}</span>`;
+    const band = (span, text, on, br) => `<span style="grid-column: span ${span}; border-top: 2px solid ${br ? '#B4703F' : on ? '#6F93B8' : '#2A3A50'}; padding-top: 8px; text-align: center; font-size: 11px; font-weight: 600; letter-spacing: .1em; color: ${br ? '#D6BF8F' : on ? '#A9C0D9' : '#B8C6D6'}">${text}</span>`;
     return `<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
         <div style="display: flex; flex-direction: column; gap: 8px; max-width: 680px">
           <span class="eb" style="color: #A9C0D9">How twelve weeks run · your version</span>
@@ -703,7 +724,7 @@
             ${Array.from({ length: 12 }, (_, k) => `<span style="text-align: center; font-size: 12px; font-weight: 600; color: ${k < 3 ? '#A9C0D9' : '#8A7A5E'}; display: flex; flex-direction: column; align-items: center; gap: 4px">${k + 1}${k === 0 ? '<span class="pinp" style="width: 8px; height: 8px; border-radius: 50%; background: #6F93B8"></span>' : ''}</span>`).join('')}</div>
           ${D.map(row).join('')}
           <div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; margin-top: 8px"><span></span>
-            ${band(3, 'FOUNDER LAUNCHPAD · FREE', true)}${band(2, 'THE 1:1 · FULL NORTH STAR')}${band(4, 'PERSONAL LEADERSHIP LAB · $97 · 2 SESSIONS')}${band(3, 'BUSINESS HUB · $397 · 3 SESSIONS IN TOTAL')}</div>
+            ${band(3, 'FOUNDER LAUNCHPAD · FREE', true)}${band(2, 'BOOK THE BOARDROOM · UNLOCKS 04–05', false, true)}${band(4, 'PERSONAL LEADERSHIP LAB · $97 · 2 SESSIONS')}${band(3, 'BUSINESS HUB · $397 · 3 SESSIONS IN TOTAL')}</div>
         </div>
       </div>
       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; border-top: 1px solid #3A2F20; padding-top: 16px">
@@ -713,11 +734,11 @@
   }
 
   const STOPS = [
-    { n: '1', short: 'Founder Launchpad', name: 'The Founder Launchpad', tag: 'Step 1 · start here', line: 'Know yourself before you build.', modules: '01–03', sessions: '—', price: 'Free', cta: 'Start free', href: '/ground-plan/', x: 150, y: 360, lx: 136, ly: 364, anchor: 'end' },
-    { n: '2', short: 'The Boardroom', name: 'The Boardroom', tag: 'Step 2 · you and Alexandru', line: 'Sit at the table with Alexandru.', modules: '04–05', sessions: '1 session', price: '[YOUR PRICE]', cta: 'Book the Boardroom', href: BOOKING, ext: true, x: 290, y: 300, lx: 306, ly: 304, anchor: 'start' },
-    { n: '3', short: 'Leadership LAB', name: 'The Personal Leadership LAB', tag: 'Step 3', line: 'Lead yourself first.', modules: '06–09', sessions: '2 sessions', price: '$97', cta: 'Join the LAB', href: LAB_URL, ext: true, x: 175, y: 235, lx: 161, ly: 239, anchor: 'end' },
-    { n: '4', short: 'Business HUB', name: 'The Business HUB', tag: 'Step 4', line: 'Build the business that carries it.', modules: '10–12', sessions: '3 in total (incl. 1 from the LAB)', price: '$397', cta: 'Join the HUB', href: HUB_URL, ext: true, x: 285, y: 160, lx: 301, ly: 164, anchor: 'start' },
-    { n: '5', short: 'The Summit', name: 'The Summit', tag: 'The top', line: 'The whole incubator, with Alexandru every week.', modules: 'All', sessions: 'Every week', price: '$1,989', cta: 'Talk about The Summit', href: '/northstar/summit', x: 230, y: 58, lx: 258, ly: 62, anchor: 'start' },
+    { n: '1', short: 'Founder Launchpad', unlock: 'Free. Modules 01–03 open the moment you sign up.', name: 'The Founder Launchpad', tag: 'Step 1 · start here', line: 'Know yourself before you build.', modules: '01–03', sessions: '—', price: 'Free', cta: 'Start free', href: '/ground-plan/', x: 150, y: 360, lx: 136, ly: 364, anchor: 'end' },
+    { n: '2', short: 'The Boardroom', unlock: 'Book one session with Alexandru. It unlocks modules 04–05 and the full North Star.', name: 'The Boardroom', tag: 'Step 2 · you and Alexandru', line: 'Sit at the table with Alexandru.', modules: '04–05', sessions: '1 session', price: '[YOUR PRICE]', cta: 'Book the Boardroom · unlock 04–05', href: BOOKING, ext: true, x: 290, y: 300, lx: 306, ly: 304, anchor: 'start' },
+    { n: '3', short: 'Leadership LAB', unlock: 'Joining unlocks modules 06–09.', name: 'The Personal Leadership LAB', tag: 'Step 3', line: 'Lead yourself first.', modules: '06–09', sessions: '2 sessions', price: '$97', cta: 'Join the LAB', href: LAB_URL, ext: true, x: 175, y: 235, lx: 161, ly: 239, anchor: 'end' },
+    { n: '4', short: 'Business HUB', unlock: 'Joining unlocks modules 10–12.', name: 'The Business HUB', tag: 'Step 4', line: 'Build the business that carries it.', modules: '10–12', sessions: '3 in total (incl. 1 from the LAB)', price: '$397', cta: 'Join the HUB', href: HUB_URL, ext: true, x: 285, y: 160, lx: 301, ly: 164, anchor: 'start' },
+    { n: '5', short: 'The Summit', unlock: 'Every module, with Alexandru every week.', name: 'The Summit', tag: 'The top', line: 'The whole incubator, with Alexandru every week.', modules: 'All', sessions: 'Every week', price: '$1,989', cta: 'Talk about The Summit', href: '/northstar/summit', x: 230, y: 58, lx: 258, ly: 62, anchor: 'start' },
   ];
   function pClimb() {
     const si = S.stop, sv = STOPS[si];
@@ -733,20 +754,21 @@
           <polyline points="200,96 230,40 262,96" fill="none" stroke="#EEF2F7" stroke-width="1.6" opacity=".6"/>
           <polyline class="trail" points="190,395 150,360 290,300 175,235 285,160 230,58" fill="none" stroke="#6F93B8" stroke-width="2.2" stroke-dasharray="6 6" stroke-linecap="round"/>
           <g class="flagw"><path d="M230 58V26" stroke="#EEF2F7" stroke-width="1.6"/><path d="M230 27h20l-6 6 6 6h-20z" fill="#6F93B8"/></g>
-          ${STOPS.map((t, i) => `<g>${i === si ? `<circle class="halo" cx="${t.x}" cy="${t.y}" r="20" fill="none" stroke="#6F93B8" stroke-width="1.5"/>` : ''}
-            <circle class="stopc" cx="${t.x}" cy="${t.y}" r="${i === si ? 11 : 8}" fill="${i === si ? '#6F93B8' : i === 4 ? '#A9C0D9' : '#0E1C2B'}" stroke="#EEF2F7" stroke-width="1.5" style="animation-delay: ${(0.2 + i * 0.15).toFixed(2)}s"/>
-            <text x="${t.lx}" y="${t.ly}" text-anchor="${t.anchor}" fill="${i === si ? '#A9C0D9' : '#B8C6D6'}" font-family="Inter" font-weight="600" font-size="12.5">${t.short}</text></g>`).join('')}
+          ${STOPS.map((t, i) => `<g>${i === si ? `<circle class="halo" cx="${t.x}" cy="${t.y}" r="20" fill="none" stroke="#D6BF8F" stroke-width="1.5"/>` : ''}
+            <circle class="stopc" cx="${t.x}" cy="${t.y}" r="${i === si ? 11 : 8}" fill="${i === si ? '#B4703F' : i === 4 ? '#A9C0D9' : '#0E1C2B'}" stroke="${i === si ? '#F6EEDD' : '#EEF2F7'}" stroke-width="1.5" style="animation-delay: ${(0.2 + i * 0.15).toFixed(2)}s"/>
+            <text x="${t.lx}" y="${t.ly}" text-anchor="${t.anchor}" fill="${i === si ? '#D6BF8F' : '#B8C6D6'}" font-family="Inter" font-weight="600" font-size="12.5">${t.short}</text>${i === 1 ? `<g transform="translate(${t.lx + 101} ${t.ly - 11})" aria-hidden="true"><rect x="1" y="5" width="10" height="8" rx="1.5" fill="#B4703F"/><path d="M3.5 5V3.5a2.5 2.5 0 0 1 5 0" fill="none" stroke="#D6BF8F" stroke-width="1.3"/></g>` : ''}</g>`).join('')}
         </svg>
         <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
-          <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 6px" role="group" aria-label="Stops on the climb">${STOPS.map((t, i) => `<button type="button" data-act="stop" data-i="${i}" data-f="stop-${i}" aria-pressed="${i === si}" style="min-height: 40px; padding: 0 12px; border-radius: 4px; border: 1px solid ${i === si ? '#6F93B8' : '#2A3A50'}; background: ${i === si ? 'rgba(111,147,184,.18)' : 'transparent'}; color: #EEF2F7; font-size: 12px; font-weight: 600; cursor: pointer">${t.n} · ${t.short}</button>`).join('')}</div>
-          <div class="pop" style="background: rgba(247,242,231,.05); border: 1px solid #2A3A50; border-radius: 9px; padding: 20px; display: flex; flex-direction: column; gap: 10px" aria-live="polite">
-            <span class="eb" style="color: #A9C0D9">${sv.tag}</span>
+          <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 6px" role="group" aria-label="Stops on the climb">${STOPS.map((t, i) => `<button type="button" data-act="stop" data-i="${i}" data-f="stop-${i}" aria-pressed="${i === si}" style="min-height: 40px; padding: 0 12px; border-radius: 4px; border: 1px solid ${i === si ? '#D6BF8F' : '#2A3A50'}; background: ${i === si ? 'linear-gradient(120deg,#2B1B12,#1C1309)' : 'transparent'}; color: ${i === si ? '#F6EEDD' : '#EEF2F7'}; font-size: 12px; font-weight: 600; cursor: pointer">${t.n} · ${t.short}${i === 1 ? ' <span aria-hidden="true" style="color: #D6BF8F">· unlocks 04–05</span>' : ''}</button>`).join('')}</div>
+          <div class="pop" style="background: linear-gradient(120deg, rgba(43,27,18,.85), rgba(28,19,9,.85)); border: 1px solid rgba(214,191,143,.5); border-radius: 9px; padding: 20px; display: flex; flex-direction: column; gap: 10px" aria-live="polite">
+            <span class="eb" style="color: #D6BF8F">${sv.tag}</span>
             <span class="sf" style="font-size: 28px; color: #EEF2F7; line-height: 1.15">${sv.name}</span>
-            <span class="sfi" style="font-size: 18px; color: #A9C0D9; line-height: 1.35">${sv.line}</span>
+            <span class="sfi" style="font-size: 18px; color: #D6BF8F; line-height: 1.35">${sv.line}</span>
+            <div style="display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 6px; background: ${si === 1 ? 'rgba(214,191,143,.16)' : 'rgba(214,191,143,.07)'}; border: 1px solid ${si === 1 ? '#D6BF8F' : 'rgba(214,191,143,.3)'}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px" fill="none" stroke="#D6BF8F" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="${si === 0 || si === 4 ? 'M8 11V8a4 4 0 0 1 7.5-2' : 'M8 11V8a4 4 0 0 1 8 0v3'}"/></svg><span style="font-size: 14.5px; font-weight: ${si === 1 ? 600 : 500}; color: #F6EEDD; line-height: 1.5">${sv.unlock}</span></div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-top: 4px">
-              ${[['MODULES', sv.modules], ['WITH ALEXANDRU', sv.sessions], ['PRICE', sv.price]].map(([k, v]) => `<div style="border: 1px solid #3A2F20; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #B8C6D6; letter-spacing: .1em">${k}</span><span style="font-weight: 600; color: #EEF2F7">${v}</span></div>`).join('')}
+              ${[['MODULES', sv.modules], ['WITH ALEXANDRU', sv.sessions], ['PRICE', sv.price]].map(([k, v]) => `<div style="border: 1px solid rgba(214,191,143,.28); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #CDBB97; letter-spacing: .1em">${k}</span><span style="font-weight: 600; color: #EEF2F7">${v}</span></div>`).join('')}
             </div>
-            <a href="${sv.href}" class="go no-print"${sv.ext ? ' target="_blank" rel="noopener"' : ''} style="align-self: flex-start; margin-top: 6px; display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 4px; background: #6F93B8; color: #0E1C2B; font-weight: 600; text-decoration: none">${sv.cta} <span class="arr" aria-hidden="true">${sv.ext ? '↗' : '→'}</span></a>
+            <a href="${sv.href}" class="go no-print"${sv.ext ? ' target="_blank" rel="noopener"' : ''} style="align-self: flex-start; margin-top: 6px; display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 4px; background: #D6BF8F; color: #1C1309; font-weight: 600; text-decoration: none">${sv.cta} <span class="arr" aria-hidden="true">${sv.ext ? '↗' : '→'}</span></a>
           </div>
         </div>
       </div>`;
@@ -1014,7 +1036,7 @@
     return `<div style="position: fixed; inset: 0; z-index: 50; background: rgba(16,13,9,.6); display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto">
       <form class="card pop" id="gate-form" role="dialog" aria-modal="true" aria-labelledby="gate-h" novalidate style="position: relative; width: 100%; max-width: 480px; padding: 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.35); margin: auto">
         <button type="button" data-act="gate-skip" data-f="gate-x" aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-        <div style="display: flex; align-items: center; gap: 12px; padding-right: 44px"><svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10" fill="none" stroke="#6F93B8" stroke-width="1.4"/><polygon points="12,4 14,12 12,13.5 10,12" fill="#6F93B8"/></svg><div style="display: flex; flex-direction: column"><span class="eb">Before your first answer</span><span class="sf" style="font-size: 22px" id="gate-h">Who is this compass for?</span></div></div>
+        <div style="display: flex; align-items: center; gap: 12px; padding-right: 44px"><svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10" fill="none" stroke="#6F93B8" stroke-width="1.4"/><polygon points="12,4 14,12 12,13.5 10,12" fill="#6F93B8"/></svg><div style="display: flex; flex-direction: column"><span class="eb">Before your first answer</span><span class="sf" style="font-size: 22px" id="gate-h">Who is this North Star for?</span></div></div>
         <span style="font-size: 14px; color: var(--muted)">We keep your answers with your name, so your feedback and your launchpad are yours.</span>
         <div class="gate-two" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
           <label style="${lab}">First name<input class="inp" id="g-first" type="text" autocomplete="given-name" value="${esc(P.first)}" data-f="g-first"></label>
@@ -1023,7 +1045,7 @@
         <label style="${lab}">Email<input class="inp" id="g-email" type="email" autocomplete="email" value="${esc(P.email)}"></label>
         <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: var(--muted)"><input type="checkbox" id="g-consent"${P.consent ? ' checked' : ''} style="width: 18px; height: 18px; margin-top: 1px; accent-color: #6F93B8; flex: none">I agree that ExploraSelf may email me my results and occasional guidance. I can unsubscribe any time.</label>
         <span id="gate-err" role="alert" style="font-size: 13px; color: var(--self); font-weight: 600"></span>
-        <button type="submit" data-f="gate-go" style="min-height: 50px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; font-size: 15px; cursor: pointer">Start my compass →</button>
+        <button type="submit" data-f="gate-go" style="min-height: 50px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; font-size: 15px; cursor: pointer">Start my North Star →</button>
         <button type="button" data-act="gate-skip" data-f="gate-skip" style="min-height: 44px; border-radius: 5px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-weight: 600; cursor: pointer">Skip for now · keep exploring</button>
         ${UI.signinOpen ? `<div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); padding-top: 12px"><span style="font-size: 13px; font-weight: 600">Already have an account? Sign in with the email above.</span>${pSignin('gate')}</div>`
           : '<button type="button" data-act="signin-open" data-f="signin-open" style="border: 0; background: none; padding: 6px 0; color: var(--goldink); font-size: 13px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer">Already have an account? Sign in</button>'}
@@ -1116,7 +1138,7 @@
     put('s-reading', pReading(c));
     put('s-numbers', pNumbers(c));
     for (let i = 0; i < 4; i++) put('fb-' + i, pFeedback(c, i));
-    put('s-save', pSave());
+    put('s-save', pSave(c));
     put('s-weeks', pWeeks(c));
     put('s-climb', pClimb());
     put('lab-in', pLabIn());

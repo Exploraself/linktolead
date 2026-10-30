@@ -68,7 +68,7 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
       <span style="font-size: 12px; color: #5A6580; margin-top: -6px">At least 10 characters. You sign in with your email and this password.</span>` : ''}
       <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: #3D4966"><input type="checkbox" id="j-consent" style="width: 18px; height: 18px; margin-top: 1px; accent-color: #B4975F; flex: none">${CONSENT}</label>
       <span id="gate-err" role="alert" style="font-size: 13px; color: #B5512E; font-weight: 700"></span>
-      <button type="submit" class="ab-go">${stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY GROUND PLAN →'}</button>
+      <button type="submit" class="ab-go">${stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →'}</button>
       ${stay ? '' : '<button type="button" data-close style="min-height: 44px; border-radius: 5px; border: 1px solid #D8CDBB; background: transparent; color: #121C2D; font-weight: 700; cursor: pointer">Not now · keep reading</button>'}
       <a href="/ground-plan/#signin" style="font-size: 13px; text-align: center; font-weight: 700; color: #7A5E26">Already have an account? Sign in</a>
     </form>
@@ -125,7 +125,7 @@ function wire(gate, variant, landing) {
     } catch (ex) {
       err(ex && ex.message && !/fetch|network|load failed|import/i.test(ex.message) ? ex.message : 'We could not reach the account service just now. Try again in a minute.');
     }
-    go.disabled = false; go.textContent = ctx.stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY GROUND PLAN →';
+    go.disabled = false; go.textContent = ctx.stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →';
   });
 }
 
