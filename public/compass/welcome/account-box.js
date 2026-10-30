@@ -1,11 +1,11 @@
 /* The account box on the sales pages: makes the free account and opens the
  * founder's Ground Plan at /start, signed in at once.
  *
- *   'full'   (/compass/welcome and /compass/welcome-a, landing "c"): first
- *            name, surname, email, company (or "No company yet"), interest,
- *            industry, a password (required: at least 10 characters, typed
- *            twice), consent.
- *   'simple' (/a and /b = "/"): first name, surname, email, consent. No
+ *   'full'   (/compass/welcome and /compass/welcome-a, landing "c"; / and
+ *            /b, landing "b"): first name, surname, email, company (or "No
+ *            company yet"), interest, industry, a password (required: at
+ *            least 10 characters, typed twice), consent.
+ *   'simple' (/a, landing "a"): first name, surname, email, consent. No
  *            password, ever: these founders sign in by email link.
  *
  * The consent box starts unticked; without it the account is still made, and
@@ -28,13 +28,21 @@ const STYLE = `.abox .inp{min-height:46px;border:1px solid #D8CDBB;border-radius
 .abox .ab-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:420px){.abox .ab-two{grid-template-columns:1fr}}`;
 
-const markup = (variant) => `<div class="gpop abox" role="dialog" aria-modal="true" aria-labelledby="gate-h" style="position: relative; width: 100%; max-width: 480px; background: #FFFDF8; color: #15213B; border-radius: 10px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.4); margin: auto; font-family: 'Libre Franklin', Arial, sans-serif; box-sizing: border-box">
+// The words at the top of the box. The Compass sales page carries the
+// visitor's answers into the account; the home page has none to carry.
+const HEAD = {
+  compass: ['YOUR FULL ROAD IS ONE STEP AWAY', 'Where should we send your Compass?', 'Your answers from this page come with you. Free.'],
+  full: ['START FREE', 'Your free account', 'Free. You sign in with your email and a password.'],
+  simple: ['START FREE', 'Your free account', 'One minute. Name and email. Free.'],
+};
+
+const markup = (variant, head = HEAD[variant]) => `<div class="gpop abox" role="dialog" aria-modal="true" aria-labelledby="gate-h" style="position: relative; width: 100%; max-width: 480px; background: #FFFDF8; color: #15213B; border-radius: 10px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.4); margin: auto; font-family: 'Libre Franklin', Arial, sans-serif; box-sizing: border-box">
     <style>${STYLE}</style>
     <button type="button" data-close aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #D8CDBB; background: #FFFFFF; color: #15213B; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
     <form id="gate-form" novalidate style="display: flex; flex-direction: column; gap: 14px">
-      <span style="font-size: 12px; font-weight: 700; letter-spacing: .16em; color: #7A5E26; padding-right: 44px">${variant === 'full' ? 'YOUR FULL ROAD IS ONE STEP AWAY' : 'START FREE'}</span>
-      <h2 id="gate-h" style="margin: 0; font: 600 26px/1.25 Fraunces, Georgia, serif; padding-right: 40px">${variant === 'full' ? 'Where should we send your Compass?' : 'Your free account'}</h2>
-      <span style="font-size: 14px; color: #3D4966">${variant === 'full' ? 'Your answers from this page come with you. Free.' : 'One minute. Name and email. Free.'}</span>
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: .16em; color: #7A5E26; padding-right: 44px">${head[0]}</span>
+      <h2 id="gate-h" style="margin: 0; font: 600 26px/1.25 Fraunces, Georgia, serif; padding-right: 40px">${head[1]}</h2>
+      <span style="font-size: 14px; color: #3D4966">${head[2]}</span>
       <div class="ab-two">
         <label style="${LAB}">First name<input class="inp" id="j-first" type="text" autocomplete="given-name" maxlength="60"></label>
         <label style="${LAB}">Surname<input class="inp" id="j-last" type="text" autocomplete="family-name" maxlength="60"></label>
@@ -55,9 +63,9 @@ const markup = (variant) => `<div class="gpop abox" role="dialog" aria-modal="tr
 let ctx = { opener: null, stage: null, variant: 'full', landing: 'c' };
 function close() { $('#gate').hidden = true; if (ctx.opener) ctx.opener.focus(); }
 
-function wire(gate, variant) {
-  gate.innerHTML = markup(variant);
-  gate.dataset.variant = variant;
+function wire(gate, variant, landing) {
+  gate.innerHTML = markup(variant, HEAD[variant === 'full' && landing === 'c' ? 'compass' : variant]);
+  gate.dataset.variant = variant + ' ' + landing;
   gate.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
   if (!gate.dataset.wired) {
     gate.addEventListener('click', (e) => { if (e.target === gate) close(); });
@@ -85,7 +93,7 @@ function wire(gate, variant) {
     err('');
     try {
       const A = await import('/account.js');
-      const source = variant === 'full' ? 'sales-page' : 'home';
+      const source = ctx.landing === 'c' ? 'sales-page' : 'home';
       const out = A.joined() ? { token: A.token() } : await A.signup({ first, last, email, consent, source, stage: p.stage, type: variant,
         landing: ctx.landing, utm: utm(),
         ...(d ? { company: d.company, noCompany: d.noCompany, interest: d.interest, industry: d.industry, password: pw, confirm: pw2 } : {}) });
@@ -101,14 +109,14 @@ function wire(gate, variant) {
 
 /** Open the box. A founder already signed in on this device goes straight to
  *  their Ground Plan. */
-export function open({ gate, opener, stage, variant = 'full', landing = variant === 'full' ? 'c' : 'b' }) {
+export function open({ gate, opener, stage, variant = 'full', landing = variant === 'full' ? 'c' : 'a' }) {
   ctx = { opener, stage, variant, landing };
   if (hasAccount()) {
     if (stage) { const p = known() || {}; p.stage = stage.id; try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* private mode */ } }
     location.href = '/start#home';
     return;
   }
-  if (gate.dataset.variant !== variant) wire(gate, variant);
+  if (gate.dataset.variant !== variant + ' ' + landing) wire(gate, variant, landing);
   const p = known();
   if (p) { $('#j-first').value = p.first || ''; $('#j-last').value = p.last || ''; $('#j-email').value = p.email || ''; }
   gate.hidden = false;
