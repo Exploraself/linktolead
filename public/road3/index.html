@@ -164,6 +164,30 @@ button{font:inherit}
 :root[data-theme="light"] .dk [style*="color: #C9BCA4"]{color:#5E5446!important}
 :root[data-theme="light"] .dk [style*="color: #F3EBDA"]{color:#1C1309!important}
 :root[data-theme="light"] .dk [style*="background: rgba(180,151,95,.16)"]{background:rgba(180,151,95,.22)!important}
+/* Hero image · the constellation (30 Oct). Gold light; deeper gold on the light page. */
+.row>.vz{flex-direction:column;align-items:center;gap:10px}
+.r3c{width:100%;max-width:440px;height:auto;overflow:visible;--r3c-dot:#F3DDA0;--r3c-lab:#F3DDA0;--r3c-labs:#D6BF8F;--r3c-core:#14100B}
+.r3c-gl{fill:none;stroke:url(#r3c-gold);stroke-width:1.8;stroke-linecap:round;filter:url(#r3c-glow)}
+.r3c-dot{fill:var(--r3c-dot);filter:url(#r3c-glow)}
+.r3c-core{fill:var(--r3c-core)}
+.r3c-lab{font:700 9.5px 'Inter',Arial,sans-serif;letter-spacing:.28em;fill:var(--r3c-lab);text-anchor:middle}
+.r3c-labs{font:600 8.5px 'Inter',Arial,sans-serif;letter-spacing:.18em;fill:var(--r3c-labs);text-anchor:middle}
+.r3c-cap{margin:0;font:italic 500 19px/1.35 Newsreader,Georgia,serif;color:#D6BF8F;text-align:center;max-width:32ch}
+:root[data-theme="light"] .r3c{--r3c-dot:#9A7A3F;--r3c-lab:#5E4510;--r3c-labs:#7A5C16;--r3c-core:#FFF8EA}
+:root[data-theme="light"] .r3c-cap{color:#7A5C16}
+.r3c-tw{animation:r3cTw 3s ease-in-out infinite}.r3c-tw2{animation:r3cTw 4.2s ease-in-out infinite .8s}.r3c-tw3{animation:r3cTw 3.6s ease-in-out infinite 1.6s}
+@keyframes r3cTw{50%{opacity:.15}}
+.r3c-old{animation:r3cOld 10s ease-in-out infinite}
+@keyframes r3cOld{0%,45%{opacity:1}58%,92%{opacity:.12}100%{opacity:1}}
+.r3c-new{stroke-dasharray:200;stroke-dashoffset:200;animation:r3cNew 10s ease-in-out infinite}
+@keyframes r3cNew{0%,48%{stroke-dashoffset:200}62%,92%{stroke-dashoffset:0}100%{stroke-dashoffset:200}}
+.r3c-heat{transform-origin:210px 150px;animation:r3cHeat 10s ease-in-out infinite}
+@keyframes r3cHeat{0%{opacity:.1;transform:scale(.7)}40%{opacity:.75;transform:scale(1.7)}52%,100%{opacity:0;transform:scale(.7)}}
+.r3c-p1{animation:r3cP1 10s linear infinite}@keyframes r3cP1{0%,45%{opacity:1}50%,100%{opacity:0}}
+.r3c-p2{animation:r3cP2 10s linear infinite;opacity:0}@keyframes r3cP2{0%,58%{opacity:0}62%,92%{opacity:1}96%,100%{opacity:0}}
+/* Still: show the answer, roads between them and a calm centre. */
+@media (prefers-reduced-motion:reduce){.r3c *{animation:none !important}.r3c-new{stroke-dashoffset:0}.r3c-old{opacity:.12}.r3c-heat,.r3c-p1,.r3c-p2{opacity:0}}
+[data-off] .r3c *{animation-play-state:paused}
 </style>
 </head>
 <body>
@@ -183,13 +207,44 @@ button{font:inherit}
           <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 8px"><button type="button" class="cta" data-join>Join →</button><span class="note">3 levels · Instant access</span></div>
         </div>
         <div class="vz">
-          <svg viewBox="0 0 420 300" style="width: 100%; max-width: 420px; height: auto" role="img" aria-label="Thoughts in your head become a written page">
-            <g fill="none" stroke="#8F8775" stroke-width="1.6" stroke-linecap="round"><path d="M70 150c-24-6-30-40-6-52 6-30 46-34 58-12 22-14 52 2 46 26 22 6 22 40-4 44-4 26-44 30-56 10-18 14-48 4-38-16z"></path><path d="M78 128c14-10 30 6 18 16s-26-2-12-14M116 112c10 8 0 22-10 14M132 150c-8-10 12-18 16-6"></path></g>
-            <path d="M190 150h52" stroke="#B4975F" stroke-width="2" stroke-dasharray="4 6"></path><path d="M238 142l10 8-10 8" fill="none" stroke="#B4975F" stroke-width="2"></path>
-            <rect x="268" y="62" width="120" height="164" fill="#F3EBDA"></rect><rect x="268" y="62" width="120" height="164" fill="none" stroke="#B4975F" stroke-width="1.5"></rect>
-            <g stroke="#C9B48A" stroke-width="1.2"><path d="M284 96h88M284 120h88M284 144h88M284 168h88M284 192h60"></path></g>
-            <g fill="none" stroke="#7A5C16" stroke-width="2" stroke-linecap="round"><path d="M284 90l4 4 8-8M284 114l4 4 8-8M284 138l4 4 8-8"></path></g>
+          <!-- Hero image (30 Oct, Alexandru picked option D): every road runs through you.
+               Six stars (clients, team, money, market, suppliers, family) joined only
+               through YOU, which glows hot; then light-lines join them to each other and
+               the centre cools. Gold light on the dark hero, deeper gold on the light one. -->
+          <svg class="r3c" viewBox="0 0 420 300" role="img" aria-label="Clients, team, money, market, suppliers and family connect only through one overloaded point called you; then they connect to each other and the centre calms.">
+            <defs>
+              <linearGradient id="r3c-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3DDA0"/><stop offset=".45" stop-color="#C9A96E"/><stop offset=".7" stop-color="#8E6A22"/><stop offset="1" stop-color="#F3DDA0"/></linearGradient>
+              <radialGradient id="r3c-halo"><stop offset="0" stop-color="#F3DDA0" stop-opacity=".9"/><stop offset="1" stop-color="#B4975F" stop-opacity="0"/></radialGradient>
+              <filter id="r3c-glow" filterUnits="userSpaceOnUse" x="-60" y="-60" width="540" height="420"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <circle class="r3c-dot r3c-tw" cx="40" cy="40" r="1.1"/><circle class="r3c-dot r3c-tw2" cx="390" cy="120" r="1.2"/><circle class="r3c-dot r3c-tw3" cx="200" cy="292" r="1"/><circle class="r3c-dot r3c-tw" cx="230" cy="26" r="1.2"/>
+            <g class="r3c-old"><path class="r3c-gl" d="M210 150 L90 70 M210 150 L330 70 M210 150 L60 170 M210 150 L360 170 M210 150 L120 260 M210 150 L300 260" stroke-width="1.2"/></g>
+            <path class="r3c-new r3c-gl" d="M90 70 L330 70 M60 170 L120 260 M360 170 L300 260 M90 70 L60 170 M330 70 L360 170 M120 260 L300 260" stroke-width="1.2"/>
+            <circle class="r3c-heat" cx="210" cy="150" r="28" fill="url(#r3c-halo)"/>
+            <circle class="r3c-core" cx="210" cy="150" r="22"/><circle class="r3c-gl" cx="210" cy="150" r="22"/><text class="r3c-lab" x="210" y="154">YOU</text>
+            <g class="r3c-p1">
+              <circle class="r3c-dot" r="2.6"><animateMotion dur="1.4s" repeatCount="indefinite" path="M90 70 L210 150"/></circle>
+              <circle class="r3c-dot" r="2.6"><animateMotion dur="1.7s" repeatCount="indefinite" path="M360 170 L210 150"/></circle>
+              <circle class="r3c-dot" r="2.6"><animateMotion dur="1.2s" repeatCount="indefinite" path="M120 260 L210 150"/></circle>
+              <circle class="r3c-dot" r="2.6"><animateMotion dur="1.9s" repeatCount="indefinite" path="M330 70 L210 150"/></circle>
+              <circle class="r3c-dot" r="2.6"><animateMotion dur="1.5s" repeatCount="indefinite" path="M60 170 L210 150"/></circle>
+            </g>
+            <g class="r3c-p2">
+              <circle class="r3c-dot" r="2.6"><animateMotion dur="1.6s" repeatCount="indefinite" path="M90 70 L330 70"/></circle>
+              <circle class="r3c-dot" r="2.6"><animateMotion dur="1.4s" repeatCount="indefinite" path="M360 170 L300 260"/></circle>
+              <circle class="r3c-dot" r="2.6"><animateMotion dur="1.8s" repeatCount="indefinite" path="M60 170 L120 260"/></circle>
+              <circle class="r3c-dot" r="2.6"><animateMotion dur="2s" repeatCount="indefinite" path="M300 260 L120 260"/></circle>
+            </g>
+            <g>
+              <circle class="r3c-dot" cx="90" cy="70" r="5"/><text class="r3c-labs" x="90" y="52">CLIENTS</text>
+              <circle class="r3c-dot" cx="330" cy="70" r="5"/><text class="r3c-labs" x="330" y="52">TEAM</text>
+              <circle class="r3c-dot" cx="60" cy="170" r="5"/><text class="r3c-labs" x="60" y="194">MONEY</text>
+              <circle class="r3c-dot" cx="360" cy="170" r="5"/><text class="r3c-labs" x="360" y="194">MARKET</text>
+              <circle class="r3c-dot" cx="120" cy="260" r="5"/><text class="r3c-labs" x="120" y="284">SUPPLIERS</text>
+              <circle class="r3c-dot" cx="300" cy="260" r="5"/><text class="r3c-labs" x="300" y="284">FAMILY</text>
+            </g>
           </svg>
+          <p class="r3c-cap">When every road runs through you, you are the traffic jam.</p>
         </div>
       </div>
     </div>
