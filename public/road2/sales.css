@@ -4,12 +4,12 @@
    same way as /compass (style.css there). Motion stops under
    prefers-reduced-motion. */
 html{scroll-behavior:smooth}
-body{margin:0;background:#F3EFEA}
-a{color:#7A5E26}a:hover{color:#121C2D}
-:focus-visible{outline:3px solid #B4975F;outline-offset:3px}
+body{margin:0;background:#EEF2F7}
+a{color:#3E6A94}a:hover{color:#121C2D}
+:focus-visible{outline:3px solid #6F93B8;outline-offset:3px}
 .fc *{box-sizing:border-box}
 .fc h1,.fc h2,.fc h3,.fc p{margin:0}
-.fc{font-family:'Inter',Arial,sans-serif;color:#121C2D;background:#F3EFEA;overflow:hidden}
+.fc{font-family:'Inter',Arial,sans-serif;color:#121C2D;background:#EEF2F7;overflow:hidden}
 .fc button{font-family:inherit}
 .serif{font-family:Newsreader,Georgia,serif;font-style:italic;font-weight:400}
 /* Headings in Newsreader. It is a serif with a lighter top weight than the old
@@ -18,22 +18,22 @@ a{color:#7A5E26}a:hover{color:#121C2D}
 .fc h1,.fc h2,.fc h3,.h2{font-family:Newsreader,Georgia,serif;font-weight:500 !important;letter-spacing:-.015em !important}
 .fc h1 .serif,.fc h2 .serif,.fc h3 .serif{font-weight:400 !important}
 .wrap{max-width:1160px;margin:0 auto}
-.kick{font-size:13px;font-weight:700;letter-spacing:.16em;color:#7A5E26}
-.kick.gold{color:#B4975F}
+.kick{font-size:13px;font-weight:700;letter-spacing:.16em;color:#3E6A94}
+.kick.gold{color:#6F93B8}
 .h2{font-size:clamp(32px,4.6vw,56px);line-height:1;text-transform:uppercase}
 .lede{font-size:18px;line-height:1.6;color:#3D4966}
-.gold-btn{border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 26px;background:#B4975F;color:#121C2D;font-weight:900;font-size:15px;text-transform:uppercase;letter-spacing:.06em;border-radius:4px;text-decoration:none}
-.gold-btn:hover{color:#121C2D;background:#D6BF8F}
+.gold-btn{border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 26px;background:#6F93B8;color:#121C2D;font-weight:900;font-size:15px;text-transform:uppercase;letter-spacing:.06em;border-radius:4px;text-decoration:none}
+.gold-btn:hover{color:#121C2D;background:#A9C0D9}
 .yn{min-height:48px;min-width:96px;border:2px solid #121C2D;background:#FFFFFF;color:#121C2D;font-weight:900;font-size:15px;cursor:pointer;border-radius:4px}
-.yn[aria-pressed="true"]{background:#121C2D;color:#F3EFEA}
-.inp{font-family:inherit;font-size:15px;min-height:46px;padding:0 12px;border:1.5px solid #D8CDBB;border-radius:5px;width:100%;color:#121C2D;background:#FFFFFF}
+.yn[aria-pressed="true"]{background:#121C2D;color:#EEF2F7}
+.inp{font-family:inherit;font-size:15px;min-height:46px;padding:0 12px;border:1.5px solid #CBD5E1;border-radius:5px;width:100%;color:#121C2D;background:#FFFFFF}
 .slide-card{background:#FFFFFF;border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 18px 40px rgba(21,33,59,.07)}
 .row{display:flex;justify-content:space-between;font-weight:700;font-size:14px;gap:10px}
 .row b{font-weight:900;font-size:22px}
-.msg{background:#F3EFEA;border-radius:6px;padding:14px;font-size:15px;line-height:1.45;min-height:66px}
-input[type=range]{width:100%;accent-color:#B4975F;height:44px}
+.msg{background:#EEF2F7;border-radius:6px;padding:14px;font-size:15px;line-height:1.45;min-height:66px}
+input[type=range]{width:100%;accent-color:#6F93B8;height:44px}
 input.now{accent-color:#5A6580}
-.grid-bg{background-color:#111D38;background-image:linear-gradient(rgba(180,151,95,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(180,151,95,.07) 1px,transparent 1px);background-size:28px 28px}
+.grid-bg{background-color:#111D38;background-image:linear-gradient(rgba(111,147,184,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(111,147,184,.07) 1px,transparent 1px);background-size:28px 28px}
 .seg{display:flex;align-items:flex-end;padding:10px;font-weight:700;font-size:13px;border-radius:4px;overflow:hidden;box-shadow:inset 0 2px 0 rgba(255,255,255,.25)}
 [hidden]{display:none !important}
 
@@ -43,12 +43,12 @@ input.now{accent-color:#5A6580}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes glow{0%,100%{opacity:.15}50%{opacity:.9}}
 @keyframes statement{0%{opacity:0;transform:translateY(16px)}100%{opacity:1;transform:none}}
-@keyframes chip{0%,30%{background:#FFFFFF;color:#121C2D}40%,90%{background:#121C2D;color:#F3EFEA}100%{background:#FFFFFF;color:#121C2D}}
+@keyframes chip{0%,30%{background:#FFFFFF;color:#121C2D}40%,90%{background:#121C2D;color:#EEF2F7}100%{background:#FFFFFF;color:#121C2D}}
 @keyframes lineIn{0%,20%{transform:scaleX(0)}50%,100%{transform:scaleX(1)}}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(180,151,95,.55)}60%{box-shadow:0 0 0 14px rgba(180,151,95,0)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(111,147,184,.55)}60%{box-shadow:0 0 0 14px rgba(111,147,184,0)}}
 @keyframes popIn{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:none}}
 @keyframes show{0%{opacity:0}2%,23%{opacity:1}25%,100%{opacity:0}}
-@keyframes sideOn{0%,23%{background:#121C2D;color:#F3EFEA}25%,100%{background:transparent;color:#121C2D}}
+@keyframes sideOn{0%,23%{background:#121C2D;color:#EEF2F7}25%,100%{background:transparent;color:#121C2D}}
 @keyframes prog{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @keyframes ringRev{to{transform:rotate(-360deg)}}
 @keyframes orbit{to{transform:rotate(360deg)}}
@@ -102,24 +102,24 @@ input.now{accent-color:#5A6580}
   .gpop,.rise,.settle,.ring,.q1,.q2,.q3,.q4,.st1,.st2,.st3,.c2,.ln,.cta,.pop,.reveal,.prog,.ring-rev,.orbit,.seg,.seg span,.scan{animation:none !important}
   .needle5{animation:none !important;transform:rotate(22deg)}
   /* The look-inside shows its first screen, still. */
-  .scr,.side{animation:none !important}.scr1{opacity:1}.side1{background:#121C2D;color:#F3EFEA}
+  .scr,.side{animation:none !important}.scr1{opacity:1}.side1{background:#121C2D;color:#EEF2F7}
 }
 
 /* Tap a number to type it exactly. */
 [data-edit]{cursor:pointer;border-bottom:1.5px dashed currentColor;padding-bottom:1px}
-[data-edit]:focus-visible{outline:3px solid #B4975F;outline-offset:3px}
-.numbox{font:inherit;color:inherit;width:6.5em;max-width:40vw;min-height:40px;padding:0 6px;border:1.5px solid #B4975F;border-radius:5px;background:#FFFFFF;color:#121C2D;text-align:right}
+[data-edit]:focus-visible{outline:3px solid #6F93B8;outline-offset:3px}
+.numbox{font:inherit;color:inherit;width:6.5em;max-width:40vw;min-height:40px;padding:0 6px;border:1.5px solid #6F93B8;border-radius:5px;background:#FFFFFF;color:#121C2D;text-align:right}
 
 /* The optional password in the account box. */
-.pwopt summary{cursor:pointer;font-size:13px;font-weight:700;color:#7A5E26;min-height:32px}
+.pwopt summary{cursor:pointer;font-size:13px;font-weight:700;color:#3E6A94;min-height:32px}
 .pwopt{display:flex;flex-direction:column;gap:10px}
 .pwopt[open]{padding-bottom:4px}
 .pwhint{display:block;font-size:12px;color:#5A6580;margin:4px 0 8px}
 .pwl{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;margin-top:8px}
 .pwrow{display:flex;gap:6px}
 .pwrow .inp{flex:1;min-width:0}
-.pweye{flex:none;width:46px;min-height:46px;border:1.5px solid #D8CDBB;border-radius:5px;background:#FFFFFF;color:#121C2D;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
-.pweye[aria-pressed="true"]{background:#F3EFEA}
+.pweye{flex:none;width:46px;min-height:46px;border:1.5px solid #CBD5E1;border-radius:5px;background:#FFFFFF;color:#121C2D;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.pweye[aria-pressed="true"]{background:#EEF2F7}
 [data-off],[data-off] *{animation-play-state:paused !important}
 
 /* ── A win has four sides: four circles that overlap ─────────────────────────
@@ -130,28 +130,28 @@ input.now{accent-color:#5A6580}
 .win4{display:flex;flex-wrap:wrap;gap:56px;align-items:center}
 .win4-tx{flex:1 1 400px;min-width:0;display:flex;flex-direction:column;gap:20px}
 .win4 .win4-h{text-transform:none}
-.win4-list{display:flex;flex-direction:column;border-top:1px solid #D6C9AC;margin-top:6px}
-.win4-list button{display:flex;align-items:center;gap:14px;min-height:56px;padding:10px 12px;border:0;border-bottom:1px solid #D6C9AC;background:transparent;color:#14100B;font:inherit;font-size:16px;text-align:left;cursor:pointer;transition:background .25s}
+.win4-list{display:flex;flex-direction:column;border-top:1px solid #CBD5E1;margin-top:6px}
+.win4-list button{display:flex;align-items:center;gap:14px;min-height:56px;padding:10px 12px;border:0;border-bottom:1px solid #CBD5E1;background:transparent;color:#0E1C2B;font:inherit;font-size:16px;text-align:left;cursor:pointer;transition:background .25s}
 .win4-list i{flex:none;width:12px;height:12px;border-radius:50%;transition:transform .25s}
 .win4-list b{flex:none;width:180px;font-weight:600}
-.win4-list span{color:#4A4238}
-.win4-list button[aria-pressed="true"]{background:rgba(180,151,95,.14)}
+.win4-list span{color:#46536A}
+.win4-list button[aria-pressed="true"]{background:rgba(111,147,184,.14)}
 .win4-list button[aria-pressed="true"] i{transform:scale(1.4)}
 .win4-vz{flex:1 1 360px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:18px}
 .win4-box{position:relative;width:min(500px,100%);aspect-ratio:1}
 .w4c{position:absolute;width:56%;height:56%}
 .w4-self{left:8%;top:8%}.w4-people{left:36%;top:8%}.w4-business{left:8%;top:36%}.w4-market{left:36%;top:36%}
 .w4in{width:100%;height:100%;border-radius:50%;mix-blend-mode:multiply;background:rgba(var(--rgb),.28);border:1.5px solid rgba(var(--rgb),.9);transition:background .45s ease,border-color .45s ease}
-.w4c span{position:absolute;width:46%;text-align:center;font-size:clamp(11px,2.8vw,14px);font-weight:600;line-height:1.25;color:#14100B;transition:opacity .35s}
+.w4c span{position:absolute;width:46%;text-align:center;font-size:clamp(11px,2.8vw,14px);font-weight:600;line-height:1.25;color:#0E1C2B;transition:opacity .35s}
 .w4-self span{left:2%;top:18%}.w4-people span{right:2%;top:18%}.w4-business span{left:2%;bottom:18%}.w4-market span{right:2%;bottom:18%}
 .win4-box[data-active] .w4in{background:rgba(var(--rgb),.10);border-color:rgba(var(--rgb),.3)}
 .win4-box[data-active] .w4c span{opacity:.35}
 .win4-box[data-active="self"] .w4-self .w4in,.win4-box[data-active="people"] .w4-people .w4in,.win4-box[data-active="business"] .w4-business .w4in,.win4-box[data-active="market"] .w4-market .w4in{background:rgba(var(--rgb),.55);border-color:rgba(var(--rgb),.9)}
 .win4-box[data-active="self"] .w4-self span,.win4-box[data-active="people"] .w4-people span,.win4-box[data-active="business"] .w4-business span,.win4-box[data-active="market"] .w4-market span{opacity:1}
 .w4disc,.w4ring{position:absolute;left:50%;top:50%;width:17.2%;height:17.2%;border-radius:50%;transform:translate(-50%,-50%)}
-.w4disc{background:#1C1309;color:#B4975F;display:flex;align-items:center;justify-content:center;font:italic 400 clamp(14px,3.6vw,20px)/1 Newsreader,Georgia,serif;box-shadow:0 12px 30px rgba(28,19,9,.25)}
-.w4ring{border:2px solid #B4975F;opacity:0}
-.win4-cap{font:italic 400 20px/1.4 Newsreader,Georgia,serif;color:#4A4238;text-align:center;min-height:1.4em}
+.w4disc{background:#1C1309;color:#6F93B8;display:flex;align-items:center;justify-content:center;font:italic 400 clamp(14px,3.6vw,20px)/1 Newsreader,Georgia,serif;box-shadow:0 12px 30px rgba(28,19,9,.25)}
+.w4ring{border:2px solid #6F93B8;opacity:0}
+.win4-cap{font:italic 400 20px/1.4 Newsreader,Georgia,serif;color:#46536A;text-align:center;min-height:1.4em}
 @keyframes w4TL{from{opacity:0;transform:translate(-18%,-18%)}to{opacity:1;transform:none}}
 @keyframes w4TR{from{opacity:0;transform:translate(18%,-18%)}to{opacity:1;transform:none}}
 @keyframes w4BL{from{opacity:0;transform:translate(-18%,18%)}to{opacity:1;transform:none}}
@@ -174,17 +174,17 @@ input.now{accent-color:#5A6580}
 /* Stronger look (30 Oct): the circles sit on a navy plate, read as an
    instrument: hairline crosshair, solid rims, deeper colour, uppercase labels,
    a gold seal at the centre. */
-.win4-box{background:radial-gradient(circle at 50% 45%,#1A2638 0%,#121C2D 62%,#0B1422 100%);border-radius:6px;box-shadow:0 30px 60px -28px rgba(14,24,48,.75),inset 0 0 0 1px rgba(180,151,95,.35)}
-.win4-box::before,.win4-box::after{content:"";position:absolute;background:rgba(180,151,95,.22);pointer-events:none}
+.win4-box{background:radial-gradient(circle at 50% 45%,#1A2638 0%,#121C2D 62%,#0B1422 100%);border-radius:6px;box-shadow:0 30px 60px -28px rgba(14,24,48,.75),inset 0 0 0 1px rgba(111,147,184,.35)}
+.win4-box::before,.win4-box::after{content:"";position:absolute;background:rgba(111,147,184,.22);pointer-events:none}
 .win4-box::before{left:50%;top:5%;bottom:5%;width:1px}
 .win4-box::after{top:50%;left:5%;right:5%;height:1px}
 .w4c{z-index:1}
 .w4in{mix-blend-mode:screen;background:rgba(var(--rgb),.30);border:2px solid rgba(var(--rgb),1);box-shadow:inset 0 0 40px rgba(0,0,0,.25)}
-.w4c span{font:700 clamp(9.5px,2.3vw,12px)/1.3 'Inter',Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#F3EFEA}
+.w4c span{font:700 clamp(9.5px,2.3vw,12px)/1.3 'Inter',Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#EEF2F7}
 .win4-box[data-active] .w4in{background:rgba(var(--rgb),.07);border-color:rgba(var(--rgb),.35)}
 .win4-box[data-active="self"] .w4-self .w4in,.win4-box[data-active="people"] .w4-people .w4in,.win4-box[data-active="business"] .w4-business .w4in,.win4-box[data-active="market"] .w4-market .w4in{background:rgba(var(--rgb),.62);border-color:rgba(var(--rgb),1)}
 .w4disc,.w4ring{z-index:2}
-.w4disc{background:radial-gradient(circle at 35% 30%,#D6BF8F,#B4975F 55%,#7E6638);color:#121C2D;font:800 clamp(10px,2.4vw,13px)/1 'Inter',Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;box-shadow:0 0 0 4px #121C2D,0 0 0 5px rgba(180,151,95,.6),0 14px 30px rgba(0,0,0,.45)}
+.w4disc{background:radial-gradient(circle at 35% 30%,#A9C0D9,#6F93B8 55%,#7E6638);color:#121C2D;font:800 clamp(10px,2.4vw,13px)/1 'Inter',Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;box-shadow:0 0 0 4px #121C2D,0 0 0 5px rgba(111,147,184,.6),0 14px 30px rgba(0,0,0,.45)}
 @media (prefers-reduced-motion:reduce){.win4-box .w4c,.win4-box .w4in,.win4-box .w4disc,.win4-box .w4ring{animation:none!important;opacity:1}.win4-box .w4ring{opacity:0}.win4-box.wait .w4c,.win4-box.wait .w4disc{opacity:1}}
 
 /* The Movement (30 Oct): a watch movement on the navy plate. Four skeleton
