@@ -1,6 +1,6 @@
 // The Worker's front door.
 //
-// Cloudflare serves everything in public/ directly. Only /api/* and /c come
+// Cloudflare serves everything in public/ directly. Only /api/*, /b and /c come
 // here (see run_worker_first in wrangler.toml); each /api path is handed to its file
 // in functions/api/, called the same way Cloudflare Pages Functions would call
 // it: onRequestGet / onRequestPost with { request, env, waitUntil }.
@@ -11,7 +11,7 @@
 // step and no package.json.
 
 import { json } from './functions/_shared.js';
-import { toC } from './functions/_landing.js';
+import { toB, toC } from './functions/_landing.js';
 import * as state from './functions/api/state.js';
 import * as compass from './functions/api/compass.js';
 import * as note from './functions/api/note.js';
@@ -52,7 +52,8 @@ export const ROUTES = {
 export default {
   async fetch(request, env, ctx) {
     const path = new URL(request.url).pathname.replace(/\/+$/, '');
-    // Sales page C: the Compass sales page, with the query string kept.
+    // /b → / and /c → /compass/welcome/, with the query string kept.
+    if (path === '/b') return toB(request);
     if (path === '/c') return toC(request);
     const route = ROUTES[path];
     if (!route) {

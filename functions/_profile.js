@@ -2,8 +2,8 @@
 // (the full form), and where they came from.
 //
 // Two forms make the same student record:
-//   FULL   (/compass/welcome and /compass/welcome-a, landing "c"; / and /b,
-//          landing "b"): first name, surname, email, company (or "No company
+//   FULL   (/compass/welcome and /compass/welcome-a, landing "c"; /, landing
+//          "b"): first name, surname, email, company (or "No company
 //          yet"), interest, industry, a password (required), consent.
 //   SIMPLE (/a, landing "a", and the Compass's "Who is this compass for?"
 //          box): first name, surname, email, consent. No password, ever:

@@ -22,11 +22,11 @@ keep_vars = true
 directory = "./public"
 binding = "ASSETS"
 # An address with no page gets public/404.html and a real 404 status, never
-# the home page. Every page is its own folder (/, /a, /b, /start, /compass…).
+# the home page. Every page is its own folder (/, /a, /start, /compass…).
 not_found_handling = "404-page"
-# The API and /c (a 302 to /compass/welcome, query string kept) reach
-# worker.js; every page and file is served as before.
-run_worker_first = ["/api/*", "/c", "/c/"]
+# The API, /b (a 302 to /) and /c (a 302 to /compass/welcome/), both with the
+# query string kept, reach worker.js; every page and file is served as before.
+run_worker_first = ["/api/*", "/b", "/b/", "/c", "/c/"]
 
 # The student record: programme answers, worksheet figures, Compass reports and
 # notes to the mentor. Free tier; see functions/_shared.js for how routes behave
