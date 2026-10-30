@@ -121,7 +121,8 @@ for (const [from, to] of OLD) {
   ok(w.status === 302 && w.headers.get('location') === to + q && pg.status === 302 && pg.headers.get('location') === to + q, `${from} → ${to}, utm kept (Worker and Pages)`);
 }
 ok((await worker.fetch(get('/b'), assets, {})).headers.get('location') === '/road1/', 'no query string: none added');
-for (const p of ['/road1/', '/road2/', '/road3/', '/compass', '/compass/summit', '/ground-plan/']) ok(await (await worker.fetch(get(p), assets, {})).text() === 'asset' && await (await pagesRedirect({ request: get(p), next: () => new Response('asset') })).text() === 'asset', `${p} is served, not redirected`);
+for (const [from, to] of [['/compass', '/northstar/'], ['/compass/', '/northstar/'], ['/compass/summit', '/northstar/summit/'], ['/summit', '/northstar/summit/']]) ok((await worker.fetch(get(from + '?utm_source=x'), assets, {})).headers.get('location') === to + '?utm_source=x', `${from} → ${to} (the North Star's new address), utm kept`);
+for (const p of ['/road1/', '/road2/', '/road3/', '/northstar/', '/northstar/summit/', '/ground-plan/']) ok(await (await worker.fetch(get(p), assets, {})).text() === 'asset' && await (await pagesRedirect({ request: get(p), next: () => new Response('asset') })).text() === 'asset', `${p} is served, not redirected`);
 { const r = await pagesRedirect({ request: get('/start?signin=abc'), next: () => new Response('asset') }); ok(r.status === 302 && r.headers.get('location') === '/ground-plan/?signin=abc', '/start (old links, old emails) lands on /ground-plan/, sign-in code kept'); }
 for (const d of ['index.html', 'page.js', 'lab.js', 'a', 'b', 'compass/welcome', 'compass/welcome-a']) ok(!existsSync(new URL('../public/' + d, import.meta.url)), `public/${d}: no copy left at the old address`);
 const W = read('wrangler.toml');

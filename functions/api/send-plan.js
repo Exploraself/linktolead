@@ -86,7 +86,7 @@ export async function onRequestPost({ request, env }) {
   const first = String(me.name || '').split(' ')[0] || plan.name;
   const ctx = await letterContext(D, me.id, body.tz);
   const r = await send(env, { to: email, ...resultsLetter(base, { first, weakest: weakestName(record, plan), to: email, tier: me.tier, ...ctx }),
-    why: 'You asked for your results at linktolead.exploraself.com/compass. They were sent once, to this address.', unsubUrl: unsubLink(base, p) });
+    why: 'You asked for your results at linktolead.exploraself.com/northstar. They were sent once, to this address.', unsubUrl: unsubLink(base, p) });
   if (!r.ok) return bad('It did not send. Try again in a minute.', 502);
 
   await logged(D, email, ip);

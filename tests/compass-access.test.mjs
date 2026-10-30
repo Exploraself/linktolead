@@ -18,7 +18,7 @@ ok(/const r = await A\.pull\(\);[\s\S]{0,300}S\.profile/.test(compass), 'an acco
 ok(read('public/compass/index.html').includes('<div id="acct-gate" hidden></div>'), 'its own box, apart from the North Star sign-in box');
 
 // The North Star banner in the programme.
-ok(/CB_TIMES = 5/.test(app) && /function compassBanner\(\)/.test(app) && /href="\/compass\/"/.test(app), 'the North Star banner, for five visits, links to /compass/');
+ok(/CB_TIMES = 5/.test(app) && /function compassBanner\(\)/.test(app) && /href="\/northstar\/"/.test(app), 'the North Star banner, for five visits, links to /northstar/');
 ok(/dataset\.cban === 'close'\) \{ cbSet\(CB_TIMES\)/.test(app), 'closing it ends it early');
 ok(read('public/style.css').includes('.cban,.cban::after,.cban-needle{animation:none}'), 'still with reduced motion');
 
