@@ -22,12 +22,16 @@ export const PORTRAIT = '/mail/alexandru.jpg';
 const LINK = Symbol('link');
 /** A link inside a paragraph: shown as its address, in both parts. */
 export const link = (url, label) => ({ [LINK]: true, url, label: label || url.replace(/^https?:\/\//, '') });
+const BUTTON = Symbol('button');
+/** The one main action of a letter, as its own paragraph: a gold button in
+ *  the html (a table, so every inbox draws it), "label: url" in plain text. */
+export const button = (url, label) => ({ [BUTTON]: true, url, label });
 
 /** The offers, each a paragraph after "P.S.". `tier` hides an offer the
  *  founder already holds (The Boardroom, once they are in it). */
 export const OFFERS = {
   boardroom: { paid: true, line: () => ['Want to look at your answers together? Book a 1:1 with me in The Boardroom: ', link(BOOKING)] },
-  unshakeable: { paid: true, line: () => ['One thing I’d love you to try: the Unshakeable assessment. It shows how steady you stay when the pressure comes, and where to start building. It’s $9.99 (valued at $199): ', link('https://exploraself.com/unshakeable')] },
+  unshakeable: { paid: true, line: () => ['One thing I’d love you to try: the Unshakeable assessment. It shows how steady you stay when the pressure comes, and where to start building. It’s $9.99 (valued at $199). ', link('https://exploraself.com/unshakeable', 'Take the Unshakeable assessment →')] },
   play: { paid: false, line: () => ['Got ten minutes? Play Leadionaire: fifteen decisions, thirty seconds each. It shows how you choose under pressure: ', link('https://exploraself.com/play')] },
   first100: { paid: false, line: () => ['If clients are the next thing on your mind, the First 100 Clients assessment is free and takes ten minutes: ', link('https://exploraself.com/first-100-clients')] },
   library: { paid: false, line: (base) => ['While you’re in, open Built to Lead in your library: 99 practical tools, free with your account. ', link(`${base}/start#library`)] },
@@ -54,6 +58,11 @@ export function pickOffer(kind, { seed = 0, tier = 'free' } = {}) {
 const PAPER = '#FFFDF8', INK = '#14100B', MUTED = '#6A6052', GOLD_INK = '#6E5213';
 
 function parts(p) {
+  if (p && p[BUTTON]) return {
+    button: true,
+    html: `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 22px"><tr><td style="border-radius:6px;background:#C9A24A"><a href="${esc(p.url)}" style="display:block;padding:14px 26px;font:bold 16px/1 Arial,sans-serif;color:#14100B;text-decoration:none;border-radius:6px">${esc(p.label)}</a></td></tr></table>`,
+    text: `${p.label}: ${p.url}`,
+  };
   const list = Array.isArray(p) ? p : [p];
   const html = list.map((x) => (x && x[LINK] ? `<a href="${esc(x.url)}" style="color:${GOLD_INK}">${esc(x.label)}</a>` : esc(x))).join('');
   const text = list.map((x) => (x && x[LINK] ? x.url : String(x))).join('');
@@ -70,7 +79,7 @@ export function letter(base, paras, offer = null, { sign = true } = {}) {
   const P = paras.map(parts);
   const ps = offer && OFFERS[offer] ? parts(['P.S. ', ...OFFERS[offer].line(base)]) : null;
   const html = `<!doctype html><html><body style="margin:0;background:${PAPER}"><div style="max-width:560px;margin:0 auto;padding:32px 22px;background:${PAPER};font:16px/1.7 Georgia,'Times New Roman',serif;color:${INK}">
-    ${P.map((p) => `<p style="margin:0 0 16px;white-space:pre-wrap">${p.html}</p>`).join('\n    ')}
+    ${P.map((p) => (p.button ? p.html : `<p style="margin:0 0 16px;white-space:pre-wrap">${p.html}</p>`)).join('\n    ')}
     ${sign ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0 22px"><tr>
       <td style="vertical-align:middle;padding-right:14px"><img src="${esc(base)}${PORTRAIT}" width="64" height="64" alt="Alexandru Cojocari" style="display:block;width:64px;height:64px;border-radius:50%;border:2px solid #C9A24A"></td>
       <td style="vertical-align:middle"><img src="${esc(base)}${SIGNATURE}" width="150" height="60" alt="Alexandru" style="display:block;margin:0 0 2px;border:0">
@@ -100,7 +109,8 @@ export function launchpadWelcome(base, { first, to = '', tier, offer } = {}) {
 export function resultsLetter(base, { first, weakest, to = '', tier, offer } = {}) {
   return { subject: 'Your Leadership Compass', ...letter(base, [
     hi(first),
-    ['Here is your Leadership Compass: ', link(`${base}/compass`), '.'],
+    'Here is your Leadership Compass, ready whenever you are.',
+    button(`${base}/compass`, 'Open my Compass →'),
     weakest
       ? `Start with the domain that needs you most. For you that’s ${weakest}. One honest hour there changes more than a week anywhere else.`
       : 'Start with the domain that needs you most. One honest hour there changes more than a week anywhere else.',
@@ -111,8 +121,9 @@ export function resultsLetter(base, { first, weakest, to = '', tier, offer } = {
 export function signinLetter(base, url, { first, to = '', offer } = {}) {
   return { subject: 'Your link to get back in', ...letter(base, [
     hi(first),
-    ['Here’s your way back in: ', link(url, url), '. It works once, for the next 30 minutes.'],
     'Good to see you again. Everything you wrote is right where you left it.',
+    button(url, 'Sign me back in →'),
+    'The button works once, for the next 30 minutes.',
   ], offerFor('signin', to, 'free', offer)) };
 }
 
@@ -139,7 +150,7 @@ export function answerLetter(base, { first, question, answer, to = '', tier, off
     hi(first),
     `You asked: “${q.length > 300 ? q.slice(0, 300).trimEnd() + '…' : q}”`,
     ...paras,
-    ['The whole conversation is in your Ground Plan: ', link(`${base}/start#ask`), '.'],
+    ['The whole conversation is waiting in ', link(`${base}/start#ask`, 'your Ground Plan'), '.'],
   ], offerFor('mentor', to, tier, offer)) };
 }
 
