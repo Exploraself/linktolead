@@ -33,6 +33,8 @@ if (!state.work) state.work = {};
 const oldEntrance = !!(state.referee || (state.diag && Object.keys(state.diag).length)) && !!state.stage;
 const hashNow = (() => { try { return location.hash; } catch { return ''; } })();
 const linkCode = (() => { try { return new URLSearchParams(location.search).get('signin') || ''; } catch { return ''; } })();
+/** Arrived from "Sign out" in the profile menu: say so on the sign-in screen. */
+const signedOut = (() => { try { return new URLSearchParams(location.search).get('out') === '1'; } catch { return false; } })();
 /** Arrived from a password-reset email: open the password box once signed in. */
 let resetAsk = (() => { try { return new URLSearchParams(location.search).get('reset') === '1'; } catch { return false; } })();
 let view = linkCode ? 'loading' : entry({ joined: account.joined(), old: oldEntrance, hash: hashNow });
@@ -925,6 +927,11 @@ async function comeHome() {
   }
   if (view === 'redirect') return;
   render();
+  if (signedOut && view === 'signin') {
+    const m = $('#si-msg');
+    if (m) { m.textContent = 'You’re signed out. Everything you wrote is saved; sign in any time to pick it up again.'; m.style.color = 'var(--goldink, #7A5C16)'; m.style.fontWeight = '600'; }
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch { /* old browser */ }
+  }
   if (!account.joined()) return;
   if (!profileMounted) { profileMounted = true; import('/profile-menu.js').then((m) => m.mount($('#pmhost'))).catch(() => {}); }
   const [r, msgs, th] = await Promise.all([account.pull(), account.messages(), account.thread()]);
