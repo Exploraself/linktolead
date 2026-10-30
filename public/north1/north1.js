@@ -60,7 +60,7 @@
   if (S) for (var k = 0; k < 24; k++) {
     var s = document.createElementNS(ns, 'circle');
     s.setAttribute('class', 'star'); s.setAttribute('cx', String(20 + Math.random() * 480)); s.setAttribute('cy', String(10 + Math.random() * 110));
-    s.setAttribute('r', String(Math.random() * 1.2 + .4)); s.setAttribute('fill', '#F3EAD7'); s.setAttribute('opacity', '.5');
+    s.setAttribute('r', String(Math.random() * 1.2 + .4)); s.setAttribute('fill', '#EEF2F7'); s.setAttribute('opacity', '.5');
     s.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';
     S.appendChild(s);
   }

@@ -5,7 +5,7 @@
 <meta name="color-scheme" content="light dark">
 <script src="/theme.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#1C1309">
+<meta name="theme-color" content="#0E1C2B">
 <script>/* Keep relative assets inside this tool at /compass without a redirect. */
 if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=document.createElement('base');b.href=location.pathname+'/';document.head.appendChild(b);}
 </script>
@@ -39,14 +39,14 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
 
   <!-- ===== LEFT MENU ===== -->
   <aside class="side" aria-label="Compass">
-    <a href="#s-overview" data-go="overview" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #F7F2E7"><img src="assets/logo.webp" alt="" style="width: 38px; height: auto"><span style="font-size: 12px; letter-spacing: .13em; font-weight: 600">EXPLORASELF<small style="display: block; font-size: 8px; letter-spacing: .16em; font-weight: 400; color: #D3C4A5; margin-top: 3px">LEADER’S NORTH STAR</small></span></a>
-    <div class="side-extra" style="font-size: 9px; letter-spacing: .17em; color: #D3C4A5; margin: 44px 12px 12px">YOUR NEXT CHAPTER</div>
+    <a href="#s-overview" data-go="overview" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #EEF2F7"><img src="assets/logo.webp" alt="" style="width: 38px; height: auto"><span style="font-size: 12px; letter-spacing: .13em; font-weight: 600">EXPLORASELF<small style="display: block; font-size: 8px; letter-spacing: .16em; font-weight: 400; color: #B8C6D6; margin-top: 3px">LEADER’S NORTH STAR</small></span></a>
+    <div class="side-extra" style="font-size: 9px; letter-spacing: .17em; color: #B8C6D6; margin: 44px 12px 12px">YOUR NEXT CHAPTER</div>
     <nav class="navl" aria-label="Main navigation" id="nav"></nav>
     <a class="incub-link" href="/ground-plan/#programme"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12Z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m12 5.7 2 4.3 4.3 2-4.3 2-2 4.3-2-4.3-4.3-2 4.3-2Z" fill="currentColor"/></svg><span><small>The incubator</small><b>The Founder’s Blueprint</b></span><i aria-hidden="true">→</i></a>
     <div class="side-extra" style="margin-top: auto; padding: 30px 12px 0">
-      <p style="font-family: Newsreader, Georgia, serif; font-size: 22px; line-height: 1.4; color: #D6BF8F">Lead yourself.<br>Build what matters.</p>
-      <small style="font-size: 10px; color: #D3C4A5">Four domains. One whole picture.</small>
-      <div style="font-size: 9px; margin-top: 26px; color: #D3C4A5" id="save-status">○ Saved on this browser</div>
+      <p style="font-family: Newsreader, Georgia, serif; font-size: 22px; line-height: 1.4; color: #A9C0D9">Lead yourself.<br>Build what matters.</p>
+      <small style="font-size: 10px; color: #B8C6D6">Four domains. One whole picture.</small>
+      <div style="font-size: 9px; margin-top: 26px; color: #B8C6D6" id="save-status">○ Saved on this browser</div>
     </div>
   </aside>
 
@@ -54,8 +54,8 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
   <main id="main" tabindex="-1">
     <div id="gate"></div>
 
-    <!-- top bar -->
-    <div style="display: flex; flex-direction: column; gap: 12px">
+    <!-- top bar: stays at the top while you scroll (30 Oct) -->
+    <div class="topwrap" style="display: flex; flex-direction: column; gap: 12px">
       <header class="topbar" style="min-height: 64px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: -20px -22px 0; padding: 10px 28px">
         <span style="font-size: 9px; letter-spacing: .16em; color: var(--muted)">A BUSINESS THAT WORKS. A LIFE THAT MATTERS.</span>
         <div id="top-tools" style="display: flex; align-items: center; gap: 14px">
@@ -65,9 +65,9 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
           <button type="button" data-act="ws" data-f="ws" id="ws-btn" aria-expanded="false" aria-label="Your workspace" title="Your workspace" style="width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
       </header>
-      <div id="how"></div>
-      <div id="ws"></div>
     </div>
+    <div id="how"></div>
+    <div id="ws"></div>
 
     <!-- ===== YOUR NORTH STAR · OVERVIEW ===== -->
     <section id="s-overview" style="display: flex; flex-direction: column; gap: 28px">
@@ -81,13 +81,13 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
       </div>
       <div class="deep drift rise r1" style="border-radius: 10px; display: flex; flex-wrap: wrap; align-items: center; overflow: hidden">
         <div class="deep-hero" style="flex: 1 1 380px; padding: 44px 44px; display: flex; flex-direction: column; gap: 16px">
-          <span class="eb track" style="color: #D6BF8F; font-size: 13px; letter-spacing: .2em">Continue your exploration</span>
-          <h2 class="sf" style="font-size: clamp(34px, 3.6vw, 48px); line-height: 1.12; color: #F7F2E7">A stronger business starts with a <span class="sfi" style="color: #D6BF8F; font-weight: 500">clearer you.</span></h2>
-          <p style="color: #D3C4A5; font-size: 16px; line-height: 1.8; max-width: 440px">Numbers reveal what is happening. Personal leadership helps you decide what to do about it. Bring both into focus.</p>
-          <button type="button" data-go="clear" class="go" id="continue" style="align-self: flex-start; min-height: 48px; padding: 0 20px; border-radius: 4px; border: 0; background: #B4975F; color: #14100B; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px">Show me my road <span class="arr" aria-hidden="true">↓</span></button>
+          <span class="eb track" style="color: #A9C0D9; font-size: 13px; letter-spacing: .2em">Continue your exploration</span>
+          <h2 class="sf" style="font-size: clamp(34px, 3.6vw, 48px); line-height: 1.12; color: #EEF2F7">A stronger business starts with a <span class="sfi" style="color: #A9C0D9; font-weight: 500">clearer you.</span></h2>
+          <p style="color: #B8C6D6; font-size: 16px; line-height: 1.8; max-width: 440px">Numbers reveal what is happening. Personal leadership helps you decide what to do about it. Bring both into focus.</p>
+          <button type="button" data-go="clear" class="go" id="continue" style="align-self: flex-start; min-height: 48px; padding: 0 20px; border-radius: 4px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px">Show me my road <span class="arr" aria-hidden="true">↓</span></button>
         </div>
-        <div class="hero-cmp" style="flex: 1 1 320px; display: flex; justify-content: center; padding: 24px; color: #F7F2E7">
-          <div style="width: 100%; max-width: 360px" aria-hidden="true"><svg viewBox="0 0 400 400" font-family="inherit"><defs><path id="cmp-ring" d="M200,200 m-178,0 a178,178 0 1,1 356,0 a178,178 0 1,1 -356,0"/></defs><circle cx="200" cy="200" r="196" fill="none" stroke="#B4975F" stroke-width="6" stroke-dasharray="1 9.26" opacity=".55"/><g><text font-weight="700" font-size="10.5" letter-spacing="2.6" fill="#B4975F"><textPath href="#cmp-ring">PURPOSE · JUDGMENT · ENERGY · TRUST · BOUNDARIES · CONVERSATIONS · OFFER · COST · SYSTEMS · CUSTOMERS · DEMAND · IMPACT ·</textPath></text><animateTransform attributeName="transform" type="rotate" from="0 200 200" to="360 200 200" dur="70s" repeatCount="indefinite"/></g><g><circle cx="200" cy="200" r="162" fill="none" stroke="currentColor" opacity=".35" stroke-width="1" stroke-dasharray="14 6 2 6"/><animateTransform attributeName="transform" type="rotate" from="360 200 200" to="0 200 200" dur="45s" repeatCount="indefinite"/></g><g><circle cx="200" cy="38" r="4" fill="#B4975F"/><animateTransform attributeName="transform" type="rotate" from="0 200 200" to="360 200 200" dur="14s" repeatCount="indefinite"/></g><path d="M200 200 L200 52 A148 148 0 0 1 348 200 Z" fill="#B4975F" opacity=".15"><animate attributeName="opacity" values=".15;.9;.15" dur="4s" begin="0s" repeatCount="indefinite"/></path><path d="M200 200 L348 200 A148 148 0 0 1 200 348 Z" fill="#B4975F" opacity=".15"><animate attributeName="opacity" values=".15;.9;.15" dur="4s" begin="1s" repeatCount="indefinite"/></path><path d="M200 200 L200 348 A148 148 0 0 1 52 200 Z" fill="#B4975F" opacity=".15"><animate attributeName="opacity" values=".15;.9;.15" dur="4s" begin="2s" repeatCount="indefinite"/></path><path d="M200 200 L52 200 A148 148 0 0 1 200 52 Z" fill="#B4975F" opacity=".15"><animate attributeName="opacity" values=".15;.9;.15" dur="4s" begin="3s" repeatCount="indefinite"/></path><circle cx="200" cy="200" r="148" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="200" cy="200" r="96" fill="none" stroke="currentColor" stroke-width=".6" opacity=".4"/><line x1="200" y1="52" x2="200" y2="348" stroke="currentColor" stroke-width=".8"/><line x1="52" y1="200" x2="348" y2="200" stroke="currentColor" stroke-width=".8"/><text x="262" y="118" fill="currentColor" font-weight="700" font-size="16" text-anchor="middle" letter-spacing=".3"><tspan x="262">Lead</tspan><tspan x="262" dy="19">yourself</tspan></text><text x="262" y="281" fill="currentColor" font-weight="700" font-size="16" text-anchor="middle" letter-spacing=".3"><tspan x="262">Lead your</tspan><tspan x="262" dy="19">people</tspan></text><text x="138" y="281" fill="currentColor" font-weight="700" font-size="16" text-anchor="middle" letter-spacing=".3"><tspan x="138">Lead your</tspan><tspan x="138" dy="19">business</tspan></text><text x="138" y="118" fill="currentColor" font-weight="700" font-size="16" text-anchor="middle" letter-spacing=".3"><tspan x="138">Lead the</tspan><tspan x="138" dy="19">market</tspan></text><g transform="rotate(-150 200 200)"><polygon points="200,64 210,200 200,212 190,200" fill="#B4975F"/><polygon points="200,336 210,200 200,188 190,200" fill="currentColor" opacity=".45"/><animateTransform attributeName="transform" type="rotate" values="-150 200 200;55 200 200;10 200 200;30 200 200;22 200 200" keyTimes="0;.4;.6;.75;1" dur="3s" begin="0.3s" fill="freeze"/><animateTransform attributeName="transform" type="rotate" values="22 200 200;34 200 200;22 200 200" dur="7s" begin="3.3s" repeatCount="indefinite"/></g><circle cx="200" cy="200" r="13" fill="#1C1309" stroke="#B4975F" stroke-width="3"/><circle cx="200" cy="200" r="4" fill="#B4975F"/></svg></div>
+        <div class="hero-cmp" style="flex: 1 1 320px; display: flex; justify-content: center; padding: 24px; color: #EEF2F7">
+          <div style="width: 100%; max-width: 360px" aria-hidden="true"><svg viewBox="0 0 400 400" font-family="inherit"><defs><path id="cmp-ring" d="M200,200 m-178,0 a178,178 0 1,1 356,0 a178,178 0 1,1 -356,0"/></defs><circle cx="200" cy="200" r="196" fill="none" stroke="#6F93B8" stroke-width="6" stroke-dasharray="1 9.26" opacity=".55"/><g><text font-weight="700" font-size="10.5" letter-spacing="2.6" fill="#6F93B8"><textPath href="#cmp-ring">PURPOSE · JUDGMENT · ENERGY · TRUST · BOUNDARIES · CONVERSATIONS · OFFER · COST · SYSTEMS · CUSTOMERS · DEMAND · IMPACT ·</textPath></text><animateTransform attributeName="transform" type="rotate" from="0 200 200" to="360 200 200" dur="70s" repeatCount="indefinite"/></g><g><circle cx="200" cy="200" r="162" fill="none" stroke="currentColor" opacity=".35" stroke-width="1" stroke-dasharray="14 6 2 6"/><animateTransform attributeName="transform" type="rotate" from="360 200 200" to="0 200 200" dur="45s" repeatCount="indefinite"/></g><g><circle cx="200" cy="38" r="4" fill="#6F93B8"/><animateTransform attributeName="transform" type="rotate" from="0 200 200" to="360 200 200" dur="14s" repeatCount="indefinite"/></g><path d="M200 200 L200 52 A148 148 0 0 1 348 200 Z" fill="#6F93B8" opacity=".15"><animate attributeName="opacity" values=".15;.9;.15" dur="4s" begin="0s" repeatCount="indefinite"/></path><path d="M200 200 L348 200 A148 148 0 0 1 200 348 Z" fill="#6F93B8" opacity=".15"><animate attributeName="opacity" values=".15;.9;.15" dur="4s" begin="1s" repeatCount="indefinite"/></path><path d="M200 200 L200 348 A148 148 0 0 1 52 200 Z" fill="#6F93B8" opacity=".15"><animate attributeName="opacity" values=".15;.9;.15" dur="4s" begin="2s" repeatCount="indefinite"/></path><path d="M200 200 L52 200 A148 148 0 0 1 200 52 Z" fill="#6F93B8" opacity=".15"><animate attributeName="opacity" values=".15;.9;.15" dur="4s" begin="3s" repeatCount="indefinite"/></path><circle cx="200" cy="200" r="148" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="200" cy="200" r="96" fill="none" stroke="currentColor" stroke-width=".6" opacity=".4"/><line x1="200" y1="52" x2="200" y2="348" stroke="currentColor" stroke-width=".8"/><line x1="52" y1="200" x2="348" y2="200" stroke="currentColor" stroke-width=".8"/><text x="262" y="118" fill="currentColor" font-weight="700" font-size="16" text-anchor="middle" letter-spacing=".3"><tspan x="262">Lead</tspan><tspan x="262" dy="19">yourself</tspan></text><text x="262" y="281" fill="currentColor" font-weight="700" font-size="16" text-anchor="middle" letter-spacing=".3"><tspan x="262">Lead your</tspan><tspan x="262" dy="19">people</tspan></text><text x="138" y="281" fill="currentColor" font-weight="700" font-size="16" text-anchor="middle" letter-spacing=".3"><tspan x="138">Lead your</tspan><tspan x="138" dy="19">business</tspan></text><text x="138" y="118" fill="currentColor" font-weight="700" font-size="16" text-anchor="middle" letter-spacing=".3"><tspan x="138">Lead the</tspan><tspan x="138" dy="19">market</tspan></text><g transform="rotate(-150 200 200)"><polygon points="200,64 210,200 200,212 190,200" fill="#6F93B8"/><polygon points="200,336 210,200 200,188 190,200" fill="currentColor" opacity=".45"/><animateTransform attributeName="transform" type="rotate" values="-150 200 200;55 200 200;10 200 200;30 200 200;22 200 200" keyTimes="0;.4;.6;.75;1" dur="3s" begin="0.3s" fill="freeze"/><animateTransform attributeName="transform" type="rotate" values="22 200 200;34 200 200;22 200 200" dur="7s" begin="3.3s" repeatCount="indefinite"/></g><circle cx="200" cy="200" r="13" fill="#0E1C2B" stroke="#6F93B8" stroke-width="3"/><circle cx="200" cy="200" r="4" fill="#6F93B8"/></svg></div>
         </div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 14px">
@@ -103,7 +103,7 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
       <span class="eb">How it works</span>
       <h1 class="sf" style="font-size: clamp(30px, 4vw, 44px); line-height: 1.05">Four domains. <span class="sfi" style="color: var(--goldink)">One whole picture.</span></h1>
       <p style="color: var(--muted); font-size: 16px; line-height: 1.8">Lead yourself, your people, your business and your market. Answer from real life, add rough numbers, read your compass, and choose your next steps. Everything saves as you go.</p>
-      <button type="button" data-go="clear" style="align-self: flex-start; min-height: 46px; padding: 0 18px; border-radius: 4px; border: 0; background: var(--deep); color: #F7F2E7; font-weight: 600; cursor: pointer">Start with step 01 →</button>
+      <button type="button" data-go="clear" style="align-self: flex-start; min-height: 46px; padding: 0 18px; border-radius: 4px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 600; cursor: pointer">Start with step 01 →</button>
     </section>
 
     <!-- ===== STEP 01 · GET CLEAR ===== -->
@@ -131,7 +131,7 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
       <!-- ===== STRENGTHS + NORTH STAR READING ===== -->
       <section id="s-reading" style="display: flex; flex-direction: column; gap: 20px"></section>
 
-      <button type="button" data-go="people" style="align-self: flex-end; min-height: 48px; padding: 0 20px; border-radius: 4px; border: 0; background: var(--deep); color: #F7F2E7; font-weight: 600; cursor: pointer">Next: lead your people →</button>
+      <button type="button" data-go="people" style="align-self: flex-end; min-height: 48px; padding: 0 20px; border-radius: 4px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 600; cursor: pointer">Next: lead your people →</button>
     </div>
 
     <!-- ===== STEP 02 · not written yet, and says so ===== -->
@@ -140,7 +140,7 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
         <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2 20c1-3.5 3.5-5 7-5s6 1.5 7 5M16 4.5a3.5 3.5 0 0 1 0 6.5M18 15c2 .6 3.4 2.3 4 5" fill="none" stroke="var(--people)" stroke-width="1.8" stroke-linecap="round"/></svg>
         <div style="display: flex; flex-direction: column; gap: 2px"><span class="eb">Step 02 · Lead your people · Know your people</span><span style="font-size: 14px; color: var(--muted)">Customers and team. For founders without a team yet: how to build one. Questions to be written next.</span></div>
       </section>
-      <button type="button" data-go="numbers" style="align-self: flex-end; min-height: 48px; padding: 0 20px; border-radius: 4px; border: 0; background: var(--deep); color: #F7F2E7; font-weight: 600; cursor: pointer">Next: count what matters →</button>
+      <button type="button" data-go="numbers" style="align-self: flex-end; min-height: 48px; padding: 0 20px; border-radius: 4px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 600; cursor: pointer">Next: count what matters →</button>
     </div>
 
     <!-- ===== STEP 03 · COUNT WHAT MATTERS ===== -->
@@ -156,15 +156,15 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
           <div id="fb-0"></div><div id="fb-1"></div><div id="fb-2"></div><div id="fb-3"></div>
         </div>
         <div class="deep" style="border-radius: 9px; padding: 26px; display: flex; flex-wrap: wrap; gap: 22px; align-items: center">
-          <svg class="spin" width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="none" stroke="#B4975F" stroke-width="1.5" stroke-dasharray="2 6"/><path d="M32 10l5 22-5 4-5-4z" fill="#B4975F"/></svg>
-          <div style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 6px"><span class="eb" style="color: #D6BF8F">Self-leadership is all four at once</span><span class="sf" style="font-size: 22px; line-height: 1.3">You just looked at yourself, your people, your business and your market together. The future needs a plan — and a plan needs all four.</span><span style="font-size: 14px; color: #C4B69D">Link to Lead walks you through it, level by level, with Alexandru and the team.</span></div>
-          <div class="no-print" style="display: flex; flex-direction: column; gap: 8px"><button type="button" data-go="plan" style="display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px; border-radius: 5px; border: 0; background: #B4975F; color: #14100B; font-weight: 600; cursor: pointer">Ask “what if?” →</button><a href="/road1/" style="text-align: center; color: #D6BF8F; font-weight: 600; font-size: 14px; padding: 8px 0">See Link to Lead</a></div>
+          <svg class="spin" width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="none" stroke="#6F93B8" stroke-width="1.5" stroke-dasharray="2 6"/><path d="M32 10l5 22-5 4-5-4z" fill="#6F93B8"/></svg>
+          <div style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 6px"><span class="eb" style="color: #A9C0D9">Self-leadership is all four at once</span><span class="sf" style="font-size: 22px; line-height: 1.3">You just looked at yourself, your people, your business and your market together. The future needs a plan — and a plan needs all four.</span><span style="font-size: 14px; color: #A9B6C6">Link to Lead walks you through it, level by level, with Alexandru and the team.</span></div>
+          <div class="no-print" style="display: flex; flex-direction: column; gap: 8px"><button type="button" data-go="plan" style="display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 600; cursor: pointer">Ask “what if?” →</button><a href="/road1/" style="text-align: center; color: #A9C0D9; font-weight: 600; font-size: 14px; padding: 8px 0">See Link to Lead</a></div>
         </div>
       </section>
     </div>
 
     <!-- ===== SAVE YOUR RESULTS ===== -->
-    <section id="s-save" class="card no-print" style="padding: 24px; display: flex; flex-wrap: wrap; gap: 24px; align-items: center; border-top: 4px solid #B4975F"></section>
+    <section id="s-save" class="card no-print" style="padding: 24px; display: flex; flex-wrap: wrap; gap: 24px; align-items: center; border-top: 4px solid #6F93B8"></section>
 
     <!-- ===== YOUR TWELVE WEEKS ===== -->
     <section id="s-weeks" class="deep" style="border-radius: 12px; padding: 30px 26px; display: flex; flex-direction: column; gap: 20px"></section>
@@ -172,14 +172,14 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
     <!-- ===== YOUR CLIMB · LINK TO LEAD ===== -->
     <section id="s-climb" class="deep" style="border-radius: 12px; padding: 30px 26px; display: flex; flex-direction: column; gap: 18px"></section>
 
-    <div class="breath" aria-hidden="true"><svg viewBox="0 0 120 14" width="120" height="14"><line x1="0" y1="7" x2="48" y2="7" stroke="#B4975F" stroke-width="1"/><path d="M60 1l6 6-6 6-6-6z" fill="#B4975F"/><line x1="72" y1="7" x2="120" y2="7" stroke="#B4975F" stroke-width="1"/></svg></div>
+    <div class="breath" aria-hidden="true"><svg viewBox="0 0 120 14" width="120" height="14"><line x1="0" y1="7" x2="48" y2="7" stroke="#6F93B8" stroke-width="1"/><path d="M60 1l6 6-6 6-6-6z" fill="#6F93B8"/><line x1="72" y1="7" x2="120" y2="7" stroke="#6F93B8" stroke-width="1"/></svg></div>
 
     <!-- ===== STEP 04 · WHAT IF? ===== -->
     <section id="s-whatif" class="deep" style="border-radius: 12px; padding: 32px 26px; display: flex; flex-direction: column; gap: 24px">
       <div class="whead">
         <div style="display: flex; flex-direction: column; gap: 10px; min-width: 0">
-          <span class="eb" style="color: #D6BF8F" id="labtag">Step 04 · The what-if lab</span>
-          <h1 class="sfi" style="font-size: clamp(64px, 10vw, 112px); line-height: .9; color: #B4975F">What if?</h1>
+          <span class="eb" style="color: #A9C0D9" id="labtag">Step 04 · The what-if lab</span>
+          <h1 class="sfi" style="font-size: clamp(64px, 10vw, 112px); line-height: .9; color: #6F93B8">What if?</h1>
           <span class="sf" style="font-size: 21px; line-height: 1.35; max-width: 34ch">You want to grow. So ask it. Move one of four levers and watch your cash, clients, time and people answer.</span>
         </div>
         <svg class="whub" id="lab-hub" viewBox="0 0 320 175" role="img" aria-label="You, with cash, clients, time and people around you"></svg>
@@ -187,10 +187,10 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
       <div id="lab-in" style="display: flex; flex-direction: column; gap: 22px"></div>
       <div class="wverdict" id="lab-head" aria-live="polite"></div>
       <div id="lab-deep"></div>
-      <p style="font-size: 13px; color: #C4B69D; border-top: 1px solid #3A2F20; padding-top: 14px" id="labfoot"></p>
+      <p style="font-size: 13px; color: #A9B6C6; border-top: 1px solid #3A2F20; padding-top: 14px" id="labfoot"></p>
     </section>
 
-    <div class="breath" aria-hidden="true"><svg viewBox="0 0 120 14" width="120" height="14"><line x1="0" y1="7" x2="48" y2="7" stroke="#B4975F" stroke-width="1"/><path d="M60 1l6 6-6 6-6-6z" fill="#B4975F"/><line x1="72" y1="7" x2="120" y2="7" stroke="#B4975F" stroke-width="1"/></svg></div>
+    <div class="breath" aria-hidden="true"><svg viewBox="0 0 120 14" width="120" height="14"><line x1="0" y1="7" x2="48" y2="7" stroke="#6F93B8" stroke-width="1"/><path d="M60 1l6 6-6 6-6-6z" fill="#6F93B8"/><line x1="72" y1="7" x2="120" y2="7" stroke="#6F93B8" stroke-width="1"/></svg></div>
 
     <!-- ===== DAWN · the road to The Summit ===== -->
     <section id="s-dawn" class="dawn" aria-label="The road from where you are to The Summit">
@@ -200,23 +200,23 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
 
     <!-- ===== THE SUMMIT ===== -->
     <section id="s-summit" class="lux" style="border-radius: 14px; padding: 10px; position: relative; overflow: hidden">
-      <div style="border: 1px solid rgba(180,151,95,.55); border-radius: 10px; padding: 8px">
-        <div style="border: 1px solid rgba(180,151,95,.25); border-radius: 7px; padding: 46px 32px; display: flex; flex-wrap: wrap; align-items: center; gap: 36px">
+      <div style="border: 1px solid rgba(111,147,184,.55); border-radius: 10px; padding: 8px">
+        <div style="border: 1px solid rgba(111,147,184,.25); border-radius: 7px; padding: 46px 32px; display: flex; flex-wrap: wrap; align-items: center; gap: 36px">
           <svg viewBox="0 0 260 200" style="flex: 0 1 260px; height: auto" aria-hidden="true">
-            <circle class="twinkle" cx="40" cy="30" r="1.4" fill="#D6BF8F"/><circle class="twinkle t2" cx="210" cy="22" r="1.1" fill="#F7F2E7"/><circle class="twinkle t3" cx="160" cy="54" r="1" fill="#D6BF8F"/><circle class="twinkle" cx="90" cy="64" r="0.9" fill="#F7F2E7"/>
-            <circle class="glowpeak" cx="130" cy="48" r="26" fill="rgba(180,151,95,.18)"/>
-            <polyline points="10,190 130,48 250,190" fill="none" stroke="#B4975F" stroke-width="1.4"/>
-            <polyline points="70,190 130,48 190,190" fill="none" stroke="#594A32" stroke-width="1"/>
-            <polyline points="112,70 130,48 150,72" fill="none" stroke="#F7F2E7" stroke-width="1.4" opacity=".7"/>
-            <path d="M130 48V20" stroke="#F7F2E7" stroke-width="1.2"/><path class="flagw" d="M130 21h18l-5 5 5 5h-18z" fill="#B4975F"/>
+            <circle class="twinkle" cx="40" cy="30" r="1.4" fill="#A9C0D9"/><circle class="twinkle t2" cx="210" cy="22" r="1.1" fill="#EEF2F7"/><circle class="twinkle t3" cx="160" cy="54" r="1" fill="#A9C0D9"/><circle class="twinkle" cx="90" cy="64" r="0.9" fill="#EEF2F7"/>
+            <circle class="glowpeak" cx="130" cy="48" r="26" fill="rgba(111,147,184,.18)"/>
+            <polyline points="10,190 130,48 250,190" fill="none" stroke="#6F93B8" stroke-width="1.4"/>
+            <polyline points="70,190 130,48 190,190" fill="none" stroke="#2A3A50" stroke-width="1"/>
+            <polyline points="112,70 130,48 150,72" fill="none" stroke="#EEF2F7" stroke-width="1.4" opacity=".7"/>
+            <path d="M130 48V20" stroke="#EEF2F7" stroke-width="1.2"/><path class="flagw" d="M130 21h18l-5 5 5 5h-18z" fill="#6F93B8"/>
           </svg>
           <div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 14px">
-            <span style="font-size: 12px; letter-spacing: .32em; color: #D6BF8F">LINK TO LEAD · THE TOP</span>
+            <span style="font-size: 12px; letter-spacing: .32em; color: #A9C0D9">LINK TO LEAD · THE TOP</span>
             <h2 class="sf foil" style="font-size: clamp(44px, 6vw, 76px); line-height: .98">The Summit</h2>
-            <p class="sfi" style="font-size: 22px; line-height: 1.4; color: #EFE4CC">The whole incubator. With Alexandru beside you, every week.</p>
+            <p class="sfi" style="font-size: 22px; line-height: 1.4; color: #E3EAF2">The whole incubator. With Alexandru beside you, every week.</p>
             <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 6px">
-              <a href="/compass/summit" class="go" style="min-height: 52px; padding: 0 26px; border-radius: 3px; border: 1px solid #D6BF8F; background: #B4975F; color: #14100B; font-weight: 600; font-size: 15px; letter-spacing: .04em; text-decoration: none; display: inline-flex; align-items: center; gap: 10px">Open The Summit <span class="arr" aria-hidden="true">→</span></a>
-              <span style="font-family: Newsreader, Georgia, serif; font-size: 26px; color: #F7F2E7">$1,989</span>
+              <a href="/compass/summit" class="go" style="min-height: 52px; padding: 0 26px; border-radius: 3px; border: 1px solid #A9C0D9; background: #6F93B8; color: #0E1C2B; font-weight: 600; font-size: 15px; letter-spacing: .04em; text-decoration: none; display: inline-flex; align-items: center; gap: 10px">Open The Summit <span class="arr" aria-hidden="true">→</span></a>
+              <span style="font-family: Newsreader, Georgia, serif; font-size: 26px; color: #EEF2F7">$1,989</span>
             </div>
           </div>
         </div>
@@ -230,7 +230,7 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
   </main>
 <div id="acct-gate" hidden></div>
 </div>
-<div id="toast" role="status" aria-live="polite" style="position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #1C1309; color: #F7F2E7; border: 1px solid #B4975F; border-radius: 5px; padding: 12px 20px; font: 13px 'Inter', Arial, sans-serif; z-index: 90; max-width: 90vw; display: none"></div>
+<div id="toast" role="status" aria-live="polite" style="position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #0E1C2B; color: #EEF2F7; border: 1px solid #6F93B8; border-radius: 5px; padding: 12px 20px; font: 13px 'Inter', Arial, sans-serif; z-index: 90; max-width: 90vw; display: none"></div>
 <script src="model.js"></script>
 <script src="engine.js"></script>
 <script src="app.js"></script>
