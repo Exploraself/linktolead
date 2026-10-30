@@ -186,3 +186,26 @@ input.now{accent-color:#5A6580}
 .w4disc,.w4ring{z-index:2}
 .w4disc{background:radial-gradient(circle at 35% 30%,#D6BF8F,#B4975F 55%,#7E6638);color:#121C2D;font:800 clamp(10px,2.4vw,13px)/1 'Inter',Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;box-shadow:0 0 0 4px #121C2D,0 0 0 5px rgba(180,151,95,.6),0 14px 30px rgba(0,0,0,.45)}
 @media (prefers-reduced-motion:reduce){.win4-box .w4c,.win4-box .w4in,.win4-box .w4disc,.win4-box .w4ring{animation:none!important;opacity:1}.win4-box .w4ring{opacity:0}.win4-box.wait .w4c,.win4-box.wait .w4disc{opacity:1}}
+
+/* The Movement (30 Oct): a watch movement on the navy plate. Four skeleton
+   gears in gold line, a jewel for each domain, turn the gold WIN gear. A
+   domain line lights its gear and dims the rest. Slow, calm; still under
+   reduced motion. */
+.win4-box .w4svg{position:absolute;inset:4%;width:92%;height:92%}
+.w4gear{transform-box:fill-box;transform-origin:center}
+.w4ccw{animation:w4spin 26s linear infinite reverse}.w4cw{animation:w4spin 20s linear infinite}
+@keyframes w4spin{to{transform:rotate(360deg)}}
+.w4lab{font:700 13px/1 'Inter',Arial,sans-serif;letter-spacing:.16em;fill:#E6D3A3}
+.w4win{font:600 22px/1 Newsreader,Georgia,serif;letter-spacing:.24em;fill:#E6D3A3}
+.w4shine{animation:w4shine 9s ease-in-out infinite}
+@keyframes w4shine{0%,62%{transform:translateX(-180px) skewX(-18deg)}82%,100%{transform:translateX(180px) skewX(-18deg)}}
+.w4halo{animation:w4halo 9s ease-in-out infinite}
+@keyframes w4halo{0%,100%{opacity:.5}50%{opacity:1}}
+.w4g{transition:opacity .45s ease}
+.w4jewel{transition:r .3s ease}
+.win4-box[data-active] .w4g{opacity:.28}
+.win4-box[data-active="self"] .w4-self,.win4-box[data-active="people"] .w4-people,.win4-box[data-active="business"] .w4-business,.win4-box[data-active="market"] .w4-market{opacity:1;filter:drop-shadow(0 0 10px rgba(230,211,163,.45))}
+.win4-box.wait .w4svg{opacity:0}
+.win4-box.go .w4svg{animation:w4in 1.4s cubic-bezier(.22,1,.36,1) both}
+@keyframes w4in{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.w4ccw,.w4cw,.w4shine,.w4halo,.win4-box.go .w4svg{animation:none}.win4-box.wait .w4svg{opacity:1}}
