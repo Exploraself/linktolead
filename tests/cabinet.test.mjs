@@ -17,7 +17,7 @@ ok(full.includes('Needs you now') && full.includes('Open my reading →') && ful
 ok(C.handAngle('free') === -120 && C.handAngle('lab') === 0 && C.handAngle('premium') === 120 && full.includes('rotate(0 180 180)'), 'the dial hand points at the founder’s step');
 ok(!/Elena|Marsh|example/i.test(full), 'no example founder anywhere');
 const empty = C.cabinetHTML({ first: '', tier: 'free', bands: [], plans: null, prog: null });
-ok(!empty.includes('<dt>Stage today</dt>') && !empty.includes('<dt>Start here</dt>') && empty.includes('Take my Compass →') && empty.includes('Good'), 'missing values are left out, never invented');
+ok(!empty.includes('<dt>Stage today</dt>') && !empty.includes('<dt>Start here</dt>') && empty.includes('Take my North Star →') && empty.includes('Good'), 'missing values are left out, never invented');
 ok(read('public/cabinet.css').includes(':root[data-theme="dark"] .cab{') && C.theme() === 'light', 'Morning and Evening follow the site light (theme.js)');
 localStorage.setItem('es-theme', 'dark');
 ok(C.theme() === 'dark', 'the founder’s pick is kept on this browser');
@@ -41,14 +41,16 @@ ok(dots.join() === 'done,done,here,open,open,gate,gate,gate,gate,gate,gate,gate'
 const banded = C.cabinetHTML({ tier: 'session', band: { level: 3, title: 'Name the gap', done: 9, dots } });
 ok(banded.includes('class="incub"') && banded.includes('Level 03 of 12 · <b>Name the gap</b> · 9 of 28 answers') && banded.includes('data-level="3"') && banded.includes('Continue Level 03 →'), 'band: the founder’s level, its answers and Continue');
 ok(!full.includes('class="incub"') && !C.cabinetHTML({ tier: 'free', band: null }).includes('class="incub"'), 'no band without a FULL account');
-ok(!/animation/.test(read('public/cabinet.css').split('.incub{')[1].split('/* The Leadership Compass')[0]), 'the band is static');
+ok(!/animation/.test(read('public/cabinet.css').split('.incub{')[1].split('/* The Leader’s North Star')[0]), 'the band is static');
 ok(/full = pulled && signupType !== 'simple'/.test(app), 'band only once the account is read, and never for simple accounts');
-// The Compass strip, and the music module.
-ok(C.compassStripHTML(true).includes('Open my Compass →') && C.compassStripHTML(false).includes('Take my Compass →') && app.includes('compassStripHTML(!!compassRec)'), 'the Leadership Compass has its own strip');
+// The North Star strip, and the music module.
+ok(C.compassStripHTML(true).includes('Open my North Star →') && C.compassStripHTML(false).includes('Take my North Star →') && app.includes('compassStripHTML(!!compassRec)'), 'the Leader’s North Star has its own strip');
 const Mu = await import('../public/music.js');
+const { readFileSync: rfMu } = await import('node:fs');
+ok(!/crackle/.test(rfMu(new URL('../public/music.js', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')), 'no vinyl crackle in the music');
 ok(Mu.shade(100) === 0 && Mu.shade(0) === 0.62 && Mu.shade(50) === 0.31, 'light: 100 is no shade, lower is dimmer');
 ok(Mu.tempo('trio', 0) < Mu.tempo('trio', 100) && Mu.tempo('ambient', 50) < Mu.tempo('trio', 50), 'energy moves the tempo');
-ok(Object.keys(Mu.TRACKS).length === 3 && Mu.MODES.focus.light < Mu.MODES.study.light && Mu.MODES.focus.lamp === true && Mu.MODES.study.lamp === false, 'three pieces; Focus mode = light, music and the Lamp');
+ok(Object.keys(Mu.TRACKS).length === 6 && ['road','burn','riff'].every((k) => Mu.TRACKS[k]) && Mu.MODES.focus.light < Mu.MODES.study.light && Mu.MODES.focus.lamp === true && Mu.MODES.study.lamp === false, 'six pieces (three rock); Focus mode = light, music and the Lamp');
 ok(/M\.answered\(answered\(st, level, dom\)\)/.test(app) && /chime\(\)/.test(mu) && read('public/music.css').includes('#mp-dim.lamp.aimed'), 'the Lamp: a pool of light on the question, a chord and a candle per answer');
 ok(Mu.mayAsk('2000-01-01') === true, 'the two-minute invitation may show');
 ok(/ASK_AFTER = 120/.test(mu) && /if \(!here \|\| isOn\(\) \|\| !mayAsk\(\)/.test(mu), 'after two minutes on the dashboard, once a day, never while music plays');

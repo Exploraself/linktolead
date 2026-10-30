@@ -4,7 +4,7 @@
 // POST { token, stage, from } saves the stage on the account, logs a
 // 'stage-change' event { from, to } (/mentor shows it in the founder's
 // history) and, after the reply, resyncs the stage tag in Mailchimp. From
-// then on the chosen stage wins over the Compass's, on every device.
+// then on the chosen stage wins over the North Star's, on every device.
 
 import { json, bad, db, now, clean, studentBy, accountTables } from '../_shared.js';
 import { syncFounder } from '../_mailchimp.js';

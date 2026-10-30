@@ -21,7 +21,7 @@ import { now } from './_shared.js';
 
 export const DEFAULT_FORM = { host: 'exploraselfmba.us8.list-manage.com', server: 'us8', u: 'ab5e056ba759e867cde44f4da', id: '41448b6750', f_id: '005a1ae1f0', tag: '3359661' };
 
-/** The four domains, as tags, in the Compass's own order. */
+/** The four domains, as tags, in the North Star's own order. */
 export const DOMAIN_TAGS = ['lead-yourself', 'lead-your-people', 'lead-your-business', 'lead-the-market'];
 const STAGE_TAGS = ['build', 'grow', 'scale'];
 
@@ -75,7 +75,7 @@ export function mailchimpState(env = {}) {
 }
 
 /** The Mailchimp tag for each sales page (the landing key stored on the
- *  profile): /road1/, /road2/ (the Compass sales page) and /road3/ (the 12
+ *  profile): /road1/, /road2/ (the North Star sales page) and /road3/ (the 12
  *  Scrolls page). Founders tagged before the roads keep their old tags. */
 /** Which sales page a founder signed up on (Alexandru, 30 Oct 2026). The old
  *  names ('Landing - Road 1' …) are sent as inactive, so a founder whose tags
@@ -94,7 +94,7 @@ export function tagsFor({ source, stage, weakest, tier, signupType, interest, in
   if (source) out.push({ name: source, status: 'active' });
   // Which form they signed up with.
   if (signupType === 'full' || signupType === 'simple') out.push({ name: signupType === 'full' ? 'Signup - Full' : 'Signup - Simple', status: 'active' });
-  // The sales page they signed up on (the Compass box has none).
+  // The sales page they signed up on (the North Star box has none).
   if (Object.hasOwn(LANDING_TAGS, landing)) out.push({ name: LANDING_TAGS[landing], status: 'active' }, { name: OLD_LANDING_TAGS[landing], status: 'inactive' });
   // The audience has no merge fields for these, so they go as tags.
   if (interest) out.push({ name: `Interest - ${interest}`, status: 'active' });
@@ -106,9 +106,9 @@ export function tagsFor({ source, stage, weakest, tier, signupType, interest, in
   return out;
 }
 
-/** The weakest Compass domain as a tag: the lowest answered score, a tie going
+/** The weakest North Star domain as a tag: the lowest answered score, a tie going
  *  to the first in order (the same rule as the Ground Plan). Null until every
- *  domain has an answer, which is when the Compass counts as done. */
+ *  domain has an answer, which is when the North Star counts as done. */
 export function weakestTag(resultsJson) {
   let r;
   try { r = typeof resultsJson === 'string' ? JSON.parse(resultsJson) : resultsJson; } catch { return null; }
@@ -234,7 +234,7 @@ export async function record(D, { studentId, email, action, mode, status, detail
 
 /**
  * Sync one founder: 'join' (new account, or consent given), 'resubscribe'
- * (letters turned back on: Mailchimp asks them to confirm), 'tags' (Compass
+ * (letters turned back on: Mailchimp asks them to confirm), 'tags' (North Star
  * done, a step or stage changed; API mode only), 'tag' (one more tag, `tag`,
  * such as a library download; API mode only) or 'unsubscribe' (unsubscribed,
  * paused, deleted).
@@ -255,7 +255,7 @@ export async function syncFounder(env, D, studentId, action = 'join', { keepLog 
   if ((action === 'tags' || action === 'tag') && st.mode === 'form') return { status: 'skipped', detail: 'Form mode does not tag.' };
   if (action === 'tag' && !tag) return { status: 'skipped', detail: 'No tag.' };
   const c = await D.prepare('SELECT stage, results_json FROM compass WHERE student_id = ?').bind(studentId).first();
-  // A stage the founder chose on /start wins over the Compass's.
+  // A stage the founder chose on /start wins over the North Star's.
   const chose = await D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'stage-change' LIMIT 1").bind(studentId).first();
   const [first, ...rest] = String(s.name || '').split(' ');
   const member = { email: s.email, first, last: rest.join(' '), source: p.source || 'compass',

@@ -2,7 +2,7 @@
  * and brass plate, the climb as a gold watch dial, a record player, a desk
  * with the founder's four working objects, and the library shelf.
  *
- * Everything shown is the founder's own (name, stage, Compass bands, plan
+ * Everything shown is the founder's own (name, stage, North Star bands, plan
  * count, programme level). A value that is not known is left out, never
  * filled with an example. Morning (light) and Evening (dark) are the site's
  * light and dark (public/theme.js): they follow the device until the founder
@@ -50,13 +50,13 @@ export function levelDots(here, doneOf, held) {
 }
 const DOT_NAMES = { done: 'finished', here: 'you are here', open: 'open', gate: 'opens with a later step' };
 
-/** The Leadership Compass, in its own small place under the Cabinet: one
+/** The Leader’s North Star, in its own small place under the Cabinet: one
  *  slim strip, always there. `read`: the founder has a reading. */
 export function compassStripHTML(read) {
-  return `<a class="cstrip" href="/compass/" aria-label="${read ? 'Open your Leadership Compass reading' : 'Take your Leadership Compass'}">
+  return `<a class="cstrip" href="/compass/" aria-label="${read ? 'Open your Leader’s North Star reading' : 'Take your Leader’s North Star'}">
     <span class="cstrip-dial" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="none" stroke="#C9A24A" stroke-width="1.4"/><circle cx="20" cy="7" r="2" fill="#A8623A"/><circle cx="33" cy="20" r="2" fill="#4C7355"/><circle cx="20" cy="33" r="2" fill="#36607F"/><circle cx="7" cy="20" r="2" fill="#9A7418"/><path d="M20 9l3 11-3 2-3-2z" fill="#E3C47E"/><path d="M20 31l3-11-3-2-3 2z" fill="#6E5A36"/><circle cx="20" cy="20" r="2.2" fill="#C9A24A"/></svg></span>
-    <span class="cstrip-t"><span class="cstrip-k">Leadership Compass</span><b>${read ? 'Your direction in all four domains, any time you need it.' : 'Find where you stand in all four domains. Eight plain questions.'}</b></span>
-    <span class="cstrip-go">${read ? 'Open my Compass →' : 'Take my Compass →'}</span>
+    <span class="cstrip-t"><span class="cstrip-k">Leader’s North Star</span><b>${read ? 'Your direction in all four domains, any time you need it.' : 'Find where you stand in all four domains. Eight plain questions.'}</b></span>
+    <span class="cstrip-go">${read ? 'Open my North Star →' : 'Take my North Star →'}</span>
   </a>`;
 }
 
@@ -154,13 +154,13 @@ export function cabinetHTML(c) {
         ${pr ? `<div class="cab-ring"><svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="32" fill="none" stroke="var(--line)" stroke-width="6"/><circle cx="40" cy="40" r="32" fill="none" stroke="var(--gold)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(201.1 * Math.min(1, (pr.done || 0) / 28)).toFixed(1)} 201.1" transform="rotate(-90 40 40)"/></svg><div><b>${pr.done || 0} of 28</b><small>answers in Level ${String(pr.level).padStart(2, '0')}</small></div></div>
         <p>Level ${String(pr.level).padStart(2, '0')}: ${esc(pr.title)}.</p>` : '<p>Your twelve levels start with Level 01.</p>'}
         <button type="button" class="cab-btn solid" data-go="work">Continue →</button></article>
-      <article class="cab-obj"><p class="cab-eb">Leadership Compass</p>
+      <article class="cab-obj"><p class="cab-eb">Leader’s North Star</p>
         ${anyBand ? `<div class="cab-doms">${DOMAINS.map(([n, col], i) => bands[i] ? `<div><span class="cab-dot" style="background:${col}"></span>${n}<span class="cab-band ${BAND_CLASS[bands[i]] || 'mid'}">${esc(bands[i])}</span></div>` : '').join('')}</div>`
           : '<p>Eight plain questions and your rough numbers. Feedback in all four domains.</p>'}
-        <a class="cab-btn" href="/compass/">${anyBand ? 'Open my reading →' : 'Take my Compass →'}</a></article>
+        <a class="cab-btn" href="/compass/">${anyBand ? 'Open my reading →' : 'Take my North Star →'}</a></article>
       <article class="cab-obj"><p class="cab-eb">The ledger · Account Plans</p>
         ${p && p.total ? `<div class="cab-ring"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="14" y="10" width="52" height="62" rx="4" fill="none" stroke="var(--gold)" stroke-width="2"/><path d="M24 26h32M24 36h32M24 46h20" stroke="var(--line)" stroke-width="2"/><path d="M24 56l5 5 9-10" fill="none" stroke="var(--gold)" stroke-width="2.4" stroke-linecap="round"/></svg><div><b>${p.count} of ${p.total}</b><small>steps ticked</small></div></div>
-        ${p.next ? `<div class="cab-next"><span class="cab-k">Next · ${esc(p.next.domain)}</span>${esc(p.next.title)}</div>` : ''}` : '<p>Your step-by-step plans open from your Compass reading.</p>'}
+        ${p.next ? `<div class="cab-next"><span class="cab-k">Next · ${esc(p.next.domain)}</span>${esc(p.next.title)}</div>` : ''}` : '<p>Your step-by-step plans open from your North Star reading.</p>'}
         <button type="button" class="cab-btn" data-cab="plans">Open the ledger →</button></article>
       <article class="cab-obj"><p class="cab-eb">Ask Alexandru</p>
         <div class="cab-portrait"><img src="/cabinet/alexandru.jpg" alt="Alexandru Cojocari" width="640" height="512" loading="lazy"></div>

@@ -1,4 +1,4 @@
-// The Compass sales pages: stepped sliders and the sentences at the edges.
+// The North Star sales pages: stepped sliders and the sentences at the edges.
 //
 // Big ranges move in growing steps so a phone can still hit small numbers, a
 // typed value above the top is kept, and no message ever shows NaN, Infinity

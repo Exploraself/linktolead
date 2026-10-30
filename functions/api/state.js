@@ -36,7 +36,7 @@ export async function onRequestGet({ request, env }) {
   for (const r of sheets.results || []) w[r.key] = r.value;
 
   // stageChosen: the founder picked this stage on /start ("Change where I
-  // stand"), so it wins over the Compass's on every device. signupType:
+  // stand"), so it wins over the North Star's on every device. signupType:
   // 'simple' founders never have a password, so /start offers none.
   return json({ ok: true, me: { name: me.name, email: me.email, stage: me.stage, stageChosen: !!chose, tier: me.tier, thin: me.thin_domain, hasPassword: !!(auth && auth.pass_hash),
     signupType: (prof && prof.signup_type) || null,

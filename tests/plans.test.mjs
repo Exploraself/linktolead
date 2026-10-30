@@ -83,14 +83,14 @@ r = await signup({ request: post('/api/signup', { first: 'Ana', email: 'ana@exam
 const token = (await r.json()).token;
 r = await plansGet({ request: get('/api/plans?t=' + token), env });
 j = await r.json();
-ok(r.status === 200 && j.compass === false && j.domains.length === 4 && j.whatif === null && j.count === 0 && j.total === 32, 'before the Compass: the fixed order, 0 of 32');
+ok(r.status === 200 && j.compass === false && j.domains.length === 4 && j.whatif === null && j.count === 0 && j.total === 32, 'before the North Star: the fixed order, 0 of 32');
 
 await compassPost({ request: post('/api/compass', { token, stage: 'building', answers: { v: 2 },
   results: { scores: [6, 6, 0, 3], answered: all }, flags: { pains: ['clients'], want: 'income', lab: { p: 0, m: 50, d: 0 } } }), env });
 r = await plansGet({ request: get('/api/plans?t=' + token), env });
 j = await r.json();
-ok(j.domains[0].id === 'work' && j.domains[0].band === 'now' && j.domains[0].goal && j.domains.find((d) => d.id === 'market').said[0] === 'Not enough clients', 'after the Compass: its order, band, pain and goal');
-ok(j.whatif && j.whatif.id === 'message', 'after the Compass: the What-if plan for the lever moved most');
+ok(j.domains[0].id === 'work' && j.domains[0].band === 'now' && j.domains[0].goal && j.domains.find((d) => d.id === 'market').said[0] === 'Not enough clients', 'after the North Star: its order, band, pain and goal');
+ok(j.whatif && j.whatif.id === 'message', 'after the North Star: the What-if plan for the lever moved most');
 
 // Ticks.
 r = await tick({ request: post('/api/plans/tick', { token, step: 'work-1', done: true }), env });
@@ -107,6 +107,6 @@ r = await tick({ request: post('/api/plans/tick', { token, step: 'made-up', done
 ok(r.status === 400, 'an unknown step is refused');
 r = await tick({ request: post('/api/plans/tick', { token: 'x'.repeat(48), step: 'work-1', done: true }), env });
 ok(r.status === 401, 'no valid token: no tick');
-ok(!env.DB.raw.prepare("SELECT COUNT(*) n FROM compass WHERE flags_json LIKE '%got%'").get().n, 'ticks never touch the Compass record (or its launchpad)');
+ok(!env.DB.raw.prepare("SELECT COUNT(*) n FROM compass WHERE flags_json LIKE '%got%'").get().n, 'ticks never touch the North Star record (or its launchpad)');
 
 done();

@@ -1,4 +1,4 @@
-// The Leadership Compass engine: scoring, the twelve feedback versions, the
+// The Leader’s North Star engine: scoring, the twelve feedback versions, the
 // launchpad, what the numbers tell you, and the What-if lab.
 //
 // The rule that matters most: every figure comes from what the founder

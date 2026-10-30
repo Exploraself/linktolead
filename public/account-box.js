@@ -1,7 +1,7 @@
 /* The account box on the sales pages: makes the free account and opens the
  * founder's Ground Plan at /start, signed in at once.
  *
- *   'full'   (/road2/, the Compass sales page, landing "road2"; /road1/,
+ *   'full'   (/road2/, the North Star sales page, landing "road2"; /road1/,
  *            landing "road1"): first name, surname, email, company (or "No
  *            company yet"), interest, industry, a password (required: at
  *            least 10 characters, typed twice), consent.
@@ -15,11 +15,11 @@
  * time a box opens (/road1/, /road2/, /road3/), then open() each time.
  *
  * On /compass (landing "compass", `stay`): a visitor from outside makes the
- * full account here, then stays on the Compass, signed in, with everything
+ * full account here, then stays on the North Star, signed in, with everything
  * open. An email that already has an account goes to `onExisting`. */
 import { detailFields, readDetails, CONSENT, utm } from '/forms.js';
 
-/** Inside this box only: the Compass page has its own #gate-form. */
+/** Inside this box only: the North Star page has its own #gate-form. */
 const $ = (s) => (ctx.gate || document).querySelector(s);
 const KEY = 'exploraself-profile';
 const known = () => { try { const p = JSON.parse(localStorage.getItem(KEY) || 'null'); return p && p.email ? p : null; } catch { return null; } };
@@ -34,13 +34,13 @@ const STYLE = `.abox .inp{min-height:46px;border:1px solid #D8CDBB;border-radius
 .abox .ab-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:420px){.abox .ab-two{grid-template-columns:1fr}}`;
 
-// The words at the top of the box. The Compass sales page carries the
+// The words at the top of the box. The North Star sales page carries the
 // visitor's answers into the account; the home page has none to carry.
 const HEAD = {
-  compass: ['YOUR FULL ROAD IS ONE STEP AWAY', 'Where should we send your Compass?', 'Your answers from this page come with you. Free.'],
+  compass: ['YOUR FULL ROAD IS ONE STEP AWAY', 'Where should we send your North Star?', 'Your answers from this page come with you. Free.'],
   full: ['START FREE', 'Your free account', 'Free. You sign in with your email and a password.'],
   simple: ['START FREE', 'Your free account', 'One minute. Name and email. Free.'],
-  stay: ['YOUR COMPASS, IN FULL', 'Your free account', 'Your answers come with you, and the whole Compass opens: your feedback, your plans and your library. Free.'],
+  stay: ['YOUR NORTH STAR, IN FULL', 'Your free account', 'Your answers come with you, and the whole North Star opens: your feedback, your plans and your library. Free.'],
 };
 
 const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpop abox" role="dialog" aria-modal="true" aria-labelledby="gate-h" style="position: relative; width: 100%; max-width: 480px; background: #FFFDF8; color: #15213B; border-radius: 10px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.4); margin: auto; font-family: 'Inter', Arial, sans-serif; box-sizing: border-box">
@@ -61,7 +61,7 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
       <span style="font-size: 12px; color: #5A6580; margin-top: -6px">At least 10 characters. You sign in with your email and this password.</span>` : ''}
       <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: #3D4966"><input type="checkbox" id="j-consent" style="width: 18px; height: 18px; margin-top: 1px; accent-color: #C9A24A; flex: none">${CONSENT}</label>
       <span id="gate-err" role="alert" style="font-size: 13px; color: #B5512E; font-weight: 700"></span>
-      <button type="submit" class="ab-go">${stay ? 'OPEN MY COMPASS →' : 'OPEN MY GROUND PLAN →'}</button>
+      <button type="submit" class="ab-go">${stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY GROUND PLAN →'}</button>
       ${stay ? '' : '<button type="button" data-close style="min-height: 44px; border-radius: 5px; border: 1px solid #D8CDBB; background: transparent; color: #15213B; font-weight: 700; cursor: pointer">Not now · keep reading</button>'}
       <a href="/ground-plan/#signin" style="font-size: 13px; text-align: center; font-weight: 700; color: #7A5E26">Already have an account? Sign in</a>
     </form>
@@ -111,7 +111,7 @@ function wire(gate, variant, landing) {
     } catch (ex) {
       err(ex && ex.message && !/fetch|network|load failed|import/i.test(ex.message) ? ex.message : 'We could not reach the account service just now. Try again in a minute.');
     }
-    go.disabled = false; go.textContent = ctx.stay ? 'OPEN MY COMPASS →' : 'OPEN MY GROUND PLAN →';
+    go.disabled = false; go.textContent = ctx.stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY GROUND PLAN →';
   });
 }
 

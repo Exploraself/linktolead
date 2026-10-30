@@ -1,7 +1,7 @@
-/* ExploraSelf Leadership Compass: the intelligence.
+/* ExploraSelf Leader’s North Star: the intelligence.
  *
- * How the Compass asks, scores and answers, as plain rules. The logic and the
- * copy follow "00 Leadership Compass · The Intelligence" (Drive): eight
+ * How the North Star asks, scores and answers, as plain rules. The logic and the
+ * copy follow "00 Leader’s North Star · The Intelligence" (Drive): eight
  * questions for the stage today, two per domain; a band per domain (Needs you
  * now / Taking shape / A strength) that picks one of twelve feedback versions;
  * pains and a goal that say "You said:" on their domain; a compass reading from

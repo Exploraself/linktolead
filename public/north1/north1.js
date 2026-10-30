@@ -1,4 +1,4 @@
-/* /north1/, the Leadership Compass sales page.
+/* /north1/, the Leader’s North Star sales page.
  *
  * 1. Every "Start" link goes to /compass/ with this visitor's own utm_* tags;
  *    with none, utm_source=north1, so sign-ups from this page can be told
@@ -21,9 +21,9 @@
 
   /* 2 · The sample question */
   var SAID = [
-    'That’s an honest place to start. The Compass helps you write it down first, because the rest of the business leans on it.',
-    'Worth checking. In the Compass you find one real example before you count it as yes.',
-    'Good ground to build on. The Compass asks seven more like this, across all four domains.',
+    'That’s an honest place to start. The North Star helps you write it down first, because the rest of the business leans on it.',
+    'Worth checking. In the North Star you find one real example before you count it as yes.',
+    'Good ground to build on. The North Star asks seven more like this, across all four domains.',
     'Clear on this one. Now see whether the other three domains are as clear.'
   ];
   var ans = document.getElementById('ans'), out = document.getElementById('tryout');
@@ -31,7 +31,7 @@
     var b = e.target.closest('button[data-a]'); if (!b) return;
     ans.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
     b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
-    out.innerHTML = '<b>' + SAID[+b.dataset.a] + '</b><a href="' + to + '">Answer all eight in the Compass →</a>';
+    out.innerHTML = '<b>' + SAID[+b.dataset.a] + '</b><a href="' + to + '">Answer all eight in the North Star →</a>';
     out.hidden = false;
   });
 

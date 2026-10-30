@@ -1,5 +1,5 @@
-/* The Leadership Compass sales page (versions A and B share this file).
-   Navy, cream and one gold; the Compass's own fonts: Newsreader for headings
+/* The Leader’s North Star sales page (versions A and B share this file).
+   Navy, cream and one gold; the North Star's own fonts: Newsreader for headings
    and the italic human lines, Inter for everything else. Loaded the
    same way as /compass (style.css there). Motion stops under
    prefers-reduced-motion. */
@@ -14,7 +14,7 @@ a{color:#7A5E26}a:hover{color:#15213B}
 .serif{font-family:Newsreader,Georgia,serif;font-style:italic;font-weight:400}
 /* Headings in Newsreader. It is a serif with a lighter top weight than the old
    sans, so the 900 of the old headings becomes Newsreader's 600, with the
-   Compass's slight negative tracking. */
+   North Star's slight negative tracking. */
 .fc h1,.fc h2,.fc h3,.h2{font-family:Newsreader,Georgia,serif;font-weight:500 !important;letter-spacing:-.015em !important}
 .fc h1 .serif,.fc h2 .serif,.fc h3 .serif{font-weight:400 !important}
 .wrap{max-width:1160px;margin:0 auto}
@@ -171,4 +171,18 @@ input.now{accent-color:#5A6580}
 [data-off] .win4-box .w4in,[data-off] .win4-box .w4ring{animation-play-state:paused}
 @media (max-width:760px){.win4{flex-direction:column;align-items:stretch;gap:36px}.win4-tx,.win4-vz{flex:none}.win4-list b{width:auto;min-width:140px}}
 @media (max-width:420px){.win4-list button{flex-wrap:wrap;gap:4px 12px}.win4-list span{flex-basis:100%;padding-left:26px;font-size:15px}}
+/* Stronger look (30 Oct): the circles sit on a navy plate, read as an
+   instrument: hairline crosshair, solid rims, deeper colour, uppercase labels,
+   a gold seal at the centre. */
+.win4-box{background:radial-gradient(circle at 50% 45%,#1D2C4C 0%,#15213B 62%,#0E1830 100%);border-radius:6px;box-shadow:0 30px 60px -28px rgba(14,24,48,.75),inset 0 0 0 1px rgba(201,162,74,.35)}
+.win4-box::before,.win4-box::after{content:"";position:absolute;background:rgba(201,162,74,.22);pointer-events:none}
+.win4-box::before{left:50%;top:5%;bottom:5%;width:1px}
+.win4-box::after{top:50%;left:5%;right:5%;height:1px}
+.w4c{z-index:1}
+.w4in{mix-blend-mode:screen;background:rgba(var(--rgb),.30);border:2px solid rgba(var(--rgb),1);box-shadow:inset 0 0 40px rgba(0,0,0,.25)}
+.w4c span{font:700 clamp(9.5px,2.3vw,12px)/1.3 'Inter',Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#F3EFEA}
+.win4-box[data-active] .w4in{background:rgba(var(--rgb),.07);border-color:rgba(var(--rgb),.35)}
+.win4-box[data-active="self"] .w4-self .w4in,.win4-box[data-active="people"] .w4-people .w4in,.win4-box[data-active="business"] .w4-business .w4in,.win4-box[data-active="market"] .w4-market .w4in{background:rgba(var(--rgb),.62);border-color:rgba(var(--rgb),1)}
+.w4disc,.w4ring{z-index:2}
+.w4disc{background:radial-gradient(circle at 35% 30%,#E3C47E,#C9A24A 55%,#8E6C22);color:#15213B;font:800 clamp(10px,2.4vw,13px)/1 'Inter',Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;box-shadow:0 0 0 4px #15213B,0 0 0 5px rgba(201,162,74,.6),0 14px 30px rgba(0,0,0,.45)}
 @media (prefers-reduced-motion:reduce){.win4-box .w4c,.win4-box .w4in,.win4-box .w4disc,.win4-box .w4ring{animation:none!important;opacity:1}.win4-box .w4ring{opacity:0}.win4-box.wait .w4c,.win4-box.wait .w4disc{opacity:1}}

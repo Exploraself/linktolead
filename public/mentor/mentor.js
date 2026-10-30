@@ -102,7 +102,7 @@ function tableHTML() {
       <span class="count">${rows.length} of ${data.students.length}</span><span style="flex:1"></span>
       <button class="ghost" id="csv">Export CSV</button><button class="ghost" id="refresh">Refresh</button></div>
     ${flash ? `<p class="flash" role="status">${esc(flash)}</p>` : ''}
-    ${rows.length ? `<div class="tscroll"><table><thead><tr><th>Founder</th><th>Joined</th><th>Last seen</th><th>Stage</th><th>Step</th><th>Compass</th><th>Plans</th><th>Form</th><th>Landing</th><th>Company</th><th>Interest</th><th>Industry</th><th>Password</th><th>Consent</th><th>Unsub.</th><th>Paused</th><th>Mailchimp</th><th>Actions</th></tr></thead>
+    ${rows.length ? `<div class="tscroll"><table><thead><tr><th>Founder</th><th>Joined</th><th>Last seen</th><th>Stage</th><th>Step</th><th>North Star</th><th>Plans</th><th>Form</th><th>Landing</th><th>Company</th><th>Interest</th><th>Industry</th><th>Password</th><th>Consent</th><th>Unsub.</th><th>Paused</th><th>Mailchimp</th><th>Actions</th></tr></thead>
     <tbody>${rows.map((s) => `<tr>
       <td><span class="nm" data-open="${esc(s.id)}">${esc(s.name || '—')}</span><span class="em">${esc(s.email)}</span>${s.open_notes ? `<span class="em warn"><span class="dot"></span>${s.open_notes} unanswered question${s.open_notes > 1 ? 's' : ''}</span>` : ''}</td>
       <td class="tiny">${when(s.joined_at)}</td><td class="tiny">${when(s.last_seen_at || s.joined_at)}</td>
@@ -192,7 +192,7 @@ function deleteBox(id) {
   const s = person(id);
   $('#dlg').innerHTML = `<div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlg-h"><form class="dlgbox" id="delform">
     <h2 id="dlg-h">Delete ${esc(s.name || s.email)}?</h2>
-    <p>This removes every row for this founder: their account, answers, worksheets, Compass, notes, plan ticks, messages and history. It cannot be undone.</p>
+    <p>This removes every row for this founder: their account, answers, worksheets, North Star, notes, plan ticks, messages and history. It cannot be undone.</p>
     <label>Type their email to confirm<input id="d-email" autocomplete="off" placeholder="${esc(s.email)}"></label>
     <p class="err" id="d-err" role="status"></p>
     <div class="acts"><button type="submit" class="danger-solid">Delete for good</button><button type="button" class="ghost" data-close>Cancel</button></div>
@@ -236,7 +236,7 @@ async function one(id) {
         <div class="k"><b>Step</b><span>${esc(STEP_NAMES[s.tier || 'free'] || s.tier)}</span></div>
         <div class="k"><b>Answers written</b><span>${A.filter((a) => a.body).length}</span></div>
         <div class="k"><b>Signed up with</b><span>${esc(P.signup_type ? P.signup_type + ' form' : '—')}</span></div>
-        <div class="k"><b>Landing</b><span>${esc(({ road1: 'Road 1 (/road1/)', road2: 'Road 2 (/road2/)', road3: 'Road 3 (/road3/)', compass: 'The Compass box' })[P.landing] || '—')}${P.utm_source ? ' · ' + esc([P.utm_source, P.utm_medium, P.utm_campaign, P.utm_content, P.utm_term].filter(Boolean).join(' / ')) : ''}</span></div>
+        <div class="k"><b>Landing</b><span>${esc(({ road1: 'Road 1 (/road1/)', road2: 'Road 2 (/road2/)', road3: 'Road 3 (/road3/)', compass: 'The North Star box' })[P.landing] || '—')}${P.utm_source ? ' · ' + esc([P.utm_source, P.utm_medium, P.utm_campaign, P.utm_content, P.utm_term].filter(Boolean).join(' / ')) : ''}</span></div>
         <div class="k"><b>Company</b><span>${P.company === '' ? 'No company yet' : esc(P.company || '—')}</span></div>
         <div class="k"><b>Interest</b><span>${esc(P.interest || '—')}</span></div>
         <div class="k"><b>Industry</b><span>${esc(P.industry || '—')}</span></div>
@@ -251,12 +251,12 @@ async function one(id) {
       <ul class="climb" style="margin:8px 0 0;padding-left:18px">${K.map((c) => `<li>${esc(c.name)} · ${esc(day(c.at))}</li>`).join('')}</ul></div>
     <div class="panel"><h2>Where they stand</h2>
       ${SC.length ? `<ul class="climb" style="margin:8px 0 0;padding-left:18px">${SC.map((c) => `<li>${c.from ? esc(c.from) + ' → ' : ''}${esc(c.to)} · ${esc(day(c.at))}</li>`).join('')}</ul>`
-        : '<p class="tiny" style="margin-top:8px">No stage changes. They walk the stage from their Compass or sign-up.</p>'}</div>
+        : '<p class="tiny" style="margin-top:8px">No stage changes. They walk the stage from their North Star or sign-up.</p>'}</div>
     <div class="panel"><h2>Library</h2>
       ${LB.length ? `<ul class="climb" style="margin:8px 0 0;padding-left:18px">${LB.map((x) => `<li>${esc(x.name)} · ${esc(day(x.at))}</li>`).join('')}</ul>`
         : '<p class="tiny" style="margin-top:8px">Nothing downloaded yet.</p>'}</div>
     ${C ? compassPanel(C)
-      : '<div class="panel"><h2>Compass</h2><p class="tiny" style="margin-top:8px">Not done yet.</p></div>'}
+      : '<div class="panel"><h2>North Star</h2><p class="tiny" style="margin-top:8px">Not done yet.</p></div>'}
     <div class="panel"><h2>Account plans · ${T.length} of ${data ? data.totalSteps || 28 : 28} steps done</h2>
       ${T.length ? DOMS.map(([k, label]) => { const rows = T.filter((t) => t.domain === k); return rows.length ? `<div class="dom ${k}" style="padding-top:10px"><h3>${label}</h3>${rows.map((t) => `<div class="ans"><em>${esc(t.title || t.step_id)}</em><p>Done ${when(t.done_at)}</p></div>`).join('')}</div>` : ''; }).join('')
         : '<p class="tiny" style="margin-top:8px">No steps ticked yet.</p>'}</div>
@@ -356,7 +356,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#dlg'
 
 load();
 
-/** The Compass, readable: stage, the four domains (answers, score out of 6,
+/** The North Star, readable: stage, the four domains (answers, score out of 6,
  *  band), what they said is hard, and their goal. Never raw data. */
 const DOMS = [['Lead yourself', '#A8623A'], ['Lead your people', '#4C7355'], ['Lead your business', '#36607F'], ['Lead the market', '#9A7418']];
 const PAIN = { clients: 'Not enough clients', cash: 'Cash is tight', time: 'No time for myself', alone: 'Doing everything myself', team: 'Team not stepping up', direction: 'Unclear direction', price: 'Prices feel too low', switch: 'I can’t switch off' };
@@ -369,7 +369,7 @@ function compassPanel(C) {
   const total = ans.reduce((a, b) => a + (b || 0), 0);
   const stage = C.stage ? C.stage[0].toUpperCase() + C.stage.slice(1) : '—';
   const pains = Array.isArray(f.pains) ? f.pains.map((k) => PAIN[k] || k) : [];
-  return `<div class="panel"><h2>Compass</h2><p class="tiny">Saved ${when(C.updated_at)} · stage ${esc(stage)} · ${total} of 8 questions answered</p>
+  return `<div class="panel"><h2>North Star</h2><p class="tiny">Saved ${when(C.updated_at)} · stage ${esc(stage)} · ${total} of 8 questions answered</p>
     ${total ? `<div class="kgrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:12px">${DOMS.map(([n, col], i) => `<div class="k" style="border-top:3px solid ${col}"><b>${n}</b><span>${ans[i] ? `${sc[i] ?? 0} of 6 · ${esc(bd[i] || '')}` : 'Not answered yet'}</span></div>`).join('')}</div>`
       : '<p class="tiny" style="margin-top:8px">Opened, but no questions answered yet.</p>'}
     ${pains.length || f.want ? `<p class="tiny" style="margin-top:12px">${pains.length ? `<b>Finds hard:</b> ${esc(pains.join(' · '))}` : ''}${pains.length && f.want ? ' &nbsp; ' : ''}${f.want ? `<b>Goal:</b> ${esc(GOAL[f.want] || f.want)}` : ''}</p>` : ''}</div>`;

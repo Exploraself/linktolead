@@ -1,6 +1,6 @@
-/* The Leadership Compass questions: eight per stage, two per domain, asked
+/* The Leader’s North Star questions: eight per stage, two per domain, asked
  * for the stage the founder is in today. Each names what to open and look at
- * (AGENTS.md rule 1). The rest of the v1 Compass model that used to live here
+ * (AGENTS.md rule 1). The rest of the v1 North Star model that used to live here
  * (old scoring, summaries and backups) was no longer read by any page and was
  * removed in PR 4 to keep the page light. */
 (function (root) {

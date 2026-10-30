@@ -1,4 +1,4 @@
-/* ExploraSelf Leadership Compass · v18. One continuous page; the menu scrolls
+/* ExploraSelf Leader’s North Star · v18. One continuous page; the menu scrolls
  * to each section.
  *
  * Everything a founder enters saves to this browser first (localStorage,
@@ -7,12 +7,12 @@
  * and when the page is hidden, never on every tap. "Who is this compass for?"
  * creates the account; a visitor who already gave their name and email on the
  * sales page gets one without being asked again. Answers given before the
- * account existed are moved into it, never discarded. Older Compass entries
+ * account existed are moved into it, never discarded. Older North Star entries
  * (exploraself-compass-v1) are carried over on first load and left in place.
  *
  * The account calls live in /account.js, shared with the programme at /start,
  * loaded here with import() so this stays a plain script. Without it (opened
- * as a file, or offline) the Compass works exactly as before, on this browser.
+ * as a file, or offline) the North Star works exactly as before, on this browser.
  *
  * The page is drawn in parts. Each part is rebuilt from the state and only
  * written to the page when its markup changes, so an answer does not redraw
@@ -68,7 +68,7 @@
   }
   function clampN(v, lo, hi) { const n = Number(v); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : 0; }
 
-  /** Carry a founder's entries over from the Compass before v18. Their old
+  /** Carry a founder's entries over from the North Star before v18. Their old
    *  record stays where it is. */
   function migrate(old) {
     const s = blank();
@@ -96,7 +96,7 @@
     const old = read(OLD);
     return old && old.version === 1 ? migrate(old) : blank();
   })();
-  /* Details given on the Compass sales page arrive here, never asked twice. */
+  /* Details given on the North Star sales page arrive here, never asked twice. */
   let fromSales = false;
   (() => {
     const pre = read(DEFAULT_PROFILE);
@@ -185,7 +185,7 @@
   }
   const hasWork = (s) => Object.keys(s.ans).length > 0 || Object.keys(s.str).length > 0 || Object.keys(s.nums).length > 0 || s.pains.length > 0 || !!s.want;
   /** Arriving from a sign-in link: spend the code, then bring the account's
-   *  Compass here if this browser has none. If both have answers, this
+   *  North Star here if this browser has none. If both have answers, this
    *  browser's copy comes first and goes up to the account. */
   async function signInFromLink(code) {
     try { history.replaceState(null, '', location.pathname + location.hash); } catch { /* old browser */ }
@@ -194,7 +194,7 @@
     catch (e) { toast(e && e.message ? e.message : 'That sign-in link did not work. Ask for a new one.'); return; }
     await afterSignIn(me);
   }
-  /* Signed in (by link or password): bring the account's Compass here if this
+  /* Signed in (by link or password): bring the account's North Star here if this
    * browser has none; otherwise this browser's copy goes up to the account. */
   async function afterSignIn(me) {
     const theirs = await A.loadCompass();
@@ -207,7 +207,7 @@
     for (const k of ['first', 'last', 'email', 'industry']) if (!S.profile[k] && me[k]) S.profile[k] = String(me[k]).slice(0, 120);
     S.acct = { email: S.profile.email, state: 'yes' };
     save(); await sync(); status(); render();
-    toast('You are signed in. Your Compass is saved to your account.');
+    toast('You are signed in. Your North Star is saved to your account.');
   }
   async function pwSignIn(where) {
     const email = (($(where === 'gate' ? '#g-email' : '#ws-signin') || {}).value || '').trim(), pw = ($('#si-pw-' + where) || {}).value || '';
@@ -235,7 +235,7 @@
     if (code) await signInFromLink(code);
     status();
     if (signedIn()) {
-      // Signed up on any of our pages: the Compass knows who this is.
+      // Signed up on any of our pages: the North Star knows who this is.
       if (!S.profile.email) {
         const r = await A.pull();
         if (r && r.me) {
@@ -244,7 +244,7 @@
           S.acct = { email: S.profile.email, state: 'yes' }; save();
         }
       }
-      // Nothing answered on this browser: bring the account's Compass here
+      // Nothing answered on this browser: bring the account's North Star here
       // instead of saving an empty one over it. Answers here: save them.
       if (!hasWork(S)) {
         const theirs = await A.loadCompass();
@@ -271,7 +271,7 @@
     if (!signedIn()) fullAccount();
   }
   /** The full free account, on this page. Done: the page reloads signed in and
-   *  the whole Compass is open. An email that already has an account signs in
+   *  the whole North Star is open. An email that already has an account signs in
    *  right here instead. */
   let box = null;
   function fullAccount() {
@@ -702,7 +702,7 @@
             ${Array.from({ length: 12 }, (_, k) => `<span style="text-align: center; font-size: 12px; font-weight: 600; color: ${k < 3 ? '#E3C47E' : '#8A7A5E'}; display: flex; flex-direction: column; align-items: center; gap: 4px">${k + 1}${k === 0 ? '<span class="pinp" style="width: 8px; height: 8px; border-radius: 50%; background: #C9A24A"></span>' : ''}</span>`).join('')}</div>
           ${D.map(row).join('')}
           <div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; margin-top: 8px"><span></span>
-            ${band(3, 'FOUNDER LAUNCHPAD · FREE', true)}${band(2, 'THE 1:1 · FULL COMPASS')}${band(4, 'PERSONAL LEADERSHIP LAB · $97 · 2 SESSIONS')}${band(3, 'BUSINESS HUB · $397 · 3 SESSIONS IN TOTAL')}</div>
+            ${band(3, 'FOUNDER LAUNCHPAD · FREE', true)}${band(2, 'THE 1:1 · FULL NORTH STAR')}${band(4, 'PERSONAL LEADERSHIP LAB · $97 · 2 SESSIONS')}${band(3, 'BUSINESS HUB · $397 · 3 SESSIONS IN TOTAL')}</div>
         </div>
       </div>
       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; border-top: 1px solid #3A2F20; padding-top: 16px">
