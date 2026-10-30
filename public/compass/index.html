@@ -54,8 +54,8 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
   <main id="main" tabindex="-1">
     <div id="gate"></div>
 
-    <!-- top bar -->
-    <div style="display: flex; flex-direction: column; gap: 12px">
+    <!-- top bar: stays at the top while you scroll (30 Oct) -->
+    <div class="topwrap" style="display: flex; flex-direction: column; gap: 12px">
       <header class="topbar" style="min-height: 64px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: -20px -22px 0; padding: 10px 28px">
         <span style="font-size: 9px; letter-spacing: .16em; color: var(--muted)">A BUSINESS THAT WORKS. A LIFE THAT MATTERS.</span>
         <div id="top-tools" style="display: flex; align-items: center; gap: 14px">
@@ -65,9 +65,9 @@ if(location.protocol!=='file:'&&/\/compass$/.test(location.pathname)){const b=do
           <button type="button" data-act="ws" data-f="ws" id="ws-btn" aria-expanded="false" aria-label="Your workspace" title="Your workspace" style="width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
       </header>
-      <div id="how"></div>
-      <div id="ws"></div>
     </div>
+    <div id="how"></div>
+    <div id="ws"></div>
 
     <!-- ===== YOUR NORTH STAR · OVERVIEW ===== -->
     <section id="s-overview" style="display: flex; flex-direction: column; gap: 28px">

@@ -246,3 +246,7 @@ details[data-step] summary::-webkit-details-marker{display:none}
 .incub-link i{font-style:normal;color:#D6BF8F}
 /* The Blueprint keeps its own colours (antique gold) inside the North Star (steel blue). */
 @media (max-width:860px){.incub-link{margin:8px 0 10px;padding:10px 12px}}
+
+/* The top bar stays at the top while you scroll (30 Oct). */
+.topwrap{position:sticky;top:20px;z-index:25}
+.topwrap .topbar{background:var(--panel);box-shadow:0 10px 24px -20px rgba(14,28,43,.5)}
