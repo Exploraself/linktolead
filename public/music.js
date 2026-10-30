@@ -331,7 +331,7 @@ export function answered(n) {
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
 const PAUSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
-const DISC = '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#0B0907"/><g fill="none" stroke="#2E2822" stroke-width=".7"><circle cx="20" cy="20" r="16"/><circle cx="20" cy="20" r="13"/><circle cx="20" cy="20" r="10"/></g><path d="M8 13A14 14 0 0 1 22 6" fill="none" stroke="#F3EBD2" stroke-opacity=".18" stroke-width="3"/><circle cx="20" cy="20" r="6.5" fill="#C9A24A"/><circle cx="20" cy="20" r="1.2" fill="#1C1309"/></svg>';
+const DISC = '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#0B0907"/><g fill="none" stroke="#2E2822" stroke-width=".7"><circle cx="20" cy="20" r="16"/><circle cx="20" cy="20" r="13"/><circle cx="20" cy="20" r="10"/></g><path d="M8 13A14 14 0 0 1 22 6" fill="none" stroke="#F3EBD2" stroke-opacity=".18" stroke-width="3"/><circle cx="20" cy="20" r="6.5" fill="#B4975F"/><circle cx="20" cy="20" r="1.2" fill="#1C1309"/></svg>';
 
 /** The player's markup, from the settings. */
 export function playerHTML(s = S, playing = false, open = false) {

@@ -7,7 +7,7 @@
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const STAGE = { build: 'Building', grow: 'Growing', scale: 'Scaling' };
-const SPINE = { build: '#15213B', grow: '#1F4A3A', scale: '#5E2335' }; // navy, forest, wine
+const SPINE = { build: '#121C2D', grow: '#1F4A3A', scale: '#5E2335' }; // navy, forest, wine
 
 /** The eight lines, in two groups. `L` is LIBRARY; `steps` the live number of
  *  plan steps, or null when it could not be read (then the line says no number). */
@@ -40,7 +40,7 @@ export function items(L, steps) {
 
 /** The shelf: the three manuals drawn as books, then the real covers. */
 function shelf(L) {
-  const books = L.manuals.map((m) => `<div class="kit-book" style="--spine:${SPINE[m.k] || '#15213B'}" role="img" aria-label="${esc(m.n)}, ${m.pages} pages">
+  const books = L.manuals.map((m) => `<div class="kit-book" style="--spine:${SPINE[m.k] || '#121C2D'}" role="img" aria-label="${esc(m.n)}, ${m.pages} pages">
       <span class="kit-book-k">${esc(m.n.split(' · ')[0])}</span><span class="kit-book-n">${esc(STAGE[m.k] || m.n)}</span><span class="kit-book-p">${m.pages} pages</span></div>`).join('');
   const covers = L.books.map((b) => `<figure class="kit-cover">
       <img src="${esc(b.cover)}" alt="${esc(b.n)}: ${esc(b.kicker)}" width="480" height="480" loading="lazy" decoding="async">
@@ -52,21 +52,21 @@ function shelf(L) {
 
 /* A picture for each line: small live drawings for the tools, the real
  * covers and the three manuals for the library. Decorative (aria-hidden). */
-const G = '#C9A24A', GH = '#E3C47E', DOM = ['#B8683A', '#548C62', '#4680B0', '#C99834'];
+const G = '#B4975F', GH = '#D6BF8F', DOM = ['#B8683A', '#548C62', '#4680B0', '#B8954F'];
 const VIS = {
   star: () => `<svg viewBox="0 0 160 110"><g transform="translate(80 55)">${DOM.map((c, i) => `<path d="M0 0 L${[0, 38, 0, -38][i]} ${[-38, 0, 38, 0][i]} A38 38 0 0 1 ${[38, 0, -38, 0][i]} ${[0, 38, 0, -38][i]}Z" fill="${c}" fill-opacity="${[.9, .45, .6, .35][i]}"/>`).join('')}
     <circle r="44" fill="none" stroke="${G}" stroke-opacity=".5"/><circle r="38" fill="none" stroke="${G}"/>
-    <g class="kv-needle"><path d="M0 -40 L5 0 L0 5 L-5 0Z" fill="${GH}"/><path d="M0 40 L5 0 L0 -5 L-5 0Z" fill="#2A3A5A"/></g><circle r="4" fill="#15213B" stroke="${GH}" stroke-width="2"/></g></svg>`,
-  plan: () => `<svg viewBox="0 0 160 110"><rect x="38" y="8" width="84" height="96" rx="4" fill="#F3EFEA"/><rect x="46" y="17" width="34" height="5" rx="2" fill="#15213B"/>
+    <g class="kv-needle"><path d="M0 -40 L5 0 L0 5 L-5 0Z" fill="${GH}"/><path d="M0 40 L5 0 L0 -5 L-5 0Z" fill="#273449"/></g><circle r="4" fill="#121C2D" stroke="${GH}" stroke-width="2"/></g></svg>`,
+  plan: () => `<svg viewBox="0 0 160 110"><rect x="38" y="8" width="84" height="96" rx="4" fill="#F3EFEA"/><rect x="46" y="17" width="34" height="5" rx="2" fill="#121C2D"/>
     ${[['STAGE', 44], ['WEAKEST', 30], ['GOAL', 52]].map(([t, w], i) => `<text x="46" y="${36 + i * 12}" font-size="5.5" font-weight="700" letter-spacing=".6" fill="#7A5E26">${t}</text><rect class="kv-bar" style="--d:${i * .25}s" x="82" y="${32 + i * 12}" width="${w - 12}" height="5" rx="2" fill="${DOM[i]}"/>`).join('')}
-    ${[0, 1, 2].map((i) => `<circle cx="51" cy="${76 + i * 10}" r="3.5" fill="#15213B"/><text x="51" y="${78 + i * 10}" font-size="5" font-weight="800" fill="${GH}" text-anchor="middle">${i + 1}</text><rect x="58" y="${74 + i * 10}" width="${50 - i * 8}" height="4" rx="2" fill="#C8BFAE"/>`).join('')}</svg>`,
+    ${[0, 1, 2].map((i) => `<circle cx="51" cy="${76 + i * 10}" r="3.5" fill="#121C2D"/><text x="51" y="${78 + i * 10}" font-size="5" font-weight="800" fill="${GH}" text-anchor="middle">${i + 1}</text><rect x="58" y="${74 + i * 10}" width="${50 - i * 8}" height="4" rx="2" fill="#C8BFAE"/>`).join('')}</svg>`,
   ticks: () => `<svg viewBox="0 0 160 110">${[0, 1, 2, 3].map((i) => `<g transform="translate(34 ${14 + i * 22})"><rect width="92" height="16" rx="3" fill="#F3EFEA" fill-opacity="${1 - i * .12}"/>
-    <rect x="4" y="3" width="10" height="10" rx="2" fill="none" stroke="#15213B" stroke-width="1.3"/><path class="kv-tick" style="--d:${i * .6}s" d="M6 8.5l2.4 2.4L13 5.5" fill="none" stroke="${G}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>
+    <rect x="4" y="3" width="10" height="10" rx="2" fill="none" stroke="#121C2D" stroke-width="1.3"/><path class="kv-tick" style="--d:${i * .6}s" d="M6 8.5l2.4 2.4L13 5.5" fill="none" stroke="${G}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>
     <rect x="20" y="6" width="${58 - i * 9}" height="4" rx="2" fill="#C8BFAE"/><circle cx="84" cy="8" r="3" fill="${DOM[i]}"/></g>`).join('')}</svg>`,
   stairs: () => `<svg viewBox="0 0 160 110"><path d="M20 98 H56 V74 H92 V50 H128 V26 H146" fill="none" stroke="${G}" stroke-width="2.5" stroke-linejoin="round"/>
     ${[0, 1, 2].map((l) => DOM.map((c, d) => `<circle class="kv-dot" style="--d:${(l * 4 + d) * .12}s" cx="${26 + l * 36 + d * 8}" cy="${90 - l * 24}" r="3.2" fill="${c}"/>`).join('') + `<text x="${38 + l * 36}" y="${108 - l * 24}" font-size="6.5" font-weight="800" fill="${GH}" text-anchor="middle">0${l + 1}</text>`).join('')}
     <path d="M146 26 V8 M146 9 L158 12 L146 15Z" stroke="#F3EFEA" stroke-width="1.5" fill="${G}"/></svg>`,
-  manuals: (L) => `<div class="kv-books">${L.manuals.map((m) => `<span style="--spine:${SPINE[m.k] || '#15213B'}"><small>${esc(m.n.split(' · ')[0])}</small><b>${esc(STAGE[m.k] || m.n)}</b></span>`).join('')}</div>`,
+  manuals: (L) => `<div class="kv-books">${L.manuals.map((m) => `<span style="--spine:${SPINE[m.k] || '#121C2D'}"><small>${esc(m.n.split(' · ')[0])}</small><b>${esc(STAGE[m.k] || m.n)}</b></span>`).join('')}</div>`,
 };
 const visFor = (key, L, i) => (key === 'cover' ? `<img class="kv-cover" src="${esc(L.books[i].cover)}" alt="" width="480" height="480" loading="lazy" decoding="async">` : VIS[key](L));
 const KEYS = { tools: ['star', 'plan', 'ticks', 'stairs'], library: ['manuals', 'cover', 'cover', 'cover'] };

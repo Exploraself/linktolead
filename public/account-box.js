@@ -26,11 +26,11 @@ const known = () => { try { const p = JSON.parse(localStorage.getItem(KEY) || 'n
 const hasAccount = () => { try { return !!localStorage.getItem('ftb-token'); } catch { return false; } };
 const LAB = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700';
 
-const STYLE = `.abox .inp{min-height:46px;border:1px solid #D8CDBB;border-radius:5px;padding:0 12px;font:15px 'Inter',Arial,sans-serif;color:#15213B;background:#FFFFFF;width:100%;box-sizing:border-box}
+const STYLE = `.abox .inp{min-height:46px;border:1px solid #D8CDBB;border-radius:5px;padding:0 12px;font:15px 'Inter',Arial,sans-serif;color:#121C2D;background:#FFFFFF;width:100%;box-sizing:border-box}
 .abox select.inp{padding-right:8px}
-.abox .inp:focus-visible{outline:2px solid #C9A24A;outline-offset:1px}
-.abox .ab-go{min-height:52px;border:0;border-radius:5px;background:#C9A24A;color:#14100B;font:700 15px 'Inter',Arial,sans-serif;letter-spacing:.04em;cursor:pointer}
-.abox .ab-go:hover{background:#E3C47E}
+.abox .inp:focus-visible{outline:2px solid #B4975F;outline-offset:1px}
+.abox .ab-go{min-height:52px;border:0;border-radius:5px;background:#B4975F;color:#14100B;font:700 15px 'Inter',Arial,sans-serif;letter-spacing:.04em;cursor:pointer}
+.abox .ab-go:hover{background:#D6BF8F}
 .abox .ab-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:420px){.abox .ab-two{grid-template-columns:1fr}}`;
 
@@ -43,9 +43,9 @@ const HEAD = {
   stay: ['YOUR NORTH STAR, IN FULL', 'Your free account', 'Your answers come with you, and the whole North Star opens: your feedback, your plans and your library. Free.'],
 };
 
-const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpop abox" role="dialog" aria-modal="true" aria-labelledby="gate-h" style="position: relative; width: 100%; max-width: 480px; background: #FFFDF8; color: #15213B; border-radius: 10px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.4); margin: auto; font-family: 'Inter', Arial, sans-serif; box-sizing: border-box">
+const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpop abox" role="dialog" aria-modal="true" aria-labelledby="gate-h" style="position: relative; width: 100%; max-width: 480px; background: #FFFDF8; color: #121C2D; border-radius: 10px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.4); margin: auto; font-family: 'Inter', Arial, sans-serif; box-sizing: border-box">
     <style>${STYLE}</style>
-    <button type="button" data-close aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #D8CDBB; background: #FFFFFF; color: #15213B; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <button type="button" data-close aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #D8CDBB; background: #FFFFFF; color: #121C2D; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
     <form id="gate-form" novalidate style="display: flex; flex-direction: column; gap: 14px">
       <span style="font-size: 12px; font-weight: 700; letter-spacing: .16em; color: #7A5E26; padding-right: 44px">${head[0]}</span>
       <h2 id="gate-h" style="margin: 0; font: 500 26px/1.25 Newsreader, Georgia, serif; padding-right: 40px">${head[1]}</h2>
@@ -59,10 +59,10 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
       <label style="${LAB}">Password<input class="inp" id="j-pw" type="password" autocomplete="new-password" minlength="10" maxlength="200"></label>
       <label style="${LAB}">Confirm password<input class="inp" id="j-pw2" type="password" autocomplete="new-password" minlength="10" maxlength="200"></label>
       <span style="font-size: 12px; color: #5A6580; margin-top: -6px">At least 10 characters. You sign in with your email and this password.</span>` : ''}
-      <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: #3D4966"><input type="checkbox" id="j-consent" style="width: 18px; height: 18px; margin-top: 1px; accent-color: #C9A24A; flex: none">${CONSENT}</label>
+      <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: #3D4966"><input type="checkbox" id="j-consent" style="width: 18px; height: 18px; margin-top: 1px; accent-color: #B4975F; flex: none">${CONSENT}</label>
       <span id="gate-err" role="alert" style="font-size: 13px; color: #B5512E; font-weight: 700"></span>
       <button type="submit" class="ab-go">${stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY GROUND PLAN →'}</button>
-      ${stay ? '' : '<button type="button" data-close style="min-height: 44px; border-radius: 5px; border: 1px solid #D8CDBB; background: transparent; color: #15213B; font-weight: 700; cursor: pointer">Not now · keep reading</button>'}
+      ${stay ? '' : '<button type="button" data-close style="min-height: 44px; border-radius: 5px; border: 1px solid #D8CDBB; background: transparent; color: #121C2D; font-weight: 700; cursor: pointer">Not now · keep reading</button>'}
       <a href="/ground-plan/#signin" style="font-size: 13px; text-align: center; font-weight: 700; color: #7A5E26">Already have an account? Sign in</a>
     </form>
   </div>`;

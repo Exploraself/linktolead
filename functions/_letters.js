@@ -64,7 +64,7 @@ const PAPER = '#FFFDF8', INK = '#14100B', MUTED = '#6A6052', GOLD_INK = '#6E5213
 function parts(p) {
   if (p && p[BUTTON]) return {
     button: true,
-    html: `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 22px"><tr><td style="border-radius:6px;background:#C9A24A"><a href="${esc(p.url)}" style="display:block;padding:14px 26px;font:bold 16px/1 Arial,sans-serif;color:#14100B;text-decoration:none;border-radius:6px">${esc(p.label)}</a></td></tr></table>`,
+    html: `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 22px"><tr><td style="border-radius:6px;background:#B4975F"><a href="${esc(p.url)}" style="display:block;padding:14px 26px;font:bold 16px/1 Arial,sans-serif;color:#14100B;text-decoration:none;border-radius:6px">${esc(p.label)}</a></td></tr></table>`,
     text: `${p.label}: ${p.url}`,
   };
   const list = Array.isArray(p) ? p : [p];
@@ -130,13 +130,13 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
     ${P.map((p) => (p.button ? p.html : `<p style="margin:0 0 16px;white-space:pre-wrap">${p.html}</p>`)).join('\n    ')}
     ${good ? `<p style="margin:0 0 16px">${esc(good)}</p>` : ''}
     ${sign ? `<p style="margin:0 0 ${qs.length ? 10 : 16}px">${esc(replyLine)}</p>` : ''}
-    ${qs.length ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 18px;border-left:2px solid #C9A24A"><tr><td style="padding:2px 0 2px 14px;font:14px/1.5 Arial,sans-serif;color:${MUTED}">
+    ${qs.length ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 18px;border-left:2px solid #B4975F"><tr><td style="padding:2px 0 2px 14px;font:14px/1.5 Arial,sans-serif;color:${MUTED}">
       <p style="margin:0 0 6px;font:bold 11px/1.4 Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:${GOLD_INK}">One tap to ask</p>
       ${qs.map((q) => `<p style="margin:0 0 6px"><a href="${esc(mailto(M.email, q))}" style="color:${GOLD_INK};text-decoration:underline">${esc(q)}</a></p>`).join('')}
     </td></tr></table>` : ''}
     ${bye ? `<p style="margin:0 0 6px">${esc(bye)}</p>` : ''}
     ${sign ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 22px"><tr>
-      <td style="vertical-align:middle;padding-right:14px"><img src="${esc(pic(M.photo))}" width="64" height="64" alt="${esc(M.name)}" style="display:block;width:64px;height:64px;border-radius:50%;border:2px solid #C9A24A"></td>
+      <td style="vertical-align:middle;padding-right:14px"><img src="${esc(pic(M.photo))}" width="64" height="64" alt="${esc(M.name)}" style="display:block;width:64px;height:64px;border-radius:50%;border:2px solid #B4975F"></td>
       <td style="vertical-align:middle"><img src="${esc(pic(M.signature))}" width="190" height="53" alt="${esc(M.first)}" style="display:block;margin:0 0 2px;border:0;width:190px;height:auto">
       <p style="margin:0;font:13px/1.5 Arial,sans-serif;color:${MUTED}">${esc(M.name)} · ${esc(M.title)}</p></td></tr></table>` : ''}
     ${ps ? `<p style="margin:0;padding-top:14px;border-top:1px dashed #D6C9AC;font-style:italic">${ps.html}</p>` : ''}

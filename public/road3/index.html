@@ -35,12 +35,12 @@
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:#14100B;color:#F3EBDA;font-family:'Inter',Arial,sans-serif;overflow-x:hidden}
-a{color:#E3C47E}a:hover{color:#F6EEDD}
+a{color:#D6BF8F}a:hover{color:#F6EEDD}
 button{font:inherit}
-:focus-visible{outline:3px solid #C9A24A;outline-offset:3px}
-.skip{position:absolute;left:-999px;top:8px;background:#C9A24A;color:#14100B;padding:10px 14px;z-index:90}
+:focus-visible{outline:3px solid #B4975F;outline-offset:3px}
+.skip{position:absolute;left:-999px;top:8px;background:#B4975F;color:#14100B;padding:10px 14px;z-index:90}
 .skip:focus{left:8px}
-.backbar{position:sticky;top:0;z-index:40;background:#C9A24A;color:#14100B;text-align:center;padding:10px 16px;font:600 14px/1.3 'Inter',Arial,sans-serif}
+.backbar{position:sticky;top:0;z-index:40;background:#B4975F;color:#14100B;text-align:center;padding:10px 16px;font:600 14px/1.3 'Inter',Arial,sans-serif}
 .backbar a{color:#14100B;text-decoration:underline;text-underline-offset:3px}
 .sc{min-height:640px;padding:clamp(56px,8vw,96px) 16px;display:flex;align-items:center}
 .dk{background:#14100B;color:#F3EBDA}.lt{background:#F6EFE2;color:#1C1309}
@@ -50,7 +50,7 @@ button{font:inherit}
 .row>.vz{flex:1 1 340px;min-width:0;display:flex;justify-content:center}
 .h1{margin:0;font:500 clamp(40px,6.4vw,76px)/1.03 Newsreader,Georgia,serif;letter-spacing:-.02em}
 .h2{margin:0;font:500 clamp(30px,4.6vw,54px)/1.08 Newsreader,Georgia,serif;letter-spacing:-.015em}
-.h1 em,.h2 em{font-style:italic;font-weight:500;color:#C9A24A}
+.h1 em,.h2 em{font-style:italic;font-weight:500;color:#B4975F}
 .lt .h2 em{color:#7A5C16}
 .sub{margin:0;font-size:clamp(17px,1.8vw,20px);line-height:1.55;color:#C9BDA6;max-width:46ch}
 .lt .sub{color:#5E5446}
@@ -58,13 +58,13 @@ button{font:inherit}
 .jm li{display:flex;align-items:center;gap:7px;color:#8F8775}
 .jm li::before{content:"";width:7px;height:7px;border-radius:50%;border:1.5px solid currentColor;box-sizing:border-box}
 .jm .dn{color:#B9AC94}.jm .dn::before{background:currentColor}
-.jm .nw{color:#C9A24A}.jm .nw::before{background:#C9A24A;border-color:#C9A24A;box-shadow:0 0 0 4px rgba(201,162,74,.22)}
-.lt .jm li{color:#7D7262}.lt .jm .dn{color:#6B6153}.lt .jm .nw{color:#7A5C16}.lt .jm .nw::before{background:#C9A24A;border-color:#C9A24A}
-.cta{display:inline-flex;align-items:center;min-height:56px;padding:0 32px;border:0;background:#C9A24A;color:#14100B;font:700 18px/1 'Inter',Arial,sans-serif;text-decoration:none;cursor:pointer}
-.cta:hover{background:#E3C47E;color:#14100B}
+.jm .nw{color:#B4975F}.jm .nw::before{background:#B4975F;border-color:#B4975F;box-shadow:0 0 0 4px rgba(180,151,95,.22)}
+.lt .jm li{color:#7D7262}.lt .jm .dn{color:#6B6153}.lt .jm .nw{color:#7A5C16}.lt .jm .nw::before{background:#B4975F;border-color:#B4975F}
+.cta{display:inline-flex;align-items:center;min-height:56px;padding:0 32px;border:0;background:#B4975F;color:#14100B;font:700 18px/1 'Inter',Arial,sans-serif;text-decoration:none;cursor:pointer}
+.cta:hover{background:#D6BF8F;color:#14100B}
 .note{font-size:14.5px;letter-spacing:.04em;color:#B7AB93}
 .lt .note{color:#5E5446}
-.k{font:700 11px/1.4 'Inter',Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#C9A24A}
+.k{font:700 11px/1.4 'Inter',Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#B4975F}
 .cards{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
 .cards li{display:flex;flex-direction:column;gap:14px;padding:24px 22px;background:#FFFDF7;border:1px solid #DFD3B8}
 .cards b{font:500 21px/1.2 Newsreader,Georgia,serif}
@@ -76,13 +76,13 @@ button{font:inherit}
 .stairs li{padding:18px;background:#FFFDF7;border:1.5px solid #DFD3B8;display:flex;flex-direction:column;justify-content:flex-end;gap:4px}
 .stairs b{font:500 24px/1.1 Newsreader,Georgia,serif}
 .stairs span{font-size:14px;color:#5E5446}
-.stairs .s1{height:150px;background:linear-gradient(110deg,#B88F37,#E3C47E 50%,#C9A24A);border:0;color:#14100B}.stairs .s1 span{color:#14100B}
+.stairs .s1{height:150px;background:linear-gradient(110deg,#B88F37,#D6BF8F 50%,#B4975F);border:0;color:#14100B}.stairs .s1 span{color:#14100B}
 .stairs .s2{height:190px}.stairs .s3{height:230px}
 @media(max-width:560px){.stairs{grid-template-columns:1fr}.stairs li{height:auto!important;min-height:96px}}
 .steps{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}
 .steps li{display:flex;flex-direction:column;gap:12px}
-.steps .n{width:52px;height:52px;border-radius:50%;border:1.5px solid #C9A24A;display:flex;align-items:center;justify-content:center;font:500 22px/1 Newsreader,Georgia,serif;color:#E3C47E}
-.steps .n.on{background:#C9A24A;color:#14100B}
+.steps .n{width:52px;height:52px;border-radius:50%;border:1.5px solid #B4975F;display:flex;align-items:center;justify-content:center;font:500 22px/1 Newsreader,Georgia,serif;color:#D6BF8F}
+.steps .n.on{background:#B4975F;color:#14100B}
 .steps b{font:500 22px/1.2 Newsreader,Georgia,serif}
 .steps span{font-size:15.5px;color:#C9BDA6}
 .lvhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px}
@@ -93,15 +93,15 @@ button{font:inherit}
 .levels li{padding:14px;background:#FFFDF7;border:1px solid #DFD3B8}
 .levels li b{font:600 13px/1 'Inter',Arial,sans-serif;color:#6B6153}
 .levels li p{margin:8px 0 0;font:500 16px/1.25 Newsreader,Georgia,serif}
-.levels .free{background:#C9A24A;border-color:#C9A24A;color:#14100B}.levels .free b{color:#14100B}
-.levels .with{border-color:#C9A24A}.levels .with b{color:#7A5C16}
-.levels .last{background:#1C1309;border-color:#1C1309;color:#F3EBDA}.levels .last b{color:#E3C47E}
+.levels .free{background:#B4975F;border-color:#B4975F;color:#14100B}.levels .free b{color:#14100B}
+.levels .with{border-color:#B4975F}.levels .with b{color:#7A5C16}
+.levels .last{background:#1C1309;border-color:#1C1309;color:#F3EBDA}.levels .last b{color:#D6BF8F}
 .legend{display:flex;flex-wrap:wrap;gap:8px 22px}
 .legend i{display:inline-block;width:12px;height:12px;vertical-align:-1px;margin-right:6px}
 .change{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .change li{display:grid;grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr);align-items:center;gap:12px;padding:18px 20px;background:#1E1710}
 .change s{font-size:17px;color:#9D917E;text-decoration-color:rgba(157,145,126,.5)}
-.change b{font:500 20px/1.25 Newsreader,Georgia,serif;color:#E3C47E}
+.change b{font:500 20px/1.25 Newsreader,Georgia,serif;color:#D6BF8F}
 @media(max-width:560px){.change li{grid-template-columns:1fr;gap:6px}.change li>span{display:none}}
 .shelf{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:28px}
 .mans{position:relative;width:250px;height:210px}
@@ -115,8 +115,8 @@ button{font:inherit}
 .line{list-style:none;margin:10px 0 0;padding:0;border-left:1.5px solid #3A3022;max-width:520px}
 .line li{position:relative;padding:0 0 18px 22px}
 .line li:last-child{padding-bottom:0}
-.line li::before{content:"";position:absolute;left:-6px;top:4px;width:10px;height:10px;border-radius:50%;background:#C9A24A}
-.line li.open::before{background:#14100B;border:1.5px solid #C9A24A;box-sizing:border-box}
+.line li::before{content:"";position:absolute;left:-6px;top:4px;width:10px;height:10px;border-radius:50%;background:#B4975F}
+.line li.open::before{background:#14100B;border:1.5px solid #B4975F;box-sizing:border-box}
 .line b{font:500 17px/1.3 Newsreader,Georgia,serif}
 .line span{font-size:14.5px;color:#C9BDA6}
 .ladder{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
@@ -125,10 +125,10 @@ button{font:inherit}
 .ladder .nm span{display:block;font-size:13px;color:#5E5446}
 .ladder .bars{display:grid;grid-template-columns:repeat(12,1fr);gap:3px}
 .ladder .bars i{height:10px;background:#EFE6D3}
-.ladder .bars i.on{background:#C9A24A}
+.ladder .bars i.on{background:#B4975F}
 .ladder .pr{text-align:right;font-weight:700;font-size:16px}
-.ladder .top{background:#1C1309;color:#F3EBDA;box-shadow:inset 0 0 0 1.5px #C9A24A;border-color:#1C1309}
-.ladder .top .nm b,.ladder .top .pr{color:#E3C47E}.ladder .top .nm span{color:#C9BDA6}.ladder .top .bars i.on{background:#E3C47E}
+.ladder .top{background:#1C1309;color:#F3EBDA;box-shadow:inset 0 0 0 1.5px #B4975F;border-color:#1C1309}
+.ladder .top .nm b,.ladder .top .pr{color:#D6BF8F}.ladder .top .nm span{color:#C9BDA6}.ladder .top .bars i.on{background:#D6BF8F}
 @media(max-width:700px){.ladder li{grid-template-columns:minmax(0,1fr) auto}.ladder .bars{grid-column:1/-1;grid-row:2}}
 .page90{width:300px;max-width:100%;padding:26px 24px;background:#F3EBDA;color:#1C1309;box-shadow:0 30px 50px -24px rgba(0,0,0,.8);display:flex;flex-direction:column;gap:14px}
 .page90 p{margin:0;font:700 10px/1 'Inter',Arial,sans-serif;letter-spacing:.2em;color:#7A5C16}
@@ -136,7 +136,7 @@ button{font:inherit}
 .page90 .bar{height:8px;margin-top:8px;background:#E6DCC5}
 .page90 .sep{padding-bottom:10px;border-bottom:1px solid #D6C9AC}
 .page90 .spark{margin-top:8px;display:flex;align-items:flex-end;gap:4px;height:34px}
-.page90 .spark i{flex:1;background:#C9A24A}
+.page90 .spark i{flex:1;background:#B4975F}
 .close{min-height:560px;background:radial-gradient(80% 120% at 50% 0%,#2A2014 0%,#14100B 65%);text-align:center}
 .foot{background:#0E0B07;color:#9D917E;font-size:13px;line-height:1.7;padding:28px 16px;text-align:center}
 #gate{position:fixed;inset:0;z-index:60;background:rgba(16,13,9,.65);display:flex;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}
@@ -153,17 +153,17 @@ button{font:inherit}
 :root[data-theme="light"] .dk .sub,:root[data-theme="light"] .dk .note,:root[data-theme="light"] .dk .steps span,:root[data-theme="light"] .dk .line span{color:#5E5446}
 :root[data-theme="light"] .dk .k{color:#7A5C16}
 :root[data-theme="light"] .dk .jm li{color:#7D7262}:root[data-theme="light"] .dk .jm .dn{color:#6B6153}:root[data-theme="light"] .dk .jm .nw{color:#7A5C16}
-:root[data-theme="light"] .dk .steps .n{color:#7A5C16;border-color:#B88F37}:root[data-theme="light"] .dk .steps .n.on{color:#14100B;background:#C9A24A}
+:root[data-theme="light"] .dk .steps .n{color:#7A5C16;border-color:#B88F37}:root[data-theme="light"] .dk .steps .n.on{color:#14100B;background:#B4975F}
 :root[data-theme="light"] .four div{background:#FFFDF7;border-color:#DFD3B8;color:#1C1309}
 :root[data-theme="light"] .four .you{background:#1C1309;color:#F3EBDA;box-shadow:0 0 0 6px #ECE2CC}
 :root[data-theme="light"] .change li{background:#FFFDF7;border:1px solid #DFD3B8}:root[data-theme="light"] .change s{color:#7D7262}:root[data-theme="light"] .change b{color:#7A5C16}
 :root[data-theme="light"] .line{border-color:#D6C9AC}:root[data-theme="light"] .line li.open::before{background:#ECE2CC}
 :root[data-theme="light"] .close{background:radial-gradient(80% 120% at 50% 0%,#FFF8EA 0%,#ECE2CC 65%)}
 :root[data-theme="light"] .foot{background:#E3D8C1;color:#5E5446}
-:root[data-theme="light"] .dk [style*="color: #E3C47E"],:root[data-theme="light"] .dk [style*="color: #C9A24A"]{color:#7A5C16!important}
+:root[data-theme="light"] .dk [style*="color: #D6BF8F"],:root[data-theme="light"] .dk [style*="color: #B4975F"]{color:#7A5C16!important}
 :root[data-theme="light"] .dk [style*="color: #C9BCA4"]{color:#5E5446!important}
 :root[data-theme="light"] .dk [style*="color: #F3EBDA"]{color:#1C1309!important}
-:root[data-theme="light"] .dk [style*="background: rgba(201,162,74,.16)"]{background:rgba(201,162,74,.22)!important}
+:root[data-theme="light"] .dk [style*="background: rgba(180,151,95,.16)"]{background:rgba(180,151,95,.22)!important}
 </style>
 </head>
 <body>
@@ -172,12 +172,12 @@ button{font:inherit}
 <main class="pg" id="main">
 
   <!-- 1 · ARRIVE · what this is -->
-  <section class="sc dk" style="min-height: 760px; background: radial-gradient(90% 90% at 20% 0%, #2A2014 0%, #14100B 60%); border-bottom: 3px solid #C9A24A">
+  <section class="sc dk" style="min-height: 760px; background: radial-gradient(90% 90% at 20% 0%, #2A2014 0%, #14100B 60%); border-bottom: 3px solid #B4975F">
     <div class="in">
       <ol class="jm" aria-label="Where you are on this page"><li class="nw">Arrive</li><li>Understand</li><li>See your path</li><li>Choose</li><li>Begin</li></ol>
       <div class="row">
         <div class="tx">
-          <div style="display: flex; align-items: center; gap: 12px"><svg width="28" height="28" viewBox="0 0 34 34" aria-hidden="true"><rect x="7" y="7" width="20" height="20" transform="rotate(45 17 17)" fill="none" stroke="#C9A24A" stroke-width="1.6"></rect><rect x="13" y="13" width="8" height="8" transform="rotate(45 17 17)" fill="#C9A24A"></rect></svg><div><p style="margin: 0; font: 500 24px/1 Newsreader, Georgia, serif; color: #E3C47E">Link to Lead</p><p class="k" style="margin: 5px 0 0; font-size: 10px">The Founder’s Blueprint · The Incubator</p></div></div>
+          <div style="display: flex; align-items: center; gap: 12px"><svg width="28" height="28" viewBox="0 0 34 34" aria-hidden="true"><rect x="7" y="7" width="20" height="20" transform="rotate(45 17 17)" fill="none" stroke="#B4975F" stroke-width="1.6"></rect><rect x="13" y="13" width="8" height="8" transform="rotate(45 17 17)" fill="#B4975F"></rect></svg><div><p style="margin: 0; font: 500 24px/1 Newsreader, Georgia, serif; color: #D6BF8F">Link to Lead</p><p class="k" style="margin: 5px 0 0; font-size: 10px">The Founder’s Blueprint · The Incubator</p></div></div>
           <h1 class="h1">Your business, on paper.<br><em>Not in your head.</em></h1>
           <p class="sub">A twelve-week programme for founders.</p>
           <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 8px"><button type="button" class="cta" data-join>Join →</button><span class="note">3 levels · Instant access</span></div>
@@ -185,8 +185,8 @@ button{font:inherit}
         <div class="vz">
           <svg viewBox="0 0 420 300" style="width: 100%; max-width: 420px; height: auto" role="img" aria-label="Thoughts in your head become a written page">
             <g fill="none" stroke="#8F8775" stroke-width="1.6" stroke-linecap="round"><path d="M70 150c-24-6-30-40-6-52 6-30 46-34 58-12 22-14 52 2 46 26 22 6 22 40-4 44-4 26-44 30-56 10-18 14-48 4-38-16z"></path><path d="M78 128c14-10 30 6 18 16s-26-2-12-14M116 112c10 8 0 22-10 14M132 150c-8-10 12-18 16-6"></path></g>
-            <path d="M190 150h52" stroke="#C9A24A" stroke-width="2" stroke-dasharray="4 6"></path><path d="M238 142l10 8-10 8" fill="none" stroke="#C9A24A" stroke-width="2"></path>
-            <rect x="268" y="62" width="120" height="164" fill="#F3EBDA"></rect><rect x="268" y="62" width="120" height="164" fill="none" stroke="#C9A24A" stroke-width="1.5"></rect>
+            <path d="M190 150h52" stroke="#B4975F" stroke-width="2" stroke-dasharray="4 6"></path><path d="M238 142l10 8-10 8" fill="none" stroke="#B4975F" stroke-width="2"></path>
+            <rect x="268" y="62" width="120" height="164" fill="#F3EBDA"></rect><rect x="268" y="62" width="120" height="164" fill="none" stroke="#B4975F" stroke-width="1.5"></rect>
             <g stroke="#C9B48A" stroke-width="1.2"><path d="M284 96h88M284 120h88M284 144h88M284 168h88M284 192h60"></path></g>
             <g fill="none" stroke="#7A5C16" stroke-width="2" stroke-linecap="round"><path d="M284 90l4 4 8-8M284 114l4 4 8-8M284 138l4 4 8-8"></path></g>
           </svg>
@@ -206,7 +206,7 @@ button{font:inherit}
         <li><svg width="38" height="38" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#7A5C16" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="3"></circle><circle cx="16.5" cy="9.5" r="2.5"></circle><path d="M3 19c.9-3 3-4.6 5.5-4.6S13.1 16 14 19M14.5 14.6c2.6-.4 4.9.9 6 4.4"></path></svg><b>Your people, led</b><span>Not hoping they understood.</span></li>
         <li><svg width="38" height="38" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#7A5C16" stroke-width="1.5"><path d="M12 3v14M7 8h10M5 14a7 7 0 0 0 14 0"></path><circle cx="12" cy="3.5" r="1.5"></circle></svg><b>A mind that holds</b><span>On a bad week too.</span></li>
       </ul>
-      <p style="margin: 6px 0 0; padding-top: 20px; border-top: 3px solid #C9A24A; max-width: 44ch; font: 500 clamp(19px,2.2vw,24px)/1.45 Newsreader, Georgia, serif"><b style="font-weight: 600; color: #7A5C16">Everything you need to do it is here</b> — the questions, the worksheets, the numbers, and someone who has done it reading what you write.</p>
+      <p style="margin: 6px 0 0; padding-top: 20px; border-top: 3px solid #B4975F; max-width: 44ch; font: 500 clamp(19px,2.2vw,24px)/1.45 Newsreader, Georgia, serif"><b style="font-weight: 600; color: #7A5C16">Everything you need to do it is here</b> — the questions, the worksheets, the numbers, and someone who has done it reading what you write.</p>
     </div>
   </section>
 
@@ -224,7 +224,7 @@ button{font:inherit}
             <div>Lead yourself</div>
             <div style="justify-content: flex-end; text-align: right">Lead your people</div>
             <div style="align-items: flex-end">Lead your business</div>
-            <div style="align-items: flex-end; justify-content: flex-end; text-align: right; border: 1.5px solid #C9A24A; background: rgba(201,162,74,.16); color: #E3C47E">Lead the market</div>
+            <div style="align-items: flex-end; justify-content: flex-end; text-align: right; border: 1.5px solid #B4975F; background: rgba(180,151,95,.16); color: #D6BF8F">Lead the market</div>
             <span class="you">YOU</span>
           </div>
         </div>
@@ -256,7 +256,7 @@ button{font:inherit}
         <li><span class="n" aria-hidden="true">2</span><b>Your Ground Plan</b><span>Your stage and your first three moves.</span></li>
         <li><span class="n on" aria-hidden="true">3</span><b>One level a week</b><span>Open it, count it, write it down.</span></li>
       </ol>
-      <p style="margin: 8px 0 0; max-width: 52ch; font: 500 clamp(18px,2vw,21px)/1.5 Newsreader, Georgia, serif; color: #F3EBDA">The numbers are never the point. They help you <b style="color: #E3C47E; font-weight: 600">decide</b>, <b style="color: #E3C47E; font-weight: 600">lead a person</b> or <b style="color: #E3C47E; font-weight: 600">hand something over</b>.</p>
+      <p style="margin: 8px 0 0; max-width: 52ch; font: 500 clamp(18px,2vw,21px)/1.5 Newsreader, Georgia, serif; color: #F3EBDA">The numbers are never the point. They help you <b style="color: #D6BF8F; font-weight: 600">decide</b>, <b style="color: #D6BF8F; font-weight: 600">lead a person</b> or <b style="color: #D6BF8F; font-weight: 600">hand something over</b>.</p>
     </div>
   </section>
 
@@ -273,7 +273,7 @@ button{font:inherit}
         </div>
       </div>
       <ol class="levels" id="levels" role="tabpanel" aria-labelledby="tab-build"></ol>
-      <p class="note legend"><span><i style="background: #C9A24A"></i>Open the day you join</span><span><i style="border: 1px solid #C9A24A"></i>With Alexandru</span><span><i style="border: 1px solid #DFD3B8"></i>LAB and HUB</span></p>
+      <p class="note legend"><span><i style="background: #B4975F"></i>Open the day you join</span><span><i style="border: 1px solid #B4975F"></i>With Alexandru</span><span><i style="border: 1px solid #DFD3B8"></i>LAB and HUB</span></p>
     </div>
   </section>
 
@@ -283,9 +283,9 @@ button{font:inherit}
       <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="nw">See your path</li><li>Choose</li><li>Begin</li></ol>
       <h2 class="h2">From your head <em>to paper.</em></h2>
       <ul class="change">
-        <li><s>A week you can’t account for</s><span aria-hidden="true" style="color: #C9A24A; text-align: center">→</span><b>Last week’s hours, visible</b></li>
-        <li><s>Customers you guess at</s><span aria-hidden="true" style="color: #C9A24A; text-align: center">→</span><b>Ten real names</b></li>
-        <li><s>Everything runs through you</s><span aria-hidden="true" style="color: #C9A24A; text-align: center">→</span><b>One process someone else ran</b></li>
+        <li><s>A week you can’t account for</s><span aria-hidden="true" style="color: #B4975F; text-align: center">→</span><b>Last week’s hours, visible</b></li>
+        <li><s>Customers you guess at</s><span aria-hidden="true" style="color: #B4975F; text-align: center">→</span><b>Ten real names</b></li>
+        <li><s>Everything runs through you</s><span aria-hidden="true" style="color: #B4975F; text-align: center">→</span><b>One process someone else ran</b></li>
       </ul>
     </div>
   </section>
