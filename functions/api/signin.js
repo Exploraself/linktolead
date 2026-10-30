@@ -2,7 +2,7 @@
 //
 // POST { email } answers the same way whether or not there is an account, so
 // the form cannot be used to find out who has one. When there is, it emails
-// /northstar/?signin=<code>. The code is 32 random bytes; only its SHA-256 is
+// /compass?signin=<code>. The code is 32 random bytes; only its SHA-256 is
 // stored, it lasts 30 minutes and works once. Requests share the mail limits
 // with every other email (3 per address, 10 per connection, per hour), and
 // they count whether or not the address has an account.

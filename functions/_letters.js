@@ -174,7 +174,7 @@ export function resultsLetter(base, { first, weakest, to = '', tier, offer, ...o
   return { subject: 'Your Leader’s North Star', ...letter(base, [
     hi(first),
     'Here is your Leader’s North Star, ready whenever you are.',
-    button(`${base}/northstar/`, 'Open my North Star →'),
+    button(`${base}/compass`, 'Open my North Star →'),
     weakest
       ? `Start with the domain that needs you most. For you that’s ${weakest}. One honest hour there changes more than a week anywhere else.`
       : 'Start with the domain that needs you most. One honest hour there changes more than a week anywhere else.',
