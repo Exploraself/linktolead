@@ -125,7 +125,10 @@ for (const p of ['/road1/', '/road2/', '/road3/', '/northstar', '/northstar/summ
 { const r = await pagesRedirect({ request: get('/start?signin=abc'), next: () => new Response('asset') }); ok(r.status === 302 && r.headers.get('location') === '/ground-plan/?signin=abc', '/start (old links, old emails) lands on /ground-plan/, sign-in code kept'); }
 for (const d of ['index.html', 'page.js', 'lab.js', 'a', 'b', 'compass/welcome', 'compass/welcome-a']) ok(!existsSync(new URL('../public/' + d, import.meta.url)), `public/${d}: no copy left at the old address`);
 const W = read('wrangler.toml');
-ok(/not_found_handling = "404-page"/.test(W) && OLD.every(([from]) => W.includes(`"${from}"`)), 'Worker: unknown addresses get the 404 page; every old address reaches the Worker');
+const RULES = JSON.parse(W.match(/run_worker_first = (\[.*\])/)[1]);
+const covered = (p) => RULES.some((r) => r === p || (r.endsWith('/*') && p.startsWith(r.slice(0, -1))));
+ok(/not_found_handling = "404-page"/.test(W) && OLD.every(([from]) => covered(from)), 'Worker: unknown addresses get the 404 page; every old address reaches the Worker');
+ok(!RULES.some((r) => RULES.some((o) => o !== r && o.endsWith('/*') && r.startsWith(o.slice(0, -1)))), 'Worker: no run_worker_first rule another one already covers (Workers Builds refuses them)');
 const NF = read('public/404.html');
 ok(existsSync(new URL('../public/404.html', import.meta.url)) && /noindex/.test(NF) && NF.includes('This page does not exist.') && !NF.includes('Link to Lead — The Founder'), 'a real 404 page (not the home page)');
 const B = read('public/road1/index.html');
