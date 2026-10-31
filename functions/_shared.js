@@ -93,7 +93,10 @@ export async function accountTables(D) {
       'avatar TEXT',
       // The landing tag a founder already carries when their page was renamed
       // after they joined (see the move below): sent instead of the new one.
-      'landing_tag TEXT']) {
+      'landing_tag TEXT',
+      // When the founder last signed in with Google (functions/api/google.js):
+      // Google is their way in, so a full account needs no password.
+      'google_at TEXT']) {
     try { await D.prepare(`ALTER TABLE student_profile ADD COLUMN ${col}`).run(); } catch { /* already there */ }
   }
   // An answer in "Ask Alexandru" is a message that points at the question

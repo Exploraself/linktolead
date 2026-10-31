@@ -472,7 +472,8 @@ function askAccount(then) {
   heldAnswer = then || null;
   import('/reset-box.js').then((m) => m.openComplete({ name: state.me && state.me.name, email: state.me && state.me.email, missing,
     done: () => {
-      missing = []; signupType = 'full'; hasPassword = true;
+      if (missing.includes('password')) hasPassword = true;
+      missing = []; signupType = 'full';
       const go = heldAnswer; heldAnswer = null;
       if (go) go();
       saidNote('Your account is complete. Your answer is saved.');

@@ -59,18 +59,30 @@ ok(code === 401 && /Google could not confirm/.test(out.error), 'POST: a token fo
 // ── A new address: the free account, as the simple form makes it ───────────
 [code, out] = await J(await gPost({ request: post('/api/google', { credential: 'tok-new-founder-000000001', consent: true, landing: 'north3', source: 'sales-page', utm: { utm_source: 'meta' } }), env }));
 ok(code === 200 && out.token && out.existing === false && out.me.email === 'nina@example.com' && out.me.first === 'Nina', 'new: an account, signed in, the email in lower case');
-ok(out.missing.join() === 'company,interest,industry,password', 'new: it says what a full account still lacks');
+ok(out.missing.join() === 'company,interest,industry', 'new: it says what a full account still lacks, and never a password');
 const nina = DB.raw.prepare("SELECT s.name, p.signup_type, p.landing, p.utm_source, p.consent FROM student s JOIN student_profile p ON p.student_id = s.id WHERE s.email = 'nina@example.com'").get();
 ok(nina && nina.name === 'Nina Moss' && nina.signup_type === 'simple' && nina.landing === 'north3' && nina.utm_source === 'meta' && nina.consent, 'new: name, landing page, utm and consent kept');
 ok(DB.raw.prepare("SELECT COUNT(*) AS n FROM event WHERE kind = 'signup' AND detail = 'sales-page · google'").get().n === 1, 'new: the sign-up is logged as Google');
 ok(sent.length === 1 && sent[0].to[0] === 'nina@example.com' && Array.isArray(sent[0].attachments), 'new + consent: the North Star welcome, with the plan attached');
 const st = await (await stateGet({ request: get(`/api/state?t=${out.token}`), env })).json();
-ok(st.me.missing.length === 4 && st.me.hasPassword === false, 'new: the Blueprint will ask once for the rest, as for every account');
+ok(st.me.missing.join() === 'company,interest,industry' && st.me.hasPassword === false, 'new: the Blueprint will ask once for the rest, without a password');
+{
+  const { onRequestPost: complete } = await import('../functions/api/complete.js');
+  const [c2, o2] = await J(await complete({ request: post('/api/complete', { token: out.token, company: 'Moss & Co', interest: 'Steady clients', industry: 'Other' }), env }));
+  const st2 = await (await stateGet({ request: get(`/api/state?t=${out.token}`), env })).json();
+  ok(c2 === 200 && o2.complete && st2.me.missing.length === 0 && st2.me.signupType === 'full' && !st2.me.hasPassword, 'a Google account is full with company, interest and industry: no password');
+}
 
 // No consent: the account, and nothing emailed.
 TOKENS['tok-quiet-0000000000001'] = { ...base, email: 'quiet@example.com', given_name: 'Q' };
 await gPost({ request: post('/api/google', { credential: 'tok-quiet-0000000000001' }), env });
 ok(sent.length === 1, 'new without consent: nothing is emailed');
+
+// An older account that signs in with Google stops being asked for a password.
+{
+  const { missingOf } = await import('../functions/_profile.js');
+  ok(missingOf({ company: '', interest: 'Steady clients', industry: 'Other' }).join() === 'password' && missingOf({ company: '', interest: 'Steady clients', industry: 'Other', google_at: '2026-10-31' }).length === 0, 'missingOf: Google counts as the way in');
+}
 
 // ── An address that already has an account: it opens ────────────────────────
 const [, s1] = await J(await signup({ request: post('/api/signup', { first: 'Sam', last: 'Ray', email: 'sam@example.com', type: 'simple', landing: 'road3' }), env }));
@@ -78,6 +90,7 @@ const [, s1] = await J(await signup({ request: post('/api/signup', { first: 'Sam
 ok(code === 200 && out.token === s1.token && out.existing === true && out.me.first === 'Sam', 'existing: the same account opens, with its own name');
 ok(DB.raw.prepare("SELECT COUNT(*) AS n FROM student WHERE email = 'sam@example.com'").get().n === 1, 'existing: never a second account');
 ok(sent.length === 1, 'existing: no welcome letter again');
+ok(!(await (await stateGet({ request: get(`/api/state?t=${s1.token}`), env })).json()).me.missing.includes('password'), 'existing: after a Google sign-in, no password is asked any more');
 
 // ── A paused account stays closed ──────────────────────────────────────────
 await signup({ request: post('/api/signup', { first: 'Pat', last: 'Lee', email: 'pat@example.com', type: 'full', company: 'Lee Co', interest: 'Steady clients', industry: 'Other', password: 'a long enough secret', confirm: 'a long enough secret' }), env });
