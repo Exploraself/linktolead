@@ -64,10 +64,10 @@ export function compassStripHTML(read) {
 export function bandHTML(b) {
   if (!b) return '';
   const lv = String(b.level).padStart(2, '0');
-  return `<section class="incub" aria-label="The incubator: The Founder's Blueprint">
+  return `<section class="incub" aria-label="The Founder's Blueprint">
     <div class="incub-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5 21.5 12 12 21.5 2.5 12Z" fill="none" stroke="#D6BF8F" stroke-width="1.2"/><path d="m12 5.7 2 4.3 4.3 2-4.3 2-2 4.3-2-4.3-4.3-2 4.3-2Z" fill="#D6BF8F"/></svg></div>
     <div class="incub-copy">
-      <p class="incub-eb">The incubator · Link to Lead · your full account</p>
+      <p class="incub-eb">Link to Lead · your full account</p>
       <h2>The Founder’s Blueprint</h2>
       <p class="incub-now">Level ${lv} of 12${b.title ? ` · <b>${esc(b.title)}</b>` : ''} · ${b.done || 0} of ${b.total || 28} done</p>
       <ol class="incub-levels" aria-label="Twelve levels">${b.dots.map((d, i) => `<li class="lv-${d}"><span aria-hidden="true">${String(i + 1).padStart(2, '0')}</span><span class="vh">Level ${String(i + 1).padStart(2, '0')}, ${DOT_NAMES[d]}</span></li>`).join('')}</ol>

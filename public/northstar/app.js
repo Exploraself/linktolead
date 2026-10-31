@@ -337,15 +337,15 @@
 
   /* ── Parts ──────────────────────────────────────────────────────────────── */
   const NAV = [['overview', '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><g><polygon points="12,4 14,12 12,13.5 10,12" fill="#6F93B8"/><polygon points="12,20 14,12 12,10.5 10,12" fill="currentColor" opacity=".5"/><animateTransform attributeName="transform" type="rotate" values="20 12 12;34 12 12;20 12 12" dur="7s" repeatCount="indefinite"/></g></svg>', 'Your North Star'],
-    ['clear', '01', 'Get clear'], ['people', '02', 'Lead your people'], ['numbers', '03', 'Count what matters'], ['plan', '04', 'Choose your next steps'], ['method', '⌘', 'How it works']];
+    ['clear', '1', 'Yourself'], ['people', '2', 'Your people'], ['numbers', '3', 'Your numbers'], ['plan', '4', 'Your next steps'], ['method', '⌘', 'How it works']];
   const navOn = () => (typeof window !== 'undefined' && window.__nsSpy) || UI.page; // spy.js: the section on screen
   const pNav = (c) => NAV.map(([id, ni, t]) => `<button type="button" class="nl ${navOn() === id ? 'on' : ''}" data-go="${id}" data-f="nav-${id}"${navOn() === id ? ' aria-current="true"' : ''}><span class="ni">${ni}</span>${t}${id === 'clear' ? `<small style="margin-left: auto; font-size: 9px">${c.answered}/8</small>` : ''}</button>`).join('');
 
-  const STEP_CARDS = [['01', 'Get clear', 'Know yourself', 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'clear'],
-    ['02', 'Lead your people', 'Know your people', D[1].icon, 'people'], ['03', 'Count what matters', 'Know your numbers', 'M4 20V10M10 20V4M16 20v-7M22 20H2', 'numbers'],
-    ['04', 'Choose your next steps', 'Know your market', 'M6 21V4M6 4h11l-3 4 3 4H6', 'plan']];
+  const STEP_CARDS = [['1', 'Yourself', 'Eight plain questions', 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'clear'],
+    ['2', 'Your people', 'Customers and team', D[1].icon, 'people'], ['3', 'Your numbers', 'One month, roughly', 'M4 20V10M10 20V4M16 20v-7M22 20H2', 'numbers'],
+    ['4', 'Your next steps', 'Your road and the what-if lab', 'M6 21V4M6 4h11l-3 4 3 4H6', 'plan']];
   const pStepcards = () => STEP_CARDS.map(([n, t, k, icon, go], i) => `<button type="button" data-go="${go}" data-f="card-${go}" class="card lift stepc rise" style="animation-delay: ${(i + 1) / 10}s; text-align: left; padding: 18px; cursor: pointer; color: var(--ink); display: flex; flex-direction: column; gap: 8px; min-height: 150px">
-      <span style="display: flex; justify-content: space-between; align-items: center; width: 100%"><span style="font-size: 11px; letter-spacing: .14em; color: var(--goldink); font-weight: 520">STEP ${n}</span><svg class="sico" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="${icon}" fill="none" stroke="${CSSV[i]}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span style="display: flex; justify-content: space-between; align-items: center; width: 100%"><span style="font-size: 11px; letter-spacing: .14em; color: var(--goldink); font-weight: 520">PART ${n}</span><svg class="sico" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="${icon}" fill="none" stroke="${CSSV[i]}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       <span class="sf" style="font-size: 21px; display: flex; align-items: center; gap: 8px">${t} <span class="sarr" aria-hidden="true">→</span></span>
       <span style="font-size: 13px; color: var(--muted)">${k}</span></button>`).join('');
 
@@ -397,7 +397,6 @@
     const chips = (hasGoal ? path : [S4[here].name]).map((nm, k, arr) => `<span style="padding: 5px 9px; border-radius: 12px; background: ${k === 0 ? '#6F93B8' : k === arr.length - 1 ? '#0E1C2B' : '#E3EAF2'}; color: ${k === arr.length - 1 && k !== 0 ? '#EEF2F7' : '#0E1C2B'}">${nm}</span>`).join('');
     return `<section class="rise r1" style="display: flex; flex-direction: column; gap: 18px">
       <div style="display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap">
-        <span style="background: #6F93B8; color: #0E1C2B; font-weight: 900; font-size: 13px; padding: 6px 10px; border-radius: 3px; letter-spacing: .08em">STEP 1</span>
         <h2 style="font-weight: 900; font-size: 28px">Where are you <span class="serif" style="color: var(--goldink); font-weight: 400">today?</span></h2>
       </div>
       <p style="color: var(--muted); font-size: 16px">Tap the stage that is true now, not the one that would look best on a business card.</p>
@@ -410,15 +409,15 @@
     </section>
     <section class="rise r2" style="display: flex; flex-direction: column; gap: 18px">
       <div style="display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap">
-        <span style="background: #6F93B8; color: #0E1C2B; font-weight: 900; font-size: 13px; padding: 6px 10px; border-radius: 3px; letter-spacing: .08em">STEP 2</span>
         <h2 style="font-weight: 900; font-size: 28px">Where do you want <span class="serif" style="color: var(--goldink); font-weight: 400">to get?</span></h2>
       </div>
       <p style="color: var(--muted); font-size: 16px">Now tap the stage you want to reach on your road.</p>
-      <div style="background: #0E1C2B; color: #EEF2F7; border-radius: 12px; padding: 34px 18px 22px; box-shadow: 0 30px 60px rgba(28,19,9,.18)">
+      <div class="j-road" style="background: #0E1C2B; color: #EEF2F7; border-radius: 12px; padding: 34px 18px 22px; box-shadow: 0 30px 60px rgba(28,19,9,.18)">
         <div style="position: relative; height: 150px">
           <div style="position: absolute; left: 12.5%; right: 12.5%; top: 50%; height: 4px; margin-top: -2px; background: repeating-linear-gradient(90deg, #2A3A50 0 10px, transparent 10px 18px); border-radius: 2px"></div>
           <div class="fill" style="position: absolute; top: 50%; height: 6px; margin-top: -3px; border-radius: 3px; background: #6F93B8; box-shadow: 0 0 14px rgba(111,147,184,.7); left: ${pos(here)}%; width: ${hasGoal ? 25 * gap : 0}%"></div>
           ${hasGoal && gap > 0 ? `<span class="trav" style="--from: ${pos(here)}%; --to: ${pos(gi)}%"></span>` : ''}
+          ${hasGoal ? '' : `<span class="nshand" aria-hidden="true" style="--from: ${pos(Math.min(3, here + 1))}%; --to: ${pos(3)}%"><svg width="34" height="40" viewBox="0 0 24 28"><path d="M9 13V4.5a1.6 1.6 0 0 1 3.2 0V12m0-1.5a1.6 1.6 0 0 1 3.2 0V13m0-1a1.6 1.6 0 0 1 3.2 0v5c0 4.5-3 8-7 8h-1c-2.6 0-4-1.3-5.4-3.4L2.6 17a1.6 1.6 0 0 1 2.6-1.8L9 18.5" fill="#EEF2F7" stroke="#0E1C2B" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/></svg></span>`}
           ${stages.map((x) => `<div style="position: absolute; top: 0; bottom: 0; left: ${pos(x.i)}%; width: 0">
             ${x.isGoal ? '<svg class="flag" width="28" height="34" viewBox="0 0 28 34" aria-hidden="true" style="position: absolute; left: 0; top: 8px"><path d="M6 32V3" stroke="#EEF2F7" stroke-width="2"/><path d="M6 4h18l-5 6 5 6H6z" fill="#6F93B8"/></svg>' : ''}
             ${x.isHere ? '<span class="jring"></span><span class="jring ring2"></span>' : ''}
@@ -431,27 +430,11 @@
         </div>
         ${hasGoal ? `<div class="rise" style="margin-top: 26px; border-top: 1px solid #3A2F20; padding-top: 20px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center">
             <span style="font-size: 20px; line-height: 1.4"><b style="color: #6F93B8">You are here:</b> ${S4[here].name} <span style="color: #A9B6C6">→</span> <b style="color: #6F93B8">Your goal:</b> ${gap === 0 ? 'go deeper' : S4[gi].name} · ${gap === 0 ? 'we sharpen what you already do' : words[gap]}</span>
-            <span class="serif" style="font-size: 16px; color: #E3EAF2; max-width: 680px; line-height: 1.45">Your questions stay about where you are today. Your goal shapes your road in Step 04 — ${roadText}.</span></div>`
+            <span class="serif" style="font-size: 16px; color: #E3EAF2; max-width: 680px; line-height: 1.45">Your questions stay about where you are today. Your goal shapes your road in Part 4 — ${roadText}.</span></div>`
         : '<p style="margin-top: 22px; text-align: center; color: #A9B6C6; font-size: 15px">Tap a stage ahead of you. Your road will draw itself.</p>'}
       </div>
     </section>
-    <section class="rise r3" style="display: flex; flex-direction: column; gap: 16px">
-      <span style="font-size: 12px; font-weight: 600; letter-spacing: .18em; color: var(--goldink)">WHAT HAPPENS NEXT</span>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px">
-        <a href="#s-questions" class="next1" style="text-decoration: none; color: #0E1C2B; background: #6F93B8; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 8px; min-height: 140px">
-          <span style="font-weight: 900; font-size: 13px; letter-spacing: .14em">01 · YOU ARE GOING HERE NOW</span>
-          <span style="font-weight: 900; font-size: 20px">Answer 8 questions about today</span>
-          <span style="font-size: 14px">About ${S4[here].name} — across all four domains. Start →</span></a>
-        <div style="background: #0E1C2B; color: #EEF2F7; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 8px; min-height: 140px">
-          <span style="font-weight: 900; font-size: 13px; letter-spacing: .14em; color: #A9B6C6">02 · THEN</span>
-          <span style="font-weight: 900; font-size: 20px">Add your numbers</span>
-          <span style="font-size: 14px; color: #B8C6D6">One month. A range is enough.</span></div>
-        <div style="background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 10px; min-height: 140px; color: #0E1C2B">
-          <span style="font-weight: 900; font-size: 13px; letter-spacing: .14em; color: #3E6A94">03 · AND YOU GET</span>
-          <span style="font-weight: 900; font-size: 20px">Your road, step by step</span>
-          <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; font-weight: 900">${chips}</div></div>
-      </div>
-    </section>`;
+`;
   }
 
   const pHerebar = (c) => (c.goal >= 0 ? `<div id="s-questions" class="card" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
@@ -508,13 +491,14 @@
     const done = qs.filter((q) => Number.isInteger(S.ans[q.id])).length;
     const rows = qs.map((q, i) => {
       const di = D.findIndex((d) => d.id === q.domain), a = S.ans[q.id], now = i === qi;
-      return `<li><button type="button" class="nsb-s${Number.isInteger(a) ? ' done' : ''}${now ? ' now' : ''}" data-act="nsq" data-i="${i}" data-f="nsq-${i}"${now ? ' aria-current="step"' : ''}>
-        <span class="nsb-n" style="color: ${CSSV[di]}">0${i + 1}</span>
-        <span class="nsb-st"><b>${esc(q.short || q.text)}</b><i>${now ? 'Answering now' : Number.isInteger(a) ? esc(E.ANSWERS[a][0]) : ''}</i></span></button></li>`;
+      const missed = !now && !Number.isInteger(a) && i < qi;
+      return `<li><button type="button" class="nsb-s${Number.isInteger(a) ? ' done' : ''}${missed ? ' missed' : ''}${now ? ' now' : ''}" data-act="nsq" data-i="${i}" data-f="nsq-${i}"${now ? ' aria-current="step"' : ''}>
+        <span class="nsb-n">${Number.isInteger(a) ? '✓' : i + 1}</span>
+        <span class="nsb-st"><b>${esc(q.short || q.text)}</b><i>${now ? 'Answering now' : Number.isInteger(a) ? `Answered · ${esc(E.ANSWERS[a][0])}` : missed ? 'Not answered yet' : ''}</i></span></button></li>`;
     }).join('') + TAPS.map(([t], k) => {
       const i = qs.length + k, now = i === qi, picked = k === 0 ? S.pains.length : S.want ? 1 : 0;
       return `<li><button type="button" class="nsb-s${picked ? ' done' : ''}${now ? ' now' : ''}" data-act="nsq" data-i="${i}" data-f="nsq-${i}"${now ? ' aria-current="step"' : ''}>
-        <span class="nsb-n" style="color: var(--acc)">${String(i + 1).padStart(2, '0')}</span>
+        <span class="nsb-n">${picked ? '✓' : i + 1}</span>
         <span class="nsb-st"><b>${t}</b><i>${now ? 'Choosing now' : picked ? `${picked} chosen` : 'Two more taps'}</i></span></button></li>`;
     }).join('');
     const tap = qi >= qs.length ? qi - qs.length : -1;
@@ -523,15 +507,14 @@
     const seg = qs.map((x, i) => `<i class="${Number.isInteger(S.ans[x.id]) ? 'done' : ''}${i === qi ? ' now' : ''}"></i>`).join('')
       + TAPS.map((_, k) => `<i class="${(k === 0 ? S.pains.length : S.want) ? 'done' : ''}${qs.length + k === qi ? ' now' : ''}"></i>`).join('');
     return `<div class="nsb" id="nsb">
-      <aside class="nsb-l" aria-label="Step 01 and its eight questions">
+      <aside class="nsb-l" aria-label="Part 1, Yourself, and its questions">
         <button type="button" class="nsb-x" data-act="nsb-steps" aria-label="Close the questions">×</button>
-        <span class="eb">Step 01 · Get clear · ${esc(stg)}</span>
-        <h2 class="sf nsb-t">Eight questions. <span class="sfi" style="color: var(--goldink)">One page.</span></h2>
-        <p class="nsb-c">${done} of ${qs.length} answered</p>
-        <ol class="nsb-list">${rows}</ol>
+        <span class="eb">Your questions · ${esc(stg)}</span>
+        <p class="nsb-c">${done} of ${qs.length} answered${S.want ? ' · and what you want most' : ''}</p>
+        <ol class="nsb-list" style="--fill: ${Math.round((done + (S.pains.length ? 1 : 0) + (S.want ? 1 : 0)) / total * 100)}%">${rows}</ol>
       </aside>
       <section class="nsb-r" id="nsb-r" tabindex="-1" aria-label="The question" aria-keyshortcuts="1 2 3 4 Enter">
-        <button type="button" class="nsb-phone" data-act="nsb-steps" aria-label="Show all eight questions"><span><i aria-hidden="true"></i>Step 01 · ${tap >= 0 ? 'Two more taps' : esc(D[di].name)} · ${qi + 1} of ${total}</span><span aria-hidden="true">Questions ▾</span></button>
+        <button type="button" class="nsb-phone" data-act="nsb-steps" aria-label="Show all eight questions"><span><i aria-hidden="true"></i>Part 1 · Question ${qi + 1} of ${total}</span><span aria-hidden="true">Questions ▾</span></button>
         <div class="nsb-seg" aria-hidden="true">${seg}</div>
         ${tap >= 0 ? tapsPage(tap, qi + 1, total) : `<span class="eb nsb-lab">0${qi + 1} · ${esc(D[di].name)}</span>
         <div class="nsb-body">
@@ -558,8 +541,9 @@
     const qs = context().qs, total = qs.length + TAPS.length;
     if (qi === null) qi = firstOpenQ(qs);
     if (d > 0 && qi === total - 1) {
-      // The last page: on to the North Star reading.
+      // The last page: on to the North Star reading, once nothing is open.
       document.body.classList.remove('nsb-open');
+      if (guide(context(), 1)) return;
       const el = document.getElementById('s-reading');
       if (el) { el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: true }); }
       return;
@@ -666,55 +650,159 @@
   }
   let swallowed = false;
 
-  function pReading(c) {
-    const R = 150, sc = c.sc.map((s) => s.score), str = c.rd.str;
+  /* The compass (31 Oct): the four domains with their names outside the
+   * circle, in readable type. Solid: your answers to the questions; dashed:
+   * your strengths as you rated them. The gap between the two is the point. */
+  function pCompass(c, withAnswers) {
+    const R = 150, cx = 280, cy = 250, sc = c.sc.map((s) => s.score), str = c.rd.str;
     const rA = sc.map((v) => 14 + v / 6 * (R - 14)), rS = str.map((v) => 14 + v / 5 * (R - 14));
-    const pts = (r) => `200,${200 - r[0]} ${200 + r[1]},200 200,${200 + r[2]} ${200 - r[3]},200`;
-    const any = c.rd.any, hi = c.rd.hi, lo = c.rd.lo;
-    return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 700px">
-        <span class="eb">Your North Star reading</span>
-        <h2 class="sf" style="font-size: clamp(28px, 3.6vw, 40px); line-height: 1.05">Where you are strong. <span class="sfi" style="color: var(--goldink)">Where you are low.</span></h2>
-        <p style="color: var(--muted)">Rate four strengths honestly. Together with your answers, they draw your North Star.</p></div>
-      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
-        <div class="card" style="flex: 1 1 340px; min-width: 0; padding: 18px; display: flex; flex-direction: column; gap: 14px">
-          <span style="font-weight: 520">How strong are you at…</span>
-          ${E.STRENGTHS.map((s, i) => `<div style="display: flex; flex-direction: column; gap: 6px">
-            <div style="display: flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="${s.icon}" fill="none" stroke="${CSSV[s.d]}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-weight: 520; font-size: 14px" id="st-${i}">${s.name}</span><span style="font-size: 12px; color: var(--muted)">· ${D[s.d].name}</span></div>
-            <div style="display: flex; gap: 6px" role="group" aria-labelledby="st-${i}">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-act="str" data-i="${i}" data-v="${n}" data-f="str-${i}-${n}" aria-label="${s.name}: ${n} of 5" aria-pressed="${str[i] === n}" style="flex: 1; min-height: 44px; border-radius: 5px; border: 1.5px solid ${str[i] >= n ? '#6F93B8' : 'var(--line)'}; background: ${str[i] >= n ? '#6F93B8' : 'var(--paper)'}; color: ${str[i] >= n ? '#0E1C2B' : 'var(--ink)'}; cursor: pointer; font-weight: 520">${n}</button>`).join('')}</div></div>`).join('')}
-          <span style="font-size: 12px; color: var(--muted)">1 = not yet · 5 = people come to me for this</span>
+    const pts = (r) => `${cx},${cy - r[0]} ${cx + r[1]},${cy} ${cx},${cy + r[2]} ${cx - r[3]},${cy}`;
+    const anyS = str.some((v) => v > 0);
+    return `<svg class="nscompass" viewBox="0 0 560 500" role="img" aria-label="Your North Star. Your answers: Lead yourself ${sc[0]}, Lead your people ${sc[1]}, Lead your business ${sc[2]}, Lead the market ${sc[3]}, each out of 6. Your strengths: ${str.join(', ')}, each out of 5.">
+      <circle cx="${cx}" cy="${cy}" r="150" fill="none" stroke="#2A3A50"/><circle cx="${cx}" cy="${cy}" r="100" fill="none" stroke="#2A3A50"/><circle cx="${cx}" cy="${cy}" r="50" fill="none" stroke="#2A3A50"/>
+      <line x1="${cx}" y1="${cy - 160}" x2="${cx}" y2="${cy + 160}" stroke="#2A3A50"/><line x1="${cx - 160}" y1="${cy}" x2="${cx + 160}" y2="${cy}" stroke="#2A3A50"/>
+      ${anyS ? `<polygon points="${pts(rS)}" fill="none" stroke="#EEF2F7" stroke-width="2" stroke-dasharray="7 5"/>` : ''}
+      ${withAnswers ? `<polygon points="${pts(rA)}" fill="rgba(111,147,184,.35)" stroke="#6F93B8" stroke-width="3" stroke-linejoin="round"/>
+      <circle cx="${cx}" cy="${cy - rA[0]}" r="7" fill="#E0A282"/><circle cx="${cx + rA[1]}" cy="${cy}" r="7" fill="#9BC0A1"/><circle cx="${cx}" cy="${cy + rA[2]}" r="7" fill="#91B8D5"/><circle cx="${cx - rA[3]}" cy="${cy}" r="7" fill="#DDBD69"/>` : ''}
+      <circle cx="${cx}" cy="${cy}" r="7" fill="#0E1C2B" stroke="#6F93B8" stroke-width="2"/>
+      <text x="${cx}" y="62" fill="#E0A282" class="cl" text-anchor="middle">LEAD YOURSELF</text>
+      <text x="${cx + 166}" y="${cy - 8}" fill="#9BC0A1" class="cl">LEAD YOUR</text><text x="${cx + 166}" y="${cy + 16}" fill="#9BC0A1" class="cl">PEOPLE</text>
+      <text x="${cx}" y="${cy + 190}" fill="#91B8D5" class="cl" text-anchor="middle">LEAD YOUR BUSINESS</text>
+      <text x="${cx - 166}" y="${cy - 8}" fill="#DDBD69" class="cl" text-anchor="end">LEAD THE</text><text x="${cx - 166}" y="${cy + 16}" fill="#DDBD69" class="cl" text-anchor="end">MARKET</text>
+    </svg>`;
+  }
+  const compassKey = (withAnswers) => `<div class="nskey">
+      <span><i class="k-ans"></i><b>Your answers</b><small>from the eight questions</small></span>
+      <span><i class="k-str"></i><b>Your strengths</b><small>as you rated yourself</small></span>
+      ${withAnswers ? '<p>Where the two lines part, look twice: that gap is your first lesson.</p>' : '<p>After Part 1, your answers join this compass, so you can compare the two.</p>'}
+    </div>`;
+
+  /* Before you start: your four strengths, and the compass drawing them. */
+  function pStrengths(c) {
+    const str = c.rd.str;
+    return `<div style="display: flex; flex-direction: column; gap: 6px"><h2 class="sf" style="font-size: 26px; line-height: 1.15">Your four strengths, <span class="sfi" style="color: var(--goldink)">as you see them.</span></h2>
+        <p style="color: var(--muted)">1 = not yet · 5 = people come to me for this.</p></div>
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: stretch">
+        <div class="card" style="flex: 1 1 320px; min-width: 0; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+          ${E.STRENGTHS.map((st, i) => `<div class="nsstr" data-sti="${i}" style="display: flex; flex-direction: column; gap: 6px">
+            <span style="font-weight: 520; font-size: 14px" id="st-${i}">${st.name}</span>
+            <div style="display: flex; gap: 6px" role="group" aria-labelledby="st-${i}">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-act="str" data-i="${i}" data-v="${n}" data-f="str-${i}-${n}" aria-label="${st.name}: ${n} of 5" aria-pressed="${str[i] === n}" style="flex: 1; min-height: 44px; border-radius: 5px; border: 1.5px solid ${str[i] >= n ? '#6F93B8' : 'var(--line)'}; background: ${str[i] >= n ? '#6F93B8' : 'var(--paper)'}; color: ${str[i] >= n ? '#0E1C2B' : 'var(--ink)'}; cursor: pointer; font-weight: 520">${n}</button>`).join('')}</div></div>`).join('')}
         </div>
-        <div class="deep" style="flex: 1 1 420px; min-width: 0; border-radius: 9px; padding: 18px; display: flex; flex-wrap: wrap; gap: 18px; align-items: center">
-          <svg viewBox="0 0 400 400" style="flex: 1 1 260px; max-width: 340px; height: auto" role="img" aria-label="Your North Star: Lead yourself ${sc[0]}, Lead your people ${sc[1]}, Lead your business ${sc[2]}, Lead the market ${sc[3]}, each out of 6">
-            <g class="spin"><circle cx="200" cy="200" r="186" fill="none" stroke="#6F93B8" stroke-width="1" stroke-dasharray="2 8" opacity=".6"/></g>
-            <circle cx="200" cy="200" r="150" fill="none" stroke="#3A2F20"/><circle cx="200" cy="200" r="100" fill="none" stroke="#3A2F20"/><circle cx="200" cy="200" r="50" fill="none" stroke="#3A2F20"/>
-            <line x1="200" y1="44" x2="200" y2="356" stroke="#3A2F20"/><line x1="44" y1="200" x2="356" y2="200" stroke="#3A2F20"/>
-            <polygon points="${pts(rS)}" fill="none" stroke="#EEF2F7" stroke-width="1.5" stroke-dasharray="5 4" opacity=".75"/>
-            <polygon points="${pts(rA)}" fill="rgba(111,147,184,.35)" stroke="#6F93B8" stroke-width="2.5" stroke-linejoin="round"/>
-            <circle cx="200" cy="${200 - rA[0]}" r="6" fill="#E0A282"/><circle cx="${200 + rA[1]}" cy="200" r="6" fill="#9BC0A1"/><circle cx="200" cy="${200 + rA[2]}" r="6" fill="#91B8D5"/><circle cx="${200 - rA[3]}" cy="200" r="6" fill="#DDBD69"/>
-            <text x="200" y="30" fill="#E0A282" font-family="Inter" font-weight="800" font-size="11" text-anchor="middle" letter-spacing="1.2">LEAD YOURSELF · ${sc[0]}/6</text>
-            <text x="372" y="196" fill="#9BC0A1" font-family="Inter" font-weight="800" font-size="11" text-anchor="end" letter-spacing="1.2">LEAD YOUR PEOPLE</text>
-            <text x="372" y="214" fill="#9BC0A1" font-family="Inter" font-weight="600" font-size="12" text-anchor="end">${sc[1]}/6</text>
-            <text x="200" y="384" fill="#91B8D5" font-family="Inter" font-weight="800" font-size="11" text-anchor="middle" letter-spacing="1.2">LEAD YOUR BUSINESS · ${sc[2]}/6</text>
-            <text x="28" y="196" fill="#DDBD69" font-family="Inter" font-weight="800" font-size="11" letter-spacing="1.2">LEAD THE MARKET</text>
-            <text x="28" y="214" fill="#DDBD69" font-family="Inter" font-weight="600" font-size="12">${sc[3]}/6</text>
-            <circle cx="200" cy="200" r="7" fill="#0E1C2B" stroke="#6F93B8" stroke-width="2"/>
-          </svg>
-          <div style="flex: 1 1 200px; display: flex; flex-direction: column; gap: 10px">
-            <div style="display: flex; gap: 14px; font-size: 12px; color: #A9B6C6; flex-wrap: wrap"><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 10px; background: rgba(111,147,184,.5); border: 2px solid #6F93B8"></span>Your answers</span><span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 0; border-top: 2px dashed #EEF2F7"></span>Your strengths</span></div>
-            <div style="display: flex; flex-direction: column; gap: 2px"><span class="eb" style="color: #9BC0A1">Your strength</span><span class="sf" style="font-size: 20px">${any ? D[hi].name : 'Answer and rate to see it'}</span></div>
-            <div style="display: flex; flex-direction: column; gap: 2px"><span class="eb" style="color: #E0A282">Lowest right now</span><span class="sf" style="font-size: 20px">${any ? D[lo].name : '—'}</span></div>
-            <div style="display: flex; flex-direction: column; gap: 2px"><span class="eb" style="color: #A9C0D9">Start here</span><span style="font-size: 14px">${any ? D[lo].step : 'Your first step appears here.'}</span></div>
-          </div>
-        </div>
-      </div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px">
-        ${D.map((d, i) => `<div class="card" style="padding: 14px; display: flex; gap: 10px; align-items: flex-start; border-top: 3px solid ${CSSV[i]}">
-          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${d.icon}" fill="none" stroke="${CSSV[i]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 520; font-size: 13px">${d.name} · next step</span><span style="font-size: 13px; color: var(--muted)">${i === lo && any ? 'Start here. ' : ''}${d.step}</span></div></div>`).join('')}
+        <div class="deep nscompbox" style="flex: 1 1 380px">${pCompass(c, false)}${compassKey(false)}</div>
       </div>`;
   }
 
-  /* Step 03 part 1: three numbers a group, one group open at a time. */
+  /* The end of Part 1: your answers beside your strengths, and where to start. */
+  function pReading(c) {
+    const any = c.rd.any, hi = c.rd.hi, lo = c.rd.lo, done = partState(c).p1.done === partState(c).p1.total;
+    return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 700px">
+        <span class="eb">${done ? 'Part 1 done · your North Star' : 'Your North Star · fills in as you answer'}</span>
+        <h2 class="sf" style="font-size: clamp(28px, 3.6vw, 40px); line-height: 1.05">Your answers <span class="sfi" style="color: var(--goldink)">beside your strengths.</span></h2></div>
+      <div class="deep nscompbox nsreading">
+        ${pCompass(c, true)}
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          ${compassKey(true)}
+          <div class="nsread"><span class="eb" style="color: #9BC0A1">Strongest</span><b class="sf">${any ? D[hi].name : 'Answer to see it'}</b></div>
+          <div class="nsread"><span class="eb" style="color: #E0A282">Needs you first</span><b class="sf">${any ? D[lo].name : '—'}</b></div>
+          <div class="nsread"><span class="eb" style="color: #A9C0D9">Start here</span><span>${any ? D[lo].step : 'Your first move appears here.'}</span></div>
+        </div>
+      </div>`;
+  }
+
+  /* ── The path through the North Star (31 Oct) ───────────────────────────
+   * Before you start, then four parts. What is done, what is open, and the
+   * first thing still open, so the founder never has to remember. */
+  const PARTS = [['Yourself', 'clear'], ['Your people', 'people'], ['Your numbers', 'numbers'], ['Your next steps', 'plan']];
+  function partState(c) {
+    const qs = c.qs, G = E.groupsFor(S.mode);
+    const strDone = [0, 1, 2, 3].filter((i) => (Number(S.str[i]) || 0) > 0).length;
+    const ansDone = qs.filter((q) => Number.isInteger(S.ans[q.id])).length;
+    const p1 = { done: (S.goal ? 1 : 0) + strDone + ansDone + (S.want ? 1 : 0), total: 1 + 4 + qs.length + 1 };
+    const p3 = { done: Math.min(S.group, G.length) + [0, 1, 2, 3].filter((i) => S.got[i]).length, total: G.length + 4 };
+    const p4 = { done: S.lab && (S.lab.p || S.lab.m || S.lab.f || S.lab.d) ? 1 : 0, total: 1 };
+    const all = p1.done + p3.done + p4.done, tot = p1.total + p3.total + p4.total;
+    const part = p1.done < p1.total ? 0 : p3.done < p3.total ? 2 : 3;
+    return { p1, p3, p4, pct: Math.round(all / tot * 100), part, open: [p1.done < p1.total, false, p3.done < p3.total, p4.done < p4.total] };
+  }
+  /* The first thing still open in a part, and where it is on the page. */
+  function firstOpenItem(c, upTo) {
+    const qs = c.qs;
+    if (!S.goal) return { el: '#s-journey .j-road', label: 'where you want to get' };
+    for (let i = 0; i < 4; i++) if (!((Number(S.str[i]) || 0) > 0)) return { el: `.nsstr[data-sti="${i}"]`, label: 'your four strengths' };
+    const qi0 = qs.findIndex((q) => !Number.isInteger(S.ans[q.id]));
+    if (qi0 >= 0) return { el: '#nsb-r', label: `question ${qi0 + 1}`, q: qi0 };
+    if (!S.want) return { el: '#nsb-r', label: 'what you want most', q: qs.length + 1 };
+    if (upTo <= 2) return null;
+    const G = E.groupsFor(S.mode);
+    if (S.group < G.length) return { el: `[data-f="grp-${Math.min(S.group, G.length - 1)}"]`, label: 'your numbers' };
+    return null;
+  }
+  const pProg = (c) => {
+    const P = partState(c), done = [P.p1.done === P.p1.total, P.p1.done === P.p1.total, P.p3.done === P.p3.total, P.p4.done === P.p4.total];
+    const cur = done.indexOf(false);
+    return `<div class="nsprog-in">
+      <ol class="nsprog-parts" aria-label="Your path through the North Star">${PARTS.map(([n, go], i) => {
+        const st = done[i] ? 'done' : i === cur ? 'now' : 'wait';
+        return `<li class="${st}"><button type="button" data-go="${go}" aria-label="Part ${i + 1}, ${n}${st === 'done' ? ', done' : st === 'now' ? ', you are here' : ''}"><i aria-hidden="true">${st === 'done' ? '✓' : i + 1}</i><span>${n}</span></button></li>`;
+      }).join('<li class="arr" aria-hidden="true"></li>')}</ol>
+      <div class="nsprog-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${P.pct}" aria-label="Your North Star, ${P.pct}% done"><i style="width: ${P.pct}%"></i></div>
+      <span class="nsprog-pct">${P.pct}%</span></div>`;
+  };
+
+  /* Something above is still open: say so, then take the founder there, slow,
+   * faster, then easing to a stop, and let the open thing pulse three times. */
+  let guiding = false;
+  function guide(c, upTo = 4) {
+    const it = firstOpenItem(c, upTo);
+    if (!it || guiding) return false;
+    guiding = true;
+    toast(`One thing above is still open: ${it.label}. Taking you there.`);
+    if (it.q != null) { qi = it.q; put('questions', pQuestions(context())); placeCrown(); }
+    setTimeout(() => {
+      const el = document.querySelector(it.el);
+      if (!el) { guiding = false; return; }
+      const top = Math.max(0, el.getBoundingClientRect().top + scrollY - (($('.topwrap') || {}).offsetHeight || 120) - 24);
+      const done = () => {
+        el.classList.remove('nsflash'); void el.offsetWidth; el.classList.add('nsflash');
+        setTimeout(() => el.classList.remove('nsflash'), 2200);
+        const f = el.querySelector('button, [tabindex]') || el; try { f.focus({ preventScroll: true }); } catch { /* fine */ }
+        guiding = false;
+      };
+      if (reduced()) { window.scrollTo({ top, behavior: 'instant' }); done(); return; }
+      const from = scrollY, dist = top - from, dur = Math.min(2200, Math.max(900, Math.abs(dist) * 0.45)), t0 = performance.now();
+      const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+      const step = (now) => { const t = Math.min(1, (now - t0) / dur); window.scrollTo({ top: from + dist * ease(t), behavior: 'instant' }); if (t < 1) requestAnimationFrame(step); else done(); };
+      requestAnimationFrame(step);
+    }, 1500);
+    return true;
+  }
+  /* A part finished: say so, warmly, once. */
+  let lastDone = null;
+  function celebrate(c) {
+    const P = partState(c), now = [P.p1.done === P.p1.total, P.p3.done === P.p3.total, P.p4.done === P.p4.total];
+    if (lastDone) {
+      if (now[0] && !lastDone[0]) toast(`Part 1 · Yourself done. ${P.pct}% of your North Star. Next: Part 3 · Your numbers.`);
+      else if (now[1] && !lastDone[1]) toast(`Part 3 · Your numbers done. ${P.pct}%. Next: Part 4 · Your next steps.`);
+      else if (now[2] && !lastDone[2]) toast(`Your North Star is complete. ${P.pct}%.`);
+    }
+    lastDone = now;
+  }
+  /* Later parts wait, visibly, until the one before is done. */
+  function lockParts(c) {
+    const P = partState(c), p1 = P.p1.done === P.p1.total, p3 = P.p3.done === P.p3.total;
+    const locked = { 2: !p1, 3: !p1, 4: !p1 || !p3 };
+    document.querySelectorAll('.nspart').forEach((el) => {
+      const n = +el.dataset.part, on = !!locked[n];
+      el.classList.toggle('nslocked', on);
+      let note = el.querySelector(':scope > .nslocknote');
+      if (on && !note) { note = document.createElement('p'); note.className = 'nslocknote'; el.prepend(note); }
+      if (note) note.textContent = on ? (n === 4 && p1 ? `Opens after Part 3 · Your numbers (${P.p3.done} of ${P.p3.total} done)` : `Opens after Part 1 · Yourself (${P.p1.done} of ${P.p1.total} done)`) : '';
+      if (!on && note) note.remove();
+    });
+    document.body.classList.toggle('ns-p1done', p1);
+  }
+
+  /* Part 3, your numbers: three numbers a group, one group open at a time. */
   function pNumbers(c) {
     const G = E.groupsFor(S.mode), has = S.mode === 'yes', gi = Math.min(S.group, G.length);
     const TINTG = { 0: 'var(--tself)', 1: 'var(--tpeople)', 2: 'var(--twork)', 3: 'var(--tmarket)' };
@@ -733,7 +821,7 @@
       return `<div style="background: var(--paper); border: 1.5px solid ${active ? '#6F93B8' : 'var(--line)'}; border-radius: 7px; overflow: hidden; transition: border-color .3s ease">
         <button type="button" data-act="grp" data-i="${i}" data-f="grp-${i}" aria-expanded="${active}" style="width: 100%; background: none; border: 0; padding: 16px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; text-align: left; color: var(--ink)">
           <span style="width: 38px; height: 38px; border-radius: 50%; background: ${i < gi ? '#6F93B8' : TINTG[g.d]}; display: inline-flex; align-items: center; justify-content: center; flex: none"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="${g.icon}" fill="none" stroke="${i < gi ? '#0E1C2B' : CSSV[g.d]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          <span style="display: flex; flex-direction: column; flex: 1; min-width: 0"><span style="font-weight: 520; font-size: 16px">0${i + 1} · ${g.title}</span><span style="font-size: 13px; color: var(--muted)">${esc(status)}</span></span>
+          <span style="display: flex; flex-direction: column; flex: 1; min-width: 0"><span style="font-weight: 520; font-size: 16px">${g.title}</span><span style="font-size: 13px; color: var(--muted)">${esc(status)}</span></span>
           <span style="font-size: 12px; font-weight: 520; color: var(--goldink)">${i < gi ? 'Done · edit' : active ? '' : 'Open'}</span></button>
         ${active ? `<div class="pop" style="padding: 0 18px 18px; display: flex; flex-direction: column; gap: 14px">
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">${fields}</div>
@@ -744,7 +832,7 @@
         </div>` : ''}</div>`;
     }).join('');
     return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 720px">
-        <span class="eb">Step 03 · Count what matters · Part 1 of 2</span>
+        <span class="eb">Part 3 · Your numbers</span>
         <h1 class="sf" style="font-size: clamp(30px, 4vw, 44px); line-height: 1.05">${has ? 'Four small groups.' : 'No sales yet? Good.'} <span class="sfi" style="color: var(--goldink)">${has ? 'An insight after each.' : 'Start with your offer, your runway and your market.'}</span></h1>
         <p style="color: var(--muted)">${has ? 'One month. Pick a range from the list, or type your own. Each group tells you something before you move on.' : 'We will not ask you for sales you do not have yet. Three small groups, and an insight after each.'}</p></div>
       <div style="display: flex; flex-direction: column; gap: 10px">${groups}</div>
@@ -786,11 +874,11 @@
       <button type="button" data-act="account" data-f="account-${eyebrow.length}" class="go" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; cursor: pointer">${cta} <span class="arr" aria-hidden="true">→</span></button>`;
   }
 
-  /* Step 03 part 2: one card per domain. "Got it" opens the next. */
+  /* Part 3, what they mean: one card per domain. "Got it" opens the next. */
   function pFeedback(c, i) {
     const s = c.sc[i], f = E.feedback(i, s, S.pains, S.want), locked = i > 0 && !S.got[i - 1];
     // Before either question is answered there is nothing to read back yet.
-    if (!s.answered) Object.assign(f, { big: `Answer the two ${D[i].name.toLowerCase()} questions in Step 01, and this card fills in.`, why: 'Nothing here is said about you before you have said it yourself.', feel: [] });
+    if (!s.answered) Object.assign(f, { big: `Answer the two ${D[i].name.toLowerCase()} questions in Part 1, and this card fills in.`, why: 'Nothing here is said about you before you have said it yourself.', feel: [] });
     const nums = S.mode === 'yes' ? E.numberLines(c.n, money)[i] : '';
     const bg = ['#F4E1D6', '#F3EAD3', '#E3ECE4'], ink = ['#8A4524', '#3E6A94', '#35593D'];
     const open = !!S.more[i];
@@ -798,7 +886,7 @@
       ${locked ? `<span style="font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 8px">${lockIcon('currentColor')}Tick “Got it” on the domain above to open this one.</span>` : ''}
       <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"><span style="width: 34px; height: 34px; border-radius: 50%; background: ${TINT[i]}; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="${D[i].icon}" fill="none" stroke="${CSSV[i]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h3 class="sf" style="font-size: 20px; font-weight: 440">${D[i].name}</h3>
         <span style="font-size: 11px; font-weight: 520; letter-spacing: .12em; padding: 4px 10px; border-radius: 12px; background: ${f.bandIndex === null ? 'var(--cream)' : bg[f.bandIndex]}; color: ${f.bandIndex === null ? 'var(--muted)' : ink[f.bandIndex]}">${f.band}</span>
-        <span style="display: inline-flex; gap: 3px" role="img" aria-label="${s.score} of 6">${[0, 1, 2, 3, 4, 5].map((k) => `<span style="width: 14px; height: 6px; border-radius: 3px; background: ${k < s.score ? CSSV[i] : 'var(--cream)'}"></span>`).join('')}</span>
+        <span class="nslevel" style="--c: ${CSSV[i]}"><b>${s.score}</b> of 6 · your level</span>
         <span style="flex: 1; height: 1px; background: var(--line); min-width: 40px"></span></div>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
         <div class="card lift" style="border-top: 4px solid ${CSSV[i]}; padding: 18px; display: flex; flex-direction: column; gap: 8px">
@@ -892,22 +980,22 @@
         </div>
       </div>
       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; border-top: 1px solid #3A2F20; padding-top: 16px">
-        <p style="flex: 1 1 360px; font-size: 14px; color: #B8C6D6; line-height: 1.7">Every column is one week, and every week works all four. The weight shifts toward ${f === null ? 'the domain that needs you most' : D[f].name}. The coverage never drops. You are at week 1. The Summit ($1,989): the whole incubator, with Alexandru every week.</p>
+        <p style="flex: 1 1 360px; font-size: 14px; color: #B8C6D6; line-height: 1.7">Every column is one week, and every week works all four. The weight shifts toward ${f === null ? 'the domain that needs you most' : D[f].name}. The coverage never drops. You are at week 1. The Summit ($1,989): the whole Blueprint, with Alexandru every week.</p>
         <a href="/ground-plan/#home" class="go no-print" style="display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 4px; background: #6F93B8; color: #0E1C2B; font-weight: 520; text-decoration: none">Start week 1 free · The Founder Launchpad <span class="arr" aria-hidden="true">→</span></a>
       </div>`;
   }
 
   const STOPS = [
-    { n: '1', short: 'Founder Launchpad', unlock: 'Free. Modules 01–03 open the moment you sign up.', name: 'The Founder Launchpad', tag: 'Step 1 · start here', line: 'Know yourself before you build.', modules: '01–03', sessions: '—', price: 'Free', cta: 'Start free', href: '/ground-plan/', x: 150, y: 360, lx: 136, ly: 364, anchor: 'end' },
-    { n: '2', short: 'The Boardroom', unlock: 'Book one session with Alexandru. It unlocks modules 04–05 and the full North Star.', name: 'The Boardroom', tag: 'Step 2 · you and Alexandru', line: 'Sit at the table with Alexandru.', modules: '04–05', sessions: '1 session', price: '[YOUR PRICE]', cta: 'Book the Boardroom · unlock 04–05', href: BOOKING, ext: true, x: 290, y: 300, lx: 306, ly: 304, anchor: 'start' },
-    { n: '3', short: 'Leadership LAB', unlock: 'Joining unlocks modules 06–09.', name: 'The Personal Leadership LAB', tag: 'Step 3', line: 'Lead yourself first.', modules: '06–09', sessions: '2 sessions', price: '$97', cta: 'Join the LAB', href: LAB_URL, ext: true, x: 175, y: 235, lx: 161, ly: 239, anchor: 'end' },
-    { n: '4', short: 'Business HUB', unlock: 'Joining unlocks modules 10–12.', name: 'The Business HUB', tag: 'Step 4', line: 'Build the business that carries it.', modules: '10–12', sessions: '3 in total (incl. 1 from the LAB)', price: '$397', cta: 'Join the HUB', href: HUB_URL, ext: true, x: 285, y: 160, lx: 301, ly: 164, anchor: 'start' },
-    { n: '5', short: 'The Summit', unlock: 'Every module, with Alexandru every week.', name: 'The Summit', tag: 'The top', line: 'The whole incubator, with Alexandru every week.', modules: 'All', sessions: 'Every week', price: '$1,989', cta: 'Talk about The Summit', href: '/northstar/summit', x: 230, y: 58, lx: 258, ly: 62, anchor: 'start' },
+    { n: '1', short: 'Founder Launchpad', unlock: 'Free. Modules 01–03 open the moment you sign up.', name: 'The Founder Launchpad', tag: 'Start here', line: 'Know yourself before you build.', modules: '01–03', sessions: '—', price: 'Free', cta: 'Start free', href: '/ground-plan/', x: 150, y: 360, lx: 136, ly: 364, anchor: 'end' },
+    { n: '2', short: 'The Boardroom', unlock: 'Book one session with Alexandru. It unlocks modules 04–05 and the full North Star.', name: 'The Boardroom', tag: 'You and Alexandru', line: 'Sit at the table with Alexandru.', modules: '04–05', sessions: '1 session', price: '[YOUR PRICE]', cta: 'Book the Boardroom · unlock 04–05', href: BOOKING, ext: true, x: 290, y: 300, lx: 306, ly: 304, anchor: 'start' },
+    { n: '3', short: 'Leadership LAB', unlock: 'Joining unlocks modules 06–09.', name: 'The Personal Leadership LAB', tag: 'Go deeper', line: 'Lead yourself first.', modules: '06–09', sessions: '2 sessions', price: '$97', cta: 'Join the LAB', href: LAB_URL, ext: true, x: 175, y: 235, lx: 161, ly: 239, anchor: 'end' },
+    { n: '4', short: 'Business HUB', unlock: 'Joining unlocks modules 10–12.', name: 'The Business HUB', tag: 'Build the business', line: 'Build the business that carries it.', modules: '10–12', sessions: '3 in total (incl. 1 from the LAB)', price: '$397', cta: 'Join the HUB', href: HUB_URL, ext: true, x: 285, y: 160, lx: 301, ly: 164, anchor: 'start' },
+    { n: '5', short: 'The Summit', unlock: 'Every module, with Alexandru every week.', name: 'The Summit', tag: 'The top', line: 'The whole Blueprint, with Alexandru every week.', modules: 'All', sessions: 'Every week', price: '$1,989', cta: 'Talk about The Summit', href: '/northstar/summit', x: 230, y: 58, lx: 258, ly: 62, anchor: 'start' },
   ];
   function pClimb() {
     const si = S.stop, sv = STOPS[si];
     return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 720px">
-        <span class="eb" style="color: #A9C0D9">Link to Lead · the incubator</span>
+        <span class="eb" style="color: #A9C0D9">Link to Lead · The Founder’s Blueprint</span>
         <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; color: #EEF2F7">Your climb. <span class="sfi" style="color: #A9C0D9">One step at a time.</span></h2>
         <p style="color: #B8C6D6; font-size: 15px; line-height: 1.7">Tap a stop on the trail to see what opens there.</p></div>
       <div style="display: flex; flex-wrap: wrap; gap: 26px; align-items: center">
@@ -941,7 +1029,7 @@
   /* ── The What-if lab v2 ──────────────────────────────────────────────────
    * Four levers on the left, each in one row with the answer it moves most on
    * the right. The answers are read-only sliders that glide to their new value.
-   * The lab runs only on the founder's own Step 03 numbers; until they are
+   * The lab runs only on the founder's own Part 3 numbers; until they are
    * there it shows itself locked and says which boxes to fill. */
   const PAIRS = [
     { k: 'p', name: 'Raise your price', icon: 'M12 2v20M17 6.5C17 4.6 14.8 3.5 12 3.5S7 4.6 7 6.5s2 2.8 5 3.5 5 1.7 5 3.8-2.2 3.2-5 3.2-5-1.2-5-3.2',
@@ -989,7 +1077,7 @@
     const lock = L.locked ? `<div class="wlock" role="status">
         <div class="wlock-msg">
           <strong>See your real situation, from left to right.</strong>
-          <span>Fill ${NUMW[Math.min(4, chips.length)]} ${chips.length === 1 ? 'box' : 'boxes'} ${missing.length ? 'in Step 03 · Count what matters' : 'below'}. A range is enough. Then come back and every slider moves on your own month.</span>
+          <span>Fill ${NUMW[Math.min(4, chips.length)]} ${chips.length === 1 ? 'box' : 'boxes'} ${missing.length ? 'in Part 3 · Your numbers' : 'below'}. A range is enough. Then come back and every slider moves on your own month.</span>
           <div class="wchips">${chips.map((c) => `<span class="wchip"><i aria-hidden="true"></i>${esc(c)}</span>`).join('')}</div>
         </div>
         ${missing.length ? '<button type="button" class="go" data-act="lab-take" data-f="lab-take" style="min-height: 48px; padding: 0 20px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; font-size: 15px; cursor: pointer">Take me there ↑</button>' : ''}
@@ -1055,7 +1143,7 @@
     const head = $('#lab-head');
     if (L.locked) {
       for (const x of PAIRS) {
-        set('lv-val-' + x.k, '—'); set('lv-note-' + x.k, 'Opens when Step 03 is filled.');
+        set('lv-val-' + x.k, '—'); set('lv-note-' + x.k, 'Opens when Part 3 is filled.');
         tween(x.out.k, null); set('out-note-' + x.out.k, 'Waiting for your numbers.');
         const f = document.getElementById('fill-' + x.out.k), th = document.getElementById('thumb-' + x.out.k), td = document.getElementById('today-' + x.out.k);
         if (f) { f.style.width = '0%'; f.style.background = '#8A7A5E'; }
@@ -1089,12 +1177,12 @@
 
     const dc = s.cash === null ? null : s.cash - t.cash;
     set('out-note-cash', s.cash === null ? 'Set a helper rate in Fine-tune to see what the help costs.' : Math.abs(dc) < 1 ? 'Same money as today.' : `${signed(dc)} a month compared with today.`);
-    set('out-note-clients', s.clients === null ? 'Add your new paying customers in Step 03 to see this.'
+    set('out-note-clients', s.clients === null ? 'Add your new paying customers in Part 3 to see this.'
       : s.clients < s.clientsWanted - 0.05 ? `You serve ${ab(s.clients)}${whole(s.clients)}. ${whole(s.clientsWanted)} want you, so you can choose the best fit.`
       : s.clients > t.clients + 0.05 ? `+${whole(s.clients - t.clients)} a month compared with today.` : 'Same as today.');
     const back = t.mine - s.mine;
     set('out-note-time', b.limit ? (s.mine > b.limit ? `${whole(s.mine - b.limit)} hours beyond the ${whole(b.limit)} you chose.` : `Within the ${whole(b.limit)} hours you chose.${back > 0.5 ? ` ${whole(back)} hours a month back.` : ''}`)
-      : `${back > 0.5 ? whole(back) + ' hours a month back.' : back < -0.5 ? whole(-back) + ' more hours a month.' : 'Same hours as today.'} Add the hours you want to work in Step 03 to see your limit.`);
+      : `${back > 0.5 ? whole(back) + ' hours a month back.' : back < -0.5 ? whole(-back) + ' more hours a month.' : 'Same hours as today.'} Add the hours you want to work in Part 3 to see your limit.`);
     set('out-note-people', s.people === null ? (b.hire === null ? 'Set the monthly cost of one more person in Fine-tune to see this.' : 'Set a helper rate in Fine-tune first.')
       : s.people >= 0.1 ? `About ${(Math.round(s.people * 10) / 10).toFixed(1)} people at ${money(b.hire)} a month each.` : 'No room to pay for help yet.');
 
@@ -1150,7 +1238,7 @@
   function labFoot() {
     const b = E.labBase(S);
     const parts = [];
-    if (b.ready) parts.push(b.plan ? 'Built from your offer in Step 03 and the customers a month you plan for.' : 'Built from your month in Step 03.');
+    if (b.ready) parts.push(b.plan ? 'Built from your offer in Part 3 and the customers a month you plan for.' : 'Built from your month in Part 3.');
     if (b.ready && b.est) parts.push('Some of it comes from ranges, so read every figure as “about”.');
     if (b.ready && b.acqMissing) parts.push('Spending to win customers was not entered, so it counts as nothing here.');
     parts.push(labMode() === 'time' ? '“Give me back time” serves only the work needed to keep today’s money.' : '“Give me more money” serves everyone who wants to buy.');
@@ -1158,7 +1246,7 @@
     return parts.join(' ');
   }
 
-  /** "Take me there": up to Step 03, the right group open, the missing boxes
+  /** "Take me there": up to Part 3, the right group open, the missing boxes
    *  glowing for about four seconds. */
   function takeToNumbers() {
     const L = labCalc();
@@ -1298,7 +1386,9 @@
     put('modes', pModes());
     put('dombars', pDombars(c));
     put('questions', pQuestions(c));
+    put('s-strengths', pStrengths(c));
     put('s-reading', pReading(c));
+    put('nsprog', pProg(c));
     put('s-numbers', pNumbers(c));
     for (let i = 0; i < 4; i++) put('fb-' + i, pFeedback(c, i));
     put('s-save', pSave(c));
@@ -1307,7 +1397,7 @@
     put('lab-in', pLabIn());
     updateLab();
     put('lab-deep', pLabDeep());
-    $('#labtag').textContent = S.mode === 'yes' ? 'Step 04 · The what-if lab · your real month' : 'Step 04 · The what-if lab · your first customers (plan)';
+    $('#labtag').textContent = S.mode === 'yes' ? 'Part 4 · Your next steps · the what-if lab' : 'Part 4 · Your next steps · the what-if lab';
     $('#labfoot').textContent = labFoot();
     put('mbar', pMbar(c));
     put('gate', pGate());
@@ -1315,7 +1405,7 @@
     put('ws', pWs());
     $('#how-btn').setAttribute('aria-expanded', String(UI.how));
     $('#ws-btn').setAttribute('aria-expanded', String(UI.ws));
-    mountCrown(); placeCrown();
+    mountCrown(); placeCrown(); lockParts(c); celebrate(c);
     if (keep && (!document.activeElement || document.activeElement === document.body || !document.activeElement.isConnected)) {
       const el = document.querySelector(`[data-f="${keep}"]`);
       if (el) el.focus({ preventScroll: true });
@@ -1389,6 +1479,17 @@
   }
 
   /* ── Events ──────────────────────────────────────────────────────────────── */
+  /* A locked part, or a jump to one: guide back to what is still open. */
+  document.addEventListener('click', (e) => {
+    const c = context(), P = partState(c);
+    const go = e.target.closest && e.target.closest('[data-go]');
+    const want = go ? { people: 2, numbers: 3, plan: 4 }[go.dataset.go] : 0;
+    const inLocked = e.target.closest && e.target.closest('.nslocked');
+    const need = want ? want : inLocked ? +inLocked.dataset.part : 0;
+    if (!need) return;
+    const p1 = P.p1.done === P.p1.total, p3 = P.p3.done === P.p3.total;
+    if ((need >= 2 && !p1) || (need === 4 && !p3)) { e.preventDefault(); e.stopPropagation(); guide(c, need === 4 && p1 ? 4 : 1); }
+  }, true);
   document.addEventListener('click', (e) => {
     const t = e.target.closest('[data-go],[data-act]');
     if (!t || t.tagName === 'INPUT') return;

@@ -124,7 +124,7 @@
     plan: [
       { key: 'offer', title: 'Your offer', icon: IC.offer, d: 2, fields: [['price', 'What you will charge one customer', MONEY], ['hpc', 'Hours to serve one customer', PER_CUSTOMER], ['cpc', 'What it costs you to serve one', MONEY]] },
       { key: 'road', title: 'Your runway', icon: IC.road, d: 0, fields: [['risk', 'Money you can put at risk', MONEY], ['wait', 'Months you can wait for income', MONTHS], ['week', 'Hours a week you can give', WEEK]] },
-      { key: 'market', title: 'Your market', icon: IC.cust, d: 1, fields: [['talked', 'People you have talked to about the problem', COUNT], ['pay', 'People who said they would pay', COUNT], ['where', 'Where they gather', WHERE]] },
+      { key: 'market', title: 'Your first buyers', icon: IC.cust, d: 1, fields: [['talked', 'People you have talked to about the problem', COUNT], ['pay', 'People who said they would pay', COUNT], ['where', 'Where they gather', WHERE]] },
     ],
   };
   const groupsFor = (mode) => (mode === 'yes' ? GROUPS.yes : GROUPS.plan);

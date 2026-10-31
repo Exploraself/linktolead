@@ -30,4 +30,10 @@ ok(nsc.includes('@media(prefers-reduced-motion:reduce)') && nsc.includes('@media
 const MQ = (await import('node:module')).createRequire(import.meta.url)('../public/northstar/model.js').Q;
 ok(MQ.length === 32 && MQ.every((q) => q.short && q.text && q.prompt && q.lo && q.hi && !/\bwrite one\b|copy the/i.test(q.prompt)), 'North Star: 32 plain questions, a short hint each (nothing to write), and feedback the moment they are answered');
 ok(ns.includes('noteFor(q, a)'), 'North Star: the feedback is the question’s own line');
+const nsi = read('public/northstar/index.html');
+ok(!/Step 0\d|>STEP |Part \d of \d/.test(nsi + ns), 'North Star: one word, one meaning: only Parts 1–4, no "Step 01", no "Part 1 of 2"');
+ok(nsi.includes('Before you start') && nsi.includes('id="s-strengths"') && nsi.indexOf('id="s-strengths"') < nsi.indexOf('id="questions"'), 'North Star: before you start (where you are, where you want to get, strengths) comes before the questions');
+ok(ns.includes('function guide(') && ns.includes("toast(`One thing above is still open") && nsc.includes('.nsflash{animation:nsflash .7s ease-in-out 3') && ns.includes('if (reduced()) { window.scrollTo({ top, behavior: \'instant\' })'), 'North Star: something open above: a message, an eased scroll, three pulses (a jump with reduced motion)');
+ok(ns.includes('lockParts(c)') && nsc.includes('.nslocked') && ns.includes('Opens after Part 1 · Yourself'), 'North Star: later parts wait until the one before is done');
+ok(ns.includes('const pProg') && nsi.includes('id="nsprog"') && ns.includes('aria-valuenow'), 'North Star: the path bar, always at the top, with a percentage');
 done();

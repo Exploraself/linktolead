@@ -151,6 +151,7 @@ function draw(root, me) {
       ${items(me).map(([href, label, d]) => `<a role="menuitem" href="${href}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>${esc(label)}</a>`).join('')}
       <div class="pm-sep" role="separator"></div>
       <div class="pm-look" role="group" aria-label="Light and dark"><span>Light</span>${[['device', 'Device'], ['light', 'Light'], ['dark', 'Dark']].map(([k, n]) => `<button type="button" data-theme-set="${k}" aria-pressed="${themePick() === k}">${n}</button>`).join('')}</div>
+      ${typeof document !== 'undefined' && document.querySelector('[data-act="ws"]') ? '<button type="button" role="menuitem" class="pm-i" data-pm="ws"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Make it yours</button>' : ''}
       <button type="button" role="menuitemcheckbox" class="pm-i" data-pm="letters" aria-checked="${letterState(me)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM3 7l9 6 9-6"/></svg>Letters from your mentor<span class="pm-sw"><span>${letterState(me) === 'true' ? 'On' : 'Off'}</span><i></i></span></button>
       <p class="pm-note" id="pm-lnote" role="status">${esc(lettersNote)}</p>
       <div class="pm-sep" role="separator"></div>
@@ -189,6 +190,7 @@ export async function mount(host, { fixed = false } = {}) {
       return;
     }
     if (t.hasAttribute('data-theme-set')) { e.stopPropagation(); if (window.ESTheme) window.ESTheme.set(t.getAttribute('data-theme-set')); return; }
+    if (t.dataset.pm === 'ws') { root.classList.remove('open'); const w = document.querySelector('[data-act="ws"]'); if (w) w.click(); return; }
     if (t.dataset.pm === 'delete') { root.classList.remove('open'); deleteDialog(cached()); return; }
     if (t.dataset.pm === 'out') { A.signOut(); try { localStorage.removeItem(ME_KEY); } catch { /* private mode */ } location.href = '/ground-plan/?out=1#signin'; return; }
     // A link to this same page: the page reads its #place on load.
