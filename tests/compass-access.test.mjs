@@ -13,7 +13,7 @@ ok(/variant: 'full', landing: 'compass', stay: true/.test(compass), 'the North S
 ok(!/createAccount\(fromSales \? 'sales-page' : 'compass', true\)/.test(compass), 'no quiet simple account from the North Star any more');
 ok(/if \(!signedIn\(\)\) \{ fullAccount\(\); return; \}/.test(compass), '"Email me my results" without an account: the full form first');
 ok(/if \(ctx\.stay\) location\.reload\(\)/.test(box) && /OPEN MY NORTH STAR →/.test(box), 'after the form: back on the North Star, signed in');
-ok(/stay \? '' : '<button type="button" data-close[^']*Not now/.test(box), 'no "Not now" on the North Star: the account is required');
+ok(/stay \? '' : '<button type="button" class="ab-no" data-close[^']*Not now/.test(box), 'no "Not now" on the North Star: the account is required');
 ok(/const r = await A\.pull\(\);[\s\S]{0,300}S\.profile/.test(compass), 'an account from any page: the North Star knows the founder');
 ok(read('public/northstar/index.html').includes('<div id="acct-gate" hidden></div>'), 'its own box, apart from the North Star sign-in box');
 
