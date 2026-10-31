@@ -201,7 +201,7 @@ export const NORTH_STAR_LANDINGS = ['compass', 'north1', 'north2', 'north3'];
 /** The Massive Growth Plan, attached to the North Star welcome (Alexandru,
  *  31 Oct 2026). Resend fetches it from the live Library, so the address is
  *  the public one, whatever site sent the letter. */
-export const GROWTH_PLAN_PDF = { filename: 'Massive-Growth-Plan.pdf', path: 'https://linktolead.exploraself.com/library/massive-growth-plan.pdf' };
+export const GROWTH_PLAN_PDF = { filename: 'North-Star-Massive-Growth-Plan.pdf', path: 'https://linktolead.exploraself.com/library/massive-growth-plan.pdf' };
 
 /** "northstar-welcome": sent once, when an account is made on a North Star page. */
 export function northStarWelcome(base, { first, to = '', tier, offer, ...o } = {}) {
@@ -210,7 +210,7 @@ export function northStarWelcome(base, { first, to = '', tier, offer, ...o } = {
     'You’re in. Your Leader’s North Star is open, and I’m really glad you’re here.',
     'Eight plain questions and your rough numbers. You’ll see where you stand in all four domains, and which one needs you first.',
     button(`${base}/northstar/`, 'Open my North Star →'),
-    'Your Massive Growth Plan is attached: 20 + 1 steps to accelerate your growth and win with grace. Print it and write by hand. It is waiting for you at the end of your North Star too, where you tick each step as you do it.',
+    'Your North Star Massive Growth Plan is attached: 20 + 1 steps to accelerate your growth and win with grace. Print it and write by hand. It is waiting for you at the end of your North Star too, where you tick each step as you do it.',
     'When you’re ready to work on it, The Founder Launchpad is waiting at your Base Camp, free.',
   ], offerFor('launchpad-welcome', to, tier, offer), close('launchpad-welcome', { ...o, to })), attachments: [GROWTH_PLAN_PDF] };
 }
