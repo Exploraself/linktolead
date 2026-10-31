@@ -19,6 +19,8 @@ import { report } from './feedback.js';
 import * as account from './account.js';
 import { videoBlock } from './video-talk.js';
 import * as M from './music.js';
+import { LEVELS4, CHAPTERS4, DOMS, UNITS, STEPS4, CLOSES, wkey, tapOf, slideOf, wordOf, shown, domainUnits, levelUnits,
+  firstStep, lines4, sentence, reading, fieldsOf } from './levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -124,12 +126,18 @@ function worksheetHTML(fw, st, lv, dk) {
     <p class="sdecide"><b>What this decides.</b> ${esc(fw.decides)}</p>
   </div>`;
 }
+/** Version 4 (31 Oct 2026): progress counts the tap, the slide and the
+ *  sentence in each domain, so a level is twelve units (UNITS). The earlier
+ *  seven-step answers stay saved, untouched. */
 function answered(st, lv, dk) {
-  return SEVEN.filter((_, i) => (state.answers[aKey(st, lv, dk, i)] || '').trim()).length;
+  return domainUnits(state.work, lv, DOMS.indexOf(dk));
 }
 function levelDone(st, lv) {
-  return DOMAINS.reduce((n, d) => n + answered(st, lv, d.k), 0);
+  return levelUnits(state.work, lv);
 }
+/** A level's name and promise, from Version 4. */
+const titleOf = (st, n) => { const x = LEVELS4[n - 1]; return x ? `${x.word} · ${x.title}` : weekTitle(st, n); };
+const promise4 = (st, n) => (LEVELS4[n - 1] ? LEVELS4[n - 1].promise : promiseOf(st, n));
 // (level access now comes from levelState and the tier — see the workspace below)
 
 // ── The Base Camp home base ───────────────────────────────────────────────
@@ -148,7 +156,7 @@ const firstName = () => (pulled && state.me && state.me.name ? state.me.name.spl
 
 /** The first level not yet finished and open to this founder. */
 function nextLevel(st) {
-  for (let n = 1; n <= 12; n++) if (levelDone(st, n) < 28) return reachable(st, n) ? n : Math.max(1, n - 1);
+  for (let n = 1; n <= 12; n++) if (levelDone(st, n) < UNITS) return reachable(st, n) ? n : Math.max(1, n - 1);
   return 12;
 }
 
@@ -299,23 +307,23 @@ function cabinetData(st, gp, first) {
   let next = null;
   if (P) for (const d of P.domains) { const x = d.steps.find((y) => !P.done[y.id]); if (x) { next = { title: x.title, domain: d.name }; break; } }
   let lv = 1;
-  while (lv < 12 && levelDone(st, lv) === 28) lv++;
+  while (lv < 12 && levelDone(st, lv) === UNITS) lv++;
   // The incubator band: FULL accounts only, once the account has been read.
   const full = pulled && signupType !== 'simple';
-  const band = full ? { level: lv, title: weekTitle(st, lv), done: levelDone(st, lv),
-    dots: levelDots(lv, (n) => levelDone(st, n), (n) => holds(state.tier || 'free', gateFor(n))) } : null;
+  const band = full ? { level: lv, title: titleOf(st, lv), done: levelDone(st, lv), total: UNITS,
+    dots: levelDots(lv, (n) => levelDone(st, n), (n) => holds(state.tier || 'free', gateFor(n)), UNITS) } : null;
   return {
     first, name: state.me && state.me.name, tier: state.tier || 'free',
     stageName: STAGES[st] && STAGES[st].n, aimName: null, startHere: gp && gp.weakest ? gp.weakest.name : null,
     bands, plans: P ? { count: P.count, total: P.total, next } : null,
-    prog: { level: lv, title: weekTitle(st, lv), done: levelDone(st, lv) },
+    prog: { level: lv, title: titleOf(st, lv), done: levelDone(st, lv), total: UNITS },
     askUnread: askUnread(), band,
   };
 }
 
 function homeView() {
   const st = state.stage || 'build';
-  const gp = compassRec && window.CompassEngine ? groundPlan(compassRec, window.CompassEngine, { STAGES, weekTitle, promise: promiseOf }) : null;
+  const gp = compassRec && window.CompassEngine ? groundPlan(compassRec, window.CompassEngine, { STAGES, weekTitle: titleOf, promise: promise4 }) : null;
   const first = firstName();
   return `<div class="gp">
     ${cabinetHTML(cabinetData(st, gp, first))}
@@ -354,11 +362,11 @@ function signinView() {
 // that module opens underneath. Nothing else moves.
 
 function levelState(st, n) {
-  if (levelDone(st, n) === 28) return 'done';
+  if (levelDone(st, n) === UNITS) return 'done';
   if (n === 1) return 'open';
   // A level opens when the one before it is finished. The gate is the work,
   // not the clock — and the tier gate sits on top of it, further down.
-  return levelDone(st, n - 1) === 28 ? 'open' : 'waiting';
+  return levelDone(st, n - 1) === UNITS ? 'open' : 'waiting';
 }
 function reachable(st, n) {
   return holds(state.tier, gateFor(n)) && levelState(st, n) !== 'waiting';
@@ -408,7 +416,7 @@ function railHTML(st) {
           return `<li><button type="button" class="rlev ${stt}${n === level && view === 'work' ? ' here' : ''}"
             data-level="${n}" aria-current="${n === level && view === 'work' ? 'true' : 'false'}">
             <span class="rnum">${String(n).padStart(2, '0')}</span>
-            <span class="rtxt"><b>${esc(weekTitle(st, n))}</b>${done ? `<em>${done} of 28</em>` : ''}</span>
+            <span class="rtxt"><b>${esc(titleOf(st, n))}</b>${done ? `<em>${done} of ${UNITS}</em>` : ''}</span>
             <span class="rmark ${stt}" aria-hidden="true">${marks[stt] || ''}</span>
             <span class="vh">${stt === 'done' ? 'finished' : stt === 'locked' ? 'not yet open' : stt === 'waiting' ? 'opens when the level before is finished' : 'open'}</span>
           </button></li>`;
@@ -425,27 +433,34 @@ function railHTML(st) {
   </nav>`;
 }
 
-// ── A level, as a notebook: the Crown ───────────────────────────────────────
-// The level and its seven steps on the left page, one question on the right.
-// Enter moves to the next question, Shift + Enter is a new line. Everything
+// ── A level, as a notebook: the Crown, Version 4 ───────────────────────────
+// The level, its promise and its four domains on the left page; one move on
+// the right: tap the line that sounds like you, slide to the honest number,
+// write one sentence, then read four lines back. Enter moves on. Everything
 // else (the levels, the library, the music, Focus, the light, Ask Alexandru,
-// a 1:1) waits in the Crown at the bottom of the screen, and steps back while
-// the founder writes.
+// a 1:1) waits in the Crown at the bottom of the screen.
 const pad = (n) => String(n).padStart(2, '0');
-/** The step on the right page: 0–6, or 7 for the end of the domain. null
- *  means "the first one not yet written", decided when the page is drawn. */
+/** The move on the right page: an index into STEPS4, or STEPS4.length for
+ *  the chapter reading. null: where the founder left off, decided on drawing. */
 let qi = null;
-function firstOpen(st, lv, dk) {
-  for (let i = 0; i < 7; i++) if (!(state.answers[aKey(st, lv, dk, i)] || '').trim()) return i;
-  return 7;
-}
-/** Can the founder write in this level now? Owned, open and published. */
+/** Can the founder work in this level now? Owned and open. */
 function writable(st) {
-  return holds(state.tier, gateFor(level)) && levelState(st, level) !== 'waiting' && !!levelFor(st, level);
+  return holds(state.tier, gateFor(level)) && levelState(st, level) !== 'waiting' && !!LEVELS4[level - 1];
+}
+const stepAt = (i) => STEPS4[i] || [-1, 'reading'];
+/** A move is done enough to go on: a tap needs a choice. */
+const ready = (i) => { const [d, k] = stepAt(i); return k !== 'tap' || tapOf(state.work, level, d) != null; };
+const lastStep = () => (CLOSES[level] != null ? STEPS4.length : STEPS4.length - 1);
+/** Keep one answer: on this device first, then the account, in batches. */
+function keep4(d, k, v) {
+  const key = wkey(level, d, k);
+  state.work[key] = String(v);
+  save();
+  account.touch('work', key, String(v));
 }
 
 function bookHTML(st) {
-  const title = weekTitle(st, level);
+  const x = LEVELS4[level - 1];
   const g = gateFor(level);
   let right = '';
   if (!holds(state.tier, g)) {
@@ -461,96 +476,134 @@ function bookHTML(st) {
     right = `<div class="wait">
         <p class="eyebrow">Not yet</p>
         <h3>Finish level ${pad(level - 1)} first</h3>
-        <p>${prev} of its 28 answers are written. This level opens when all twenty-eight are, because every question here assumes the ones before it have been answered honestly.</p>
+        <p>${prev} of its ${UNITS} moves are done. This level opens when all of them are, because every move here builds on the ones before it.</p>
         <button class="cta" type="button" data-level="${level - 1}">Back to level ${pad(level - 1)}</button>
       </div>`;
-  } else if (!levelFor(st, level)) {
-    right = `<div class="wait"><p class="eyebrow">In preparation</p>
-      <h3>This level is written and not yet published here</h3>
-      <p>Nothing is shown before it is finished.</p></div>`;
   }
-  const L = right ? null : levelFor(st, level);
-  if (L && qi === null) qi = firstOpen(st, level, dom);
-  return `<div class="book${L ? '' : ' shut'}">
-    <aside class="leaf leaf-l" id="leafl" aria-label="Level ${pad(level)} and its steps">${leftHTML(st, title, L)}</aside>
-    <section class="leaf leaf-r" aria-label="${L ? 'The question' : 'This level'}">${right || pageHTML(st, L)}</section>
+  const open = !right;
+  if (open && (qi === null || qi > lastStep())) qi = firstStep(state.work, level);
+  if (open) dom = DOMS[Math.max(0, stepAt(qi)[0])];
+  return `<div class="book${open ? '' : ' shut'}">
+    <aside class="leaf leaf-l" id="leafl" aria-label="Level ${pad(level)} and its four domains">${leftHTML(st, x, open)}</aside>
+    <section class="leaf leaf-r" aria-label="${open ? 'This move' : 'This level'}">${right || pageHTML(st, x)}</section>
   </div>`;
 }
 
-/** The left page: the level, the four domains, and this domain's seven steps
- *  with what has been written so far. Each step opens on the right page. */
-function leftHTML(st, title, L) {
+/** The left page: the level, its floor, the belief it changes, its promise,
+ *  and the four domains with how far each has come. */
+function leftHTML(st, x, open) {
   const done = levelDone(st, level);
+  const ch = CHAPTERS4.find((c) => c.lv.includes(level - 1));
+  const cur = stepAt(qi === null ? 0 : qi)[0];
   const head = `<button type="button" class="cw-sx" data-crown="steps" aria-label="Close the steps">×</button>
-    <p class="eyebrow">Level ${pad(level)} · ${esc(STAGES[st].n)} · leans on ${esc(emphasisName(st, level).toLowerCase())}</p>
-    <h2 class="cw-t">${esc(title)}</h2>
-    <div class="lvtrack"><i style="width:${done / 28 * 100}%"></i></div>
-    <p class="lvcount" id="lvcount">${done} of 28 answered</p>`;
+    <p class="eyebrow">Level ${pad(level)} · ${esc(ch ? ch.name : '')}</p>
+    <h2 class="cw-t">${esc(x.word)}. <em>${esc(x.title)}.</em></h2>
+    <p class="cw-floor">${esc(x.floor)}</p>
+    <div class="lvtrack"><i style="width:${done / UNITS * 100}%"></i></div>
+    <p class="lvcount" id="lvcount">${done} of ${UNITS} done</p>`;
   const all = `<button type="button" class="cw-all" data-go="rail">☰ All twelve levels</button>`;
-  if (!L) return `${head}${all}`;
-  const D = L[dom];
-  const tabs = DOMAINS.map((d) => `<button type="button" class="mtab" data-dom="${d.k}" data-k="${d.k}"
-      aria-pressed="${d.k === dom}"><b>${esc(LEAD[d.k])}</b><em>${answered(st, level, d.k)}/7</em></button>`).join('');
-  const steps = D.steps.map((q, i) => {
-    const v = (state.answers[aKey(st, level, dom, i)] || '').trim();
-    const now = i === qi;
-    return `<li><button type="button" class="cw-s${v ? ' done' : ''}${now ? ' now' : ''}" data-qi="${i}"${now ? ' aria-current="step"' : ''}>
-      <span class="cw-n">${pad(i + 1)}</span>
-      <span class="cw-st"><b>${SEVEN[i].n}</b><i>${now ? 'Writing now' : esc(v)}</i></span></button></li>`;
+  if (!open) return `${head}${all}`;
+  const doms = x.d.map((D, d) => {
+    const u = domainUnits(state.work, level, d), now = d === cur;
+    return `<li><button type="button" class="cw-s${u === 3 ? ' done' : ''}${now ? ' now' : ''}" data-qd="${d}"${now ? ' aria-current="step"' : ''}>
+      <span class="cw-n cw-letter" style="background:var(--${DOMS[d]})">${esc(D.l)}</span>
+      <span class="cw-st"><b>${esc(D.name)}</b><i>${esc(LEAD[DOMS[d]])} · ${u} of 3</i></span></button></li>`;
   }).join('');
   return `${head}
-    <div class="mtabs cw-doms" role="group" aria-label="The four domains">${tabs}</div>
-    <p class="cw-dk"><span class="dkey sm" style="background:var(--${dom})"></span>${esc(LEAD[dom])}${D.title === title ? '' : ` · ${esc(D.title)}`}</p>
-    <p class="cw-ds">${esc(D.sub)}</p>
-    <ol class="cw-steps">${steps}</ol>
+    <p class="cw-belief">From <b>“${esc(x.old)}”</b><br>to <b>“${esc(x.neu)}”</b></p>
+    <ol class="cw-steps cw-doms4">${doms}</ol>
+    <p class="cw-promise"><b>By Sunday.</b> ${esc(x.promise)}</p>
+    ${CLOSES[level] != null ? `<p class="cw-chapnote">This level closes ${esc(CHAPTERS4[CLOSES[level]].name)}. Your chapter reading comes after it.</p>` : ''}
     <p class="cw-more"><a href="#cw-video">▶ This level’s teaching</a>${all}</p>`;
 }
 
-/** The right page: one question, the ruled lines to write on, and a note in
- *  the margin on what this step asks for. Or, after the seventh, what comes
- *  next. */
-function pageHTML(st, L) {
-  const D = L[dom], name = LEAD[dom];
-  const seg = Array.from({ length: 7 }, (_, i) => `<i class="${(state.answers[aKey(st, level, dom, i)] || '').trim() ? 'done' : ''}${i === qi ? ' now' : ''}" data-i="${i}"></i>`).join('');
-  const top = `<button type="button" class="cw-phone" data-crown="steps" aria-label="Show the steps of this level">
-      <span><i aria-hidden="true"></i>Level ${pad(level)} · ${esc(name)} · ${qi < 7 ? `${qi + 1} of 7` : 'done'}</span><span aria-hidden="true">Steps ▾</span></button>
-    <div class="cw-seg" aria-hidden="true">${seg}</div>`;
-  if (qi >= 7) {
-    const gain = nextGain(st, level), full = answered(st, level, dom) === 7;
-    return `${top}<p class="cw-lab">${esc(name)} · after the seventh</p>
-      ${domFoot(st, full, gain)}
-      <footer class="cw-foot"><button type="button" class="cw-back" data-qmove="-1">← Back to Review</button></footer>`;
+/** The right page: one move. */
+function pageHTML(st, x) {
+  const [d, kind] = stepAt(qi), D = d >= 0 ? x.d[d] : null, w = state.work;
+  const total = lastStep() + 1;
+  const seg = Array.from({ length: total }, (_, i) => `<i class="${i < qi ? 'done' : ''}${i === qi ? ' now' : ''}" data-i="${i}"></i>`).join('');
+  const label = D ? `${esc(D.l)} · ${esc(D.name)} · ${esc(LEAD[DOMS[d]])}` : kind === 'credo' ? `Level ${pad(level)} · ${esc(x.word)} · your credo` : 'Your chapter reading';
+  const top = `<button type="button" class="cw-phone" data-crown="steps" aria-label="Show the four domains of this level">
+      <span><i aria-hidden="true"></i>Level ${pad(level)} · ${esc(x.word)} · ${qi + 1} of ${total}</span><span aria-hidden="true">Domains ▾</span></button>
+    <div class="cw-seg" aria-hidden="true">${seg}</div>
+    <p class="cw-lab"${D ? ` style="color:var(--${DOMS[d]})"` : ''}>${label} <span class="cw-kind">${{ tap: 'Tap', slide: 'Slide', formula: 'Write once', lines: 'Your four lines', credo: 'Your credo', reading: 'Chapter reading' }[kind]}</span></p>`;
+  let body = '';
+  if (kind === 'tap') {
+    const t = tapOf(w, level, d);
+    body = `<h3 class="cw-q" id="cwq">${D.t.q}</h3>
+      <div class="cw-opts" role="group" aria-labelledby="cwq">${D.t.o.map((o, k) => `<button type="button" class="cw-o" data-v4t="${k}" aria-pressed="${t === k}"><kbd aria-hidden="true">${k + 1}</kbd><span>${esc(o)}</span></button>`).join('')}</div>
+      <p class="cw-keys"><kbd>1–${D.t.o.length}</kbd> choose · <kbd>Enter ↵</kbd> next</p>`;
+  } else if (kind === 'slide') {
+    let v = slideOf(w, level, d);
+    if (v == null) { v = D.s.d; keep4(d, 's', v); }
+    const pc = (v - D.s.min) / (D.s.max - D.s.min) * 100;
+    body = `<h3 class="cw-q" id="cwq">${esc(D.s.q)}</h3>
+      <div class="cw-slide"><div class="cw-big"><span id="cwbig">${esc(shown(D.s, v))}</span><small id="cwword">${D.s.raw ? '' : esc(wordOf(D.s, v))}</small></div>
+      <input type="range" id="cwr" data-v4s="${d}" min="${D.s.min}" max="${D.s.max}" step="${D.s.step}" value="${v}" style="--p:${pc}%" aria-labelledby="cwq">
+      <div class="cw-ends"><span>${esc(D.s.e[0])}</span><span>${esc(D.s.e[1])}</span></div></div>
+      <p class="cw-keys"><kbd>← →</kbd> slide · <kbd>Enter ↵</kbd> next</p>`;
+  } else if (kind === 'formula') {
+    body = `<h3 class="cw-q" id="cwq">Write it once.</h3>
+      <p class="cw-formula">${D.f.map((p) => {
+        if (typeof p === 'string') return esc(p);
+        const v = w[wkey(level, d, p[0])] || '';
+        return `<input id="cwf-${d}-${p[0]}" data-v4f="${d}.${p[0]}" placeholder="${esc(p[1])}" value="${esc(v)}" size="${Math.max(8, (v || p[1]).length)}" aria-label="${esc(p[1])}" enterkeyhint="next" autocomplete="off">`;
+      }).join('')}</p>
+      <p class="cw-keys"><kbd>Enter ↵</kbd> next blank, then the next move</p>`;
+  } else if (kind === 'lines') {
+    body = `<h3 class="cw-q">${esc(D.name)}, <em>in four lines.</em></h3>
+      <div class="cw-fb">${lines4(w, level, d).map((l) => `<div class="cw-fl"><h4>${l[0]}<small>${l[1]}</small></h4><p>${l[2]}</p></div>`).join('')}</div>`;
+  } else if (kind === 'credo') {
+    const next = LEVELS4[level];
+    body = `<h3 class="cw-q">Four sentences. <em>Your North Star for this week.</em></h3>
+      <div class="cw-credo">${x.d.map((Dd, k) => `<p><span style="color:var(--${DOMS[k]})">${esc(Dd.l)}</span>${sentence(w, level, k)}</p>`).join('')}</div>
+      ${CLOSES[level] != null ? `<p class="cw-note">This closes ${esc(CHAPTERS4[CLOSES[level]].name)}. Your chapter reading is next.</p>`
+        : next ? `<div class="gain"><p class="eyebrow">${compass} What level ${pad(level + 1)} gives you</p><p class="gaint">${esc(next.word)} · ${esc(next.title)}</p><p class="gainp">${esc(next.promise)}</p>
+          ${levelDone(st, level) === UNITS ? `<button class="cta" type="button" data-level="${level + 1}">${holds(state.tier, gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button>` : `<p class="cw-note">It opens when all ${UNITS} moves here are done: ${UNITS - levelDone(st, level)} to go.</p>`}</div>` : ''}`;
+  } else {
+    body = readingHTML(CLOSES[level]);
   }
-  const i = qi, k = aKey(st, level, dom, i), v = state.answers[k] || '';
-  const fw = fwFor(st, level, dom);
-  return `${top}
-    <p class="cw-lab">${pad(i + 1)} · ${SEVEN[i].n}</p>
-    <div class="cw-body">
-      <div class="cw-col">
-        <h3 class="cw-q" id="cwq">${esc(D.steps[i])}</h3>
-        <div class="cw-write">
-          <textarea id="cwa" data-k="${k}" rows="4" enterkeyhint="${i === 6 ? 'done' : 'next'}" aria-labelledby="cwq" aria-describedby="cwn"
-            placeholder="Write here, then press Enter">${esc(v)}</textarea>
-        </div>
-        <p class="cw-keys"><kbd>Enter ↵</kbd> next question · <kbd>Shift + Enter</kbd> new line</p>
-      </div>
-      <p class="cw-note" id="cwn">${esc(SEVEN[i].why)}</p>
-    </div>
-    ${fw && fw.after === i + 1 ? worksheetHTML(fw, st, level, dom) : ''}
+  const last = qi >= lastStep();
+  const nextLabel = kind === 'lines' ? (d < 3 ? 'Next domain →' : 'See my credo') : kind === 'credo' && CLOSES[level] != null ? 'My chapter reading' : 'Next ↵';
+  return `${top}${body}
     <footer class="cw-foot">
-      <button type="button" class="cw-back" data-qmove="-1"${i === 0 ? ' disabled' : ''}>← Back</button>
-      <button type="button" class="cw-next" data-qmove="1">${i === 6 ? `Finish ${esc(name)}` : 'Next ↵'}</button>
+      <button type="button" class="cw-back" data-qmove="-1"${qi === 0 ? ' disabled' : ''}>← Back</button>
+      ${last ? '<span></span>' : `<button type="button" class="cw-next" data-qmove="1"${ready(qi) ? '' : ' disabled'}>${nextLabel}</button>`}
     </footer>`;
+}
+
+/** The chapter reading after levels 05, 09 and 12: the four domains across
+ *  the chapter, from the founder's own sliders, and the four movements. */
+function readingHTML(ci) {
+  const r = reading(state.work, ci), DN = DOMAINS.map((d) => LEAD[d.k]);
+  const pts = r.scores.map((sc, d) => { const a = -Math.PI / 2 + d * Math.PI / 2, rad = 20 + sc * 100; return [150 + Math.cos(a) * rad, 140 + Math.sin(a) * rad]; });
+  const rings = [40, 70, 100, 120].map((rr) => `<rect x="${150 - rr}" y="${140 - rr}" width="${2 * rr}" height="${2 * rr}" transform="rotate(45 150 140)" fill="none" stroke="var(--line)"/>`).join('');
+  const radar = `<svg class="cw-radar" viewBox="0 0 300 290" role="img" aria-label="Where your four domains stand across ${esc(r.chapter.name)}">${rings}
+    <polygon points="${pts.map((p) => p.join(',')).join(' ')}" fill="rgba(180,151,95,.22)" stroke="var(--gold)" stroke-width="2"/>
+    ${pts.map((p, d) => `<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="var(--${DOMS[d]})"/>`).join('')}
+    <text x="150" y="10" text-anchor="middle">YOURSELF</text><text x="292" y="144" text-anchor="end">PEOPLE</text><text x="150" y="285" text-anchor="middle">BUSINESS</text><text x="8" y="144">MARKET</text></svg>`;
+  const words = r.chapter.lv.map((i) => LEVELS4[i].word).join(', ');
+  return `<h3 class="cw-q">${esc(r.chapter.name)}, <em>read together.</em></h3>
+    <div class="cw-reading">${radar}<div class="cw-fb">
+      <div class="cw-fl"><h4>Where you were<small>Admit it.</small></h4><p>Across ${esc(words.replace(/, (?=[^,]*$)/, ' and '))}, your lowest corner was ${esc(DN[r.lo])}: ${Math.round(r.scores[r.lo] * 10)} out of 10, from your own answers.</p></div>
+      <div class="cw-fl"><h4>Where you struggle<small>Don’t fight it.</small></h4><p>${esc(DN[r.lo])} asks the most of you now. The next chapter leans there first.</p></div>
+      <div class="cw-fl"><h4>Where you shine<small>Don’t ignore it.</small></h4><p>${esc(DN[r.hi])} is your strongest, at ${Math.round(r.scores[r.hi] * 10)} out of 10. Lead with it while you build the rest.</p></div>
+      <div class="cw-fl"><h4>What you will do<small>Exactly.</small></h4><ol>${r.exact.map((e) => `<li>${e}</li>`).join('')}</ol></div>
+    </div></div>
+    <p class="cw-star"><small>Your North Star${r.next ? ` for ${esc(r.next.name)}` : ' for the next ninety days'}</small>${r.star}</p>
+    ${r.next && LEVELS4[r.last] ? `<div class="gain"><p class="gaint">${esc(r.next.n)} · ${esc(r.next.name)}</p><p class="gainp">${esc(r.next.about)}</p>
+      <button class="cta" type="button" data-level="${r.last + 1}">${holds(state.tier, gateFor(r.last + 1)) ? `Open level ${pad(r.last + 1)}` : 'See what opens it'}</button></div>` : ''}
+    <p class="cw-note">Read only from what you tapped, slid and wrote. Nothing is assumed about you, and nothing is compared with anybody else.</p>`;
 }
 
 /** Under the book: the level's teaching, this domain's film, and the stage. */
 function underHTML(st) {
   if (!writable(st)) return '';
-  const L = levelFor(st, level), D = L[dom], title = weekTitle(st, level);
+  const x = LEVELS4[level - 1];
   const lv = levelVideo(st, level), vid = videoFor(st, level, dom);
   return `<div class="cw-under" id="cw-video">
-    ${videoBlock({ key: `${st}.${level}`, title: lv.title || title, sub: lv.sub || promiseOf(st, level), src: lv.src, poster: lv.poster })}
-    ${vid ? `<div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${esc(vid)}" title="${esc(D.title)}"
+    ${videoBlock({ key: `${st}.${level}`, title: lv.title || `${x.word} · ${x.title}`, sub: lv.sub || x.promise, src: lv.src, poster: lv.poster })}
+    ${vid ? `<div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${esc(vid)}" title="${esc(x.title)}"
       loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : ''}
     ${stageStrip(st)}
   </div>`;
@@ -607,30 +660,19 @@ function workHTML(st) {
   ${crownHTML()}`;
 }
 
-/** Grow the answer with what is written, four ruled lines at least. */
-function grow(t) {
-  if (!t) return;
-  t.style.height = 'auto';
-  t.style.height = `${Math.max(t.scrollHeight, 4 * parseFloat(getComputedStyle(t).lineHeight || '40'))}px`;
-}
-/** Turn the page: draw the book again with the question at `qi`, and put the
- *  cursor at the end of what is already written. */
+/** Turn the page: draw the book again at move `qi`, and put the focus on
+ *  the first thing to answer. */
 function drawBook(focus = true) {
   const st = state.stage || 'build';
   const m = $('#mod');
   if (!m) return render();
   m.innerHTML = bookHTML(st);
   document.body.classList.toggle('cw-shut', !writable(st));
-  const t = $('#cwa');
-  grow(t);
   if (focus) {
-    const f = t || document.querySelector('.leaf-r .cw-lab');
-    if (f) {
-      if (!t) f.setAttribute('tabindex', '-1');
-      f.focus({ preventScroll: true });
-      if (t) { const n = t.value.length; t.setSelectionRange(n, n); }
-    }
     const r = document.querySelector('.leaf-r');
+    const f = document.querySelector('#cwr') || [...document.querySelectorAll('.cw-formula input')].find((i) => !i.value) || document.querySelector('.cw-formula input')
+      || document.querySelector('.cw-o[aria-pressed="true"]') || document.querySelector('.cw-o') || document.querySelector('.leaf-r .cw-lab');
+    if (f) { if (!/^(INPUT|BUTTON)$/.test(f.tagName)) f.setAttribute('tabindex', '-1'); f.focus({ preventScroll: true }); }
     if (r && r.getBoundingClientRect().top < 0) r.scrollIntoView({ block: 'start' });
   }
   M.setCandles(answered(st, level, dom));
@@ -638,7 +680,8 @@ function drawBook(focus = true) {
 function moveQ(d) {
   const st = state.stage || 'build';
   if (view !== 'work' || !writable(st) || qi === null) return;
-  const to = Math.max(0, Math.min(7, qi + d));
+  if (d > 0 && !ready(qi)) return;
+  const to = Math.max(0, Math.min(lastStep(), qi + d));
   if (to === qi) return;
   qi = to;
   drawBook();
@@ -663,65 +706,6 @@ function hush() {
   document.body.classList.add('cw-hushed');
   clearTimeout(hushT);
   hushT = setTimeout(() => document.body.classList.remove('cw-hushed'), 1600);
-}
-
-/** What comes after this domain: the next one, or — when all four are done —
- *  what the next level gives you, stated as the things that will exist. */
-function domFoot(st, full, gain) {
-  const i = DOMAINS.findIndex((d) => d.k === dom);
-  const next = DOMAINS[i + 1];
-  const whole = levelDone(st, level) === 28;
-
-  if (whole && gain) {
-    return `${reportHTML(st)}<div class="gain">
-      <p class="eyebrow">${compass} Level ${String(level).padStart(2, '0')} is closed</p>
-      <h4>What level ${String(gain.level).padStart(2, '0')} gives you</h4>
-      <p class="gaint">${esc(gain.title)}</p>
-      <p class="gainp">${esc(gain.promise)}</p>
-      <button class="cta" type="button" data-level="${gain.level}">
-        ${holds(state.tier, gain.gate) ? `Open level ${String(gain.level).padStart(2, '0')}` : 'See what opens it'}</button>
-    </div>`;
-  }
-  if (whole) {
-    return `${reportHTML(st)}<div class="gain"><p class="eyebrow">${compass} The twelfth is closed</p>
-      <h4>You have finished ${esc(STAGES[st].n)}</h4>
-      <p class="gainp">Twelve levels, four domains, three hundred and thirty-six answers in your own hand. Read level one again and see what you would now write differently.</p>
-      <button class="cta" type="button" data-level="1">Back to level 01</button></div>`;
-  }
-  if (next) {
-    return `<div class="donext">
-      <p>${full ? `All seven written. ${DOMAINS.find((d) => d.k === dom).n} is done.` : `${answered(st, level, dom)} of 7 written in ${DOMAINS.find((d) => d.k === dom).n}.`}</p>
-      <button class="ghost" type="button" data-dom="${next.k}">Next: ${next.n} →</button>
-      ${level > 1 && !holds(state.tier, 'session') ? `<p class="hardline">Hard going? <a href="${esc(BOOKING)}" target="_blank" rel="noopener">A 1:1 session with ${esc(mentor.first)}</a> is always there.</p>` : ''}</div>`;
-  }
-  return `<div class="donext"><p>${28 - levelDone(st, level)} answers left in this level. It closes when all twenty-eight are written.</p>
-    <button class="ghost" type="button" data-dom="self">Back to Lead yourself</button></div>`;
-}
-
-/** What the Blueprint says back. Levels one to three only — after that the
- *  founder has the figures and does not need a reading of them. */
-function reportHTML(st) {
-  const r = report(state, st, level);
-  if (!r) return '';
-  return `<section class="rep">
-    <header class="reph">
-      <p class="eyebrow">${compass} Your reading after level ${String(r.level).padStart(2, '0')}</p>
-      <h4>${r.clear ? 'Nothing here is firing' : 'Where you are, from what you wrote'}</h4>
-      <p class="repstand">${esc(r.stand)}</p>
-      ${r.thin ? `<p class="repthin">${esc(r.thin)}</p>` : ''}
-    </header>
-    ${r.findings.length ? `<ol class="reps">${r.findings.map((f, i) => `<li class="rfind sev${f.sev}">
-      <span class="rfn">${i + 1}</span>
-      <div>
-        ${f.domain ? `<p class="rfd"><span class="dkey sm" style="background:var(--${f.domain.k})"></span>${esc(f.domain.n)}</p>` : '<p class="rfd">Across all four</p>'}
-        <h5>${esc(f.title)}</h5>
-        <p class="rfb">${esc(f.body)}</p>
-        <p class="rfs"><b>Your next step.</b> ${esc(f.step)}</p>
-        ${f.where ? `<button class="rfw" type="button" data-level="${f.where.lv}">
-          Where this is worked: level ${String(f.where.lv).padStart(2, '0')} · ${esc(f.where.title)} →</button>` : ''}
-      </div></li>`).join('')}</ol>` : ''}
-    <p class="repfine">Everything above is read from your own entries. Nothing is assumed about you, and no part of it is compared with anybody else.</p>
-  </section>`;
 }
 
 /** Where the founder is: the three stages as rising steps, theirs lit. */
@@ -898,7 +882,7 @@ function render() {
   else if (DASHBOARD.includes(view)) dashboardShown();
   // The Lamp's candles count the domain on screen, in the programme only.
   M.setCandles(view === 'work' ? answered(st, level, dom) : -1);
-  if (view === 'work') { grow($('#cwa')); document.body.classList.toggle('cw-shut', !writable(st)); }
+  if (view === 'work') document.body.classList.toggle('cw-shut', !writable(st));
 }
 const DASHBOARD = ['home', 'work', 'library', 'ask'];
 
@@ -932,7 +916,16 @@ document.addEventListener('click', (e) => {
     return;
   }
   if (b.dataset.qmove) { moveQ(+b.dataset.qmove); return; }
-  if (b.dataset.qi) { qi = +b.dataset.qi; document.body.classList.remove('stepsopen'); drawBook(); return; }
+  if (b.dataset.qd) { qi = STEPS4.findIndex((x) => x[0] === +b.dataset.qd); document.body.classList.remove('stepsopen'); drawBook(); return; }
+  if (b.dataset.v4t) {
+    const d = stepAt(qi)[0], st = state.stage || 'build', had = answered(st, level, dom);
+    keep4(d, 't', +b.dataset.v4t);
+    drawBook(false);
+    const x = document.querySelector(`.cw-o[data-v4t="${b.dataset.v4t}"]`); if (x) x.focus({ preventScroll: true });
+    if (answered(st, level, dom) > had) M.answered(answered(st, level, dom));
+    refreshRail();
+    return;
+  }
   if (b.dataset.go === 'rail') {
     document.body.classList.remove('crownopen', 'stepsopen');
     const on = document.body.classList.toggle('railopen');
@@ -992,8 +985,31 @@ document.addEventListener('keydown', (e) => {
     return;
   }
   const t = e.target;
-  if (e.key === 'Enter' && !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey && !e.isComposing
-    && t && t.matches && t.matches('textarea[data-k]')) { e.preventDefault(); moveQ(1); }
+  if (e.altKey || e.ctrlKey || e.metaKey || e.isComposing || !t || !t.closest) return;
+  const inPage = t.closest('.leaf-r') || t === document.body;
+  if (!inPage || t.closest('.cw-foot, .gain, .gate, .wait')) return;
+  // Number keys choose on a tap.
+  if (/^[1-9]$/.test(e.key) && stepAt(qi)[1] === 'tap' && t.tagName !== 'INPUT') {
+    const b = document.querySelectorAll('.leaf-r .cw-o')[Number(e.key) - 1];
+    if (b) { e.preventDefault(); b.click(); }
+    return;
+  }
+  if (e.key !== 'Enter' || e.shiftKey) return;
+  // In the sentence, Enter goes to the next blank, then to the next move.
+  if (t.dataset && t.dataset.v4f) {
+    e.preventDefault();
+    const ins = [...document.querySelectorAll('.cw-formula input')], i = ins.indexOf(t);
+    const nextIn = ins.slice(i + 1).find((x) => !x.value.trim()) || ins[i + 1];
+    if (nextIn) { nextIn.focus(); return; }
+    moveQ(1); return;
+  }
+  // On an answer, Enter chooses it (if it isn't yet) and moves on.
+  if (t.classList && t.classList.contains('cw-o')) {
+    e.preventDefault();
+    if (t.getAttribute('aria-pressed') !== 'true') t.click();
+    moveQ(1); return;
+  }
+  e.preventDefault(); moveQ(1);
 });
 
 /* The Crown turns: a swipe left is the next question, a swipe right the one
@@ -1098,30 +1114,33 @@ document.addEventListener('input', (e) => {
     if (host) host.innerHTML = windowHTML(fw, st, level, dom);
     return;
   }
-  const a = e.target.closest('textarea[data-k]');
-  if (!a) return;
-  const st = state.stage || 'build';
-  const was = levelDone(st, level);
-  const hadIt = !!(state.answers[a.dataset.k] || '').trim();
-  state.answers[a.dataset.k] = a.value;
-  save();
-  account.touch('answers', a.dataset.k, a.value);
-  const has = !!a.value.trim();
-  document.querySelectorAll(`.cw-s[data-qi="${qi}"], .cw-seg i[data-i="${qi}"]`).forEach((x) => x.classList.toggle('done', has));
-  grow(a); hush();
-  // The Lamp: a newly written answer plays a chord and lights a candle.
-  if (!hadIt && a.value.trim()) M.answered(answered(st, level, dom)); else if (hadIt && !a.value.trim()) M.setCandles(answered(st, level, dom));
-
+  // Version 4: the slider and the sentence save as they move.
+  const v = e.target.closest('input[data-v4s], input[data-v4f]');
+  if (!v || view !== 'work') return;
+  const st = state.stage || 'build', had = answered(st, level, dom);
+  if (v.dataset.v4s != null) {
+    const d = +v.dataset.v4s, D = LEVELS4[level - 1].d[d], n = +v.value;
+    keep4(d, 's', n);
+    v.style.setProperty('--p', `${(n - D.s.min) / (D.s.max - D.s.min) * 100}%`);
+    const big = $('#cwbig'), wd = $('#cwword');
+    if (big) big.textContent = shown(D.s, n);
+    if (wd) wd.textContent = D.s.raw ? '' : wordOf(D.s, n);
+  } else {
+    const [d, k] = v.dataset.v4f.split('.');
+    keep4(+d, k, v.value);
+    v.size = Math.max(8, (v.value || v.placeholder).length);
+    hush();
+  }
+  // The Lamp: a move newly done plays a chord and lights a candle.
+  const now = answered(st, level, dom);
+  if (now > had) M.answered(now); else if (now < had) M.setCandles(now);
   const n = levelDone(st, level);
   const c = $('#lvcount'), f = document.querySelector('.lvtrack i');
-  if (c) c.textContent = `${n} of 28 answered`;
-  if (f) f.style.width = (n / 28 * 100) + '%';
-  const tab = document.querySelector(`.mtab[data-k="${dom}"] em`);
-  if (tab) tab.textContent = `${answered(st, level, dom)}/7`;
-
-  // What the level says when it closes (the reading, what the next level
-  // gives) is on the page after the seventh question, drawn when the founder
-  // turns to it, so typing never costs a re-render.
+  if (c) c.textContent = `${n} of ${UNITS} done`;
+  if (f) f.style.width = `${n / UNITS * 100}%`;
+  const row = document.querySelector(`.cw-s[data-qd="${DOMS.indexOf(dom)}"]`);
+  if (row) { row.classList.toggle('done', now === 3); const i = row.querySelector('i'); if (i) i.textContent = `${LEAD[dom]} · ${now} of 3`; }
+  const nx = document.querySelector('.cw-next'); if (nx) nx.disabled = !ready(qi);
   refreshRail();
 });
 

@@ -7,12 +7,12 @@ const read = (f) => fs.readFileSync(f, 'utf8');
 const app = read('public/app.js'), css = read('public/crown.css'), html = read('public/ground-plan/index.html');
 
 ok(html.includes('/crown.css') && read('public/assets/fonts.css').includes('la-belle-aurore.woff2') && fs.existsSync('public/assets/fonts/la-belle-aurore.woff2'), 'styles linked; the handwriting font is served from this site');
-ok(/e\.key === 'Enter' && !e\.shiftKey/.test(app) && app.includes("t.matches('textarea[data-k]')") && app.includes('moveQ(1)'), 'Enter moves to the next question; Shift + Enter stays a new line');
-ok(app.includes('enterkeyhint="${i === 6 ? \'done\' : \'next\'}"'), 'a phone keyboard shows Next');
+ok(app.includes("if (e.key !== 'Enter' || e.shiftKey) return;") && app.includes('moveQ(1)') && app.includes("t.dataset && t.dataset.v4f"), 'Enter moves on: the next blank of the sentence, then the next move');
+ok(app.includes('enterkeyhint="next"'), 'a phone keyboard shows Next');
 for (const k of ['Levels', 'Library', 'Music', 'Focus', 'Light', 'Ask Alexandru', 'Book 1:1']) ok(app.includes(`'${k}'`), `the Crown keeps ${k}`);
 ok(app.includes('M.openPlayer()') && app.includes("M.openPlayer('mp-light')") && app.includes("M.mode('focus')") && read('public/music.js').includes('export function openPlayer('), 'Music, Light and Focus reach the full player');
-ok(app.includes('${railHTML(st)}') && app.includes('underHTML(st)') && app.includes('videoBlock(') && app.includes('stageStrip(st)') && app.includes('worksheetHTML(fw, st, level, dom)') && app.includes('domFoot(st, full, gain)'), 'nothing is lost: the levels, the video, the stage, the worksheet, the reading');
-ok(/state\.answers\[a\.dataset\.k\] = a\.value;\s*save\(\);\s*account\.touch\('answers', a\.dataset\.k, a\.value\);/.test(app), 'answers save to the device first, then to the account, as before');
+ok(app.includes('${railHTML(st)}') && app.includes('underHTML(st)') && app.includes('videoBlock(') && app.includes('stageStrip(st)') && app.includes('readingHTML(CLOSES[level])'), 'nothing is lost: the levels, the video, the stage, and a chapter reading after 05, 09 and 12');
+ok(/state\.work\[key\] = String\(v\);\s*save\(\);\s*account\.touch\('work', key, String\(v\)\);/.test(app), 'Version 4 answers save to the device first, then to the account (with the worksheets)');
 ok(css.includes('@media(prefers-reduced-motion:reduce)') && css.includes('@media(max-width:760px)') && css.includes(':root[data-theme="dark"]'), 'reduced motion, the phone and the dark theme');
 ok(app.includes("e.key === 'Escape'") && app.includes('aria-expanded'), 'Escape closes; the Crown says whether it is open');
 // The North Star: the eight questions as a notebook, keys 1–4 and Enter.

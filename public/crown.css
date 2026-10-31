@@ -193,6 +193,71 @@ body.crownopen .jw{opacity:1;visibility:visible;pointer-events:auto;transform:tr
 @media(min-width:1280px){.book{min-height:min(700px,calc(100vh / 1.1 - 240px))}}
 @media(max-width:360px){.crown-arc{--r:136px}.jw{width:66px;left:-33px}}
 
+
+/* ── Version 4 (31 Oct 2026): tap, slide, write once, four lines back ───── */
+.cw-floor{font-size:13px;color:var(--soft)}
+.cw-belief{font:italic 400 15px/1.45 var(--display);color:var(--soft);border-left:2px solid var(--gold);padding-left:12px;margin-top:4px}
+.cw-belief b{font-style:normal;font-weight:500;color:var(--qink)}
+.cw-doms4{margin-top:6px}
+.cw-letter{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font:500 15px var(--display)}
+.cw-promise{font-size:13.5px;line-height:1.55;color:var(--soft);padding-top:10px;border-top:1px solid var(--edge)}
+.cw-promise b{color:var(--goldink);font-weight:600}
+.cw-chapnote{font:400 19px/1.3 'La Belle Aurore','Segoe Script',cursive;color:var(--hand);transform:rotate(-1.5deg)}
+.cw-kind{display:inline-block;margin-left:8px;padding:1px 9px;border-radius:999px;border:1px solid var(--edge);color:var(--soft);font-size:10.5px;letter-spacing:.06em;text-transform:none;vertical-align:1px}
+.cw-q em{color:var(--goldink)}
+.cw-opts{display:flex;flex-direction:column;max-width:640px;margin-top:6px}
+.cw-o{display:flex;gap:14px;align-items:center;min-height:52px;padding:6px 12px;margin:0 -12px;border-bottom:1px solid var(--rule);border-radius:10px;text-align:left;font:400 16px/1.35 var(--body);color:var(--qink);transition:background .2s}
+.cw-o:hover{background:rgba(180,151,95,.08)}
+.cw-o kbd{flex:none;width:24px;height:24px;border-radius:6px;border:1px solid var(--edge);display:inline-flex;align-items:center;justify-content:center;font:500 12px var(--body);color:var(--soft)}
+.cw-o[aria-pressed="true"]{background:rgba(180,151,95,.16);color:var(--goldink);font-weight:600}
+.cw-o[aria-pressed="true"] kbd{background:var(--gold);border-color:var(--gold);color:#2B1B12}
+.cw-slide{max-width:640px;margin-top:18px}
+.cw-big{display:flex;align-items:baseline;gap:12px;font:300 64px/1 var(--display);color:var(--goldink);font-variant-numeric:tabular-nums}
+.cw-big small{font:italic 400 20px var(--display);color:var(--soft)}
+.cw-slide input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:44px;background:transparent;margin-top:8px}
+.cw-slide input[type=range]:focus{outline:none}
+.cw-slide input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--gold) var(--p,50%),var(--rule) var(--p,50%))}
+.cw-slide input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--gold) var(--p,50%),var(--rule) var(--p,50%))}
+.cw-slide input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-11px;border-radius:50%;background:var(--crownbg);border:2px solid var(--gold);box-shadow:0 4px 12px rgba(43,27,18,.25)}
+.cw-slide input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--crownbg);border:2px solid var(--gold)}
+.cw-slide input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 6px rgba(180,151,95,.35)}
+.cw-slide input[type=range]:focus-visible::-moz-range-thumb{box-shadow:0 0 0 6px rgba(180,151,95,.35)}
+.cw-ends{display:flex;justify-content:space-between;font:italic 400 14px var(--display);color:var(--soft)}
+.cw-formula{max-width:720px;margin-top:8px;font:400 24px/2.15 var(--display);color:var(--qink)}
+.cw-formula input{font:inherit;color:var(--goldink);border:0;border-bottom:1.5px solid var(--gold);background:transparent;padding:0 4px;min-width:110px;max-width:100%;outline:none}
+.cw-formula input:focus{border-bottom-color:var(--qink);background:rgba(180,151,95,.07)}
+.cw-formula input::placeholder{color:var(--soft);opacity:.55;font-style:italic;font-size:.78em}
+.cw-fb{display:flex;flex-direction:column;max-width:720px}
+.cw-fl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;padding:13px 0;border-bottom:1px solid var(--rule);animation:cwin .6s cubic-bezier(.2,.8,.2,1) both}
+.cw-fl:nth-child(2){animation-delay:.3s}.cw-fl:nth-child(3){animation-delay:.6s}.cw-fl:nth-child(4){animation-delay:.9s}
+@keyframes cwin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.cw-fl h4{font:400 18px/1.25 var(--display);color:var(--qink)}
+.cw-fl h4 small{display:block;font:italic 400 14px var(--display);color:var(--goldink);margin-top:2px}
+.cw-fl p,.cw-fl ol{font:400 17.5px/1.5 var(--display);color:var(--qink);margin:0}
+.cw-fl ol{padding-left:18px}
+.leaf-r mark{background:none;color:var(--goldink);font-style:italic}
+.leaf-r mark.blank{color:var(--soft);opacity:.6}
+.cw-credo{max-width:720px;padding:22px 24px;border:1px solid var(--edge);border-radius:8px;background:var(--leaf)}
+.cw-credo p{margin:0 0 10px;font:400 19px/1.5 var(--display);color:var(--qink)}
+.cw-credo p:last-child{margin:0}
+.cw-credo span{font:600 11px var(--body);letter-spacing:.14em;margin-right:10px}
+.cw-note{font:400 20px/1.35 'La Belle Aurore','Segoe Script',cursive;color:var(--hand);transform:rotate(-1.5deg);max-width:560px}
+.cw-reading{display:grid;grid-template-columns:280px minmax(0,1fr);gap:26px;align-items:start}
+.cw-radar{width:100%;height:auto}
+.cw-radar text{font:500 10px var(--body);fill:var(--soft);letter-spacing:.08em}
+.cw-star{padding:16px 18px;border-radius:8px;background:var(--crownbg);color:#F3EBDC;font:400 18px/1.5 var(--display);max-width:720px}
+.cw-star small{display:block;font:500 10.5px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.cw-star mark{color:#D6BF8F}
+.leaf-r .gain{margin-top:4px}
+@media(max-width:1180px){.cw-reading{grid-template-columns:1fr}.cw-radar{max-width:280px}}
+@media(max-width:760px){
+  .cw-big{font-size:52px}
+  .cw-formula{font-size:20px}
+  .cw-fl{grid-template-columns:1fr;gap:4px}
+  .cw-o{font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){.cw-fl{animation:none}.cw-o{transition:none}}
+
 @media(prefers-reduced-motion:reduce){
   .jw,.crown,.crown-veil,.crown-hint,.cw-drawer,.leaf-l,.cw-s,.cw-write,body.inwork .top,body.inwork .mp{transition:none!important}
 }
