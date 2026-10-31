@@ -144,6 +144,9 @@
 
   /* ── The account ─────────────────────────────────────────────────────────── */
   let A = null, dirty = false, syncing = false, leverTimer;
+  /* "Continue with Google" (/google.js, 31 Oct): loaded with the account. */
+  let GS = null;
+  const gSlot = (c) => (GS ? GS.slot(c, document.body.classList.contains('dark')) : '');
   const signedIn = () => !!(A && A.joined());
   /* The Massive Growth Plan's ticks (31 Oct): { step id: date ticked }, from
    * the account. Signed in only; kept apart from the Account Plans. */
@@ -284,6 +287,7 @@
     try { (await import('/forms.js')).rememberUtm(); } catch { /* old browser */ }
     try { A = await import('/account.js'); } catch { A = null; }
     if (!A) return;
+    import('/google.js').then((m) => { GS = m; if (UI.gate) render(); }).catch(() => { GS = null; });
     let code = '';
     try { code = new URLSearchParams(location.search).get('signin') || ''; } catch { /* no location */ }
     if (code) await signInFromLink(code);
@@ -362,6 +366,25 @@
   function openSignin() {
     UI.signinFor = 'plans'; UI.signin = ''; openGate('account'); render();
     setTimeout(() => { const f = $('#si-pw-gate'); if (f) f.focus(); }, 0);
+  }
+  /** Signed in or signed up with Google, from the sign-in box or the gate:
+   *  the same as a password sign-in, and the gate's consent tick counts. */
+  async function googleDone(out, fromGate) {
+    const me = out.me || {};
+    for (const k of ['first', 'last', 'email']) if (me[k] && (k === 'email' || !S.profile[k])) S.profile[k] = String(me[k]).slice(0, 120);
+    if (fromGate) S.profile.consent = !!($('#g-consent') || {}).checked;
+    const next = UI.after; UI.after = null;
+    UI.gate = false; UI.signin = ''; UI.signinFor = null;
+    await afterSignIn(me);
+    if (next === 'email') sendEmail();
+  }
+  function mountGoogleBox() {
+    const el = document.querySelector('#gate .g-slot');
+    if (!el || !GS || el.dataset.on) return;
+    el.dataset.on = '1';
+    const fromGate = !!el.closest('#gate-form');
+    GS.mount(el, { landing: 'compass', source: 'compass', onDone: (out) => googleDone(out, fromGate),
+      onError: (m) => { if (fromGate) { const t = $('#gate-err'); if (t) t.textContent = m; } else { UI.signin = m; render(); } } });
   }
   function closeGate() {
     UI.gate = false; render();
@@ -1980,6 +2003,7 @@
         <button type="button" data-act="si-x" data-f="si-x" aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer">×</button>
         <h2 id="si-h" class="sf" style="font-size: 24px; font-weight: 440; padding-right: 44px">${siTitle}</h2>
         <span id="si-line" style="font-size: 14px; color: var(--muted)">${SIGNIN_LINE}</span>
+        ${gSlot('')}
         <label style="${lab}">Email<input class="inp" id="g-email" type="email" autocomplete="email" value="${esc(P.email)}"></label>
         ${pSignin('gate')}
       </form></div>`;
@@ -1988,6 +2012,7 @@
         <button type="button" data-act="gate-skip" data-f="gate-x" aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         <div style="display: flex; align-items: center; gap: 12px; padding-right: 44px"><svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10" fill="none" stroke="#6F93B8" stroke-width="1.4"/><polygon points="12,4 14,12 12,13.5 10,12" fill="#6F93B8"/></svg><div style="display: flex; flex-direction: column"><span class="eb">Before your first answer</span><span class="sf" style="font-size: 22px" id="gate-h">Who is this North Star for?</span></div></div>
         <span style="font-size: 14px; color: var(--muted)">We keep your answers with your name, so your feedback and your launchpad are yours.</span>
+        ${gSlot('g-consent')}
         <div class="gate-two" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
           <label style="${lab}">First name<input class="inp" id="g-first" type="text" autocomplete="given-name" value="${esc(P.first)}" data-f="g-first"></label>
           <label style="${lab}">Surname<input class="inp" id="g-last" type="text" autocomplete="family-name" value="${esc(P.last)}"></label>
@@ -2175,6 +2200,7 @@
     $('#labfoot').textContent = labFoot();
     put('mbar', pMbar(c));
     put('gate', pGate());
+    mountGoogleBox();
     put('how', pHow());
     put('ws', pWs());
     $('#how-btn').setAttribute('aria-expanded', String(UI.how));

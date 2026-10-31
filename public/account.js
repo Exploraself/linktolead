@@ -107,6 +107,14 @@ export async function login(email, password) {
   return out;
 }
 
+/** "Continue with Google": the ID token from Google, checked on the server
+ *  (api/google.js), opens the account or makes it; keeps the token. */
+export async function google(credential, extra = {}) {
+  const out = await post('/api/google', { credential, ...extra });
+  if (out.token) keep(out.token);
+  return out;
+}
+
 /** Confirmed name and email on first opening the other door (api/cross.js). */
 export const cross = (to, first, last) => post('/api/cross', { token: token(), to, first, last });
 

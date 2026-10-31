@@ -36,6 +36,7 @@ import * as cross from './functions/api/cross.js';
 import * as complete from './functions/api/complete.js';
 import * as accountDelete from './functions/api/account-delete.js';
 import * as count from './functions/api/count.js';
+import * as google from './functions/api/google.js';
 
 /** One line per route. A new file in functions/api/ needs its line here. */
 export const ROUTES = {
@@ -63,6 +64,7 @@ export const ROUTES = {
   '/api/complete': complete,
   '/api/account-delete': accountDelete,
   '/api/count': count,
+  '/api/google': google,
 };
 
 export default {

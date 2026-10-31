@@ -18,6 +18,13 @@ keep_vars = true
 #   MAILCHIMP_DOUBLE_OPTIN  text    "yes" = Mailchimp confirms by email first
 # Never put the API key in this file.
 
+# "Continue with Google" (functions/_google.js): the public Web client ID from
+# Google Cloud (Google Auth Platform → Clients → linktolead, origin
+# https://linktolead.exploraself.com). It is not a secret; the client secret is
+# not used and never goes here. keep_vars above still keeps the dashboard's.
+[vars]
+GOOGLE_CLIENT_ID = "313189996932-63o1k2imuk2ospi47fnd12ak51oe1pj6.apps.googleusercontent.com"
+
 [assets]
 directory = "./public"
 binding = "ASSETS"
