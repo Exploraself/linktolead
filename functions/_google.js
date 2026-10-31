@@ -7,10 +7,14 @@
 // a verified address. Nothing from the token is trusted before those checks.
 //
 // GOOGLE_CLIENT_ID is the public Web client ID from Google Cloud ("Clients",
-// ends in .apps.googleusercontent.com). It is not a secret. Without it the
-// button never shows and POST /api/google refuses.
+// ends in .apps.googleusercontent.com). It is not a secret. Set to an empty
+// value, the button never shows and POST /api/google refuses.
 
-export const clientId = (env) => (env && typeof env.GOOGLE_CLIENT_ID === 'string' ? env.GOOGLE_CLIENT_ID.trim() : '');
+// The live site runs on Cloudflare Pages, which does not read wrangler.toml's
+// [vars], so the public ID is also kept here. A GOOGLE_CLIENT_ID variable,
+// where one is set, wins; set it to an empty value to switch the button off.
+export const CLIENT_ID = '313189996932-63o1k2imuk2ospi47fnd12ak51oe1pj6.apps.googleusercontent.com';
+export const clientId = (env) => (env && typeof env.GOOGLE_CLIENT_ID === 'string' ? env.GOOGLE_CLIENT_ID.trim() : CLIENT_ID);
 
 const ISSUERS = ['accounts.google.com', 'https://accounts.google.com'];
 
