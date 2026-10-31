@@ -11,7 +11,7 @@
  * goes through /api/library?item=<key>&t=<token>, never the PDF directly. */
 (function () {
   window.GrowthPlan = {
-    "name": "Massive Growth Plan",
+    "name": "The Leader’s North Star · Massive Growth Plan",
     "item": "mgp",
     "subtitle": "20 + 1 steps to accelerate your growth and win with grace",
     "tagline": "For leaders who are dreamers at heart, critics in the head, <i>realistic</i> sometimes, and always ready to serve.",

@@ -206,7 +206,7 @@ export const LIBRARY = {
   // The plan and the planner (31 Oct 2026): personal working material, so a
   // free account opens them like everything else here. Portrait covers (tall).
   growth: [
-    { k: 'mgp', kicker: '20 + 1 steps', n: 'Massive Growth Plan', sub: 'The action plan at the end of your North Star. Twenty steps inside you and one weekly habit, written by hand.',
+    { k: 'mgp', kicker: '20 + 1 steps', n: 'The Leader’s North Star · Massive Growth Plan', sub: 'The action plan at the end of your North Star. Twenty steps inside you and one weekly habit, written by hand.',
       cover: '/library/cover-massive-growth-plan.jpg',
       // Written in online, in the plan at the end of the North Star. Founders from
       // the Blueprint cross with the North Star's one question ("Is this you?"),
