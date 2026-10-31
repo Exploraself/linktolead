@@ -61,7 +61,7 @@ export function footer(env, { why, unsubUrl }) {
  *  `html` is a full document whose </body> receives the footer. A letter's
  *  `replyTo` (the mentor's address) and `fromName` ("Alexandru at ExploraSelf")
  *  go with it. */
-export async function send(env, { to, subject, html, text, why, unsubUrl, replyTo, fromName }) {
+export async function send(env, { to, subject, html, text, why, unsubUrl, replyTo, fromName, attachments }) {
   const st = mailState(env);
   if (!st.ready) return { ok: false, why: st.reason };
   const apiKey = await key(env);
@@ -73,6 +73,8 @@ export async function send(env, { to, subject, html, text, why, unsubUrl, replyT
     text: text + '\n' + f.text,
   };
   if (replyTo && /^[^@\s<>"]+@[^@\s<>"]+$/.test(replyTo)) body.reply_to = replyTo;
+  // Files Resend fetches from our own site and attaches (a public https path).
+  if (Array.isArray(attachments) && attachments.length) body.attachments = attachments.map((a) => ({ filename: a.filename, path: a.path }));
   if (unsubUrl) body.headers = { 'List-Unsubscribe': `<${unsubUrl}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' };
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',
