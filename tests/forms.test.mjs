@@ -96,7 +96,7 @@ ok(me.signupType === 'simple' && me.hasPassword === false && !('needs' in me), '
 let lr = await login({ request: post('/api/login', { email: 'fay@example.com', password: 'a-long-password' }), env });
 ok(lr.status === 200 && (await lr.json()).token === fay, 'full: sign-in with email and password');
 lr = await login({ request: post('/api/login', { email: 'fay@example.com', password: 'wrong-password-x' }), env });
-ok(/Forgot your password\? Email me a sign-in link/.test((await lr.json()).error), 'a wrong password points to "Forgot your password? Email me a sign-in link"');
+ok(/Forgot your password\?” to get a reset link/.test((await lr.json()).error), 'a wrong password points to "Forgot your password?"');
 ok((await stateGet({ request: get('/api/state?t=nobody-at-all-here-0000'), env })).status === 404, 'an account that does not exist answers 404, so /start forgets it');
 
 // ── /mentor ─────────────────────────────────────────────────────────────────

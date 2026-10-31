@@ -147,7 +147,10 @@ const promise4 = (st, n) => (LEVELS4[n - 1] ? LEVELS4[n - 1].promise : promiseOf
 
 const eye = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>';
 /** A password box with its show / hide button. */
-const pwField = (id, label, auto) => `<label class="pwf"><span>${label}</span><span class="pwrow"><input id="${id}" type="password" autocomplete="${auto}" minlength="10"><button type="button" class="pweye" data-eye="${id}" aria-label="Show ${label.toLowerCase()}" aria-pressed="false">${eye}</button></span></label>`;
+const COPYI = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+/* Show and copy (31 Oct): a password field cannot be copied while hidden, so
+ * a new password has its own copy button. */
+const pwField = (id, label, auto) => `<label class="pwf"><span>${label}</span><span class="pwrow"><input id="${id}" type="password" autocomplete="${auto}" minlength="10"><button type="button" class="pweye" data-eye="${id}" aria-label="Show ${label.toLowerCase()}" aria-pressed="false">${eye}</button>${auto === 'new-password' ? `<button type="button" class="pweye" data-copypw="${id}" aria-label="Copy ${label.toLowerCase()}">${COPYI}</button>` : ''}</span></label>`;
 
 /** A promise's first sentence: what that level leaves you with by Sunday. */
 const promiseOf = (st, n) => { const L = (LEVELS[st] || {})[n]; return L && L.promise ? L.promise.split(/(?<=\.)\s+(?=[A-Z])/)[0] : ''; };
@@ -347,7 +350,7 @@ function signinView() {
         ${pwField('si-pw', 'Password', 'current-password')}
       </div>
       <button class="cta" type="submit">Sign in →</button>
-      <button class="lib-link" type="button" data-link>Forgot your password? Email me a sign-in link</button>
+      <span class="si-help"><button class="lib-link" type="button" data-reset>Forgot your password?</button><button class="lib-link" type="button" data-link>No password? Email me a sign-in link</button></span>
       <p class="joinerr" id="si-msg" role="status"></p>
       <p class="savenote">New here? <a href="/north3/#join">Create your free account →</a></p>
     </form>
@@ -963,7 +966,14 @@ document.addEventListener('click', (e) => {
   }
   if (b.dataset.replyto) { replyTo = replyTo === b.dataset.replyto ? null : b.dataset.replyto; render(); const t = document.querySelector('.note-reply textarea'); if (t) t.focus(); return; }
   if (b.dataset.signout !== undefined) { account.signOut(); location.replace('/north3/'); return; }
-  if (b.hasAttribute('data-link')) { sendSigninLink(); return; }
+  // The reset, in its own box (31 Oct): /reset-box.js.
+  if (b.hasAttribute('data-reset') || b.hasAttribute('data-link')) { const email = (($('#si-email') || {}).value || '').trim(); import('/reset-box.js').then((m) => m.openReset({ email, mode: b.hasAttribute('data-link') ? 'link' : 'reset' })).catch(() => sendSigninLink()); return; }
+  if (b.dataset.copypw) {
+    const f = document.getElementById(b.dataset.copypw); if (!f || !f.value) return;
+    const done = (ok) => { b.textContent = ok ? '✓' : '—'; setTimeout(() => { b.innerHTML = COPYI; }, 1400); };
+    navigator.clipboard.writeText(f.value).then(() => done(true), () => done(false));
+    return;
+  }
   if (b.dataset.stage) { state.stage = b.dataset.stage; save(); view = 'work'; render(); window.scrollTo({ top: 0, behavior: 'instant' }); return; }
   if (b.dataset.level) {
     level = +b.dataset.level; dom = 'self'; view = 'work'; qi = null;
@@ -1198,11 +1208,21 @@ async function comeHome() {
   }
   render();
   if (view === 'ask') openAsk();
-  if (resetAsk) openReset();
+  if (resetAsk) newPassword();
   else if (hashNow === '#account') openReset('');
   loadPlans();
 }
-/** From a password-reset email: the password box, open and in view. */
+/** From a password-reset email (31 Oct): its own box, "Choose a new
+ *  password", then "Your new password is saved". The password box in Your
+ *  account stays as the way back if the box cannot load. */
+function newPassword() {
+  resetAsk = false;
+  import('/reset-box.js').then((m) => m.openNewPassword({ email: state.me && state.me.email,
+    save: async (a, c) => { const r = await account.setPassword(a, c); hasPassword = true; return r; },
+    done: () => { view = 'home'; render(); } }))
+    .catch(() => openReset());
+}
+/** The password box in Your account, open and in view. */
 let profileMounted = false;
 function openReset(say = 'Choose your new password here. At least 10 characters.') {
   resetAsk = false;
