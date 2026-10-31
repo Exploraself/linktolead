@@ -14,6 +14,7 @@
 
 import { json, bad, db, now, mentorOk, clean, looksLikeEmail, accountTables, newToken } from '../_shared.js';
 import { DOMAIN_STEPS, WHATIF_STEPS, ALL_STEP_IDS } from '../_plans.js';
+import { GROWTH_IDS, GROWTH_SQL } from '../_growth.js';
 import { sendLink } from './signin.js';
 import { send, origin, mailState } from '../_mail.js';
 import { mentorLetter, answerLetter } from '../_letters.js';
@@ -53,7 +54,8 @@ export function stageChanges(events) {
  *  twelve Blueprint levels hold at least one written answer (level_list:
  *  which ones). crossed: the doors they crossed ('blueprint', 'northstar';
  *  functions/api/cross.js). avatar: their profile photo, a small data: URL,
- *  or null. */
+ *  or null. plan_ticks counts the Account Plans only; growth_ticks the
+ *  Massive Growth Plan (growth_list: "id|done_at,…"). */
 async function roster(D) {
   const rows = await D.prepare(`
     SELECT s.id, s.name, s.email, s.phone, s.company, s.tier,
@@ -64,7 +66,9 @@ async function roster(D) {
       (SELECT updated_at FROM compass c WHERE c.student_id = s.id) AS compass_at,
       (SELECT c.flags_json FROM compass c WHERE c.student_id = s.id) AS ns_flags,
       (SELECT c.results_json FROM compass c WHERE c.student_id = s.id) AS ns_results,
-      (SELECT COUNT(*) FROM plan_tick t WHERE t.student_id = s.id) AS plan_ticks,
+      (SELECT COUNT(*) FROM plan_tick t WHERE t.student_id = s.id AND t.step_id NOT IN (${GROWTH_SQL})) AS plan_ticks,
+      (SELECT COUNT(*) FROM plan_tick t WHERE t.student_id = s.id AND t.step_id IN (${GROWTH_SQL})) AS growth_ticks,
+      (SELECT GROUP_CONCAT(t.step_id || '|' || t.done_at) FROM plan_tick t WHERE t.student_id = s.id AND t.step_id IN (${GROWTH_SQL})) AS growth_list,
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'library-download') AS library,
       (SELECT COUNT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS levels,
       (SELECT GROUP_CONCAT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS level_list,
@@ -84,6 +88,7 @@ const CSV_COLS = [['name', 'Name'], ['email', 'Email'], ['joined_at', 'Joined'],
   ['signup', 'Sign-up form'], ['landing_name', 'Landing'], ['utm_source', 'utm_source'], ['utm_medium', 'utm_medium'], ['utm_campaign', 'utm_campaign'], ['utm_content', 'utm_content'], ['company_name', 'Company'], ['interest', 'Interest'], ['industry', 'Industry'],
   ['compass', 'North Star done'], ['plan_ticks', 'Plan steps done'], ['library_names', 'Library'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp'],
   ['ns_wants', 'Wants (North Star)'], ['ns_pains', 'Hurts (North Star)'], ['ns_values', 'Cares about (North Star)'], ['ns_first', 'Needs them first'], ['ns_team', 'Works with'],
+  ['growth_plan', 'Growth plan'],
   ['group', 'Group'], ['levels', 'Blueprint levels'], ['crossed_names', 'Crossed']];
 const NS = {
   pains: { clients: 'Not enough clients', cash: 'Cash is tight', time: 'No time for myself', alone: 'Doing everything myself', team: 'Team not stepping up', direction: 'Unclear direction', price: 'Prices feel too low', switch: 'I can’t switch off' },
@@ -119,7 +124,7 @@ export function toCSV(list) {
   const books = (v) => String(v || '').split(',').filter((k) => LIBRARY_ITEMS[k]).map((k) => LIBRARY_ITEMS[k].name).join('; ');
   const row = (s) => ({ ...s, step: STEPS[s.tier || 'free'] || s.tier, library_names: books(s.library), signup: s.signup_type || '',
     company_name: s.company === '' ? 'No company yet' : s.company || '', landing_name: LANDING_NAMES[s.landing] || '', compass: yes(s.compass_at), has_password: yes(s.has_password), consent: yes(s.consent), unsubscribed: yes(s.unsubscribed), paused: yes(s.paused),
-    ...nsWords(s), group: groupName(s), levels: s.levels || 0, crossed_names: String(s.crossed || '').split(',').filter((k) => CROSSED[k]).map((k) => CROSSED[k]).join('; ') });
+    ...nsWords(s), growth_plan: Number(s.growth_ticks) || 0, group: groupName(s), levels: s.levels || 0, crossed_names: String(s.crossed || '').split(',').filter((k) => CROSSED[k]).map((k) => CROSSED[k]).join('; ') });
   return [CSV_COLS.map(([, h]) => cell(h)).join(','), ...list.map((s) => { const r = row(s); return CSV_COLS.map(([k]) => cell(r[k])).join(','); })].join('\r\n') + '\r\n';
 }
 
@@ -134,13 +139,14 @@ export async function onRequestGet({ request, env }) {
   if (one) {
     const me = await D.prepare('SELECT * FROM student WHERE id = ?').bind(one).first();
     if (!me) return bad('Not found.', 404);
-    const [answers, sheets, compass, notes, prof, ticks, auth, messages, steps, stages, library, asked] = await Promise.all([
+    const [answers, sheets, compass, notes, prof, ticks, growth, auth, messages, steps, stages, library, asked] = await Promise.all([
       D.prepare('SELECT stage,level,domain,step,body,updated_at FROM answer WHERE student_id=? ORDER BY level,domain,step').bind(one).all(),
       D.prepare('SELECT key,value FROM sheet WHERE student_id=?').bind(one).all(),
       D.prepare('SELECT * FROM compass WHERE student_id=?').bind(one).first(),
       D.prepare('SELECT id,level,domain,body,status,reply,created_at FROM note WHERE student_id=? ORDER BY created_at DESC').bind(one).all(),
       D.prepare('SELECT industry,consent,consent_at,source,unsubscribed,unsub_at,signup_type,company,interest,landing,utm_source,utm_medium,utm_campaign,utm_content,utm_term,mentor_id,tz FROM student_profile WHERE student_id=?').bind(one).first(),
-      D.prepare('SELECT step_id,done_at FROM plan_tick WHERE student_id=? ORDER BY done_at').bind(one).all(),
+      D.prepare(`SELECT step_id,done_at FROM plan_tick WHERE student_id=? AND step_id NOT IN (${GROWTH_SQL}) ORDER BY done_at`).bind(one).all(),
+      D.prepare(`SELECT step_id,done_at FROM plan_tick WHERE student_id=? AND step_id IN (${GROWTH_SQL}) ORDER BY done_at`).bind(one).all(),
       D.prepare('SELECT pass_hash IS NOT NULL AS has_password, paused, set_at FROM account_auth WHERE student_id=?').bind(one).first(),
       D.prepare('SELECT subject,body,channel,sent_at,read_at FROM message WHERE student_id=? AND note_id IS NULL ORDER BY sent_at DESC LIMIT 20').bind(one).all(),
       D.prepare("SELECT detail, at FROM event WHERE student_id=? AND kind='mentor-step' ORDER BY id").bind(one).all(),
@@ -154,6 +160,7 @@ export async function onRequestGet({ request, env }) {
       climb: climbOf(me, steps.results || []), stages: stageChanges(stages.results || []), thread: asked.items,
       library: (library.results || []).filter((r) => LIBRARY_ITEMS[r.item]).map((r) => ({ item: r.item, name: LIBRARY_ITEMS[r.item].name, at: r.at })),
       ticks: (ticks.results || []).map((t) => ({ ...t, domain: STEP[t.step_id] ? STEP[t.step_id].domain : null, title: STEP[t.step_id] ? STEP[t.step_id].title : t.step_id })),
+      growth: growth.results || [], totalGrowth: GROWTH_IDS.length,
       mentors: await mentors(D) });
   }
 
@@ -171,7 +178,7 @@ export async function onRequestGet({ request, env }) {
   // page builds whole sentences from them (theirWords in dash.js).
   const words = await D.prepare(`SELECT w.student_id, w.key, w.value, w.updated_at, s.name, s.email FROM sheet w JOIN student s ON s.id = w.student_id
       WHERE w.key LIKE 'w.v4.%' AND w.value <> '' ORDER BY w.updated_at DESC LIMIT 600`).all();
-  return json({ ok: true, students, words: words.results || [], waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
+  return json({ ok: true, students, words: words.results || [], waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, totalGrowth: GROWTH_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
     mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags } });
 }
 

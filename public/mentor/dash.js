@@ -269,3 +269,27 @@ export function theirWords(rows, levels, limit = 12) {
   }
   return out.sort((a, b) => b.at.localeCompare(a.at)).slice(0, limit);
 }
+
+/** The Massive Growth Plan ticks in a roster row: growth_list is
+ *  "mgp-3|2026-11-02T…,mgp-1|…" (functions/api/mentor.js). → { id: date }. */
+export function growthDone(s) {
+  const out = {};
+  for (const part of String((s && s.growth_list) || '').split(',')) {
+    const [id, at] = part.split('|');
+    if (/^mgp-\d{1,2}$/.test(id || '') && at) out[id] = at;
+  }
+  return out;
+}
+/** The ticked steps by domain, in the plan's own order, every word from
+ *  window.GrowthPlan (plan): [{ name, col, steps: [{ n, id, title, at }] }].
+ *  Domains with nothing ticked are left out; step 21 comes last, under the
+ *  plan's own name for it. */
+export function growthGroups(plan, done) {
+  if (!plan || !Array.isArray(plan.domains)) return [];
+  const D = done || {};
+  let n = 0;
+  const out = plan.domains.map((d) => ({ name: d.name, col: d.col,
+    steps: d.steps.map((s) => { n += 1; return { n, id: s.id, title: s.title, at: D[s.id] || '' }; }).filter((s) => s.at) }));
+  if (plan.plus) out.push({ name: plan.plus.move, col: '', steps: D[plan.plus.id] ? [{ n: n + 1, id: plan.plus.id, title: plan.plus.title, at: D[plan.plus.id] }] : [] });
+  return out.filter((g) => g.steps.length);
+}

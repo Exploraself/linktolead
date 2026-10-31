@@ -23,6 +23,7 @@ import * as signin from './functions/api/signin.js';
 import * as unsubscribe from './functions/api/unsubscribe.js';
 import * as plans from './functions/api/plans.js';
 import * as planTick from './functions/api/plans/tick.js';
+import * as growthPlan from './functions/api/growth-plan.js';
 import * as login from './functions/api/login.js';
 import * as password from './functions/api/password.js';
 import * as messages from './functions/api/messages.js';
@@ -49,6 +50,7 @@ export const ROUTES = {
   '/api/unsubscribe': unsubscribe,
   '/api/plans': plans,
   '/api/plans/tick': planTick,
+  '/api/growth-plan': growthPlan,
   '/api/login': login,
   '/api/password': password,
   '/api/messages': messages,

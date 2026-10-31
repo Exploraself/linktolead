@@ -170,6 +170,15 @@ export async function plans() {
 }
 export const tick = (step, done) => post('/api/plans/tick', { token: token(), step, done });
 
+/** The Massive Growth Plan's ticks at the end of the North Star: { done, count,
+ *  total }. Null when signed out or offline. Kept apart from the plans above. */
+export async function growthPlan() {
+  const t = token();
+  if (!t) return null;
+  try { const r = await fetch(`/api/growth-plan?t=${encodeURIComponent(t)}`); return r.ok ? await r.json() : null; } catch { return null; }
+}
+export const growthTick = (step, done) => post('/api/growth-plan', { token: token(), step, done });
+
 /** "Change where I stand": the stage on the account, with the one it replaced. */
 export const setStage = (stage, from) => post('/api/stage', { token: token(), stage, from });
 

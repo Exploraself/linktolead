@@ -662,3 +662,69 @@ body:not(.ns-p1done) .mbar{display:none !important}
 .cf[data-theme="dark"] .nscmp b.up{color:#9BC0A1}.cf[data-theme="dark"] .nscmp b.down{color:#F0A27E}
 .nscmp .tiny{font-size:12.5px;color:var(--muted);margin:8px 0 0}
 @media(max-width:760px){.nscmp table{font-size:13px}.nscmp th,.nscmp td{padding:7px 4px}.nscmp td:not(:first-child),.nscmp th{white-space:nowrap}.nscmp-body{padding:10px 10px}}
+
+/* ── The Massive Growth Plan (31 Oct): the last of the results. Every word is
+   drawn from growth-plan.js by growth.js. The head is the same navy band as
+   the action plan; the steps sit on the page's paper, each domain in its own
+   colour (--c, from the file), lifted for dark so it still reads. ───────── */
+.nsgp{display:flex;flex-direction:column;gap:22px}
+.gp-head{display:flex;flex-direction:column;gap:12px;padding:30px 22px;border-radius:14px;background:linear-gradient(120deg,#132338,#0E1C2B);color:#EEF2F7;border:1px solid rgba(214,191,143,.5)}
+.gp-head h2{margin:0;font-size:clamp(32px,5vw,48px);line-height:1.05;color:#EEF2F7}
+.gp-sub{margin:0;font-size:16px;line-height:1.5;color:#D6BF8F;font-weight:520}
+.gp-tag{margin:0;font-size:15px;line-height:1.6;color:#D9E2EC;max-width:62ch}
+.gp-tag i{font-family:Newsreader,Georgia,serif;font-size:1.08em;color:#EEF2F7}
+.gp-lead{margin:6px 0 0;padding-top:14px;border-top:1px solid rgba(214,191,143,.35);font-size:clamp(22px,3vw,28px);line-height:1.25;color:#EEF2F7}
+.gp-moves{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;counter-reset:gpm}
+.gp-moves li{counter-increment:gpm;display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid rgba(214,191,143,.45);border-radius:999px;font-size:13px;color:#EEF2F7}
+.gp-moves li::before{content:counter(gpm);font-size:11px;font-weight:600;color:#D6BF8F}
+.gp-prog{display:flex;flex-direction:column;gap:8px;margin-top:6px;font-size:14px;color:#D9E2EC}
+.gp-prog b{font-size:20px;font-weight:600;color:#D6BF8F;font-variant-numeric:tabular-nums}
+.gp-bar{display:block;height:6px;border-radius:3px;background:rgba(214,191,143,.18);overflow:hidden}
+.gp-bar i{display:block;height:100%;background:#D6BF8F;border-radius:3px;transition:width .5s ease}
+.gp-dom{--cc:var(--c,var(--goldink));display:flex;flex-direction:column;gap:10px}
+.cf[data-theme="dark"] .gp-dom{--cc:color-mix(in srgb,var(--c,#A9C0D9) 55%,#fff)}
+.gp-plus{--c:#8A6A1E}
+.gp-dh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding:0 2px 8px;border-bottom:3px solid var(--cc)}
+.gp-dh h3{margin:0;font-size:clamp(24px,3.2vw,30px);line-height:1.15;color:var(--cc)}
+.gp-ds{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.gp-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr;gap:10px}
+.gp-step{display:flex;flex-direction:column;gap:10px;padding:18px 16px;background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--cc);border-radius:8px;transition:background .25s ease,border-color .25s ease}
+.gp-step.on{background:var(--panel);border-color:var(--cc)}
+.gp-top{display:flex;align-items:center;gap:10px}
+.gp-n{flex:none;width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--cc);color:var(--paper);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.gp-move{font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--cc)}
+.gp-t{margin:0;font-size:clamp(20px,2.6vw,24px);line-height:1.2;color:var(--ink)}
+.gp-truth{margin:0;font-family:Newsreader,Georgia,serif;font-size:17px;line-height:1.5;color:var(--muted)}
+.gp-lines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;font-size:15px;line-height:2.1;color:var(--ink)}
+.gp-bw{white-space:nowrap}
+.gp-blank{display:inline-block;width:var(--w,8em);max-width:calc(100% - 1.4em);height:1.15em;vertical-align:-.2em;margin:0 .15em;border-bottom:1.5px solid var(--cc)}
+.gp-vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.gp-hint{font-size:.72em;color:var(--muted);margin-left:.1em}
+.gp-foot{display:flex;align-items:center;gap:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.gp-done{flex:1 1 auto;min-width:0;margin:0;font-size:14px;line-height:1.5;color:var(--ink)}
+.gp-done b{font-weight:600;color:var(--cc)}
+.gp-tk{flex:none;display:flex;flex-direction:column;align-items:center;gap:3px}
+.gp-tick{width:44px;height:44px;border-radius:50%;border:2px solid var(--cc);background:transparent;color:var(--cc);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background .2s ease,transform .2s ease}
+.gp-tick svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;opacity:.28}
+.gp-tick:hover svg{opacity:.6}
+.gp-tick[aria-pressed="true"]{background:var(--cc);color:var(--paper)}
+.gp-tick[aria-pressed="true"] svg{opacity:1}
+.gp-when{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.gp-voices,.gp-dls{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr;gap:8px}
+.gp-voices li{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-radius:7px;background:var(--cream)}
+.gp-voices b{font-size:19px;color:var(--ink)}
+.gp-voices span{font-size:14.5px;line-height:1.45;color:var(--muted)}
+.gp-dls li{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid var(--line);border-radius:7px}
+.gp-dls b{font-size:19px;color:var(--ink)}
+.gp-dls span{font-size:14px;line-height:1.5;color:var(--muted)}
+.gp-dl{align-self:flex-start;display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:600;color:var(--goldink);text-underline-offset:4px}
+.gp-pdf{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:5px;background:#D6BF8F;color:#0E1C2B !important;font-size:14.5px;font-weight:600;text-decoration:none}
+.gp-pdf:hover,.gp-pdf:focus-visible{background:#E6D3AA}
+@media(min-width:760px){
+  .gp-head{padding:36px 34px}
+  .gp-prog{flex-direction:row;align-items:center;gap:14px}.gp-bar{flex:1 1 auto}
+  .gp-step{padding:22px 24px}
+  .gp-voices{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gp-dls{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+}
+@media (prefers-reduced-motion:reduce){.gp-step,.gp-tick,.gp-bar i{transition:none}}

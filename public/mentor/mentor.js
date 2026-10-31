@@ -9,7 +9,7 @@
 // one-founder view, one(id).
 
 import { STEP_KEYS, STEP_NAMES, STEP_SHORT, GROUPS, LANDING_SHORT, summary, filter, byLanding, groupOf, nextAction, funnel, today, levelSet, levelCount, launchpadDone, crossedOf,
-  told, toldTally, theirWords, SIDES, PAIN_NAMES, WANT_NAMES, VALUE_NAMES, TEAM_NAMES } from './dash.js';
+  told, toldTally, theirWords, SIDES, PAIN_NAMES, WANT_NAMES, VALUE_NAMES, TEAM_NAMES, growthDone, growthGroups } from './dash.js';
 import { LEVELS4, wordOf } from '/levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
@@ -51,6 +51,15 @@ const groupPill = (s) => { const g = groupOf(s); return g ? `<span class="pill $
 const levelsBar = (s) => { const L = levelSet(s), n = levelCount(s), has = (i) => (s.level_list ? L.has(i + 1) : i < n);
   return `<span class="prog" role="img" aria-label="${n} of 12 levels">${Array.from({ length: 12 }, (_, i) => `<i class="${has(i) ? 'on' : ''}${i < 3 ? ' free' : ''}"></i>`).join('')}</span>`; };
 const landingName = (s) => LANDING_SHORT[s.landing] || '';
+/** The Massive Growth Plan: "x/21", and the ticked steps by domain with
+ *  their dates. Every word from window.GrowthPlan (/northstar/growth-plan.js). */
+const gpTotal = () => (data && data.totalGrowth) || 21;
+const gpCount = (s) => `${Number(s.growth_ticks) || 0}/${gpTotal()}`;
+function gpList(s) {
+  const G = growthGroups(window.GrowthPlan, growthDone(s));
+  if (!G.length) return '';
+  return `<div class="gpl">${G.map((g) => `<div><h4${g.col ? ` style="--c:${esc(g.col)}"` : ''}>${esc(g.name)}</h4><ul>${g.steps.map((x) => `<li><b style="font-weight:500">${x.n}. ${esc(x.title)}</b><span>${esc(day(x.at))}</span></li>`).join('')}</ul></div>`).join('')}</div>`;
+}
 
 function gate(msg) {
   $('#q').hidden = true; $('#tb').hidden = true; $('#tabs').hidden = true; closeDrawer();
@@ -173,14 +182,14 @@ function foundersHTML() {
       <td class="c-who"><span class="who">${avatar(s)}<span style="min-width:0"><b>${esc(s.name || '—')}</b><span class="em">${esc(s.email)}</span>${toldLine(s)}</span></span></td>
       <td class="c-group">${groupPill(s)}</td><td class="c-step">${esc(STEP_SHORT[s.tier || 'free'] || s.tier)}</td>
       <td class="c-lv">${levelsBar(s)}</td>
-      <td class="c-stage">${esc(stageName(s.stage))}</td><td class="c-seen num">${esc(when(s.last_seen_at || s.joined_at))}</td>
+      <td class="c-stage">${esc(stageName(s.stage))}</td><td class="c-gp num">${esc(gpCount(s))}</td><td class="c-seen num">${esc(when(s.last_seen_at || s.joined_at))}</td>
       <td class="c-next">${n.tone ? `<span class="pill ${n.tone}">${esc(n.label)}</span>` : `<span class="sub">${esc(n.label)}</span>`}</td></tr>`; };
   return `${filtersHTML()}
     <div class="panel"><div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><h2>Founders</h2><span class="sub" id="count">${rows.length} of ${data.students.length}</span>
       ${any ? '<button type="button" class="btn" data-fclear style="margin-left:auto">Clear the filters</button>' : ''}</div>
       ${!data.students.length ? '<div class="empty">Nobody here yet. The roster fills as founders sign up.</div>'
-        : `<div class="tw"><table class="ftable"><thead><tr><th>Founder</th><th>Group</th><th>Step</th><th>Blueprint</th><th>Stage</th><th>Last seen</th><th>Next</th></tr></thead>
-        <tbody>${rows.map(row).join('') || `<tr><td colspan="7" class="sub">Nobody matches these filters.${any ? ' Clear the filters to see everyone.' : ''}</td></tr>`}</tbody></table></div>`}
+        : `<div class="tw"><table class="ftable"><thead><tr><th>Founder</th><th>Group</th><th>Step</th><th>Blueprint</th><th>Stage</th><th>Growth plan</th><th>Last seen</th><th>Next</th></tr></thead>
+        <tbody>${rows.map(row).join('') || `<tr><td colspan="8" class="sub">Nobody matches these filters.${any ? ' Clear the filters to see everyone.' : ''}</td></tr>`}</tbody></table></div>`}
     </div>`;
 }
 
@@ -291,6 +300,7 @@ function drawerHTML(s) {
       <dt>Blueprint</dt><dd>${lv} of 12 levels${lp ? ' · Launchpad done' : ''}</dd>
       <dt>North Star</dt><dd>${s.compass_at ? 'done · ' + esc(day(s.compass_at)) : 'not yet'}</dd>
       <dt>Plans</dt><dd>${s.plan_ticks || 0} of ${data.totalSteps || 28} steps</dd>
+      <dt>Growth plan</dt><dd>${Number(s.growth_ticks) || 0} of ${gpTotal()} steps done</dd>
       <dt>Joined</dt><dd>${esc(day(s.joined_at))}${land ? ' · ' + esc(land) : ''}${s.utm_source ? `<span class="em">${esc(s.utm_source)}${s.utm_content ? ' · ' + esc(s.utm_content) : ''}</span>` : ''}</dd>
       <dt>Last seen</dt><dd>${esc(when(s.last_seen_at || s.joined_at))}</dd>
       <dt>Signed up with</dt><dd>${esc(s.signup_type ? s.signup_type + ' form' : '—')}</dd>
@@ -309,6 +319,7 @@ function drawerHTML(s) {
       ${lv ? `<li>Blueprint: ${lv} of 12 levels${lp ? ' · Launchpad done' : ''}</li>` : ''}
       ${(s.tier || 'free') !== 'free' ? `<li>Step: ${esc(STEP_NAMES[s.tier] || s.tier)}</li>` : ''}
       ${s.paused ? '<li>Paused</li>' : ''}</ul></div>
+    ${Number(s.growth_ticks) ? `<div><p class="lbl">Growth plan · ${esc(gpCount(s))}</p>${gpList(s)}</div>` : ''}
     <div><p class="lbl">All actions</p><div class="acts" style="margin-top:8px">
       <button class="btn" data-open="${id}">Open their work</button>
       <button class="btn" data-msg="${id}">Send a message</button>

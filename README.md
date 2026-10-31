@@ -166,3 +166,21 @@ Nobody is sent to Mailchimp without consent. `/mentor` shows the mode, what is m
 | Profile menu: Leader’s North Star, Light/Dark, "Letters from your mentor: On/Off" (consent, synced to Mailchimp; turning back on asks Mailchimp to confirm), "Delete my account" (two steps; Mailchimp unsubscribed, never hard-deleted) | `public/profile-menu.js`, `/api/letters`, `/api/account-delete` |
 | Mailchimp landing tags | `salespageincubator1` / `2` / `3` (Road 1, 2, 3) |
 | The North Star sales page | `/north1/` |
+
+## 10. The Massive Growth Plan (31 Oct 2026)
+
+The North Star ends with the Massive Growth Plan: 20 + 1 steps, after the
+North Star Action Plan (which stays as it is, with its PDF).
+
+| What | Where |
+|---|---|
+| Every word of the plan (Alexandru's approved text, ids `mgp-1` … `mgp-21`) | `public/northstar/growth-plan.js` (`window.GrowthPlan`): change the text there, never in code |
+| Drawing it: the header, four domains in their colours, step 21, blanks as lines, "x of 21 done" | `public/northstar/growth.js`, styles in `public/northstar/crown.css` |
+| Ticks (signed in only; a signed-out tick opens the sign-in) | `GET/POST /api/growth-plan` (`functions/api/growth-plan.js`), saved in `plan_tick` |
+| The server's own list of the 21 ids (a test holds it equal to the file) | `functions/_growth.js` |
+| /mentor: "Growth plan x/21" in Founders, the ticked steps with dates in the drawer, a "Growth plan" CSV column | `functions/api/mentor.js`, `public/mentor/` |
+
+Growth Plan ticks share `plan_tick` with the Account Plans but are never
+counted with them: `/api/plans` ("x of 32"), the count `/api/plans/tick`
+returns and /mentor's "Plan steps done" stay the plans' own. No Mailchimp
+tags.
