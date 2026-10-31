@@ -1,6 +1,9 @@
 // "/road4/": Road 4, the sales page for The Founder's Blueprint. Every call
-// to action on it opens the FULL account form (with a password), landing
-// "road4", so a founder who arrives here signs up here.
+// to action on it opens the account form, landing "road4", so a founder who
+// arrives here signs up here. Which form is a test (01 START HERE §3b, 1 Nov):
+// each new device gets the simple form (name + email) or the full one (with a
+// password) at random, kept on that device, and the account records which
+// (signup_type), so the two can be compared by sign-ups. FORM_TEST off = full.
 //
 // Everything on it is a tap or a drag; nothing is typed, saved or sent:
 //   · the mirror: the stage, then eight questions answered yes or no, each
@@ -9,23 +12,19 @@
 //     week one would start (the real level-one steps for that domain);
 //   · two kinds of stuck: the Hoper and the Grinder on a triangle of reason,
 //     strategy and effort;
-//   · week one, drawn day by day from the real level-one steps;
+//   · week one, drawn from the real Version 4 level one (SEED): the four
+//     moves, one card per part of the business, the mirror's part marked;
 //   · the twelve weeks as a climb from Base Camp to the summit, each camp
-//     with its real promise;
+//     with its real Version 4 word and promise (the same for every stage);
 //   · "Count it yourself" (two sliders) and today against week twelve.
 //
 // The two blocks marked "@site" are the only parts that need the site. The
 // preview artifact replaces them with the same data inlined and a note.
 
 // @site data
-import { DOMAINS, SEVEN, STAGES, LEVEL_NAMES, gateFor } from '/content.js';
-const FILES = { build: ['/levels-build.js', 'BUILD'], grow: ['/levels-grow.js', 'GROW'], scale: ['/levels-scale.js', 'SCALE'] };
-const loaded = {};
-/** One stage's twelve levels, loaded once. */
-function loadStage(st) {
-  if (!loaded[st]) loaded[st] = import(FILES[st][0]).then((m) => m[FILES[st][1]]).catch(() => { delete loaded[st]; return null; });
-  return loaded[st];
-}
+import { DOMAINS, STAGES, gateFor } from '/content.js';
+import { LEVELS4 } from '/levels-v4.js';
+import { remember, stickyJoin, countUp } from '/road-kit.js';
 // @end data
 
 const $ = (s) => document.querySelector(s);
@@ -41,11 +40,20 @@ let box = null;
 const loadBox = () => box || (box = import('/account-box.js').catch(() => { box = null; }));
 const joined = (() => { try { return !!localStorage.getItem('ftb-token'); } catch { return false; } })();
 import('/forms.js').then((m) => m.rememberUtm()).catch(() => {});
+const FORM_TEST = true;
+const variant = (() => {
+  if (!FORM_TEST) return 'full';
+  try {
+    let v = localStorage.getItem('ftb-r4-form');
+    if (v !== 'simple' && v !== 'full') { v = Math.random() < 0.5 ? 'simple' : 'full'; localStorage.setItem('ftb-r4-form', v); }
+    return v;
+  } catch { return 'full'; }
+})();
 function join(e) {
   if (e) e.preventDefault();
   const opener = e && e.currentTarget;
   gate.hidden = false;
-  loadBox().then((m) => m && m.open({ gate, opener, stage: { id: stage }, variant: 'full', landing: 'road4' }));
+  loadBox().then((m) => m && m.open({ gate, opener, stage: { id: stage }, variant, landing: 'road4' }));
 }
 // A founder who has already joined is not starting: the buttons say so.
 function wireJoin(a) {
@@ -148,8 +156,8 @@ async function reading() {
   const order = [...new Set([...STAGES[stage].emphasis.filter((k) => k in by), ...DOMAINS.map((d) => d.k)])];
   const worst = total ? order.reduce((a, k) => (by[k] > by[a] ? k : a), order[0]) : 'self';
   const type = total <= 1 ? 'leader' : L[4] ? 'grinder' : 'hoper';
-  const lv = await loadStage(stage);
-  const one = lv && lv[1] ? lv[1][worst] : null;
+  const L1 = LEVELS4[0], di = DOMAINS.findIndex((d) => d.k === worst), one = L1.d[di];
+  remember('road4', { stage, worst, leaking: total, word: L1.word, letter: one.l, part: one.name });
   // The diamond: one corner per domain, pulled in by every leak.
   const pts = { self: [0, -1], people: [1, 0], work: [0, 1], market: [-1, 0] };
   const at = (k, r) => [130 + pts[k][0] * r, 130 + pts[k][1] * r];
@@ -172,17 +180,22 @@ async function reading() {
       <p class="rtype">This week you sound like <a href="#types" data-show-type="${type}">${esc(TYPES[type].name)}</a>.</p>
     </div>
   </div>
-  ${one ? `<div class="rstart"><p class="mtag">Where your week one would start · ${esc(dname(worst))}</p>
-    <h4>${esc(one.title)}</h4><ol>${one.steps.slice(0, 2).map((s, i) => `<li><b>${esc(SEVEN[i].n)}.</b> ${esc(s)}</li>`).join('')}</ol>
-    <p class="rprom">${esc(lv[1].promise)}</p>
-    <div class="acts"><a class="cta" href="#join" data-join>Start my free three weeks <span class="ar" aria-hidden="true">→</span></a><button type="button" class="ghost" data-again>Look again</button></div></div>` : ''}`;
+  <div class="rstart"><p class="mtag">Where your week one would start · ${esc(dname(worst))} · ${esc(L1.word)}, letter ${esc(one.l)}</p>
+    <h4>${esc(one.name)}</h4><ol><li><b>Tap.</b> ${plain(one.t.q)}</li><li><b>Slide.</b> ${esc(one.s.q)}</li></ol>
+    <p class="rprom">By Sunday of week one: ${esc(L1.promise.charAt(0).toLowerCase() + L1.promise.slice(1))}</p>
+    <div class="acts"><a class="cta" href="#join" data-join>Start week one on ${esc(dname(worst))}, free <span class="ar" aria-hidden="true">→</span></a><button type="button" class="ghost" data-again>Look again</button></div></div>`;
   result.querySelectorAll('[data-join]').forEach(wireJoin);
   result.querySelector('[data-again]')?.addEventListener('click', () => { result.hidden = true; stageBox.hidden = false; $('#mirror').scrollIntoView({ behavior: still() ? 'auto' : 'smooth' }); });
   result.querySelector('[data-show-type]').addEventListener('click', () => pickType(type));
   replay(result);
   result.scrollIntoView({ behavior: still() ? 'auto' : 'smooth', block: 'start' });
-  week.dom = worst; drawDays();
+  week.dom = worst; week.set = true; today = di; drawDays();
+  const mine = $('#close-mine');
+  mine.textContent = total ? `Your mirror said ${dname(worst)}. Week one starts there, on your own answers.` : 'Your mirror held on all eight. Week one checks it against your calendar.';
+  mine.hidden = false;
 }
+/** A question from the levels file, as plain text (its emphasis kept as words). */
+const plain = (h) => esc(String(h).replace(/<[^>]+>/g, ''));
 
 // ── Two kinds of stuck ──────────────────────────────────────────────────────
 const TYPES = {
@@ -219,27 +232,18 @@ function pickType(k) {
 $('.typebtns').addEventListener('click', (e) => { const b = e.target.closest('[data-type]'); if (b) pickType(b.dataset.type); });
 drawType('hoper');
 
-// ── Week one, day by day ────────────────────────────────────────────────────
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const STEP_ART = [
-  '<path class="ln" d="M10 34 L30 14 L36 20 L16 40 L8 42 Z"/><path class="ln scrib" d="M38 42 h14"/>',
-  '<rect class="ln" x="8" y="10" width="40" height="34" rx="3"/><path class="ln" d="M8 18h40"/><rect class="bar" style="--i:0" x="14" y="30" width="6" height="10"/><rect class="bar" style="--i:1" x="25" y="24" width="6" height="16"/><rect class="bar" style="--i:2" x="36" y="27" width="6" height="13"/>',
-  '<rect class="ln" x="10" y="12" width="14" height="30"/><rect class="ln" x="34" y="26" width="14" height="16"/><path class="gapl" d="M34 12 h14 v14"/>',
-  '<path class="ln" d="M16 8h24M16 46h24M19 8c0 12 18 13 18 19S19 34 19 46M37 8c0 12-18 13-18 19s18 7 18 19"/><circle class="grain" cx="28" cy="26" r="1.6"/>',
-  '<path class="ln" d="M28 46 V28 M28 28 L12 12 M28 28 L44 12"/><circle class="pick" cx="44" cy="12" r="4"/>',
-  '<rect class="ln" x="8" y="10" width="40" height="34" rx="3"/><path class="ln" d="M8 18h40"/><path class="tick" d="M18 31 l6 6 12-12"/>',
-  '<circle class="ln" cx="28" cy="27" r="18"/><path class="tick" d="M19 27 l6 6 12-12"/>',
-];
+// ── Week one: the real level one, four parts, four moves each ──────────────
 const week = { dom: 'self' };
 let today = 0, dayTimer = null;
-async function drawDays() {
-  const lv = await loadStage(stage);
-  if (!lv || !lv[1]) return;
-  const d = lv[1][week.dom];
-  $('#week-eyebrow').textContent = `Week one · ${dname(week.dom)} · ${STAGES[stage].n}`;
-  $('#days').innerHTML = d.steps.map((s, i) => `<li class="day${i === today ? ' on' : ''}">
-    <span class="dn">${DAYS[i]}</span><svg class="dart" viewBox="0 0 56 52" aria-hidden="true">${STEP_ART[i]}</svg>
-    <b>${esc(SEVEN[i].n)}</b><p>${esc(s)}</p></li>`).join('');
+const DCOL = { self: 'var(--self)', people: 'var(--people)', work: 'var(--work)', market: 'var(--market)' };
+function drawDays() {
+  const L1 = LEVELS4[0];
+  $('#week-eyebrow').textContent = `Week one · ${L1.word} · ${L1.title}`;
+  $('#days').innerHTML = L1.d.map((x, i) => { const k = DOMAINS[i].k, mine = k === week.dom && week.set;
+    return `<li class="day${i === today ? ' on' : ''}" style="--dc:${DCOL[k]}">
+    <span class="lt" aria-hidden="true">${esc(x.l)}</span><span class="dk">${esc(DOMAINS[i].n)} · ${esc(x.name)}</span>
+    ${mine ? '<span class="yours">Where your mirror points</span>' : ''}
+    <p class="tq">${plain(x.t.q)}</p><p class="sq">Then slide: ${esc(x.s.q)}</p></li>`; }).join('');
 }
 function dayWalk(on) {
   clearInterval(dayTimer); dayTimer = null;
@@ -259,16 +263,14 @@ const camp = Array.from({ length: 12 }, (_, i) => trail.getPointAtLength(len * (
 $('#camps').innerHTML = camp.map((p, i) => `<g class="camp ${BAND[gateFor(i + 1)][0]}" data-wk="${i + 1}" tabindex="0" role="button" aria-label="Week ${i + 1}">
   <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="13"/><text x="${p.x.toFixed(1)}" y="${(p.y + 4).toFixed(1)}" text-anchor="middle">${i + 1}</text></g>`).join('');
 let wk = 1;
-async function drawClimb(swap) {
-  const L = await loadStage(stage);
-  if (!L) return;
-  const names = LEVEL_NAMES[stage];
-  document.querySelectorAll('#camps .camp').forEach((g) => { const n = +g.dataset.wk; g.classList.toggle('on', n === wk); g.setAttribute('aria-label', `Week ${n}: ${names[n - 1]}`); g.setAttribute('aria-pressed', String(n === wk)); });
+function drawClimb(swap) {
+  const name = (n) => `${LEVELS4[n - 1].word} · ${LEVELS4[n - 1].title}`;
+  document.querySelectorAll('#camps .camp').forEach((g) => { const n = +g.dataset.wk; g.classList.toggle('on', n === wk); g.setAttribute('aria-label', `Week ${n}: ${name(n)}`); g.setAttribute('aria-pressed', String(n === wk)); });
   const p = camp[wk - 1];
   $('#climber').setAttribute('transform', `translate(${p.x.toFixed(1)} ${(p.y - 26).toFixed(1)})`);
   $('#wk-band').textContent = `Week ${wk} · ${BAND[gateFor(wk)][1]}`;
-  $('#wk-name').textContent = names[wk - 1];
-  $('#wk-promise').textContent = L[wk] ? L[wk].promise : '';
+  $('#wk-name').textContent = name(wk);
+  $('#wk-promise').textContent = `By Sunday: ${LEVELS4[wk - 1].promise.charAt(0).toLowerCase()}${LEVELS4[wk - 1].promise.slice(1)}`;
   if (swap) replay($('.climb .sunday'));
 }
 const goWeek = (n) => { wk = Math.min(12, Math.max(1, n)); drawClimb(true); };
@@ -278,13 +280,9 @@ $('#wk-prev').addEventListener('click', () => goWeek(wk - 1));
 $('#wk-next').addEventListener('click', () => goWeek(wk + 1));
 
 // ── The stage, chosen in the mirror or above the climb ──────────────────────
-function setStage(st) {
-  stage = st;
-  document.querySelectorAll('[data-stage]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.stage === stage)));
-  document.querySelectorAll('[data-stage-eyebrow]').forEach((x) => { x.textContent = `Your ${STAGES[stage].n} climb`; });
-  drawClimb(); drawDays();
-}
-document.querySelectorAll('[data-stages]').forEach((g) => g.addEventListener('click', (e) => { const b = e.target.closest('[data-stage]'); if (b && b.dataset.stage !== stage) setStage(b.dataset.stage); }));
+// The levels are the same for every stage (Version 4); the stage goes with
+// the sign-up, and breaks ties in the mirror.
+function setStage(st) { stage = st; }
 
 // ── Count it yourself ───────────────────────────────────────────────────────
 const now = $('#s-now'), want = $('#s-want'), cal = $('#cal');
@@ -310,6 +308,12 @@ function ba(k) {
 $('.ba-switch').addEventListener('click', (e) => { const b = e.target.closest('[data-ba]'); if (b) { touched = true; ba(b.dataset.ba); } });
 
 drawClimb(); drawDays();
+
+// ── The phone bar, and the year counted up the first time it is seen ───────
+stickyJoin({ title: 'The first three weeks are free', line: 'No card. Your work is yours to keep.', label: joined ? 'Continue' : 'Start free',
+  after: $('.hero'), quiet: [$('#close-cta'), $('#mirror-box'), $('.year .acts')], onJoin: (e) => (joined ? (location.href = '/ground-plan/#home') : join(e)) });
+const stopCount = countUp($('#o-year'), () => Math.max(0, now.value - want.value) * 52, (n) => `${n.toLocaleString('en-US')} h`);
+now.addEventListener('input', stopCount); want.addEventListener('input', stopCount);
 
 // ── Motion: what arrives as you scroll, and the pause button ────────────────
 // Everything is visible at rest; only what starts below the first screen

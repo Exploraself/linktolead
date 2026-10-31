@@ -136,14 +136,20 @@ ok(!/ten questions|10 questions/i.test(B) && !B.includes('Mockup at real size') 
 ok(!/href="\/(compass\/welcome|road2)/.test(B) && (B.match(/<a [^>]*class="cta"[^>]*>/g) || []).every((a) => a.includes('data-join')) && read('public/road1/page.js').includes("variant: 'full', landing: 'road1'") && B.includes('<script type="module" src="/road1/page.js"></script>'), 'Road 1: every call to action opens the FULL form (landing road1), none goes to Road 2');
 ok(B.indexOf('<h2 class="sectitle">Move one lever. Watch the four answer.</h2>') > B.indexOf('id="library"') && B.indexOf('id="whatif-lab"') < B.indexOf('id="start"'), 'Road 1: the What-if Lab, after the library and before the close');
 const A = read('public/road3/index.html');
-ok(A.includes('The Leader’s North Star shows which one you are in.') && A.includes('<b>Your free account</b><span>One minute. Name and email.</span>') && A.includes('<b>Your Base Camp</b><span>Your stage and your first three moves.</span>'), 'Road 3: the North Star line and the three steps');
+ok(!A.includes('The Leader’s North Star shows which one you are in.') && A.includes('<b>Your free account</b><span>One minute. Name and email.</span>') && A.includes('<b>Your Base Camp</b><span>Your stage and your first three moves.</span>') && A.includes('Tap, slide, write one sentence, read four lines back.'), 'Road 3: the three steps, in the four moves of Version 4; no second product named');
+ok(A.includes('id="s-now"') && A.includes('id="s-want"') && A.includes('What another year like this <em>costs you.</em>'), 'Road 3: what another year costs, counted by the founder');
+ok(A.includes('/cabinet/alexandru.jpg') && A.includes('I built made-to-measure kitchens and wardrobes') && A.includes('The whole risk is three weeks of honest work.'), 'Road 3: Alexandru’s face and story, and the risk line');
 for (const [n, p] of [['The Founder Launchpad', 'No cost'], ['The Boardroom', 'One 1:1 session']]) ok(A.includes(`<b>${n}</b>`) && A.includes(`<span class="pr">${p}</span>`), `Road 3: ${n} · ${p}`);
 // Cold visitors see only the next step, never the whole ladder (30 Oct).
 ok(!['$97', '$397', '$1,989'].some((p) => A.includes(`<span class="pr">${p}</span>`)) && A.includes('Start free. When you’re ready, one hour with Alexandru opens the next two weeks.'), 'Road 3: only the next step, no LAB, HUB or Summit prices');
 ok(A.includes('Your business can’t grow <em>past you.</em>') && A.includes('The Founder’s Blueprint · Link to Lead') && !/incubator/i.test(A), 'Road 3: its own headline, and no "Incubator"');
-ok(A.includes('Start tonight, free. <em>By Tuesday, you’ll be ahead.</em>') && A.includes('>Start free →</button>') && A.includes('Levels 01–03 free · Instant access') && !/ten questions/i.test(A), 'Road 3: the close');
-ok(!/PHOTO/.test(A) && read('public/road3/page.js').includes("variant: 'simple', landing: 'road3'") && A.includes('src="/road3/page.js"') && A.includes('<a href="/north3/">The Leader’s North Star</a>'), 'Road 3: no photo placeholder; Join opens the simple form, landing road3; its footer links to Road 2');
-ok(levelsHTML('build').includes(`<p>${weekTitle('build', 1)}</p>`) && (levelsHTML('grow').match(/<li/g) || []).length === 12, 'Road 3: level names come from content.js');
+ok(A.includes('Start tonight, free. <em>By Tuesday, you’ll be ahead.</em>') && A.includes('>Start my free three weeks →</button>') && !A.includes('>Join →<') && !/ten questions/i.test(A), 'Road 3: the close; every button says what it starts');
+ok(!/PHOTO/.test(A) && read('public/road3/page.js').includes("variant: 'simple', landing: 'road3'") && A.includes('src="/road3/page.js"') && !A.includes('href="/north3/"'), 'Road 3: no photo placeholder; Join opens the simple form, landing road3; no link leads away to another offer');
+{
+  const { LEVELS4 } = await import('../public/levels-v4.js');
+  const LH = levelsHTML();
+  ok((LH.match(/<li class="(free|with|last|)">/g) || []).length === 12 && LEVELS4.every((L) => LH.includes(`${String(L.n).padStart(2, '0')} · ${L.word}</b>`)) && (LH.match(/class="ch"/g) || []).length === 3, 'Road 3: the twelve Version 4 words, in three chapters');
+}
 ok([1, 3, 4, 5, 6, 11, 12].map(band).join() === 'free,free,with,with,,,last', 'Road 3: the levels’ bands');
 const WB = read('public/north3/index.html');
 for (const W of [WB]) ok(W.includes('<button type="button" data-gate class="cta gold-btn" style="min-height: 56px; padding: 0 32px; font-size: 17px">Show me my road →</button>') && !W.includes('href="#dream"') && !/<a [^>]*href="\/(?!compass\/assets|assets)/.test(W), 'Road 2: "Show me my road" opens the full form; no link leaves the page');
@@ -201,17 +207,33 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
   const R4 = read('public/road4/index.html'), R4J = read('public/road4/page.js'), R4C = read('public/road4/road4.css');
   const R4T = R4.replace(/<!--[\s\S]*?-->/g, '');
   ok(tagsFor({ landing: 'road4', signupType: 'full' }).some((x) => x.name === 'linktolead-road4' && x.status === 'active'), 'road4: tagged linktolead-road4');
-  ok(R4J.includes("variant: 'full', landing: 'road4'") && R4.includes('<script type="module" src="/road4/page.js"></script>') && (R4.match(/<a [^>]*class="cta"[^>]*>/g) || []).every((x) => x.includes('data-join') || x.includes('href="#mirror"')), 'road4: every call to action opens the FULL form (or the mirror), landing road4');
+  ok(R4J.includes("{ gate, opener, stage: { id: stage }, variant, landing: 'road4' }") && R4J.includes("Math.random() < 0.5 ? 'simple' : 'full'") && R4J.includes("localStorage.setItem('ftb-r4-form', v)") && R4.includes('<script type="module" src="/road4/page.js"></script>') && (R4.match(/<a [^>]*class="cta"[^>]*>/g) || []).every((x) => x.includes('data-join') || x.includes('href="#mirror"')), 'road4: every call to action opens the form (or the mirror), landing road4; simple or full is a test, kept per device');
+  ok(!['$97', '$397', '$1,989'].some((p) => { const i = R4.indexOf(`<span class="pr">${p}</span>`); return i < 0 || i < R4.indexOf('<details class="later'); }), 'road4: only the next step is open; the LAB, HUB and Summit wait behind one tap');
   for (const [n, p] of [['The Founder Launchpad', 'Free'], ['The Boardroom — an hour with Alexandru', 'No cost'], ['Personal Leadership LAB', '$97'], ['Business Growth HUB', '$397'], ['The Summit', '$1,989']]) ok(R4.includes(`<b>${n}</b><span class="pr">${p}</span>`), `road4: ${n} · ${p}`);
   ok(R4C.includes('prefers-reduced-motion') && R4C.includes('html.still') && R4.includes('id="still"'), 'road4: motion stops for reduced motion and for the Pause button');
   ok(!/\b(99|32) (tools|frameworks)\b|P\.A\.C\.E|most founders|incubator/i.test(R4T + R4J), 'road4: no tool or framework names, no banned words');
   ok(!/\/start[#/"']/.test(R4 + R4J), 'road4: links go to /ground-plan/, not the old /start');
-  ok(!/<textarea|<input type="text"|localStorage\.setItem\((?!'ftb-still')/.test(R4 + R4J), 'road4: nothing to type, and nothing kept but the motion choice');
-  ok(R4J.includes("'/levels-build.js'") && R4J.includes('L[wk].promise') && R4J.includes('LEVEL_NAMES[stage]') && R4J.includes('lv[1][week.dom]') && R4J.includes('one.steps.slice(0, 2)'), 'road4: week one, the climb and the reading come from the level files');
+  ok(!/<textarea|<input type="text"|localStorage\.setItem\((?!'ftb-still'|'ftb-r4-form')/.test(R4 + R4J), 'road4: nothing to type; kept on the device: the motion choice, the form test, and (through road-kit) what the mirror found');
+  ok(R4J.includes("import { LEVELS4 } from '/levels-v4.js'") && R4J.includes('LEVELS4[wk - 1].promise') && R4J.includes('L1.d.map(') && !R4J.includes('levels-build.js') && !R4J.includes('SEVEN'), 'road4: week one, the climb and the reading come from the Version 4 levels');
   const QN = (R4J.match(/\{ k: '(self|people|work|market)', art: /g) || []);
   ok(QN.length === 8 && ['self', 'people', 'work', 'market'].every((k) => QN.filter((x) => x.includes(`'${k}'`)).length === 2), 'road4: the mirror asks eight questions, two in each domain');
   ok(/\/\/ @site data[\s\S]*\/\/ @end data/.test(R4J) && /\/\/ @site join[\s\S]*\/\/ @end join/.test(R4J), 'road4: the site-only blocks are marked for the preview build');
   ok(R4.includes('/cabinet/alexandru.jpg') && R4.includes('I was the business, too.') && !/PHOTO OF/.test(R4), 'road4: Alexandru, in his own story, with his photo');
+}
+// The three Blueprint pages (1 Nov): one phone bar, one hand-off to Base Camp, no banned words.
+{
+  const K = read('public/road-kit.js'), AR = read('public/arrival.js');
+  for (const r of ['road1', 'road3', 'road4']) {
+    const H = read(`public/${r}/index.html`).replace(/<!--[\s\S]*?-->/g, ''), J = read(`public/${r}/page.js`);
+    ok(/stickyJoin\(/.test(J) && /remember\(|k\.remember\(/.test(J), `${r}: the phone bar, and what the founder found kept for Base Camp`);
+    ok(!/most founders|incubator|twenty-eight answers|seven questions/i.test(H), `${r}: no banned or outdated words`);
+  }
+  ok(K.includes("localStorage.setItem('ftb-arrival'") && K.includes('prefers-reduced-motion') && K.includes('@media(min-width:761px){.rk-bar{display:none}}'), 'road-kit: device only, still for reduced motion, phone only');
+  ok(read('public/ground-plan/index.html').includes('<script src="/arrival.js" type="module"></script>'), 'Base Camp loads the arrival note');
+  const { noteFor } = await import('../public/arrival.js');
+  ok(noteFor({ landing: 'road4', worst: 'people', leaking: 3, word: 'SEED', letter: 'E', part: 'Entrust' }).includes('Lead your people') && noteFor({ landing: 'road1', extraYear: 780 }).includes('780 hours a year') && noteFor({ landing: 'road3', extraYear: 0 }) === '' && noteFor(null) === '', 'arrival note: the founder’s own finding said back, nothing when there is nothing of theirs');
+  const B1 = read('public/road1/index.html');
+  ok(B1.includes('<details class="later" id="later">') && B1.indexOf('<details class="later"') < B1.indexOf('The Personal Leadership LAB') && B1.indexOf('</details>') > B1.indexOf('<p class="pprice">$1,989</p>') && B1.includes('Weeks <b>6–9</b>'), 'Road 1: the LAB, HUB and Summit behind one tap; the LAB opens weeks 6–9');
 }
 // The tag system (30 Oct): every tag is "linktolead" or "linktolead-<group>-<value>", lowercase, no spaces.
 {

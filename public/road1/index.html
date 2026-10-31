@@ -6,7 +6,7 @@
 <script src="/theme.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Link to Lead — The Founder's Blueprint | ExploraSelf</title>
-<meta name="description" content="Twelve weeks that put your business on paper instead of in your head. The Leader’s North Star shows which twelve you walk and which of the four domains they lean on. First three levels free.">
+<meta name="description" content="What is your business for? Twelve practical weeks that take the business out of your head and onto paper, one Sunday at a time. The first three weeks are free and stay free.">
 <meta name="theme-color" content="#14100B">
 <link rel="icon" href="/northstar/assets/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/northstar/assets/favicon-32.png" sizes="32x32" type="image/png">
@@ -14,7 +14,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ExploraSelf">
 <meta property="og:title" content="Link to Lead — The Founder's Blueprint | ExploraSelf">
-<meta property="og:description" content="Twelve weeks that put your business on paper instead of in your head. The Leader’s North Star shows which twelve you walk and which of the four domains they lean on. First three levels free.">
+<meta property="og:description" content="What is your business for? Twelve practical weeks that take the business out of your head and onto paper, one Sunday at a time. The first three weeks are free and stay free.">
 <meta property="og:url" content="https://linktolead.exploraself.com/road1/">
 <meta property="og:image" content="https://linktolead.exploraself.com/northstar/assets/og-image.png">
 <meta property="og:image:width" content="1200">
@@ -22,7 +22,7 @@
 <meta property="og:image:alt" content="From founder to intentional leader. The ExploraSelf Leader’s North Star.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Link to Lead — The Founder's Blueprint | ExploraSelf">
-<meta name="twitter:description" content="Twelve weeks that put your business on paper instead of in your head. The Leader’s North Star shows which twelve you walk and which of the four domains they lean on. First three levels free.">
+<meta name="twitter:description" content="What is your business for? Twelve practical weeks that take the business out of your head and onto paper, one Sunday at a time. The first three weeks are free and stay free.">
 <meta name="twitter:image" content="https://linktolead.exploraself.com/northstar/assets/og-image.png">
 <link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
@@ -518,6 +518,44 @@ footer .wrap{padding-block:28px 46px;font-size:12px;color:#8E8370}
 .here{top:3px}
 @media(max-width:720px){.here p{font-size:9.5px}}
 button.cta{border:0;cursor:pointer}
+/* 1 Nov: the cost of waiting, the guide, the later climb, the close, motion */
+.cost{display:grid;gap:28px;align-items:center;margin-top:18px}
+@media(min-width:860px){.cost{grid-template-columns:1fr 1fr}}
+.sl{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:baseline;margin-top:18px;font-weight:600;font-size:15px;color:#F2E9D6}
+.sl output{font:500 22px/1 var(--display);color:var(--gold-hi);font-variant-numeric:tabular-nums}
+.sl input{grid-column:1/-1;width:100%;accent-color:#B4975F;min-height:32px}
+.yr{background:#0B0805;border:1px solid var(--line-dark);padding:clamp(22px,4vw,32px);display:grid;gap:10px}
+.yr .big{font:500 clamp(56px,9vw,88px)/1 var(--display);color:#E3C47E;font-variant-numeric:tabular-nums}
+.yr .eq{color:#CFC4AE}
+.yr .ask{font:italic 400 clamp(19px,2.3vw,22px)/1.4 var(--display);color:#F2E9D6}
+.alex{display:grid;gap:clamp(24px,5vw,52px);align-items:center}
+@media(min-width:820px){.alex{grid-template-columns:.85fr 1.15fr}}
+.face{margin:0}
+.face img{display:block;width:100%;height:auto;aspect-ratio:5/4;object-fit:cover}
+.face figcaption{margin-top:10px;font-size:13px;color:var(--muted)}
+.alex .sig{margin-top:18px;font:italic 400 28px/1 var(--display);color:var(--gold-ink)}
+.later{border-bottom:2px solid var(--ink)}
+.later > summary{list-style:none;cursor:pointer;background:var(--cream)}
+.later > summary::-webkit-details-marker{display:none}
+.later > summary .wrap{display:grid;gap:6px;padding-block:28px;position:relative;padding-right:56px}
+.later > summary b{font:500 clamp(22px,3.2vw,30px)/1.2 var(--display)}
+.later > summary .wrap::after{content:"+";position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);font:400 34px/1 var(--body);color:var(--gold-ink);transition:transform .3s}
+.later[open] > summary .wrap::after{transform:translateY(-50%) rotate(45deg)}
+.later > summary:hover b{color:var(--gold-ink)}
+.hero-face{display:none}
+@media(min-width:1120px){.hero-face{display:block;position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:50%;transform:translateY(-38%);width:230px;margin:0;z-index:3}
+  .hero-face img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;border:1px solid rgba(214,191,143,.45);box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+  .hero-face figcaption{margin-top:12px;font:italic 400 15px/1.45 var(--display);color:#D6BF8F}}
+.close .mine{margin:18px auto 0;font:italic 400 clamp(19px,2.2vw,22px)/1.45 var(--display);color:var(--gold);max-width:44ch}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.enter > *{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
+.enter > :nth-child(3){animation-delay:.15s}.enter > :nth-child(4){animation-delay:.45s}.enter > :nth-child(5){animation-delay:.65s}
+.rv{transition:opacity .8s ease,transform .8s ease}
+.rv.wait{opacity:0;transform:translateY(18px)}
+.close .cta{animation:beckon 2.6s ease-in-out 1s 3}
+@keyframes beckon{0%{box-shadow:0 0 0 0 rgba(214,191,143,.6)}70%{box-shadow:0 0 0 16px rgba(214,191,143,0)}100%{box-shadow:0 0 0 0 rgba(214,191,143,0)}}
+@media(prefers-reduced-motion:reduce){.enter > *,.close .cta{animation:none}.rv.wait{opacity:1;transform:none}.rv{transition:none}}
+html.rk-bar-on footer{padding-bottom:76px}
 #gate{position:fixed;inset:0;z-index:60;background:rgba(16,13,9,.65);display:flex;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}
 #gate[hidden]{display:none}
 </style>
@@ -525,23 +563,23 @@ button.cta{border:0;cursor:pointer}
 <body>
 
 <!-- ═══ hero ═══ -->
-<section class="hero"><div class="wrap">
+<section class="hero"><div class="wrap enter">
   <div class="lockup">
     <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="7" y="7" width="20" height="20" transform="rotate(45 17 17)" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--gold)"/><rect x="13" y="13" width="8" height="8" transform="rotate(45 17 17)" fill="var(--gold)"/></svg>
     <div>
       <p class="lw">Link to Lead</p>
-      <p class="ls">The Founder’s Blueprint · The Incubator</p>
+      <p class="ls">The Founder’s Blueprint · ExploraSelf</p>
     </div>
   </div>
   <!-- Headline decided 29 Oct: "What is your business for?". The alternate, kept
        so Alexandru can switch back: <h1>Your business, on paper. <em>Not in your head.</em></h1> -->
+  <figure class="hero-face" aria-hidden="true"><img src="/cabinet/alexandru.jpg" alt="" width="640" height="512" decoding="async"><figcaption>Alexandru and the team read what you write, before you ever speak.</figcaption></figure>
   <h1>What is your business <em>for?</em></h1>
-  <p class="lede">A twelve-week founder programme. Each week you open something real — your calendar, your invoices, your delivery — count it, and write down what is actually there.</p>
+  <p class="lede">Twelve practical weeks that take the business out of your head and onto paper. Each week you open something real, your calendar, your invoices, your customers, and write down what is actually there.</p>
   <div class="go-row">
-    <a class="cta" href="#join" data-join>See where I stand →</a>
-    <p class="free"><b>FREE</b><span>Levels 01–03<br>Free account · one minute</span></p>
+    <a class="cta" href="#join" data-join>Start my free three weeks →</a>
+    <p class="free"><b>FREE</b><span>Weeks 1–3, and they stay free<br>No card · your work is yours to keep</span></p>
   </div>
-  <p class="under">Your Base Camp comes once you tell us where to send it.</p>
 </div></section>
 
 <!-- ═══ welcome bridge ═══ -->
@@ -564,7 +602,7 @@ button.cta{border:0;cursor:pointer}
   <hr style="border:0;border-top:2px solid var(--ink);margin:34px 0 0">
   <p class="eyebrow" style="margin-top:30px">What you already lead</p>
   <h2 class="sectitle">Four things hold the business up</h2>
-  <p class="lede">You are leading all four right now, whether you chose to or not. Most founders are strong in two and guessing at the other two.</p>
+  <p class="lede">You are leading all four right now, whether you chose to or not. The first weeks show you which ones you actually know, and which ones you are guessing at.</p>
 
   <div class="fours" id="fours">
     <div class="four s on"><p class="n">One</p><h3>Lead yourself</h3>
@@ -589,6 +627,28 @@ button.cta{border:0;cursor:pointer}
     <p>Everything you are trying to fix sits in one of those four. Work the wrong one and nothing moves.</p>
     <p class="b">So the whole job is finding out which one — and fixing that one first.</p>
   </div>
+</div></section>
+
+<!-- ═══ the cost of waiting, counted by the founder (1 Nov; nothing invented, nothing sent) ═══ -->
+<section class="band dark" id="cost"><div class="wrap">
+  <p class="turn">Before the how, count what staying the same costs you.</p>
+  <p class="eyebrow">Count it yourself</p>
+  <h2 class="sectitle">What another year like this costs you</h2>
+  <div class="cost">
+    <div>
+      <p class="lede" style="color:#DDD3BD">Two numbers only you know. Drag them to your real week.</p>
+      <label class="sl">Hours you actually work in a week <output id="o-now">55 h</output><input type="range" id="s-now" min="20" max="90" value="55"></label>
+      <label class="sl">Hours you would choose to work <output id="o-want">40 h</output><input type="range" id="s-want" min="10" max="70" value="40"></label>
+    </div>
+    <div class="yr">
+      <p class="eyebrow">Beyond the week you want, every year</p>
+      <p class="big" id="o-year">780 h</p>
+      <p class="eq" id="o-eq">That is 20 of your chosen weeks, every year.</p>
+      <p class="ask" id="r-ask">Who got those hours last year, and who went without them?</p>
+    </div>
+  </div>
+  <div class="ctarow"><a class="cta" href="#join" data-join>Start taking them back, free →</a>
+    <p class="under">Week one starts by counting where last week actually went.</p></div>
 </div></section>
 
 <!-- ═══ the twelve ═══ -->
@@ -628,39 +688,7 @@ button.cta{border:0;cursor:pointer}
     <p class="mnote">Every column is one week. Every column has all four — that is the whole point. The weight shifts, the coverage never does.</p>
   </div>
 
-  <p class="small">Seven questions in each, every week — <strong>name it · evidence · gap · cost · decision · move · review</strong>. Twenty-eight answers close a week. None can be answered by thinking hard; each names what to open, what to count and what to write.</p>
-</div></section>
-
-<!-- ═══ stages + emphasis ═══ -->
-<section class="band dark"><div class="wrap">
-  <p class="turn">All four, every week — but not with the same weight. That depends on where you actually are, not where the last podcast said you should be.</p>
-  <p class="eyebrow">Where you are</p>
-  <h2 class="sectitle">Your stage decides what comes first</h2>
-  <p class="lede" style="color:#DDD3BD">A founder chasing first clients and a founder with a team describe their problem with the same words and do not have the same problem.</p>
-
-  <div class="stages">
-    <div class="stage s1"><span class="sn">1</span><p class="num">Stage one</p><h3>Building</h3>
-      <p>Finding the offer and the first clients. Everything depends on you.</p>
-      <div class="wt"><p class="wl">These two carry it</p>
-        <div class="chips"><span class="ch" style="background:var(--self)">Lead yourself</span>
-        <span class="ch" style="background:var(--market)">Lead the market</span>
-        <span class="ch off">Lead your people</span><span class="ch off">Lead your business</span></div></div></div>
-    <div class="stage s2"><span class="sn">2</span><p class="num">Stage two</p><h3>Growing</h3>
-      <p>Clients repeat, but the business still runs through one head.</p>
-      <div class="wt"><p class="wl">These two carry it</p>
-        <div class="chips"><span class="ch" style="background:var(--people)">Lead your people</span>
-        <span class="ch" style="background:var(--work)">Lead your business</span>
-        <span class="ch off">Lead yourself</span><span class="ch off">Lead the market</span></div></div></div>
-    <div class="stage s3"><span class="sn">3</span><p class="num">Stage three</p><h3>Scaling</h3>
-      <p>There is a team, and the constraint is judgement, not work.</p>
-      <div class="wt"><p class="wl">All four, evenly</p>
-        <div class="chips"><span class="ch" style="background:var(--self)">Lead yourself</span>
-        <span class="ch" style="background:var(--people)">Lead your people</span>
-        <span class="ch" style="background:var(--work)">Lead your business</span>
-        <span class="ch" style="background:var(--market)">Lead the market</span></div></div></div>
-  </div>
-
-  <p class="small" style="color:var(--muted-dark)">You work all four either way. Only the weight changes — and your Leader’s North Star sets it, not you.</p>
+  <p class="small">Four moves in each, every week: <strong>tap</strong> the line that sounds like you, <strong>slide</strong> to the honest number, <strong>write once</strong>, one sentence with blanks, and <strong>read four lines</strong> back, built only from your answers. No blank pages, and nothing you can answer by thinking hard.</p>
 </div></section>
 
 <!-- ═══ what changes ═══ -->
@@ -718,16 +746,16 @@ button.cta{border:0;cursor:pointer}
   <h2 class="sectitle">Three things happen, in this order</h2>
   <div class="steps">
     <div class="stp"><span class="circ">1</span><h3>We find where you are</h3>
-      <p>A free account and the Leader’s North Star, then your Base Camp: which stage you are in, and which of the four is costing you most.</p></div>
+      <p>A free account, then your Base Camp: where you stand, and which of the four is costing you most.</p></div>
     <div class="stp"><span class="circ">2</span><h3>You work one week at a time</h3>
-      <p>Open something real, count it, write it down. Twenty-eight answers closes a week.</p></div>
+      <p>Tap, slide, write one sentence, read four lines back. Four parts of the business close a week.</p></div>
     <div class="stp"><span class="circ">3</span><h3>You get an answer, in your own numbers</h3>
-      <p>After week three the Blueprint reads your own figures back and names the one thing to fix first.</p></div>
+      <p>Your own answers come back to you as four plain lines. After week three, Alexandru and the team read them and name the one thing to fix first.</p></div>
   </div>
   <p class="small">Every week asks you to open something real — your calendar, your invoices, your delivery — and write down what is actually there. That is the method, and it is why it works.</p>
   <p class="lead-why">The numbers are never the point. Each one is there to help you <b>make a decision</b>, <b>lead a person</b> or <b>hand something over</b> — the leadership work only you can do.</p>
-  <div class="ctarow"><a class="cta" href="#join" data-join>See where I stand</a>
-    <p class="under">One minute. Name and email. Nothing to pay.</p></div>
+  <div class="ctarow"><a class="cta" href="#join" data-join>Start my free three weeks</a>
+    <p class="under">A free account: your name, email and a password, so your work is saved. Nothing to pay.</p></div>
 </div></section>
 
 <!-- ═══ door 1 ═══ -->
@@ -750,6 +778,20 @@ button.cta{border:0;cursor:pointer}
   <p class="small">No card. An email, so your work is saved, follows you between devices — and so Alexandru can read it before you ever speak.</p>
   <div class="ctarow"><a class="cta" href="#join" data-join>Start now</a>
     <p class="under">Two minutes to find your starting point.</p></div>
+</div></section>
+
+<!-- ═══ the guide (1 Nov): Alexandru, in his own story ═══ -->
+<section class="band"><div class="wrap">
+  <div class="alex">
+    <figure class="face"><img src="/cabinet/alexandru.jpg" alt="Alexandru Cojocari" width="640" height="512" loading="lazy" decoding="async"><figcaption>Alexandru Cojocari · Founder, ExploraSelf · Rome</figcaption></figure>
+    <div>
+      <p class="eyebrow">Why this exists</p>
+      <h2 class="sectitle">I was the business, too.</h2>
+      <p class="lede">In my late teens I built made-to-measure kitchens and wardrobes. I loved it. I also did everything myself, and I didn’t watch the money. Orders came late, and the business closed.</p>
+      <p class="lede">Today I mentor founders. The Blueprint is what I wish someone had put in front of me then: the right things to look at, one week at a time, and someone to read them with me.</p>
+      <p class="sig">Alexandru</p>
+    </div>
+  </div>
 </div></section>
 
 <!-- ═══ bridge → business ═══ -->
@@ -889,7 +931,7 @@ button.cta{border:0;cursor:pointer}
       <div class="rk"><b>More than half the work depends on you</b>
         <p>Then the business cannot grow past your diary, cannot be handed over, and cannot survive a bad fortnight.</p></div>
     </div>
-    <p class="rknote">Neither is a verdict. Both are questions worth answering before another quarter goes by — and most founders have never put a number to either.</p>
+    <p class="rknote">Neither is a verdict. Both are questions worth answering before another quarter goes by.</p>
   </div>
 
   <div class="ctarow">
@@ -898,10 +940,14 @@ button.cta{border:0;cursor:pointer}
   </div>
 </div></section>
 
+<!-- ═══ after week five: one tap away, so the open offer stays the next step ═══ -->
+<details class="later" id="later">
+<summary><span class="wrap"><span class="eyebrow">After week five</span><b>See where the climb goes: the LAB, the HUB and The Summit</b></span></summary>
+
 <!-- ═══ door 3 · LAB ═══ -->
 <section class="band"><div class="wrap">
   <p class="turn">Ready to keep going under your own steam? Let’s build the owner.</p>
-  <div class="doorhead"><span class="weeks">Weeks <b>1–9</b></span><span class="eyebrow">From operator to owner</span></div>
+  <div class="doorhead"><span class="weeks">Weeks <b>6–9</b></span><span class="eyebrow">From operator to owner</span></div>
   <h2 class="sectitle">The Personal Leadership LAB</h2>
   <p class="lede">Weeks six to nine are where the business stops living in your head — and where you find out what it has been costing you to keep it there.</p>
   <div class="yolist">
@@ -1004,6 +1050,8 @@ button.cta{border:0;cursor:pointer}
   </div>
 </div></section>
 
+</details>
+
 <!-- ═══ what it is worth ═══ -->
 <section class="band dark"><div class="wrap">
   <p class="turn">Finally, let’s talk about what it is worth.</p>
@@ -1054,22 +1102,23 @@ button.cta{border:0;cursor:pointer}
 <!-- ═══ bridge → close ═══ -->
 <section class="bridge"><div class="wrap">
   <p style="margin-top:0">Every one of those starts in the same place, and it costs nothing to find out which.</p>
-  <p class="sub">The alternative is another quarter of guessing which of the four is the one holding you back — and most founders can name the cost of that without being told.</p>
+  <p class="sub">The alternative is another quarter of guessing which of the four is the one holding you back. You already know what that costs.</p>
 </div></section>
 
 <!-- ═══ close ═══ -->
 <section class="close" id="start"><div class="wrap">
   <p class="eyebrow">Start here</p>
   <h2>Start tonight, free. <em>By Tuesday, you’ll be ahead.</em></h2>
-  <button type="button" class="cta" data-join>Create my free account →</button>
-  <p class="under">Levels 01–03 free · Instant access</p>
+  <p class="mine" id="close-mine" hidden></p>
+  <div id="close-cta"><button type="button" class="cta" data-join>Create my free account →</button>
+  <p class="under">Levels 01–03 free · Instant access</p></div>
 </div></section>
 
 <footer><div class="wrap"><strong style="color:#C9BCA4">ExploraSelf</strong> · A Good People Company · Lead yourself. Grow your business.</div></footer>
 
 <!-- The full account form (/account-box.js, with a password): every call
      to action on this page opens it, so founders who arrive here sign up here
-     (landing road1, "salespageincubator1"). -->
+     (landing road1, Mailchimp tag "linktolead-road1"). -->
 <div id="gate" hidden></div>
 <script type="module" src="/road1/page.js"></script>
 

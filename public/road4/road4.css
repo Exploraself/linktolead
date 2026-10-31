@@ -428,6 +428,66 @@ section{position:relative}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:70;background:var(--deep);color:#F3EBDA;border:1px solid var(--gold);border-radius:8px;padding:14px 18px;max-width:min(440px,calc(100% - 32px));font-size:14.5px;box-shadow:0 20px 40px rgba(0,0,0,.35)}
 .toast[hidden]{display:none}
 
+/* ── 1 Nov: the eye's path, the four moves, the chapters, the next step only ── */
+/* Hero: a small gold label says what this is, the headline holds the eye, the
+   italic hook names the feeling, the plain offer line says what happens next. */
+.hero .eyebrow{color:var(--gold);font-size:12px}
+.hero .lede.offer{margin-top:16px;max-width:46ch;font-size:clamp(16px,1.8vw,18px);color:#CFC4AE}
+.hero .fine{color:#A99C82}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.enter > *{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
+.enter > :nth-child(2){animation-delay:.12s}.enter > :nth-child(3){animation-delay:.5s}
+.enter > :nth-child(4){animation-delay:.7s}.enter > :nth-child(5){animation-delay:.9s}.enter > :nth-child(6){animation-delay:1s}
+.berg-wrap{animation:rise 1.2s .3s cubic-bezier(.2,.7,.2,1) both}
+.head h2 i{font-style:italic;font-weight:400;color:var(--gold-ink)}
+.navy .head h2 i,.dark .head h2 i{color:var(--gold-hi)}
+
+/* the four moves, then one card per part of the business */
+.moves{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.moves li{position:relative;display:block;padding-left:48px!important;font-size:14.5px;line-height:1.45;color:var(--muted);padding:12px 14px;border-radius:6px;background:color-mix(in srgb,var(--panel) 70%,transparent);border:1px solid var(--line)}
+.moves span{position:absolute;left:14px;top:12px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#14100B;font:700 12px/1 var(--body)}
+.moves b{color:var(--ink);font-weight:600}
+.days.four{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.days.four .day{border-top:4px solid var(--dc,var(--gold))}
+.day .lt{font:500 46px/1 var(--display);color:var(--dc,var(--gold-ink))}
+.day .dk{font:700 11px/1.3 var(--body);letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.day .tq{font:400 17px/1.45 var(--display);color:var(--ink)}
+.day .sq{font-size:13.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px;margin-top:4px}
+.day .yours{font:700 10.5px/1 var(--body);letter-spacing:1.6px;text-transform:uppercase;color:var(--leak)}
+
+/* the three chapters above the climb */
+.chapters{list-style:none;margin:0 0 22px;padding:0;display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.chapters li{display:grid;gap:2px;padding:12px 16px;border:1px solid rgba(255,255,255,.14);border-radius:6px;background:rgba(255,255,255,.04)}
+.chapters small{font:700 11px/1.3 var(--body);letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
+.chapters b{font:500 21px/1.2 var(--display);color:#FFFCF4}
+.chapters span{font-size:13.5px;color:var(--muted-dark)}
+
+/* the cost of waiting ends on the offer */
+.year .acts{margin-top:10px}
+.year .fine{color:#B3A78F}
+
+/* the guide's book */
+.alex .book{display:flex;gap:14px;align-items:center;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);font-size:14.5px;color:var(--muted)}
+.alex .book img{width:56px;height:56px;object-fit:cover;flex:none;box-shadow:4px 8px 16px -8px rgba(0,0,0,.5)}
+.alex .book b{color:var(--ink);font-weight:600}
+
+/* only the next step is open; the rest of the climb waits behind one tap */
+.later{margin-top:14px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+.later summary{cursor:pointer;list-style:none;min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 20px;font:600 15px/1.35 var(--body);color:var(--gold-ink)}
+.later summary::-webkit-details-marker{display:none}
+.later summary::after{content:"+";font:400 24px/1 var(--body);transition:transform .3s}
+.later[open] summary::after{transform:rotate(45deg)}
+.later > .lede{padding:0 20px 14px}
+.later .ladder{padding:0 14px 14px}
+.later[open] .ladder{animation:swap .45s ease}
+@media(min-width:860px){.rung:nth-child(n){margin-left:0}.ladder > .rung:nth-child(2){margin-left:28px}}
+
+/* the close, in the founder's own words when the mirror was used */
+.close .mine{margin-top:16px;font:italic 400 clamp(19px,2.2vw,22px)/1.45 var(--display);color:#E3C47E;max-width:46ch}
+.close .side .cta{box-shadow:0 0 0 0 rgba(227,196,126,.55);animation:beckon 2.6s ease-in-out 1s 3}
+@keyframes beckon{0%{box-shadow:0 0 0 0 rgba(227,196,126,.55)}70%{box-shadow:0 0 0 16px rgba(227,196,126,0)}100%{box-shadow:0 0 0 0 rgba(227,196,126,0)}}
+html.rk-bar-on .foot{padding-bottom:76px}
+
 /* stillness: the founder's choice, or the device's */
 html.still *,html.still *::before,html.still *::after{animation:none!important;transition:none!important}
 html.still .rv.wait{opacity:1;transform:none}
