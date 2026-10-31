@@ -51,3 +51,16 @@ export function details(body = {}) {
     : !industry ? 'Choose your industry.' : '';
   return { company: noCompany || company ? company : null, interest, industry, problem };
 }
+
+/** What an account still lacks to be a full account (31 Oct 2026, Alexandru:
+ *  one universal rule, whatever sales page a founder came from). Any of
+ *  'company' (never asked: NULL; '' means "No company yet" and counts),
+ *  'interest', 'industry', 'password'. Empty: the account is complete. */
+export function missingOf({ company, interest, industry, hasPassword } = {}) {
+  const out = [];
+  if (company === null || company === undefined) out.push('company');
+  if (!INTERESTS.includes(interest)) out.push('interest');
+  if (!INDUSTRIES.includes(industry)) out.push('industry');
+  if (!hasPassword) out.push('password');
+  return out;
+}

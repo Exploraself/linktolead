@@ -5,6 +5,7 @@
 import { json, bad, db, now, clean, accountTables } from '../_shared.js';
 import { mentorFor, keepTz } from '../_mentor.js';
 import { originOf } from '../_mailchimp.js';
+import { missingOf } from '../_profile.js';
 
 async function student(D, token) {
   if (!token || token.length < 20) return null;
@@ -25,7 +26,7 @@ export async function onRequestGet({ request, env }) {
     D.prepare('SELECT stage,results_json,flags_json,updated_at,answers_json FROM compass WHERE student_id = ?').bind(me.id).first(),
     D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(me.id).first(),
     D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'stage-change' LIMIT 1").bind(me.id).first(),
-    D.prepare('SELECT signup_type, consent, unsubscribed, avatar, landing, source, industry FROM student_profile WHERE student_id = ?').bind(me.id).first(),
+    D.prepare('SELECT signup_type, consent, unsubscribed, avatar, landing, source, industry, company, interest FROM student_profile WHERE student_id = ?').bind(me.id).first(),
   ]);
   const crossed = ((await D.prepare("SELECT detail FROM event WHERE student_id = ? AND kind = 'crossed'").bind(me.id).all()).results || []).map((r) => r.detail);
   await D.prepare('UPDATE student SET last_seen_at=? WHERE id=?').bind(now(), me.id).run();
@@ -53,6 +54,9 @@ export async function onRequestGet({ request, env }) {
     avatar: (prof && prof.avatar) || '',
     // The industry from sign-up, so the North Star workspace does not ask again.
     industry: (prof && prof.industry) || '',
+    // What the account still lacks to be full (one rule for every sales page);
+    // the Blueprint asks for it once, at the first answer (api/complete.js).
+    missing: missingOf({ ...(prof || {}), hasPassword: !!(auth && auth.pass_hash) }),
     // Which door they came in through, and the doors they confirmed since (api/cross.js).
     origin: originOf(prof || {}), crossed,
     // "Letters from your mentor": on when they gave consent and did not unsubscribe.
