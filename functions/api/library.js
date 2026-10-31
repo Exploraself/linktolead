@@ -18,6 +18,7 @@ export const LIBRARY_ITEMS = {
   scale: { name: 'The Founder’s Blueprint · Scaling', slug: 'blueprint-scaling', file: '/library/blueprint-scaling.pdf' },
   btl: { name: 'Built to Lead', slug: 'built-to-lead', file: '/library/built-to-lead.pdf' },
   wb: { name: 'Worth Building', slug: 'worth-building', file: '/library/worth-building.pdf' },
+  nww: { name: 'A New Way of Winning', slug: 'a-new-way-of-winning', file: '/library/a-new-way-of-winning.pdf' },
 };
 /** The tag system (functions/_mailchimp.js): linktolead-library-<book>. */
 export const libraryTag = (key) => `linktolead-library-${LIBRARY_ITEMS[key].slug}`;
