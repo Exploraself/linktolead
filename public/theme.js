@@ -10,6 +10,10 @@
  * Sets <html data-theme="light|dark"> and data-theme-pick="device|light|dark",
  * and fires 'es-theme' on window whenever the light changes.
  *
+ * A page may set its own default with <html data-theme-default="dark"> (the
+ * three Blueprint sales pages, 1 Nov): with no pick it opens in that light, not
+ * the device's, and its switch simply flips between dark and light.
+ *
  * Changing the light is never abrupt (30 Oct): the whole page cross-fades over
  * about a second (View Transitions), or, where that is missing, every colour
  * eases across. Under prefers-reduced-motion it changes at once. */
@@ -21,7 +25,9 @@
     if (!read()) { var old = localStorage.getItem('cab-theme'); if (old === 'light' || old === 'dark') write(old); }
   } catch (e) { /* private mode */ }
   try { mq = window.matchMedia('(prefers-color-scheme: dark)'); } catch (e) { mq = null; }
-  function pick() { var p = read(); return p === 'light' || p === 'dark' ? p : 'device'; }
+  var DEF = root.getAttribute('data-theme-default');
+  if (DEF !== 'light' && DEF !== 'dark') DEF = null;
+  function pick() { var p = read(); return p === 'light' || p === 'dark' ? p : DEF || 'device'; }
   function current() { var p = pick(); return p === 'device' ? (mq && mq.matches ? 'dark' : 'light') : p; }
   var ICON = {
     device: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/></svg>',
@@ -35,7 +41,7 @@
     for (var j = 0; j < seg.length; j++) seg[j].setAttribute('aria-pressed', String(seg[j].getAttribute('data-theme-set') === p));
     for (var i = 0; i < b.length; i++) {
       b[i].innerHTML = ICON[p];
-      var next = p === 'device' ? 'light' : p === 'light' ? 'dark' : 'device';
+      var next = DEF ? (p === 'dark' ? 'light' : 'dark') : p === 'device' ? 'light' : p === 'light' ? 'dark' : 'device';
       b[i].setAttribute('aria-label', NAME[p] + '. Switch to ' + NAME[next].toLowerCase());
       b[i].title = NAME[p];
     }
@@ -63,7 +69,7 @@
     try { window.dispatchEvent(new CustomEvent('es-theme', { detail: { theme: t, pick: pick() } })); } catch (e) { /* old browser */ }
   }
   function set(v) { write(v === 'light' || v === 'dark' ? v : null); apply(); }
-  function cycle() { var p = pick(); set(p === 'device' ? 'light' : p === 'light' ? 'dark' : 'device'); }
+  function cycle() { if (DEF) { set(current() === 'dark' ? 'light' : 'dark'); return; } var p = pick(); set(p === 'device' ? 'light' : p === 'light' ? 'dark' : 'device'); }
   apply(); ready = true;
   if (mq) { var on = function () { if (pick() === 'device') apply(); }; if (mq.addEventListener) mq.addEventListener('change', on); else if (mq.addListener) mq.addListener(on); }
   window.ESTheme = { get: current, pick: pick, set: set, cycle: cycle };
