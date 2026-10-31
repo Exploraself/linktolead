@@ -9,7 +9,9 @@ import { onRequestPost as signup } from '../functions/api/signup.js';
 import { onRequestPost as compassPost } from '../functions/api/compass.js';
 import { onRequestPost as avatar } from '../functions/api/avatar.js';
 import { onRequestPost as notePost } from '../functions/api/note.js';
-import { summary, filter, groupOf, funnel, nextAction, today, byLanding, levelSet, levelCount, launchpadDone, readyForBoardroom, crossedOf } from '../public/mentor/dash.js';
+import { summary, filter, groupOf, funnel, nextAction, today, byLanding, levelSet, levelCount, launchpadDone, readyForBoardroom, crossedOf, told, toldTally, theirWords } from '../public/mentor/dash.js';
+import { nsWords } from '../functions/api/mentor.js';
+import { LEVELS4 } from '../public/levels-v4.js';
 import { fakeD1, fakeResend, post, tally } from './_d1.mjs';
 import fs from 'node:fs';
 
@@ -115,4 +117,27 @@ await notePost({ request: post('/api/note', { token: nina, body: 'Is the Bluepri
 L = await roster();
 const T2 = today(L.students, L.waiting);
 ok(T2[0].kind === 'question' && T2[0].s.email === 'nina@example.com' && nextAction(L.students.find((s) => s.email === 'nina@example.com')).key === 'question', 'a real question comes first in "Needs you today"');
+
+// ── What founders told the North Star, and their own words (31 Oct) ─────────
+{
+  const a = { ns_flags: JSON.stringify({ pains: ['clients', 'alone', 'nope'], want: 'steady', want2: 'freedom', values: ['family', 'faith'], team: 'solo' }), ns_results: JSON.stringify({ scores: [4, 2, 5, 3], answered: [1, 1, 1, 1] }) };
+  const b = { ns_flags: JSON.stringify({ pains: ['clients'], want: 'income', values: ['growth'] }), ns_results: JSON.stringify({ scores: [1, 3, 0, 4], answered: [1, 1, 0, 1] }) };
+  const c = { ns_flags: null, ns_results: null };
+  const ta = told(a);
+  ok(ta.pains.join() === 'clients,alone' && ta.wants.join() === 'steady,freedom' && ta.values.join() === 'family,faith' && ta.team === 'solo' && ta.first === 1 && ta.best === 2, 'told: names only what they picked; the side that needs them first is the lowest answered score');
+  ok(told(b).first === 0 && told(b).best === 3 && !told(c).any, 'told: an unanswered side is never "first"; a founder who answered nothing is left out');
+  const T = toldTally([a, b, c]);
+  ok(T.people === 2 && T.pains[0].name === 'Not enough clients' && T.pains[0].n === 2 && T.wants.length === 3 && T.first.find((x) => x.name === 'Lead your people').n === 1, 'toldTally: real counts, most named first');
+  const w = nsWords(a);
+  ok(w.ns_wants === 'Steady clients; More free time' && w.ns_pains === 'Not enough clients; Doing everything myself' && w.ns_first === 'Lead your people' && w.ns_team === 'Just me', 'CSV: what they told the North Star, as words');
+  const L1 = LEVELS4[0], D0 = L1.d[0], keys = D0.f.filter((x) => typeof x !== 'string').map((x) => x[0]);
+  const rows = keys.map((k, i) => ({ student_id: 's1', name: 'Ana', key: `w.v4.1.0.${k}`, value: 'v' + i, updated_at: '2026-10-31T10:0' + i }));
+  rows.push({ student_id: 's2', name: 'Bo', key: `w.v4.1.0.${keys[0]}`, value: 'half', updated_at: '2026-10-31T11:00' });
+  const W = theirWords(rows, LEVELS4);
+  ok(W.length === 1 && W[0].name === 'Ana' && W[0].side === 'Lead yourself' && W[0].word === L1.word && keys.every((k, i) => W[0].text.includes('v' + i)) && !/<|____/.test(W[0].text), 'theirWords: whole sentences only, built from their blanks');
+  const R = await roster();
+  ok(Array.isArray(R.words) && R.students.every((s) => 'ns_flags' in s && 'ns_results' in s), 'the roster carries the North Star answers and the newest Blueprint words');
+  ok(js.includes('function toldHTML()') && js.includes('function wordsHTML()') && js.includes('function v4Panel(work)') && js.includes("'/northstar/engine.js'"), 'the page shows what they told, their words, their Blueprint and their numbers');
+}
+
 done();

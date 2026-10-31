@@ -8,7 +8,9 @@
 // in Founders opens a drawer with every action; "Open their work" is the
 // one-founder view, one(id).
 
-import { STEP_KEYS, STEP_NAMES, STEP_SHORT, GROUPS, LANDING_SHORT, summary, filter, byLanding, groupOf, nextAction, funnel, today, levelSet, levelCount, launchpadDone, crossedOf } from './dash.js';
+import { STEP_KEYS, STEP_NAMES, STEP_SHORT, GROUPS, LANDING_SHORT, summary, filter, byLanding, groupOf, nextAction, funnel, today, levelSet, levelCount, launchpadDone, crossedOf,
+  told, toldTally, theirWords, SIDES, PAIN_NAMES, WANT_NAMES, VALUE_NAMES, TEAM_NAMES } from './dash.js';
+import { LEVELS4, wordOf } from '/levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
 const KEY = 'ftb-mentor-key';
@@ -120,12 +122,35 @@ function landingHTML() {
     <p class="tiny">Counted from the sign-ups that recorded their landing; earlier accounts have none.</p></div>`;
 }
 
+/** What founders told the North Star, counted across everyone who answered. */
+function toldHTML() {
+  const T = toldTally(data.students);
+  const list = (title, rows) => `<div><h3>${title}</h3>${rows.length ? `<div class="funnel">${rows.slice(0, 8).map((r) => `<div class="fr"><span>${esc(r.name)}</span><span class="fbar"><i style="width:${Math.round(r.n / T.people * 100)}%"></i></span><span class="num">${r.n}</span></div>`).join('')}</div>` : '<p class="tiny">Nobody yet.</p>'}</div>`;
+  return `<div class="panel"><div><h2>What founders tell the North Star</h2><p class="sub">${T.people ? `From ${plural(T.people, 'founder', 'founders')} who answered. Real answers only. Write your next ad, video or letter from the top line of “What hurts most”.` : 'Nobody has answered these yet. The lists fill as founders take the North Star.'}</p></div>
+    ${T.people ? `<div class="tgrid">${list('What hurts most', T.pains)}${list('What they want most', T.wants)}${list('What they care about', T.values)}${list('The side that needs them first', T.first)}${list('Who works with them', T.team)}</div>` : ''}</div>`;
+}
+
+/** Their own sentences from the Blueprint, newest first: the words to reuse. */
+function wordsHTML() {
+  const W = theirWords(data.words, LEVELS4, 12);
+  return `<div class="panel"><div><h2>Their words</h2><p class="sub">The newest sentences founders wrote in the Blueprint. Their language, for your pages, ads and letters (section 4 of 01 START HERE).</p></div>
+    ${W.length ? `<ul class="words">${W.map((w) => `<li><q>${esc(w.text)}</q><span class="em"><button type="button" class="linkish" data-drawer="${esc(w.id)}">${esc(w.name || w.email || '—')}</button> · Level ${String(w.lv).padStart(2, '0')}${w.word ? ' ' + esc(w.word) : ''} · ${esc(w.side)} · ${esc(when(w.at))}</span></li>`).join('')}</ul>`
+      : '<p class="hint">No finished sentences yet. They appear here when founders complete a sentence in the Blueprint.</p>'}</div>`;
+}
+
 function todayHTML(S) {
   return `<div><h2>Where your founders are</h2><p class="sub">Tap a group to see who is in it. Each group has the one thing that moves them on.</p></div>
     ${groupsHTML(S)}
     <div class="row2">${needsHTML()}${funnelHTML()}</div>
+    <div class="row2">${toldHTML()}${wordsHTML()}</div>
     ${landingHTML()}`;
 }
+
+/** One short line under a founder's name: what they want, what hurts. */
+const toldLine = (s) => { const t = told(s); const bits = [];
+  if (t.wants.length) bits.push('Wants: ' + t.wants.map((k) => WANT_NAMES[k]).join(' · '));
+  if (t.pains.length) bits.push('Hurts: ' + t.pains.map((k) => PAIN_NAMES[k]).join(' · '));
+  return bits.length ? `<span class="told">${esc(bits.join('  ·  '))}</span>` : ''; };
 
 // ── Founders ─────────────────────────────────────────────────────────────────
 
@@ -145,7 +170,7 @@ function foundersHTML() {
   const any = Object.keys(NO_FILTER).some((k) => F[k] !== 'all') || q;
   const row = (s) => { const n = nextAction(s);
     return `<tr data-drawer="${esc(s.id)}" tabindex="0"${openId === s.id ? ' class="on"' : ''} aria-label="${esc(s.name || s.email)}: open the details">
-      <td class="c-who"><span class="who">${avatar(s)}<span style="min-width:0"><b>${esc(s.name || '—')}</b><span class="em">${esc(s.email)}</span></span></span></td>
+      <td class="c-who"><span class="who">${avatar(s)}<span style="min-width:0"><b>${esc(s.name || '—')}</b><span class="em">${esc(s.email)}</span>${toldLine(s)}</span></span></td>
       <td class="c-group">${groupPill(s)}</td><td class="c-step">${esc(STEP_SHORT[s.tier || 'free'] || s.tier)}</td>
       <td class="c-lv">${levelsBar(s)}</td>
       <td class="c-stage">${esc(stageName(s.stage))}</td><td class="c-seen num">${esc(when(s.last_seen_at || s.joined_at))}</td>
@@ -262,6 +287,7 @@ function drawerHTML(s) {
     <div class="panel" style="padding:12px 14px"><b>Next: ${esc(n.label)}</b><div class="acts">${main}</div></div>
     <dl class="dkv">
       <dt>Stage</dt><dd>${esc(stageName(s.stage))}</dd>
+      ${(() => { const t = told(s); return t.any ? `${t.wants.length ? `<dt>Wants</dt><dd>${esc(t.wants.map((k) => WANT_NAMES[k]).join(' · '))}</dd>` : ''}${t.pains.length ? `<dt>Hurts</dt><dd>${esc(t.pains.map((k) => PAIN_NAMES[k]).join(' · '))}</dd>` : ''}${t.values.length ? `<dt>Cares about</dt><dd>${esc(t.values.map((k) => VALUE_NAMES[k]).join(' · '))}</dd>` : ''}${t.first >= 0 ? `<dt>Needs them first</dt><dd>${esc(SIDES[t.first])}${t.best >= 0 && t.best !== t.first ? ' · strongest: ' + esc(SIDES[t.best]) : ''}</dd>` : ''}${t.team ? `<dt>Works with</dt><dd>${esc(TEAM_NAMES[t.team])}</dd>` : ''}` : ''; })()}
       <dt>Blueprint</dt><dd>${lv} of 12 levels${lp ? ' · Launchpad done' : ''}</dd>
       <dt>North Star</dt><dd>${s.compass_at ? 'done · ' + esc(day(s.compass_at)) : 'not yet'}</dd>
       <dt>Plans</dt><dd>${s.plan_ticks || 0} of ${data.totalSteps || 28} steps</dd>
@@ -404,9 +430,41 @@ async function csv() {
 }
 
 /* One founder's work: "Open their work" and "Read and answer". */
+/** The North Star's own engine (a plain script), so the numbers read exactly
+ *  as the founder saw them. Loaded once, only for a founder's page. */
+let engineP = null;
+function engine() {
+  if (window.CompassEngine) return Promise.resolve(window.CompassEngine);
+  if (!engineP) engineP = new Promise((ok) => { const sc = document.createElement('script'); sc.src = '/northstar/engine.js'; sc.onload = () => ok(window.CompassEngine || null); sc.onerror = () => ok(null); document.head.appendChild(sc); });
+  return engineP;
+}
+const strip = (x) => String(x ?? '').replace(/<[^>]*>/g, '');
+/** Their Blueprint (Version 4), level by level: what they tapped, slid and wrote. */
+function v4Panel(work) {
+  const W = {};
+  for (const r of work || []) W[r.key] = r.value;
+  const lvls = [...new Set(Object.keys(W).map((k) => (/^w\.v4\.(\d{1,2})\./.exec(k) || [])[1]).filter(Boolean).map(Number))].sort((a, b) => a - b);
+  if (!lvls.length) return '<div class="panel"><h2>Their Blueprint</h2><p class="tiny" style="margin-top:8px">Nothing answered in the Blueprint yet.</p></div>';
+  return `<div class="panel"><h2>Their Blueprint</h2><p class="sub">What they tapped, slid and wrote, level by level, in their own words.</p>
+    ${lvls.map((lv) => { const L = LEVELS4[lv - 1]; if (!L) return '';
+      const doms = L.d.map((D, di) => {
+        const g = (k) => W[`w.v4.${lv}.${di}.${k}`];
+        const t = g('t'), sv = g('s'), fields = D.f.filter((x) => typeof x !== 'string'), anyF = fields.some((x) => String(g(x[0]) || '').trim());
+        if (t == null && sv == null && !anyF) return '';
+        const tap = t != null && D.t.o[Number(t)] != null ? strip(D.t.o[Number(t)]) : '';
+        let slide = '';
+        if (sv != null && Number.isFinite(Number(sv))) { const w = wordOf(D.s, Number(sv)); slide = `${sv}${D.s.sfx || ''}${w && String(w) !== String(sv) ? ' · ' + w : ''}`; }
+        const sent = anyF ? D.f.map((x) => (typeof x === 'string' ? x : (String(g(x[0]) || '').trim() || '____'))).join('') : '';
+        return `<div class="v4d"><b>${esc(SIDES[di])}</b><span>${tap ? `Tapped: “${esc(tap)}”` : ''}${slide ? `${tap ? '<br>' : ''}Slid: ${esc(slide)} <span class="tiny">(${esc(strip(D.s.q))})</span>` : ''}${sent ? `${tap || slide ? '<br>' : ''}<q>${esc(strip(sent))}</q>` : ''}</span></div>`;
+      }).join('');
+      return doms ? `<div class="v4l"><h3>Level ${String(lv).padStart(2, '0')} · ${esc(L.word)} · ${esc(L.title)}</h3>${doms}</div>` : '';
+    }).join('')}</div>`;
+}
+
 async function one(id) {
   const r = await api('?student=' + encodeURIComponent(id));
   if (!r.ok) return load();
+  NSE = r.data && r.data.compass ? await engine() : null;
   const d = r.data, s = d.student, A = d.answers || [], C = d.compass, P = d.profile || {}, T = d.ticks || [], M = d.messages || [], K = d.climb || [];
   const SC = d.stages || [], LB = d.library || [], TH = d.thread || [];
   const LEADN = { self: 'Lead yourself', people: 'Lead your people', work: 'Lead your business', market: 'Lead the market' };
@@ -446,6 +504,7 @@ async function one(id) {
         : '<p class="tiny" style="margin-top:8px">Nothing downloaded yet.</p>'}</div>
     ${C ? compassPanel(C)
       : '<div class="panel"><h2>North Star</h2><p class="tiny" style="margin-top:8px">Not done yet.</p></div>'}
+    ${v4Panel(d.work)}
     <div class="panel"><h2>Account plans · ${T.length} of ${data ? data.totalSteps || 28 : 28} steps done</h2>
       ${T.length ? DOMS.map(([k, label]) => { const rows = T.filter((t) => t.domain === k); return rows.length ? `<div class="dom ${k}" style="padding-top:10px"><h3>${label}</h3>${rows.map((t) => `<div class="ans"><em>${esc(t.title || t.step_id)}</em><p>Done ${when(t.done_at)}</p></div>`).join('')}</div>` : ''; }).join('')
         : '<p class="tiny" style="margin-top:8px">No steps ticked yet.</p>'}</div>
@@ -585,16 +644,47 @@ load();
 const DOMS = [['Lead yourself', '#A8623A'], ['Lead your people', '#4C7355'], ['Lead your business', '#36607F'], ['Lead the market', '#9A7418']];
 const PAIN = { clients: 'Not enough clients', cash: 'Cash is tight', time: 'No time for myself', alone: 'Doing everything myself', team: 'Team not stepping up', direction: 'Unclear direction', price: 'Prices feel too low', switch: 'I can’t switch off' };
 const GOAL = { freedom: 'More free time', income: 'Higher income', steady: 'Steady clients', team: 'A team I trust', clarity: 'Clarity on direction', grow: 'A new market' };
+const CUR = { USD: '$', EUR: '€', GBP: '£', CAD: 'CA$', AUD: 'A$' };
+const MONEY_K = new Set(['sales', 'deliv', 'run', 'save', 'out', 'acq', 'price', 'cpc', 'risk']);
+/** One number as the founder gave it: "about $3,750", "60 hours", "6 months". */
+function numWord(k, x, cur) {
+  const v = x.v, ab = x.est ? 'about ' : '';
+  if (typeof v !== 'number') return String(v);
+  const r = Math.round(v).toLocaleString('en-US');
+  if (MONEY_K.has(k)) return ab + (CUR[cur] || '$') + r;
+  if (k === 'hrs' || k === 'want' || k === 'unpaid') return `${ab}${r} hours`;
+  if (k === 'hpc') return `${ab}${r} hours per customer`;
+  if (k === 'week') return `${ab}${r} hours a week`;
+  if (k === 'months' || k === 'wait') return `${ab}${r} months`;
+  return ab + r;
+}
+let NSE = null; // the North Star engine, loaded by one(id) for the numbers
 function compassPanel(C) {
-  let r = {}, f = {};
+  const E = NSE;
+  let r = {}, f = {}, S = {};
   try { r = JSON.parse(C.results_json || '{}') || {}; } catch { r = {}; }
   try { f = JSON.parse(C.flags_json || '{}') || {}; } catch { f = {}; }
+  try { S = JSON.parse(C.answers_json || '{}') || {}; } catch { S = {}; }
   const ans = r.answered || [], sc = r.scores || [], bd = r.bands || [];
   const total = ans.reduce((a, b) => a + (b || 0), 0);
   const stage = C.stage ? C.stage[0].toUpperCase() + C.stage.slice(1) : '—';
   const pains = Array.isArray(f.pains) ? f.pains.map((k) => PAIN[k] || k) : [];
-  return `<div class="panel"><h2>North Star</h2><p class="tiny">Saved ${when(C.updated_at)} · stage ${esc(stage)} · ${total} of 8 questions answered</p>
+  const wants = [f.want, f.want2].filter((k, i, a) => k && a.indexOf(k) === i).map((k) => GOAL[k] || k);
+  const values = Array.isArray(f.values) ? f.values.map((k) => VALUE_NAMES[k] || k) : [];
+  const P = S.profile || {}, taken = (Array.isArray(S.history) ? S.history.length : 0) + 1;
+  const said = [['What hurts most', pains], ['What they want most', wants], ['What they care about', values], ['Who works with them', TEAM_NAMES[f.team] ? [TEAM_NAMES[f.team]] : []],
+    ['Their business', [P.business, P.type, P.industry].filter(Boolean)], ['Customers yet', S.mode === 'yes' ? ['Yes'] : S.mode === 'plan' ? ['Not yet'] : []]].filter((x) => x[1].length);
+  let nums = '';
+  if (E && typeof E.numbers === 'function' && S.mode) {
+    let n = {}, F = [];
+    try { n = E.numbers(S) || {}; F = E.fieldsFor(S.mode) || []; } catch { n = {}; F = []; }
+    const rows = F.filter(([k]) => n[k]).map(([k, label]) => [label, numWord(k, n[k], P.currency)]);
+    if (n.sales && n.deliv && n.run && [n.sales.v, n.deliv.v, n.run.v].every((v) => typeof v === 'number')) rows.push(['Left this month', numWord('sales', { v: n.sales.v - n.deliv.v - n.run.v, est: n.sales.est || n.deliv.est || n.run.est }, P.currency)]);
+    nums = rows.length ? `<p class="lbl" style="margin-top:14px">Their numbers</p><dl class="dkv" style="margin-top:6px">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl><p class="tiny" style="margin-top:6px">As they gave them. “About” means they picked a range.</p>` : '';
+  }
+  return `<div class="panel"><h2>North Star</h2><p class="tiny">Saved ${when(C.updated_at)} · stage ${esc(stage)} · ${total} of 8 questions answered · taken ${taken === 1 ? 'once' : taken + ' times'}</p>
     ${total ? `<div class="kgrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:12px">${DOMS.map(([n, col], i) => `<div class="k" style="border-top:3px solid ${col}"><b>${n}</b><span>${ans[i] ? `${sc[i] ?? 0} of 6 · ${esc(bd[i] || '')}` : 'Not answered yet'}</span></div>`).join('')}</div>`
       : '<p class="tiny" style="margin-top:8px">Opened, but no questions answered yet.</p>'}
-    ${pains.length || f.want ? `<p class="tiny" style="margin-top:12px">${pains.length ? `<b>Finds hard:</b> ${esc(pains.join(' · '))}` : ''}${pains.length && f.want ? ' &nbsp; ' : ''}${f.want ? `<b>Goal:</b> ${esc(GOAL[f.want] || f.want)}` : ''}</p>` : ''}</div>`;
+    ${said.length ? `<dl class="dkv" style="margin-top:14px">${said.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v.join(' · '))}</dd>`).join('')}</dl>` : ''}
+    ${nums}</div>`;
 }

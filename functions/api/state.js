@@ -25,7 +25,7 @@ export async function onRequestGet({ request, env }) {
     D.prepare('SELECT stage,results_json,flags_json,updated_at,answers_json FROM compass WHERE student_id = ?').bind(me.id).first(),
     D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(me.id).first(),
     D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'stage-change' LIMIT 1").bind(me.id).first(),
-    D.prepare('SELECT signup_type, consent, unsubscribed, avatar, landing, source FROM student_profile WHERE student_id = ?').bind(me.id).first(),
+    D.prepare('SELECT signup_type, consent, unsubscribed, avatar, landing, source, industry FROM student_profile WHERE student_id = ?').bind(me.id).first(),
   ]);
   const crossed = ((await D.prepare("SELECT detail FROM event WHERE student_id = ? AND kind = 'crossed'").bind(me.id).all()).results || []).map((r) => r.detail);
   await D.prepare('UPDATE student SET last_seen_at=? WHERE id=?').bind(now(), me.id).run();
@@ -51,6 +51,8 @@ export async function onRequestGet({ request, env }) {
   return json({ ok: true, me: { name: me.name, email: me.email, stage: me.stage, stageChosen: !!chose, tier: me.tier, thin: me.thin_domain, hasPassword: !!(auth && auth.pass_hash),
     signupType: (prof && prof.signup_type) || null,
     avatar: (prof && prof.avatar) || '',
+    // The industry from sign-up, so the North Star workspace does not ask again.
+    industry: (prof && prof.industry) || '',
     // Which door they came in through, and the doors they confirmed since (api/cross.js).
     origin: originOf(prof || {}), crossed,
     // "Letters from your mentor": on when they gave consent and did not unsubscribe.

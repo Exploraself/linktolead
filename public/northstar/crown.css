@@ -143,7 +143,9 @@ body.ns-qview #banner{opacity:0;visibility:hidden;pointer-events:none;transition
 /* ── The path (31 Oct): Before you start, then Parts 1–4 ───────────────── */
 /* One fewer thing on the top bar: with an account, light/dark and Make it
    yours live in the initials menu. */
-#top-tools:has(.pm) [data-theme-switch],#top-tools:has(.pm) #ws-btn{display:none !important}
+/* 31 Oct: light/dark always stays in the top bar; the workspace button hides
+   while the menu is there, because "Make it yours" is in the menu. */
+#top-tools:has(.pm) #ws-btn{display:none !important}
 .nsprog:empty{display:none}
 .nsprog{margin:0 -22px;padding:8px 28px 10px;border-bottom:1px solid var(--line);background:var(--panel)}
 .nsprog-in{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"parts pct" "bar bar";gap:6px 14px;align-items:center}
