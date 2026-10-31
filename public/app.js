@@ -346,7 +346,7 @@ function signinView() {
   return `<section class="band qband"><div class="wrap narrow">
     <p class="eyebrow">${compass} Your Base Camp</p>
     <h1 class="qh">Sign in</h1>
-    <p class="sec-lede">Your email and password. Signed up with your name and email only, or forgotten your password? We email you a link that signs you in on this device.</p>
+    <p class="sec-lede">Continue with Google, or your email and password. Signed up with your name and email only, or forgotten your password? We email you a link that signs you in on this device.</p>
     <form class="joinbox bare" id="signinform" novalidate>
       ${googleSlot()}
       <div class="joinrow">
