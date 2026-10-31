@@ -146,11 +146,14 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
   // notice, an answer or a mentor's own letter would read it out of place
   // (Alexandru, 31 Oct 2026).
   if (sign && intro && P.length && /^Hi\b/.test(P[0].text || '')) P.splice(1, 0, parts(opener(M)));
-  // Security letters (sign-in link, reset, password changed) stay about
-  // security: no encouragement, no promotion, no assessments.
-  const tests = sign && !security ? threeAssessments(seed) : [];
-  const ps = !security && offer && OFFERS[offer] ? parts(['P.S. ', ...OFFERS[offer].line(base)]) : null;
-  const good = sign && !security ? GOOD_WORDS[seed % GOOD_WORDS.length] : '';
+  // Every letter serves (Alexandru, 31 Oct 2026): greet, thank, encourage,
+  // say we are here, and give something to do. Security letters (sign-in
+  // link, reset, password changed) never sell: their P.S. is a free gift.
+  const free = Object.keys(OFFERS).filter((k) => !OFFERS[k].paid);
+  const use = security && offer && OFFERS[offer] && OFFERS[offer].paid ? free[seed % free.length] : offer;
+  const tests = sign ? threeAssessments(seed) : [];
+  const ps = use && OFFERS[use] ? parts(['P.S. ', ...OFFERS[use].line(base)]) : null;
+  const good = sign ? GOOD_WORDS[seed % GOOD_WORDS.length] : '';
   const qs = !sign || ask === null ? [] : Array.isArray(ask) ? ask : (SHORTCUTS[ask] || SHORTCUTS.start);
   const bye = sign ? farewell(tz, at) : '';
   const replyLine = 'Any question at all, big or small? Just reply to this email. It comes straight to me, and I read every one.';
@@ -243,12 +246,14 @@ export function signinLetter(base, url, { first, to = '', offer, reset = false, 
     'No problem at all, it happens to all of us. Tap the button and you’ll land at your Base Camp with the password box already open.',
     button(url, 'Choose my new password →'),
     'The button works for the next 30 minutes, on your phone or your computer, until you save the new password. If you didn’t ask for this, you can simply ignore it.',
+    'Thank you for keeping your account safe.',
   ], offerFor('signin', to, 'free', offer), close('signin', { ...o, to }, 'security')) };
   return { subject: 'Your link to get back in', ...letter(base, [
     hi(first),
     'Good to see you again. Everything you wrote is right where you left it.',
     button(url, 'Sign me back in →'),
     'The button works for the next 30 minutes, on your phone or your computer.',
+    'Thank you for coming back.',
   ], offerFor('signin', to, 'free', offer), close('signin', { ...o, to }, 'security')) };
 }
 
@@ -258,6 +263,7 @@ export function passwordChangedLetter(base, { first, to = '', offer, ...o } = {}
     hi(first),
     'Your password was just changed. If that was you, all is well and there’s nothing else to do.',
     'If it wasn’t, just reply to this email and we’ll lock the account straight away. Your work is safe with us.',
+    'Thank you for keeping your account safe.',
   ], offerFor('password', to, 'free', offer), close('password', { ...o, to }, 'security')) };
 }
 
@@ -273,6 +279,7 @@ export function answerLetter(base, { first, question, answer, to = '', tier, off
   const paras = String(answer || '').split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
   return { subject: 'An answer to your question', ...letter(base, [
     hi(first),
+    'Thank you for your question.',
     `You asked: “${q.length > 300 ? q.slice(0, 300).trimEnd() + '…' : q}”`,
     ...paras,
     ['The whole conversation is waiting in ', link(`${base}/ground-plan/#ask`, 'your Base Camp'), '.'],
