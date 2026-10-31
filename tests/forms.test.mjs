@@ -181,7 +181,7 @@ const noRun = baseOf({ ...EXAMPLE, run: null, rate: null, hire: null }), nm = E.
 ok(noRun.fixed === 0 && nm.cash === null && nm.people === null && Number.isFinite(nm.mine), 'empty Fine-tune boxes: no money figure invented, the hours still move');
 
 // ── Mailchimp landing tags ──────────────────────────────────────────────────
-ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', road4: 'linktolead-road4', compass: 'linktolead-northstar', summit: 'linktolead-summit' }), 'landing tags: the linktolead-… system');
+ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', road4: 'linktolead-road4', scan: 'linktolead-scan', compass: 'linktolead-northstar', summit: 'linktolead-summit' }), 'landing tags: the linktolead-… system');
 // Road 2.1 (30 Oct): its own tag, no empty old tag, the FULL form, and road2 untouched beside it.
 {
   const { tagsFor } = await import('../functions/_mailchimp.js');
@@ -193,7 +193,7 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
   ok(labels.size === 1 && labels.has('Start my North Star →'), 'road2.1: one button label, everywhere');
   const AB = read('public/account-box.js');
   ok(AB.includes("const NS_HOME = ['road21'];") && AB.includes("? '/northstar/' : '/ground-plan/#home'") && J21.includes("location.replace('/northstar/')") && read('functions/_landing.js').includes("'/road2.1': '/north2/'"), 'north2 (was road2.1): Start my North Star opens the North Star, and the old address still lands');
-  ok(read('public/north3/sales.js').includes("landing: 'road2', next: opener ? '/northstar/' : ''") && AB.includes('const after = () => ctx.next ||') && read('functions/_landing.js').includes("'/road2': '/north3/'") && read('public/ground-plan/index.html').includes("/north3/#join"), 'north (was road2): its buttons open the North Star; sign-ups sent from the Blueprint still land on Base Camp; the old address still lands');
+  ok(read('public/north3/sales.js').includes("landing: 'road2', next: opener ? '/northstar/' : ''") && AB.includes('const after = () => ctx.next ||') && !read('functions/_landing.js').includes("'/road2':") && read('public/ground-plan/index.html').includes("/north3/#join"), 'north (was road2): its buttons open the North Star; sign-ups sent from the Blueprint still land on Base Camp; /road2/ is a page again (31 Oct)');
   ok(!/most founders|incubator/i.test(R21.replace(/<!--[\s\S]*?-->/g, '')), 'road2.1: no banned words on the page');
 }
 // Road 4 (31 Oct): the sales page for The Founder's Blueprint, taps only.
@@ -212,6 +212,21 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
   ok(QN.length === 8 && ['self', 'people', 'work', 'market'].every((k) => QN.filter((x) => x.includes(`'${k}'`)).length === 2), 'road4: the mirror asks eight questions, two in each domain');
   ok(/\/\/ @site data[\s\S]*\/\/ @end data/.test(R4J) && /\/\/ @site join[\s\S]*\/\/ @end join/.test(R4J), 'road4: the site-only blocks are marked for the preview build');
   ok(R4.includes('/cabinet/alexandru.jpg') && R4.includes('I was the business, too.') && !/PHOTO OF/.test(R4), 'road4: Alexandru, in his own story, with his photo');
+}
+// Road 2 (31 Oct): The Founder's Blueprint as a thermal scan, at /road2/.
+{
+  const R2 = read('public/road2/index.html'), J2 = read('public/road2/page.js'), C2 = read('public/road2/road2.css'), T2 = read('public/road2/thermal.js');
+  const R2T = R2.replace(/<!--[\s\S]*?-->/g, '');
+  ok(tagsFor({ landing: 'scan', signupType: 'full' }).some((x) => x.name === 'linktolead-scan' && x.status === 'active'), 'road2: tagged linktolead-scan');
+  ok(J2.includes("variant: 'full', landing: 'scan'") && R2.includes('<script type="module" src="/road2/page.js"></script>') && (R2.match(/<a [^>]*class="(btn|go)[^"]*"[^>]*>/g) || []).every((x) => x.includes('data-join') || x.includes('href="#scan"')), 'road2: every call to action opens the FULL form (or the scan), landing scan');
+  for (const [n, p] of [['The Founder Launchpad', 'Free'], ['The Boardroom', 'No cost'], ['Personal Leadership LAB', '$97'], ['Business Growth HUB', '$397'], ['The Summit', '$1,989']]) ok(R2.includes(`<h3>${n}</h3><p class="price">${p}</p>`), `road2: ${n} · ${p}`);
+  ok(C2.includes('prefers-reduced-motion') && C2.includes('html.still') && R2.includes('id="still"') && T2.includes('settle('), 'road2: motion stops for reduced motion and Pause motion; the heat maps settle to a still frame');
+  ok(!/\b(99|32) (tools|frameworks)\b|P\.A\.C\.E|most founders|incubator|googleapis/i.test(R2T + J2 + C2), 'road2: no tool or framework names, no banned words, no third-party fonts');
+  ok(!/<textarea|<input type="text"|localStorage\.setItem\((?!'ftb-still')/.test(R2 + J2), 'road2: nothing to type, and nothing kept but the motion choice');
+  ok(J2.includes("'/levels-build.js'") && J2.includes('L[wk].promise') && J2.includes('LEVEL_NAMES[stage]') && J2.includes('one.steps.slice(0, 2)'), 'road2: the protocol and the reading come from the level files');
+  const SN = J2.match(/\{ k: '(self|people|work|market)', q: /g) || [];
+  ok(SN.length === 8 && ['self', 'people', 'work', 'market'].every((k) => SN.filter((x) => x.includes(`'${k}'`)).length === 2), 'road2: eight sensors, two in each domain');
+  ok(R2.includes('/cabinet/alexandru.jpg') && R2.includes('href="/assets/fonts/unbounded.woff2"') && C2.includes("url(/assets/fonts/unbounded.woff2)"), 'road2: Alexandru’s photo; its heading font served from this site');
 }
 // The tag system (30 Oct): every tag is "linktolead" or "linktolead-<group>-<value>", lowercase, no spaces.
 {
