@@ -29,7 +29,7 @@ ok(prof.unsub_id && prof.unsub_id.length >= 40 && prof.unsubscribed === 0, 'prof
 ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id = ? AND kind = 'signup'").get(token).n === 1, 'event: signup logged');
 ok(sent.length === 1 && sent[0].body.to[0] === 'ana@example.com' && sent[0].body.subject === 'Welcome to The Founder Launchpad', 'one email on signup: the Launchpad welcome');
 const w = sent[0].body;
-ok(/^Hi Ana,/.test(w.text) && w.text.includes('Start with Level 01 tonight') && w.html.includes('/mail/signature.png') && /\nP\.S\. /.test(w.text), 'welcome: a letter, signed, with a P.S.');
+ok(/^Hi Ana,/.test(w.text) && w.text.includes('Start with Level 01 today') && w.html.includes('/mail/signature.png') && /\nP\.S\. /.test(w.text), 'welcome: a letter, signed, with a P.S.');
 ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id = ? AND kind = 'launchpad-welcome'").get(token).n === 1, 'event: launchpad-welcome logged');
 ok(w.html.includes('/api/unsubscribe?u=' + prof.unsub_id) && w.text.includes('Via Esempio 1') && w.headers['List-Unsubscribe'], 'welcome: footer and headers');
 ok(DB.raw.prepare("SELECT COUNT(*) n FROM mailchimp_log WHERE student_id = ? AND action = 'join'").get(token).n === 1, 'the Mailchimp join is tried once, after the reply (tests/mailchimp.test.mjs covers it)');
