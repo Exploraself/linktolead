@@ -8,6 +8,11 @@
  *   title, subtitle, intro, actions: [{ domain, title, why, lines: [..],
  *   done, start }], closing: { title, lines: [..], url, mentor } }
  *
+ * Optional (31 Oct, the Launchpad plan uses them; the North Star plan does
+ * not, so it prints exactly as before): brand (header line), footName,
+ * closing.cta (the label in the dark box), and action.section (a heading
+ * drawn when it changes, e.g. "Week 1 · Set the ground").
+ *
  * Text is set in WinAnsi; curly quotes, dashes and the middle dot are kept,
  * anything outside it is replaced. Line breaks are measured with the fonts'
  * own character widths, so nothing runs off the page. */
@@ -86,13 +91,14 @@ async function jpeg(dataUrl) {
 
 export async function makePlanPDF(plan) {
   const d = new Doc();
-  d.foot = `${plan.name ? plan.name + ' · ' : ''}The Leader’s North Star Action Plan · ExploraSelf · ${plan.date}`;
+  const brand = plan.brand || 'The Leader’s North Star';
+  d.foot = `${plan.name ? plan.name + ' · ' : ''}${plan.footName || 'The Leader’s North Star Action Plan'} · ExploraSelf · ${plan.date}`;
   const logo = await jpeg(plan.logo).catch(() => null);
 
   // ── Cover block ──
   if (logo) d.image(M, H - M - 40, 40, 40 * logo.h / logo.w);
   d.text(M + (logo ? 52 : 0), H - M - 16, 'EXPLORASELF', 11, 'HB', NAVY);
-  d.text(M + (logo ? 52 : 0), H - M - 31, win(`The Leader’s North Star · ${plan.date}`), 9.5, 'H', SOFT);
+  d.text(M + (logo ? 52 : 0), H - M - 31, win(`${brand} · ${plan.date}`), 9.5, 'H', SOFT);
   d.y = H - M - 70;
   d.para(plan.title, { size: 28, f: 'T', c: NAVY, lead: 1.15, after: 2 });
   d.para(plan.subtitle, { size: 14, f: 'TI', c: GOLD, lead: 1.3, after: 10 });
@@ -114,12 +120,20 @@ export async function makePlanPDF(plan) {
   d.para(plan.intro, { size: 11.5, f: 'T', c: INK, lead: 1.45, after: 14 });
 
   // ── The five actions ──
+  let section = '';
   plan.actions.forEach((a, i) => {
     const est = 120 + a.lines.length * 30;
+    if (a.section && a.section !== section) {
+      section = a.section;
+      d.need(Math.min(est, 360) + 44);
+      d.para(a.section, { size: 15, f: 'HB', c: NAVY, lead: 1.2, after: 4 });
+      d.line(M, d.y, W - M, d.y, GOLD, 0.8); d.y -= 16;
+    }
     d.need(Math.min(est, 360));
     // Number and title band.
     d.rect(M, d.y - 30, 30, 30, GOLD);
-    d.text(M + 10.5, d.y - 21, String(i + 1), 15, 'HB', [1, 1, 1]);
+    const num = String(i + 1);
+    d.text(M + 15 - width(num, 15, 'HB') / 2, d.y - 21, num, 15, 'HB', [1, 1, 1]);
     d.text(M + 42, d.y - 11, win(a.domain.toUpperCase() + (a.start ? '  ·  START HERE' : '')), 8, 'HB', a.start ? [0.71, 0.32, 0.18] : SOFT);
     d.text(M + 42, d.y - 27, win(a.title), 16, 'T', NAVY);
     d.y -= 40;
@@ -143,7 +157,7 @@ export async function makePlanPDF(plan) {
   d.need(80);
   d.y -= 6;
   d.rect(M, d.y - 62, CW, 62, NAVY);
-  d.text(M + 18, d.y - 24, win('START TONIGHT, AT NO COST'), 8.5, 'HB', GOLD);
+  d.text(M + 18, d.y - 24, win(plan.closing.cta || 'START TONIGHT, AT NO COST'), 8.5, 'HB', GOLD);
   d.text(M + 18, d.y - 46, win(plan.closing.url), 18, 'HB', [1, 1, 1]);
   d.y -= 78;
   d.para(plan.closing.mentor, { size: 10, f: 'H', c: SOFT });
@@ -163,7 +177,7 @@ export async function makePlanPDF(plan) {
   }
   objs[pagesId - 1] = `<< /Type /Pages /Kids [${pageIds.map((i) => `${i} 0 R`).join(' ')}] /Count ${pageIds.length} >>`;
   const catId = add(`<< /Type /Catalog /Pages ${pagesId} 0 R >>`);
-  const infoId = add(`<< /Title (${esc(win(plan.title).replace(/[\x91\x92]/g, "'"))}) /Author (ExploraSelf) /Creator (The Leader's North Star) >>`);
+  const infoId = add(`<< /Title (${esc(win(plan.title).replace(/[\x91\x92]/g, "'"))}) /Author (ExploraSelf) /Creator (${esc(win(brand).replace(/[\x91\x92]/g, "'"))}) >>`);
 
   // Everything is a byte string (each char < 256).
   let out = '%PDF-1.4\n%\xE2\xE3\xCF\xD3\n';

@@ -17,6 +17,7 @@ import { cabinetHTML, cabinetShown, cabinetHidden, cabinetClick, dashboardShown,
 import { result as fwResult } from './frameworks.js';
 import { report } from './feedback.js';
 import * as account from './account.js';
+import { launchpadCardHTML, downloadLaunchpadPlan } from './launchpad-plan.js';
 import { videoBlock } from './video-talk.js';
 import * as M from './music.js';
 import { LEVELS4, CHAPTERS4, DOMS, UNITS, STEPS4, CLOSES, wkey, tapOf, slideOf, wordOf, shown, domainUnits, levelUnits,
@@ -331,6 +332,7 @@ function homeView() {
   return `<div class="gp">
     ${cabinetHTML(cabinetData(st, gp, first))}
     ${compassStripHTML(!!compassRec, compassRec && compassRec.taken ? compassRec.taken.length : 1)}
+    ${launchpadCardHTML({ thin: (state.me && state.me.thin) || '' })}
     ${notesHTML()}
     ${nudgeHTML(st)}
     ${gp ? planHTML(gp, st) : `<section class="gp-wrap gp-two gp-grid">${standHTML(st)}</section>${howItWorks(st)}`}
@@ -907,6 +909,12 @@ function refreshRail() {
 document.addEventListener('click', (e) => {
   const b = e.target.closest('button, a.cta');
   if (!b) return;
+  // The Launchpad Action Plan (31 Oct): twenty actions, five per domain, as a PDF.
+  if (b.hasAttribute('data-lpp')) {
+    const full = (state.me && state.me.name) || '';
+    downloadLaunchpadPlan(b, { first: full.split(' ')[0] || '', full, stage: (STAGES[state.stage || 'build'] || {}).n || '', thin: (state.me && state.me.thin) || '' });
+    return;
+  }
   if (b.id === 'crownb') { if (crownSwallow) { crownSwallow = false; return; } crownOpen(!document.body.classList.contains('crownopen')); return; }
   if (b.dataset.crown) {
     const k = b.dataset.crown;
@@ -1188,7 +1196,7 @@ async function comeHome() {
     for (const [k, v] of Object.entries(r.work || {})) if (v && !state.work[k]) state.work[k] = v;
     compassRec = r.compass || null;
     if (r.me) {
-      state.me = { name: r.me.name, email: r.me.email };
+      state.me = { name: r.me.name, email: r.me.email, thin: r.me.thin || '' };
       if (r.me.tier) state.tier = r.me.tier;
       hasPassword = !!r.me.hasPassword;
       signupType = r.me.signupType || null;
