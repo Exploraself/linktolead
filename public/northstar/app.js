@@ -145,6 +145,36 @@
   /* ── The account ─────────────────────────────────────────────────────────── */
   let A = null, dirty = false, syncing = false, leverTimer;
   const signedIn = () => !!(A && A.joined());
+  /* The Massive Growth Plan's ticks (31 Oct): { step id: date ticked }, from
+   * the account. Signed in only; kept apart from the Account Plans. */
+  let GP_DONE = {};
+  async function loadGrowth() {
+    if (!signedIn() || !A.growthPlan) return;
+    const r = await A.growthPlan();
+    if (r && r.done) { GP_DONE = r.done; render(); }
+  }
+  /** Tick or untick one step. Signed out: the sign-in box opens instead. */
+  async function growthTick(id) {
+    if (!signedIn()) {
+      UI.signinFor = 'menu'; UI.signin = ''; openGate('account'); render();
+      setTimeout(() => { const f = $('#g-email'); if (f && !f.value) f.focus(); else { const p = $('#si-pw-gate'); if (p) p.focus(); } }, 0);
+      return;
+    }
+    const was = GP_DONE[id], on = !was;
+    GP_DONE = { ...GP_DONE };
+    if (on) GP_DONE[id] = new Date().toISOString(); else delete GP_DONE[id];
+    render();
+    try {
+      const r = await A.growthTick(id, on);
+      if (r && r.done) { GP_DONE = r.done; render(); }
+    } catch (e) {
+      GP_DONE = { ...GP_DONE };
+      if (was) GP_DONE[id] = was; else delete GP_DONE[id];
+      render();
+      toast(e && e.message ? e.message : 'That tick did not save. Try again in a minute.');
+    }
+  }
+  const pGrowth = () => (window.GrowthPlan && window.GrowthView ? window.GrowthView.html(window.GrowthPlan, { done: GP_DONE }) : '');
   /** What the account keeps: this whole state (so another device can carry
    *  on), plus the scores and choices the Account Plans are ordered by. */
   function payload() {
@@ -277,6 +307,8 @@
       } else { dirty = true; await sync(); }
     }
     render();
+    loadGrowth();
+    window.addEventListener('ftb:signedin', loadGrowth);
     if (UI.cmp) { const r = document.getElementById('s-reading'); if (r) r.scrollIntoView({ block: 'start' }); }
     // The menu is always there (31 Oct): signed in it shows the initials or
     // photo; signed out a plain person icon, with "Sign in" first.
@@ -2126,6 +2158,7 @@
     for (let i = 0; i < 4; i++) put('fb-' + i, pFeedback(c, i));
     put('s-save', pSave(c));
     put('s-plan', pPlan(c));
+    put('s-growth', pGrowth());
     put('s-next', pNext(c));
     put('s-weeks', pWeeks(c));
     put('s-climb', pClimb());
@@ -2292,6 +2325,7 @@
       case 'card-share': cardOut(true); return;
       case 'card-dl': cardOut(false); return;
       case 'plan-pdf': downloadPlan(t); return;
+      case 'gp-tick': growthTick(v); return;
       case 'alloptions': { UI.opts = !UI.opts; const o = document.getElementById('s-options'); if (o) o.hidden = !UI.opts; render(); if (UI.opts && o) o.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); return; }
       case 'regate': fullAccount(); return;
       case 'account': {

@@ -143,8 +143,9 @@ td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
   .ftable td.c-group{grid-column:1;grid-row:2}.ftable td.c-step{grid-column:2;grid-row:2;font-size:13px}.ftable td.c-lv{grid-column:3;grid-row:2;justify-self:end}
   .ftable td.c-stage,.ftable td.c-seen{font-size:12.5px;color:var(--muted);grid-row:3}
   .ftable td.c-stage{grid-column:1}.ftable td.c-seen{grid-column:2/-1}
+  .ftable td.c-gp{grid-column:1/-1;grid-row:4;font-size:12.5px;color:var(--muted)}.ftable td.c-gp::before{content:"Growth plan "}
   .ftable td.c-seen::before{content:"Seen "}
-  .ftable td.c-next{grid-column:1/-1;grid-row:4}
+  .ftable td.c-next{grid-column:1/-1;grid-row:5}
   .ftable td[colspan]{grid-column:1/-1}
   .who{min-width:0}
 }
@@ -164,6 +165,10 @@ td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
 .tl li{padding-left:12px;position:relative;font-size:13px}
 .tl li::before{content:"";position:absolute;left:-6px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--gold)}
 .tl span{color:var(--muted)}
+.gpl{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.gpl h4{margin:0;font-size:13px;font-weight:600;padding-left:8px;border-left:3px solid var(--c,var(--gold))}
+.gpl ul{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:3px;font-size:13px}
+.gpl li{display:flex;gap:8px;justify-content:space-between}.gpl li span{color:var(--muted);white-space:nowrap}
 .drawer select{min-height:36px;padding:6px 10px;width:auto;max-width:100%}
 .lbl{font-size:13px;font-weight:700}
 
@@ -235,6 +240,8 @@ footer{max-width:1280px;margin:0 auto;padding:10px 22px 50px;font-size:12px;colo
 <div id="dlg"></div>
 <footer>Private. Nothing here is shared with anyone else.</footer>
 
+<!-- The Massive Growth Plan's words, for the drawer (window.GrowthPlan). -->
+<script src="/northstar/growth-plan.js"></script>
 <script type="module" src="/mentor/mentor.js"></script>
 </body>
 </html>

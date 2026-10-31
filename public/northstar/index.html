@@ -193,6 +193,11 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
     <!-- ===== YOUR NORTH STAR ACTION PLAN (31 Oct, round 6): a PDF to keep ===== -->
     <section id="s-plan" class="nsplan"></section>
 
+    <!-- ===== THE MASSIVE GROWTH PLAN (31 Oct): the last of the results, 20 + 1
+         steps drawn from growth-plan.js by growth.js; ticks saved to the
+         account (/api/growth-plan), apart from the Account Plans ===== -->
+    <section id="s-growth" class="nsgp" aria-labelledby="gp-h"></section>
+
     <!-- ===== YOUR NEXT STEP (31 Oct, round 4): one ending, one button ===== -->
     <section id="s-next" class="nsnext">
       <span class="eb" style="color: #D6BF8F">Your next step</span>
@@ -261,6 +266,8 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
 <script src="engine.js"></script>
 <script type="module">/* The music player, opened from the Crown (Music, Focus, Light). */ import * as M from '/music.js'; window.ESMusic = M;</script>
 <script src="/fullscreen.js" defer></script>
+<script src="growth-plan.js"></script>
+<script src="growth.js"></script>
 <script src="app.js"></script>
 <script src="spy.js"></script>
 <script src="horizon.js"></script>
