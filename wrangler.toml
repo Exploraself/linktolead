@@ -22,11 +22,11 @@ keep_vars = true
 directory = "./public"
 binding = "ASSETS"
 # An address with no page gets public/404.html and a real 404 status, never
-# the home page. Every page is its own folder (/road1, /road2, /road3, /start…).
+# the home page. Every page is its own folder (/road1 … /road4, /north2, /north3…).
 not_found_handling = "404-page"
 # The API and the old sales-page addresses reach worker.js. Each old address
 # is a 302 to its road, query string kept (functions/_landing.js): / and /b →
-# /road1/, /compass/welcome, /compass/welcome-a and /c → /road2/, /a → /road3/.
+# /road1/, /compass/welcome, /compass/welcome-a and /c → /north3/, /a → /road3/.
 # /compass/* covers /compass/welcome and /compass/welcome-a (Wrangler refuses
 # a rule that another rule already covers). Every page and file is served as before.
 run_worker_first = ["/api/*", "/", "/b", "/b/", "/c", "/c/", "/a", "/a/", "/compass", "/compass/*"]

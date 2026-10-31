@@ -40,14 +40,14 @@
     catch (e) { four.classList.add('run'); }
   }
 
-  /* The account box: the FULL form, landing "road21" (its name in the account records and Mailchimp is unchanged). /north2/#join opens it. */
+  /* The account box: the FULL form, landing "north2" (Mailchimp tag linktolead-north2; until 31 Oct it was "road21"). /north2/#join opens it. */
   var gate = $('#gate'), box = null;
   try { import('/forms.js').then(function (m) { m.rememberUtm(); }).catch(function () {}); } catch (e) { /* old browser */ }
   function loadBox() { return box || (box = import('/account-box.js').catch(function () { box = null; })); }
   function openGate(e) {
     var opener = e && e.currentTarget;
     gate.hidden = false;
-    loadBox().then(function (m) { if (m) m.open({ gate: gate, opener: opener, stage: null, variant: 'full', landing: 'road21' }); });
+    loadBox().then(function (m) { if (m) m.open({ gate: gate, opener: opener, stage: null, variant: 'full', landing: 'north2' }); });
   }
   document.querySelectorAll('[data-gate]').forEach(function (b) { b.addEventListener('click', openGate); });
   if (location.hash === '#join') {

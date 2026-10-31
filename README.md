@@ -86,9 +86,24 @@ Three sales pages, the roads, all ending at `/start`:
 | Road | Address | Old addresses (302 here, query string kept) | Account form | Landing |
 |---|---|---|---|---|
 | Road 1 | `/road1/` (the long page, with the What-if Lab before the close) | `/`, `/b` | FULL | `road1` |
-| Road 2 | `/road2/` (the North Star sales page) | `/compass/welcome`, `/compass/welcome-a`, `/c` | FULL | `road2` |
+| Road 2 | `/road2/` (since 31 Oct, the Blueprint page "You built the house. You forgot the door.": for the founder who builds, polishes and rebuilds, and keeps the selling for later) | — | FULL | `road2` |
 | Road 3 | `/road3/` (the 12 Scrolls page) | `/a` | SIMPLE | `road3` |
 | Road 4 | `/road4/` (the sales page for The Founder's Blueprint: the mirror of eight taps, the two kinds of stuck, week one drawn day by day, the twelve weeks as a climb) | — | FULL | `road4` |
+| North 2 | `/north2/` (a North Star sales page; was `/road2.1/`) | `/road2.1` | FULL | `north2` |
+| North 3 | `/north3/` (the North Star sales page; was `/road2/` until 31 Oct) | `/compass/welcome`, `/compass/welcome-a`, `/c` | FULL | `north3` |
+
+**The landing rule (31 Oct 2026).** A page's landing is its address, and its
+Mailchimp tag is `linktolead-` + that landing (`linktolead-road2`,
+`linktolead-north3` …). Road pages and The Summit are Blueprint doors and send
+the Founder Launchpad welcome; `/north1/`, `/north2/`, `/north3/` and the
+North Star box are North Star doors and send "Your Leader's North Star is
+open". Until 31 Oct `/north3/` stored `road2` and `/north2/` stored `road21`.
+The first time the database opens after that, a one-time step (marker
+`landing-north-2026-10-31` in the `migration` table) moves those founders,
+only those who joined before the step ran, to `north3` / `north2`, so they
+still count as North Star. Their Mailchimp tag is kept as it was
+(`linktolead-road2` / `linktolead-road2.1`, in `student_profile.landing_tag`):
+no tag on an existing contact is changed.
 
 The redirects live in `functions/_landing.js` (the Worker and Pages both use
 it), and every old address is in `run_worker_first` in `wrangler.toml`.
@@ -109,7 +124,7 @@ arrived with. Mailchimp gets `Signup - Full` / `Signup - Simple`,
 `Interest - <goal>`, `Industry - <name>` and
 COMPANY. `/mentor` shows all of it and a table of sign-ups per landing.
 Landings stored before the roads (`a`, `b`, `c`) are moved to `road3`, `road1`
-and `road2` the first time the database is opened; founders tagged before keep
+and `north3` the first time the database is opened; founders tagged before keep
 their old Mailchimp landing tags, and get the new one at their next sync.
 Unknown addresses get `public/404.html` with a 404 status.
 

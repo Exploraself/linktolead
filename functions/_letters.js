@@ -193,10 +193,11 @@ export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {
   ], offerFor('launchpad-welcome', to, tier, offer), close('launchpad-welcome', { ...o, to })) };
 }
 
-/** Sign-ups from a North Star page (road2, north2 (landing road21), the North Star box) came
- *  for the North Star, so their welcome opens it; the Launchpad is the next
- *  step, not the subject (Alexandru, 30 Oct). */
-export const NORTH_STAR_LANDINGS = ['road2', 'road21', 'compass'];
+/** Sign-ups from a North Star page (/north1/, /north2/, /north3/, the North
+ *  Star box) came for the North Star, so their welcome opens it; the
+ *  Launchpad is the next step, not the subject (Alexandru, 30 Oct). The road
+ *  pages (/road1/ … /road4/) and The Summit get the Launchpad welcome. */
+export const NORTH_STAR_LANDINGS = ['compass', 'north1', 'north2', 'north3'];
 
 /** "northstar-welcome": sent once, when an account is made on a North Star page. */
 export function northStarWelcome(base, { first, to = '', tier, offer, ...o } = {}) {

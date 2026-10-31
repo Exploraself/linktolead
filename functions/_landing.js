@@ -1,4 +1,4 @@
-// The three sales pages live at /road1/, /north3/ and /road3/; The Leader’s
+// The sales pages live at /road1/ … /road4/, /north2/ and /north3/; The Leader’s
 // North Star at /northstar/ (it was /compass until 30 Oct). Their old
 // addresses (and the short ones on ads and banners) are 302s that keep the
 // query string (the utm_* tags), so the sign-up on the road they land on still
@@ -18,8 +18,8 @@ export const REDIRECTS = {
   '/summit': '/northstar/summit/',
   '/north-star': '/northstar/',
   '/blueprint': '/road1/',
-  // Road 2 became /north3/ (31 Oct): the North Star sales page.
-  '/road2': '/north3/',
+  // /road2 is no longer here: it moved to /north3/ on 31 Oct, and the same day
+  // /road2/ became the Blueprint page again (the new one).
   // Road 2.1 became /north2/ (31 Oct): it sells the North Star.
   '/road2.1': '/north2/',
 };

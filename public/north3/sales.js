@@ -268,7 +268,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
   function openGate(e) {
     const opener = e && e.currentTarget;
     gate.hidden = false;
-    loadBox().then((m) => m && m.open({ gate, opener, stage: stage === null ? null : STAGES[stage], variant: 'full', landing: 'road2', next: opener ? '/northstar/' : '' }));
+    loadBox().then((m) => m && m.open({ gate, opener, stage: stage === null ? null : STAGES[stage], variant: 'full', landing: 'north3', next: opener ? '/northstar/' : '' }));
   }
   document.querySelectorAll('[data-gate]').forEach((b) => b.addEventListener('click', openGate));
   if (location.hash === '#join') {
