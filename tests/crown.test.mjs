@@ -27,4 +27,7 @@ for (const k of ['Steps', 'Download', 'Music', 'Focus', 'Light', 'Blueprint', 'B
 ok(ns.includes('data-act="ans"') && ns.includes('gated(() => { S.ans[t.dataset.q] = Number(v); })'), 'North Star: answers go through the same path as before');
 ok(read('public/music.js').includes('if (opts.quiet) quiet = true;'), 'the player never starts itself on the North Star');
 ok(nsc.includes('@media(prefers-reduced-motion:reduce)') && nsc.includes('@media(max-width:760px)') && nsc.includes('.cf[data-theme="dark"] .nsb'), 'North Star: reduced motion, phone, dark');
+const MQ = (await import('node:module')).createRequire(import.meta.url)('../public/northstar/model.js').Q;
+ok(MQ.length === 32 && MQ.every((q) => q.short && q.text && q.prompt && q.lo && q.hi && !/\bwrite one\b|copy the/i.test(q.prompt)), 'North Star: 32 plain questions, a short hint each (nothing to write), and feedback the moment they are answered');
+ok(ns.includes('noteFor(q, a)'), 'North Star: the feedback is the question’s own line');
 done();

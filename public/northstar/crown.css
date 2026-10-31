@@ -28,7 +28,7 @@
 .nsb-r:focus-visible{box-shadow:inset 0 0 0 2px #6F93B8}
 .nsb-phone,.nsb-seg{display:none}
 .nsb-lab{color:var(--acc)}
-.nsb-body{display:grid;grid-template-columns:minmax(0,540px) minmax(120px,170px);gap:36px;align-items:start}
+.nsb-body{display:grid;grid-template-columns:minmax(0,540px) minmax(180px,250px);gap:36px;align-items:start}
 .nsb-q{font-size:30px;line-height:1.25;color:var(--qink);font-weight:400}
 .nsb-p{margin-top:10px !important;font-size:14px;line-height:1.6;color:var(--soft)}
 .nsb-opts{display:flex;flex-direction:column;margin-top:16px}
@@ -44,7 +44,9 @@
 .nsb-keys{margin-top:14px !important;font-size:13px;color:var(--soft)}
 .nsb-keys kbd{font:500 12px Inter,Arial,sans-serif;padding:3px 8px;border-radius:6px;border:1px solid var(--edge);background:var(--lf);color:var(--qink)}
 @media(hover:none){.nsb-keys{display:none}}
-.nsb-note{margin-top:150px !important;font:400 21px/1.35 'La Belle Aurore','Segoe Script','Bradley Hand',cursive;color:var(--hand);transform:rotate(-2deg)}
+.nsb-note{margin-top:96px !important;font:400 20px/1.4 'La Belle Aurore','Segoe Script','Bradley Hand',cursive;color:var(--hand);transform:rotate(-1.5deg);animation:nsnote .5s ease both}
+.nsb-note small{display:block;font:500 10px Inter,Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:4px;transform:rotate(1.5deg)}
+@keyframes nsnote{from{opacity:0;transform:translateY(6px) rotate(-1.5deg)}to{opacity:1;transform:rotate(-1.5deg)}}
 .nsb-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:110px;padding-top:20px;border-top:1px solid var(--rule)}
 .nsb-back,.nsb-next{min-height:44px;padding:0 20px;border-radius:999px;font:500 14px/1 Inter,Arial,sans-serif;cursor:pointer;white-space:nowrap}
 .nsb-back{border:1px solid var(--edge);background:none;color:var(--qink)}
@@ -98,7 +100,7 @@ body.crownopen .jw{opacity:1;visibility:visible;pointer-events:auto;transform:tr
 @media(max-width:760px){
   .crown-wrap{--cb:calc(max(6px,env(safe-area-inset-bottom,0px)) + 20px)}
   .nsb{display:block;box-shadow:none;margin:0 -6px}
-  .nsb-r{border-radius:6px;padding:16px 18px 24px;border:1px solid var(--edge)}
+  .nsb-r{border-radius:6px;padding:16px 18px 110px;border:1px solid var(--edge)}
   .nsb-l{position:fixed;inset:0;z-index:96;overflow-y:auto;overscroll-behavior:contain;border:0;border-radius:0;padding:60px 24px 40px;
     transform:translateY(100%);visibility:hidden;transition:transform .35s ease,visibility 0s linear .35s}
   body.nsb-open .nsb-l{transform:none;visibility:visible;transition:transform .35s ease}
@@ -124,7 +126,8 @@ body.crownopen .jw{opacity:1;visibility:visible;pointer-events:auto;transform:tr
   .crown-hint{bottom:calc(var(--cb) + 236px)}
 }
 @media(max-width:360px){.crown-arc{--r:136px}.jw{width:66px;left:-33px}}
-@media(prefers-reduced-motion:reduce){.jw,.crown,.crown-row,.crown-veil,.crown-hint,.nsb-l,.nsb-s,.nsb-o{transition:none !important}}
+.nsb-note{}
+@media(prefers-reduced-motion:reduce){.nsb-note{animation:none}.jw,.crown,.crown-row,.crown-veil,.crown-hint,.nsb-l,.nsb-s,.nsb-o{transition:none !important}}
 @media print{.crown-wrap{display:none !important}.nsb{box-shadow:none}}
 
 /* While the questions are on screen, the launchpad banner steps aside so it
