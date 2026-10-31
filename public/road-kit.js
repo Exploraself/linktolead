@@ -224,9 +224,10 @@ export function miniMirror(host, { page, first, onJoin }) {
 
 /**
  * Model stories (1 Nov): what a founder's first three Sundays can look like,
- * written as the model Alexandru will replace with real founders' words. They
- * are NOT real people, and every one carries the visible "Model story" tag
- * until a real one, with written permission, takes its place. No names:
+ * written as projections from what the levels ask, not as reviews. No card
+ * tag (Alexandru, 1 Nov); instead each page's section intro says plainly they
+ * are illustrations. A real founder's words, with written permission, replace
+ * a model one (model: false) when they exist. No names:
  * the quote, and the role of the person it models (Alexandru, 1 Nov)
  * (AGENTS.md §6, 01 START HERE §5). Swap `model: true` for a real story only.
  */
@@ -254,7 +255,7 @@ export function stories(host) {
   if (!host) return;
   const s = document.createElement('style'); s.textContent = SCSS; document.head.appendChild(s);
   host.classList.add('rk-st');
-  host.innerHTML = STORIES.map((x) => `<article>${x.model ? '<span class="tag">Model story · not a real founder yet</span>' : ''}
+  host.innerHTML = STORIES.map((x) => `<article>
     <p class="pn">${esc(x.stage)} · ${esc(x.pain)}</p><blockquote>“${esc(x.quote)}”</blockquote>
     <ul>${x.proof.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
     <p class="by"><b>${esc(x.title)}</b><span>${esc(x.who)}</span></p></article>`).join('');
