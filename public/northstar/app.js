@@ -543,7 +543,7 @@
     if (d > 0 && qi === total - 1) {
       // The last page: on to the North Star reading, once nothing is open.
       document.body.classList.remove('nsb-open');
-      if (guide(context(), 1)) return;
+      if (guide(context(), 1, 'reading')) return;
       const el = document.getElementById('s-reading');
       if (el) { el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: true }); }
       return;
@@ -672,10 +672,11 @@
     </svg>`;
   }
   const compassKey = (withAnswers) => `<div class="nskey">
-      <span><i class="k-ans"></i><b>Your answers</b><small>from the eight questions</small></span>
+      <span class="${withAnswers ? '' : 'dim'}"><i class="k-ans"></i><b>Your answers</b><small>${withAnswers ? 'from the eight questions' : 'join after Part 1'}</small></span>
       <span><i class="k-str"></i><b>Your strengths</b><small>as you rated yourself</small></span>
-      ${withAnswers ? '<p>Where the two lines part, look twice: that gap is your first lesson.</p>' : '<p>After Part 1, your answers join this compass, so you can compare the two.</p>'}
     </div>`;
+  const compassFig = (c, withAnswers) => `<figure class="nscfig">${compassKey(withAnswers)}${pCompass(c, withAnswers)}
+      <figcaption>${withAnswers ? 'Where the two lines part, look twice: that gap is your first lesson.' : 'After Part 1, your answers join this compass, so you can compare the two.'}</figcaption></figure>`;
 
   /* Before you start: your four strengths, and the compass drawing them. */
   function pStrengths(c) {
@@ -688,7 +689,7 @@
             <span style="font-weight: 520; font-size: 14px" id="st-${i}">${st.name}</span>
             <div style="display: flex; gap: 6px" role="group" aria-labelledby="st-${i}">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-act="str" data-i="${i}" data-v="${n}" data-f="str-${i}-${n}" aria-label="${st.name}: ${n} of 5" aria-pressed="${str[i] === n}" style="flex: 1; min-height: 44px; border-radius: 5px; border: 1.5px solid ${str[i] >= n ? '#6F93B8' : 'var(--line)'}; background: ${str[i] >= n ? '#6F93B8' : 'var(--paper)'}; color: ${str[i] >= n ? '#0E1C2B' : 'var(--ink)'}; cursor: pointer; font-weight: 520">${n}</button>`).join('')}</div></div>`).join('')}
         </div>
-        <div class="deep nscompbox" style="flex: 1 1 380px">${pCompass(c, false)}${compassKey(false)}</div>
+        <div class="deep nscompbox" style="flex: 1 1 380px">${compassFig(c, false)}</div>
       </div>`;
   }
 
@@ -699,9 +700,8 @@
         <span class="eb">${done ? 'Part 1 done · your North Star' : 'Your North Star · fills in as you answer'}</span>
         <h2 class="sf" style="font-size: clamp(28px, 3.6vw, 40px); line-height: 1.05">Your answers <span class="sfi" style="color: var(--goldink)">beside your strengths.</span></h2></div>
       <div class="deep nscompbox nsreading">
-        ${pCompass(c, true)}
-        <div style="display: flex; flex-direction: column; gap: 14px">
-          ${compassKey(true)}
+        ${compassFig(c, true)}
+        <div class="nsreads">
           <div class="nsread"><span class="eb" style="color: #9BC0A1">Strongest</span><b class="sf">${any ? D[hi].name : 'Answer to see it'}</b></div>
           <div class="nsread"><span class="eb" style="color: #E0A282">Needs you first</span><b class="sf">${any ? D[lo].name : '—'}</b></div>
           <div class="nsread"><span class="eb" style="color: #A9C0D9">Start here</span><span>${any ? D[lo].step : 'Your first move appears here.'}</span></div>
@@ -713,12 +713,16 @@
    * Before you start, then four parts. What is done, what is open, and the
    * first thing still open, so the founder never has to remember. */
   const PARTS = [['Yourself', 'clear'], ['Your people', 'people'], ['Your numbers', 'numbers'], ['Your next steps', 'plan']];
+  /* Part 3 is done when every number box has an answer ("Not sure yet"
+   * counts; "Type my own" counts once something is typed). */
+  const numFields = () => E.groupsFor(S.mode).flatMap((g, gi) => g.fields.map(([key, label]) => ({ gi, key, label, title: g.title, k: S.mode + '.' + key })));
+  const filled = (k) => { const v = S.nums[k]; return !!v && v.pick !== '' && v.pick != null && (v.pick !== 'own' || String(v.own || '').trim() !== ''); };
   function partState(c) {
-    const qs = c.qs, G = E.groupsFor(S.mode);
+    const qs = c.qs;
     const strDone = [0, 1, 2, 3].filter((i) => (Number(S.str[i]) || 0) > 0).length;
     const ansDone = qs.filter((q) => Number.isInteger(S.ans[q.id])).length;
     const p1 = { done: (S.goal ? 1 : 0) + strDone + ansDone + (S.want ? 1 : 0), total: 1 + 4 + qs.length + 1 };
-    const p3 = { done: Math.min(S.group, G.length) + [0, 1, 2, 3].filter((i) => S.got[i]).length, total: G.length + 4 };
+    const F = numFields(), p3 = { done: F.filter((x) => filled(x.k)).length, total: F.length };
     const p4 = { done: S.lab && (S.lab.p || S.lab.m || S.lab.f || S.lab.d) ? 1 : 0, total: 1 };
     const all = p1.done + p3.done + p4.done, tot = p1.total + p3.total + p4.total;
     const part = p1.done < p1.total ? 0 : p3.done < p3.total ? 2 : 3;
@@ -727,55 +731,108 @@
   /* The first thing still open in a part, and where it is on the page. */
   function firstOpenItem(c, upTo) {
     const qs = c.qs;
-    if (!S.goal) return { el: '#s-journey .j-road', label: 'where you want to get' };
-    for (let i = 0; i < 4; i++) if (!((Number(S.str[i]) || 0) > 0)) return { el: `.nsstr[data-sti="${i}"]`, label: 'your four strengths' };
+    if (!S.goal) return { el: '#s-journey .j-road', label: 'where you want to get', key: 'goal' };
+    for (let i = 0; i < 4; i++) if (!((Number(S.str[i]) || 0) > 0)) return { el: `.nsstr[data-sti="${i}"]`, label: `your strength · ${E.STRENGTHS[i].name.toLowerCase()}`, key: 'str' + i };
     const qi0 = qs.findIndex((q) => !Number.isInteger(S.ans[q.id]));
-    if (qi0 >= 0) return { el: '#nsb-r', label: `question ${qi0 + 1}`, q: qi0 };
-    if (!S.want) return { el: '#nsb-r', label: 'what you want most', q: qs.length + 1 };
+    if (qi0 >= 0) return { el: '#nsb-r', label: `question ${qi0 + 1} of ${qs.length}`, q: qi0, key: 'q' + qi0 };
+    if (!S.want) return { el: '#nsb-r', label: 'what you want most', q: qs.length + 1, key: 'want' };
     if (upTo <= 2) return null;
-    const G = E.groupsFor(S.mode);
-    if (S.group < G.length) return { el: `[data-f="grp-${Math.min(S.group, G.length - 1)}"]`, label: 'your numbers' };
+    const f = numFields().find((x) => !filled(x.k));
+    if (f) return { el: `#f-${CSS.escape(f.k)}`, label: `${f.title} · ${f.label.replace(/[?:.]$/, '').toLowerCase()}`, group: f.gi, key: 'n:' + f.k };
     return null;
+  }
+  /* Something skipped: an open item with an answered one after it. */
+  const skipped = (d) => d.some((x, i) => !x && d.slice(i + 1).some(Boolean));
+  function gaps(c) {
+    const d1 = [!!S.goal, ...[0, 1, 2, 3].map((i) => (Number(S.str[i]) || 0) > 0), ...c.qs.map((q) => Number.isInteger(S.ans[q.id])), !!S.want];
+    return { 0: skipped(d1), 2: skipped(numFields().map((x) => filled(x.k))) };
   }
   const pProg = (c) => {
     const P = partState(c), done = [P.p1.done === P.p1.total, P.p1.done === P.p1.total, P.p3.done === P.p3.total, P.p4.done === P.p4.total];
-    const cur = done.indexOf(false);
-    return `<div class="nsprog-in">
+    const cur = done.indexOf(false), gp = gaps(c), miss = !!UI.chain || !!gp[cur];
+    return `<div class="nsprog-in${miss ? ' miss' : ''}">
       <ol class="nsprog-parts" aria-label="Your path through the North Star">${PARTS.map(([n, go], i) => {
-        const st = done[i] ? 'done' : i === cur ? 'now' : 'wait';
-        return `<li class="${st}"><button type="button" data-go="${go}" aria-label="Part ${i + 1}, ${n}${st === 'done' ? ', done' : st === 'now' ? ', you are here' : ''}"><i aria-hidden="true">${st === 'done' ? '✓' : i + 1}</i><span>${n}</span></button></li>`;
+        const st = done[i] ? 'done' : i === cur ? 'now' + (miss ? ' miss' : '') : 'wait';
+        return `<li class="${st}"><button type="button" data-go="${go}" aria-label="Part ${i + 1}, ${n}${st === 'done' ? ', done' : i === cur ? (miss ? ', something is still open' : ', you are here') : ''}"><i aria-hidden="true">${st === 'done' ? '✓' : i + 1}</i><span>${n}</span></button></li>`;
       }).join('<li class="arr" aria-hidden="true"></li>')}</ol>
       <div class="nsprog-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${P.pct}" aria-label="Your North Star, ${P.pct}% done"><i style="width: ${P.pct}%"></i></div>
-      <span class="nsprog-pct">${P.pct}%</span></div>`;
+      <span class="nsprog-pct${miss ? ' miss' : ''}">${P.pct}%${miss ? '<small>something open</small>' : ''}</span></div>`;
   };
 
-  /* Something above is still open: say so, then take the founder there, slow,
-   * faster, then easing to a stop, and let the open thing pulse three times. */
+  /* Something is still open: say so, dim the page, take the founder there
+   * (slow, faster, easing to a stop), and flash the open thing in red three
+   * times. With a destination, it is a chain: once that is answered, on to
+   * the next open thing, and when nothing is left, to where they wanted to go. */
   let guiding = false;
-  function guide(c, upTo = 4) {
+  const DEST = { people: 'Part 2 · Your people', numbers: 'Part 3 · Your numbers', plan: 'Part 4 · Your next steps', reading: 'your North Star' };
+  function spotlight(el) {
+    document.querySelectorAll('.nsspot').forEach((x) => x.remove());
+    el.classList.remove('nsflash'); void el.offsetWidth; el.classList.add('nsflash');
+    setTimeout(() => el.classList.remove('nsflash'), 2600);
+    const r = el.getBoundingClientRect(), pad = 8, sp = document.createElement('div');
+    const hb = ($('.topwrap') || { getBoundingClientRect: () => ({ bottom: 0 }) }).getBoundingClientRect().bottom, top = Math.max(r.top - pad, hb + 4);
+    sp.className = 'nsspot'; sp.setAttribute('aria-hidden', 'true');
+    Object.assign(sp.style, { left: r.left - pad + 'px', top: top + 'px', width: r.width + pad * 2 + 'px', height: Math.max(40, Math.min(r.bottom + pad, innerHeight - 12) - top) + 'px' });
+    document.body.appendChild(sp);
+    const off = () => { sp.classList.add('out'); setTimeout(() => sp.remove(), 400); removeEventListener('scroll', off); };
+    setTimeout(off, 2700); addEventListener('scroll', off, { passive: true, once: true });
+  }
+  function scrollToEl(el, then) {
+    const top = Math.max(0, el.getBoundingClientRect().top + scrollY - (($('.topwrap') || {}).offsetHeight || 120) - 28);
+    if (reduced()) { window.scrollTo({ top, behavior: 'instant' }); then(); return; }
+    const from = scrollY, dist = top - from;
+    if (Math.abs(dist) < 4) { then(); return; }
+    const dur = Math.min(2200, Math.max(700, Math.abs(dist) * 0.45)), t0 = performance.now();
+    const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    const step = (now) => { const t = Math.min(1, (now - t0) / dur); window.scrollTo({ top: from + dist * ease(t), behavior: 'instant' }); if (t < 1) requestAnimationFrame(step); else then(); };
+    requestAnimationFrame(step);
+  }
+  function guide(c, upTo = 4, dest = null, next = false) {
     const it = firstOpenItem(c, upTo);
     if (!it || guiding) return false;
     guiding = true;
-    toast(`One thing above is still open: ${it.label}. Taking you there.`);
+    if (dest) UI.chain = { dest, upTo };
+    if (UI.chain) UI.chain.last = it.key;
+    put('nsprog', pProg(c));
+    toast(next ? `Done. Next still open: ${it.label}.` : `Still open: ${it.label}. Taking you there${UI.chain ? ', then on to ' + DEST[UI.chain.dest] : ''}.`);
     if (it.q != null) { qi = it.q; put('questions', pQuestions(context())); placeCrown(); }
+    if (it.group != null && S.group !== it.group) { S.group = it.group; save(); render(); }
     setTimeout(() => {
       const el = document.querySelector(it.el);
-      if (!el) { guiding = false; return; }
-      const top = Math.max(0, el.getBoundingClientRect().top + scrollY - (($('.topwrap') || {}).offsetHeight || 120) - 24);
-      const done = () => {
-        el.classList.remove('nsflash'); void el.offsetWidth; el.classList.add('nsflash');
-        setTimeout(() => el.classList.remove('nsflash'), 2200);
-        const f = el.querySelector('button, [tabindex]') || el; try { f.focus({ preventScroll: true }); } catch { /* fine */ }
+      if (!el) { guiding = false; UI.chain = null; return; }
+      scrollToEl(el, () => {
+        spotlight(el);
+        const f = el.matches('select, input, button') ? el : el.querySelector('select, input, button, [tabindex]') || el;
+        try { f.focus({ preventScroll: true }); } catch { /* fine */ }
         guiding = false;
-      };
-      if (reduced()) { window.scrollTo({ top, behavior: 'instant' }); done(); return; }
-      const from = scrollY, dist = top - from, dur = Math.min(2200, Math.max(900, Math.abs(dist) * 0.45)), t0 = performance.now();
-      const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-      const step = (now) => { const t = Math.min(1, (now - t0) / dur); window.scrollTo({ top: from + dist * ease(t), behavior: 'instant' }); if (t < 1) requestAnimationFrame(step); else done(); };
-      requestAnimationFrame(step);
-    }, 1500);
+      });
+    }, next ? 900 : 1500);
     return true;
   }
+  /* After each change: is the chain's open thing answered? Then the next, or
+   * the place the founder wanted in the first place. Never while typing. */
+  function chainCheck() {
+    clearTimeout(chainCheck.t);
+    chainCheck.t = setTimeout(() => {
+      const ch = UI.chain;
+      if (!ch || guiding) return;
+      const a = document.activeElement;
+      if (a && a.tagName === 'INPUT' && a.type === 'text') return;
+      const c = context(), it = firstOpenItem(c, ch.upTo);
+      if (!it) {
+        UI.chain = null; put('nsprog', pProg(c));
+        toast(`All done. Taking you to ${DEST[ch.dest]}.`);
+        setTimeout(() => { if (ch.dest === 'reading') { const el = $('#s-reading'); if (el) scrollToEl(el, () => {}); } else go(ch.dest); }, 1300);
+        return;
+      }
+      if (it.key === ch.last) return;
+      // The notebook turns its own page; the next question is already there.
+      if (it.q != null && /^q|^want/.test(ch.last || '')) { ch.last = it.key; return; }
+      guide(c, ch.upTo, null, true);
+    }, 1000);
+  }
+  document.addEventListener('focusout', () => { if (UI.chain) chainCheck(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.chain) { UI.chain = null; put('nsprog', pProg(context())); } });
   /* A part finished: say so, warmly, once. */
   let lastDone = null;
   function celebrate(c) {
@@ -880,13 +937,11 @@
     // Before either question is answered there is nothing to read back yet.
     if (!s.answered) Object.assign(f, { big: `Answer the two ${D[i].name.toLowerCase()} questions in Part 1, and this card fills in.`, why: 'Nothing here is said about you before you have said it yourself.', feel: [] });
     const nums = S.mode === 'yes' ? E.numberLines(c.n, money)[i] : '';
-    const bg = ['#F4E1D6', '#F3EAD3', '#E3ECE4'], ink = ['#8A4524', '#3E6A94', '#35593D'];
     const open = !!S.more[i];
     return `<div style="display: flex; flex-direction: column; gap: 10px; opacity: ${locked ? '.45' : '1'}; transition: opacity .5s ease"${locked ? ' inert' : ''}>
       ${locked ? `<span style="font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 8px">${lockIcon('currentColor')}Tick “Got it” on the domain above to open this one.</span>` : ''}
       <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"><span style="width: 34px; height: 34px; border-radius: 50%; background: ${TINT[i]}; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="${D[i].icon}" fill="none" stroke="${CSSV[i]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h3 class="sf" style="font-size: 20px; font-weight: 440">${D[i].name}</h3>
-        <span style="font-size: 11px; font-weight: 520; letter-spacing: .12em; padding: 4px 10px; border-radius: 12px; background: ${f.bandIndex === null ? 'var(--cream)' : bg[f.bandIndex]}; color: ${f.bandIndex === null ? 'var(--muted)' : ink[f.bandIndex]}">${f.band}</span>
-        <span class="nslevel" style="--c: ${CSSV[i]}"><b>${s.score}</b> of 6 · your level</span>
+        <span class="nsband b${f.bandIndex === null ? 'x' : f.bandIndex}">${f.bandIndex === null ? 'Not answered yet' : `${['Needs you now', 'Halfway there', 'A strength'][f.bandIndex]} <b>· ${s.score} of 6</b>`}</span>
         <span style="flex: 1; height: 1px; background: var(--line); min-width: 40px"></span></div>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
         <div class="card lift" style="border-top: 4px solid ${CSSV[i]}; padding: 18px; display: flex; flex-direction: column; gap: 8px">
@@ -1073,7 +1128,7 @@
     const input = (key, label, hint) => `<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 520; color: #EEF2F7">${label}
         <input class="inp" type="text" inputmode="decimal" data-lab="${key}" data-f="lab-${key}" value="${esc(S.lab[key])}" placeholder="${hint}" style="background: #121E2D; color: #EEF2F7; border-color: #2A3A50"></label>`;
     const missing = L.locked ? L.need : [];
-    const chips = [...missing.map((x) => x.label), ...(L.locked && L.planned ? ['Customers a month you plan for (below)'] : [])];
+    const chips = [...missing.map((x) => x.label), ...(L.locked && L.planned ? ['Customers a month you aim for (below)'] : [])];
     const lock = L.locked ? `<div class="wlock" role="status">
         <div class="wlock-msg">
           <strong>See your real situation, from left to right.</strong>
@@ -1088,6 +1143,7 @@
           <div class="wrow"><label for="w-${x.k}" class="wname"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${x.icon}" fill="none" stroke="#6F93B8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>${x.name}</label><span class="wbig" id="lv-val-${x.k}">—</span></div>
           <input id="w-${x.k}" type="range" min="0" max="${E.LEVER_RANGE[x.k]}" step="5" value="${L.locked ? 0 : S.lab[x.k] || 0}" data-lever="${x.k}" data-f="w-${x.k}"${dis}>
           <span class="wnote" id="lv-note-${x.k}"></span>
+          <span class="wcoach" id="lv-coach-${x.k}"${UI.coach && UI.coach.lines[x.k] ? '' : ' hidden'}>${UI.coach && UI.coach.lines[x.k] ? esc(['p', 'm', 'f', 'd'].indexOf(x.k) + 1 + '. ' + UI.coach.lines[x.k]) : ''}</span>
         </div>
         <div class="warrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="wcard" role="meter" id="out-${x.out.k}" aria-labelledby="out-name-${x.out.k}" aria-valuemin="0">
@@ -1097,11 +1153,12 @@
           <span class="wnote" id="out-note-${x.out.k}"></span>
         </div></div>`).join('');
     return `${lock}
-      ${plan ? `<div style="max-width: 320px">${input('plan', 'Customers a month you plan for', 'Your plan, a number')}</div>` : ''}
-      <div class="wswitch" role="group" aria-label="What should the gain go to?">
-        <button type="button" data-act="lab-mode" data-v="time" data-f="lab-mode-time"${dis}>Give me back time</button>
-        <button type="button" data-act="lab-mode" data-v="money" data-f="lab-mode-money"${dis}>Give me more money</button>
-      </div>
+      ${plan ? `<div style="max-width: 320px">${input('plan', 'How many customers a month do you aim for?', 'A number')}</div>` : ''}
+      <div class="wswitchq"><span id="wsw-q">When the business earns more, what do you want back?</span>
+      <div class="wswitch" role="group" aria-labelledby="wsw-q">
+        <button type="button" data-act="lab-mode" data-v="time" data-f="lab-mode-time"${dis}>More free time<small>Same income, fewer hours</small></button>
+        <button type="button" data-act="lab-mode" data-v="money" data-f="lab-mode-money"${dis}>More money<small>Same hours, more income</small></button>
+      </div></div>
       <div class="wlab${L.locked ? ' locked' : ''}">
         <div class="wheads" aria-hidden="true"><span>You move</span><span></span><span>Moves by itself</span></div>
         <div class="wrows">${rows}</div>
@@ -1126,19 +1183,121 @@
     const step = (now) => { const a = dur ? Math.min(1, (now - t0) / dur) : 1, e = 1 - Math.pow(1 - a, 3); el.textContent = fmt(from + (to - from) * e); if (a < 1) tween[k] = requestAnimationFrame(step); };
     tween[k] = requestAnimationFrame(step);
   }
-  function hubSVG(improved) {
-    const NP = [['Cash', 160, 23, 160, 12, 'middle'], ['Clients', 222, 85, 244, 89, 'start'], ['Time', 160, 147, 160, 168, 'middle'], ['People', 98, 85, 76, 89, 'end']];
-    const all = improved.filter(Boolean).length;
-    return `<circle cx="160" cy="85" r="62" fill="none" stroke="${all >= 3 ? '#6F93B8' : '#3A2F20'}" stroke-width="2" stroke-dasharray="4 5"/>
-      <circle cx="160" cy="85" r="22" fill="#0E1C2B" stroke="#6F93B8" stroke-width="1.5"/><text x="160" y="90" text-anchor="middle" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="13">You</text>
-      ${NP.map((n, i) => `<line x1="160" y1="85" x2="${n[1]}" y2="${n[2]}" stroke="#3A2F20" stroke-width="1"/><circle class="node" cx="${n[1]}" cy="${n[2]}" r="14" fill="${improved[i] ? '#6F93B8' : '#0E1C2B'}" stroke="#6F93B8" stroke-width="1.5"/><text x="${n[3]}" y="${n[4]}" text-anchor="${n[5]}" fill="#EEF2F7" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="520">${n[0]}</text>`).join('')}`;
+  /* ── The target (31 Oct) ───────────────────────────────────────────────
+   * Four checks for a month that works: cash left over, customers kept,
+   * hours within your limit, room to pay one person. Each miss pulls the shot
+   * away from the centre, toward its own side. */
+  const AIM = [
+    { k: 'cash', name: 'Cash', x: 0, y: -1 },
+    { k: 'clients', name: 'Clients', x: 1, y: 0 },
+    { k: 'time', name: 'Time', x: 0, y: 1 },
+    { k: 'people', name: 'People', x: -1, y: 0 },
+  ];
+  function aimOf(b, s, t) {
+    const lim = b.limit || 160;
+    const miss = {
+      cash: s.cash === null ? null : s.cash >= 0 ? 0 : Math.min(1, -s.cash / Math.max(b.sales, 1)),
+      clients: s.clients === null || t.clients === null ? null : s.clients >= t.clients - 0.05 ? 0 : Math.min(1, (t.clients - s.clients) / Math.max(t.clients, 1)),
+      time: s.mine <= lim + 0.5 ? 0 : Math.min(1, (s.mine - lim) / lim),
+      people: s.people === null ? null : s.people >= 1 ? 0 : 1 - Math.max(0, s.people),
+    };
+    const known = AIM.filter((a) => miss[a.k] !== null), on = known.filter((a) => miss[a.k] < 0.001).length;
+    let vx = 0, vy = 0, sq = 0;
+    for (const a of known) { vx += a.x * miss[a.k]; vy += a.y * miss[a.k]; sq += miss[a.k] ** 2; }
+    const r = Math.min(1, Math.sqrt(sq / Math.max(1, known.length)) * 1.6);
+    let ang = Math.atan2(vy, vx);
+    if (Math.hypot(vx, vy) < 0.01 && r > 0) { const w = known.reduce((m, a) => (miss[a.k] > miss[m.k] ? a : m), known[0]); ang = Math.atan2(w.y, w.x); }
+    return { miss, on, total: known.length, r, ang, lim, cost: known.reduce((n, a) => n + miss[a.k], 0) };
+  }
+  function targetSVG(A) {
+    const c = 150, R = 112, locked = !A;
+    const sx = locked ? c : c + Math.cos(A.ang) * A.r * R, sy = locked ? c : c + Math.sin(A.ang) * A.r * R;
+    const centred = A && A.on === A.total;
+    const lab = [[c, 18, 'middle'], [282, c + 5, 'end'], [c, 292, 'middle'], [18, c + 5, 'start']];
+    return `<circle cx="${c}" cy="${c}" r="${R}" fill="rgba(111,147,184,.06)" stroke="#2A3A50" stroke-width="1.5"/>
+      <circle cx="${c}" cy="${c}" r="${R * 0.66}" fill="none" stroke="#2A3A50" stroke-width="1.5"/>
+      <circle cx="${c}" cy="${c}" r="${R * 0.33}" fill="${centred ? 'rgba(155,192,161,.25)' : 'rgba(111,147,184,.10)'}" stroke="${centred ? '#9BC0A1' : '#3E6A94'}" stroke-width="2"/>
+      <circle cx="${c}" cy="${c}" r="5" fill="${centred ? '#9BC0A1' : '#6F93B8'}"/>
+      <line x1="${c}" y1="${c - R - 6}" x2="${c}" y2="${c + R + 6}" stroke="#2A3A50"/><line x1="${c - R - 6}" y1="${c}" x2="${c + R + 6}" y2="${c}" stroke="#2A3A50"/>
+      ${AIM.map((a, i) => { const m = A ? A.miss[a.k] : null, col = m === null ? '#8A7A5E' : m < 0.001 ? '#9BC0A1' : '#E0A282';
+        return `<text x="${lab[i][0]}" y="${lab[i][1]}" text-anchor="${lab[i][2]}" fill="${col}" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="600" letter-spacing=".06em">${m === null ? '' : m < 0.001 ? '✓ ' : '✕ '}${a.name.toUpperCase()}</text>`; }).join('')}
+      ${locked ? '' : `<g class="wshot" style="transform: translate(${sx.toFixed(1)}px, ${sy.toFixed(1)}px)"><circle r="15" fill="none" stroke="${centred ? '#9BC0A1' : '#E0A282'}" stroke-width="2.5" opacity=".55"/><circle r="8" fill="${centred ? '#9BC0A1' : '#E0A282'}" stroke="#0E1C2B" stroke-width="2"/></g>`}`;
+  }
+  /* The smallest change of the four levers that centres the target, or comes
+   * closest. A search over the slider steps; the month model is cheap. */
+  function centreLevers(b, mode) {
+    const t = E.month(b, {}, mode), R = E.LEVER_RANGE, best = { score: Infinity, lab: null };
+    for (let p = 0; p <= R.p; p += 10) for (let m = 0; m <= R.m; m += 10) for (let f = 0; f <= R.f; f += 10) for (let d = 0; d <= (b.rate === null ? 0 : R.d); d += 10) {
+      const lab = { p, m, f, d }, s = E.month(b, lab, mode), A = aimOf(b, s, t);
+      const effort = (p / R.p) ** 2 + (m / R.m) ** 2 + (f / R.f) ** 2 + (d / R.d) ** 2;
+      const score = A.cost * 20 + effort;
+      if (score < best.score) { best.score = score; best.lab = lab; best.A = A; }
+    }
+    return best;
+  }
+  const COACH = {
+    p: (v) => (!v ? 'Keep your price where it is.' : v > 50 ? `Raise your price by ${v}%. That much says today’s price is far below what the work costs you.` : `Raise your price by ${v}%. The same work leaves you more cash.`),
+    m: (v) => (v ? `Say what you do more clearly, so about ${v}% more of the right people say yes.` : 'Your message can stay as it is for now.'),
+    f: (v) => (v ? `Cut the hours each sale takes by ${v}%: a checklist, a template, one meeting fewer.` : 'Your hours for each sale can stay as they are.'),
+    d: (v) => (v ? `Hand ${v}% of the delivery hours to a helper. Keep the work only you can do.` : 'You can keep doing the work yourself for now.'),
+  };
+  /* "Yes, show me": the sliders move to the centre one by one, slowly, each
+   * with its sentence; then the way on, to the Founder Launchpad. */
+  let coaching = false;
+  function coach() {
+    const L = labCalc();
+    if (L.locked || coaching) return;
+    const best = centreLevers(L.b, labMode()), order = ['p', 'm', 'f', 'd'];
+    coaching = true; UI.coach = { lines: {}, best, done: false };
+    put('lab-coach', pCoach());
+    const first = document.querySelector('.wrows');
+    const run = (i) => {
+      if (i >= order.length) {
+        coaching = false; UI.coach.done = true; save(); renderLab(); put('lab-coach', pCoach());
+        const cta = $('#lab-coach'); if (cta) setTimeout(() => scrollToEl(cta, () => {}), 300);
+        return;
+      }
+      const k = order[i], from = Number(S.lab[k]) || 0, to = best.lab[k], card = document.getElementById('w-' + k)?.closest('.wcard');
+      UI.coach.lines[k] = COACH[k](to);
+      const line = document.getElementById('lv-coach-' + k); if (line) { line.textContent = (i + 1) + '. ' + UI.coach.lines[k]; line.hidden = false; }
+      card && card.classList.add('wnow');
+      const dur = reduced() || from === to ? 0 : 1500, t0 = performance.now();
+      const step = (now) => {
+        const a = dur ? Math.min(1, (now - t0) / dur) : 1, e = a < 0.5 ? 2 * a * a : 1 - Math.pow(-2 * a + 2, 2) / 2;
+        S.lab[k] = Math.round(from + (to - from) * e);
+        const el = document.getElementById('w-' + k); if (el) el.value = S.lab[k];
+        updateLab();
+        if (a < 1) requestAnimationFrame(step);
+        else setTimeout(() => { card && card.classList.remove('wnow'); run(i + 1); }, reduced() ? 0 : 900);
+      };
+      requestAnimationFrame(step);
+    };
+    if (first) scrollToEl(first, () => setTimeout(() => run(0), 300)); else run(0);
+  }
+  function pCoach() {
+    const L = labCalc();
+    if (L.locked || !UI.coach) return '';
+    const { best, done } = UI.coach, centred = best.A && best.A.on === best.A.total;
+    const moves = ['p', 'm', 'f', 'd'].filter((k) => best.lab[k]).length, big = ['p', 'm', 'f', 'd'].some((k) => best.lab[k] / E.LEVER_RANGE[k] > 0.3), MW = (['No change', 'One move', 'Two moves', 'Three moves', 'Four moves'][moves]).replace(' move', big ? ' move' : ' small move');
+    if (!done) return `<div class="wcoachbox"><span class="eb" style="color: #D6BF8F">Centring your target</span><span class="sf" style="font-size: 20px">Watch the four levers move, one at a time.</span></div>`;
+    return `<div class="wcoachbox pop">
+      <span class="eb" style="color: #D6BF8F">${centred ? 'Your target, centred' : 'As close to the centre as these four levers go'}</span>
+      <ol>${['p', 'm', 'f', 'd'].map((k) => `<li>${esc(UI.coach.lines[k] || '')}</li>`).join('')}</ol>
+      <span style="color: #E3EAF2; font-size: 15px">${centred ? `${MW}, and your month works. Doing ${moves === 1 ? 'it' : 'them'} for real, step by step, is what the Founder Launchpad is for.` : 'The rest needs more than four levers: a clearer offer and a plan. That is where the Founder Launchpad starts.'}</span>
+      <a class="go" href="/ground-plan/#home" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 5px; background: #D6BF8F; color: #1C1309; font-weight: 600; text-decoration: none">Take me to my Founder Launchpad <span aria-hidden="true">→</span></a>
+    </div>`;
   }
 
   /** Set every value in the lab without redrawing it, so handles glide. */
   function updateLab() {
     const L = labCalc(), set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-    const hub = $('#lab-hub'), hk = L.locked ? 'x' : L.improved.join();
-    if (hub && hub.dataset.k !== hk) { hub.innerHTML = hubSVG(L.locked ? [false, false, false, false] : L.improved); hub.dataset.k = hk; }
+    const A = L.locked ? null : aimOf(L.b, L.s, L.t), hub = $('#lab-hub'), hk = A ? [A.on, A.r.toFixed(2), A.ang.toFixed(2), ...AIM.map((a) => A.miss[a.k])].join() : 'x';
+    if (hub && hub.dataset.k !== hk) { hub.innerHTML = targetSVG(A); hub.dataset.k = hk; hub.setAttribute('aria-label', A ? `Your target: ${A.on} of ${A.total} on target` : 'Your target, waiting for your numbers'); }
+    const aim = $('#lab-aim');
+    if (aim) aim.innerHTML = !A ? '<b>Your target</b><span>It aims once Part 3 is filled.</span>'
+      : A.on === A.total ? `<b>${A.on} of ${A.total} on target. Centred.</b><span>Your month works: cash left over, customers kept, hours within ${whole(A.lim)}, room for help.</span>`
+      : `<b>${A.on} of ${A.total} on target</b><span>${AIM.filter((a) => A.miss[a.k] > 0.001).map((a) => ({ cash: 'cash runs short', clients: 'customers drop', time: `more than ${whole(A.lim)} hours`, people: 'no room to pay help' })[a.k]).join(' · ')}</span>
+        <div class="waimq"><span>Do you want to know how to centre it?</span><button type="button" data-act="lab-centre" data-f="lab-centre"${coaching ? ' disabled' : ''}>Yes, show me</button></div>`;
     document.querySelectorAll('[data-act="lab-mode"]').forEach((el) => el.setAttribute('aria-pressed', String(el.dataset.v === labMode())));
     const head = $('#lab-head');
     if (L.locked) {
@@ -1238,10 +1397,10 @@
   function labFoot() {
     const b = E.labBase(S);
     const parts = [];
-    if (b.ready) parts.push(b.plan ? 'Built from your offer in Part 3 and the customers a month you plan for.' : 'Built from your month in Part 3.');
+    if (b.ready) parts.push(b.plan ? 'Built from your offer in Part 3 and the customers a month you aim for.' : 'Built from your month in Part 3.');
     if (b.ready && b.est) parts.push('Some of it comes from ranges, so read every figure as “about”.');
     if (b.ready && b.acqMissing) parts.push('Spending to win customers was not entered, so it counts as nothing here.');
-    parts.push(labMode() === 'time' ? '“Give me back time” serves only the work needed to keep today’s money.' : '“Give me more money” serves everyone who wants to buy.');
+    parts.push(labMode() === 'time' ? '“More free time” serves only the work needed to keep today’s money.' : '“More money” serves everyone who wants to buy.');
     parts.push('A higher price may change demand, and help costs money before it saves time. Check both before acting.');
     return parts.join(' ');
   }
@@ -1396,6 +1555,7 @@
     put('s-climb', pClimb());
     put('lab-in', pLabIn());
     updateLab();
+    put('lab-coach', pCoach());
     put('lab-deep', pLabDeep());
     $('#labtag').textContent = S.mode === 'yes' ? 'Part 4 · Your next steps · the what-if lab' : 'Part 4 · Your next steps · the what-if lab';
     $('#labfoot').textContent = labFoot();
@@ -1405,7 +1565,7 @@
     put('ws', pWs());
     $('#how-btn').setAttribute('aria-expanded', String(UI.how));
     $('#ws-btn').setAttribute('aria-expanded', String(UI.ws));
-    mountCrown(); placeCrown(); lockParts(c); celebrate(c);
+    mountCrown(); placeCrown(); lockParts(c); celebrate(c); if (UI.chain) chainCheck();
     if (keep && (!document.activeElement || document.activeElement === document.body || !document.activeElement.isConnected)) {
       const el = document.querySelector(`[data-f="${keep}"]`);
       if (el) el.focus({ preventScroll: true });
@@ -1488,7 +1648,7 @@
     const need = want ? want : inLocked ? +inLocked.dataset.part : 0;
     if (!need) return;
     const p1 = P.p1.done === P.p1.total, p3 = P.p3.done === P.p3.total;
-    if ((need >= 2 && !p1) || (need === 4 && !p3)) { e.preventDefault(); e.stopPropagation(); guide(c, need === 4 && p1 ? 4 : 1); }
+    if ((need >= 2 && !p1) || (need === 4 && !p3)) { e.preventDefault(); e.stopPropagation(); guide(c, need === 4 ? 4 : 1, { 2: 'people', 3: 'numbers', 4: 'plan' }[need]); }
   }, true);
   document.addEventListener('click', (e) => {
     const t = e.target.closest('[data-go],[data-act]');
@@ -1516,8 +1676,9 @@
         return;
       }
       case 'mode': S.mode = v; S.group = 0; S.lab.p = 0; S.lab.m = 0; S.lab.f = 0; S.lab.d = 0; save(); render(); return;
-      case 'lab-mode': S.lab.mode = v === 'money' ? 'money' : 'time'; save(); renderLab(); return;
+      case 'lab-mode': if (coaching) return; S.lab.mode = v === 'money' ? 'money' : 'time'; UI.coach = null; put('lab-coach', ''); document.querySelectorAll('.wcoach').forEach((x) => { x.hidden = true; }); save(); renderLab(); return;
       case 'lab-take': takeToNumbers(); return;
+      case 'lab-centre': coach(); return;
       case 'ans': gated(() => { S.ans[t.dataset.q] = Number(v); }); return;
       case 'nsq': qi = i; document.body.classList.remove('nsb-open'); put('questions', pQuestions(context())); placeCrown(); { const r = document.getElementById('nsb-r'); if (r) r.focus({ preventScroll: true }); } return;
       case 'nsmove': nsMove(Number(v)); return;
@@ -1580,7 +1741,7 @@
   });
   document.addEventListener('input', (e) => {
     const t = e.target;
-    if (t.dataset.lever) { S.lab[t.dataset.lever] = Number(t.value); save(); renderLab(); return; }
+    if (t.dataset.lever) { if (UI.coach && UI.coach.done) { UI.coach = null; put('lab-coach', ''); document.querySelectorAll('.wcoach').forEach((x) => { x.hidden = true; }); } S.lab[t.dataset.lever] = Number(t.value); save(); renderLab(); return; }
     if (t.dataset.own) { S.nums[t.dataset.own] = { pick: 'own', own: t.value.slice(0, 80) }; save(); return; }
     if (t.dataset.lab) { S.lab[t.dataset.lab] = t.value.replace(/[^\d.]/g, '').slice(0, 12); save(); }
   });

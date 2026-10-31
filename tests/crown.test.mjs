@@ -33,7 +33,11 @@ ok(ns.includes('noteFor(q, a)'), 'North Star: the feedback is the question’s o
 const nsi = read('public/northstar/index.html');
 ok(!/Step 0\d|>STEP |Part \d of \d/.test(nsi + ns), 'North Star: one word, one meaning: only Parts 1–4, no "Step 01", no "Part 1 of 2"');
 ok(nsi.includes('Before you start') && nsi.includes('id="s-strengths"') && nsi.indexOf('id="s-strengths"') < nsi.indexOf('id="questions"'), 'North Star: before you start (where you are, where you want to get, strengths) comes before the questions');
-ok(ns.includes('function guide(') && ns.includes("toast(`One thing above is still open") && nsc.includes('.nsflash{animation:nsflash .7s ease-in-out 3') && ns.includes('if (reduced()) { window.scrollTo({ top, behavior: \'instant\' })'), 'North Star: something open above: a message, an eased scroll, three pulses (a jump with reduced motion)');
+ok(ns.includes('function guide(') && ns.includes('Still open: ${it.label}') && nsc.includes('.nsflash{animation:nsflash .8s ease-in-out 3') && nsc.includes('.nsspot{') && ns.includes("if (reduced()) { window.scrollTo({ top, behavior: 'instant' })"), 'North Star: something open: a message, the page dims, an eased scroll, three red flashes (a jump with reduced motion)');
+ok(ns.includes('function chainCheck(') && ns.includes('All done. Taking you to') && ns.includes("{ 2: 'people', 3: 'numbers', 4: 'plan' }[need]"), 'North Star: the guide is a chain: each open thing in turn, then where the founder wanted to go');
+ok(ns.includes('const filled = (k)') && ns.includes('numFields().find((x) => !filled(x.k))') && !ns.includes('S.got[i]).length'), 'North Star: Part 3 is done when every number box is filled; the "Got it" ticks do not hold it back');
+ok(ns.includes('function targetSVG(') && ns.includes('function centreLevers(') && ns.includes('href="/ground-plan/#home"') && !ns.includes('function hubSVG('), 'North Star: the what-if lab aims at a target, centres it on request and leads to the Founder Launchpad');
+ok(!ns.includes('of 6 · your level') && ns.includes("'Halfway there'"), 'North Star: one level banner on each card, no "Taking shape" on the card');
 ok(ns.includes('lockParts(c)') && nsc.includes('.nslocked') && ns.includes('Opens after Part 1 · Yourself'), 'North Star: later parts wait until the one before is done');
 ok(ns.includes('const pProg') && nsi.includes('id="nsprog"') && ns.includes('aria-valuenow'), 'North Star: the path bar, always at the top, with a percentage');
 done();

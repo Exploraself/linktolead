@@ -177,11 +177,12 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
         <div style="display: flex; flex-direction: column; gap: 10px; min-width: 0">
           <span class="eb" style="color: #A9C0D9" id="labtag">Part 4 · Your next steps · the what-if lab</span>
           <h1 class="sfi" style="font-size: clamp(64px, 10vw, 112px); line-height: .9; color: #6F93B8">What if?</h1>
-          <span class="sf" style="font-size: 21px; line-height: 1.35; max-width: 34ch">You want to grow. So ask it. Move one of four levers and watch your cash, clients, time and people answer.</span>
+          <span class="sf" style="font-size: 21px; line-height: 1.35; max-width: 34ch">Move a lever. Your month answers, and the target shows how close it is to a month that works.</span>
         </div>
-        <svg class="whub" id="lab-hub" viewBox="0 0 320 175" role="img" aria-label="You, with cash, clients, time and people around you"></svg>
+        <div class="wtarget"><svg class="whub" id="lab-hub" viewBox="0 0 300 300" role="img" aria-label="Your target"></svg><div class="waim" id="lab-aim" aria-live="polite"></div></div>
       </div>
       <div id="lab-in" style="display: flex; flex-direction: column; gap: 22px"></div>
+      <div id="lab-coach" aria-live="polite"></div>
       <div class="wverdict" id="lab-head" aria-live="polite"></div>
       <div id="lab-deep"></div>
       <p style="font-size: 13px; color: #A9B6C6; border-top: 1px solid #3A2F20; padding-top: 14px" id="labfoot"></p>

@@ -80,11 +80,11 @@ const C = read('public/northstar/index.html');
 const at = (id) => C.indexOf(id);
 ok(at('id="s-climb"') < at('class="breath"') && at('class="breath"') < at('id="s-whatif"'), 'gold divider between your climb and the lab');
 ok(at('id="s-whatif"') < C.lastIndexOf('class="breath"') && C.lastIndexOf('class="breath"') < at('id="s-dawn"') && at('id="s-dawn"') < at('id="s-summit"'), 'divider, then the dawn, then The Summit');
-ok(C.includes('Move one of four levers and watch your cash, clients, time and people answer.'), 'lab header copy');
+ok(C.includes('Move a lever. Your month answers, and the target shows how close it is to a month that works.'), 'lab header copy');
 ok(C.includes('<script src="dawn.js"></script>'), 'dawn script loaded');
 const LAB = read('public/northstar/app.js') + read('public/northstar/engine.js');
 ok(!/\$250|price: 250|n: 20, price/.test(LAB), 'no example month shipped');
-for (const t of ['See your real situation, from left to right.', 'Take me there ↑', 'Give me back time', 'Give me more money', 'Fine-tune (optional)', 'Each sale takes fewer hours']) ok(LAB.includes(t), `lab copy: ${t}`);
+for (const t of ['See your real situation, from left to right.', 'Take me there ↑', 'More free time', 'Same income, fewer hours', 'More money', 'Same hours, more income', 'Do you want to know how to centre it?', 'Take me to my Founder Launchpad', 'Fine-tune (optional)', 'Each sale takes fewer hours']) ok(LAB.includes(t), `lab copy: ${t}`);
 ok(read('public/northstar/dawn.js').includes('prefers-reduced-motion'), 'dawn respects reduced motion');
 
 // PR 5: "What opens with your free account", on Road 2, right after

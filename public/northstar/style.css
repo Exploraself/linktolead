@@ -152,10 +152,26 @@ details[data-step] summary::-webkit-details-marker{display:none}
 /* ── What-if lab v2 ── */
 .breath{height:14px;margin-block:-35px;display:flex;justify-content:center;align-items:center}
 .whead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,360px);gap:24px;align-items:center}
-.whub{width:100%;max-width:360px;height:auto;justify-self:end}
+.wtarget{justify-self:end;display:flex;flex-direction:column;align-items:center;gap:8px;max-width:340px;width:100%}
+.whub{width:100%;max-width:300px;height:auto}
+.wshot{transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.waim{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;color:#E3EAF2}
+.waim b{font:500 20px/1.2 Newsreader,Georgia,serif;color:#EEF2F7}
+.waim>span{font-size:13.5px;color:#A9C0D9}
+.waimq{margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 14px;border:1px solid rgba(214,191,143,.55);border-radius:10px;background:rgba(214,191,143,.08)}
+.waimq span{font:italic 400 17px/1.3 Newsreader,Georgia,serif;color:#F6EEDD}
+.waimq button{min-height:44px;padding:0 20px;border-radius:5px;border:0;background:#D6BF8F;color:#1C1309;font-weight:600;font-size:14px;cursor:pointer}
+.waimq button:disabled{opacity:.5;cursor:wait}
+.wcoach{display:block;margin-top:8px;padding:10px 12px;border-radius:6px;background:rgba(214,191,143,.12);border-left:3px solid #D6BF8F;color:#F6EEDD;font-size:14.5px;line-height:1.45}
+.wcard.wnow{border-color:#D6BF8F !important;box-shadow:0 0 0 3px rgba(214,191,143,.25)}
+.wcoachbox{display:flex;flex-direction:column;gap:12px;padding:20px 22px;border-radius:10px;border:1px solid #D6BF8F;background:linear-gradient(120deg,rgba(43,27,18,.85),rgba(28,19,9,.85));color:#EEF2F7}
+.wcoachbox ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:15px;line-height:1.5}
+.wswitchq{display:flex;flex-direction:column;gap:8px}
+.wswitchq>span{font:italic 400 18px/1.3 Newsreader,Georgia,serif;color:#E3EAF2}
+.wswitch button small{display:block;font-size:11.5px;font-weight:400;opacity:.8}
 .whub .node{transition:fill .5s}
 .wswitch{display:inline-grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border:1px solid #3A2F20;border-radius:999px;align-self:flex-start}
-.wswitch button{min-height:44px;padding:0 18px;border-radius:999px;border:0;background:transparent;color:#EEF2F7;font-weight:520;font-size:14px;cursor:pointer}
+.wswitch button{min-height:52px;padding:4px 20px;line-height:1.25;border-radius:999px;border:0;background:transparent;color:#EEF2F7;font-weight:520;font-size:14px;cursor:pointer}
 .wswitch button[aria-pressed="true"]{background:#6F93B8;color:#0E1C2B}
 .wswitch button:disabled{cursor:not-allowed;opacity:.6}
 .wlock{border:1.5px solid #6F93B8;border-radius:10px;padding:16px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:rgba(111,147,184,.10);animation:wglow 2.2s ease-in-out infinite}
@@ -206,7 +222,7 @@ details[data-step] summary::-webkit-details-marker{display:none}
 @media (max-width:860px){
   .breath{margin-block:-19px}
   .whead{grid-template-columns:1fr}
-  .whub{justify-self:center;max-width:300px}
+  .wtarget{justify-self:center}.whub{max-width:260px}
   .wheads{display:none}
   .wswitch{align-self:stretch;border-radius:14px}
   .wswitch button{padding:6px 10px;font-size:13px;line-height:1.2;border-radius:10px}
@@ -217,7 +233,7 @@ details[data-step] summary::-webkit-details-marker{display:none}
 }
 @media (prefers-reduced-motion:reduce){
   .wlock,.wchip i,.glowbox{animation:none}
-  .wfill,.wthumb,.whub .node{transition:none}
+  .wfill,.wthumb,.wshot{transition:none}
 }
 @media print{.breath,.dawn{display:none !important}}
 
@@ -231,14 +247,14 @@ details[data-step] summary::-webkit-details-marker{display:none}
 }
 [data-off],[data-off] *{animation-play-state:paused !important}
 /* The way into the incubator, in its own place under the North Star menu. */
-.incub-link{display:flex;align-items:center;gap:10px;margin:16px 0 0;padding:12px;border-radius:10px;text-decoration:none;color:#F6EEDD;background:linear-gradient(120deg,#2B1B12,#1C1309);border:1px solid rgba(214,191,143,.6);box-shadow:inset 0 0 0 3px #1C1309,inset 0 0 0 4px rgba(214,191,143,.25)}
-.incub-link:hover{border-color:#D6BF8F}
+.incub-link{display:grid;grid-template-columns:22px minmax(0,1fr) auto;align-items:center;gap:6px 9px;margin:18px 0 0;padding:14px 14px;border-radius:10px;text-decoration:none;color:#F6EEDD;background:linear-gradient(120deg,#2B1B12,#1C1309);border:1px solid rgba(214,191,143,.6);box-shadow:inset 0 0 0 3px #1C1309,inset 0 0 0 4px rgba(214,191,143,.25)}
+.incub-link:hover,.incub-link:focus-visible{border-color:#D6BF8F;color:#F6EEDD;background:linear-gradient(120deg,#3A2516,#24180B)}
 .incub-link:focus-visible{outline:2px solid #B4975F;outline-offset:3px}
-.incub-link svg{width:26px;height:26px;flex:none;color:#D6BF8F}
-.incub-link span{flex:1;min-width:0;line-height:1.25}
-.incub-link small{display:block;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#D6BF8F;font-weight:520}
-.incub-link b{display:block;font:440 14.5px/1.25 Newsreader,Georgia,serif}
-.incub-link i{font-style:normal;color:#D6BF8F}
+.incub-link svg{width:22px;height:22px;color:#D6BF8F}
+.incub-link span{display:contents}
+.incub-link small{display:block;font-size:9.5px;letter-spacing:.14em;white-space:nowrap;text-transform:uppercase;color:#D6BF8F;font-weight:520}
+.incub-link b{grid-column:1/-1;grid-row:2;display:block;font:440 17px/1.25 Newsreader,Georgia,serif;color:#F6EEDD}
+.incub-link i{font-style:normal;color:#D6BF8F;grid-column:3;grid-row:1;transition:transform .2s ease}.incub-link:hover i{transform:translateX(3px)}
 /* The Blueprint keeps its own colours (antique gold) inside the North Star (steel blue). */
 @media (max-width:860px){.incub-link{margin:8px 0 10px;padding:10px 12px}}
 
@@ -319,3 +335,4 @@ details[data-step] summary::-webkit-details-marker{display:none}
 @keyframes smSnow{0%,100%{opacity:.75}50%{opacity:1}}
 .sm-climber{filter:drop-shadow(0 0 4px #FFE6B0)}
 @media (prefers-reduced-motion:reduce){.sm-trail,.sm-camp,.sm-star,.sm-halo,.sm-snow{animation:none !important}.sm-climber{display:none}.sm-camp{fill:#D6BF8F}}
+.wcoach[hidden]{display:none}
