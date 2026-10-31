@@ -203,6 +203,14 @@ export const BOOKING = 'https://forms.gle/opnxfhFTJJg69Qy77';
 // nothing. Print editions are paid, through the shop and Amazon. The LAB
 // workbook is a paid product, so it opens on exploraself.com/lab, never here.
 export const LIBRARY = {
+  // The plan and the planner (31 Oct 2026): personal working material, so a
+  // free account opens them like everything else here. Portrait covers (tall).
+  growth: [
+    { k: 'mgp', kicker: '20 + 1 steps', n: 'Massive Growth Plan', sub: 'The action plan at the end of your North Star. Twenty steps inside you and one weekly habit, written by hand.',
+      cover: '/library/cover-massive-growth-plan.jpg', preview: '/library/massive-growth-plan-preview.pdf', file: '/library/massive-growth-plan.pdf', print: false, tall: true },
+    { k: 'lgp', kicker: '2027 · 52 weeks', n: 'The Leader’s Growth Planner 2027', sub: 'Plan the week on the left. Face it on the right, in your Sunday boardroom. Digital first, ready to print.',
+      cover: '/library/cover-leaders-growth-planner-2027.jpg', preview: '/library/leaders-growth-planner-2027-preview.pdf', file: '/library/leaders-growth-planner-2027.pdf', print: null, tall: true },
+  ],
   manuals: [
     { k: 'build', n: 'The Founder’s Blueprint · Building', sub: 'Finding the offer and the first clients', pages: 79, file: '/library/blueprint-building.pdf' },
     { k: 'grow', n: 'The Founder’s Blueprint · Growing', sub: 'Clients repeat, everything runs through you', pages: 77, file: '/library/blueprint-growing.pdf' },

@@ -37,7 +37,7 @@ const mOne = async (env, id) => (await (await mGet({ request: new Request('https
 const events = (env, id, kind) => env.DB.raw.prepare('SELECT detail FROM event WHERE student_id = ? AND kind = ? ORDER BY id').all(id, kind).map((e) => e.detail);
 
 // ── The library ─────────────────────────────────────────────────────────────
-const fromContent = Object.fromEntries([...LIBRARY.manuals, ...LIBRARY.books].filter((b) => b.file).map((b) => [b.k, { name: b.n, file: b.file }]));
+const fromContent = Object.fromEntries([...LIBRARY.manuals, ...LIBRARY.books, ...LIBRARY.growth].filter((b) => b.file).map((b) => [b.k, { name: b.n, file: b.file }]));
 ok(JSON.stringify(Object.fromEntries(Object.entries(LIBRARY_ITEMS).map(([k, v]) => [k, { name: v.name, file: v.file }]))) === JSON.stringify(fromContent) && Object.values(LIBRARY_ITEMS).every((v) => /^[a-z-]+$/.test(v.slug)), 'the library items match LIBRARY in content.js, each with a tag slug');
 ok(libraryTag('btl') === 'linktolead-library-built-to-lead', 'the tag: "linktolead-library-<book>"');
 
