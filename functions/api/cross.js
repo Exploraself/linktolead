@@ -1,6 +1,7 @@
 // Crossing between the two doors (31 Oct 2026). One account opens both the
 // North Star and the Blueprint. The first time a founder who came in through
-// one opens the other, the page asks them to confirm their name and email.
+// one opens the other, the page asks one plain question (31 Oct: one tap,
+// nothing to type): open it with your account? Yes records the crossing.
 // That confirmation is kept as an event and tagged in Mailchimp, so Alexandru
 // can see and manage the founders who cross:
 //   linktolead-crossed-blueprint   came in through the North Star, opened the Blueprint
