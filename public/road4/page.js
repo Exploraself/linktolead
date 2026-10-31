@@ -24,7 +24,7 @@
 // @site data
 import { DOMAINS, STAGES, gateFor } from '/content.js';
 import { LEVELS4 } from '/levels-v4.js';
-import { remember, stickyJoin, countUp, count, trackScroll, matchHeadline, welcomeBack, stories } from '/road-kit.js';
+import { remember, stickyJoin, countUp, count, trackScroll, matchHeadline, welcomeBack, stories, nowThen } from '/road-kit.js';
 // @end data
 
 const $ = (s) => document.querySelector(s);
@@ -306,20 +306,12 @@ function hours() {
 }
 now.addEventListener('input', hours); want.addEventListener('input', hours); hours();
 
-// ── Today and week twelve ───────────────────────────────────────────────────
-const rows = $('.ba-rows');
-let touched = false;
-function ba(k) {
-  rows.dataset.baState = k;
-  document.querySelectorAll('[data-ba]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.ba === k)));
-}
-$('.ba-switch').addEventListener('click', (e) => { const b = e.target.closest('[data-ba]'); if (b) { touched = true; ba(b.dataset.ba); } });
-
+// ── Today and week twelve: the founder's own marks, and their own case (road-kit.js)
 drawClimb(); drawDays();
 
 // ── The phone bar, and the year counted up the first time it is seen ───────
 stickyJoin({ title: 'The first three weeks are free', line: 'No card. Your work is yours to keep.', label: joined ? 'Continue' : 'Start free',
-  after: $('.hero'), quiet: [$('#close-cta'), $('#mirror-box'), $('.year .acts')], onJoin: (e) => (joined ? (location.href = '/ground-plan/#home') : join(e)) });
+  after: $('.hero'), quiet: [$('#close-cta'), $('#mirror-box'), $('.year .acts'), $('#nt'), $('#nt-case')], onJoin: (e) => (joined ? (location.href = '/ground-plan/#home') : join(e)) });
 const stopCount = countUp($('#o-year'), () => Math.max(0, now.value - want.value) * 52, (n) => `${n.toLocaleString('en-US')} h`);
 now.addEventListener('input', stopCount); want.addEventListener('input', stopCount);
 const movedOnce = () => count('road4', 'cost_moved');
@@ -329,6 +321,7 @@ now.addEventListener('change', movedOnce); want.addEventListener('change', moved
 matchHeadline($('.hero h1'), 'road4');
 welcomeBack($('#back'), 'road4');
 stories($('#story-list'));
+nowThen($('#nt'), $('#nt-case'), { page: 'road4', onJoin: join });
 trackScroll('road4');
 document.addEventListener('click', (e) => { if (e.target.closest('[data-join], .rk-bar button')) count('road4', 'cta'); }, true);
 
@@ -340,8 +333,6 @@ try {
   const io = new IntersectionObserver((es) => es.forEach((x) => { if (x.isIntersecting) { x.target.classList.remove('wait'); io.unobserve(x.target); } }), { rootMargin: '0px 0px -8% 0px' });
   document.querySelectorAll('.rv').forEach((el) => { if (!still() && el.getBoundingClientRect().top > fold) { el.classList.add('wait'); io.observe(el); } });
   new IntersectionObserver((es) => dayWalk(es.some((x) => x.isIntersecting))).observe($('#days'));
-  const flip = new IntersectionObserver((es) => { if (es.some((x) => x.isIntersecting)) { flip.disconnect(); if (!still()) setTimeout(() => { if (!touched) ba('then'); }, 1800); } }, { threshold: .6 });
-  flip.observe(rows);
 } catch { /* old browser: everything is already visible */ }
 document.addEventListener('visibilitychange', () => { if (document.hidden) dayWalk(false); });
 

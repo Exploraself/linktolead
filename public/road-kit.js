@@ -259,3 +259,162 @@ export function stories(host) {
     <ul>${x.proof.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
     <p class="by"><b>${esc(x.name)}</b><span>${esc(x.who)}</span></p></article>`).join('');
 }
+
+// ── 1 Nov, round 3: today and week twelve, and the founder's own case ──────
+/**
+ * The frame Alexandru kept (road4's "Today / Week twelve"), now on all three
+ * pages, and made theirs: in Today they tap what is true this week; in Week
+ * twelve they tap the one thing they want most. Then they make their own case
+ * (motivational interviewing): how ready, 1 to 10, and why not lower, by
+ * tapping their reasons. The page only says back what they chose. On a phone
+ * the whole frame fits one screen and the switch sits under the thumb, at the
+ * bottom of the stack. Device only; nothing typed, nothing sent.
+ */
+const NT = [
+  { k: 'week', n: 'Your week', now: 'Spent by whoever asks first.', then: 'A shape you chose, with one block defended every week.', i: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>' },
+  { k: 'reason', n: 'Your reason', now: 'Hard to say out loud.', then: 'One sentence you would say to a customer.', i: '<path d="M12 3v18M5 8l7-5 7 5"/>' },
+  { k: 'price', n: 'Your price', now: 'Quoted from fear.', then: 'The worth of your hour, written as a number and said out loud.', i: '<path d="M7 4h10l2 4H5Z"/><path d="M5 8v12h14V8M10 13h4"/>' },
+  { k: 'people', n: 'Your people', now: 'Waiting, guessing what you expect.', then: 'Told plainly what you expect, and what they may decide without you.', i: '<circle cx="9" cy="9" r="3"/><circle cx="16" cy="10" r="2.4"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5M14.5 15c2.6-.4 4.8 1 5.4 4"/>' },
+  { k: 'work', n: 'The work', now: 'Lives in your head.', then: 'Written down, run by somebody else, and corrected where it was wrong.', i: '<path d="M6 4h12v16H6z"/><path d="M9 9h6M9 12h6M9 15h4"/>' },
+  { k: 'customers', n: 'Your customers', now: 'Whoever happens to find you.', then: 'A hundred real names and an order to approach them in.', i: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/>' },
+  { k: 'ninety', n: 'Your next ninety days', now: 'The next fire.', then: 'One page: one outcome, three priorities, one number you check weekly.', i: '<path d="M5 20 12 5l7 15"/><path d="M9 13h6"/>' },
+];
+const WHY = ['It is costing me my evenings', 'The people at home are paying for it', 'My team deserves to know what I expect', 'I am tired of guessing', 'I want my price to be fair', 'I want a week away that I don’t pay for later', 'I started this for a reason, and I’ve lost it'];
+const NCSS = `.rk-nt{display:grid;gap:10px;font-family:Inter,system-ui,Arial,sans-serif;color:#1C1309}
+.rk-nt .hint{margin:0;font-size:14.5px;color:inherit;opacity:.8}
+.rk-nt .sw{display:inline-flex;justify-self:start;border:1px solid #D6C9AC;border-radius:999px;padding:3px;background:#FFFCF4}
+.rk-nt .sw button{min-height:44px;padding:0 20px;border:0;border-radius:999px;background:none;color:#1C1309;font:600 15px/1 Inter,system-ui,Arial,sans-serif;cursor:pointer}
+.rk-nt .sw button[aria-pressed="true"]{background:#C9A24A;color:#14100B}
+.rk-nt ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.rk-nt li button{width:100%;text-align:left;display:grid;grid-template-columns:28px 170px 1fr auto;gap:4px 14px;align-items:center;background:#FFFCF4;border:1px solid #D6C9AC;border-radius:6px;padding:14px 18px;cursor:pointer;color:#1C1309;font:inherit;transition:border-color .4s,box-shadow .3s}
+.rk-nt li button:hover{border-color:#B4975F}
+.rk-nt svg{width:24px;height:24px;fill:none;stroke:#6E5213;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.rk-nt b{font:700 11px/1.4 Inter,system-ui,Arial,sans-serif;letter-spacing:1.8px;text-transform:uppercase;color:#6E5213}
+.rk-nt .tx{display:grid}
+.rk-nt .tx span{grid-area:1/1;font:400 clamp(16px,2vw,19px)/1.4 Newsreader,Georgia,serif;transition:opacity .45s ease,transform .45s ease}
+.rk-nt .now{color:#4A4033}
+.rk-nt .then{opacity:0;transform:translateY(8px)}
+.rk-nt[data-st="then"] .now{opacity:0;transform:translateY(-8px)}
+.rk-nt[data-st="then"] .then{opacity:1;transform:none}
+.rk-nt[data-st="then"] li button{border-color:#C9A24A}
+.rk-nt .pill{font:700 10.5px/1 Inter,system-ui,Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:5px 8px;border-radius:3px;white-space:nowrap;visibility:hidden}
+.rk-nt[data-st="now"] li[data-true] .pill.t{visibility:visible;background:#F6E2D3;color:#8A3B12}
+.rk-nt[data-st="now"] li[data-true] button{box-shadow:inset 4px 0 0 #C2643A}
+.rk-nt[data-st="then"] li[data-want] .pill.w{visibility:visible;background:#C9A24A;color:#14100B}
+.rk-nt[data-st="then"] li[data-want] button{box-shadow:inset 4px 0 0 #C9A24A,0 10px 24px -14px rgba(110,82,19,.6)}
+.rk-nt .pill.w{display:none}.rk-nt[data-st="then"] .pill.t{display:none}.rk-nt[data-st="then"] .pill.w{display:inline-block}
+.rk-nt .tally{margin:0;font-size:14px;color:inherit;opacity:.85}
+.rk-nt .pl{display:none}
+.rk-nt li:nth-child(2) .tx span{transition-delay:.05s}.rk-nt li:nth-child(3) .tx span{transition-delay:.1s}.rk-nt li:nth-child(4) .tx span{transition-delay:.15s}.rk-nt li:nth-child(5) .tx span{transition-delay:.2s}.rk-nt li:nth-child(6) .tx span{transition-delay:.25s}.rk-nt li:nth-child(7) .tx span{transition-delay:.3s}
+@media(max-width:620px){
+  .rk-nt{gap:8px}
+  .rk-nt .hint{font-size:14px;line-height:1.4}
+  .rk-nt ul{gap:5px}
+  .rk-nt li button{grid-template-columns:20px 1fr;gap:10px;padding:8px 12px}
+  .rk-nt svg{width:20px;height:20px}
+  .rk-nt b,.rk-nt .pill{display:none!important}
+  .rk-nt .pl{display:inline;font:700 10.5px/1 Inter,system-ui,Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6E5213;font-style:normal}
+  .rk-nt .tx span{font-size:14.5px;line-height:1.32}
+  .rk-nt .sw{order:9;justify-self:stretch;display:grid;grid-template-columns:1fr 1fr}
+  .rk-nt .sw button{min-height:48px}
+  .rk-nt .tally{order:10;text-align:center}
+}
+.rk-case{display:grid;gap:14px;background:#1C1309;color:#F3EBDA;border:1px solid rgba(201,162,74,.45);padding:clamp(20px,4vw,30px);font-family:Inter,system-ui,Arial,sans-serif;box-shadow:0 30px 60px -30px rgba(0,0,0,.7)}
+.rk-case[hidden]{display:none}
+.rk-case .k{margin:0;font:700 11px/1.4 Inter,system-ui,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#D6BF8F}
+.rk-case .q{margin:0;font:500 clamp(21px,2.6vw,27px)/1.3 Newsreader,Georgia,serif;text-wrap:balance}
+.rk-case .scale{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px}
+.rk-case .scale button{min-height:46px;border:1px solid #B4975F;background:none;color:#F3EBDA;font:600 16px/1 Inter,system-ui,Arial,sans-serif;cursor:pointer;border-radius:3px;font-variant-numeric:tabular-nums}
+.rk-case .scale button[aria-pressed="true"]{background:#C9A24A;color:#14100B}
+.rk-case .ends{display:flex;justify-content:space-between;font-size:13px;color:#B3A78F;margin-top:-6px}
+.rk-case .chips{display:flex;flex-wrap:wrap;gap:8px}
+.rk-case .chips button{min-height:42px;padding:8px 14px;border:1px solid #5A4A30;background:rgba(255,255,255,.04);color:#E8DFCB;font:500 14.5px/1.3 Inter,system-ui,Arial,sans-serif;cursor:pointer;border-radius:999px;text-align:left}
+.rk-case .chips button[aria-pressed="true"]{border-color:#C9A24A;background:rgba(201,162,74,.18);color:#FFF6E2}
+.rk-case .say{margin:0;font:italic 400 clamp(19px,2.3vw,23px)/1.45 Newsreader,Georgia,serif;color:#E3C47E;border-left:3px solid #B4975F;padding-left:16px}
+.rk-case .go{justify-self:start;min-height:50px;padding:0 22px;border:0;background:#C9A24A;color:#14100B;font:700 15px/1 Inter,system-ui,Arial,sans-serif;cursor:pointer;border-radius:3px}
+.rk-case .fine{margin:0;font-size:14px;color:#B3A78F}
+.rk-case button:focus-visible,.rk-nt button:focus-visible{outline:2px solid #C9A24A;outline-offset:2px}
+@media(max-width:520px){.rk-case .scale{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.rk-nt .tx span{transition:none}}`;
+export function nowThen(host, caseHost, { page, onJoin, auto = true }) {
+  if (!host) return;
+  const s = document.createElement('style'); s.textContent = NCSS; document.head.appendChild(s);
+  host.classList.add('rk-nt'); host.dataset.st = 'now';
+  host.innerHTML = `<p class="hint" id="${page}-nt-hint">Tap every line that is true this week. Then switch to week twelve and tap the one you want most.</p>
+    <div class="sw" role="group" aria-label="Today or week twelve"><button type="button" data-st="now" aria-pressed="true">Today</button><button type="button" data-st="then" aria-pressed="false">Week twelve</button></div>
+    <ul>${NT.map((r) => `<li data-k="${r.k}"><button type="button" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true">${r.i}</svg><b>${esc(r.n)}</b>
+      <span class="tx"><span class="now"><em class="pl">${esc(r.n)} · </em>${esc(r.now)}</span><span class="then"><em class="pl">${esc(r.n)} · </em>${esc(r.then)}</span></span><span class="pill t">True this week</span><span class="pill w">Most wanted</span></button></li>`).join('')}</ul>
+    <p class="tally" aria-live="polite"></p>`;
+  const mine = new Set(); let want = '', ready = 0; const why = new Set(); let touched = false; let open = () => {};
+  const tally = host.querySelector('.tally');
+  const st = (v) => {
+    host.dataset.st = v;
+    host.querySelectorAll('.sw button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.st === v)));
+    host.querySelectorAll('li').forEach((li) => li.querySelector('button').setAttribute('aria-pressed', String(v === 'now' ? mine.has(li.dataset.k) : want === li.dataset.k)));
+    say();
+  };
+  const say = () => {
+    tally.textContent = host.dataset.st === 'now'
+      ? (mine.size ? `${mine.size} of 7 are true this week.` : '')
+      : (want ? `Most wanted by week twelve: ${NT.find((r) => r.k === want).n.toLowerCase()}.` : 'Tap the one you want most.');
+  };
+  host.querySelector('.sw').addEventListener('click', (e) => { const b = e.target.closest('[data-st]'); if (b) { touched = true; st(b.dataset.st); count(page, 'ba_flip'); } });
+  host.querySelector('ul').addEventListener('click', (e) => {
+    const li = e.target.closest('li'); if (!li) return;
+    touched = true; const k = li.dataset.k;
+    if (host.dataset.st === 'now') { mine.has(k) ? mine.delete(k) : mine.add(k); li.toggleAttribute('data-true', mine.has(k)); }
+    else { host.querySelectorAll('li').forEach((x) => x.removeAttribute('data-want')); want = want === k ? '' : k; if (want) li.setAttribute('data-want', ''); }
+    count(page, 'ba_mark'); st(host.dataset.st); open();
+  });
+  // As before on road4: once seen, untouched, it turns to week twelve by itself.
+  if (auto && !still() && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => { if (es.some((x) => x.isIntersecting)) { io.disconnect(); setTimeout(() => { if (!touched) st('then'); }, 2200); } }, { threshold: .6 });
+    io.observe(host);
+  }
+  // The founder's own case
+  if (!caseHost) return;
+  caseHost.classList.add('rk-case'); caseHost.hidden = true;
+  open = () => { if (caseHost.hidden && (mine.size || want)) { caseHost.hidden = false; draw(); } };
+  const draw = () => {
+    const w = want ? NT.find((r) => r.k === want) : null;
+    caseHost.innerHTML = `<p class="k">Your own case · no one else’s</p>
+      <p class="q">How ready are you to change this, from 1 to 10?</p>
+      <div class="scale" role="group" aria-label="How ready, 1 to 10">${Array.from({ length: 10 }, (_, i) => `<button type="button" data-r="${i + 1}" aria-pressed="${ready === i + 1}">${i + 1}</button>`).join('')}</div>
+      <div class="ends" aria-hidden="true"><span>Not now</span><span>Tonight</span></div>
+      ${ready ? `<p class="q">You said ${ready}${ready > 1 ? `, not ${ready - 1}` : ''}. Why not lower? Tap what is true.</p>
+      <div class="chips" role="group" aria-label="Your reasons">${WHY.map((x, i) => `<button type="button" data-w="${i}" aria-pressed="${why.has(i)}">${esc(x)}</button>`).join('')}</div>` : ''}
+      ${ready && why.size ? `<p class="say">${mine.size ? `${mine.size} of 7 are true for you this week. ` : ''}${w ? `The one you want most by week twelve is ${esc(w.n.toLowerCase())}: ${esc(w.then.charAt(0).toLowerCase() + w.then.slice(1))} ` : ''}You are at ${ready} out of 10, and your reasons are your own: ${[...why].map((i) => `“${esc(WHY[i])}.”`).join(' ')}</p>
+      <p class="fine">Those are your reasons, not ours. Week one starts on them.</p>
+      <button type="button" class="go" data-go>Start my free three weeks →</button>
+      <p class="fine">No card. Your work stays yours. Stop any week.</p>` : ''}`;
+    caseHost.querySelector('[data-go]')?.addEventListener('click', onJoin);
+  };
+  caseHost.addEventListener('click', (e) => {
+    const r = e.target.closest('[data-r]'), w = e.target.closest('[data-w]');
+    if (r) { ready = +r.dataset.r; count(page, 'ready'); }
+    else if (w) { const i = +w.dataset.w; why.has(i) ? why.delete(i) : why.add(i); }
+    else return;
+    draw();
+    if (ready && why.size) { let a = {}; try { a = JSON.parse(localStorage.getItem('ftb-arrival') || '{}') || {}; } catch { /* private mode */ } remember(page, { ...a, landing: page, mine: [...mine], want, ready, why: [...why].map((i) => WHY[i]) }); }
+    (r ? caseHost.querySelector(`[data-r="${ready}"]`) : caseHost.querySelector(`[data-w="${w.dataset.w}"]`))?.focus({ preventScroll: true });
+  });
+}
+
+/** The example of the four lines a founder reads back (level 01, S), as on road4. */
+const FCSS = `.rk-fl{display:grid;gap:12px;background:#FFFCF4;color:#1C1309;border:1px solid #D6C9AC;padding:clamp(18px,3vw,26px);font-family:Inter,system-ui,Arial,sans-serif;max-width:760px}
+.rk-fl .k{margin:0;font:700 11px/1.4 Inter,system-ui,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#6E5213}
+.rk-fl .ex{margin:0;font-size:14.5px;color:#4A4033}
+.rk-fl ol{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.rk-fl li{display:grid;gap:2px;padding-left:14px;border-left:3px solid #C9A24A;font:400 18px/1.45 Newsreader,Georgia,serif}
+.rk-fl li small{font:700 11px/1.4 Inter,system-ui,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6E5213}`;
+export function fourLines(host) {
+  if (!host) return;
+  const s = document.createElement('style'); s.textContent = FCSS; document.head.appendChild(s);
+  host.classList.add('rk-fl');
+  host.innerHTML = `<p class="k">Example · the four lines you read back</p>
+    <p class="ex">A founder taps “If I hit my numbers, then I’m worth something”, slides to <b>8</b>, and fills one sentence. This is what comes back, built only from those answers:</p>
+    <ol><li><small>Admit it</small>Last month the rule “If I hit my numbers, then I’m worth something” ran your day most days.</li>
+    <li><small>Don’t fight it</small>It was learned, so it can be tested. Don’t argue with it. Test it once, on purpose.</li>
+    <li><small>Don’t ignore it</small>You named your rule in one sentence. That is the first lever, and you pulled it.</li>
+    <li><small>Exactly</small>On Thursday you will take the evening off, phone in a drawer, and write what really happened.</li></ol>`;
+}

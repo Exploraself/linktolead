@@ -247,6 +247,15 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
     ok(r.pages.road4.view === 2 && r.pages.road1.view === 0 && (await C.onRequestGet({ request: new Request('https://x/api/count'), env })).status === 403, 'counter: read with the mentor key only, counts add up');
     ok(read('worker.js').includes("'/api/count': count"), 'counter: routed by the Worker');
   }
+  // Round 3 (1 Nov): Today / Week twelve on all three pages, with the founder's own case; nothing typed.
+  for (const r of ['road1', 'road3', 'road4']) ok(read(`public/${r}/index.html`).includes('<div id="nt"') && read(`public/${r}/index.html`).includes('id="nt-case"') && /nowThen\(/.test(read(`public/${r}/page.js`)), `${r}: today and week twelve, and the founder's own case`);
+  ok(K.includes('Tap every line that is true this week') && K.includes('Why not lower?') && K.includes('.rk-nt .sw{order:9') && !/<textarea|type="text"/.test(K), 'own case: tap only; on a phone the switch sits at the bottom of the stack');
+  {
+    const C2 = await import('../functions/api/count.js');
+    ok(['ba_flip', 'ba_mark', 'ready'].every((m) => C2.MOMENTS.includes(m)), 'counter: the frame and the ready scale are counted');
+    const { noteFor: nf } = await import('../public/arrival.js');
+    ok(nf({ landing: 'road4', ready: 7, why: ['I am tired of guessing'] }).includes('7 out of 10') && nf({ landing: 'road4', ready: 7, why: ['I am tired of guessing'] }).includes('“I am tired of guessing.”'), 'arrival note: their own number and their own reasons, said back');
+  }
   ok(B1.includes('<details class="later" id="later">') && B1.indexOf('<details class="later"') < B1.indexOf('The Personal Leadership LAB') && B1.indexOf('</details>') > B1.indexOf('<p class="pprice">$1,989</p>') && B1.includes('Weeks <b>6–9</b>'), 'Road 1: the LAB, HUB and Summit behind one tap; the LAB opens weeks 6–9');
 }
 // The tag system (30 Oct): every tag is "linktolead" or "linktolead-<group>-<value>", lowercase, no spaces.

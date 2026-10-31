@@ -13,6 +13,9 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 /** The note's words for what was found, or '' when there is nothing to say back. */
 export function noteFor(a) {
   if (!a || typeof a !== 'object') return '';
+  if (Number(a.ready) > 0 && Array.isArray(a.why) && a.why.length) {
+    return `You said you are at <b>${esc(a.ready)} out of 10</b>, and your reasons were your own: ${a.why.slice(0, 2).map((w) => `“${esc(w)}.”`).join(' ')} Level 01 starts on them.`;
+  }
   if (a.worst) {
     const d = DOMAINS.find((x) => x.k === a.worst);
     if (!d) return '';

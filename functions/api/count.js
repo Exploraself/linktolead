@@ -10,7 +10,7 @@
 import { json, bad, db, mentorOk } from '../_shared.js';
 
 export const PAGES = ['road1', 'road3', 'road4'];
-export const MOMENTS = ['view', 's25', 's50', 's75', 's100', 'mirror_start', 'mirror_done', 'mini_done', 'cost_moved', 'cta', 'form_open', 'form_simple', 'form_full', 'pain_match', 'back'];
+export const MOMENTS = ['view', 's25', 's50', 's75', 's100', 'mirror_start', 'mirror_done', 'mini_done', 'cost_moved', 'cta', 'form_open', 'form_simple', 'form_full', 'pain_match', 'back', 'ba_flip', 'ba_mark', 'ready'];
 const day = () => new Date().toISOString().slice(0, 10);
 const READY = new WeakSet();
 async function table(D) {

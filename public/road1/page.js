@@ -7,7 +7,7 @@
 // another year like this costs" is counted by the founder (two sliders), kept
 // on this device only so Base Camp can say it back once (/road-kit.js).
 import { rememberUtm } from '/forms.js';
-import { remember, stickyJoin, countUp, count, trackScroll, matchHeadline, welcomeBack, miniMirror, stories } from '/road-kit.js';
+import { remember, stickyJoin, countUp, count, trackScroll, matchHeadline, welcomeBack, miniMirror, stories, nowThen, fourLines } from '/road-kit.js';
 
 rememberUtm();
 const gate = document.getElementById('gate');
@@ -68,7 +68,7 @@ if (now && want) {
 
 // ── The phone bar, and the bands arriving as they are reached ──────────────
 stickyJoin({ title: 'The first three weeks are free', line: 'No card. Your work is yours to keep.', label: signedIn ? 'Continue' : 'Start free',
-  after: $('.hero'), quiet: [$('#close-cta'), $('#cost .ctarow')], onJoin: (e) => (signedIn ? (location.href = '/ground-plan/#home') : join(e)) });
+  after: $('.hero'), quiet: [$('#close-cta'), $('#cost .ctarow'), $('#nt'), $('#nt-case'), $('#mm')], onJoin: (e) => (signedIn ? (location.href = '/ground-plan/#home') : join(e)) });
 try {
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const io = new IntersectionObserver((es) => es.forEach((x) => { if (x.isIntersecting) { x.target.classList.remove('wait'); io.unobserve(x.target); } }), { rootMargin: '0px 0px -8% 0px' });
@@ -85,4 +85,6 @@ matchHeadline($('.hero h1'), 'road1', 'em');
 welcomeBack($('#back'), 'road1');
 miniMirror($('#mm'), { page: 'road1', onJoin: join });
 stories($('#story-list'));
+nowThen($('#nt'), $('#nt-case'), { page: 'road1', onJoin: join });
+fourLines($('#fl'));
 trackScroll('road1');

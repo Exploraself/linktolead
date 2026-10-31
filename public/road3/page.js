@@ -77,11 +77,13 @@ if (typeof document !== 'undefined' && $('#levels')) {
   // The phone bar, the year counted up once, and the scrolls arriving.
   import('/road-kit.js').then((k) => {
     k.stickyJoin({ title: 'The first three weeks are free', line: 'Name and email. No card.', label: signedIn() ? 'Continue' : 'Start free',
-      after: document.querySelector('.sc'), quiet: [$('#close-cta')], onJoin: (e) => (signedIn() ? (location.href = '/ground-plan/#home') : join(e)) });
+      after: document.querySelector('.sc'), quiet: [$('#close-cta'), $('#nt'), $('#nt-case'), $('#mm')], onJoin: (e) => (signedIn() ? (location.href = '/ground-plan/#home') : join(e)) });
     k.matchHeadline(document.querySelector('.h1'), 'road3', 'em');
     k.welcomeBack($('#back'), 'road3');
     k.miniMirror($('#mm'), { page: 'road3', onJoin: join });
     k.stories($('#story-list'));
+    k.nowThen($('#nt'), $('#nt-case'), { page: 'road3', onJoin: join });
+    k.fourLines($('#fl'));
     k.trackScroll('road3');
     now.addEventListener('change', () => k.count('road3', 'cost_moved'));
     want.addEventListener('change', () => k.count('road3', 'cost_moved'));
