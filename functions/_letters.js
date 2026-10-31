@@ -137,15 +137,20 @@ const mailto = (to, q) => `mailto:${to}?subject=${encodeURIComponent(q)}`;
  *   sign    false leaves out the whole close (the notice to the mentor)
  * Returns { html, text, replyTo, fromName } for send().
  */
-export function letter(base, paras, offer = null, { sign = true, mentor, tz = '', at, ask = 'start', seed = 0 } = {}) {
+export function letter(base, paras, offer = null, { sign = true, mentor, tz = '', at, ask = 'start', seed = 0, intro = false, security = false } = {}) {
   const M = asMentor(mentor);
   const pic = (u) => (/^https:\/\//.test(u) ? u : `${base}${u}`);
   const P = paras.map(parts);
-  // The personal first line, right after the greeting.
-  if (sign && P.length && /^Hi\b/.test(P[0].text || '')) P.splice(1, 0, parts(opener(M)));
-  const tests = sign ? threeAssessments(seed) : [];
-  const ps = offer && OFFERS[offer] ? parts(['P.S. ', ...OFFERS[offer].line(base)]) : null;
-  const good = sign ? GOOD_WORDS[seed % GOOD_WORDS.length] : '';
+  // The personal first line, right after the greeting: only in a first
+  // letter (the welcomes and the results). A sign-in, a reset, a password
+  // notice, an answer or a mentor's own letter would read it out of place
+  // (Alexandru, 31 Oct 2026).
+  if (sign && intro && P.length && /^Hi\b/.test(P[0].text || '')) P.splice(1, 0, parts(opener(M)));
+  // Security letters (sign-in link, reset, password changed) stay about
+  // security: no encouragement, no promotion, no assessments.
+  const tests = sign && !security ? threeAssessments(seed) : [];
+  const ps = !security && offer && OFFERS[offer] ? parts(['P.S. ', ...OFFERS[offer].line(base)]) : null;
+  const good = sign && !security ? GOOD_WORDS[seed % GOOD_WORDS.length] : '';
   const qs = !sign || ask === null ? [] : Array.isArray(ask) ? ask : (SHORTCUTS[ask] || SHORTCUTS.start);
   const bye = sign ? farewell(tz, at) : '';
   const replyLine = 'Any question at all, big or small? Just reply to this email. It comes straight to me, and I read every one.';
@@ -181,14 +186,17 @@ const hi = (first) => (first ? `Hi ${first},` : 'Hi,');
 /** The offer for one letter to one address, unless the caller chose one. */
 const offerFor = (kind, to, tier, offer) => (offer !== undefined ? offer : 'unshakeable');
 /** The close of a letter: who it is from, their time, which good word. */
-const close = (kind, { mentor, tz, at, to = '' } = {}, ask = 'start') => ({ mentor, tz, at, ask, seed: seedOf(`${kind}|${to}|${new Date(at || Date.now()).toISOString().slice(0, 10)}`) });
+/** The letters that open with Alexandru's personal first line. */
+const INTRO = ['launchpad-welcome', 'results'];
+const close = (kind, { mentor, tz, at, to = '' } = {}, ask = 'start') => ({ mentor, tz, at, ask, intro: INTRO.includes(kind), security: ask === 'security',
+  seed: seedOf(`${kind}|${to}|${new Date(at || Date.now()).toISOString().slice(0, 10)}`) });
 
 /** "launchpad-welcome": sent once, when the account is made. */
 export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {}) {
   return { subject: 'Welcome to The Founder Launchpad', ...letter(base, [
     hi(first),
     'You’re in. Welcome to The Founder Launchpad. I’m really glad you’re here.',
-    'Start with Level 01 tonight. In about an hour you’ll have your business on paper, not only in your head.',
+    'Start with Level 01 today. In about an hour you’ll have your business on paper, not only in your head.',
     `${asMentor(o.mentor).first} and the team read every word you write in there, and we’re cheering you on.`,
   ], offerFor('launchpad-welcome', to, tier, offer), close('launchpad-welcome', { ...o, to })) };
 }

@@ -27,7 +27,7 @@ const OPENER = 'Alexandru from ExploraSelf here. I’m sure what I’ve put on p
 let L = launchpadWelcome(B, { first: 'Maria', offer: 'boardroom' });
 ok(L.subject === 'Welcome to The Founder Launchpad', 'welcome: subject');
 ok(JSON.stringify(paras(L.text).slice(0, 5)) === JSON.stringify(['Hi Maria,', OPENER, 'You’re in. Welcome to The Founder Launchpad. I’m really glad you’re here.',
-  'Start with Level 01 tonight. In about an hour you’ll have your business on paper, not only in your head.',
+  'Start with Level 01 today. In about an hour you’ll have your business on paper, not only in your head.',
   'Alexandru and the team read every word you write in there, and we’re cheering you on.']), 'welcome: the greeting, the personal first line, then the three paragraphs');
 ok(L.text.includes('\n\nAlexandru\nAlexandru Cojocari · ExploraSelf\n\nP.S. Want to look at your answers together? Book a 1:1 with me in The Boardroom: ' + BOOKING), 'welcome: signed, then the Boardroom P.S. with the booking link');
 ok(LETTER_BOOKING === BOOKING, 'the booking link is the one in content.js');
@@ -40,14 +40,14 @@ ok(L.text.includes('P.S. One thing I’d love you to try: the Unshakeable assess
 ok(!resultsLetter(B, { first: 'Maria', offer: null }).text.includes('For you that’s'), 'results: no domain named when none is known');
 
 L = signinLetter(B, `${B}/start?signin=abc`, { first: 'Maria', offer: 'play' });
-ok(L.subject === 'Your link to get back in' && paras(L.text)[2] === 'Good to see you again. Everything you wrote is right where you left it.' && paras(L.text)[3] === `Sign me back in →: ${B}/start?signin=abc` && paras(L.text)[4] === 'The button works for the next 30 minutes, on your phone or your computer.', 'sign-in: subject, words and the button');
-ok(L.text.includes('P.S. Got ten minutes? Play Leadionaire: fifteen decisions, thirty seconds each. It shows how you choose under pressure: https://exploraself.com/play'), 'sign-in: the game P.S.');
+ok(L.subject === 'Your link to get back in' && paras(L.text)[1] === 'Good to see you again. Everything you wrote is right where you left it.' && paras(L.text)[2] === `Sign me back in →: ${B}/start?signin=abc` && paras(L.text)[3] === 'The button works for the next 30 minutes, on your phone or your computer.', 'sign-in: subject, words and the button');
+ok(!L.text.includes('P.S.') && !L.text.includes(OPENER) && !/Free assessments/.test(L.text) && !GOOD_WORDS.some((g) => L.text.includes(g)), 'sign-in: a security letter: no first line, no good word, no P.S., no assessments (31 Oct)');
 
 L = passwordChangedLetter(B, { first: 'Maria', offer: 'first100' });
-ok(L.subject === 'Your password was changed' && paras(L.text)[2] === 'Your password was just changed. If that was you, all is well and there’s nothing else to do.'
-  && paras(L.text)[3] === 'If it wasn’t, just reply to this email and we’ll lock the account straight away. Your work is safe with us.', 'password: subject and words');
-ok(L.text.includes('P.S. If clients are the next thing on your mind, the First 100 Clients assessment is free and takes ten minutes: https://exploraself.com/first-100-clients'), 'password: the First 100 Clients P.S.');
-ok(passwordChangedLetter(B, { first: 'Maria', offer: 'library' }).text.includes(`P.S. While you’re in, open Built to Lead in your library: 99 practical tools, free with your account. ${B}/ground-plan/#library`), 'the library P.S.');
+ok(L.subject === 'Your password was changed' && paras(L.text)[1] === 'Your password was just changed. If that was you, all is well and there’s nothing else to do.'
+  && paras(L.text)[2] === 'If it wasn’t, just reply to this email and we’ll lock the account straight away. Your work is safe with us.', 'password: subject and words');
+ok(!L.text.includes('P.S.') && !L.text.includes(OPENER) && !/Free assessments/.test(L.text), 'password: a security letter, nothing to sell');
+ok(launchpadWelcome(B, { first: 'Maria', offer: 'library' }).text.includes(`P.S. While you’re in, open Built to Lead in your library: 99 practical tools, free with your account. ${B}/ground-plan/#library`), 'the library P.S.');
 ok(launchpadWelcome(B, { offer: null }).text.startsWith('Hi,\n\n'), 'no first name: "Hi,"');
 
 // ── The look ────────────────────────────────────────────────────────────────
@@ -72,11 +72,13 @@ ok(farewell('Europe/Rome', noon) === 'See you soon. Have a good afternoon.' && f
 for (const [name, l] of [['welcome', launchpadWelcome(B, { first: 'Ana', tz: 'Europe/Rome', at: noon })], ['results', resultsLetter(B, { first: 'Ana', at: noon })],
   ['sign-in', signinLetter(B, `${B}/x`, { first: 'Ana', at: noon })], ['password', passwordChangedLetter(B, { first: 'Ana', at: noon })],
   ['mentor', mentorLetter(B, { subject: 'Hi', body: 'A word.', at: noon })], ['answer', answerLetter(B, { first: 'Ana', question: 'Q?', answer: 'A.', at: noon })]]) {
-  ok(GOOD_WORDS.some((g) => l.text.includes(g)), `${name}: a good word and encouragement`);
+  const sec = name === 'sign-in' || name === 'password';
+  ok(sec ? !GOOD_WORDS.some((g) => l.text.includes(g)) : GOOD_WORDS.some((g) => l.text.includes(g)), `${name}: ${sec ? 'no' : 'a'} good word`);
   ok(l.text.includes('Just reply to this email. It comes straight to me') && /mailto:support@exploraself\.com\?subject=/.test(l.html), `${name}: reply here, with one-tap questions`);
   ok(/See you soon\. Have a (good|restful) /.test(l.text), `${name}: see you soon and a wish for the day`);
   ok(l.html.includes('/mail/signature.png') && l.html.includes('/mail/alexandru.jpg'), `${name}: the signature and the photo`);
-  ok(/\n\nP\.S\. /.test(l.text), `${name}: a promotion in the P.S.`);
+  ok(sec ? !/P\.S\./.test(l.text) : /\n\nP\.S\. /.test(l.text), `${name}: ${sec ? 'no promotion' : 'a promotion in the P.S.'}`);
+  ok(['welcome', 'results'].includes(name) ? l.text.includes(OPENER) : !l.text.includes(OPENER), `${name}: the personal first line only in a first letter`);
   ok(l.replyTo === 'support@exploraself.com' && l.fromName === 'Alexandru at ExploraSelf', `${name}: from and reply to the mentor`);
 }
 ok(signinLetter(B, `${B}/x`, {}).text.includes(SHORTCUTS.security[0]) && resultsLetter(B, {}).text.includes(SHORTCUTS.results[0]), 'the questions fit the letter');
@@ -104,12 +106,12 @@ sent = fakeResend();
 await signinPost({ request: post('/api/signin', { email: 'ana@example.com', to: 'start' }, '9.9.9.1'), env });
 const s1 = sent[0].body;
 ok(s1.subject === 'Your link to get back in' && /^Hi Ana,/.test(s1.text) && /Sign me back in →: \S+\/ground-plan\/\?signin=[\w-]{40,}\n/.test(s1.text), 'sign-in route: the letter with a fresh link');
-ok(s1.text.includes('P.S. One thing I’d love you to try: the Unshakeable assessment.') && !/The Boardroom/.test(s1.text), 'sign-in route: the Unshakeable P.S., always');
+ok(!s1.text.includes('P.S.') && !s1.text.includes(OPENER), 'sign-in route: no promotion and no first line in a security letter');
 
 sent = fakeResend();
 r = await password({ request: post('/api/password', { token: ana, password: 'another-long-one', confirm: 'another-long-one' }, '9.9.9.2'), env });
 ok(r.status === 200 && (await r.json()).changed === true, 'password changed');
-ok(sent.length === 1 && sent[0].body.subject === 'Your password was changed' && sent[0].body.to[0] === 'ana@example.com' && sent[0].body.text.includes('the Unshakeable assessment'), 'password route: the letter, with the Unshakeable P.S.');
+ok(sent.length === 1 && sent[0].body.subject === 'Your password was changed' && sent[0].body.to[0] === 'ana@example.com' && !sent[0].body.text.includes('P.S.'), 'password route: the letter, with nothing to sell');
 ok(env.DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id = ? AND kind = 'password-letter'").get(ana).n === 1, 'password letter logged');
 env.DB.raw.prepare('UPDATE student_profile SET unsubscribed = 1 WHERE student_id = ?').run(ana);
 env.DB.raw.prepare('DELETE FROM mail_log').run(); // three an hour per address: start the hour again
