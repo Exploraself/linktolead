@@ -19,6 +19,8 @@ export const LIBRARY_ITEMS = {
   btl: { name: 'Built to Lead', slug: 'built-to-lead', file: '/library/built-to-lead.pdf' },
   wb: { name: 'Worth Building', slug: 'worth-building', file: '/library/worth-building.pdf' },
   nww: { name: 'A New Way of Winning', slug: 'a-new-way-of-winning', file: '/library/a-new-way-of-winning.pdf' },
+  mgp: { name: 'Massive Growth Plan', slug: 'massive-growth-plan', file: '/library/massive-growth-plan.pdf' },
+  lgp: { name: 'The Leader’s Growth Planner 2027', slug: 'leaders-growth-planner', file: '/library/leaders-growth-planner-2027.pdf' },
 };
 /** The tag system (functions/_mailchimp.js): linktolead-library-<book>. */
 export const libraryTag = (key) => `linktolead-library-${LIBRARY_ITEMS[key].slug}`;
