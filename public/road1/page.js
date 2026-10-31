@@ -7,7 +7,7 @@
 // another year like this costs" is counted by the founder (two sliders), kept
 // on this device only so Base Camp can say it back once (/road-kit.js).
 import { rememberUtm } from '/forms.js';
-import { remember, stickyJoin, countUp, count, trackScroll, matchHeadline, welcomeBack, miniMirror, stories, nowThen, fourLines } from '/road-kit.js';
+import { remember, stickyJoin, countUp, count, trackScroll, matchHeadline, welcomeBack, miniMirror, stories, nowThen, fourLines, whenLine } from '/road-kit.js';
 
 rememberUtm();
 const gate = document.getElementById('gate');
@@ -87,4 +87,5 @@ miniMirror($('#mm'), { page: 'road1', onJoin: join });
 stories($('#story-list'));
 nowThen($('#nt'), $('#nt-case'), { page: 'road1', onJoin: join });
 fourLines($('#fl'));
+whenLine(document.querySelector('[data-when]'));
 trackScroll('road1');

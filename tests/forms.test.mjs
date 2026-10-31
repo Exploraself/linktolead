@@ -256,6 +256,13 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
     const { noteFor: nf } = await import('../public/arrival.js');
     ok(nf({ landing: 'road4', ready: 7, why: ['I am tired of guessing'] }).includes('7 out of 10') && nf({ landing: 'road4', ready: 7, why: ['I am tired of guessing'] }).includes('“I am tired of guessing.”'), 'arrival note: their own number and their own reasons, said back');
   }
+  // Dark by default (1 Nov): the three sales pages open dark; the switch flips dark and light; Base Camp keeps following the device.
+  for (const r of ['road1', 'road3', 'road4']) ok(read(`public/${r}/index.html`).includes('<html lang="en" data-theme-default="dark">'), `${r}: opens dark unless the founder picked light`);
+  { const TJ = read('public/theme.js'); ok(TJ.includes("root.getAttribute('data-theme-default')") && TJ.includes("if (DEF) { set(current() === 'dark' ? 'light' : 'dark'); return; }") && !read('public/ground-plan/index.html').includes('data-theme-default'), 'theme.js: a page default, flipped dark ↔ light; Base Camp unchanged'); }
+  // The closing line on the visitor's clock (1 Nov): today before 5 pm, tonight after; always the day after tomorrow.
+  { const W = (d) => { const w = KIT.whenText(new Date(d)); return w.start + ' ' + w.by; };
+    ok(W('2026-11-05T10:00') === 'Start today, free. By Saturday, you’ll be ahead.' && W('2026-11-05T18:30') === 'Start tonight, free. By Saturday, you’ll be ahead.' && W('2026-11-08T23:00') === 'Start tonight, free. By Tuesday, you’ll be ahead.', 'closing line: today or tonight, and the day after tomorrow');
+    for (const r of ['road1', 'road3', 'road4']) ok(read(`public/${r}/index.html`).includes('data-when>Start tonight, free.') && /whenLine\(/.test(read(`public/${r}/page.js`)), `${r}: the closing line follows the visitor's clock`); }
   ok(B1.includes('<details class="later" id="later">') && B1.indexOf('<details class="later"') < B1.indexOf('The Personal Leadership LAB') && B1.indexOf('</details>') > B1.indexOf('<p class="pprice">$1,989</p>') && B1.includes('Weeks <b>6–9</b>'), 'Road 1: the LAB, HUB and Summit behind one tap; the LAB opens weeks 6–9');
 }
 // The tag system (30 Oct): every tag is "linktolead" or "linktolead-<group>-<value>", lowercase, no spaces.
