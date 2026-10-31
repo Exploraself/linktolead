@@ -49,6 +49,11 @@ export function stageChanges(events) {
     .filter((x) => x.to);
 }
 
+/** Every founder, with what the cockpit needs. levels: how many of the
+ *  twelve Blueprint levels hold at least one written answer (level_list:
+ *  which ones). crossed: the doors they crossed ('blueprint', 'northstar';
+ *  functions/api/cross.js). avatar: their profile photo, a small data: URL,
+ *  or null. */
 async function roster(D) {
   const rows = await D.prepare(`
     SELECT s.id, s.name, s.email, s.phone, s.company, s.tier,
@@ -59,6 +64,10 @@ async function roster(D) {
       (SELECT updated_at FROM compass c WHERE c.student_id = s.id) AS compass_at,
       (SELECT COUNT(*) FROM plan_tick t WHERE t.student_id = s.id) AS plan_ticks,
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'library-download') AS library,
+      (SELECT COUNT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS levels,
+      (SELECT GROUP_CONCAT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS level_list,
+      (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'crossed') AS crossed,
+      p.avatar,
       p.industry, p.source, p.consent, p.unsubscribed, p.mailchimp_status, p.mailchimp_at, p.signup_type, p.company, p.interest, p.landing, p.utm_source, p.utm_medium, p.utm_campaign, p.utm_content,
       CASE WHEN au.pass_hash IS NULL THEN 0 ELSE 1 END AS has_password, COALESCE(au.paused, 0) AS paused
     FROM student s
@@ -71,14 +80,24 @@ async function roster(D) {
 const LANDING_NAMES = { road1: 'Road 1', road2: 'North 3 (was Road 2)', road21: 'North 2 (was Road 2.1)', road3: 'Road 3', road4: 'Road 4', compass: 'North Star box', summit: 'The Summit' };
 const CSV_COLS = [['name', 'Name'], ['email', 'Email'], ['joined_at', 'Joined'], ['last_seen_at', 'Last seen'], ['stage', 'Stage'], ['step', 'Step'],
   ['signup', 'Sign-up form'], ['landing_name', 'Landing'], ['utm_source', 'utm_source'], ['utm_medium', 'utm_medium'], ['utm_campaign', 'utm_campaign'], ['utm_content', 'utm_content'], ['company_name', 'Company'], ['interest', 'Interest'], ['industry', 'Industry'],
-  ['compass', 'North Star done'], ['plan_ticks', 'Plan steps done'], ['library_names', 'Library'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp']];
+  ['compass', 'North Star done'], ['plan_ticks', 'Plan steps done'], ['library_names', 'Library'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp'],
+  ['group', 'Group'], ['levels', 'Blueprint levels'], ['crossed_names', 'Crossed']];
+/** The cockpit's groups, the same rule as groupOf in public/mentor/dash.js
+ *  (a test holds them equal): North Star done = compass_at; Blueprint
+ *  started = an answer written. */
+export function groupName(s) {
+  const n = !!s.compass_at, b = Number(s.written) > 0 || Number(s.levels) > 0;
+  return n && b ? 'Both' : n ? 'North Star only' : b ? 'Blueprint only' : '';
+}
+const CROSSED = { blueprint: 'North Star → Blueprint', northstar: 'Blueprint → North Star' };
 export function toCSV(list) {
   // Quoted, and a leading = + - @ is defused so a spreadsheet never runs it.
   const cell = (v) => { let s = String(v ?? ''); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
   const yes = (v) => (v ? 'yes' : 'no');
   const books = (v) => String(v || '').split(',').filter((k) => LIBRARY_ITEMS[k]).map((k) => LIBRARY_ITEMS[k].name).join('; ');
   const row = (s) => ({ ...s, step: STEPS[s.tier || 'free'] || s.tier, library_names: books(s.library), signup: s.signup_type || '',
-    company_name: s.company === '' ? 'No company yet' : s.company || '', landing_name: LANDING_NAMES[s.landing] || '', compass: yes(s.compass_at), has_password: yes(s.has_password), consent: yes(s.consent), unsubscribed: yes(s.unsubscribed), paused: yes(s.paused) });
+    company_name: s.company === '' ? 'No company yet' : s.company || '', landing_name: LANDING_NAMES[s.landing] || '', compass: yes(s.compass_at), has_password: yes(s.has_password), consent: yes(s.consent), unsubscribed: yes(s.unsubscribed), paused: yes(s.paused),
+    group: groupName(s), levels: s.levels || 0, crossed_names: String(s.crossed || '').split(',').filter((k) => CROSSED[k]).map((k) => CROSSED[k]).join('; ') });
   return [CSV_COLS.map(([, h]) => cell(h)).join(','), ...list.map((s) => { const r = row(s); return CSV_COLS.map(([k]) => cell(r[k])).join(','); })].join('\r\n') + '\r\n';
 }
 

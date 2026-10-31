@@ -127,7 +127,8 @@ const W = [{ student_id: 'a', name: 'Ana', email: 'a@x.co', body: 'Help', create
 const S = summary(F, W, now);
 ok(S.total === 4 && S.newWeek === 2 && S.compass === 2 && S.notes === 1 && S.quiet === 2, 'tiles: total, new this week, North Star done, notes waiting, quiet 14+ days');
 ok(S.steps.free === 2 && S.steps.session === 1 && S.steps.lab === 0 && S.steps.hub === 0 && S.steps.premium === 1, 'counts per step; an empty step is 0');
-ok(JSON.stringify(summary([], [], now)) === JSON.stringify({ total: 0, newWeek: 0, compass: 0, steps: { free: 0, session: 0, lab: 0, hub: 0, premium: 0 }, notes: 0, quiet: 0, library: 0, full: 0, simple: 0 }), 'no founders: every tile 0');
+ok(JSON.stringify(summary([], [], now)) === JSON.stringify({ total: 0, newWeek: 0, compass: 0, steps: { free: 0, session: 0, lab: 0, hub: 0, premium: 0 }, notes: 0, quiet: 0, library: 0, full: 0, simple: 0,
+  groups: { ns: 0, bp: 0, both: 0, none: 0 }, ready: 0, crossed: { blueprint: 0, northstar: 0 } }), 'no founders: every tile and card 0');
 ok(filter(F, { tile: 'quiet' }, now).map((s) => s.id).join() === 'b,c' && filter(F, { tile: 'premium' }, now).map((s) => s.id).join() === 'c', 'tiles filter the table');
 ok(filter(F, { q: 'B@X' }, now).map((s) => s.id).join() === 'b' && filter(F, { tile: 'free', q: 'di' }, now).map((s) => s.id).join() === 'd', 'search, alone and with a tile');
 const N = needsYou(F, W, now);
