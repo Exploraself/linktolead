@@ -24,7 +24,7 @@ const $ = (s) => (ctx.gate || document).querySelector(s);
 const KEY = 'exploraself-profile';
 const known = () => { try { const p = JSON.parse(localStorage.getItem(KEY) || 'null'); return p && p.email ? p : null; } catch { return null; } };
 const hasAccount = () => { try { return !!localStorage.getItem('ftb-token'); } catch { return false; } };
-const LAB = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700';
+const LAB = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600';
 
 // The show-password eye (30 Oct): shows or hides what was typed, one per field.
 const EYE = '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
@@ -35,7 +35,7 @@ const STYLE = `.ab-pw{display:flex;gap:6px}.ab-pw .inp{flex:1;min-width:0}
 .abox .inp{min-height:46px;border:1px solid #D8CDBB;border-radius:5px;padding:0 12px;font:15px 'Inter',Arial,sans-serif;color:#121C2D;background:#FFFFFF;width:100%;box-sizing:border-box}
 .abox select.inp{padding-right:8px}
 .abox .inp:focus-visible{outline:2px solid #B4975F;outline-offset:1px}
-.abox .ab-go{min-height:52px;border:0;border-radius:5px;background:#B4975F;color:#14100B;font:700 15px 'Inter',Arial,sans-serif;letter-spacing:.04em;cursor:pointer}
+.abox .ab-go{min-height:52px;border:0;border-radius:5px;background:#B4975F;color:#14100B;font:600 15px 'Inter',Arial,sans-serif;letter-spacing:.04em;cursor:pointer}
 .abox .ab-go:hover{background:#D6BF8F}
 .abox .ab-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:420px){.abox .ab-two{grid-template-columns:1fr}}`;
@@ -54,8 +54,8 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
     <style>${STYLE}</style>
     <button type="button" data-close aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #D8CDBB; background: #FFFFFF; color: #121C2D; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
     <form id="gate-form" novalidate style="display: flex; flex-direction: column; gap: 14px">
-      <span style="font-size: 12px; font-weight: 700; letter-spacing: .16em; color: #7A5E26; padding-right: 44px">${head[0]}</span>
-      <h2 id="gate-h" style="margin: 0; font: 500 26px/1.25 Newsreader, Georgia, serif; padding-right: 40px">${head[1]}</h2>
+      <span style="font-size: 12px; font-weight: 600; letter-spacing: .16em; color: #7A5E26; padding-right: 44px">${head[0]}</span>
+      <h2 id="gate-h" style="margin: 0; font:440 26px/1.25 Newsreader, Georgia, serif; padding-right: 40px">${head[1]}</h2>
       <span style="font-size: 14px; color: #3D4966">${head[2]}</span>
       <div class="ab-two">
         <label style="${LAB}">First name<input class="inp" id="j-first" type="text" autocomplete="given-name" maxlength="60"></label>
@@ -67,10 +67,10 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
       <label style="${LAB}">Confirm password${pwInput('j-pw2')}</label>
       <span style="font-size: 12px; color: #5A6580; margin-top: -6px">At least 10 characters. You sign in with your email and this password.</span>` : ''}
       <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: #3D4966"><input type="checkbox" id="j-consent" style="width: 18px; height: 18px; margin-top: 1px; accent-color: #B4975F; flex: none">${CONSENT}</label>
-      <span id="gate-err" role="alert" style="font-size: 13px; color: #B5512E; font-weight: 700"></span>
+      <span id="gate-err" role="alert" style="font-size: 13px; color: #B5512E; font-weight: 600"></span>
       <button type="submit" class="ab-go">${stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →'}</button>
-      ${stay ? '' : '<button type="button" data-close style="min-height: 44px; border-radius: 5px; border: 1px solid #D8CDBB; background: transparent; color: #121C2D; font-weight: 700; cursor: pointer">Not now · keep reading</button>'}
-      <a href="/ground-plan/#signin" style="font-size: 13px; text-align: center; font-weight: 700; color: #7A5E26">Already have an account? Sign in</a>
+      ${stay ? '' : '<button type="button" data-close style="min-height: 44px; border-radius: 5px; border: 1px solid #D8CDBB; background: transparent; color: #121C2D; font-weight: 600; cursor: pointer">Not now · keep reading</button>'}
+      <a href="/ground-plan/#signin" style="font-size: 13px; text-align: center; font-weight: 600; color: #7A5E26">Already have an account? Sign in</a>
     </form>
   </div>`;
 

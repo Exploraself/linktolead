@@ -32,7 +32,7 @@ export function items(L, steps) {
         life: 'A tool ready for the hard moment: the talk, the decision, the no.', biz: 'Lead people with confidence, even if nobody taught you how.' },
       { what: wb.n, desc: `${wb.kicker}. ${head(wb.sub)}.`,
         life: 'Think bigger, with a structure behind it.', biz: 'Build toward a business that lasts and can run without you.' },
-      { what: nww.n, soon: !!nww.soon, desc: `${nww.kicker}. ${nww.sub.split(/\.\s/).slice(1).join('. ')} In your library the day it opens.`,
+      { what: nww.n, soon: !!nww.soon, desc: `${nww.kicker}. ${nww.sub.split(/\.\s/).slice(1).join('. ')} ${nww.soon ? 'In your library the day it opens.' : 'Free to download with your account.'}`,
         life: 'A win that counts at home as well as at work.', biz: 'Decide what winning is for, then build toward it.' },
     ],
   };

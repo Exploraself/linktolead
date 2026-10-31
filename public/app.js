@@ -369,7 +369,7 @@ const LIB_ICONS = [
   ['3 manuals', 'The three manuals', '<path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/>'],
   ['99 tools', 'Built to Lead, 99 tools', '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-.5-.5-2.5z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/>'],
   ['32 frameworks', 'Worth Building, 32 frameworks', '<rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/>'],
-  ['Soon', 'A New Way of Winning, coming soon', '<circle cx="12" cy="12" r="9" fill="none" stroke="#B4975F" stroke-width="1.6"/><path d="M12 6l2 6-2 1.5-2-1.5z" fill="#B4975F"/>'],
+  ['12 principles', 'A New Way of Winning, 12 principles', '<circle cx="12" cy="12" r="9" fill="none" stroke="#B4975F" stroke-width="1.6"/><path d="M12 6l2 6-2 1.5-2-1.5z" fill="#B4975F"/>'],
 ];
 const libIcons = () => `<div class="rlib"><p class="eyebrow">Your library · now open</p><div class="rlibrow">${LIB_ICONS.map(([t, label, svg]) =>
   `<button type="button" class="libi${t === 'Soon' ? ' soon' : ''}" data-go="library" aria-label="${esc(label)}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">${svg}</svg>${esc(t)}</button>`).join('')}</div></div>`;
@@ -425,73 +425,244 @@ function railHTML(st) {
   </nav>`;
 }
 
-// ── A module ─────────────────────────────────────────────────────────────────
-function moduleHTML(st) {
-  const L = levelFor(st, level);
+// ── A level, as a notebook: the Crown ───────────────────────────────────────
+// The level and its seven steps on the left page, one question on the right.
+// Enter moves to the next question, Shift + Enter is a new line. Everything
+// else (the levels, the library, the music, Focus, the light, Ask Alexandru,
+// a 1:1) waits in the Crown at the bottom of the screen, and steps back while
+// the founder writes.
+const pad = (n) => String(n).padStart(2, '0');
+/** The step on the right page: 0–6, or 7 for the end of the domain. null
+ *  means "the first one not yet written", decided when the page is drawn. */
+let qi = null;
+function firstOpen(st, lv, dk) {
+  for (let i = 0; i < 7; i++) if (!(state.answers[aKey(st, lv, dk, i)] || '').trim()) return i;
+  return 7;
+}
+/** Can the founder write in this level now? Owned, open and published. */
+function writable(st) {
+  return holds(state.tier, gateFor(level)) && levelState(st, level) !== 'waiting' && !!levelFor(st, level);
+}
+
+function bookHTML(st) {
   const title = weekTitle(st, level);
   const g = gateFor(level);
-  const owned = holds(state.tier, g);
-  const tabs = DOMAINS.map((d) => `<button type="button" class="mtab" data-dom="${d.k}" data-k="${d.k}"
-      aria-pressed="${d.k === dom}"><b>${esc(LEAD[d.k])}</b><em>${answered(st, level, d.k)}/7</em></button>`).join('');
-
-  if (!owned) {
+  let right = '';
+  if (!holds(state.tier, g)) {
     const rung = LADDER.find((r) => r.key === g);
-    return `${levelHead(st, title)}
-      <div class="gate">
+    right = `<div class="gate">
         <p class="eyebrow">${compass} What opens this</p>
         <h3>${esc(rung.n)}</h3><p>${esc(rung.what)}</p>
         <span class="price">${esc(rung.price)}</span>
         ${rung.url ? `<a class="cta" href="${esc(rung.url)}" target="_blank" rel="noopener">See what it includes ↗</a>` : ''}
       </div>`;
-  }
-  if (levelState(st, level) === 'waiting') {
+  } else if (levelState(st, level) === 'waiting') {
     const prev = levelDone(st, level - 1);
-    return `${levelHead(st, title)}
-      <div class="wait">
+    right = `<div class="wait">
         <p class="eyebrow">Not yet</p>
-        <h3>Finish level ${String(level - 1).padStart(2, '0')} first</h3>
+        <h3>Finish level ${pad(level - 1)} first</h3>
         <p>${prev} of its 28 answers are written. This level opens when all twenty-eight are, because every question here assumes the ones before it have been answered honestly.</p>
-        <button class="cta" type="button" data-level="${level - 1}">Back to level ${String(level - 1).padStart(2, '0')}</button>
+        <button class="cta" type="button" data-level="${level - 1}">Back to level ${pad(level - 1)}</button>
       </div>`;
-  }
-  if (!L) {
-    return `${levelHead(st, title)}<div class="wait"><p class="eyebrow">In preparation</p>
+  } else if (!levelFor(st, level)) {
+    right = `<div class="wait"><p class="eyebrow">In preparation</p>
       <h3>This level is written and not yet published here</h3>
       <p>Nothing is shown before it is finished.</p></div>`;
   }
+  const L = right ? null : levelFor(st, level);
+  if (L && qi === null) qi = firstOpen(st, level, dom);
+  return `<div class="book${L ? '' : ' shut'}">
+    <aside class="leaf leaf-l" id="leafl" aria-label="Level ${pad(level)} and its steps">${leftHTML(st, title, L)}</aside>
+    <section class="leaf leaf-r" aria-label="${L ? 'The question' : 'This level'}">${right || pageHTML(st, L)}</section>
+  </div>`;
+}
 
-  const D = L[dom], fw = fwFor(st, level, dom), vid = videoFor(st, level, dom);
-  const gain = nextGain(st, level);
-  const full = answered(st, level, dom) === 7;
+/** The left page: the level, the four domains, and this domain's seven steps
+ *  with what has been written so far. Each step opens on the right page. */
+function leftHTML(st, title, L) {
+  const done = levelDone(st, level);
+  const head = `<button type="button" class="cw-sx" data-crown="steps" aria-label="Close the steps">×</button>
+    <p class="eyebrow">Level ${pad(level)} · ${esc(STAGES[st].n)} · leans on ${esc(emphasisName(st, level).toLowerCase())}</p>
+    <h2 class="cw-t">${esc(title)}</h2>
+    <div class="lvtrack"><i style="width:${done / 28 * 100}%"></i></div>
+    <p class="lvcount" id="lvcount">${done} of 28 answered</p>`;
+  const all = `<button type="button" class="cw-all" data-go="rail">☰ All twelve levels</button>`;
+  if (!L) return `${head}${all}`;
+  const D = L[dom];
+  const tabs = DOMAINS.map((d) => `<button type="button" class="mtab" data-dom="${d.k}" data-k="${d.k}"
+      aria-pressed="${d.k === dom}"><b>${esc(LEAD[d.k])}</b><em>${answered(st, level, d.k)}/7</em></button>`).join('');
+  const steps = D.steps.map((q, i) => {
+    const v = (state.answers[aKey(st, level, dom, i)] || '').trim();
+    const now = i === qi;
+    return `<li><button type="button" class="cw-s${v ? ' done' : ''}${now ? ' now' : ''}" data-qi="${i}"${now ? ' aria-current="step"' : ''}>
+      <span class="cw-n">${pad(i + 1)}</span>
+      <span class="cw-st"><b>${SEVEN[i].n}</b><i>${now ? 'Writing now' : esc(v)}</i></span></button></li>`;
+  }).join('');
+  return `${head}
+    <div class="mtabs cw-doms" role="group" aria-label="The four domains">${tabs}</div>
+    <p class="cw-dk"><span class="dkey sm" style="background:var(--${dom})"></span>${esc(LEAD[dom])}${D.title === title ? '' : ` · ${esc(D.title)}`}</p>
+    <p class="cw-ds">${esc(D.sub)}</p>
+    <ol class="cw-steps">${steps}</ol>
+    <p class="cw-more"><a href="#cw-video">▶ This level’s teaching</a>${all}</p>`;
+}
 
-  const lv = levelVideo(st, level);
-  return `${levelHead(st, title)}
-    ${stageStrip(st)}
-    ${videoBlock({ key: `${st}.${level}`, title: lv.title || title, sub: lv.sub || promiseOf(st, level), src: lv.src, poster: lv.poster })}
-    <div class="mtabs" role="tablist">${tabs}</div>
-    <article class="mod">
-      <header class="modh">
-        <span class="dkey" style="background:var(--${dom})"></span>
-        <div><p class="eyebrow">${esc(LEAD[dom])} · ${esc(DOMAINS.find((d) => d.k === dom).full)}</p>
-        ${D.title === weekTitle(st, level) ? '' : `<h3>${esc(D.title)}</h3>`}
-        <p class="modsub">${esc(D.sub)}</p></div>
-      </header>
-      ${vid ? `<div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${esc(vid)}" title="${esc(D.title)}"
-        loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : ''}
-      <div class="steps">${D.steps.map((q, i) => {
-        const v = state.answers[aKey(st, level, dom, i)] || '';
-        return `<div class="step${v.trim() ? ' done' : ''}">
-          <span class="snum">${i + 1}</span>
-          <div>
-            <p class="sname">${SEVEN[i].n}</p>
-            <p class="swhy">${esc(SEVEN[i].why)}</p>
-            <p class="sask">${esc(q)}</p>
-            <textarea data-k="${aKey(st, level, dom, i)}" rows="2" placeholder="Write it here" aria-label="${SEVEN[i].n}">${esc(v)}</textarea>
-            ${fw && fw.after === i + 1 ? worksheetHTML(fw, st, level, dom) : ''}
-          </div></div>`;
-      }).join('')}</div>
+/** The right page: one question, the ruled lines to write on, and a note in
+ *  the margin on what this step asks for. Or, after the seventh, what comes
+ *  next. */
+function pageHTML(st, L) {
+  const D = L[dom], name = LEAD[dom];
+  const seg = Array.from({ length: 7 }, (_, i) => `<i class="${(state.answers[aKey(st, level, dom, i)] || '').trim() ? 'done' : ''}${i === qi ? ' now' : ''}" data-i="${i}"></i>`).join('');
+  const top = `<button type="button" class="cw-phone" data-crown="steps" aria-label="Show the steps of this level">
+      <span><i aria-hidden="true"></i>Level ${pad(level)} · ${esc(name)} · ${qi < 7 ? `${qi + 1} of 7` : 'done'}</span><span aria-hidden="true">Steps ▾</span></button>
+    <div class="cw-seg" aria-hidden="true">${seg}</div>`;
+  if (qi >= 7) {
+    const gain = nextGain(st, level), full = answered(st, level, dom) === 7;
+    return `${top}<p class="cw-lab">${esc(name)} · after the seventh</p>
       ${domFoot(st, full, gain)}
-    </article>`;
+      <footer class="cw-foot"><button type="button" class="cw-back" data-qmove="-1">← Back to Review</button></footer>`;
+  }
+  const i = qi, k = aKey(st, level, dom, i), v = state.answers[k] || '';
+  const fw = fwFor(st, level, dom);
+  return `${top}
+    <p class="cw-lab">${pad(i + 1)} · ${SEVEN[i].n}</p>
+    <div class="cw-body">
+      <div class="cw-col">
+        <h3 class="cw-q" id="cwq">${esc(D.steps[i])}</h3>
+        <div class="cw-write">
+          <textarea id="cwa" data-k="${k}" rows="4" enterkeyhint="${i === 6 ? 'done' : 'next'}" aria-labelledby="cwq" aria-describedby="cwn"
+            placeholder="Write here, then press Enter">${esc(v)}</textarea>
+        </div>
+        <p class="cw-keys"><kbd>Enter ↵</kbd> next question · <kbd>Shift + Enter</kbd> new line</p>
+      </div>
+      <p class="cw-note" id="cwn">${esc(SEVEN[i].why)}</p>
+    </div>
+    ${fw && fw.after === i + 1 ? worksheetHTML(fw, st, level, dom) : ''}
+    <footer class="cw-foot">
+      <button type="button" class="cw-back" data-qmove="-1"${i === 0 ? ' disabled' : ''}>← Back</button>
+      <button type="button" class="cw-next" data-qmove="1">${i === 6 ? `Finish ${esc(name)}` : 'Next ↵'}</button>
+    </footer>`;
+}
+
+/** Under the book: the level's teaching, this domain's film, and the stage. */
+function underHTML(st) {
+  if (!writable(st)) return '';
+  const L = levelFor(st, level), D = L[dom], title = weekTitle(st, level);
+  const lv = levelVideo(st, level), vid = videoFor(st, level, dom);
+  return `<div class="cw-under" id="cw-video">
+    ${videoBlock({ key: `${st}.${level}`, title: lv.title || title, sub: lv.sub || promiseOf(st, level), src: lv.src, poster: lv.poster })}
+    ${vid ? `<div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/${esc(vid)}" title="${esc(D.title)}"
+      loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : ''}
+    ${stageStrip(st)}
+  </div>`;
+}
+
+/** The Crown: one button, bottom centre. Tap it and seven jewels open in an
+ *  arc. Swipe it left or right to turn the page; hold it for Focus. On a
+ *  phone, Back and Next sit either side of it. */
+const JEWELS = [
+  ['rail', 'Levels', '<path d="M4 7h16M4 12h16M4 17h10"/>'],
+  ['library', 'Library', '<path d="M4 5h6a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h6z"/>'],
+  ['music', 'Music', '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>'],
+  ['focus', 'Focus', '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>'],
+  ['light', 'Light', '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/>'],
+  ['ask', 'Ask Alexandru', '<path d="M4 5h16v11H9l-5 4z"/>'],
+  ['book', 'Book 1:1', '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>'],
+];
+const crownMark = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12z"/><path d="m12 6 1.8 4.2L18 12l-4.2 1.8L12 18l-1.8-4.2L6 12l4.2-1.8z" fill="currentColor" stroke="none"/></svg>';
+const crownClose = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+function crownHTML() {
+  const jewel = ([k, n, svg], i) => {
+    const a = Math.PI - (i * Math.PI) / 6;
+    const pos = `style="--cx:${Math.cos(a).toFixed(3)};--cy:${(-Math.sin(a)).toFixed(3)}"`;
+    const ico = `<span class="jw-i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${svg}</svg></span>${esc(n)}`;
+    if (k === 'book') return `<a class="jw" ${pos} href="${esc(BOOKING)}" target="_blank" rel="noopener">${ico}</a>`;
+    if (k === 'library' || k === 'ask' || k === 'rail') return `<button type="button" class="jw" ${pos} data-go="${k}">${ico}</button>`;
+    return `<button type="button" class="jw" ${pos} data-crown="${k}"${k === 'focus' ? ' aria-pressed="false"' : ''}>${ico}</button>`;
+  };
+  return `<div class="crown-wrap" id="crown">
+    <button type="button" class="crown-veil" data-crown="close" tabindex="-1" aria-label="Close the Crown"></button>
+    <p class="crown-hint">Turn the Crown: swipe it left or right to move between questions. Hold it for Focus.</p>
+    <nav class="crown-arc" id="crown-arc" aria-label="The Crown">${JEWELS.map(jewel).join('')}</nav>
+    <div class="crown-row">
+      <button type="button" class="cw-pb" data-qmove="-1" aria-label="Previous question"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button type="button" class="crown" id="crownb" aria-expanded="false" aria-controls="crown-arc"
+        aria-label="The Crown: levels, library, music, focus, light, Ask Alexandru, book a 1:1">${crownMark}</button>
+      <button type="button" class="cw-pb nx" data-qmove="1" aria-label="Next question"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <p class="cw-pk">The keyboard’s Next key also moves on</p>
+  </div>`;
+}
+function workHTML(st) {
+  return `<div class="cw">
+    <div id="cban" class="cbanwrap">${compassBanner()}</div><div id="libban">${libBanner()}</div>
+    <p class="cw-hush"><i aria-hidden="true"></i>Quiet while you write · the tools return when you pause</p>
+    <div id="mod">${bookHTML(st)}</div>
+    <div id="under">${underHTML(st)}</div>
+  </div>
+  <button type="button" class="cw-dveil" data-go="rail" tabindex="-1" aria-label="Close the levels"></button>
+  <aside class="cw-drawer" aria-label="The twelve levels">
+    <button type="button" class="cw-dx" data-go="rail" aria-label="Close the levels">×</button>
+    <div id="railwrap">${railHTML(st)}</div>
+  </aside>
+  ${crownHTML()}`;
+}
+
+/** Grow the answer with what is written, four ruled lines at least. */
+function grow(t) {
+  if (!t) return;
+  t.style.height = 'auto';
+  t.style.height = `${Math.max(t.scrollHeight, 4 * parseFloat(getComputedStyle(t).lineHeight || '40'))}px`;
+}
+/** Turn the page: draw the book again with the question at `qi`, and put the
+ *  cursor at the end of what is already written. */
+function drawBook(focus = true) {
+  const st = state.stage || 'build';
+  const m = $('#mod');
+  if (!m) return render();
+  m.innerHTML = bookHTML(st);
+  document.body.classList.toggle('cw-shut', !writable(st));
+  const t = $('#cwa');
+  grow(t);
+  if (focus) {
+    const f = t || document.querySelector('.leaf-r .cw-lab');
+    if (f) {
+      if (!t) f.setAttribute('tabindex', '-1');
+      f.focus({ preventScroll: true });
+      if (t) { const n = t.value.length; t.setSelectionRange(n, n); }
+    }
+    const r = document.querySelector('.leaf-r');
+    if (r && r.getBoundingClientRect().top < 0) r.scrollIntoView({ block: 'start' });
+  }
+  M.setCandles(answered(st, level, dom));
+}
+function moveQ(d) {
+  const st = state.stage || 'build';
+  if (view !== 'work' || !writable(st) || qi === null) return;
+  const to = Math.max(0, Math.min(7, qi + d));
+  if (to === qi) return;
+  qi = to;
+  drawBook();
+}
+
+/** The Crown opening and closing. */
+function crownOpen(on) {
+  const w = $('#crown'), b = $('#crownb');
+  if (!w || !b) return;
+  document.body.classList.toggle('crownopen', on);
+  b.setAttribute('aria-expanded', String(on));
+  b.setAttribute('aria-label', on ? 'Close the Crown' : 'The Crown: levels, library, music, focus, light, Ask Alexandru, book a 1:1');
+  b.innerHTML = on ? crownClose : crownMark;
+  const f = w.querySelector('[data-crown="focus"]');
+  if (f) f.setAttribute('aria-pressed', String(M.current().mode === 'focus'));
+  if (on) { const j = w.querySelector('.jw'); if (j) j.focus({ preventScroll: true }); }
+}
+/** Writing quietens the room: the Crown, the header and the player step back,
+ *  and return when the founder pauses. */
+let hushT = 0;
+function hush() {
+  document.body.classList.add('cw-hushed');
+  clearTimeout(hushT);
+  hushT = setTimeout(() => document.body.classList.remove('cw-hushed'), 1600);
 }
 
 /** What comes after this domain: the next one, or — when all four are done —
@@ -553,17 +724,6 @@ function reportHTML(st) {
   </section>`;
 }
 
-function levelHead(st, title) {
-  const done = levelDone(st, level);
-  return `<header class="lvh">
-    <button class="backrail" type="button" data-go="rail">☰ Levels</button>
-    <p class="eyebrow">Level ${String(level).padStart(2, '0')} · ${esc(STAGES[st].n)} · leans on ${esc(emphasisName(st, level).toLowerCase())}</p>
-    <h2>${esc(title)}</h2>
-    <div class="lvtrack"><i style="width:${done / 28 * 100}%"></i></div>
-    <p class="lvcount" id="lvcount">${done} of 28 answered</p>
-  </header>`;
-}
-
 /** Where the founder is: the three stages as rising steps, theirs lit. */
 function stageStrip(st) {
   const order = ['build', 'grow', 'scale'];
@@ -617,22 +777,10 @@ function libBanner() {
   if (bannerSeen() || !(state.me || account.joined())) return '';
   return `<div class="libban" role="status">
     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/></svg>
-    <div><b>Your library just got fuller.</b><p>With your free account: the three Founder’s Blueprint manuals, Built to Lead (99 practical tools) and Worth Building (32 leadership frameworks). A New Way of Winning is on its way.</p></div>
+    <div><b>Your library just got fuller.</b><p>With your free account: the three Founder’s Blueprint manuals, Built to Lead (99 practical tools), Worth Building (32 leadership frameworks) and A New Way of Winning (12 principles).</p></div>
     <button type="button" class="cta" data-go="library">Open my library →</button>
     <button type="button" class="x" data-banner="close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
   </div>`;
-}
-
-/** At the top of the programme, quietly: if a step is hard, a 1:1 is
- *  always there. Founders who already have The Boardroom see the line about
- *  their session; nobody is told it is urgent. */
-function helpNote() {
-  const have = holds(state.tier, 'session');
-  return `<aside class="helpnote" aria-label="Help with a step">
-    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="#B4975F" stroke-width="1.5"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#B4975F"/></svg>
-    <p><b>Finding a step hard?</b> That is where the work is. ${have ? `Bring it to your next session with ${esc(mentor.first)}, or` : `You can always book a 1:1 session with ${esc(mentor.first)}, or`} ask in <button type="button" class="linkish" data-go="ask">Ask Alexandru</button>.</p>
-    ${have ? '' : `<a class="helpgo" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book a 1:1 ↗</a>`}
-  </aside>`;
 }
 
 /** The North Star, inside the programme: for the founder's first five visits to
@@ -728,6 +876,7 @@ function drawNav() {
 function render() {
   const st = state.stage || 'build';
   document.body.classList.toggle('inwork', view === 'work');
+  document.body.classList.remove('crownopen', 'stepsopen');
   drawNav();
   if ((view === 'work' || view === 'home') && !LEVELS[st]) {
     // Only this founder's stage is loaded, and only when needed.
@@ -739,7 +888,7 @@ function render() {
   // Alexandru) keeps the music, the light and Focus mode.
   if (!DASHBOARD.includes(view)) cabinetHidden();
   $('#main').innerHTML = view === 'work'
-    ? `<div class="shell"><div class="railwrap" id="railwrap">${railHTML(st)}</div><div class="work" id="work"><div id="cban" class="cbanwrap">${compassBanner()}</div><div id="libban">${libBanner()}</div>${helpNote()}<div id="mod">${moduleHTML(st)}</div></div></div>`
+    ? workHTML(st)
     : view === 'home' ? homeView()
     : view === 'library' ? libraryView()
     : view === 'ask' ? askView()
@@ -749,19 +898,18 @@ function render() {
   else if (DASHBOARD.includes(view)) dashboardShown();
   // The Lamp's candles count the domain on screen, in the programme only.
   M.setCandles(view === 'work' ? answered(st, level, dom) : -1);
+  if (view === 'work') { grow($('#cwa')); document.body.classList.toggle('cw-shut', !writable(st)); }
 }
 const DASHBOARD = ['home', 'work', 'library', 'ask'];
 
-/** Redraw only the module, so the rail does not flicker and its scroll holds. */
+/** A new domain or level: redraw the book and what sits under it, so the
+ *  page does not jump and the drawer of levels keeps its scroll. */
 function redrawModule() {
-  const w = $('#work');
-  if (!w) return render();
-
-  const m = $('#mod');
-  if (m) m.innerHTML = moduleHTML(state.stage || 'build'); else w.innerHTML = moduleHTML(state.stage || 'build');
-  w.scrollTo ? w.scrollTo({ top: 0, behavior: 'instant' }) : null;
-  const r = $('#rail'); if (r) refreshRail();
-  M.setCandles(answered(state.stage || 'build', level, dom));
+  if (!$('#mod')) return render();
+  const u = $('#under'); if (u) u.innerHTML = underHTML(state.stage || 'build');
+  drawBook(false);
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  refreshRail();
 }
 function refreshRail() {
   const st = state.stage || 'build';
@@ -772,7 +920,25 @@ function refreshRail() {
 document.addEventListener('click', (e) => {
   const b = e.target.closest('button, a.cta');
   if (!b) return;
-  if (b.dataset.go === 'rail') { document.body.classList.toggle('railopen'); return; }
+  if (b.id === 'crownb') { if (crownSwallow) { crownSwallow = false; return; } crownOpen(!document.body.classList.contains('crownopen')); return; }
+  if (b.dataset.crown) {
+    const k = b.dataset.crown;
+    if (k === 'steps') { document.body.classList.toggle('stepsopen'); if (document.body.classList.contains('stepsopen')) { const n = document.querySelector('.cw-s.now') || document.querySelector('.leaf-l .mtab'); if (n) n.focus({ preventScroll: true }); } return; }
+    crownOpen(false);
+    if (k === 'music') M.openPlayer();
+    else if (k === 'light') M.openPlayer('mp-light');
+    else if (k === 'focus') M.mode('focus');
+    else { const c = $('#crownb'); if (c) c.focus({ preventScroll: true }); }
+    return;
+  }
+  if (b.dataset.qmove) { moveQ(+b.dataset.qmove); return; }
+  if (b.dataset.qi) { qi = +b.dataset.qi; document.body.classList.remove('stepsopen'); drawBook(); return; }
+  if (b.dataset.go === 'rail') {
+    document.body.classList.remove('crownopen', 'stepsopen');
+    const on = document.body.classList.toggle('railopen');
+    if (on) { const h = document.querySelector('.rlev.here') || document.querySelector('.cw-dx'); if (h) h.focus({ preventScroll: true }); if (h && h.scrollIntoView) h.scrollIntoView({ block: 'center' }); }
+    return;
+  }
   if (b.dataset.cab) {
     if (cabinetClick(b)) return;
     if (b.dataset.cab === 'stand') { changingStage = true; render(); const c = document.querySelector('.gp-stand'); if (c) c.scrollIntoView({ block: 'center' }); const p = document.querySelector('.stand-pick button'); if (p) p.focus({ preventScroll: true }); return; }
@@ -807,12 +973,56 @@ document.addEventListener('click', (e) => {
   if (b.hasAttribute('data-link')) { sendSigninLink(); return; }
   if (b.dataset.stage) { state.stage = b.dataset.stage; save(); view = 'work'; render(); window.scrollTo({ top: 0, behavior: 'instant' }); return; }
   if (b.dataset.level) {
-    level = +b.dataset.level; dom = 'self'; view = 'work';
+    level = +b.dataset.level; dom = 'self'; view = 'work'; qi = null;
     document.body.classList.remove('railopen');
     render(); window.scrollTo({ top: 0, behavior: 'instant' }); return;
   }
-  if (b.dataset.dom) { dom = b.dataset.dom; redrawModule(); return; }
+  if (b.dataset.dom) { dom = b.dataset.dom; qi = null; redrawModule(); return; }
 });
+
+/* The keys of the notebook. Enter: the next question (Shift + Enter, a new
+ * line; a phone's Next key sends Enter too). Escape: close what is open. */
+document.addEventListener('keydown', (e) => {
+  if (view !== 'work') return;
+  const body = document.body;
+  if (e.key === 'Escape') {
+    if (body.classList.contains('crownopen')) { crownOpen(false); const c = $('#crownb'); if (c) c.focus(); return; }
+    if (body.classList.contains('railopen')) { body.classList.remove('railopen'); return; }
+    if (body.classList.contains('stepsopen')) { body.classList.remove('stepsopen'); return; }
+    return;
+  }
+  const t = e.target;
+  if (e.key === 'Enter' && !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey && !e.isComposing
+    && t && t.matches && t.matches('textarea[data-k]')) { e.preventDefault(); moveQ(1); }
+});
+
+/* The Crown turns: a swipe left is the next question, a swipe right the one
+ * before; held still for a moment, it starts Focus. A tap opens it. */
+let crownSwallow = false, cDown = null;
+/** After a swipe or a hold, the click that may follow is not a tap. */
+const swallow = () => { crownSwallow = true; setTimeout(() => { crownSwallow = false; }, 400); };
+document.addEventListener('pointerdown', (e) => {
+  const b = e.target.closest && e.target.closest('#crownb');
+  if (!b || document.body.classList.contains('crownopen')) return;
+  cDown = { x: e.clientX, y: e.clientY, held: false, timer: setTimeout(() => {
+    if (!cDown) return;
+    cDown.held = true; swallow();
+    M.mode('focus');
+    b.classList.add('held'); setTimeout(() => b.classList.remove('held'), 700);
+  }, 650) };
+});
+document.addEventListener('pointermove', (e) => {
+  if (cDown && Math.hypot(e.clientX - cDown.x, e.clientY - cDown.y) > 12) clearTimeout(cDown.timer);
+});
+const crownUp = (e) => {
+  if (!cDown) return;
+  const d = cDown; cDown = null; clearTimeout(d.timer);
+  if (d.held || e.type === 'pointercancel') return;
+  const dx = e.clientX - d.x, dy = e.clientY - d.y;
+  if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { swallow(); moveQ(dx < 0 ? 1 : -1); }
+};
+document.addEventListener('pointerup', crownUp);
+document.addEventListener('pointercancel', crownUp);
 
 async function sendSigninLink() {
   const msg = $('#si-msg'), email = ($('#si-email') || {}).value || '';
@@ -896,7 +1106,9 @@ document.addEventListener('input', (e) => {
   state.answers[a.dataset.k] = a.value;
   save();
   account.touch('answers', a.dataset.k, a.value);
-  a.closest('.step').classList.toggle('done', !!a.value.trim());
+  const has = !!a.value.trim();
+  document.querySelectorAll(`.cw-s[data-qi="${qi}"], .cw-seg i[data-i="${qi}"]`).forEach((x) => x.classList.toggle('done', has));
+  grow(a); hush();
   // The Lamp: a newly written answer plays a chord and lights a candle.
   if (!hadIt && a.value.trim()) M.answered(answered(st, level, dom)); else if (hadIt && !a.value.trim()) M.setCandles(answered(st, level, dom));
 
@@ -907,15 +1119,9 @@ document.addEventListener('input', (e) => {
   const tab = document.querySelector(`.mtab[data-k="${dom}"] em`);
   if (tab) tab.textContent = `${answered(st, level, dom)}/7`;
 
-  // Crossing a boundary changes what the page should say, so redraw then —
-  // and only then, so typing never costs a re-render.
-  if ((was === 28) !== (n === 28) || (was === 27 && n === 28)) { redrawModule(); return; }
-  if (answered(st, level, dom) === 7 || answered(st, level, dom) === 6) {
-    const foot = document.querySelector('.donext p');
-    if (foot) foot.textContent = answered(st, level, dom) === 7
-      ? `All seven written. ${DOMAINS.find((d) => d.k === dom).n} is done.`
-      : `${answered(st, level, dom)} of 7 written in ${DOMAINS.find((d) => d.k === dom).n}.`;
-  }
+  // What the level says when it closes (the reading, what the next level
+  // gives) is on the page after the seventh question, drawn when the founder
+  // turns to it, so typing never costs a re-render.
   refreshRail();
 });
 
@@ -990,3 +1196,15 @@ function openReset(say = 'Choose your new password here. At least 10 characters.
   const f = $('#pw1'); if (f) f.focus({ preventScroll: true });
 }
 comeHome();
+
+/* The rail sticks just under the header, never beneath it: the header's
+ * height (it wraps on narrower screens) is kept in --toph. */
+(() => {
+  try {
+    const set = () => { const t = document.querySelector('.top'); if (t) document.documentElement.style.setProperty('--toph', t.offsetHeight + 'px'); };
+    set();
+    window.addEventListener('resize', set);
+    const t = document.querySelector('.top');
+    if (t && window.ResizeObserver) new ResizeObserver(set).observe(t);
+  } catch { /* old browser: the rail sticks at the top */ }
+})();
