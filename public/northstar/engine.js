@@ -191,7 +191,8 @@
   /** One domain's feedback card, personalised by its band, pains and goal. */
   function feedback(i, s, pains, goal) {
     const c = FEEDBACK[i][s.band];
-    const g = GOALS.find((x) => x[0] === goal);
+    // One goal, or the two the founder picked (31 Oct): the one running through this domain.
+    const goals = [].concat(goal || []), g = GOALS.find((x) => goals.includes(x[0]) && x[2] === i) || GOALS.find((x) => x[0] === goals[0]);
     return Object.assign({}, c, {
       band: s.answered ? BANDS[s.band] : 'Not answered yet', bandIndex: s.answered ? s.band : null,
       pains: PAINS.filter((p) => p[2] === i && (pains || []).includes(p[0])).map((p) => p[1]),
@@ -343,6 +344,8 @@
     let vol = demand;
     const keep = b.sales - b.deliv; // what today's work leaves before running costs
     if (mode !== 'money' && perUnit !== null && perUnit > 0 && keep > 0) vol = Math.min(demand, keep / perUnit);
+    // 'both' (31 Oct): half the gain goes to time, half to money.
+    if (mode === 'both') vol = (vol + demand) / 2;
     const cash = perUnit === null ? null : vol * perUnit - fixed;
     const helpHours = vol * unitHelpHours, helpCost = unitHelp === null ? null : vol * unitHelp;
     const mine = vol * unitHours * (1 - share);

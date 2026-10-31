@@ -40,6 +40,55 @@
   {"id": "q31", "stage": "leading", "domain": "market", "short": "Who is better off", "text": "Do you check who is better off because of your business: customers, your people and others?", "prompt": "Their words, not your guess.", "lo": "Ask three clients what changed for them, and write down their words.", "hi": "Then your impact is your message. Share it."},
   {"id": "q32", "stage": "leading", "domain": "market", "short": "Changing needs", "text": "Do you watch how your customers’ needs are changing?", "prompt": "New requests, lost deals, new competitors.", "lo": "Each month, write down one thing customers asked for that you do not offer yet.", "hi": "Then you move before the market forces you to."}
   ];
-  const api = { Q };
+  /* Part 2 · Your people (31 Oct 2026): first who works with you today, then
+   * three questions about customers (two sets: with paying customers, or not
+   * yet) and three about the people who do the work (two sets: just me, so how
+   * to build a team; or with help or a team). Same four answers as Part 1. */
+  const P2 = {
+    team: [['solo', 'Just me', 'I do the work myself'], ['help', 'Me and some help', 'Freelancers, family or part-timers'], ['team', 'A team', 'People who work with me every week']],
+    customers: {
+      yes: [
+        { id: 'cy1', short: 'Your best customers', text: 'Can you name your best customers, and say what they have in common?', prompt: 'Who pays on time, comes back, and sends others.', lo: 'List your five best customers tonight. Circle what they share. That is who you grow toward.', hi: 'Then you know who to find more of. Say no faster to the rest.' },
+        { id: 'cy2', short: 'What they would miss', text: 'Do you know what your customers would miss if you closed tomorrow?', prompt: 'In their words, not yours.', lo: 'Ask two customers: “What would you miss if we stopped?” Write down their exact words.', hi: 'Then that is your message. Put their words where new customers look.' },
+        { id: 'cy3', short: 'Listening, then changing', text: 'In the last three months, did you change something because a customer told you?', prompt: 'A price, a step, a message, a delivery day.', lo: 'Ask one customer what annoys them about working with you. Fix one small thing this month.', hi: 'Then customers feel heard. Tell them what you changed: that is how loyalty is built.' },
+      ],
+      plan: [
+        { id: 'cn1', short: 'The first five', text: 'Can you name five real people who have the problem you solve?', prompt: 'Names, not a market.', lo: 'Write five names tonight. If you cannot, that is your first job this week.', hi: 'Then talk to them before you build more. Their words will shape the offer.' },
+        { id: 'cn2', short: 'Their words', text: 'Have you heard someone describe the problem in their own words?', prompt: 'What it costs them, and what they already tried.', lo: 'Have one conversation this week. Ask what they tried and what it cost them.', hi: 'Then use their exact words in your offer. People buy what they recognise.' },
+        { id: 'cn3', short: 'The first yes', text: 'Have you asked anyone to buy, or to pay a deposit?', prompt: 'A yes with money is evidence. A compliment is not.', lo: 'Ask one person for a small yes this month: a pre-order, a deposit, a paid trial.', hi: 'Then you have evidence. Ask the next five the same way.' },
+      ],
+    },
+    people: {
+      solo: [
+        { id: 'ts1', short: 'The first handover', text: 'Do you know the first task you would give to someone else?', prompt: 'One you do often, that someone could learn.', lo: 'List what you did last week. Circle one task someone else could learn in a day.', hi: 'Then write it down. That page is your first hire.' },
+        { id: 'ts2', short: 'Written down', text: 'Could someone do your main task from a written page?', prompt: 'The steps, the standard, and when to ask you.', lo: 'Write the ten steps of one task. Ten lines is enough to start.', hi: 'Then test it: hand it to someone for one week and stay out of it.' },
+        { id: 'ts3', short: 'When you can pay', text: 'Do you know how much you could pay for help, and from when?', prompt: 'An hourly rate or a monthly amount, and the month it starts.', lo: 'Pick a number and a month. A plan with a date gets done; a wish does not.', hi: 'Then put the date in your calendar and start looking a month before.' },
+      ],
+      team: [
+        { id: 'tt1', short: 'A good week, defined', text: 'Does each person know what a good week looks like in their role?', prompt: 'One or two results, not a list of tasks.', lo: 'For each person, write the one result that makes their week good. Tell them.', hi: 'Then they can judge their own work. Ask them how the week went before you say.' },
+        { id: 'tt2', short: 'Plain feedback', text: 'Do you tell people plainly when work is good, and when it is not?', prompt: 'Soon, kindly, and specific.', lo: 'This week, give one person one specific thank-you and one specific fix.', hi: 'Then trust grows both ways. Keep it weekly.' },
+        { id: 'tt3', short: 'Deciding without you', text: 'Could someone decide something today without asking you?', prompt: 'A refund, a schedule, a small spend.', lo: 'Give one person one decision with a limit. Then do not take it back.', hi: 'Then you are building leaders. Give the next decision a bigger limit.' },
+      ],
+    },
+  };
+  /** The six Part 2 questions for this founder: customers first, then people. */
+  P2.questions = (mode, team) => [...P2.customers[mode === 'yes' ? 'yes' : 'plan'], ...P2.people[team === 'solo' || !team ? 'solo' : 'team']];
+  P2.ids = () => [...P2.customers.yes, ...P2.customers.plan, ...P2.people.solo, ...P2.people.team].map((q) => q.id);
+
+  /* What they care about most (Part 1, page 11): two of these. */
+  const VALUES = [['family', 'Family'], ['faith', 'Faith'], ['freedom', 'Freedom'], ['health', 'Health'], ['integrity', 'Integrity'], ['growth', 'Growth'], ['service', 'Service'], ['legacy', 'Legacy']];
+
+  /* A word between questions, shown on six of the eleven pages once answered.
+   * The lines marked `by` are Alexandru's own principles. */
+  const SPARKS = {
+    1: { t: 'Honest beats impressive. Nobody is grading this, not even us.' },
+    3: { t: 'Business is life, and life is business.', by: 'Alexandru' },
+    5: { t: 'Halfway. Coffee is optional; honesty is not.' },
+    7: { t: 'There is a time to push, and a time to help.', by: 'Alexandru' },
+    8: { t: 'Stick to what you do best, and serve people.', by: 'Alexandru' },
+    10: { t: 'Unbalance for the balance.', by: 'Alexandru', sub: 'Sometimes you tip the scale on purpose, to find your balance.' },
+  };
+
+  const api = { Q, P2, VALUES, SPARKS };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Compass = api;
 })(this);
