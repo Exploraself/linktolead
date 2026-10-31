@@ -556,6 +556,16 @@ button.cta{border:0;cursor:pointer}
 @keyframes beckon{0%{box-shadow:0 0 0 0 rgba(214,191,143,.6)}70%{box-shadow:0 0 0 16px rgba(214,191,143,0)}100%{box-shadow:0 0 0 0 rgba(214,191,143,0)}}
 @media(prefers-reduced-motion:reduce){.enter > *,.close .cta{animation:none}.rv.wait{opacity:1;transform:none}.rv{transition:none}}
 html.rk-bar-on footer{padding-bottom:76px}
+/* 1 Nov, round 2: the after, the Boardroom door, readable, fast */
+.hero .back{margin-top:18px;padding:10px 14px;border-left:3px solid var(--gold);background:rgba(180,151,95,.12);color:#F4ECDA;font-size:15px;max-width:46ch}
+.hero .back b{color:var(--gold-hi);font-weight:600}
+.yr .after{padding-top:12px;border-top:1px solid rgba(180,151,95,.35);color:#E3C47E;font-size:16px}
+.sun3{margin-top:22px;padding:20px 22px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--gold);max-width:620px}
+.sun3 ul{margin:10px 0 0;padding-left:20px;display:grid;gap:4px;font:500 18px/1.4 var(--display)}
+.soon{display:inline-flex;align-items:center;min-height:42px;padding:0 16px;border:1px dashed var(--gold);font:600 14px/1 var(--body);color:var(--gold-hi);cursor:not-allowed}
+.close .proj{margin:12px auto 0;max-width:44ch;font-size:15.5px;color:var(--muted)}
+.under{font-size:14px}.small{font-size:14.5px}
+.band:not(#cost){content-visibility:auto;contain-intrinsic-size:auto 1100px}
 #gate{position:fixed;inset:0;z-index:60;background:rgba(16,13,9,.65);display:flex;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}
 #gate[hidden]{display:none}
 </style>
@@ -578,8 +588,9 @@ html.rk-bar-on footer{padding-bottom:76px}
   <p class="lede">Twelve practical weeks that take the business out of your head and onto paper. Each week you open something real, your calendar, your invoices, your customers, and write down what is actually there.</p>
   <div class="go-row">
     <a class="cta" href="#join" data-join>Start my free three weeks →</a>
-    <p class="free"><b>FREE</b><span>Weeks 1–3, and they stay free<br>No card · your work is yours to keep</span></p>
+    <p class="free"><b>FREE</b><span>Weeks 1–3, and they stay free<br>No card · stop any week · your work stays yours</span></p>
   </div>
+  <p class="back" id="back" hidden></p>
 </div></section>
 
 <!-- ═══ welcome bridge ═══ -->
@@ -627,6 +638,8 @@ html.rk-bar-on footer{padding-bottom:76px}
     <p>Everything you are trying to fix sits in one of those four. Work the wrong one and nothing moves.</p>
     <p class="b">So the whole job is finding out which one — and fixing that one first.</p>
   </div>
+  <p class="eyebrow" style="margin-top:34px">Three taps · no sign-up to look</p>
+  <div id="mm" aria-live="polite" style="margin-top:12px"></div>
 </div></section>
 
 <!-- ═══ the cost of waiting, counted by the founder (1 Nov; nothing invented, nothing sent) ═══ -->
@@ -645,6 +658,7 @@ html.rk-bar-on footer{padding-bottom:76px}
       <p class="big" id="o-year">780 h</p>
       <p class="eq" id="o-eq">That is 20 of your chosen weeks, every year.</p>
       <p class="ask" id="r-ask">Who got those hours last year, and who went without them?</p>
+      <p class="after" id="o-after">One protected three-hour block a week takes back 156 of them, every year.</p>
     </div>
   </div>
   <div class="ctarow"><a class="cta" href="#join" data-join>Start taking them back, free →</a>
@@ -774,6 +788,7 @@ html.rk-bar-on footer{padding-bottom:76px}
       <ul><li>Ten named customers you can approach this month</li>
           <li>Each with a way in and a date to do it</li></ul></div>
   </div>
+  <div class="sun3"><p class="eyebrow">It is Sunday, week three. On paper:</p><ul><li>One task handed over</li><li>Your “enough” as a number</li><li>Three people asked to buy</li><li>Your five numbers read, not guessed</li></ul></div>
   <p class="freenote">Free · weeks 1–3</p>
   <p class="small">No card. An email, so your work is saved, follows you between devices — and so Alexandru can read it before you ever speak.</p>
   <div class="ctarow"><a class="cta" href="#join" data-join>Start now</a>
@@ -792,6 +807,13 @@ html.rk-bar-on footer{padding-bottom:76px}
       <p class="sig">Alexandru</p>
     </div>
   </div>
+</div></section>
+
+<!-- ═══ three Sundays later: MODEL stories, tagged, until real founders' words replace them ═══ -->
+<section class="band"><div class="wrap">
+  <p class="eyebrow">Three Sundays later</p>
+  <h2 class="sectitle">What the first three weeks can look like</h2>
+  <div id="story-list" style="margin-top:24px"></div>
 </div></section>
 
 <!-- ═══ bridge → business ═══ -->
@@ -876,6 +898,7 @@ html.rk-bar-on footer{padding-bottom:76px}
   </div>
   <div class="pricerow"><span class="price" style="color:var(--gold-hi)">No cost</span>
     <span class="pricenote">One hour, and two more weeks open. The only thing it asks is that you finished the first three.</span></div>
+  <p style="margin-top:18px"><span class="soon" aria-disabled="true">Book the Boardroom · booking link coming up</span></p>
 </div></section>
 
 <!-- ═══ the North Star ═══ -->
@@ -1110,6 +1133,7 @@ html.rk-bar-on footer{padding-bottom:76px}
   <p class="eyebrow">Start here</p>
   <h2>Start tonight, free. <em>By Tuesday, you’ll be ahead.</em></h2>
   <p class="mine" id="close-mine" hidden></p>
+  <p class="proj">By your first Sunday: one task off your desk, your “enough” as a number.</p>
   <div id="close-cta"><button type="button" class="cta" data-join>Create my free account →</button>
   <p class="under">Levels 01–03 free · Instant access</p></div>
 </div></section>

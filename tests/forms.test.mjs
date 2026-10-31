@@ -233,6 +233,20 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
   const { noteFor } = await import('../public/arrival.js');
   ok(noteFor({ landing: 'road4', worst: 'people', leaking: 3, word: 'SEED', letter: 'E', part: 'Entrust' }).includes('Lead your people') && noteFor({ landing: 'road1', extraYear: 780 }).includes('780 hours a year') && noteFor({ landing: 'road3', extraYear: 0 }) === '' && noteFor(null) === '', 'arrival note: the founder’s own finding said back, nothing when there is nothing of theirs');
   const B1 = read('public/road1/index.html');
+  // Round 2 (1 Nov): model stories always carry their tag; the counter counts only known moments; the Boardroom door says its link is coming.
+  const KIT = await import('../public/road-kit.js');
+  ok(KIT.STORIES.length === 3 && KIT.STORIES.every((x) => x.model === true) && K.includes("x.model ? '<span class=\"tag\">Model story · not a real founder yet</span>'"), 'model stories: every one is marked model, and the tag is printed on the page');
+  ok(KIT.painFromUrl('https://x/road4/?pain=alone') === 'alone' && KIT.painFromUrl('https://x/?utm_content=ad3-pain-price') === 'price' && KIT.painFromUrl('https://x/?pain=nonsense') === '' && Object.values(KIT.PAINS).every((p) => p.hook && p.pain), 'message match: only the approved hooks, unknown pains leave the page as written');
+  for (const r of ['road1', 'road3', 'road4']) ok(read(`public/${r}/index.html`).includes('Book the Boardroom · booking link coming up') && read(`public/${r}/index.html`).includes('id="story-list"'), `${r}: the Boardroom door says its link is coming up; the model stories have their place`);
+  {
+    const C = await import('../functions/api/count.js');
+    const D = fakeD1(), env = { DB: D, MENTOR_KEY: 'k3y' };
+    const hit = (b) => C.onRequestPost({ request: new Request('https://x/api/count', { method: 'POST', body: JSON.stringify(b) }), env });
+    ok((await hit({ page: 'road4', moment: 'view' })).status === 200 && (await hit({ page: 'road4', moment: 'view' })).status === 200 && (await hit({ page: 'road9', moment: 'view' })).status === 400 && (await hit({ page: 'road4', moment: 'email' })).status === 400, 'counter: known pages and moments only');
+    const r = await (await C.onRequestGet({ request: new Request('https://x/api/count?k=k3y'), env })).json();
+    ok(r.pages.road4.view === 2 && r.pages.road1.view === 0 && (await C.onRequestGet({ request: new Request('https://x/api/count'), env })).status === 403, 'counter: read with the mentor key only, counts add up');
+    ok(read('worker.js').includes("'/api/count': count"), 'counter: routed by the Worker');
+  }
   ok(B1.includes('<details class="later" id="later">') && B1.indexOf('<details class="later"') < B1.indexOf('The Personal Leadership LAB') && B1.indexOf('</details>') > B1.indexOf('<p class="pprice">$1,989</p>') && B1.includes('Weeks <b>6–9</b>'), 'Road 1: the LAB, HUB and Summit behind one tap; the LAB opens weeks 6–9');
 }
 // The tag system (30 Oct): every tag is "linktolead" or "linktolead-<group>-<value>", lowercase, no spaces.

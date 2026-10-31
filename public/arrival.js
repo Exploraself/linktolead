@@ -13,11 +13,11 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 /** The note's words for what was found, or '' when there is nothing to say back. */
 export function noteFor(a) {
   if (!a || typeof a !== 'object') return '';
-  if (a.landing === 'road4' && a.worst) {
+  if (a.worst) {
     const d = DOMAINS.find((x) => x.k === a.worst);
     if (!d) return '';
     return a.leaking
-      ? `Your mirror said the business leaks most through <b>${esc(d.n)}</b>. Level 01 starts you there: <b>${esc(a.word || 'SEED')}</b>, the ${esc(a.letter || '')} for <b>${esc(a.part || '')}</b>.`
+      ? `Your mirror said the business leaks most through <b>${esc(d.n)}</b>. ${a.letter && a.part ? `Level 01 starts you there: <b>${esc(a.word || 'SEED')}</b>, the ${esc(a.letter)} for <b>${esc(a.part)}</b>.` : 'Start level 01 there.'}`
       : 'Your mirror held on all eight questions. Level 01 checks that against your calendar, not your memory.';
   }
   const h = Number(a.extraYear);

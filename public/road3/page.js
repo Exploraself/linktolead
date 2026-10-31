@@ -43,6 +43,7 @@ if (typeof document !== 'undefined' && $('#levels')) {
   const join = (e) => {
     const opener = e && e.currentTarget;
     gate.hidden = false;
+    import('/road-kit.js').then((k) => { k.count('road3', 'form_open'); k.count('road3', 'cta'); }).catch(() => {});
     loadBox().then((m) => m && m.open({ gate, opener, stage: null, variant: 'simple', landing: 'road3' }));
   };
   document.querySelectorAll('[data-join]').forEach((b) => b.addEventListener('click', join));
@@ -57,6 +58,8 @@ if (typeof document !== 'undefined' && $('#levels')) {
     $('#o-year').textContent = `${extra.toLocaleString('en-US')} h`;
     $('#o-eq').textContent = extra ? `That is ${weeks} of your chosen weeks, every year.` : 'You already work the week you want.';
     $('#r-ask').textContent = extra ? 'Who got those hours last year, and who went without them?' : 'Then the question is what each of those hours is buying you.';
+    const back = Math.min(extra, 156);
+    $('#o-after').textContent = !extra ? 'Then the work is keeping it that way.' : back < extra ? `One protected three-hour block a week takes back ${back.toLocaleString('en-US')} of them, every year.` : 'One protected block a week takes back all of them.';
     return extra;
   };
   const moved = () => {
@@ -75,6 +78,13 @@ if (typeof document !== 'undefined' && $('#levels')) {
   import('/road-kit.js').then((k) => {
     k.stickyJoin({ title: 'The first three weeks are free', line: 'Name and email. No card.', label: signedIn() ? 'Continue' : 'Start free',
       after: document.querySelector('.sc'), quiet: [$('#close-cta')], onJoin: (e) => (signedIn() ? (location.href = '/ground-plan/#home') : join(e)) });
+    k.matchHeadline(document.querySelector('.h1'), 'road3', 'em');
+    k.welcomeBack($('#back'), 'road3');
+    k.miniMirror($('#mm'), { page: 'road3', onJoin: join });
+    k.stories($('#story-list'));
+    k.trackScroll('road3');
+    now.addEventListener('change', () => k.count('road3', 'cost_moved'));
+    want.addEventListener('change', () => k.count('road3', 'cost_moved'));
     if (!touched) stop = k.countUp($('#o-year'), () => Math.max(0, now.value - want.value) * 52, (n) => `${n.toLocaleString('en-US')} h`);
   }).catch(() => {});
   try {

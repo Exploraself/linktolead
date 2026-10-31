@@ -24,7 +24,7 @@
 // @site data
 import { DOMAINS, STAGES, gateFor } from '/content.js';
 import { LEVELS4 } from '/levels-v4.js';
-import { remember, stickyJoin, countUp } from '/road-kit.js';
+import { remember, stickyJoin, countUp, count, trackScroll, matchHeadline, welcomeBack, stories } from '/road-kit.js';
 // @end data
 
 const $ = (s) => document.querySelector(s);
@@ -53,6 +53,7 @@ function join(e) {
   if (e) e.preventDefault();
   const opener = e && e.currentTarget;
   gate.hidden = false;
+  count('road4', 'form_open'); count('road4', variant === 'simple' ? 'form_simple' : 'form_full');
   loadBox().then((m) => m && m.open({ gate, opener, stage: { id: stage }, variant, landing: 'road4' }));
 }
 // A founder who has already joined is not starting: the buttons say so.
@@ -141,6 +142,7 @@ $('.tiles').addEventListener('click', (e) => {
   const t = e.target.closest('[data-pick]');
   if (!t) return;
   setStage(t.dataset.pick);
+  count('road4', 'mirror_start');
   stageBox.hidden = true; card.hidden = false; qi = 0; answers = [];
   ask();
   card.querySelector('[data-a]').focus({ preventScroll: true });
@@ -158,6 +160,7 @@ async function reading() {
   const type = total <= 1 ? 'leader' : L[4] ? 'grinder' : 'hoper';
   const L1 = LEVELS4[0], di = DOMAINS.findIndex((d) => d.k === worst), one = L1.d[di];
   remember('road4', { stage, worst, leaking: total, word: L1.word, letter: one.l, part: one.name });
+  count('road4', 'mirror_done');
   // The diamond: one corner per domain, pulled in by every leak.
   const pts = { self: [0, -1], people: [1, 0], work: [0, 1], market: [-1, 0] };
   const at = (k, r) => [130 + pts[k][0] * r, 130 + pts[k][1] * r];
@@ -295,6 +298,11 @@ function hours() {
   [...cal.children].forEach((c, i) => c.classList.toggle('on', i < weeks));
   $('#o-eq').textContent = extra ? `That is ${weeks} of your chosen weeks, every year.` : 'You already work the week you want.';
   $('#r-ask').textContent = extra ? 'Who got those hours last year, and who went without them?' : 'Then the question is what each of those hours is buying you.';
+  // The after, in their own number: one protected three-hour block a week.
+  const back = Math.min(extra, 156);
+  $('#o-after').textContent = !extra ? 'Then week seven, HOUR, makes sure those hours stay protected.'
+    : back < extra ? `One protected three-hour block a week takes back ${back.toLocaleString('en-US')} of them, every year. Week seven, HOUR, builds that block.`
+      : 'One protected block a week takes back all of them. Week seven, HOUR, builds that block.';
 }
 now.addEventListener('input', hours); want.addEventListener('input', hours); hours();
 
@@ -314,6 +322,15 @@ stickyJoin({ title: 'The first three weeks are free', line: 'No card. Your work 
   after: $('.hero'), quiet: [$('#close-cta'), $('#mirror-box'), $('.year .acts')], onJoin: (e) => (joined ? (location.href = '/ground-plan/#home') : join(e)) });
 const stopCount = countUp($('#o-year'), () => Math.max(0, now.value - want.value) * 52, (n) => `${n.toLocaleString('en-US')} h`);
 now.addEventListener('input', stopCount); want.addEventListener('input', stopCount);
+const movedOnce = () => count('road4', 'cost_moved');
+now.addEventListener('change', movedOnce); want.addEventListener('change', movedOnce);
+
+// ── Round 2: the ad's own line, a returning founder, the model stories, counting
+matchHeadline($('.hero h1'), 'road4');
+welcomeBack($('#back'), 'road4');
+stories($('#story-list'));
+trackScroll('road4');
+document.addEventListener('click', (e) => { if (e.target.closest('[data-join], .rk-bar button')) count('road4', 'cta'); }, true);
 
 // ── Motion: what arrives as you scroll, and the pause button ────────────────
 // Everything is visible at rest; only what starts below the first screen

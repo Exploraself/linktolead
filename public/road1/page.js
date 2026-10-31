@@ -7,7 +7,7 @@
 // another year like this costs" is counted by the founder (two sliders), kept
 // on this device only so Base Camp can say it back once (/road-kit.js).
 import { rememberUtm } from '/forms.js';
-import { remember, stickyJoin, countUp } from '/road-kit.js';
+import { remember, stickyJoin, countUp, count, trackScroll, matchHeadline, welcomeBack, miniMirror, stories } from '/road-kit.js';
 
 rememberUtm();
 const gate = document.getElementById('gate');
@@ -17,6 +17,7 @@ function join(e) {
   if (e) e.preventDefault();
   const opener = e && e.currentTarget;
   gate.hidden = false;
+  count('road1', 'form_open'); count('road1', 'cta');
   loadBox().then((m) => m && m.open({ gate, opener, stage: null, variant: 'full', landing: 'road1' }));
 }
 document.querySelectorAll('[data-join]').forEach((a) => a.addEventListener('click', join));
@@ -45,6 +46,8 @@ function hours() {
   $('#o-year').textContent = `${extra.toLocaleString('en-US')} h`;
   $('#o-eq').textContent = extra ? `That is ${weeks} of your chosen weeks, every year.` : 'You already work the week you want.';
   $('#r-ask').textContent = extra ? 'Who got those hours last year, and who went without them?' : 'Then the question is what each of those hours is buying you.';
+  const back = Math.min(extra, 156);
+  $('#o-after').textContent = !extra ? 'Then the work is keeping it that way.' : back < extra ? `One protected three-hour block a week takes back ${back.toLocaleString('en-US')} of them, every year.` : 'One protected block a week takes back all of them.';
   return extra;
 }
 if (now && want) {
@@ -57,6 +60,8 @@ if (now && want) {
     mine.hidden = !extra;
   };
   now.addEventListener('input', moved); want.addEventListener('input', moved);
+  const once = () => count('road1', 'cost_moved');
+  now.addEventListener('change', once); want.addEventListener('change', once);
   hours();
   stopCount = countUp($('#o-year'), () => Math.max(0, now.value - want.value) * 52, (n) => `${n.toLocaleString('en-US')} h`);
 }
@@ -74,3 +79,10 @@ try {
     });
   }
 } catch { /* old browser: everything is already visible */ }
+
+// ── Round 2: the ad's own line, a returning founder, the quick mirror, the model stories, counting
+matchHeadline($('.hero h1'), 'road1', 'em');
+welcomeBack($('#back'), 'road1');
+miniMirror($('#mm'), { page: 'road1', onJoin: join });
+stories($('#story-list'));
+trackScroll('road1');

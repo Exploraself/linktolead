@@ -171,6 +171,17 @@ button{font:inherit}
 @keyframes beckon{0%{box-shadow:0 0 0 0 rgba(227,196,126,.55)}70%{box-shadow:0 0 0 16px rgba(227,196,126,0)}100%{box-shadow:0 0 0 0 rgba(227,196,126,0)}}
 @media (prefers-reduced-motion: reduce){.rv.wait{opacity:1;transform:none}}
 html.rk-bar-on .foot{padding-bottom:84px}
+/* 1 Nov, round 2: the after, the Boardroom door, readable, fast */
+.back{margin:4px 0 0;padding:10px 14px;border-left:3px solid #B4975F;background:rgba(180,151,95,.12);font-size:15px;max-width:46ch}
+.back b{color:#D6BF8F;font-weight:600}
+.yr .after{margin:0;padding-top:12px;border-top:1px solid rgba(180,151,95,.35);color:#E3C47E;font-size:16px}
+.sun3{padding:20px 22px;background:#1E1710;border:1px solid #3A3022;max-width:620px}
+.sun3 ul{margin:10px 0 0;padding-left:20px;display:grid;gap:4px;font:500 18px/1.4 Newsreader,Georgia,serif;color:#F3EBDA}
+.soon{display:inline-flex;align-items:center;min-height:42px;padding:0 16px;border:1px dashed #B4975F;font:600 14px/1 'Inter',Arial,sans-serif;color:#7A5C16;cursor:not-allowed}
+.ladder .nm span,.face figcaption{font-size:14px}
+.sc:not(:first-of-type){content-visibility:auto;contain-intrinsic-size:auto 760px}
+:root[data-theme="light"] .back{color:#1C1309}:root[data-theme="light"] .back b{color:#7A5C16}
+:root[data-theme="light"] .sun3{background:#FFFDF7;border-color:#DFD3B8}:root[data-theme="light"] .sun3 ul{color:#1C1309}
 :root[data-theme="light"] .yr{background:#1C1309}
 :root[data-theme="light"] .story{color:#3A2F20}
 :root[data-theme="light"] .close .mine{color:#7A5C16}
@@ -235,7 +246,8 @@ html.rk-bar-on .foot{padding-bottom:84px}
           <div style="display: flex; align-items: center; gap: 12px"><svg width="28" height="28" viewBox="0 0 34 34" aria-hidden="true"><rect x="7" y="7" width="20" height="20" transform="rotate(45 17 17)" fill="none" stroke="#B4975F" stroke-width="1.6"></rect><rect x="13" y="13" width="8" height="8" transform="rotate(45 17 17)" fill="#B4975F"></rect></svg><div><p style="margin: 0; font: 500 24px/1 Newsreader, Georgia, serif; color: #D6BF8F">Link to Lead</p><p class="k" style="margin: 5px 0 0; font-size: 10px">The Founder’s Blueprint · Link to Lead</p></div></div>
           <h1 class="h1">Your business can’t grow <em>past you.</em></h1>
           <p class="sub">Twelve weeks that take the business out of your head and onto paper. The first three are free, and stay free.</p>
-          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 8px"><button type="button" class="cta" data-join>Start my free three weeks →</button><span class="note">Name and email · No card</span></div>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 8px"><button type="button" class="cta" data-join>Start my free three weeks →</button><span class="note">Name and email · No card · Stop any week</span></div>
+          <p class="back" id="back" hidden></p>
         </div>
         <div class="vz">
           <!-- Hero image (30 Oct, Alexandru picked option D): every road runs through you.
@@ -302,16 +314,11 @@ html.rk-bar-on .foot{padding-bottom:84px}
       <div class="row">
         <div class="tx">
           <h2 class="h2">Four things hold your business up. <em>One is costing you most.</em></h2>
-          <p class="sub">Work the wrong one and nothing moves.</p>
+          <p class="sub">Work the wrong one and nothing moves. Three taps show you which one to start with. No sign-up to look.</p>
         </div>
         <div class="vz">
-          <div class="four" role="img" aria-label="The four domains around you: Lead yourself, Lead your people, Lead your business and Lead the market, with one highlighted">
-            <div>Lead yourself</div>
-            <div style="justify-content: flex-end; text-align: right">Lead your people</div>
-            <div style="align-items: flex-end">Lead your business</div>
-            <div style="align-items: flex-end; justify-content: flex-end; text-align: right; border: 1.5px solid #B4975F; background: rgba(180,151,95,.16); color: #D6BF8F">Lead the market</div>
-            <span class="you">YOU</span>
-          </div>
+          <!-- The quick mirror (road-kit.js): three taps before any form. -->
+          <div id="mm" aria-live="polite"></div>
         </div>
       </div>
     </div>
@@ -334,6 +341,7 @@ html.rk-bar-on .foot{padding-bottom:84px}
             <p class="big" id="o-year">780 h</p>
             <p class="eq" id="o-eq">That is 20 of your chosen weeks, every year.</p>
             <p class="ask" id="r-ask">Who got those hours last year, and who went without them?</p>
+            <p class="after" id="o-after">One protected three-hour block a week takes back 156 of them, every year.</p>
           </div>
         </div>
       </div>
@@ -389,6 +397,7 @@ html.rk-bar-on .foot{padding-bottom:84px}
         <li><s>Customers you guess at</s><span aria-hidden="true" style="color: #B4975F; text-align: center">→</span><b>Ten real names</b></li>
         <li><s>Everything runs through you</s><span aria-hidden="true" style="color: #B4975F; text-align: center">→</span><b>One process someone else ran</b></li>
       </ul>
+      <div class="sun3"><p class="k">It is Sunday, week three. On paper:</p><ul><li>One task handed over</li><li>Your “enough” as a number</li><li>Three people asked to buy</li><li>Your five numbers read</li></ul></div>
     </div>
   </section>
 
@@ -435,6 +444,15 @@ html.rk-bar-on .foot{padding-bottom:84px}
     </div>
   </section>
 
+  <!-- 9b · CHOOSE · three Sundays later: MODEL stories, tagged, until real founders' words replace them -->
+  <section class="sc lt">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="dn">See your path</li><li class="nw">Choose</li><li>Begin</li></ol>
+      <h2 class="h2">Three Sundays later. <em>What it can look like.</em></h2>
+      <div id="story-list"></div>
+    </div>
+  </section>
+
   <!-- 10 · CHOOSE · how far you go -->
   <section class="sc lt">
     <div class="in">
@@ -446,6 +464,7 @@ html.rk-bar-on .foot{padding-bottom:84px}
         <li><span class="nm"><b>The Founder Launchpad</b><span>On your own</span></span><span class="bars" role="img" aria-label="Levels 01 to 03" data-on="3"></span><span class="pr">No cost</span></li>
         <li><span class="nm"><b>The Boardroom</b><span>With Alexandru</span></span><span class="bars" role="img" aria-label="Levels 01 to 05" data-on="5"></span><span class="pr">One 1:1 session</span></li>
       </ul>
+      <p><span class="soon" aria-disabled="true">Book the Boardroom · booking link coming up</span></p>
       <p class="risk"><b>The whole risk is three weeks of honest work.</b> If they don’t show you something about your business you couldn’t see before, stop there. You’ve paid nothing, and everything you wrote is still yours.</p>
     </div>
   </section>
@@ -477,7 +496,8 @@ html.rk-bar-on .foot{padding-bottom:84px}
       <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="dn">See your path</li><li class="dn">Choose</li><li class="nw">Begin</li></ol>
       <h2 class="h2">Start tonight, free. <em>By Tuesday, you’ll be ahead.</em></h2>
       <p class="sub mine" id="close-mine" hidden></p>
-      <div id="close-cta" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 22px"><button type="button" class="cta" data-join>Start my free three weeks →</button><span class="note">Levels 01–03 free · Name and email · No card</span></div>
+      <p class="sub" style="margin: 0 auto; text-align: center">By your first Sunday: one task off your desk, your “enough” as a number.</p>
+      <div id="close-cta" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 22px"><button type="button" class="cta" data-join>Start my free three weeks →</button><span class="note">Name and email · No card · Stop any week</span></div>
     </div>
   </section>
 </main>

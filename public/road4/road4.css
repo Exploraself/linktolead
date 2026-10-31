@@ -488,6 +488,32 @@ section{position:relative}
 @keyframes beckon{0%{box-shadow:0 0 0 0 rgba(227,196,126,.55)}70%{box-shadow:0 0 0 16px rgba(227,196,126,0)}100%{box-shadow:0 0 0 0 rgba(227,196,126,0)}}
 html.rk-bar-on .foot{padding-bottom:76px}
 
+/* ── 1 Nov, round 2: the after, made visible ─────────────────────────────── */
+.hero .back{margin-top:16px;padding:10px 14px;border-left:3px solid var(--gold);background:rgba(201,162,74,.1);color:#F3EBDA;font-size:15px;max-width:46ch}
+.hero .back b{color:var(--gold-hi);font-weight:600}
+.after3{display:grid;gap:14px;margin-top:18px}
+@media(min-width:860px){.after3{grid-template-columns:1.25fr .75fr}}
+.lines4,.sunday3{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:clamp(18px,3vw,26px);display:grid;gap:12px;align-content:start}
+.lines4 .ex{font-size:14.5px;color:var(--muted)}
+.lines4 ol{list-style:none;margin:0;padding:0;display:grid;gap:10px;counter-reset:l}
+.lines4 li{display:grid;gap:2px;padding-left:14px;border-left:3px solid var(--gold);font:400 18px/1.45 var(--display);color:var(--ink)}
+.lines4 li small{font:700 11px/1.4 var(--body);letter-spacing:2px;text-transform:uppercase;color:var(--gold-ink)}
+.sunday3{background:var(--deep);border-color:rgba(201,162,74,.4);color:#F3EBDA}
+.sunday3 .eyebrow{color:var(--gold)}
+.sunday3 h3{font-size:clamp(24px,3vw,30px);color:#FFFCF4}
+.sunday3 ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.sunday3 li{position:relative;padding-left:26px;font-size:15.5px;color:#E8DFCB}
+.sunday3 li::before{content:"";position:absolute;left:0;top:5px;width:14px;height:14px;border:1.5px solid var(--gold);border-radius:3px}
+.sunday3 li::after{content:"";position:absolute;left:4px;top:6px;width:5px;height:9px;border:solid var(--gold-hi);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.sunday3 .fine{color:#B3A78F}
+.year .after{font:500 16px/1.5 var(--body);color:#E3C47E;border-top:1px solid rgba(201,162,74,.35);padding-top:12px}
+.rung .soon{grid-column:1/-1;justify-self:start;margin-top:6px;display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border:1px dashed var(--gold);border-radius:3px;font:600 13.5px/1 var(--body);color:var(--gold-ink);cursor:not-allowed}
+/* readable for a tired founder: nothing that matters under 14px */
+.fine{font-size:14px}
+.bands{font-size:13.5px}
+/* speed: sections far below the first screen render when they are reached */
+.sec:not(#mirror):not(#climb){content-visibility:auto;contain-intrinsic-size:auto 1000px}
+
 /* stillness: the founder's choice, or the device's */
 html.still *,html.still *::before,html.still *::after{animation:none!important;transition:none!important}
 html.still .rv.wait{opacity:1;transform:none}
