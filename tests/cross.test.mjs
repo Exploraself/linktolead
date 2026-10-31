@@ -15,7 +15,7 @@ const DB = fakeD1();
 const env = { DB, MAILCHIMP_MODE: 'test', MAILCHIMP_API_KEY: 'k-us1' };
 fakeResend();
 ok(CROSS_TAGS.blueprint === 'linktolead-crossed-blueprint' && CROSS_TAGS.northstar === 'linktolead-crossed-northstar', 'the two tags Alexandru chose');
-ok(originOf({ landing: 'compass' }) === 'northstar' && originOf({ landing: 'road2' }) === 'northstar' && originOf({ landing: 'road1' }) === 'blueprint' && originOf({ landing: 'summit' }) === 'blueprint', 'the door: North Star box and sales pages, or the Blueprint pages');
+ok(originOf({ landing: 'compass' }) === 'northstar' && originOf({ landing: 'north3' }) === 'northstar' && originOf({ landing: 'north2' }) === 'northstar' && originOf({ landing: 'road2' }) === 'blueprint' && originOf({ landing: 'road1' }) === 'blueprint' && originOf({ landing: 'summit' }) === 'blueprint', 'the door: North Star box and sales pages (north1-3), or the Blueprint pages (road1-4, summit)');
 const r = await signup({ request: post('/api/signup', { first: 'Nia', last: 'Lee', email: 'nia@example.com', consent: true, type: 'full', company: 'Acme', interest: 'Higher income', industry: 'Other', password: 'a-long-password', confirm: 'a-long-password', landing: 'compass', source: 'compass' }), env });
 const nia = (await r.json()).token;
 let s = await (await stateGet({ request: get(`/api/state?t=${nia}`), env })).json();

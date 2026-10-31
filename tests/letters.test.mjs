@@ -128,7 +128,7 @@ ok(r.status === 200 && sent[0].body.text.includes('For you that’s Lead your bu
 {
   const N = northStarWelcome(B, { first: 'Ana' });
   ok(N.subject === 'Your Leader’s North Star is open' && N.text.includes('/northstar/') && !/Level 01/.test(N.text) && /P\.S\./.test(N.text), 'North Star welcome: opens the North Star, carries the P.S.');
-  ok(['road2', 'road21', 'compass'].every((k) => NORTH_STAR_LANDINGS.includes(k)) && !NORTH_STAR_LANDINGS.includes('road1') && !NORTH_STAR_LANDINGS.includes('road3'), 'North Star welcome: road2, road2.1 and the North Star box only');
+  ok(['north1', 'north2', 'north3', 'compass'].every((k) => NORTH_STAR_LANDINGS.includes(k)) && ['road1', 'road2', 'road3', 'road4', 'summit'].every((k) => !NORTH_STAR_LANDINGS.includes(k)), 'North Star welcome: north1-3 and the North Star box; road pages and The Summit get the Launchpad welcome');
 }
 
 // Every letter (30 Oct): the personal first line, and three free assessments under the P.S.

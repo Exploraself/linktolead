@@ -26,9 +26,9 @@ const write = (id, level, body = 'An answer', domain = 'self', step = 0) => DB.r
 const cross = (id, to) => DB.raw.prepare("INSERT INTO event (student_id,kind,at,detail) VALUES (?,'crossed','now',?)").run(id, to);
 
 // ── The roster's new fields ──────────────────────────────────────────────────
-const nina = await join('Nina', 'nina@example.com', 'road2');   // North Star only
+const nina = await join('Nina', 'nina@example.com', 'north3');   // North Star only
 const bob = await join('Bob', 'bob@example.com', 'road1');      // Blueprint only, levels 1–3
-const bea = await join('Bea', 'bea@example.com', 'road2');      // both, crossed to the Blueprint
+const bea = await join('Bea', 'bea@example.com', 'north3');      // both, crossed to the Blueprint
 const ned = await join('Ned', 'ned@example.com', 'road3');      // neither yet
 const ns = (token) => compassPost({ request: post('/api/compass', { token, stage: 'growing', answers: { v: 2 }, results: { scores: [1, 2, 3, 4], answered: [2, 2, 2, 2] }, flags: {} }), env });
 await ns(nina); await ns(bea);
@@ -61,11 +61,11 @@ ok(!launchpadDone({ level_list: '1,2,5' }) && launchpadDone({ levels: 3 }) && le
 // ── The funnel ───────────────────────────────────────────────────────────────
 const now = Date.parse('2026-10-31T12:00:00Z'), DAY = 86400000, iso = (d) => new Date(now - d * DAY).toISOString();
 const F = [
-  { id: 'a', name: 'Ana', email: 'a@x.co', tier: 'free', joined_at: iso(1), last_seen_at: iso(0.2), compass_at: iso(1), written: 0, levels: 0, landing: 'road2' },
+  { id: 'a', name: 'Ana', email: 'a@x.co', tier: 'free', joined_at: iso(1), last_seen_at: iso(0.2), compass_at: iso(1), written: 0, levels: 0, landing: 'north3' },
   { id: 'b', name: 'Bo', email: 'b@x.co', tier: 'free', joined_at: iso(9), last_seen_at: iso(1), written: 6, levels: 3, level_list: '1,2,3', landing: 'road1', open_notes: 1, has_password: 1 },
   { id: 'c', name: 'Cy', email: 'c@x.co', tier: 'session', joined_at: iso(20), last_seen_at: iso(2), compass_at: iso(19), written: 12, levels: 5, level_list: '1,2,3,4,5', landing: 'road1', has_password: 1 },
   { id: 'd', name: 'Di', email: 'd@x.co', tier: 'lab', joined_at: iso(40), last_seen_at: iso(3), compass_at: iso(39), written: 30, levels: 8, level_list: '1,2,3,4,5,6,7,8', landing: 'compass', company: 'Di Design' },
-  { id: 'e', name: 'Ed', email: 'e@x.co', tier: 'free', joined_at: iso(30), last_seen_at: iso(20), compass_at: iso(29), written: 0, levels: 0, landing: 'road2' },
+  { id: 'e', name: 'Ed', email: 'e@x.co', tier: 'free', joined_at: iso(30), last_seen_at: iso(20), compass_at: iso(29), written: 0, levels: 0, landing: 'north3' },
   { id: 'f', name: 'Fi', email: 'f@x.co', tier: 'free', joined_at: iso(2), last_seen_at: iso(2), written: 0, levels: 0 },
   { id: 'g', name: 'Gus', email: 'g@x.co', tier: 'free', joined_at: iso(25), last_seen_at: iso(16), written: 2, levels: 1, level_list: '1', landing: 'road3', paused: 1 },
 ];
@@ -98,7 +98,7 @@ ok(ids({ q: 'di design' }) === 'd' && ids({ q: 'E@X', group: 'ns' }) === 'e', 's
 
 // ── Where they came from ─────────────────────────────────────────────────────
 const BL = Object.fromEntries(byLanding(F, now).map((x) => [x.k, x]));
-ok(BL.road1.total === 2 && BL.road1.bp === 1 && BL.road1.both === 1 && BL.road2.total === 2 && BL.road2.ns === 2 && BL.compass.both === 1 && BL.road3.bp === 1, 'per landing: sign-ups split by group');
+ok(BL.road1.total === 2 && BL.road1.bp === 1 && BL.road1.both === 1 && BL.north3.total === 2 && BL.north3.ns === 2 && BL.compass.both === 1 && BL.road3.bp === 1, 'per landing: sign-ups split by group');
 ok(BL[''].total === 1 && BL[''].none === 1 && BL.road4.total === 0 && BL.summit.total === 0, 'per landing: none recorded in its own row; an empty landing is 0');
 
 // ── The page keeps every action ──────────────────────────────────────────────

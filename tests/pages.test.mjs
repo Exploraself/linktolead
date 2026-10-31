@@ -59,7 +59,7 @@ ok(L.includes('<h1>What is your business <em>for?</em></h1>') && L.includes('You
 
 // The four domains are always named in full on screen: no SELF / PEOPLE /
 // WORK / MARKET labels, and no Archivo or Libre Caslon left on the sales pages.
-for (const f of ['public/northstar/index.html', 'public/north3/index.html', 'public/road1/index.html']) {
+for (const f of ['public/northstar/index.html', 'public/north3/index.html', 'public/road1/index.html', 'public/road2/index.html']) {
   const s = read(f);
   ok(!/>\s*(SELF|PEOPLE|WORK|MARKET|YOURSELF|BUSINESS)\s*</.test(s), `${f}: no short domain labels`);
   ok(!/LEAD YOURSELF<\/text>|LEAD THE MARKET<\/text>/.test(s), `${f}: no duplicate small domain lines`);
@@ -68,7 +68,7 @@ for (const f of ['public/north3/index.html', 'public/north3/sales.css']) {
   ok(!/Archivo|Caslon/.test(read(f)), `${f}: North Star fonts only`);
 }
 // Fonts load once, from this site: no Google Fonts, no old .ttf files.
-for (const f of ['public/road1/index.html', 'public/ground-plan/index.html', 'public/mentor/index.html', 'public/northstar/index.html', 'public/northstar/summit/index.html', 'public/north3/index.html']) {
+for (const f of ['public/road1/index.html', 'public/road2/index.html', 'public/ground-plan/index.html', 'public/mentor/index.html', 'public/northstar/index.html', 'public/northstar/summit/index.html', 'public/north3/index.html']) {
   const s = read(f);
   ok(s.includes('href="/assets/fonts.css"') && !s.includes('fonts.googleapis.com') && s.includes('rel="preload" href="/assets/fonts/newsreader.woff2"'), `${f}: fonts once, self-hosted, preloaded`);
 }
@@ -133,7 +133,7 @@ const T = await (await plansGet({ request: new Request('https://x/api/plans?tota
 ok(T.ok && T.total === ALL_STEP_IDS.length, 'the step count comes from the live plans data');
 
 // Light and dark on every page: theme.js loads first, before any style.
-for (const f of ['public/ground-plan/index.html', 'public/road1/index.html', 'public/north3/index.html', 'public/road3/index.html', 'public/northstar/index.html', 'public/northstar/summit/index.html', 'public/404.html', 'public/mentor/index.html']) {
+for (const f of ['public/ground-plan/index.html', 'public/road1/index.html', 'public/road2/index.html', 'public/north3/index.html', 'public/road3/index.html', 'public/northstar/index.html', 'public/northstar/summit/index.html', 'public/404.html', 'public/mentor/index.html']) {
   const h = read(f);
   ok(h.indexOf('<script src="/theme.js"></script>') > 0 && h.indexOf('<script src="/theme.js"></script>') < h.indexOf('stylesheet'), `${f}: light and dark (theme.js before the styles)`);
 }

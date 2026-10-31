@@ -1,0 +1,584 @@
+<!doctype html>
+<!-- Road 2 (31 Oct 2026): the Blueprint page for the founder who builds,
+     polishes and rebuilds, and keeps the selling for later. Road 3's design
+     system (Newsreader + Inter, gold on dark, paper scrolls, the journey line,
+     the light/dark switch), one offer only: the free Founder Launchpad.
+     Round 2 (Alexandru, 31 Oct evening): clear in two seconds, no metaphor;
+     the founder is walked through four questions of their own (what makes
+     you believe it will work, do you know the steps, have you felt this
+     before and what is different now, how long will you still wait), each
+     answered with a tap and answered back, then gathered in "Your answers".
+     Taps and sliders stay on the page: never saved, never sent.
+     Every button opens the FULL account form, landing "road2" (Mailchimp tag
+     linktolead-road2), and the founder lands on Your Base Camp.
+     Until 31 Oct this address was the North Star sales page, now /north3/. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<script src="/theme.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>You keep making it better. You keep putting off the selling. | The Founder’s Blueprint | ExploraSelf</title>
+<meta name="description" content="For founders who build, polish and rebuild. Three free weeks to start asking the right people to buy.">
+<meta name="theme-color" content="#14100B">
+<link rel="icon" href="/northstar/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/northstar/assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/northstar/assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ExploraSelf">
+<meta property="og:title" content="You keep making it better. You keep putting off the selling. | ExploraSelf">
+<meta property="og:description" content="For founders who build, polish and rebuild. Three free weeks to start asking the right people to buy.">
+<meta property="og:url" content="https://linktolead.exploraself.com/road2/">
+<meta property="og:image" content="https://linktolead.exploraself.com/northstar/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="From founder to intentional leader. ExploraSelf.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="You keep making it better. You keep putting off the selling. | ExploraSelf">
+<meta name="twitter:description" content="For founders who build, polish and rebuild. Three free weeks to start asking the right people to buy.">
+<meta name="twitter:image" content="https://linktolead.exploraself.com/northstar/assets/og-image.png">
+<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts.css">
+<style>
+/* Road 3's system, as it is: dark and paper scrolls in turn, gold #B4975F,
+   champagne #D6BF8F, Newsreader for what is said, Inter for the rest. Each
+   scroll sets its own colours (--ink, --card …), so every block reads on
+   either kind of scroll. */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#14100B;color:#F3EBDA;font-family:'Inter',Arial,sans-serif;overflow-x:hidden}
+a{color:#D6BF8F}a:hover{color:#F6EEDD}
+button,input{font:inherit}
+:focus-visible{outline:3px solid #B4975F;outline-offset:3px}
+.skip{position:absolute;left:-999px;top:8px;background:#B4975F;color:#14100B;padding:10px 14px;z-index:90}
+.skip:focus{left:8px}
+.backbar{position:sticky;top:0;z-index:40;background:#B4975F;color:#14100B;text-align:center;padding:10px 16px;font:600 14px/1.3 'Inter',Arial,sans-serif}
+.backbar a{color:#14100B;text-decoration:underline;text-underline-offset:3px}
+.sc{padding:clamp(56px,8vw,96px) 16px;display:flex;align-items:center}
+.dk{background:#14100B;color:#F3EBDA;--ink:#F3EBDA;--muted:#C9BDA6;--soft:#B7AB93;--accent:#D6BF8F;--em:#B4975F;--card:#1E1710;--line:#3A3022;--sel:#B4975F;--selink:#14100B}
+.lt{background:#F6EFE2;color:#1C1309;--ink:#1C1309;--muted:#5E5446;--soft:#5E5446;--accent:#7A5C16;--em:#7A5C16;--card:#FFFDF7;--line:#DFD3B8;--sel:#1C1309;--selink:#F3EBDA}
+.in{width:100%;max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(22px,3vw,34px)}
+.row{display:flex;flex-wrap:wrap;gap:clamp(28px,5vw,64px);align-items:center}
+.row>.tx{flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.row>.vz{flex:1 1 300px;min-width:0;display:flex;justify-content:center}
+.h1{margin:0;font:500 clamp(40px,6.4vw,74px)/1.04 Newsreader,Georgia,serif;letter-spacing:-.02em}
+.h2{margin:0;font:500 clamp(30px,4.4vw,50px)/1.1 Newsreader,Georgia,serif;letter-spacing:-.015em}
+.h1 em,.h2 em{font-style:italic;font-weight:500;color:var(--em)}
+.sub{margin:0;font-size:clamp(17px,1.8vw,20px);line-height:1.55;color:var(--muted);max-width:46ch}
+.cta{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:0 32px;border:0;background:#B4975F;color:#14100B;font:700 18px/1 'Inter',Arial,sans-serif;text-decoration:none;cursor:pointer}
+.cta:hover,.cta:focus-visible{background:#D6BF8F;color:#14100B}
+.go{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;margin-top:8px}
+.note{font-size:14.5px;letter-spacing:.04em;color:var(--soft)}
+.k{margin:0;font:700 11px/1.4 'Inter',Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--em)}
+.mark{display:flex;align-items:center;gap:12px}
+.mark .k{font-size:10.5px}.nb{white-space:nowrap}
+.hero{min-height:min(760px,100svh);background:radial-gradient(90% 90% at 20% 0%,#2A2014 0%,#14100B 60%);border-bottom:3px solid #B4975F}
+.close{background:radial-gradient(80% 120% at 50% 0%,#2A2014 0%,#14100B 65%);text-align:center}
+.foot{background:#0E0B07;color:#9D917E;font-size:13px;line-height:1.7;padding:28px 16px 84px;text-align:center}
+#gate{position:fixed;inset:0;z-index:60;background:rgba(16,13,9,.65);display:flex;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}
+#gate[hidden]{display:none}
+
+/* The journey line (road 3's): where the founder is, and which questions
+   they have answered (page.js marks them). */
+.jm{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 18px;font:600 11px/1 'Inter',Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+.jm li{display:flex;align-items:center;gap:7px;color:#8F8775}
+.jm li::before{content:"";width:7px;height:7px;border-radius:50%;border:1.5px solid currentColor;box-sizing:border-box}
+.jm .dn{color:#B9AC94}.jm .dn::before{background:currentColor}
+.jm .nw{color:#B4975F}.jm .nw::before{background:#B4975F;border-color:#B4975F;box-shadow:0 0 0 4px rgba(180,151,95,.22)}
+.lt .jm li{color:#7D7262}.lt .jm .dn{color:#6B6153}.lt .jm .nw{color:#7A5C16}.lt .jm .nw::before{background:#B4975F;border-color:#B4975F}
+
+/* Plates: gold line drawings on midnight navy, the same in both lights. */
+.plate{width:100%;max-width:480px;background:#0E1C2B;border:1px solid rgba(180,151,95,.38);box-shadow:0 30px 60px -30px rgba(0,0,0,.6);color:#F3EBDA}
+.ill{max-width:360px}
+.ill svg{display:block;width:100%;height:auto}
+.ill .ln{fill:none;stroke:#B4975F;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ill .dr,.ill .out{stroke-dasharray:1;stroke-dashoffset:0}
+.ill .hot{stroke:#D6BF8F}
+.ill .fill{fill:#D6BF8F;stroke:none}
+.ill .cap{font:600 8px 'Inter',Arial,sans-serif;letter-spacing:.24em;fill:#B4975F;opacity:.75}
+
+/* 1 · Your week, as it is and as it could be: two bars, then a yes. */
+.wk{padding:clamp(22px,3vw,30px);display:flex;flex-direction:column;gap:22px}
+.wk-t{margin:0;font:600 10px/1 'Inter',Arial,sans-serif;letter-spacing:.24em;color:#B4975F}
+.wk-row{display:grid;grid-template-columns:34px minmax(0,1fr);gap:6px 14px;align-items:center}
+.wk-row svg{grid-row:span 2;width:34px;height:34px;fill:none;stroke:#D6BF8F;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.wk-l{font:600 14.5px/1.3 'Inter',Arial,sans-serif;color:#F3EBDA}
+.wk-bar{position:relative;height:16px;background:rgba(180,151,95,.14)}
+.wk-bar i{position:absolute;left:0;top:0;bottom:0;background:#B4975F}
+.wk-bar .b1{width:56%}
+.wk-bar .b2{width:36%;background:#D6BF8F}
+.yes{position:absolute;top:50%;left:36%;transform:translate(14px,-50%);display:flex;align-items:center;gap:6px;padding:7px 12px;background:#D6BF8F;color:#14100B;font:500 18px/1 Newsreader,Georgia,serif;white-space:nowrap}
+.yes::before{content:"";position:absolute;left:-6px;top:50%;margin-top:-6px;border:6px solid transparent;border-left:0;border-right-color:#D6BF8F}
+.wk-c{margin:0;font:italic 500 19px/1.3 Newsreader,Georgia,serif;color:#D6BF8F}
+@media (prefers-reduced-motion:no-preference){
+  .wk.play .wk-bar i{width:0;transition:width 1.3s cubic-bezier(.45,.05,.3,1)}
+  .wk.play.run .b1{width:90%}.wk.play.run .b2{width:5%}
+  .wk.play.run.open .b1{width:56%}.wk.play.run.open .b2{width:36%}
+  .wk.play .yes{left:5%;opacity:0;transform:translate(4px,-50%) scale(.8);transition:opacity .5s ease 1.1s,transform .5s cubic-bezier(.3,1.6,.5,1) 1.1s,left 1.3s cubic-bezier(.45,.05,.3,1)}
+  .wk.play.run.open .yes{opacity:1;left:36%;transform:translate(14px,-50%) scale(1)}
+  .wk.play .wk-c{opacity:0;transition:opacity .8s ease 1.6s}
+  .wk.play.run.open .wk-c{opacity:1}
+}
+
+/* 2 · The mirror: six cards to tap; the line under them reads the count. */
+.taps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
+.tap{width:100%;height:100%;min-height:96px;display:flex;gap:14px;align-items:flex-start;text-align:left;padding:20px;background:var(--card);color:var(--ink);border:1.5px solid var(--line);cursor:pointer;font:500 18.5px/1.35 Newsreader,Georgia,serif;transition:background .2s,border-color .2s}
+.tap:hover{border-color:#B4975F}
+.tap i{flex:none;width:24px;height:24px;margin-top:1px;border-radius:50%;border:1.5px solid #B4975F;display:flex;align-items:center;justify-content:center}
+.tap i svg{width:14px;height:14px;opacity:0}
+.tap[aria-pressed="true"]{background:var(--sel);color:var(--selink);border-color:var(--sel)}
+.tap[aria-pressed="true"] i{background:#B4975F;border-color:#B4975F}
+.tap[aria-pressed="true"] i svg{opacity:1}
+.read{margin:0;min-height:2.9em;padding-top:20px;border-top:3px solid #B4975F;max-width:40ch;font:500 clamp(21px,2.4vw,27px)/1.4 Newsreader,Georgia,serif}
+
+/* The questions: tap one answer, get an answer back, go on. */
+.opts{display:flex;flex-direction:column;gap:10px;max-width:560px}
+.opts .q2{margin:10px 0 0;font:500 clamp(22px,2.6vw,28px)/1.25 Newsreader,Georgia,serif}
+.opt{display:flex;align-items:center;gap:14px;min-height:56px;padding:12px 18px;text-align:left;background:var(--card);color:var(--ink);border:1.5px solid var(--line);cursor:pointer;font:500 18px/1.3 Newsreader,Georgia,serif;transition:background .2s,border-color .2s,color .2s}
+.opt:hover{border-color:#B4975F}
+.opt::before{content:"";flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid #B4975F;box-sizing:border-box;transition:box-shadow .2s,background .2s}
+.opt[aria-pressed="true"]{background:var(--sel);color:var(--selink);border-color:var(--sel)}
+.opt[aria-pressed="true"]::before{background:var(--selink);border-color:var(--selink);box-shadow:inset 0 0 0 3px var(--sel)}
+.reply{margin:0;max-width:52ch;padding:4px 0 4px 18px;border-left:3px solid #B4975F;font:500 clamp(19px,2.1vw,23px)/1.45 Newsreader,Georgia,serif;color:var(--ink)}
+.reply[hidden]{display:none}
+.reply.show{animation:rise .6s cubic-bezier(.3,.7,.3,1) both}
+.next{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0;border:0;background:none;color:var(--accent);font:600 15px/1 'Inter',Arial,sans-serif;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.next[hidden]{display:none}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* The drawings: still by default (no script, reduced motion); page.js adds
+   .anim when motion is welcome and .on when the drawing comes into view. */
+.ill .bud,.ill .out,.ill .dot{opacity:0}
+.ill.ans .bud{opacity:1}
+.ill.ans .flag{fill:#D6BF8F}
+.ill.ans .loop{opacity:.28}
+.ill.ans .out{opacity:1}
+.ill .glass{transform-box:fill-box;transform-origin:center;transition:transform 1s cubic-bezier(.45,.05,.3,1)}
+.ill.stop .glass{transform:rotate(90deg)}
+.ill.stop .glass .ln{stroke:#D6BF8F}
+@media (prefers-reduced-motion:no-preference){
+  .ill .bud{transform-box:fill-box;transform-origin:center;transform:scale(.3);transition:opacity .5s,transform .6s cubic-bezier(.3,1.6,.5,1)}
+  .ill.ans .bud{transform:scale(1)}
+  .ill .out{transition:opacity .4s,stroke-dashoffset 1s cubic-bezier(.45,.05,.3,1)}
+  .ill.anim .out{stroke-dashoffset:1}.ill.anim.ans .out{stroke-dashoffset:0}
+  .ill .loop{transition:opacity .6s}
+  .ill.anim .dr{stroke-dashoffset:1;opacity:0}
+  .ill.anim.on .dr{animation:draw .9s cubic-bezier(.45,.05,.3,1) var(--d,0s) both}
+  .ill.anim.on .spin{transform-box:view-box;transform-origin:120px 100px;animation:spin 7s linear infinite}
+  .ill.anim.ans .spin{animation-play-state:paused}
+  .ill.anim.on .dot{opacity:1;offset-path:path('M40 168 H76 V138 H112 V108 H148 V78 H184 V48');offset-rotate:0deg;animation:climb 4.5s ease-in-out 1.2s infinite}
+  .ill.anim.on .sandT{transform-box:fill-box;transform-origin:50% 100%;animation:sandT 6s linear infinite}
+  .ill.anim.on .sandB{transform-box:fill-box;transform-origin:50% 100%;animation:sandB 6s linear infinite}
+  .ill.anim.on .stream{stroke-dasharray:3 5;animation:fall .6s linear infinite}
+  .ill.stop .sandT,.ill.stop .sandB,.ill.stop .stream{animation-play-state:paused}
+  @keyframes draw{0%{stroke-dashoffset:1;opacity:0}6%{opacity:1}100%{stroke-dashoffset:0;opacity:1}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes climb{0%{offset-distance:0%}80%,100%{offset-distance:100%}}
+  @keyframes sandT{from{transform:scaleY(1)}to{transform:scaleY(.08)}}
+  @keyframes sandB{from{transform:scaleY(.08)}to{transform:scaleY(1)}}
+  @keyframes fall{to{stroke-dashoffset:-8}}
+}
+@media (max-width:700px){.qrow>.vz{order:-1}.qrow .ill{max-width:220px}}
+
+/* 3 · The reframe. */
+.three{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
+.three li{padding:24px 22px;border:1px solid var(--line);background:var(--card);display:flex;flex-direction:column;gap:10px}
+.three b{font:500 23px/1.2 Newsreader,Georgia,serif;color:var(--accent)}
+.three span{font-size:16px;line-height:1.5;color:var(--muted)}
+
+/* 7 · The cost: two sliders, the founder's own week. */
+.week{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:18px 40px;padding:26px 24px;background:var(--card);border:1px solid var(--line)}
+.sl{display:flex;flex-direction:column;gap:12px}
+.sl label{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font:600 15px/1.35 'Inter',Arial,sans-serif}
+.sl output{flex:none;font:500 30px/1 Newsreader,Georgia,serif;color:var(--accent)}
+.sl output small{font:600 12px 'Inter',Arial,sans-serif;letter-spacing:.06em;color:var(--muted);margin-left:4px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:44px;margin:0;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:6px;background:linear-gradient(90deg,#B4975F var(--p,0%),rgba(180,151,95,.25) var(--p,0%))}
+input[type=range]::-moz-range-track{height:6px;background:rgba(180,151,95,.25)}
+input[type=range]::-moz-range-progress{height:6px;background:#B4975F}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;margin-top:-11px;border-radius:50%;background:#1C1309;border:3px solid #B4975F}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#1C1309;border:3px solid #B4975F}
+.sl .ends{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-top:-8px}
+.said{display:flex;flex-direction:column;gap:10px;max-width:48ch}
+.said p{margin:0}
+.said .wkl{font:600 16px/1.5 'Inter',Arial,sans-serif;color:var(--muted)}
+.said .hit{font:500 clamp(22px,2.6vw,30px)/1.3 Newsreader,Georgia,serif}
+.said .ask{font:italic 500 clamp(19px,2vw,23px)/1.4 Newsreader,Georgia,serif;color:var(--accent)}
+
+/* 9 · Your answers, gathered. */
+.yours{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:10px}
+.yours div{padding:16px 18px;background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.yours dt{font:700 10.5px/1.4 'Inter',Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.yours dd{margin:0;font:500 19px/1.35 Newsreader,Georgia,serif;color:var(--ink)}
+.yours dd.none{color:var(--muted);font-style:italic}
+.yours dd.got{animation:rise .5s ease both}
+
+/* 10 · The Founder Launchpad, three free weeks. */
+.weeks{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
+.weeks li{display:flex;flex-direction:column;gap:12px;padding:24px 22px;background:var(--card);border:1px solid var(--line)}
+.weeks .n{width:46px;height:46px;border-radius:50%;background:#B4975F;color:#14100B;display:flex;align-items:center;justify-content:center;font:500 21px/1 Newsreader,Georgia,serif}
+.weeks .t{margin:0;font:700 11px/1.4 'Inter',Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+.weeks b{font:500 23px/1.2 Newsreader,Georgia,serif}
+.weeks span{font-size:16px;line-height:1.55;color:var(--muted)}
+.rule{margin:0;padding-top:20px;border-top:3px solid #B4975F;max-width:44ch;font:500 clamp(19px,2.2vw,24px)/1.45 Newsreader,Georgia,serif}
+.toward{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
+.toward li{display:flex;flex-direction:column;gap:12px;padding:20px;border:1px solid var(--line);background:var(--card);font:500 19px/1.35 Newsreader,Georgia,serif}
+.toward svg{width:30px;height:30px;fill:none;stroke:var(--accent);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* 11 · The guide. */
+.guide{display:flex;flex-wrap:wrap;gap:clamp(28px,5vw,56px);align-items:center}
+.guide img{flex:1 1 300px;min-width:0;max-width:460px;width:100%;height:auto;aspect-ratio:5/4;object-fit:cover;filter:saturate(.85) contrast(1.02);border:1px solid var(--line)}
+.guide .tx{flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.guide .story{margin:0;font-size:clamp(17px,1.8vw,19px);line-height:1.65;color:var(--muted);max-width:52ch}
+.guide .end{margin:0;font:italic 500 clamp(24px,3vw,32px)/1.25 Newsreader,Georgia,serif;color:var(--accent)}
+
+/* 12 · Four honest answers. */
+.qa{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px}
+.qa li{display:flex;flex-direction:column;gap:10px;padding:24px 22px;background:var(--card);border:1px solid var(--line)}
+.qa q{font:500 22px/1.25 Newsreader,Georgia,serif;quotes:"“" "”"}
+.qa span{font-size:16px;line-height:1.55;color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Light (public/theme.js): the dark scrolls become a warm second paper, so
+   the page still alternates; gold turns a shade deeper to keep its contrast.
+   The drawings stay gold on navy in both lights. */
+:root[data-theme="light"] body{background:#F6EFE2;color:#1C1309}
+:root[data-theme="light"] a{color:#7A5C16}:root[data-theme="light"] a:hover{color:#1C1309}
+:root[data-theme="light"] .dk{background:#ECE2CC;color:#1C1309;--ink:#1C1309;--muted:#5E5446;--soft:#5E5446;--accent:#7A5C16;--em:#7A5C16;--card:#FFFDF7;--line:#DFD3B8;--sel:#1C1309;--selink:#F3EBDA}
+:root[data-theme="light"] .dk .jm li{color:#7D7262}:root[data-theme="light"] .dk .jm .dn{color:#6B6153}:root[data-theme="light"] .dk .jm .nw{color:#7A5C16}
+:root[data-theme="light"] .hero{background:radial-gradient(90% 90% at 20% 0%,#FFF8EA 0%,#ECE2CC 60%)}
+:root[data-theme="light"] .close{background:radial-gradient(80% 120% at 50% 0%,#FFF8EA 0%,#ECE2CC 65%)}
+:root[data-theme="light"] .foot{background:#E3D8C1;color:#5E5446}
+:root[data-theme="light"] .foot strong{color:#1C1309!important}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="backbar" id="backbar" hidden><a href="/ground-plan/#home">Go to your Base Camp →</a></div>
+<main id="main">
+
+  <!-- 1 · HERO: what this is, in two seconds -->
+  <section class="sc dk hero">
+    <div class="in">
+      <div class="row">
+        <div class="tx">
+          <div class="mark"><svg width="26" height="26" viewBox="0 0 34 34" aria-hidden="true"><rect x="7" y="7" width="20" height="20" transform="rotate(45 17 17)" fill="none" stroke="#B4975F" stroke-width="1.6"></rect><rect x="13" y="13" width="8" height="8" transform="rotate(45 17 17)" fill="#B4975F"></rect></svg><p class="k">The Founder’s Blueprint · <span class="nb">Link to Lead</span></p></div>
+          <h1 class="h1">You keep making it better. <em>You keep putting off the selling.</em></h1>
+          <p class="sub">For founders who build, polish and rebuild. Three free weeks to start asking the right people to buy.</p>
+          <div class="go"><button type="button" class="cta" data-join id="hero-go">Start free tonight</button><span class="note">Free · no card · start tonight</span></div>
+        </div>
+        <div class="vz">
+          <div class="plate wk" id="week-vis" role="img" aria-label="Your week as two bars. Building, polishing and fixing fills almost all of it; asking people to buy is a sliver. Then the bars change: more time asking, and a yes.">
+            <p class="wk-t">YOUR WEEK</p>
+            <div class="wk-row">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="1"/><path d="M2 19h20M9 9l-2 2 2 2M15 9l2 2-2 2"/></svg>
+              <span class="wk-l">Building, polishing, fixing</span>
+              <div class="wk-bar"><i class="b1"></i></div>
+            </div>
+            <div class="wk-row">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v10H10l-5 4v-4H4z"/><path d="M8 10h8"/></svg>
+              <span class="wk-l">Asking people to buy</span>
+              <div class="wk-bar"><i class="b2"></i><span class="yes">Yes.</span></div>
+            </div>
+            <p class="wk-c">The same week, with the asking in it.</p>
+          </div>
+          <!-- Plays when it comes into view (on a phone it sits below the
+               button): the bars fill as the week is now, then, 2.5 s later or
+               as soon as the founder reaches for the button (page.js), they
+               change and a yes arrives. Reduced motion: the last picture. -->
+          <script>(function(){var w=document.getElementById('week-vis');try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;}catch(e){return;}w.classList.add('play','wait');function go(){if(!w.classList.contains('wait'))return;w.classList.remove('wait');requestAnimationFrame(function(){requestAnimationFrame(function(){w.classList.add('run');setTimeout(function(){w.classList.add('open');},2500);});});}if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){if(es[0].isIntersecting){io.disconnect();go();}},{threshold:.35});io.observe(w);}else go();})();</script>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · THE MIRROR -->
+  <section class="sc lt" id="mirror">
+    <div class="in">
+      <ol class="jm" aria-label="Where you are on this page"><li class="nw" data-k="you">You</li><li data-k="believe">Believe</li><li data-k="steps">Steps</li><li data-k="feel">Feeling</li><li data-k="wait">Waiting</li><li data-k="begin">Begin</li></ol>
+      <p class="k">Does this sound like your week?</p>
+      <h2 class="h2">Tap what’s true.<br> <em>Nobody sees it but you.</em></h2>
+      <ul class="taps" aria-label="Six things that may be true for you">
+        <li><button type="button" class="tap" aria-pressed="false"><i><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.5" fill="none" stroke="#14100B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>I have rewritten the same page more times than I have asked someone to buy.</button></li>
+        <li><button type="button" class="tap" aria-pressed="false"><i><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.5" fill="none" stroke="#14100B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>I know my subject better than people who earn more from it.</button></li>
+        <li><button type="button" class="tap" aria-pressed="false"><i><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.5" fill="none" stroke="#14100B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>Every name, decision and detail still waits for me.</button></li>
+        <li><button type="button" class="tap" aria-pressed="false"><i><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.5" fill="none" stroke="#14100B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>My best hours go to the screen, not to the people who would pay.</button></li>
+        <li><button type="button" class="tap" aria-pressed="false"><i><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.5" fill="none" stroke="#14100B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>The thing I sell most still has no price I say out loud.</button></li>
+        <li><button type="button" class="tap" aria-pressed="false"><i><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.5" fill="none" stroke="#14100B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>I work late because the day went to things anyone could do.</button></li>
+      </ul>
+      <p class="read" id="mirror-read" aria-live="polite">You’re closer than you think. Three weeks can get you asking.</p>
+    </div>
+  </section>
+
+  <!-- 3 · THE REFRAME -->
+  <section class="sc dk">
+    <div class="in">
+      <h2 class="h2">Building feels like progress.<br> <em>A yes is progress.</em></h2>
+      <p class="sub" style="max-width: 54ch">You can make the product better forever. It will not be bought until someone is asked. What moves the business now is not more building. It is a number, a sentence and a conversation.</p>
+      <ul class="three">
+        <li><b>Your number</b><span>What one sale leaves you.</span></li>
+        <li><b>Your sentence</b><span>Your offer, in your customer’s words.</span></li>
+        <li><b>Your conversations</b><span>Three asks a week. A yes and a no both count.</span></li>
+      </ul>
+      <button type="button" class="next" data-next="#q-believe">Four honest questions, for you only ↓</button>
+    </div>
+  </section>
+
+  <!-- 4 · QUESTION · WHAT YOU BELIEVE -->
+  <section class="sc lt" id="q-believe">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn" data-k="you">You</li><li class="nw" data-k="believe">Believe</li><li data-k="steps">Steps</li><li data-k="feel">Feeling</li><li data-k="wait">Waiting</li><li data-k="begin">Begin</li></ol>
+      <div class="row qrow">
+        <div class="tx">
+          <p class="k">What you believe</p>
+          <h2 class="h2">What makes you believe <em>it’s going to work?</em></h2>
+          <div class="opts" role="group" aria-label="Your answer" data-q="believe">
+            <button type="button" class="opt" aria-pressed="false" data-say="It may well be. But good work nobody is asked to buy stays unknown. In week 1 you ask three people to buy.">The work is good.</button>
+            <button type="button" class="opt" aria-pressed="false" data-say="Then the proof is already there. What is missing is the ask, with a price you say out loud.">People who tried it liked it.</button>
+            <button type="button" class="opt" aria-pressed="false" data-say="We know that one. That is the cost talking, not belief. Week 1 tests one old rule you have been living by.">I’ve put too much in to stop now.</button>
+            <button type="button" class="opt" aria-pressed="false" data-say="Then stop guessing and ask. A yes and a no both tell you something the screen never will.">Honestly, I’m not sure any more.</button>
+          </div>
+          <p class="reply" data-reply="believe" aria-live="polite" hidden></p>
+          <button type="button" class="next" data-next="#q-steps" hidden>Next question ↓</button>
+        </div>
+        <div class="vz">
+          <div class="plate ill" data-ill="believe">
+            <svg viewBox="0 0 240 200" role="img" aria-label="A seed in the ground sends up a stem and two leaves; when you answer, a bud opens.">
+              <text class="cap" x="16" y="22">TESTED, IT GROWS</text>
+              <path class="ln dr" pathLength="1" style="--d:0s" d="M30 168 H210"/>
+              <path class="ln dr" pathLength="1" style="--d:.2s" d="M112 168 C112 160 128 160 128 168"/>
+              <path class="ln dr" pathLength="1" style="--d:.45s" d="M120 162 C120 140 117 120 120 92"/>
+              <path class="ln dr" pathLength="1" style="--d:.9s" d="M119 128 C100 124 90 110 92 96 C106 98 117 110 119 128"/>
+              <path class="ln dr" pathLength="1" style="--d:1.1s" d="M120 112 C138 104 150 90 148 76 C134 80 122 92 120 112"/>
+              <circle class="fill bud" cx="120" cy="84" r="8"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · QUESTION · THE STEPS -->
+  <section class="sc dk" id="q-steps">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn" data-k="you">You</li><li data-k="believe">Believe</li><li class="nw" data-k="steps">Steps</li><li data-k="feel">Feeling</li><li data-k="wait">Waiting</li><li data-k="begin">Begin</li></ol>
+      <div class="row qrow">
+        <div class="tx">
+          <p class="k">What you know</p>
+          <h2 class="h2">Do you know the exact steps <em>between today and the result you want?</em></h2>
+          <div class="opts" role="group" aria-label="Your answer" data-q="steps">
+            <button type="button" class="opt" aria-pressed="false" data-say="Then the question is which one keeps moving to next week. Usually it is the one where you ask someone to buy.">Yes, every one.</button>
+            <button type="button" class="opt" aria-pressed="false" data-say="The missing ones are usually the uncomfortable ones. In the Launchpad every step names what to open, what to count and what to write.">Some of them.</button>
+            <button type="button" class="opt" aria-pressed="false" data-say="That is honest, and it can be fixed. You do not have to work out the order: each step tells you what to open, what to count and what to write.">Not really.</button>
+          </div>
+          <p class="reply" data-reply="steps" aria-live="polite" hidden></p>
+          <button type="button" class="next" data-next="#q-feel" hidden>Next question ↓</button>
+        </div>
+        <div class="vz">
+          <div class="plate ill" data-ill="steps">
+            <svg viewBox="0 0 240 200" role="img" aria-label="A staircase drawn step by step up to a flag; a point climbs it.">
+              <text class="cap" x="16" y="22">ONE STEP, THEN THE NEXT</text>
+              <path class="ln dr" pathLength="1" style="--d:0s" d="M20 168 H40"/>
+              <path class="ln dr" pathLength="1" style="--d:.15s" d="M40 168 H76 V138"/>
+              <path class="ln dr" pathLength="1" style="--d:.35s" d="M76 138 H112 V108"/>
+              <path class="ln dr" pathLength="1" style="--d:.55s" d="M112 108 H148 V78"/>
+              <path class="ln dr" pathLength="1" style="--d:.75s" d="M148 78 H184 V48"/>
+              <path class="ln dr" pathLength="1" style="--d:.95s" d="M184 48 H220"/>
+              <path class="ln dr" pathLength="1" style="--d:1.1s" d="M204 48 V20"/>
+              <path class="ln hot flag" d="M204 20 L224 27 L204 34 Z"/>
+              <circle class="fill dot" cx="0" cy="0" r="5"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · QUESTION · WHAT YOU FEEL -->
+  <section class="sc lt" id="q-feel">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn" data-k="you">You</li><li data-k="believe">Believe</li><li data-k="steps">Steps</li><li class="nw" data-k="feel">Feeling</li><li data-k="wait">Waiting</li><li data-k="begin">Begin</li></ol>
+      <div class="row qrow">
+        <div class="tx">
+          <p class="k">What you feel</p>
+          <h2 class="h2">Have you had this feeling before? <em>The “this time it will work” feeling.</em></h2>
+          <div class="opts" role="group" aria-label="Your answer" data-q="before">
+            <button type="button" class="opt" aria-pressed="false" data-say="So have we. The feeling is not the problem. What happens the week after is.">Yes, more than once.</button>
+            <button type="button" class="opt" aria-pressed="false" data-say="Then you remember what came next.">Yes, once.</button>
+            <button type="button" class="opt" aria-pressed="false" data-say="Then let’s make it the only time you need it.">No, this is the first time.</button>
+          </div>
+          <p class="reply" data-reply="before" aria-live="polite" hidden></p>
+          <div class="opts" role="group" aria-labelledby="q-now" data-q="now">
+            <p class="q2" id="q-now">What’s different now?</p>
+            <button type="button" class="opt" aria-pressed="false" data-say="Then change one thing, not everything. One step, tonight.">Nothing, if I’m honest.</button>
+            <button type="button" class="opt" aria-pressed="false" data-say="Then the three weeks are built for you. Week 1 ends with three people asked to buy.">I’m ready to ask people to buy.</button>
+            <button type="button" class="opt" aria-pressed="false" data-say="Tired is a good reason to stop guessing. Start with what you can count.">I’m tired of waiting.</button>
+            <button type="button" class="opt" aria-pressed="false" data-say="Good. Put it on paper and test it against your own numbers. That is what the three weeks do.">I have a plan this time.</button>
+          </div>
+          <p class="reply" data-reply="now" aria-live="polite" hidden></p>
+          <button type="button" class="next" data-next="#cost" hidden>Next question ↓</button>
+        </div>
+        <div class="vz">
+          <div class="plate ill" data-ill="feel">
+            <svg viewBox="0 0 240 200" role="img" aria-label="An arrow going round in a circle, the same feeling again; when you say what is different now, a straight arrow leads out of it.">
+              <text class="cap" x="16" y="22">ROUND AGAIN, OR OUT</text>
+              <g class="loop"><g class="spin"><path class="ln dr" pathLength="1" style="--d:0s" d="M120 50 A50 50 0 1 1 72 86"/><path class="ln dr" pathLength="1" style="--d:.8s" d="M64 74 L72 86 L84 78"/></g></g>
+              <path class="ln hot out" pathLength="1" d="M168 100 H226 M214 90 L226 100 L214 110"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · THE COST -->
+  <section class="sc dk" id="cost">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn" data-k="you">You</li><li data-k="believe">Believe</li><li data-k="steps">Steps</li><li data-k="feel">Feeling</li><li class="nw" data-k="wait">Waiting</li><li data-k="begin">Begin</li></ol>
+      <h2 class="h2">Last week, <em>where did your hours go?</em></h2>
+      <div class="week">
+        <div class="sl">
+          <label for="h-build">Hours building, polishing, fixing <output id="o-build" for="h-build">0<small>h</small></output></label>
+          <input type="range" id="h-build" min="0" max="80" step="1" value="0" aria-valuetext="0 hours">
+          <div class="ends" aria-hidden="true"><span>0</span><span>80</span></div>
+        </div>
+        <div class="sl">
+          <label for="h-sell">Hours talking to people who could buy <output id="o-sell" for="h-sell">0<small>h</small></output></label>
+          <input type="range" id="h-sell" min="0" max="20" step="1" value="0" aria-valuetext="0 hours">
+          <div class="ends" aria-hidden="true"><span>0</span><span>20</span></div>
+        </div>
+      </div>
+      <div class="said" id="cost-said" aria-live="polite">
+        <p class="wkl" id="cost-hint">Slide each one to last week’s real hours.</p>
+        <p class="wkl" id="cost-week" hidden></p>
+        <p class="hit" id="cost-hit" hidden></p>
+        <p class="ask" id="cost-ask" hidden>If next month looks the same, what will you have built, and who will have paid for it?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · QUESTION · HOW LONG -->
+  <section class="sc lt" id="q-wait">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn" data-k="you">You</li><li data-k="believe">Believe</li><li data-k="steps">Steps</li><li data-k="feel">Feeling</li><li class="nw" data-k="wait">Waiting</li><li data-k="begin">Begin</li></ol>
+      <div class="row qrow">
+        <div class="tx">
+          <p class="k">How long</p>
+          <h2 class="h2">How long are you <em>still ready to wait?</em></h2>
+          <div class="opts" role="group" aria-label="Your answer" data-q="wait">
+            <button type="button" class="opt" aria-pressed="false" data-say="A month of the same week gives you the same month. The Launchpad is three weeks, and the first step is tonight.">Another month.</button>
+            <button type="button" class="opt" aria-pressed="false" data-say="That is a long time to wait for an answer you could get by asking. Three weeks, starting tonight.">Another three months.</button>
+            <button type="button" class="opt" aria-pressed="false" data-say="A year is a long time to wait for a yes you could ask for this week.">Another year.</button>
+            <button type="button" class="opt" aria-pressed="false" data-say="Then don’t. Start tonight with the first step." data-stop>I’m done waiting.</button>
+          </div>
+          <p class="reply" data-reply="wait" aria-live="polite" hidden></p>
+          <button type="button" class="next" data-next="#yours" hidden>See your answers ↓</button>
+        </div>
+        <div class="vz">
+          <div class="plate ill" data-ill="wait">
+            <svg viewBox="0 0 240 200" role="img" aria-label="An hourglass with the sand running; when you say you are done waiting, it is laid down and the sand stops.">
+              <text class="cap" x="16" y="22">THE SAND KEEPS RUNNING</text>
+              <g class="glass">
+                <path class="ln dr" pathLength="1" style="--d:0s" d="M82 40 H158 M82 172 H158"/>
+                <path class="ln dr" pathLength="1" style="--d:.3s" d="M90 40 C90 84 116 94 116 106 C116 118 90 128 90 172 M150 40 C150 84 124 94 124 106 C124 118 150 128 150 172"/>
+                <path class="fill sandT" d="M97 58 H143 C140 80 124 92 120 100 C116 92 100 80 97 58 Z"/>
+                <path class="fill sandB" d="M98 168 C104 146 116 140 120 138 C124 140 136 146 142 168 Z"/>
+                <path class="ln hot stream" d="M120 104 V160" style="stroke-width:1.6"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · YOUR ANSWERS -->
+  <section class="sc dk" id="yours">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn" data-k="you">You</li><li data-k="believe">Believe</li><li data-k="steps">Steps</li><li data-k="feel">Feeling</li><li data-k="wait">Waiting</li><li class="nw" data-k="begin">Begin</li></ol>
+      <p class="k">Your answers</p>
+      <h2 class="h2">This is where you are. <em>Nobody sees it but you.</em></h2>
+      <dl class="yours">
+        <div><dt>Sounds like your week</dt><dd class="none" data-sum="mirror">Not tapped yet</dd></div>
+        <div><dt>Why you believe it will work</dt><dd class="none" data-sum="believe">Not answered yet</dd></div>
+        <div><dt>The steps to the result</dt><dd class="none" data-sum="steps">Not answered yet</dd></div>
+        <div><dt>This feeling before</dt><dd class="none" data-sum="before">Not answered yet</dd></div>
+        <div><dt>What’s different now</dt><dd class="none" data-sum="now">Not answered yet</dd></div>
+        <div><dt>Your week, last week</dt><dd class="none" data-sum="cost">Not moved yet</dd></div>
+        <div><dt>How long you’ll still wait</dt><dd class="none" data-sum="wait">Not answered yet</dd></div>
+      </dl>
+      <p class="rule">The three free weeks go deeper into the same questions: what you believe, how you read what happens, and what you feel.</p>
+      <div class="go"><button type="button" class="cta" data-join>Start free tonight</button><span class="note">Free · no card · start tonight</span></div>
+    </div>
+  </section>
+
+  <!-- 10 · THE FIRST STEP IS SMALL (levels 1–3 of public/levels-v4.js) -->
+  <section class="sc lt" id="launchpad">
+    <div class="in">
+      <p class="k">The first step is small</p>
+      <h2 class="h2">The Founder Launchpad.<br> <em>Three free weeks.</em></h2>
+      <ol class="weeks">
+        <li><span class="n">1</span><p class="t">Week 1</p><b>What you believe</b><span>One old rule tested, one task handed over, your enough as a number, three people asked to buy.</span></li>
+        <li><span class="n">2</span><p class="t">Week 2</p><b>How you read it</b><span>One event written as facts, one person asked instead of judged, your five numbers read, one customer signal tested.</span></li>
+        <li><span class="n">3</span><p class="t">Week 3</p><b>What you feel</b><span>One feeling named under the stress, one new first reaction, a storm rule written, one client’s fear in their own words.</span></li>
+      </ol>
+      <p class="rule">Every step names what to open, what to count and what to write. You fill in the blanks. The answers are yours.</p>
+      <p class="k" style="margin-top: 8px">What the three weeks work toward</p>
+      <ul class="toward">
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Evenings back, because the day goes to what only you can do.</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12.5V4h8.5L21 13.5 13.5 21z"/><circle cx="7.5" cy="8" r="1.5"/></svg>A price you say out loud without flinching.</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h11v8H9l-4 3v-3H4z"/><path d="M15 9h5v8h-1v3l-4-3h-4v-2"/></svg>Conversations every week with people who need what you built.</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 11h7M9 14.5h7M9 18h4"/></svg>A business that runs on paper, not only in your head.</li>
+      </ul>
+      <div class="go"><button type="button" class="cta" data-join>Start free tonight</button><span class="note">Free · no card · start tonight</span></div>
+    </div>
+  </section>
+
+  <!-- 11 · THE GUIDE -->
+  <section class="sc dk">
+    <div class="in">
+      <div class="guide">
+        <img src="/cabinet/alexandru.jpg" alt="Alexandru Cojocari" width="640" height="512" loading="lazy">
+        <div class="tx">
+          <h2 class="h2" style="font-size: clamp(28px,3.6vw,42px)">Alexandru and the team <em>have walked this road.</em></h2>
+          <p class="story">Alexandru’s first business made kitchens and wardrobes to measure. The work was good. The money side was not, and the business closed. ExploraSelf is built on that lesson: the craft is half of it. The other half is asking people to buy.</p>
+          <p class="end">Ambition is good — let’s give it a road.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 · FOUR HONEST ANSWERS -->
+  <section class="sc lt">
+    <div class="in">
+      <h2 class="h2">Four honest <em>answers.</em></h2>
+      <ul class="qa">
+        <li><q>I have no time.</q><span>Each step names one thing to open, count and write. Start tonight with the first one.</span></li>
+        <li><q>I need clients, not leadership.</q><span>Lead the market is one of the four domains, and in week 1 you ask three people to buy.</span></li>
+        <li><q>I tried coaching. It was talk.</q><span>Your own numbers are the only standard here. No grading.</span></li>
+        <li><q>Is this for someone like me?</q><span>If you tapped two or more cards above, it was written for you.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 13 · FINAL CALL -->
+  <section class="sc dk close">
+    <div class="in" style="align-items: center">
+      <h2 class="h2">Start asking <em>tonight.</em></h2>
+      <p class="sub" style="text-align: center">Start free. When you’re ready, one hour with Alexandru opens the next two weeks.</p>
+      <div class="go" style="justify-content: center"><button type="button" class="cta" data-join>Start free tonight</button><span class="note">Free · no card · start tonight</span></div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot"><strong style="color: #C9BCA4">ExploraSelf</strong> · A Good People Company · Lead yourself. Grow your business.<br>
+<a href="/ground-plan/#signin">Sign in</a></footer>
+
+<!-- The full account form (/account-box.js), loaded the first time a button
+     opens it. -->
+<div id="gate" hidden></div>
+<script type="module" src="/road2/page.js"></script>
+</body>
+</html>
