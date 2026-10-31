@@ -24,7 +24,7 @@ export const INDUSTRIES = ['Coaching & consulting', 'Creative & design', 'E-comm
   'Beauty & personal care', 'Education & training', 'Professional services', 'Trades & construction', 'Technology & software',
   'Real estate', 'Manufacturing', 'Nonprofit & social impact', 'Other'];
 export const SIGNUP_TYPES = ['full', 'simple'];
-export const LANDINGS = ['road1', 'road2', 'road21', 'road3', 'compass', 'summit'];
+export const LANDINGS = ['road1', 'road2', 'road21', 'road3', 'road4', 'compass', 'summit'];
 /** The landing keys before the roads, each to the road its page became. A
  *  page loaded before the rename still sends one; stored ones are moved
  *  over once (functions/_shared.js). */

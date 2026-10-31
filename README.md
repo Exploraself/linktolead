@@ -88,6 +88,7 @@ Three sales pages, the roads, all ending at `/start`:
 | Road 1 | `/road1/` (the long page, with the What-if Lab before the close) | `/`, `/b` | FULL | `road1` |
 | Road 2 | `/road2/` (the North Star sales page) | `/compass/welcome`, `/compass/welcome-a`, `/c` | FULL | `road2` |
 | Road 3 | `/road3/` (the 12 Scrolls page) | `/a` | SIMPLE | `road3` |
+| Road 4 | `/road4/` (the sales page for The Founder's Blueprint: the mirror of eight taps, the two kinds of stuck, week one drawn day by day, the twelve weeks as a climb) | — | FULL | `road4` |
 
 The redirects live in `functions/_landing.js` (the Worker and Pages both use
 it), and every old address is in `run_worker_first` in `wrangler.toml`.
@@ -98,6 +99,10 @@ the SIMPLE form (landing `compass`, no landing tag). SIMPLE: first name, surname
 these founders sign in by email link. FULL: also company (or "No company yet"),
 what they want most, industry and a password (required, at least 10
 characters). Either way the founder is signed in at once and lands on `/start`.
+
+Road 4 asks nothing to be typed: its mirror is eight yes-or-no taps, read on the
+page and never saved or sent. Its motion stops under `prefers-reduced-motion`
+and with the **Pause motion** button in its footer.
 `student_profile` keeps `signup_type`, `landing` and the `utm_*` tags they
 arrived with. Mailchimp gets `Signup - Full` / `Signup - Simple`,
 `salespageincubator1` / `salespageincubator2` / `salespageincubator3`,
