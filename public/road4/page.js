@@ -24,7 +24,7 @@
 // @site data
 import { DOMAINS, STAGES, gateFor } from '/content.js';
 import { LEVELS4 } from '/levels-v4.js';
-import { remember, stickyJoin, countUp, count, trackScroll, matchHeadline, welcomeBack, stories, nowThen } from '/road-kit.js';
+import { remember, stickyJoin, countUp, count, trackScroll, matchHeadline, welcomeBack, stories, nowThen, whenLine } from '/road-kit.js';
 // @end data
 
 const $ = (s) => document.querySelector(s);
@@ -242,6 +242,8 @@ drawType('hoper');
 // ── Week one: the real level one, four parts, four moves each ──────────────
 const week = { dom: 'self' };
 let today = 0, dayTimer = null;
+// The experiment (1 Nov): each card says its move in four or five words.
+const GIST = ['Name the rule you live by.', 'Name what only you hold.', 'Turn “enough” into a number.', 'Ask three people to buy.'];
 const DCOL = { self: 'var(--self)', people: 'var(--people)', work: 'var(--work)', market: 'var(--market)' };
 function drawDays() {
   const L1 = LEVELS4[0];
@@ -250,7 +252,7 @@ function drawDays() {
     return `<li class="day${i === today ? ' on' : ''}" style="--dc:${DCOL[k]}">
     <span class="dk">${esc(DOMAINS[i].n)}</span><span class="res">${esc(RESULTS[i])}</span><span class="lbl">${esc(L1.word)} · ${esc(x.l)} for ${esc(x.name)}</span>
     ${mine ? '<span class="yours">Where your mirror points</span>' : ''}
-    <p class="tq">${plain(x.t.q)}</p><p class="sq">Then slide: ${esc(x.s.q)}</p></li>`; }).join('');
+    <p class="tq">${esc(GIST[i])}</p></li>`; }).join('');
 }
 function dayWalk(on) {
   clearInterval(dayTimer); dayTimer = null;
@@ -326,6 +328,7 @@ matchHeadline($('.hero h1'), 'road4');
 welcomeBack($('#back'), 'road4');
 stories($('#story-list'));
 nowThen($('#nt'), $('#nt-case'), { page: 'road4', onJoin: join });
+whenLine(document.querySelector('[data-when]'), 'i');
 trackScroll('road4');
 document.addEventListener('click', (e) => { if (e.target.closest('[data-join], .rk-bar button')) count('road4', 'cta'); }, true);
 

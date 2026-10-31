@@ -439,3 +439,20 @@ export function fourLines(host) {
     <li><small>Don’t ignore it</small>You named your rule in one sentence. That is the first lever, and you pulled it.</li>
     <li><small>Exactly</small>On Thursday you will take the evening off, phone in a drawer, and write what really happened.</li></ol>`;
 }
+
+// ── 1 Nov: "Start tonight, free. By Saturday, you'll be ahead." ─────────────
+/**
+ * Alexandru's closing line, on the visitor's own clock: "today" before 5 pm,
+ * "tonight" after; the day named is always the day after tomorrow. The page
+ * keeps its written line as the fallback when scripts do not run.
+ */
+export function whenText(d = new Date()) {
+  const start = d.getHours() < 17 ? 'Start today' : 'Start tonight';
+  const day = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 2).toLocaleDateString('en-US', { weekday: 'long' });
+  return { start: `${start}, free.`, by: `By ${day}, you’ll be ahead.` };
+}
+export function whenLine(el, tag = 'em') {
+  if (!el) return;
+  const w = whenText();
+  el.innerHTML = `${w.start} <${tag}>${w.by}</${tag}>`;
+}

@@ -84,6 +84,7 @@ if (typeof document !== 'undefined' && $('#levels')) {
     k.stories($('#story-list'));
     k.nowThen($('#nt'), $('#nt-case'), { page: 'road3', onJoin: join });
     k.fourLines($('#fl'));
+    k.whenLine(document.querySelector('[data-when]'));
     k.trackScroll('road3');
     now.addEventListener('change', () => k.count('road3', 'cost_moved'));
     want.addEventListener('change', () => k.count('road3', 'cost_moved'));
