@@ -225,6 +225,7 @@
     for (const k of ['first', 'last', 'email', 'industry']) if (!S.profile[k] && me[k]) S.profile[k] = String(me[k]).slice(0, 120);
     S.acct = { email: S.profile.email, state: 'yes' };
     save(); await sync(); status(); render();
+    try { window.dispatchEvent(new Event('ftb:signedin')); } catch { /* old browser */ }
     toast('You are signed in. Your North Star is saved to your account.');
   }
   async function pwSignIn(where) {
@@ -277,7 +278,9 @@
     }
     render();
     if (UI.cmp) { const r = document.getElementById('s-reading'); if (r) r.scrollIntoView({ block: 'start' }); }
-    if (signedIn()) import('/profile-menu.js').then((m) => m.mount(document.getElementById('top-tools'))).catch(() => {});
+    // The menu is always there (31 Oct): signed in it shows the initials or
+    // photo; signed out a plain person icon, with "Sign in" first.
+    import('/profile-menu.js').then((m) => m.mount(document.getElementById('top-tools'), { guest: true })).catch(() => {});
     // Came in through the Blueprint and opening the North Star for the first
     // time: confirm name and email once (tag linktolead-crossed-northstar).
     if (signedIn()) A.pull().then((r) => {
@@ -1934,10 +1937,11 @@
   function pGate() {
     if (!UI.gate) return '';
     const P = S.profile, lab = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 520';
-    if (UI.signinFor === 'plans') return `<div style="position: fixed; inset: 0; z-index: 50; background: rgba(16,13,9,.6); display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto">
+    const siTitle = UI.signinFor === 'menu' ? 'Sign in to your account' : 'Sign in to open your plans';
+    if (UI.signinFor === 'plans' || UI.signinFor === 'menu') return `<div style="position: fixed; inset: 0; z-index: 50; background: rgba(16,13,9,.6); display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto">
       <form class="card pop" id="signin-form" role="dialog" aria-modal="true" aria-labelledby="si-h" novalidate style="position: relative; width: 100%; max-width: 440px; padding: 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.35); margin: auto">
         <button type="button" data-act="si-x" data-f="si-x" aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer">×</button>
-        <h2 id="si-h" class="sf" style="font-size: 24px; font-weight: 440; padding-right: 44px">Sign in to open your plans</h2>
+        <h2 id="si-h" class="sf" style="font-size: 24px; font-weight: 440; padding-right: 44px">${siTitle}</h2>
         <span id="si-line" style="font-size: 14px; color: var(--muted)">${SIGNIN_LINE}</span>
         <label style="${lab}">Email<input class="inp" id="g-email" type="email" autocomplete="email" value="${esc(P.email)}"></label>
         ${pSignin('gate')}
@@ -2305,6 +2309,12 @@
       case 'reset-open': { const el = $(v === 'gate' ? '#g-email' : '#ws-signin'); const email = el ? el.value.trim() : S.profile.email; import('/reset-box.js').then((m) => m.openReset({ email })).catch(() => askLink(email, v)); return; }
       case 'signin-ws': { const el = $('#ws-signin'); askLink(el ? el.value.trim() : '', 'ws'); return; }
       case 'signin-open': UI.signinOpen = true; render(); return;
+      // From the menu when signed out (31 Oct): the same sign-in box as the plans.
+      case 'signin-menu':
+        if (signedIn()) return;
+        UI.signinFor = 'menu'; UI.signin = ''; openGate('account'); render();
+        setTimeout(() => { const f = $('#g-email'); if (f && !f.value) f.focus(); else { const p = $('#si-pw-gate'); if (p) p.focus(); } }, 0);
+        return;
       case 'pw-in': pwSignIn(v); return;
       case 'pw-save': savePassword(); return;
       case 'eye': { const el = $('#' + v), show = el && el.type === 'password'; if (el) el.type = show ? 'text' : 'password'; t.setAttribute('aria-pressed', String(!!show)); return; }

@@ -40,6 +40,8 @@ const STYLE = `.pm{position:relative;font-family:'Inter',Arial,sans-serif}
 .pm-b{width:44px;height:44px;border-radius:50%;border:1px solid #B4975F;background:radial-gradient(circle at 35% 30%,#E6D6AE,#A88B55 55%,#6E5A32);color:#1C1309;font:440 15px/1 Newsreader,Georgia,serif;letter-spacing:.04em;cursor:pointer;box-shadow:0 0 0 3px rgba(180,151,95,.22),0 6px 16px -8px rgba(0,0,0,.6)}
 .pm-b:focus-visible{outline:2px solid #B4975F;outline-offset:3px}
 .pm-b.pic{background-size:cover;background-position:center;color:transparent}
+.pm-b.pm-guest{display:inline-flex;align-items:center;justify-content:center}
+.pm-b.pm-guest svg,.pm-av svg{width:20px;height:20px;fill:none;stroke:#1C1309;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .pm-who{display:flex;align-items:center;gap:12px}
 .pm-av{flex:none;width:52px;height:52px;border-radius:50%;border:1px solid #B4975F;background:radial-gradient(circle at 35% 30%,#E6D6AE,#A88B55 55%,#6E5A32);background-size:cover;background-position:center;display:inline-flex;align-items:center;justify-content:center;font:440 17px Newsreader,Georgia,serif;color:#1C1309}
 .pm-who-t{min-width:0}
@@ -55,9 +57,9 @@ const STYLE = `.pm{position:relative;font-family:'Inter',Arial,sans-serif}
 .pm-m a:hover,.pm-m button.pm-i:hover,.pm-m a:focus-visible,.pm-m button.pm-i:focus-visible{background:rgba(180,151,95,.16);outline:none}
 .pm-m svg{width:18px;height:18px;flex:none;stroke:#6E5213;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .pm-sep{height:1px;background:#D6C9AC;margin:6px 4px}
-.pm-m a.pm-compass{min-height:56px;margin:4px 0 8px;padding:8px 12px;border-radius:12px;background:linear-gradient(120deg,#1C1309,#2B1B12);color:#F7F2E7;border:1px solid rgba(180,151,95,.6)}
-.pm-m a.pm-compass:hover,.pm-m a.pm-compass:focus-visible{background:linear-gradient(120deg,#2B1B12,#3A2618)}
-.pm-m a.pm-compass svg{width:24px;height:24px;stroke:#D6BF8F;color:#D6BF8F}
+.pm-m a.pm-compass,.pm-m button.pm-compass{min-height:56px;margin:4px 0 8px;padding:8px 12px;border-radius:12px;background:linear-gradient(120deg,#1C1309,#2B1B12);color:#F7F2E7;border:1px solid rgba(180,151,95,.6)}
+.pm-m a.pm-compass:hover,.pm-m a.pm-compass:focus-visible,.pm-m button.pm-compass:hover,.pm-m button.pm-compass:focus-visible{background:linear-gradient(120deg,#2B1B12,#3A2618)}
+.pm-m a.pm-compass svg,.pm-m button.pm-compass svg{width:24px;height:24px;stroke:#D6BF8F;color:#D6BF8F}
 .pm-compass b{display:block;font:440 15px/1.25 Newsreader,Georgia,serif}.pm-compass small{display:block;font-size:11.5px;color:#D3C4A5}
 .pm-sw{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:520;color:#6E5213}
 .pm-sw i{position:relative;width:34px;height:20px;border-radius:999px;background:#D6C9AC;transition:background .2s}
@@ -160,6 +162,23 @@ async function squarePhoto(file) {
     return c.toDataURL('image/jpeg', 0.85);
   } finally { URL.revokeObjectURL(url); }
 }
+const person = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20.5c1.2-4 4.2-6 7.5-6s6.3 2 7.5 6"/></svg>';
+
+/** Signed out (31 Oct): the same circle and menu, a person icon instead of the
+ *  initials, "Sign in" first. The buttons carry the page's own data-act, so
+ *  the page opens its own sign-in box and account form. */
+function drawGuest(root) {
+  const ws = typeof document !== 'undefined' && document.querySelector('[data-act="ws"]');
+  root.innerHTML = `<button type="button" class="pm-b pm-guest" aria-haspopup="menu" aria-expanded="false" aria-label="Sign in, and your settings">${person}</button>
+    <div class="pm-m" role="menu" aria-label="Sign in and settings">
+      <div class="pm-who"><span class="pm-av">${person}</span><span class="pm-who-t"><b>Not signed in</b><span>Your answers are kept on this browser</span></span></div>
+      <button type="button" role="menuitem" class="pm-i pm-compass" data-act="signin-menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5"/></svg><span><b>Sign in</b><small>Your North Star and your Blueprint, on any device</small></span></button>
+      <button type="button" role="menuitem" class="pm-i" data-act="account"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Create my free account</button>
+      <div class="pm-sep" role="separator"></div>
+      <div class="pm-look" role="group" aria-label="Light and dark"><span>Light</span>${[['device', 'Device'], ['light', 'Light'], ['dark', 'Dark']].map(([k, n]) => `<button type="button" data-theme-set="${k}" aria-pressed="${themePick() === k}">${n}</button>`).join('')}</div>
+      ${ws ? '<button type="button" role="menuitem" class="pm-i" data-pm="ws"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Make it yours</button>' : ''}
+    </div>`;
+}
 const picStyle = (me) => (me && me.avatar && /^data:image\//.test(me.avatar) ? ` style="background-image:url('${me.avatar}')"` : '');
 let picNote = '';
 
@@ -189,13 +208,13 @@ function draw(root, me) {
 
 /** Put the circle in `host` (or fixed top-right when `fixed`). Does nothing
  *  without an account on this device. */
-export async function mount(host, { fixed = false } = {}) {
-  if (!host || !A.joined()) return;
+export async function mount(host, { fixed = false, guest = false } = {}) {
+  if (!host || (!A.joined() && !guest)) return;
   if (!document.getElementById('pm-style')) { const st = document.createElement('style'); st.id = 'pm-style'; st.textContent = STYLE; document.head.appendChild(st); }
   const root = document.createElement('div');
   root.className = 'pm' + (fixed ? ' fixed' : '');
   host.appendChild(root);
-  draw(root, cached());
+  if (A.joined()) draw(root, cached()); else drawGuest(root);
   const set = (open) => {
     root.classList.toggle('open', open); const b = root.querySelector('.pm-b'); if (b) b.setAttribute('aria-expanded', String(open));
     // Always inside the screen (31 Oct): on a phone the menu is a sheet just
@@ -234,10 +253,13 @@ export async function mount(host, { fixed = false } = {}) {
       return;
     }
     if (t.hasAttribute('data-theme-set')) { e.stopPropagation(); if (window.ESTheme) window.ESTheme.set(t.getAttribute('data-theme-set')); return; }
+    // Guest menu: the page's own sign-in box and account form take it from here.
+    if (t.dataset.act) { set(false); return; }
     if (t.dataset.pm === 'ws') { root.classList.remove('open'); const w = document.querySelector('[data-act="ws"]'); if (w) w.click(); return; }
     if (t.dataset.pm === 'delete') { root.classList.remove('open'); deleteDialog(cached()); return; }
     if (t.dataset.pm === 'out') { A.signOut(); try { localStorage.removeItem(ME_KEY); } catch { /* private mode */ } location.href = '/ground-plan/?out=1#signin'; return; }
     // A link to this same page: the page reads its #place on load.
+    if (!t.href) return;
     const u = new URL(t.href, location.href);
     if (u.pathname === location.pathname && u.hash) { e.preventDefault(); location.hash = u.hash; location.reload(); }
   });
@@ -252,11 +274,16 @@ export async function mount(host, { fixed = false } = {}) {
     draw(root, me); set(true);
   });
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { set(false); const b = root.querySelector('.pm-b'); if (b) b.focus(); } });
-  const r = await A.pull();
-  if (r && r.me) {
-    const taken = (r.compass && r.compass.taken) || [], last = taken[taken.length - 1];
-    let at = ''; try { at = last ? new Date(last).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''; } catch { /* old browser */ }
-    const me = { name: r.me.name, tier: r.me.tier, signupType: r.me.signupType, hasPassword: r.me.hasPassword, letters: r.me.letters, avatar: r.me.avatar || '', northstars: taken.length, northstarAt: at };
-    keep(me); draw(root, me);
-  }
+  const refresh = async () => {
+    const r = await A.pull();
+    if (r && r.me) {
+      const taken = (r.compass && r.compass.taken) || [], last = taken[taken.length - 1];
+      let at = ''; try { at = last ? new Date(last).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''; } catch { /* old browser */ }
+      const me = { name: r.me.name, tier: r.me.tier, signupType: r.me.signupType, hasPassword: r.me.hasPassword, letters: r.me.letters, avatar: r.me.avatar || '', northstars: taken.length, northstarAt: at };
+      keep(me); draw(root, me);
+    }
+  };
+  // Signed in on this page without a reload: the guest circle becomes theirs.
+  window.addEventListener('ftb:signedin', () => { if (A.joined()) { draw(root, cached()); refresh(); } });
+  if (A.joined()) await refresh();
 }
