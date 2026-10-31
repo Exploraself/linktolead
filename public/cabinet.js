@@ -40,11 +40,11 @@ export function theme() {
 /** The twelve levels as the band shows them: 'done', 'here', 'open' or
  *  'gate' (behind a step the founder does not hold yet). `doneOf(n)` is the
  *  answers written in level n; `held(n)` whether the founder's step opens it. */
-export function levelDots(here, doneOf, held) {
+export function levelDots(here, doneOf, held, total = 28) {
   return Array.from({ length: 12 }, (_, i) => {
     const n = i + 1;
     if (!held(n)) return 'gate';
-    if (doneOf(n) >= 28) return 'done';
+    if (doneOf(n) >= total) return 'done';
     return n === here ? 'here' : 'open';
   });
 }
@@ -69,7 +69,7 @@ export function bandHTML(b) {
     <div class="incub-copy">
       <p class="incub-eb">The incubator · Link to Lead · your full account</p>
       <h2>The Founder’s Blueprint</h2>
-      <p class="incub-now">Level ${lv} of 12${b.title ? ` · <b>${esc(b.title)}</b>` : ''} · ${b.done || 0} of 28 answers</p>
+      <p class="incub-now">Level ${lv} of 12${b.title ? ` · <b>${esc(b.title)}</b>` : ''} · ${b.done || 0} of ${b.total || 28} done</p>
       <ol class="incub-levels" aria-label="Twelve levels">${b.dots.map((d, i) => `<li class="lv-${d}"><span aria-hidden="true">${String(i + 1).padStart(2, '0')}</span><span class="vh">Level ${String(i + 1).padStart(2, '0')}, ${DOT_NAMES[d]}</span></li>`).join('')}</ol>
       <p class="incub-key"><span><i class="k-free"></i>01–03 free</span><span><i class="k-board"></i>04–05 The Boardroom</span><span><i class="k-lab"></i>06–09 The LAB</span><span><i class="k-hub"></i>10–12 The HUB</span></p>
     </div>
@@ -151,7 +151,7 @@ export function cabinetHTML(c) {
     <div class="cab-deskhead"><h2>On your desk</h2><span>One step per domain each week</span></div>
     <div class="cab-objs">
       <article class="cab-obj"><p class="cab-eb">The programme</p>
-        ${pr ? `<div class="cab-ring"><svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="32" fill="none" stroke="var(--line)" stroke-width="6"/><circle cx="40" cy="40" r="32" fill="none" stroke="var(--gold)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(201.1 * Math.min(1, (pr.done || 0) / 28)).toFixed(1)} 201.1" transform="rotate(-90 40 40)"/></svg><div><b>${pr.done || 0} of 28</b><small>answers in Level ${String(pr.level).padStart(2, '0')}</small></div></div>
+        ${pr ? `<div class="cab-ring"><svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="32" fill="none" stroke="var(--line)" stroke-width="6"/><circle cx="40" cy="40" r="32" fill="none" stroke="var(--gold)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(201.1 * Math.min(1, (pr.done || 0) / (pr.total || 28))).toFixed(1)} 201.1" transform="rotate(-90 40 40)"/></svg><div><b>${pr.done || 0} of ${pr.total || 28}</b><small>done in Level ${String(pr.level).padStart(2, '0')}</small></div></div>
         <p>Level ${String(pr.level).padStart(2, '0')}: ${esc(pr.title)}.</p>` : '<p>Your twelve levels start with Level 01.</p>'}
         <button type="button" class="cab-btn solid" data-go="work">Continue →</button></article>
       <article class="cab-obj"><p class="cab-eb">Leader’s North Star</p>

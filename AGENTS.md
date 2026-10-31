@@ -11,12 +11,19 @@ not belong in this repo.
 
 If a founder could answer it by thinking hard, rewrite it.
 
-## 2. The seven points are a fixed spine
+## 2. Four moves per domain are a fixed spine
 
-Name it · Evidence · Gap · Cost · Decision · Move · Review. The same seven at
-every level, in every domain, going a layer deeper each time. It is P.A.C.E.
-opened out. Do not add an eighth, do not reorder them, and do not skip one in
-a domain because it felt awkward to write.
+Since Version 4 (Alexandru, 31 Oct 2026): Tap · Slide · Write once · Four lines.
+Tap the line that sounds like you, slide to the honest number, write one
+sentence with blanks, then read four lines back: where you were (admit it),
+where you struggle (don't fight it), where you shine (don't ignore it), what
+you will do (exactly). The four lines are built only from the founder's own
+answers. Twelve levels, one four-letter word each (one letter per domain), in
+three chapters, with a chapter reading after levels 05, 09 and 12. The
+content lives in public/levels-v4.js. The earlier seven points (Name it ·
+Evidence · Gap · Cost · Decision · Move · Review) shaped this and still sit
+underneath it: the tap names it, the slide is the evidence and the gap, the
+sentence is the decision and the move, the four lines are the review.
 
 ## 3. Every level opens with a promise, stated as things
 

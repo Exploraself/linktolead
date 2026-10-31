@@ -39,7 +39,7 @@ ok(read('public/ground-plan/index.html').includes('/cabinet.css') && read('funct
 const dots = C.levelDots(3, (n) => (n < 3 ? 28 : n === 3 ? 9 : 0), (n) => n <= 5);
 ok(dots.join() === 'done,done,here,open,open,gate,gate,gate,gate,gate,gate,gate', 'the twelve dots: done, here, open, behind a gate');
 const banded = C.cabinetHTML({ tier: 'session', band: { level: 3, title: 'Name the gap', done: 9, dots } });
-ok(banded.includes('class="incub"') && banded.includes('Level 03 of 12 · <b>Name the gap</b> · 9 of 28 answers') && banded.includes('data-level="3"') && banded.includes('Continue Level 03 →'), 'band: the founder’s level, its answers and Continue');
+ok(banded.includes('class="incub"') && banded.includes('Level 03 of 12 · <b>Name the gap</b> · 9 of 28 done') && banded.includes('data-level="3"') && banded.includes('Continue Level 03 →'), 'band: the founder’s level, its answers and Continue');
 ok(!full.includes('class="incub"') && !C.cabinetHTML({ tier: 'free', band: null }).includes('class="incub"'), 'no band without a FULL account');
 ok(!/animation/.test(read('public/cabinet.css').split('.incub{')[1].split('/* The Leader’s North Star')[0]), 'the band is static');
 ok(/full = pulled && signupType !== 'simple'/.test(app), 'band only once the account is read, and never for simple accounts');
