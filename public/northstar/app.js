@@ -1534,14 +1534,14 @@
     const head = $('#lab-head');
     if (L.locked) {
       for (const x of PAIRS) {
-        set('lv-val-' + x.k, '—'); set('lv-note-' + x.k, 'Opens when Part 3 is filled.');
+        set('lv-val-' + x.k, '—'); set('lv-note-' + x.k, 'Try it. It answers once your numbers are in Part 3.');
         tween(x.out.k, null); set('out-note-' + x.out.k, 'Waiting for your numbers.');
         const f = document.getElementById('fill-' + x.out.k), th = document.getElementById('thumb-' + x.out.k), td = document.getElementById('today-' + x.out.k);
         if (f) { f.style.width = '0%'; f.style.background = '#8A7A5E'; }
         if (th) { th.style.left = '50%'; th.style.color = '#8A7A5E'; }
         if (td) td.style.left = '50%';
       }
-      if (head) head.textContent = 'Fill the boxes above and this lab runs on your own month.';
+      if (head) head.textContent = 'Put your numbers in Part 3 and this lab runs on your own month.';
       return;
     }
     const { b, s, t, scale, vals, mode } = L, plan = S.mode !== 'yes', { p = 0, m = 0, f = 0, d = 0 } = S.lab;
