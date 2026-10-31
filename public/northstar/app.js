@@ -254,11 +254,12 @@
     status();
     if (signedIn()) {
       // Signed up on any of our pages: the North Star knows who this is.
-      if (!S.profile.email) {
+      if (!S.profile.email || !S.profile.industry) {
         const r = await A.pull();
         if (r && r.me) {
           const [first, ...rest] = String(r.me.name || '').split(' ');
-          Object.assign(S.profile, { first: S.profile.first || first || '', last: S.profile.last || rest.join(' '), email: r.me.email || '' });
+          // The industry given at sign-up comes too (31 Oct), so the workspace never asks again.
+          Object.assign(S.profile, { first: S.profile.first || first || '', last: S.profile.last || rest.join(' '), email: S.profile.email || r.me.email || '', industry: S.profile.industry || r.me.industry || '' });
           S.acct = { email: S.profile.email, state: 'yes' }; save();
         }
       }
@@ -1928,7 +1929,8 @@
     <button type="button" data-act="email" data-f="m-email" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; cursor: pointer">Email me</button>`;
 
   const INDUSTRIES = ['Coaching & consulting', 'Creative & design', 'E-commerce & retail', 'Food & hospitality', 'Health & wellness', 'Beauty & personal care', 'Education & training', 'Professional services', 'Trades & construction', 'Technology & software', 'Real estate', 'Manufacturing', 'Nonprofit & social impact', 'Other'];
-  const industrySelect = (id, extra = '') => `<select class="inp" id="${id}" ${extra}><option value="">Choose your industry…</option>${INDUSTRIES.map((x) => `<option${S.profile.industry === x ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select>`;
+  // A value from the account that is not in this list still shows as chosen (31 Oct).
+  const industrySelect = (id, extra = '') => { const cur = S.profile.industry || '', list = cur && !INDUSTRIES.includes(cur) ? [cur, ...INDUSTRIES] : INDUSTRIES; return `<select class="inp" id="${id}" ${extra}><option value="">Choose your industry…</option>${list.map((x) => `<option${cur === x ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select>`; };
   function pGate() {
     if (!UI.gate) return '';
     const P = S.profile, lab = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 520';
@@ -1982,13 +1984,14 @@
     const TYPES = ['Solopreneur (just me)', 'Small business with a team', 'Growing company with managers', 'Not started yet (an idea)'];
     const CUR = [['USD', 'USD $'], ['EUR', 'EUR €'], ['GBP', 'GBP £'], ['CAD', 'CAD $'], ['AUD', 'AUD $']];
     return `<div class="card pop" style="padding: 22px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 24px 50px rgba(28,19,9,.14)">
-      <div style="display: flex; flex-direction: column; gap: 4px"><span class="eb">Your workspace</span><span class="sf" style="font-size: 24px">Make this yours.</span><span style="font-size: 13px; color: var(--muted)">${signedIn() ? 'Your answers and numbers are kept with your account.' : 'Your answers and numbers are kept on this browser. With a free account they follow you to any device.'}</span></div>
+      <div style="position: relative; display: flex; flex-direction: column; gap: 4px; padding-right: 52px"><span class="eb">Your workspace</span><span class="sf" style="font-size: 24px">Make this yours.</span>
+        <button type="button" data-act="ws" data-f="ws-close" aria-label="Close your workspace" title="Close" style="position: absolute; top: -6px; right: -6px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span style="font-size: 13px; color: var(--muted)">${signedIn() ? 'Your answers and numbers are kept with your account.' : 'Your answers and numbers are kept on this browser. With a free account they follow you to any device.'}</span></div>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
         <label style="${lab}">First name<input class="inp" id="ws-first" type="text" autocomplete="given-name" value="${esc(P.first)}" data-f="ws-first"></label>
         <label style="${lab}">Surname<input class="inp" id="ws-last" type="text" autocomplete="family-name" value="${esc(P.last)}"></label>
         <label style="${lab}">Business name<input class="inp" id="ws-business" type="text" value="${esc(P.business)}" placeholder="Your business"></label>
         <label style="${lab}">Business type<select class="inp" id="ws-type"><option value="">Choose…</option>${TYPES.map((t) => `<option${P.type === t ? ' selected' : ''}>${t}</option>`).join('')}</select></label>
-        <label style="${lab}">Industry <span style="color: var(--self); font-weight: 400">required</span>${industrySelect('ws-industry', 'required')}</label>
+        <label style="${lab}">Industry <span id="ws-ind-req" style="color: var(--self); font-weight: 400"${P.industry ? ' hidden' : ''}>required</span>${industrySelect('ws-industry', 'required')}</label>
         <label style="${lab}">Currency<select class="inp" id="ws-currency">${CUR.map(([v, t]) => `<option value="${v}"${P.currency === v ? ' selected' : ''}>${t}</option>`).join('')}</select></label>
       </div>
       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
@@ -2312,7 +2315,7 @@
         const ind = val('ws-industry');
         if (!ind) { UI.saved = 'Choose your industry, so the feedback can speak to your business.'; render(); return; }
         Object.assign(S.profile, { first: val('ws-first').slice(0, 60), last: val('ws-last').slice(0, 60), business: val('ws-business').slice(0, 80), type: val('ws-type'), industry: ind, currency: val('ws-currency') || 'USD' });
-        UI.saved = true; save(); render(); return;
+        UI.saved = false; UI.ws = false; save(); render(); toast(signedIn() ? 'Saved to your account. Your workspace is locked.' : 'Saved on this browser. Your workspace is locked.'); return;
       }
       default:
     }
@@ -2372,6 +2375,10 @@
     createAccount('compass', after === 'email').then(() => { if (after === 'email') sendEmail(); });
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.gate) { S.skipped = true; save(); closeGate(); } });
+  // The workspace closes with Escape too (31 Oct: with the profile circle on, its round button is hidden).
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.ws && !UI.gate) { UI.ws = false; render(); const b = document.querySelector('.pm-b') || $('#ws-btn'); if (b) b.focus(); } });
+  // Choosing an industry hides "required" at once, before Save.
+  document.addEventListener('change', (e) => { if (e.target && e.target.id === 'ws-industry') { const r = $('#ws-ind-req'); if (r) r.hidden = !!e.target.value; } });
   /* The notebook's keys, inside the questions only: 1–4 choose, Enter moves
    * on, Escape closes the Crown or the list of questions. */
   document.addEventListener('keydown', (e) => {
