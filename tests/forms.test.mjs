@@ -220,13 +220,13 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
   ok(tagsFor({ landing: 'scan', signupType: 'full' }).some((x) => x.name === 'linktolead-scan' && x.status === 'active'), 'road2: tagged linktolead-scan');
   ok(J2.includes("variant: 'full', landing: 'scan'") && R2.includes('<script type="module" src="/road2/page.js"></script>') && (R2.match(/<a [^>]*class="(btn|go)[^"]*"[^>]*>/g) || []).every((x) => x.includes('data-join') || x.includes('href="#scan"')), 'road2: every call to action opens the FULL form (or the scan), landing scan');
   for (const [n, p] of [['The Founder Launchpad', 'Free'], ['The Boardroom', 'No cost'], ['Personal Leadership LAB', '$97'], ['Business Growth HUB', '$397'], ['The Summit', '$1,989']]) ok(R2.includes(`<h3>${n}</h3><p class="price">${p}</p>`), `road2: ${n} · ${p}`);
-  ok(C2.includes('prefers-reduced-motion') && C2.includes('html.still') && R2.includes('id="still"') && T2.includes('settle('), 'road2: motion stops for reduced motion and the MOTION switch; the heat fields settle to a still frame');
+  ok(C2.includes('prefers-reduced-motion') && C2.includes('html.still') && R2.includes('id="still"') && T2.includes('settle('), 'road2: motion stops for reduced motion and Pause motion; the heat maps settle to a still frame');
   ok(!/\b(99|32) (tools|frameworks)\b|P\.A\.C\.E|most founders|incubator|googleapis/i.test(R2T + J2 + C2), 'road2: no tool or framework names, no banned words, no third-party fonts');
   ok(!/<textarea|<input type="text"|localStorage\.setItem\((?!'ftb-still')/.test(R2 + J2), 'road2: nothing to type, and nothing kept but the motion choice');
   ok(J2.includes("'/levels-build.js'") && J2.includes('L[wk].promise') && J2.includes('LEVEL_NAMES[stage]') && J2.includes('one.steps.slice(0, 2)'), 'road2: the protocol and the reading come from the level files');
   const SN = J2.match(/\{ k: '(self|people|work|market)', q: /g) || [];
   ok(SN.length === 8 && ['self', 'people', 'work', 'market'].every((k) => SN.filter((x) => x.includes(`'${k}'`)).length === 2), 'road2: eight sensors, two in each domain');
-  ok(R2.includes('/cabinet/alexandru.jpg') && R2.includes('href="/assets/fonts/unbounded.woff2"') && C2.includes("url(/assets/fonts/jetbrains-mono.woff2)"), 'road2: Alexandru’s photo; its two fonts served from this site');
+  ok(R2.includes('/cabinet/alexandru.jpg') && R2.includes('href="/assets/fonts/unbounded.woff2"') && C2.includes("url(/assets/fonts/unbounded.woff2)"), 'road2: Alexandru’s photo; its heading font served from this site');
 }
 // The tag system (30 Oct): every tag is "linktolead" or "linktolead-<group>-<value>", lowercase, no spaces.
 {

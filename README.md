@@ -89,7 +89,7 @@ Three sales pages, the roads, all ending at `/start`:
 | Road 2 | `/road2/` (the North Star sales page) | `/compass/welcome`, `/compass/welcome-a`, `/c` | FULL | `road2` |
 | Road 3 | `/road3/` (the 12 Scrolls page) | `/a` | SIMPLE | `road3` |
 | Road 4 | `/road4/` (the sales page for The Founder's Blueprint: the mirror of eight taps, the two kinds of stuck, week one drawn day by day, the twelve weeks as a climb) | — | FULL | `road4` |
-| Road 2 · the scan | `/road2/` (31 Oct: The Founder's Blueprint as a thermal scan. Eight taps heat a live map of the business; the reading names the hottest zone and week one; then the flow, the twelve weeks from hot to cool, the ladder. Its own look: the inferno scale, Unbounded and JetBrains Mono, served from `/assets/fonts/`. Until 31 Oct `/road2` redirected to `/north3/`, which keeps landing `road2`) | — | FULL | `scan` |
+| Road 2 · the scan | `/road2/` (31 Oct: The Founder's Blueprint as a thermal scan. Eight taps heat a live map of the business; the reading names the hottest zone and week one; then the flow, the twelve weeks from hot to cool, the ladder. Its own look: a plum dark, the thermal camera's colours where heat is meant, Unbounded for headings (served from `/assets/fonts/`). Until 31 Oct `/road2` redirected to `/north3/`, which keeps landing `road2`) | — | FULL | `scan` |
 
 The redirects live in `functions/_landing.js` (the Worker and Pages both use
 it), and every old address is in `run_worker_first` in `wrangler.toml`.

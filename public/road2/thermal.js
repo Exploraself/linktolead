@@ -114,11 +114,13 @@ export class Field {
 /** Runs every field that is on screen, one frame each, unless `still()`. */
 export function runner(still) {
   const live = new Set();
-  let raf = 0;
+  let raf = 0, odd = false;
   const frame = () => {
     raf = 0;
     if (still()) { live.forEach((f) => f.settle(40)); return; }
-    live.forEach((f) => { f.step(true); f.draw(); if (f.onFrame) f.onFrame(); });
+    // about thirty frames a second: heat moves slowly, and phones stay cool
+    odd = !odd;
+    if (odd) live.forEach((f) => { f.step(true); f.draw(); if (f.onFrame) f.onFrame(); });
     if (live.size) raf = requestAnimationFrame(frame);
   };
   const go = () => { if (!raf && live.size) raf = requestAnimationFrame(frame); };
