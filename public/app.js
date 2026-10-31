@@ -1208,6 +1208,13 @@ async function comeHome() {
   }
   render();
   if (view === 'ask') openAsk();
+  // Came in through the North Star and opening the Blueprint for the first
+  // time: confirm name and email once (tag linktolead-crossed-blueprint).
+  if (!resetAsk && r && r.me && r.me.origin === 'northstar' && !(r.me.crossed || []).includes('blueprint')) {
+    const [first, ...rest] = String(r.me.name || '').split(' ');
+    import('/reset-box.js').then((m) => m.openConfirm({ to: 'blueprint', first, last: rest.join(' '), email: r.me.email,
+      done: ({ first: f, last: l }) => { state.me = { ...(state.me || {}), name: [f, l].filter(Boolean).join(' ') }; save(); render(); } })).catch(() => {});
+  }
   if (resetAsk) newPassword();
   else if (hashNow === '#account') openReset('');
   loadPlans();

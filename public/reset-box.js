@@ -195,3 +195,30 @@ export function openNewPassword({ save, done = null, email = '' } = {}) {
     } catch (ex) { say(inner, plain(ex, 'It did not save. Try again in a minute.')); go.disabled = false; go.textContent = 'Save my new password'; }
   });
 }
+
+/** The first time a founder opens the other door (31 Oct): "Is this you?",
+ *  name and email to confirm, then everything is ready. to = 'blueprint' or
+ *  'northstar'. Saving goes through /api/cross (an event and a Mailchimp tag);
+ *  if it fails, the founder still goes on. */
+export function openConfirm({ to = 'blueprint', first = '', last = '', email = '', done = null } = {}) {
+  const bp = to === 'blueprint';
+  const inner = shell('');
+  put(inner, `<span class="rbx-k">${bp ? 'Welcome to Your Base Camp' : 'Welcome to The Leader’s North Star'}</span>
+    <h2 id="rbx-h">Is this you?</h2>
+    <p>One account opens both ${bp ? 'your North Star and The Founder’s Blueprint' : 'The Founder’s Blueprint and your North Star'}. Check your name and email, and everything is ready.</p>
+    <form class="rbx-form" novalidate style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label>First name<input class="inp" id="rbx-first" autocomplete="given-name" maxlength="60" value="${esc(first)}"></label><label>Surname<input class="inp" id="rbx-last" autocomplete="family-name" maxlength="60" value="${esc(last)}"></label></div>
+      <label>Email<input class="inp" id="rbx-mail" type="email" value="${esc(email)}" readonly aria-readonly="true" style="background:transparent"></label>
+      <div class="rbx-err" role="alert"></div>
+      <button type="submit" class="rbx-go">Yes, that’s me · ${bp ? 'open my Blueprint' : 'open my North Star'}</button>
+    </form>
+    <p class="rbx-tip" style="text-align:center">Not your email? Sign out from the menu at the top and sign in with yours.</p>`);
+  inner.querySelector('.rbx-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = inner.querySelector('#rbx-first').value.trim(), l = inner.querySelector('#rbx-last').value.trim();
+    if (!f) return say(inner, 'Your first name, please.');
+    const go = inner.querySelector('.rbx-go'); go.disabled = true; go.textContent = 'One moment…';
+    try { const A = await import('/account.js'); await A.cross(to, f, l); } catch { /* the founder still goes on */ }
+    close(); if (done) done({ first: f, last: l });
+  });
+}

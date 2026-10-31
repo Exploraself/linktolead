@@ -102,6 +102,11 @@ export function mailchimpState(env = {}) {
 /** Which sales page a founder signed up on (Alexandru, 30 Oct 2026). The old
  *  names ('Landing - Road 1' …) are sent as inactive, so a founder whose tags
  *  are sent again loses the old one (API mode). */
+/** Founders who cross from one door to the other (Alexandru, 31 Oct 2026). */
+export const CROSS_TAGS = { blueprint: 'linktolead-crossed-blueprint', northstar: 'linktolead-crossed-northstar' };
+/** Which door a founder came in through: the North Star (its box or its sales
+ *  pages) or the Blueprint (the road pages, The Summit). */
+export const originOf = ({ landing, source } = {}) => (['compass', 'road2', 'road21'].includes(landing) || (!landing && source === 'compass') ? 'northstar' : 'blueprint');
 export const LANDING_TAGS = { road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', road4: 'linktolead-road4', compass: 'linktolead-northstar', summit: 'linktolead-summit' };
 
 /** The tags for one founder. In API mode each stage and domain tag is sent as
