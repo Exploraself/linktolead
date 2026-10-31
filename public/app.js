@@ -787,6 +787,7 @@ function libraryView() {
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small>
         <span class="lib-acts"><a href="${esc(b.preview)}" target="_blank" rel="noopener">Preview the first pages →</a>
         ${joined ? `<a href="${esc(account.libraryHref(b.k))}" download>${dl}Free digital copy</a>` : `<a class="lib-link" href="/north3/#join">Create a free account for the free digital copy</a>`}
+        ${b.online ? `<a class="lib-online" href="${esc(b.online)}">Fill it in online →</a>` : ''}
         ${b.print === false ? '' : `<span class="lib-print">${b.print ? `<a href="${esc(b.print)}" target="_blank" rel="noopener">Print edition ↗</a>` : 'Print edition coming'}</span>`}</span></span></li>`);
   const books = LIBRARY.books.map(card).join('');
   const growth = (LIBRARY.growth || []).map(card).join('');

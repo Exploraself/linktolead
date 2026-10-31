@@ -207,7 +207,11 @@ export const LIBRARY = {
   // free account opens them like everything else here. Portrait covers (tall).
   growth: [
     { k: 'mgp', kicker: '20 + 1 steps', n: 'The Leader’s North Star · Massive Growth Plan', sub: 'The action plan at the end of your North Star. Twenty steps inside you and one weekly habit, written by hand.',
-      cover: '/library/cover-massive-growth-plan.jpg', preview: '/library/massive-growth-plan-preview.pdf', file: '/library/massive-growth-plan.pdf', print: false, tall: true },
+      cover: '/library/cover-massive-growth-plan.jpg',
+      // Written in online, in the plan at the end of the North Star. Founders from
+      // the Blueprint cross with the North Star's one question ("Is this you?"),
+      // then land on the plan, not the top (#growth-plan).
+      online: '/northstar/#growth-plan', preview: '/library/massive-growth-plan-preview.pdf', file: '/library/massive-growth-plan.pdf', print: false, tall: true },
     { k: 'lgp', kicker: '2027 · 52 weeks', n: 'The Leader’s Growth Planner 2027', sub: 'Plan the week on the left. Face it on the right, in your Sunday boardroom. Digital first, ready to print.',
       cover: '/library/cover-leaders-growth-planner-2027.jpg', preview: '/library/leaders-growth-planner-2027-preview.pdf', file: '/library/leaders-growth-planner-2027.pdf', print: null, tall: true },
   ],

@@ -67,6 +67,10 @@ export async function accountTables(D) {
       expires_at INTEGER NOT NULL, used_at INTEGER)`),
     D.prepare(`CREATE TABLE IF NOT EXISTS plan_tick (student_id TEXT NOT NULL, step_id TEXT NOT NULL,
       done_at TEXT NOT NULL, PRIMARY KEY (student_id, step_id))`),
+    // What a founder writes in the Massive Growth Plan, one row per blank
+    // (functions/api/growth-plan.js; blank ids in functions/_growth.js).
+    D.prepare(`CREATE TABLE IF NOT EXISTS growth_word (student_id TEXT NOT NULL, blank_id TEXT NOT NULL,
+      text TEXT NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY (student_id, blank_id))`),
     D.prepare('CREATE TABLE IF NOT EXISTS mail_log (email TEXT, ip TEXT, at INTEGER)'),
     D.prepare(`CREATE TABLE IF NOT EXISTS account_auth (student_id TEXT PRIMARY KEY, pass_hash TEXT, salt TEXT,
       iterations INTEGER, set_at TEXT, paused INTEGER DEFAULT 0)`),
@@ -139,4 +143,4 @@ export async function studentBy(D, token) {
 }
 
 /** Every table that holds a row for a student, for a full delete. */
-export const STUDENT_TABLES = ['answer', 'sheet', 'compass', 'note', 'event', 'student_profile', 'signin_code', 'plan_tick', 'account_auth', 'message', 'mailchimp_log', 'video_comment'];
+export const STUDENT_TABLES = ['answer', 'sheet', 'compass', 'note', 'event', 'student_profile', 'signin_code', 'plan_tick', 'growth_word', 'account_auth', 'message', 'mailchimp_log', 'video_comment'];

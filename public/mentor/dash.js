@@ -293,3 +293,37 @@ export function growthGroups(plan, done) {
   if (plan.plus) out.push({ name: plan.plus.move, col: '', steps: D[plan.plus.id] ? [{ n: n + 1, id: plan.plus.id, title: plan.plus.title, at: D[plan.plus.id] }] : [] });
   return out.filter((g) => g.steps.length);
 }
+/** What a founder wrote in the Massive Growth Plan, step by step, every word
+ *  of the plan from window.GrowthPlan (plan). done: { step id: ticked at };
+ *  words: [{ blank_id, text, updated_at }] (GET /api/mentor?growth=id).
+ *  → [{ name, col, steps: [{ n, id, title, at, changed, lines: [[{ t, w }]] }] }]
+ *  Each line is its parts in order: t is the plan's own text, w (true) what
+ *  the founder wrote in a blank; an empty blank stays a line. Only steps
+ *  with a tick or at least one written blank; changed: the last change. */
+export function growthWritten(plan, done, words) {
+  if (!plan || !Array.isArray(plan.domains)) return [];
+  const D = done || {}, W = {}, at = {};
+  for (const r of words || []) { if (!r || !r.blank_id) continue; W[r.blank_id] = String(r.text || ''); const s = r.blank_id.split('.')[0]; if (String(r.updated_at || '') > (at[s] || '')) at[s] = String(r.updated_at || ''); }
+  let n = 0;
+  const step = (s) => {
+    n += 1;
+    let k = 0, any = false;
+    const lines = (s.lines || []).map((l) => {
+      const parts = [];
+      let last = 0;
+      for (const m of l.matchAll(/_{3,}( \((day|date)\))?/g)) {
+        k += 1;
+        const w = W[`${s.id}.${k}`];
+        if (m.index > last) parts.push({ t: l.slice(last, m.index) });
+        if (w) { parts.push({ t: w, w: true }); any = true; } else parts.push({ t: m[0] });
+        last = m.index + m[0].length;
+      }
+      if (last < l.length) parts.push({ t: l.slice(last) });
+      return parts;
+    });
+    return { n, id: s.id, title: s.title, at: D[s.id] || '', changed: at[s.id] || '', lines, any };
+  };
+  const out = plan.domains.map((d) => ({ name: d.name, col: d.col, steps: d.steps.map(step).filter((x) => x.at || x.any) }));
+  if (plan.plus) { const p = step(plan.plus); if (p.at || p.any) out.push({ name: plan.plus.move, col: '', steps: [p] }); }
+  return out.filter((g) => g.steps.length).map((g) => ({ ...g, steps: g.steps.map(({ any, ...x }) => x) }));
+}

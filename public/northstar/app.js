@@ -151,10 +151,109 @@
   /* The Massive Growth Plan's ticks (31 Oct): { step id: date ticked }, from
    * the account. Signed in only; kept apart from the Account Plans. */
   let GP_DONE = {};
+  /* What they write in it (a full account only: missingOf, the rule from
+   * api/complete.js, as me.missing). Saved to this device first, always
+   * (rule 8), then to the account a moment after they stop typing, and when
+   * a field loses focus. Filling the blanks never ticks a step. */
+  let GP_WORDS = {}, GP_MISSING = null, GP_ME = null;
+  const GP_TIMER = {}, GP_BUSY = {}, GP_AGAIN = {}, GPK = 'ftb-gp-words';
+  const gpWrite = () => signedIn() && Array.isArray(GP_MISSING) && GP_MISSING.length === 0;
+  /** The device copy: what was typed, and which blanks still wait for the account. */
+  function gpLocal() {
+    const owner = String((A && A.token()) || '').slice(-12);
+    try { const j = JSON.parse(localStorage.getItem(GPK) || 'null'); if (j && j.owner === owner && j.words && j.pending) return j; } catch { /* unreadable */ }
+    return { owner, words: {}, pending: {} };
+  }
+  function gpKeep(L) { try { localStorage.setItem(GPK, JSON.stringify(L)); } catch { /* private mode: the account still keeps it */ } }
+  /** A quiet word under the step: "Saved", then nothing. */
+  function gpSay(blank, text) {
+    const el = document.querySelector(`[data-saved="${blank.split('.')[0]}"]`);
+    if (!el) return;
+    el.textContent = text; el.classList.toggle('on', !!text);
+    clearTimeout(el._t); if (text === 'Saved') el._t = setTimeout(() => { el.classList.remove('on'); }, 2400);
+  }
+  /** A field as wide as what is written (never less than its line, never
+   *  more than the line it sits on), then as tall as it needs to wrap. */
+  let gpCanvas = null;
+  function gpSize(el) {
+    const li = el.closest('li'), cs = getComputedStyle(el);
+    if (!li) return;
+    const ctx = (gpCanvas || (gpCanvas = document.createElement('canvas'))).getContext('2d');
+    ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    // Never wider than its own line (margins included), so the page never
+    // grows sideways and nothing above it moves.
+    const max = Math.max(60, li.clientWidth - Math.ceil(parseFloat(cs.fontSize) * 1.4));
+    const min = Math.min(max, parseFloat(cs.getPropertyValue('--w')) * parseFloat(cs.fontSize) || 120);
+    const want = (el.value ? ctx.measureText(el.value).width : 0) + 14;
+    el.style.width = Math.round(Math.min(max, Math.max(min, want))) + 'px';
+    el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px';
+  }
+  function gpType(el) {
+    gpSize(el);
+    const id = el.dataset.blank, v = el.value.slice(0, 500);
+    GP_WORDS[id] = v;
+    const L = gpLocal(); L.words[id] = v; L.pending[id] = 1; gpKeep(L);
+    clearTimeout(GP_TIMER[id]); GP_TIMER[id] = setTimeout(() => gpSave(id), 900);
+  }
+  async function gpSave(id, keepalive = false) {
+    clearTimeout(GP_TIMER[id]);
+    const L = gpLocal();
+    if (!L.pending[id] || !gpWrite()) return;
+    if (GP_BUSY[id]) { GP_AGAIN[id] = true; return; }
+    GP_BUSY[id] = true;
+    const text = L.words[id] || '';
+    try {
+      await A.growthWrite(id, text, keepalive);
+      const L2 = gpLocal(); if ((L2.words[id] || '') === text) { delete L2.pending[id]; gpKeep(L2); }
+      gpSay(id, 'Saved');
+    } catch (e) { gpSay(id, (e && e.message) || 'Not saved yet. It is kept on this device and will try again.'); }
+    GP_BUSY[id] = false;
+    if (GP_AGAIN[id]) { GP_AGAIN[id] = false; gpSave(id); }
+  }
+  const gpFlush = (keepalive = false) => { if (gpWrite()) Object.keys(gpLocal().pending).forEach((id) => gpSave(id, keepalive)); };
+  /** The values go into the fields after each drawing, never into the drawing
+   *  itself, so typing never redraws the section (and the page never jumps). */
+  function gpFill() {
+    if (!gpWrite()) return;
+    document.querySelectorAll('#s-growth .gp-in').forEach((el) => {
+      if (el === document.activeElement) return;
+      const v = GP_WORDS[el.dataset.blank] || '';
+      if (el.value !== v) el.value = v;
+      gpSize(el);
+    });
+  }
+  /** Land on the plan (/northstar/#growth-plan, from the Library). */
+  function toPlan(smooth) {
+    const g = document.getElementById('s-growth'), root = document.documentElement;
+    if (!g) return;
+    if (smooth && !reduced()) { g.scrollIntoView({ block: 'start', behavior: 'smooth' }); return; }
+    // Arriving from the Library: straight there, not a long glide past the
+    // whole North Star (the page scrolls smoothly by default).
+    const was = root.style.scrollBehavior; root.style.scrollBehavior = 'auto';
+    g.scrollIntoView({ block: 'start' }); root.style.scrollBehavior = was;
+  }
   async function loadGrowth() {
     if (!signedIn() || !A.growthPlan) return;
-    const r = await A.growthPlan();
-    if (r && r.done) { GP_DONE = r.done; render(); }
+    const [r, me] = await Promise.all([A.growthPlan(), A.pull().catch(() => null)]);
+    if (me && me.me) { GP_ME = me.me; if (Array.isArray(me.me.missing)) GP_MISSING = me.me.missing; }
+    if (r && r.done) GP_DONE = r.done;
+    if (r && r.words) {
+      // What this device typed and the account has not got yet wins.
+      const L = gpLocal(); GP_WORDS = { ...r.words };
+      for (const id of Object.keys(L.pending)) GP_WORDS[id] = L.words[id] || '';
+    }
+    render();
+    gpFlush();
+    if (UI.toPlan) { UI.toPlan = false; toPlan(); }
+  }
+  /** "Complete your account to write here": the Blueprint's own box when
+   *  signed in; signed out, the North Star sign-in. */
+  async function gpComplete() {
+    if (!signedIn()) { menuSignin(); return; }
+    if (!GP_ME) await loadGrowth();
+    if (gpWrite()) return;
+    import('/reset-box.js').then((m) => m.openComplete({ name: GP_ME && GP_ME.name, email: GP_ME && GP_ME.email, missing: GP_MISSING || [],
+      done: () => loadGrowth().then(() => { const f = document.querySelector('#s-growth .gp-in'); if (f) f.focus({ preventScroll: true }); }) })).catch(() => {});
   }
   /** The North Star's own sign-in box ("Sign in to your account"). */
   function menuSignin() {
@@ -182,7 +281,7 @@
    * download goes through /api/library with the founder's token (the same
    * link as the Library, A.libraryHref), never the PDF itself. */
   const pGrowth = () => (window.GrowthPlan && window.GrowthView
-    ? window.GrowthView.html(window.GrowthPlan, { done: GP_DONE, lib: signedIn() && A.libraryHref ? (k) => A.libraryHref(k) : null }) : '');
+    ? window.GrowthView.html(window.GrowthPlan, { done: GP_DONE, lib: signedIn() && A.libraryHref ? (k) => A.libraryHref(k) : null, write: gpWrite() }) : '');
   /** What the account keeps: this whole state (so another device can carry
    *  on), plus the scores and choices the Account Plans are ordered by. */
   function payload() {
@@ -328,7 +427,7 @@
       if (!r || !r.me || r.me.origin !== 'blueprint' || (r.me.crossed || []).includes('northstar')) return;
       const [first, ...rest] = String(r.me.name || '').split(' ');
       import('/reset-box.js').then((m) => m.openConfirm({ to: 'northstar', first, last: rest.join(' '), email: r.me.email,
-        done: ({ first: f, last: l }) => { S.profile.first = f; S.profile.last = l; save(); render(); } }));
+        done: ({ first: f, last: l }) => { S.profile.first = f; S.profile.last = l; save(); render(); if (UI.toPlan || location.hash === '#growth-plan') toPlan(); } }));
     }).catch(() => {});
     // From outside, with answers already on this browser: the account first.
     if (!signedIn() && !code && hasWork(S)) fullAccount();
@@ -2189,6 +2288,7 @@
     put('s-save', pSave(c));
     put('s-plan', pPlan(c));
     put('s-growth', pGrowth());
+    gpFill();
     put('s-next', pNext(c));
     put('s-weeks', pWeeks(c));
     put('s-climb', pClimb());
@@ -2359,6 +2459,7 @@
       case 'gp-tick': growthTick(v); return;
       // Signed in, the link downloads; signed out, the sign-in opens instead.
       case 'gp-dl': if (!signedIn()) { e.preventDefault(); menuSignin(); } return;
+      case 'gp-complete': gpComplete(); return;
       case 'alloptions': { UI.opts = !UI.opts; const o = document.getElementById('s-options'); if (o) o.hidden = !UI.opts; render(); if (UI.opts && o) o.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); return; }
       case 'regate': fullAccount(); return;
       case 'account': {
@@ -2483,21 +2584,34 @@
     }
   });
 
-  try { if (location.hash === '#again') UI.again = true; if (location.hash === '#compare') UI.cmp = true; } catch { /* no location */ }
+  try { if (location.hash === '#again') UI.again = true; if (location.hash === '#compare') UI.cmp = true; if (location.hash === '#growth-plan') UI.toPlan = true; } catch { /* no location */ }
   render();
   if (UI.again) setTimeout(() => go('clear'), 300);
   if (UI.cmp) setTimeout(() => { const r = document.getElementById('s-reading'); if (r) r.scrollIntoView({ block: 'start' }); }, 300);
+  // From the Library ("Fill it in online →"): land on the plan, not the top.
+  if (UI.toPlan) setTimeout(() => toPlan(), 300);
+  // Once they scroll on their own, the page stops taking them back there.
+  ['wheel', 'touchstart', 'keydown'].forEach((k) => window.addEventListener(k, () => { UI.toPlan = false; }, { once: true, passive: true }));
+  // Writing in the plan: kept as they type, saved when they pause or leave the field.
+  document.addEventListener('input', (e) => { const t = e.target; if (t && t.dataset && t.dataset.blank) gpType(t); });
+  document.addEventListener('focusout', (e) => { const t = e.target; if (t && t.dataset && t.dataset.blank) gpSave(t.dataset.blank); });
+  // Enter finishes the field (one answer, one line of thought), and saves it.
+  document.addEventListener('keydown', (e) => { const t = e.target; if (e.key === 'Enter' && !e.shiftKey && t && t.dataset && t.dataset.blank) { e.preventDefault(); t.blur(); } });
+  // A turned phone or a wider window: the fields fit their lines again.
+  { let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => document.querySelectorAll('#s-growth .gp-in').forEach(gpSize), 200); }); }
+  window.addEventListener('online', () => gpFlush());
   /* From the profile menu while already on this page: only the address changes. */
   window.addEventListener('hashchange', () => {
     if (location.hash === '#again') { UI.again = true; render(); go('clear'); }
     else if (location.hash === '#compare') { UI.cmp = true; render(); const r = document.getElementById('s-reading'); if (r) r.scrollIntoView({ block: 'start', behavior: reduced() ? 'auto' : 'smooth' }); }
+    else if (location.hash === '#growth-plan') toPlan(true);
   });
   setTimeout(() => $('#cf').classList.add('settled'), 1500);
   /* Email works only once the site has its email key and postal address. */
   try { if (location.protocol !== 'file:') fetch('/api/send-plan').then((r) => (r.ok ? r.json() : {})).then((j) => { UI.mailReady = !!j.ready; UI.mailWhy = j.reason || ''; }).catch(() => {}); } catch { /* offline */ }
   /* The last batch goes as the page is hidden or closed. */
-  document.addEventListener('visibilitychange', () => { if (document.hidden) sync(true); });
-  window.addEventListener('pagehide', () => sync(true));
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { sync(true); gpFlush(true); } });
+  window.addEventListener('pagehide', () => { sync(true); gpFlush(true); });
   if (location.protocol !== 'file:') boot();
   /* Animations rest when their section is off screen or the tab is hidden.
    * With reduced motion, SVG animations show their settled frame and stop. */

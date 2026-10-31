@@ -180,6 +180,21 @@ North Star Action Plan (which stays as it is, with its PDF).
 | The server's own list of the 21 ids (a test holds it equal to the file) | `functions/_growth.js` |
 | /mentor: "Growth plan x/21" in Founders, the ticked steps with dates in the drawer, a "Growth plan" CSV column | `functions/api/mentor.js`, `public/mentor/` |
 
+**Writing in it (full accounts).** Every run of `___` is a field in place
+(blank id = step id + "." + its number in the step, counted across its
+lines: `mgp-7.1` … never renumbered; the server's own list is
+`GROWTH_BLANK_IDS` in `functions/_growth.js`, held equal to the file by a
+test). What a founder writes is kept on the device first, then saved to
+`growth_word` a moment after they stop typing and when a field loses focus
+(`POST /api/growth-plan { token, blank, text }`, at most 500 characters; an
+empty text deletes it; refused for an account that is not full,
+`missingOf()`). Not full or signed out: lines, and "Complete your account to
+write here". Filling a step never ticks it. The Library's plan card links to
+`/northstar/#growth-plan` ("Fill it in online →"): Blueprint founders cross
+with the North Star's one question, then land on the plan. /mentor's drawer
+shows what they wrote under each step (`GET /api/mentor?growth=id`).
+Deleting an account deletes `growth_word` too.
+
 Growth Plan ticks share `plan_tick` with the Account Plans but are never
 counted with them: `/api/plans` ("x of 32"), the count `/api/plans/tick`
 returns and /mentor's "Plan steps done" stay the plans' own. No Mailchimp

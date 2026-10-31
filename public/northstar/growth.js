@@ -3,10 +3,14 @@
  * never copied into code. app.js puts it at the end of the North Star results
  * and handles the ticks; the tests run these same functions in Node.
  *
- * GrowthView.html(plan, { done, lib })      → the whole section; lib(key)
+ * GrowthView.html(plan, { done, lib, write }) → the whole section; lib(key)
  *                                             gives a Library download link
  *                                             (/api/library), or is null
- *                                             when signed out
+ *                                             when signed out; write: a full
+ *                                             account, so every blank is a
+ *                                             field to write in
+ * GrowthView.blankIds(plan)                 → every blank id, in order
+ *                                             (mgp-7.1, mgp-7.2, …)
  * GrowthView.line(text)                     → one line: runs of ___ become a
  *                                             line to write on; "(day)" and
  *                                             "(date)" are drawn small
@@ -27,6 +31,31 @@
   }
 
   const ids = (plan) => [...plan.domains.flatMap((d) => d.steps.map((s) => s.id)), plan.plus.id];
+  const BLANK = /(“?)(_{3,})(”?[.,:;]?)( \((day|date)\))?/g;
+  /** A blank's id: its step id, a dot, and its number inside the step,
+   *  counted across the step's lines in order. Never renumber. */
+  const blankIds = (plan) => [...plan.domains.flatMap((d) => d.steps), plan.plus].flatMap((s) => {
+    const n = ((s.lines || []).join('\n').match(/_{3,}/g) || []).length;
+    return Array.from({ length: n }, (_, i) => `${s.id}.${i + 1}`);
+  });
+  /** One line, written in (a full account): each blank is a field in place,
+   *  styled as the line; "(day)" and "(date)" become its placeholder. next()
+   *  gives the blank's number inside the step. Values are not drawn here:
+   *  app.js puts them in, so typing never redraws the page. */
+  function lineIn(text, stepId, next) {
+    const label = text.replace(/ ?\((day|date)\)/g, '').replace(/_{3,}/g, '…');
+    const count = (text.match(/_{3,}/g) || []).length;
+    let i = 0;
+    return esc(text).replace(BLANK, (_, a, m, b, h, hint) => {
+      const k = next(); i += 1;
+      const id = `${stepId}.${k}`;
+      // A one-line text area: it widens with what is written, and wraps onto
+      // more lines at the end of the line (app.js sizes it), so nothing typed
+      // is ever hidden.
+      return `<span class="gp-bw">${a}<textarea class="gp-in" rows="1" data-blank="${esc(id)}" id="gpb-${esc(id.replace('.', '-'))}" maxlength="500" autocomplete="off" autocapitalize="sentences" enterkeyhint="done" spellcheck="true"${hint ? ` placeholder="${hint}"` : ''}
+        aria-label="${esc(label)}${count > 1 ? ` (${i} of ${count})` : ''}" style="--w:${Math.min(14, Math.max(4, Math.round(m.length * 0.45)))}em"></textarea>${b}</span>`;
+    });
+  }
 
   /** A Library download: through /api/library when signed in (lib gives the
    *  link); signed out, a plain link that app.js turns into the sign-in. */
@@ -43,13 +72,15 @@
       <p class="gp-truth"><i>${esc(step.truth)}</i></p>`;
 
   function html(plan, st) {
-    const done = (st && st.done) || {}, lib = (st && st.lib) || null, all = ids(plan), count = all.filter((id) => done[id]).length;
+    const done = (st && st.done) || {}, lib = (st && st.lib) || null, write = !!(st && st.write), all = ids(plan), count = all.filter((id) => done[id]).length;
+    const lines = (s) => { let k = 0; return s.lines.map((l) => `<li>${write ? lineIn(l, s.id, () => ++k) : line(l)}</li>`).join(''); };
     let n = 0;
     const steps = plan.domains.map((d) => `<div class="gp-dom" style="--c:${esc(d.col)}" data-k="${esc(d.k)}">
       <div class="gp-dh"><h3 class="sf">${esc(d.name)}</h3><span class="gp-ds">${esc(d.sub)}</span></div>
       <ol class="gp-steps">${d.steps.map((s) => { n += 1; return `<li class="gp-step${done[s.id] ? ' on' : ''}" id="gp-step-${esc(s.id)}">
         ${top(n, s)}
-        <ul class="gp-lines">${s.lines.map((l) => `<li>${line(l)}</li>`).join('')}</ul>
+        <ul class="gp-lines">${lines(s)}</ul>
+        ${write ? `<p class="gp-saved" data-saved="${esc(s.id)}" aria-live="polite"></p>` : ''}
         ${foot(plan, s, done[s.id])}</li>`; }).join('')}</ol></div>`).join('');
     const P = plan.plus;
     const plus = `<div class="gp-dom gp-plus">
@@ -69,8 +100,12 @@
       <ol class="gp-moves">${plan.moves.map((m) => `<li>${esc(m)}</li>`).join('')}</ol>
       <div class="gp-prog" role="status"><span><b>${count}</b> of ${all.length} done</span><span class="gp-bar" aria-hidden="true"><i style="width:${Math.round((count / all.length) * 100)}%"></i></span></div>
     </div>
+    <div class="gp-own">
+      <p class="gp-priv">Only you, and Alexandru and the team, can read what you write here.</p>
+      ${write ? '' : '<button type="button" class="gp-complete no-print" data-act="gp-complete" data-f="gp-complete">Complete your account to write here</button>'}
+    </div>
     ${steps}${plus}`;
   }
 
-  root.GrowthView = { html, line, ids };
+  root.GrowthView = { html, line, ids, blankIds };
 })(typeof window !== 'undefined' ? window : globalThis);

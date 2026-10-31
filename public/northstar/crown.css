@@ -681,22 +681,23 @@ body:not(.ns-p1done) .mbar{display:none !important}
 .gp-prog b{font-size:20px;font-weight:600;color:#D6BF8F;font-variant-numeric:tabular-nums}
 .gp-bar{display:block;height:6px;border-radius:3px;background:rgba(214,191,143,.18);overflow:hidden}
 .gp-bar i{display:block;height:100%;background:#D6BF8F;border-radius:3px;transition:width .5s ease}
-.gp-dom{--cc:var(--c,var(--goldink));display:flex;flex-direction:column;gap:10px}
+.gp-dom{--cc:var(--c,var(--goldink));display:flex;flex-direction:column;gap:10px;min-width:0}
 .cf[data-theme="dark"] .gp-dom{--cc:color-mix(in srgb,var(--c,#A9C0D9) 55%,#fff)}
 .gp-plus{--c:#8A6A1E}
 .gp-dh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding:0 2px 8px;border-bottom:3px solid var(--cc)}
 .gp-dh h3{margin:0;font-size:clamp(24px,3.2vw,30px);line-height:1.15;color:var(--cc)}
 .gp-ds{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-.gp-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr;gap:10px}
-.gp-step{display:flex;flex-direction:column;gap:10px;padding:18px 16px;background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--cc);border-radius:8px;transition:background .25s ease,border-color .25s ease}
+.gp-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.gp-step{min-width:0;display:flex;flex-direction:column;gap:10px;padding:18px 16px;background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--cc);border-radius:8px;transition:background .25s ease,border-color .25s ease}
 .gp-step.on{background:var(--panel);border-color:var(--cc)}
 .gp-top{display:flex;align-items:center;gap:10px}
 .gp-n{flex:none;width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--cc);color:var(--paper);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
 .gp-move{font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--cc)}
 .gp-t{margin:0;font-size:clamp(20px,2.6vw,24px);line-height:1.2;color:var(--ink)}
 .gp-truth{margin:0;font-family:Newsreader,Georgia,serif;font-size:17px;line-height:1.5;color:var(--muted)}
-.gp-lines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;font-size:15px;line-height:2.1;color:var(--ink)}
+.gp-lines{min-width:0;list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;font-size:15px;line-height:2.1;color:var(--ink)}
 .gp-bw{white-space:nowrap}
+.gp-lines>li{min-width:0}
 .gp-blank{display:inline-block;width:var(--w,8em);max-width:calc(100% - 1.4em);height:1.15em;vertical-align:-.2em;margin:0 .15em;border-bottom:1.5px solid var(--cc)}
 .gp-vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .gp-hint{font-size:.72em;color:var(--muted);margin-left:.1em}
@@ -727,4 +728,15 @@ body:not(.ns-p1done) .mbar{display:none !important}
   .gp-voices{grid-template-columns:repeat(2,minmax(0,1fr))}
   .gp-dls{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
 }
-@media (prefers-reduced-motion:reduce){.gp-step,.gp-tick,.gp-bar i{transition:none}}
+.gp-own{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;padding:0 2px}
+.gp-priv{margin:0;font-size:13.5px;line-height:1.5;color:var(--muted)}
+.gp-complete{min-height:44px;padding:0;border:0;background:none;color:var(--goldink);font:600 14px/1.3 'Inter',Arial,sans-serif;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+/* A blank, written in: the line to write on, as a field. 16px so a phone
+   never zooms in (the page would jump); no box, only the line. */
+.gp-in{display:inline-block;box-sizing:border-box;width:var(--w,8em);max-width:calc(100% - 1.4em);min-height:1.75em;height:1.75em;margin:0 .15em;padding:.1em .2em 0;vertical-align:top;border:0;border-bottom:1.5px solid var(--cc);border-radius:0;background:transparent;color:var(--ink);font:500 16px/1.4 'Inter',Arial,sans-serif;resize:none;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere;-webkit-appearance:none;appearance:none;transition:background .2s ease}
+.gp-in::placeholder{color:var(--muted);opacity:.75;font-size:12px;font-weight:400}
+.gp-in:focus{outline:none;background:var(--cream);border-bottom-width:2px}
+.gp-in:focus-visible{outline:2px solid var(--cc);outline-offset:2px}
+.gp-saved{margin:-4px 0 0;min-height:1.2em;font-size:12px;color:var(--muted);opacity:0;transition:opacity .4s ease}
+.gp-saved.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.gp-step,.gp-tick,.gp-bar i,.gp-in,.gp-saved{transition:none}}
