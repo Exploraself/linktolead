@@ -5,7 +5,9 @@
  *
  * Blanks are runs of underscores (draw them as a line to write on).
  * "(day)" and "(date)" after a blank are hints, drawn small.
- * Step ids mgp-1 to mgp-21 are what a tick saves. Never renumber them. */
+ * Step ids mgp-1 to mgp-21 are what a tick saves. Never renumber them.
+ * plus.downloads: one product, The Leader's Growth Planner 2027. When its
+ * PDF is in the Library, it gets a "file". */
 (function () {
   window.GrowthPlan = {
     "name": "Massive Growth Plan",
@@ -82,7 +84,7 @@
               "For the next 12 weeks I write down what I work on, measure my goals and estimate when each will be achieved.",
               "I start on ______________ (date). My first goal: ______________ · I estimate it done by ______________"
             ],
-            "done": "week 1 is written in your Leader’s Growth Report."
+            "done": "week 1 is written in your Leader’s Growth Planner."
           }
         ]
       },
@@ -278,7 +280,7 @@
               "For 12 weeks, one brave move a week: an ask, a price, a post, a no.",
               "Every week I write: the move ______________ · what I feared ______________ · what happened ______________"
             ],
-            "done": "week 1’s brave move is written in your Leader’s Growth Report."
+            "done": "week 1’s brave move is written in your Leader’s Growth Planner."
           }
         ]
       }
@@ -309,12 +311,8 @@
       "done": "every Sunday for 12 weeks, ten minutes, written down.",
       "downloads": [
         {
-          "title": "The Leader’s Agenda 2027",
-          "text": "Dreamer · Critic · Realist · Leader. Your year, your months and 52 weekly boardrooms, in A5."
-        },
-        {
-          "title": "The Leader’s Growth Report 2027",
-          "text": "Hard to be critical with yourself? 52 weekly reports: what you worked on, your goals measured, your estimate against reality."
+          "title": "The Leader’s Growth Planner 2027",
+          "text": "Your year, your months and 52 weeks. Each week, plan it on the left and hold your Sunday boardroom on the right: what you planned, what really happened, and your one move for the week ahead."
         }
       ],
       "library": "https://linktolead.exploraself.com/ground-plan/#library"
