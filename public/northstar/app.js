@@ -326,22 +326,30 @@
     return { qs, sc, rd, pc, answered, n: E.numbers(S), here: E.STAGES.findIndex((x) => x.id === S.stage), goal: E.STAGES.findIndex((x) => x.id === S.goal) };
   }
 
-  /* ── The launchpad emblem: four quarters, four bands each, filling from the centre ── */
+  /* ── Your constellation (31 Oct, round 4): sixteen stars, four per domain,
+   * each lit by a piece in place, with the North Star in the middle growing as
+   * they light. One picture for the whole North Star: the night sky. ── */
+  const starPath = (x, y, r) => { const q = r * 0.32, f = (v) => v.toFixed(1); return `M${f(x)} ${f(y - r)}L${f(x + q)} ${f(y - q)}L${f(x + r)} ${f(y)}L${f(x + q)} ${f(y + q)}L${f(x)} ${f(y + r)}L${f(x - q)} ${f(y + q)}L${f(x - r)} ${f(y)}L${f(x - q)} ${f(y - q)}Z`; };
   function emblem(per, size, opts = {}) {
-    const pt = (rr, a) => [60 + rr * Math.cos(a * Math.PI / 180), 60 + rr * Math.sin(a * Math.PI / 180)];
-    const bandPath = (ri, ro, a0, a1) => { const [x0, y0] = pt(ro, a0), [x1, y1] = pt(ro, a1), [x2, y2] = pt(ri, a1), [x3, y3] = pt(ri, a0);
-      return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${ro} ${ro} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} L${x2.toFixed(1)} ${y2.toFixed(1)} A${ri} ${ri} 0 0 0 ${x3.toFixed(1)} ${y3.toFixed(1)} Z`; };
-    const total = per.reduce((a, b) => a + b, 0);
-    let segs = '';
-    D.forEach((_, i) => { const a0 = -90 + i * 90 + 3, a1 = a0 + 84; for (let k = 0; k < 4; k++) { const ri = 14 + k * 11, ro = ri + 9, on = k < per[i];
-      segs += `<path class="band" d="${bandPath(ri, ro, a0, a1)}" fill="${on ? LIGHT[i] : 'none'}" stroke="${on ? LIGHT[i] : '#8A7A5E'}" stroke-width="${opts.small ? 2 : 1}" stroke-dasharray="${on ? '0' : '2 3'}" style="opacity: ${on ? 1 : .55}; transition: fill .5s ease, opacity .5s ease"/>`; } });
-    const coreR = (3 + total / 16 * 7).toFixed(1), coreOp = (0.3 + total / 16 * 0.7).toFixed(2);
-    return `<svg class="${opts.cls || ''}" width="${size}" height="${size}" viewBox="0 0 120 120" role="img" aria-label="Your launchpad: ${total} of 16 pieces in place" style="flex: none">
-      ${opts.small ? '' : '<g class="spin"><circle cx="60" cy="60" r="59" fill="none" stroke="#6F93B8" stroke-width=".8" stroke-dasharray="1.5 5" opacity=".7"/></g>'}
-      ${segs}
-      ${opts.small ? '' : '<line x1="60" y1="2" x2="60" y2="118" stroke="#0E1C2B" stroke-width="2"/><line x1="2" y1="60" x2="118" y2="60" stroke="#0E1C2B" stroke-width="2"/>'}
-      <circle cx="60" cy="60" r="${coreR}" fill="#6F93B8" style="opacity: ${coreOp}; transition: r .6s ease, opacity .6s ease"/>
-      ${opts.small ? '' : '<circle cx="60" cy="60" r="11" fill="none" stroke="#EEF2F7" stroke-width=".8" opacity=".5"/><g class="orbit2"><circle cx="60" cy="3" r="2.5" fill="#EEF2F7"/></g>'}
+    const total = per.reduce((a, b) => a + b, 0), TW = [-16, 13, -9, 18], sm = !!opts.small;
+    let lines = '', stars = '';
+    D.forEach((_, i) => {
+      const mid = -45 + i * 90; let prev = [60, 60];
+      for (let k = 0; k < 4; k++) {
+        const a = (mid + TW[k]) * Math.PI / 180, r = 19 + k * 12, x = 60 + r * Math.cos(a), y = 60 + r * Math.sin(a), on = k < per[i];
+        if (on) lines += `<line x1="${prev[0].toFixed(1)}" y1="${prev[1].toFixed(1)}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${LIGHT[i]}" stroke-width="${sm ? 1.4 : 0.9}" opacity=".7"/>`;
+        stars += on ? `${sm ? '' : `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5.5" fill="${LIGHT[i]}" opacity=".22"/>`}<path class="lit" d="${starPath(x, y, sm ? 5 : 3.8)}" fill="${LIGHT[i]}"/>`
+          : `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${sm ? 2 : 1.4}" fill="#8A97A8" opacity=".55"/>`;
+        if (on) prev = [x, y];
+      }
+    });
+    const cr = (sm ? 7 : 5) + total / 16 * 6;
+    return `<svg class="${opts.cls || ''}" width="${size}" height="${size}" viewBox="0 0 120 120" role="img" aria-label="Your constellation: ${total} of 16 stars lit" style="flex: none">
+      ${sm ? '' : '<circle cx="60" cy="60" r="58" fill="#0B1522"/><g class="spin"><circle cx="60" cy="60" r="58" fill="none" stroke="#6F93B8" stroke-width=".7" stroke-dasharray="1.2 5" opacity=".6"/></g>'}
+      ${lines}${stars}
+      <circle cx="60" cy="60" r="${(cr + 4).toFixed(1)}" fill="#A9C0D9" opacity="${(0.08 + total / 16 * 0.22).toFixed(2)}"/>
+      <path d="${starPath(60, 60, cr)}" fill="#EEF2F7"/>
+      <path d="${starPath(60, 60, cr * 0.5)}" fill="#6F93B8" transform="rotate(45 60 60)"/>
     </svg>`;
   }
 
@@ -359,14 +367,14 @@
       <span class="sf" style="font-size: 21px; display: flex; align-items: center; gap: 8px">${t} <span class="sarr" aria-hidden="true">→</span></span>
       <span style="font-size: 13px; color: var(--muted)">${k}</span></button>`).join('');
 
-  const LINES = ['Every answer puts a piece in place. Watch your launchpad build from the centre out.', 'It is taking shape. Keep going: each domain has four pieces.',
-    'More than half built. The weakest corner shows you where to look.', 'Almost complete. Tick “Got it” on your feedback to finish it.', 'Your launchpad is ready. The next step is inside.'];
+  const LINES = ['Every answer lights a star. Watch your constellation appear.', 'It is taking shape. Keep going: each domain has four stars.',
+    'More than half lit. The darkest corner shows you where to look.', 'Almost complete. Tick “Got it” on your feedback to light the last stars.', 'Your constellation is complete. The next step is inside.'];
   function pBanner(c) {
     const t = c.pc.total, ready = t >= 12;
     const line = t === 16 ? LINES[4] : t === 0 ? LINES[0] : t < 8 ? LINES[1] : t < 12 ? LINES[2] : LINES[3];
     return `${emblem(c.pc.per, 124, { cls: 'lp-emb' })}
       <div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 4px; min-width: 0">
-        <span class="eb" style="color: #A9C0D9">Your launchpad · ${t} of 16 pieces in place</span>
+        <span class="eb" style="color: #A9C0D9">Your constellation · ${t} of 16 stars lit</span>
         <span class="sf" style="font-size: 18px; line-height: 1.25">${line}</span>
         <div style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; font-weight: 520">${D.map((d, i) => `<span style="display: inline-flex; align-items: center; gap: 6px; color: ${LIGHT[i]}"><span style="width: 9px; height: 9px; border-radius: 50%; background: ${LIGHT[i]}"></span>${d.name} ${c.pc.per[i]}/4</span>`).join('')}</div>
       </div>
@@ -488,7 +496,7 @@
     { act: 'val', list: M.VALUES.map(([id, t]) => [id, t, -1]), q: 'Last one. What do you care about most?', pick: 'Pick two.', on: (id) => S.values.includes(id), n: S.values.length, note: 'Every step we suggest must protect these.' },
   ][k];
   /* A word between questions (model.js SPARKS), once the page is answered. */
-  const spark = (i) => { const x = M.SPARKS && M.SPARKS[i]; return x ? `<div class="nsspark"><small>${x.by ? 'A word from ' + esc(x.by) : 'A small note'}</small><p class="sf">${esc(x.t)}</p>${x.sub ? `<span>${esc(x.sub)}</span>` : ''}</div>` : ''; };
+  const spark = (i) => { const all = M.SPARKS && M.SPARKS[i], list = all ? [].concat(all) : [], x = list.length ? list[(Math.max(0, E.STAGES.findIndex((st) => st.id === S.stage)) + i) % list.length] : null; return x ? `<div class="nsspark"><small>${x.by ? 'A word from ' + esc(x.by) : 'A small note'}</small><p class="sf">${esc(x.t)}</p>${x.sub ? `<span>${esc(x.sub)}</span>` : ''}</div>` : ''; };
   function tapsPage(k, qn, total) {
     const T = tapOf(k);
     return `<span class="eb nsb-lab">${String(qn).padStart(2, '0')} · ${k === 2 ? 'The last tap' : 'Taps that shape your feedback'}</span>
@@ -526,7 +534,14 @@
     const last = qi === total - 1;
     const seg = qs.map((x, i) => `<i class="${Number.isInteger(S.ans[x.id]) ? 'done' : ''}${i === qi ? ' now' : ''}"></i>`).join('')
       + TAPS.map((_, k) => `<i class="${tapOf(k).n ? 'done' : ''}${qs.length + k === qi ? ' now' : ''}"></i>`).join('');
-    return `<div class="nsb" id="nsb">
+    const k1 = p1Count(c);
+    return `<div class="nsq-start" role="group" aria-label="Part 1, Yourself">
+      <span class="eb">Part 1 · Yourself</span>
+      <b class="sf">${k1.done ? `${k1.done} of ${k1.total} answered.` : `${k1.total} quick questions.`} <span class="sfi">One per screen.</span></b>
+      <span>${k1.done ? 'Pick up where you left off.' : 'Tap an answer, then Next. A few minutes, and your North Star appears.'}</span>
+      <button type="button" class="go" data-act="nsq-full" data-f="nsq-full">${k1.done ? 'Continue' : 'Start'} <span class="arr" aria-hidden="true">→</span></button>
+    </div>
+    <div class="nsb" id="nsb">
       <aside class="nsb-l" aria-label="Part 1, Yourself, and its questions">
         <button type="button" class="nsb-x" data-act="nsb-steps" aria-label="Close the questions">×</button>
         <span class="eb">Your questions · ${esc(stg)}</span>
@@ -534,6 +549,8 @@
         <ol class="nsb-list" style="--fill: ${Math.round(p1Count(c).done / total * 100)}%">${rows}</ol>
       </aside>
       <section class="nsb-r" id="nsb-r" tabindex="-1" aria-label="The question" aria-keyshortcuts="1 2 3 4 Enter">
+        <button type="button" class="nsq-x" data-act="nsq-exit" aria-label="Close the questions">×</button>
+        <div class="nsmini" title="Your shape grows with every answer">${miniShape(c)}<span>Your shape</span></div>
         <button type="button" class="nsb-phone" data-act="nsb-steps" aria-label="Show all the questions"><span><i aria-hidden="true"></i>Part 1 · Question ${qi + 1} of ${total}</span><span aria-hidden="true">Questions ▾</span></button>
         <div class="nsb-seg" aria-hidden="true">${seg}</div>
         ${tap >= 0 ? tapsPage(tap, qi + 1, total) : `<span class="eb nsb-lab">0${qi + 1} · ${esc(D[di].name)}</span>
@@ -556,6 +573,15 @@
       </section>
     </div>`;
   }
+  /* Your shape, growing live while you answer (31 Oct, round 4). */
+  function miniShape(c) {
+    const R = 40, cx = 50, cy = 50, r = c.sc.map((x) => 5 + x.score / 6 * (R - 5));
+    const pts = `${cx},${cy - r[0]} ${cx + r[1]},${cy} ${cx},${cy + r[2]} ${cx - r[3]},${cy}`;
+    return `<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="${R}" fill="none" stroke="currentColor" opacity=".18"/><circle cx="50" cy="50" r="${R / 2}" fill="none" stroke="currentColor" opacity=".12"/>
+      <line x1="50" y1="6" x2="50" y2="94" stroke="currentColor" opacity=".18"/><line x1="6" y1="50" x2="94" y2="50" stroke="currentColor" opacity=".18"/>
+      <polygon class="nsmini-p" points="${pts}" fill="rgba(111,147,184,.35)" stroke="#6F93B8" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="50" cy="${cy - r[0]}" r="3.2" fill="#E0A282"/><circle cx="${cx + r[1]}" cy="50" r="3.2" fill="#9BC0A1"/><circle cx="50" cy="${cy + r[2]}" r="3.2" fill="#91B8D5"/><circle cx="${cx - r[3]}" cy="50" r="3.2" fill="#DDBD69"/></svg>`;
+  }
   /* Turn the page: the next question, or after the eighth, the North Star. */
   function nsMove(d) {
     const qs = context().qs, total = qs.length + TAPS.length;
@@ -563,6 +589,7 @@
     if (d > 0 && qi === total - 1) {
       // The last page: on to the North Star reading, once nothing is open.
       document.body.classList.remove('nsb-open');
+      if (!firstOpenItem(context(), 2)) exitFull();
       if (guide(context(), 2)) return;
       const el = document.getElementById('s-reading');
       if (el) { el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: true }); }
@@ -572,6 +599,44 @@
     if (to === qi) return;
     qi = to; put('questions', pQuestions(context())); placeCrown();
     const r = document.getElementById('nsb-r'); if (r) r.focus({ preventScroll: true });
+    toQuestionTop();
+  }
+  /* The phone (31 Oct, round 4): the questions take the whole screen, one per
+   * screen, like the Blueprint. A start card sits where they are on the page,
+   * so nobody scrolls past them without seeing them. */
+  const isPhone = () => { try { return matchMedia('(max-width: 760px)').matches; } catch { return false; } };
+  let fsByUs = false;
+  function enterFull(user) {
+    if (!isPhone()) { const r = document.getElementById('nsb-r'); if (r) { r.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); r.focus({ preventScroll: true }); } return; }
+    document.body.classList.add('nsq-full', 'ns-qview');
+    if (user && !document.fullscreenElement && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().then(() => { fsByUs = true; }).catch(() => {});
+    const n = document.getElementById('nsb'); if (n) n.scrollTop = 0;
+    placeCrown(); const r = document.getElementById('nsb-r'); if (r) r.focus({ preventScroll: true });
+  }
+  function exitFull() {
+    if (!document.body.classList.contains('nsq-full')) return;
+    document.body.classList.remove('nsq-full', 'nsb-open'); crownOpen(false);
+    if (fsByUs && document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    fsByUs = false;
+    const q = document.getElementById('questions'); if (q) q.scrollIntoView({ block: 'start' });
+  }
+  /* After a page turn the question starts at the top of the screen. */
+  function toQuestionTop() {
+    if (document.body.classList.contains('nsq-full')) { const n = document.getElementById('nsb'); if (n) n.scrollTo({ top: 0, behavior: reduced() ? 'auto' : 'smooth' }); return; }
+    const r = document.getElementById('nsb-r'), top = (($('.topwrap') || {}).offsetHeight || 0) + 8;
+    if (r && r.getBoundingClientRect().top < top) window.scrollTo({ top: r.getBoundingClientRect().top + scrollY - top, behavior: reduced() ? 'auto' : 'smooth' });
+  }
+  /* A few minutes into the questions, the full-screen button flashes once. */
+  let fsTip = null;
+  function fullscreenTip() {
+    if (fsTip) return;
+    fsTip = setTimeout(() => {
+      const b = document.querySelector('[data-fs]');
+      if (!b || b.hidden || !b.offsetParent || document.fullscreenElement || document.body.classList.contains('nsq-full')) return;
+      b.classList.remove('fsflash'); void b.offsetWidth; b.classList.add('fsflash');
+      toast('Tip: full screen makes this calmer. Tap the square at the top.');
+      setTimeout(() => b.classList.remove('fsflash'), 4000);
+    }, 150000);
   }
   const crownMark = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="m12 4 2 8-2 8-2-8z" fill="currentColor" stroke="none"/></svg>';
   const crownClose = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
@@ -663,7 +728,7 @@
     // Shown while the questions are on screen.
     const q = document.getElementById('questions');
     if (q && 'IntersectionObserver' in window) {
-      new IntersectionObserver((es) => es.forEach((x) => { document.body.classList.toggle('ns-qview', x.isIntersecting); if (!x.isIntersecting) crownOpen(false); placeCrown(); }), { rootMargin: '-25% 0px -25% 0px' }).observe(q);
+      new IntersectionObserver((es) => es.forEach((x) => { const on = x.isIntersecting || document.body.classList.contains('nsq-full'); document.body.classList.toggle('ns-qview', on); if (!on) crownOpen(false); placeCrown(); }), { rootMargin: '-25% 0px -25% 0px' }).observe(q);
     } else document.body.classList.add('ns-qview');
     window.addEventListener('resize', placeCrown);
     let rq = 0; window.addEventListener('scroll', () => { if (!rq) rq = requestAnimationFrame(() => { rq = 0; placeCrown(); }); }, { passive: true });
@@ -681,8 +746,16 @@
     return `<svg class="nscompass" viewBox="0 0 560 500" role="img" aria-label="Your North Star. Your answers: Lead yourself ${sc[0]}, Lead your people ${sc[1]}, Lead your business ${sc[2]}, Lead the market ${sc[3]}, each out of 6. Your strengths: ${str.join(', ')}, each out of 5.">
       <circle cx="${cx}" cy="${cy}" r="150" fill="none" stroke="#2A3A50"/><circle cx="${cx}" cy="${cy}" r="100" fill="none" stroke="#2A3A50"/><circle cx="${cx}" cy="${cy}" r="50" fill="none" stroke="#2A3A50"/>
       <line x1="${cx}" y1="${cy - 160}" x2="${cx}" y2="${cy + 160}" stroke="#2A3A50"/><line x1="${cx - 160}" y1="${cy}" x2="${cx + 160}" y2="${cy}" stroke="#2A3A50"/>
+      ${withAnswers && anyS ? `<polygon class="nsgap" points="${pts(rS)}" fill="#D6BF8F" stroke="#D6BF8F" stroke-width="2" stroke-linejoin="round"/>` : ''}
       ${anyS ? `<polygon points="${pts(rS)}" fill="none" stroke="#EEF2F7" stroke-width="2" stroke-dasharray="7 5"/>` : ''}
-      ${withAnswers ? `<polygon points="${pts(rA)}" fill="rgba(111,147,184,.35)" stroke="#6F93B8" stroke-width="3" stroke-linejoin="round"/>
+      ${withAnswers ? `<polygon points="${pts(rA)}" fill="${anyS ? '#22405F' : 'rgba(111,147,184,.35)'}" stroke="#6F93B8" stroke-width="3" stroke-linejoin="round"/>
+      ${(() => { // "Unused potential", where the strengths reach furthest past the answers.
+        if (!anyS) return '';
+        const g = [0, 1, 2, 3].map((i) => rS[i] - rA[i]), i = g.indexOf(Math.max(...g));
+        if (g[i] < 22) return '';
+        const m = (rS[i] + rA[i]) / 2, [x, y] = [[cx, cy - m], [cx + m, cy], [cx, cy + m], [cx - m, cy]][i];
+        return `<g class="nsgap-tag"><rect x="${x - 66}" y="${y - 13}" width="132" height="26" rx="13" fill="#1C1309" stroke="#D6BF8F"/><text x="${x}" y="${y + 4.5}" text-anchor="middle" fill="#F6EEDD" font-size="11.5" font-weight="600" letter-spacing="1.2">UNUSED POTENTIAL</text></g>`;
+      })()}
       <circle cx="${cx}" cy="${cy - rA[0]}" r="7" fill="#E0A282"/><circle cx="${cx + rA[1]}" cy="${cy}" r="7" fill="#9BC0A1"/><circle cx="${cx}" cy="${cy + rA[2]}" r="7" fill="#91B8D5"/><circle cx="${cx - rA[3]}" cy="${cy}" r="7" fill="#DDBD69"/>` : ''}
       ${withAnswers ? '' : `<g class="nsseal" aria-hidden="true"><polygon points="${pts([96, 96, 96, 96])}" fill="rgba(111,147,184,.10)" stroke="#6F93B8" stroke-width="2" stroke-dasharray="3 7"/>
         <rect x="${cx - 92}" y="${cy + 30}" width="184" height="46" rx="23" fill="#0E1C2B" stroke="#6F93B8" stroke-width="1.2"/>
@@ -699,7 +772,8 @@
   const compassKey = (withAnswers) => `<div class="nskey">
       <span><i class="k-str"></i><b>Your strengths</b><small>as you rate yourself, now</small></span>
       <span><i class="k-ans${withAnswers ? '' : ' sealed'}"></i><b>Your answers</b><small>${withAnswers ? 'from the questions in Part 1' : 'sealed: they appear after Part 1'}</small></span>
-      ${withAnswers ? '<p>Where the two lines part, look twice: that gap is your first lesson.</p>' : '<p class="nsdare"><b>A small dare.</b> Rate yourself now, honestly. After the questions we open the seal and lay your answers over your rating. Will the two shapes agree?</p>'}
+      ${withAnswers ? '<span><i class="k-gap"></i><b>Unused potential</b><small>where your strengths reach further than your answers</small></span>' : ''}
+      ${withAnswers ? '<p>Where the gold shows, you can do more than you do today.</p>' : '<p class="nsdare"><b>A small dare.</b> Rate yourself now, honestly. After the questions we open the seal and lay your answers over your rating. Will the two shapes agree?</p>'}
     </div>`;
 
   /* Before you start: your four strengths, and the compass drawing them. */
@@ -723,6 +797,7 @@
     return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 700px">
         <span class="eb">${done ? 'Part 1 done · your North Star' : 'Your North Star · fills in as you answer'}</span>
         <h2 class="sf" style="font-size: clamp(28px, 3.6vw, 40px); line-height: 1.05">Your answers <span class="sfi" style="color: var(--goldink)">beside your strengths.</span></h2></div>
+      ${done ? pGap(c) : ''}
       <div class="deep nscompbox nsreading">
         ${pCompass(c, true)}
         <div style="display: flex; flex-direction: column; gap: 14px">
@@ -732,6 +807,20 @@
           <div class="nsread"><span class="eb" style="color: #A9C0D9">Start here</span><span>${any ? D[lo].step : 'Your first move appears here.'}</span></div>
         </div>
       </div>`;
+  }
+
+  /* The message of Part 1 (31 Oct, round 4): you have more in you than you
+   * are using. Built only from their own rating and their own answers. */
+  function pGap(c) {
+    const str = c.rd.str, sc = c.sc.map((x) => x.score);
+    const gap = D.map((_, i) => (str[i] ? str[i] / 5 - sc[i] / 6 : 0));
+    const order = [0, 1, 2, 3].filter((i) => gap[i] > 0.08).sort((a, b) => gap[b] - gap[a]);
+    const strong = [0, 1, 2, 3].filter((i) => str[i] >= 4).map((i) => D[i].name);
+    const list = (a) => (a.length > 1 ? a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1] : a[0] || '');
+    if (!order.length) return `<div class="nsgapmsg"><span class="eb">What your North Star says</span><b class="sf">You use what you have. <span class="sfi">Now aim higher.</span></b>
+      <p>Your answers keep up with how you rate yourself. That is a strength in itself. The next step is to raise both: more of what you are good at, in more of your week.</p></div>`;
+    return `<div class="nsgapmsg"><span class="eb">What your North Star says</span><b class="sf">You have more in you <span class="sfi">than you are using.</span></b>
+      <p>${strong.length ? `You see real strength in ${list(strong)}. ` : 'The strengths you rated are real. '}Your answers show they are not all at work yet, most of all in <b>${D[order[0]].name}</b>. The gold below is that gap. It is not a weakness: the strengths are already yours. You can do much more with what you have.</p></div>`;
   }
 
   /* ── The feedback window after every part (31 Oct) ───────────────────────
@@ -749,27 +838,39 @@
   const chip = (bi, t) => `<span class="fbchip" style="--c: ${bi === null ? '#8A7A5E' : BAND_INK[bi]}">${esc(t)}</span>`;
   /** notes: one line per step from the founder's answers ('' = nothing yet);
    *  bands: the band behind each line, or null. */
-  function roadHTML(notes, bands) {
+  /* Part 4 says the same five steps as promises (31 Oct, round 4). */
+  const ROAD_PROMISE = [['A reason worth building for', 'You know why you do this, and what it must protect.'],
+    ['A problem you solve well', 'Customers get the result, the same good way every time.'],
+    ['The right people find you fast', 'Your message is so clear they recognise themselves in it.'],
+    ['Your first clients say yes', 'They pay, they come back, and they send others.'],
+    ['Your first people help you', 'Others carry part of the work, and your hours come back.']];
+  function roadHTML(notes, bands, road = ROAD) {
     const pos = roadPos();
-    return `<ol class="fbroad" aria-label="Your road in five steps">${ROAD.map(([t, l], i) => {
+    return `<ol class="fbroad" aria-label="Your road in five steps">${road.map(([t, l], i) => {
       const st = i < pos ? 'done' : i === pos ? 'here' : 'next';
-      return `<li class="${st}"><span class="fbn" aria-hidden="true">${i < pos ? '✓' : i + 1}</span>
+      return `<li class="${st}"><span class="fbn" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="${starPath(20, 20, st === 'here' ? 18 : 15)}"/></svg><i>${i + 1}</i></span>
         <div><span class="fbst">${st === 'here' ? 'You are here' : st === 'done' ? 'Behind you' : 'Ahead'}</span><b class="sf">${t}</b><span class="fbl">${l}</span>
         ${notes[i] ? `<span class="fbnote">${bands && bands[i] !== null && bands[i] !== undefined ? chip(bands[i], E.BANDS[bands[i]]) : ''}${esc(notes[i])}</span>` : ''}</div></li>`;
     }).join('')}</ol>`;
   }
-  /** The window itself. o = { n, eyebrow, title, intro, road, cards, ask, more, next } */
+  /** The window itself (round 4): a short letter from Alexandru first, with
+   *  "Got it"; the road under it; the detail behind "More feedback"; then a
+   *  push on to the next part.
+   *  o = { n, eyebrow, title, letter: [3 lines], ask, road, roadTitle, cards, more, next } */
   function fbWindow(o) {
-    const open = !!S.pmore[o.n];
-    return `<div class="nsfbw pop" id="fbw-in-${o.n}">
-      <div class="fbhead"><span class="eb fbeb">${o.eyebrow}</span><h2 class="sf">${o.title}</h2>${o.intro ? `<p>${o.intro}</p>` : ''}</div>
-      ${o.road}
-      <div class="fbcards">${o.cards}
-        <div class="fbcard fbask"><span class="eb fbeb">Ask yourself</span><span class="sfi">“${esc(o.ask)}”</span>
-          <label class="fbgot"><input type="checkbox" data-act="pgot" data-i="${o.n}" data-f="pgot-${o.n}"${S.pgot[o.n] ? ' checked' : ''}>Got it, I’ve read this</label></div>
+    const open = !!S.pmore[o.n], first = (S.profile.first || '').trim().split(' ')[0];
+    return `<div class="nsfbw pop${o.inner ? ' inner' : ''}" id="fbw-in-${o.n}">
+      <div class="fbhead"><span class="eb fbeb">${o.eyebrow}</span><h2 class="sf">${o.title}</h2></div>
+      <div class="fbletter">
+        <p class="fbl-hi">Dear ${first ? esc(first) : 'founder'},</p>
+        ${o.letter.filter(Boolean).map((l) => `<p>${esc(l)}</p>`).join('')}
+        <p class="fbl-ps"><b>P.S.</b> Ask yourself: “${esc(o.ask)}”</p>
+        <div class="fbl-sign"><img src="/mail/signature.png" alt="Alexandru" loading="lazy"><span>Alexandru and the team · ExploraSelf</span></div>
+        <label class="fbgot"><input type="checkbox" data-act="pgot" data-i="${o.n}" data-f="pgot-${o.n}"${S.pgot[o.n] ? ' checked' : ''}>Got it, I’ve read this</label>
       </div>
+      ${o.road ? `<div class="fbroadwrap"><span class="eb fbeb">${o.roadTitle || 'Your road, in five steps'}</span>${o.road}</div>` : ''}
       <button type="button" class="fbmore no-print" data-act="pmore" data-i="${o.n}" data-f="pmore-${o.n}" aria-expanded="${open}">${open ? 'Less feedback ↑' : 'More feedback ↓'}</button>
-      ${open ? `<div class="fbdeep pop">${o.more}</div>` : ''}
+      ${open ? `<div class="fbdeep pop">${o.cards ? `<div class="fbcards">${o.cards}</div>` : ''}${o.more || ''}</div>` : ''}
       ${o.next ? `<div class="fbnext">${o.next}</div>` : ''}
     </div>`;
   }
@@ -792,9 +893,12 @@
     const more = `<div class="fbcols"><div><span class="eb fbeb">Your ${c.qs.length} answers</span>${fbList(c.qs.filter((q) => Number.isInteger(S.ans[q.id])).map((q) => [q.short, E.ANSWERS[S.ans[q.id]][0], noteFor(q, S.ans[q.id])]))}</div>
       <div><span class="eb fbeb">Your rating against your answers</span>${gaps.length ? gaps.map(([n, g]) => `<p>${g > 0 ? `You rate yourself higher in <b>${n}</b> than your answers do. Look twice: a strength you feel is not yet a strength you can show.` : `Your answers in <b>${n}</b> are stronger than your rating. You do better than you give yourself credit for.`}</p>`).join('') : '<p>Your rating and your answers agree. You see yourself clearly, and that is a strength in itself.</p>'}
         <span class="eb fbeb" style="margin-top: 10px">This week</span><p>${esc(f(rd.lo).week)}</p></div></div>`;
-    return fbWindow({ n: 1, eyebrow: 'Part 1 done · your feedback', title: 'Your road so far.',
-      intro: 'Every business walks the same five steps, in this order. Here is where your answers put you, and what each step says about you.',
-      road: roadHTML(notes, bands),
+    const wl = named(E.GOALS, wants()).map((x) => x.toLowerCase()), vl = named(M.VALUES, S.values).map((x) => x.toLowerCase());
+    const letter = [`Your strongest side is ${D[rd.hi].name}. ${f(rd.hi).big}`,
+      `What needs you first is ${D[rd.lo].name}. Start here: ${D[rd.lo].step}`,
+      wl.length || vl.length ? `You told me ${wl.length ? 'you want ' + wl.join(' and ') : ''}${wl.length && vl.length ? ', and ' : ''}${vl.length ? 'you care most about ' + vl.join(' and ') : ''}. Every step from here must protect that.` : ''];
+    return fbWindow({ n: 1, eyebrow: 'Part 1 done · your feedback', title: 'Your road so far.', letter,
+      road: roadHTML(notes, bands), roadTitle: 'Your road, in five steps · where your answers put you',
       cards: `<div class="fbcard"><span class="eb fbeb">What your answers say</span>
           <p><small>Strongest</small><b class="sf">${D[rd.hi].name}</b></p><p><small>Needs you first</small><b class="sf">${D[rd.lo].name}</b></p><p><small>Start here</small>${esc(D[rd.lo].step)}</p></div>
         <div class="fbcard"><span class="eb fbeb">What you told us</span>${said.map(([k, v]) => `<p><small>${k}</small>${esc(v.join(' · '))}</p>`).join('')}
@@ -842,8 +946,10 @@
     const R = p2Read(), last = S.p2.ans[R.cq[2].id];
     const notes = ['', '', R.cust.big, S.mode === 'yes' ? (last >= 2 ? 'You listen, and you change. That keeps the yes coming.' : 'The yes is there. Listening keeps it.') : (last >= 2 ? 'Someone said yes with money. That is evidence.' : 'The first yes is the next thing to ask for.'), R.team.big];
     const bands = [null, null, R.cb, null, R.tb];
+    const low = R.qs.slice().sort((x, y) => S.p2.ans[x.id] - S.p2.ans[y.id])[0];
     return fbWindow({ n: 2, eyebrow: 'Part 2 done · your feedback', title: 'Your people, on your road.',
-      intro: 'Customers carry the third and fourth steps. Your team carries the fifth.', road: roadHTML(notes, bands),
+      letter: [`Your customers: ${R.cust.big}`, `${S.p2.team === 'solo' ? 'Your first team' : 'Your team'}: ${R.team.big}`, `One thing for this week: ${S.p2.ans[low.id] < 2 ? low.lo : low.hi}`],
+      road: roadHTML(notes, bands), roadTitle: 'Customers carry steps 3 and 4. Your team carries step 5.',
       cards: `<div class="fbcard"><span class="eb fbeb">Your customers</span>${chip(R.cb, E.BANDS[R.cb])}<b class="sf">${esc(R.cust.big)}</b><span class="fbsoft">${esc(R.cust.ask)}</span></div>
         <div class="fbcard"><span class="eb fbeb">${S.p2.team === 'solo' ? 'Your first team' : 'Your team'}</span>${chip(R.tb, E.BANDS[R.tb])}<b class="sf">${esc(R.team.big)}</b><span class="fbsoft">${esc(R.team.ask)}</span></div>`,
       ask: (R.cb <= R.tb ? R.cust : R.team).ask,
@@ -860,8 +966,13 @@
     const notes = S.mode === 'yes'
       ? [nl[0] ? 'Your hours: ' + nl[0] + '.' : '', nl[2] ? 'Your month: ' + nl[2] + '.' : '', nl[3] ? 'Your customers: ' + nl[3] + '.' : '', n.newc ? `${n.newc.est ? 'About ' : ''}${whole(n.newc.v)} new paying customers this month.` : '', nl[1] ? 'Your time: ' + nl[1] + '.' : '']
       : [ins('road'), ins('offer'), ins('market'), '', ''];
-    return `<div class="fbroadwrap"><span class="eb fbeb">Your road, read through your numbers</span>${roadHTML(notes, null)}</div>
-      <div class="fbnext">${nextBtn('Your numbers are on paper now, not in your head. Keep what you found, then see the road ahead and ask “what if?”.', 'Keep what I found', 'save')}</div>`;
+    const said = notes.filter(Boolean);
+    return fbWindow({ n: 3, inner: true, eyebrow: 'Part 3 done · your feedback', title: 'Your numbers, on your road.',
+      letter: said.length ? said.slice(0, 3) : ['Your numbers are on paper now, not in your head. That alone changes how you decide.'],
+      ask: 'Which one number will you check every Monday, and what will you do when it moves?',
+      road: roadHTML(notes, null), roadTitle: 'Your road, read through your numbers',
+      more: `<span class="eb fbeb">Everything your numbers said</span>${fbList(E.groupsFor(S.mode).map((g) => [g.title, '', E.insight(g.key, n, S.mode, money) || 'Not enough yet to say anything.']))}`,
+      next: nextBtn('Now the fun part: move four levers on your own month and watch the answer change.', 'Go to Part 4 · Your next steps', 'plan') });
   }
 
   /* Part 4 · Your next steps: once a lever has moved. */
@@ -869,13 +980,13 @@
     const { p = 0, m = 0, f = 0, d = 0 } = S.lab, dom = E.strongestLever(p, m, f, d);
     if (dom < 0 || labCalc().locked) return '';
     const LV = E.LEVERS[dom];
-    const notes = ['', '', '', '', `You tried: ${LV.name.toLowerCase()}. ${LV.first}`];
+    const notes = ['', '', '', '', `You tried: ${LV.name.toLowerCase()}.`];
     return fbWindow({ n: 4, eyebrow: 'Part 4 · your feedback', title: 'One lever, and the whole road moves.',
-      intro: 'Every step of the road gets easier when one change answers in all four domains.', road: roadHTML(notes, null),
-      cards: `<div class="fbcard"><span class="eb fbeb">What you tried</span><b class="sf">${esc(LV.name)}</b><span class="fbsoft">Watch out: ${esc(LV.watch)}</span></div>`,
+      letter: [`You tried it: ${LV.name.toLowerCase()}. Look how it answered in all four.`, `Watch out: ${LV.watch}`, `Your first step this week: ${LV.first}`],
       ask: 'Which one lever will you move this month, and on which day will you start?',
-      more: `<span class="eb fbeb">Your first step this week</span><p>${esc(LV.first)}</p>`,
-      next: '<p class="sf">Your North Star is complete. The next step is free, and it opens tonight.</p><a class="go fbgo" href="/ground-plan/#home">Open the Founder Launchpad · free <span class="arr" aria-hidden="true">→</span></a>' });
+      road: roadHTML(notes, null, ROAD_PROMISE), roadTitle: 'Where one good lever takes you, step by step',
+      more: `<span class="eb fbeb">This change, in four steps</span>${fbList(LV.steps.map((t, k) => [`${k + 1}. ${t}`, '', '']))}`,
+      next: nextBtn('Your North Star is complete. Keep it, share it, then take your next step.', 'Get my North Star card', 'save') });
   }
 
   /* ── The path through the North Star (31 Oct) ───────────────────────────
@@ -935,6 +1046,10 @@
     guiding = true;
     toast(`One thing above is still open: ${it.label}. Taking you there.`);
     if (it.q != null) { qi = it.q; put('questions', pQuestions(context())); placeCrown(); }
+    if (it.q != null && isPhone()) {
+      setTimeout(() => { enterFull(); const el = document.getElementById('nsb-r'); if (el) { el.classList.remove('nsflash'); void el.offsetWidth; el.classList.add('nsflash'); setTimeout(() => el.classList.remove('nsflash'), 2200); } guiding = false; }, 1200);
+      return true;
+    }
     setTimeout(() => {
       const el = document.querySelector(it.el);
       if (!el) { guiding = false; return; }
@@ -968,7 +1083,8 @@
   /* Later parts wait, visibly, until the one before is done. */
   function lockParts(c) {
     const P = partState(c), [p1, p2, p3] = P.fin;
-    const locked = { 2: !p1, 3: !p1 || !p2, 4: !p1 || !p2 || !p3 };
+    // Part 4 is open to everyone (31 Oct, round 4): the lab itself says what it needs.
+    const locked = { 2: !p1, 3: !p1 || !p2, 4: false };
     const NAMES = ['', 'Part 1 · Yourself', 'Part 2 · Your people', 'Part 3 · Your numbers'];
     document.querySelectorAll('.nspart').forEach((el) => {
       const n = +el.dataset.part, on = !!locked[n];
@@ -989,13 +1105,22 @@
     const TINTG = { 0: 'var(--tself)', 1: 'var(--tpeople)', 2: 'var(--twork)', 3: 'var(--tmarket)' };
     const groups = G.map((g, i) => {
       const ins = E.insight(g.key, c.n, S.mode, money), active = gi === i;
-      const status = i < gi ? (ins || 'Not enough yet to say anything. Open it to add a range.') : active ? 'Three quick answers · pick a range or type your own' : 'Next';
+      const status = i < gi ? (ins || 'Not enough yet to say anything. Open it to add a range.') : active ? 'Three quick answers · slide to a range, or type your own' : 'Next';
       const fields = g.fields.map(([key, label, choices]) => {
         const k = S.mode + '.' + key, cur = S.nums[k] || { pick: '', own: '' }, isText = typeof choices[0][1] === 'string';
-        const opts = [['', 'Choose…'], ...choices.map((ch, j) => [String(j), ch[0]]), ['own', isText ? 'Somewhere else…' : 'Type my own…'], ['unsure', 'Not sure yet']];
-        return `<div style="display: flex; flex-direction: column; gap: 6px">
-          <label for="f-${k}" style="font-size: 13px; font-weight: 520">${label}</label>
-          <select id="f-${k}" class="inp${UI.glow && UI.glow.keys.includes(k) && Date.now() < UI.glow.until ? ' glowbox' : ''}" data-num="${k}" data-f="num-${k}" style="border-color: ${cur.pick === 'own' ? '#6F93B8' : 'var(--line)'}">${opts.map(([v, t]) => `<option value="${v}"${cur.pick === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>
+        const glow = UI.glow && UI.glow.keys.includes(k) && Date.now() < UI.glow.until ? ' glowbox' : '';
+        const picked = /^\d+$/.test(cur.pick) ? Number(cur.pick) : -1;
+        const big = cur.pick === 'own' ? (cur.own ? esc(cur.own) : 'Type it below') : cur.pick === 'unsure' ? 'Not sure yet' : picked >= 0 ? esc(choices[picked][0]) : (isText ? 'Tap one' : 'Slide to choose');
+        const alt = `<div class="nsl-alt"><button type="button" data-act="num-own" data-k="${k}" data-f="nown-${k}" aria-pressed="${cur.pick === 'own'}">${isText ? 'Somewhere else' : 'Type the exact amount'}</button><button type="button" data-act="num-unsure" data-k="${k}" data-f="nuns-${k}" aria-pressed="${cur.pick === 'unsure'}">Not sure yet</button></div>`;
+        // Numbers slide (31 Oct, round 4): a big value that follows the thumb.
+        // Places are tapped. Exact amounts and "not sure" stay one tap away.
+        const input = isText
+          ? `<div class="nsl-chips" role="group" aria-label="${esc(label)}">${choices.map((ch, j) => `<button type="button" data-act="num-chip" data-k="${k}" data-v="${j}" data-f="nchip-${k}-${j}" aria-pressed="${picked === j}">${esc(ch[0])}</button>`).join('')}</div>`
+          : `<input type="range" class="nsl-range${picked < 0 ? ' unset' : ''}" id="f-${k}" min="0" max="${choices.length - 1}" step="1" value="${picked < 0 ? 0 : picked}" data-numr="${k}" data-f="num-${k}" aria-label="${esc(label)}" aria-valuetext="${big}">
+            <div class="nsl-ends" aria-hidden="true"><span>${esc(choices[0][0])}</span><span>${esc(choices[choices.length - 1][0])}</span></div>`;
+        return `<div class="nslide${glow}${picked >= 0 || cur.pick === 'own' ? ' set' : ''}">
+          <div class="nsl-top"><label for="f-${k}">${label}</label><b class="nsl-val sf" id="nv-${k}">${big}</b></div>
+          ${input}${alt}
           ${cur.pick === 'own' ? `<input class="inp pop" type="text" ${isText ? '' : 'inputmode="decimal"'} data-own="${k}" data-f="own-${k}" value="${esc(cur.own)}" placeholder="${isText ? 'Where they gather' : 'Type the exact amount'}" aria-label="${esc(label)}, ${isText ? 'in your words' : 'exact amount'}" style="border-color: #6F93B8">` : ''}
         </div>`;
       }).join('');
@@ -1008,14 +1133,14 @@
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">${fields}</div>
           <div class="pop deep" style="border-radius: 7px; padding: 16px 18px; display: flex; gap: 14px; align-items: center; animation-delay: .2s">
             <svg class="shim" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z" fill="none" stroke="#6F93B8" stroke-width="1.6" stroke-linejoin="round"/></svg>
-            <div style="display: flex; flex-direction: column; gap: 2px" aria-live="polite"><span class="eb" style="color: #A9C0D9">What this already tells you</span><span style="font-size: 16px; font-weight: 520">${esc(ins || 'Pick a range for each, or type your own. The answer appears here.')}</span></div></div>
+            <div style="display: flex; flex-direction: column; gap: 2px" aria-live="polite"><span class="eb" style="color: #A9C0D9">What this already tells you</span><span style="font-size: 16px; font-weight: 520">${esc(ins || 'Slide each one to a range, or type your own. The answer appears here.')}</span></div></div>
           <button type="button" data-act="grp" data-i="${i + 1}" data-f="grp-next-${i}" style="align-self: flex-end; min-height: 46px; padding: 0 20px; border-radius: 5px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 520; cursor: pointer">${i === G.length - 1 ? 'See what it all means →' : 'Next group →'}</button>
         </div>` : ''}</div>`;
     }).join('');
     return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 720px">
         <span class="eb">Part 3 · Your numbers</span>
         <h1 class="sf" style="font-size: clamp(30px, 4vw, 44px); line-height: 1.05">${has ? 'Four small groups.' : 'No sales yet? Good.'} <span class="sfi" style="color: var(--goldink)">${has ? 'An insight after each.' : 'Start with your offer, your runway and your market.'}</span></h1>
-        <p style="color: var(--muted)">${has ? 'One month. Pick a range from the list, or type your own. Each group tells you something before you move on.' : 'We will not ask you for sales you do not have yet. Three small groups, and an insight after each.'}</p></div>
+        <p style="color: var(--muted)">${has ? 'One month. Slide to a range, or type your own. Each group tells you something before you move on.' : 'We will not ask you for sales you do not have yet. Three small groups, and an insight after each.'}</p></div>
       <div style="display: flex; flex-direction: column; gap: 10px">${groups}</div>
       <p style="font-size: 12px; color: var(--muted)">A range is used at its middle, so what it tells you is said with “about”. Machines can do this arithmetic in seconds; what you do about it is the part only you can decide.</p>`;
   }
@@ -1036,7 +1161,7 @@
         ${row('Why it matters:', st.why)}${row('What to do:', st.what)}${row('About:', st.about)}${row('Done looks like:', st.done)}
         ${st.ask ? `<p class="sfi" style="margin: 0; font-size: 16px; color: #EEF2F7">“${esc(st.ask)}”</p>` : ''}
         ${st.note ? row(`${BAND_LABEL[UI.plans && UI.plans.domains.find((d) => d.id === st.domain)?.band] || ''}${st.noteFor ? ' (' + esc(st.noteFor) + ')' : ''}:`, st.note) : ''}
-        <label style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid #2A3A50; border-radius: 6px; cursor: pointer; font-size: 14px; align-self: flex-start"><input type="checkbox" data-tick="${esc(st.id)}" data-f="tick-${esc(st.id)}"${done ? ' checked' : ''} style="width: 20px; height: 20px; accent-color: #6F93B8">Done</label>
+        <label style="display: flex; align-items: center; gap: 10px; padding: 8px 0; cursor: pointer; font-size: 14px; align-self: flex-start"><input type="checkbox" data-tick="${esc(st.id)}" data-f="tick-${esc(st.id)}"${done ? ' checked' : ''} style="width: 20px; height: 20px; accent-color: #6F93B8">Done</label>
       </div></details>`;
   }
   /* The count is this plan's own steps (31 Oct: never all 32 at once). */
@@ -1084,7 +1209,7 @@
           ${f.feel.map((t) => `<span style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><circle cx="12" cy="12" r="8" fill="none" stroke="${CSSV[i]}" stroke-width="2"/><circle cx="12" cy="12" r="2.5" fill="${CSSV[i]}"/></svg>${t}</span>`).join('')}
         </div>
         <div class="deep" style="border-radius: 7px; padding: 18px; display: flex; flex-direction: column; gap: 8px"><span class="eb" style="color: #A9C0D9">Ask yourself</span><span class="sfi" style="font-size: 19px; line-height: 1.35">“${f.ask}”</span>
-          <label style="display: flex; align-items: center; gap: 10px; margin-top: 6px; padding: 10px 12px; border: 1px solid #2A3A50; border-radius: 6px; cursor: pointer; font-size: 14px"><input type="checkbox" data-act="got" data-i="${i}" data-f="got-${i}"${S.got[i] ? ' checked' : ''} style="width: 20px; height: 20px; accent-color: #6F93B8">Got it, I’ve read this</label>
+          <label style="display: flex; align-items: center; gap: 10px; margin-top: 6px; padding: 8px 0; cursor: pointer; font-size: 14px"><input type="checkbox" data-act="got" data-i="${i}" data-f="got-${i}"${S.got[i] ? ' checked' : ''} style="width: 20px; height: 20px; accent-color: #6F93B8">Got it, I’ve read this</label>
           <button type="button" data-act="more" data-i="${i}" data-f="more-${i}" aria-expanded="${open}" class="no-print" style="align-self: flex-start; margin-top: 4px; background: none; border: 1px solid #2A3A50; color: #A9C0D9; border-radius: 5px; min-height: 40px; padding: 0 14px; font-weight: 520; cursor: pointer">${open ? 'Show less' : 'Show more'}</button>
         </div>
       </div>
@@ -1114,23 +1239,90 @@
         <a href="https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(shareText(c, what, 'linkedin'))}" target="_blank" rel="noopener" data-f="share-${what}-li" style="min-height: 44px; border-radius: 5px; border: 1px solid #0A66C2; color: var(--ink); background: var(--paper); font-weight: 520; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><span style="color: #0A66C2; display: inline-flex">${LI}</span>LinkedIn</a>
       </div></div>`;
 
-  const pSave = (c) => `<div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 10px">
-      <span class="eb">Save your results</span>
-      <h2 class="sf" style="font-size: 26px; line-height: 1.2">Keep what you found. <span class="sfi" style="color: var(--goldink)">Print it, send it, share it.</span></h2>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 14px; font-size: 14px">
-        ${['Your first insight', 'Your North Star reading', 'Your feedback in all four domains', 'A next step for each domain', 'Your twelve weeks'].map((t) => `<span style="display: inline-flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#6F93B8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>${t}</span>`).join('')}
-      </div>
-      <span style="font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px">${lockIcon('currentColor', 13)}The deeper “Show more” insights stay inside your account.</span>
-    </div>
-    <div style="flex: 0 1 280px; display: flex; flex-direction: column; gap: 8px; min-width: 240px">
-      <button type="button" data-act="email" data-f="email" ${UI.sending ? 'disabled' : ''} style="min-height: 50px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="#0E1C2B" stroke-width="1.8"/><path d="M3 7l9 6 9-6" fill="none" stroke="#0E1C2B" stroke-width="1.8"/></svg>${UI.sending ? 'Sending…' : 'Email me my results'}</button>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
-        <button type="button" data-act="print" data-f="print" style="min-height: 46px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 520; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Print</button>
-        <button type="button" data-act="print" data-f="pdf" style="min-height: 46px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 520; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Save as PDF</button>
-      </div>
-      <div class="no-print" style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--line)">
-        ${c && c.rd && c.rd.any ? shareRow(c, 'reading', 'SHARE YOUR READING') : ''}
+  /* ── Your North Star card (31 Oct, round 4): one picture to keep and share.
+   * Built from their own answers; it downloads as an image, or opens the
+   * phone's share sheet, so it can go to WhatsApp or LinkedIn with the link. */
+  function cardSVG(c) {
+    const W = 1080, H = 1350, cx = 540, cy = 610, R = 250, sc = c.sc.map((x) => x.score), str = c.rd.str;
+    const rA = sc.map((v) => 24 + v / 6 * (R - 24)), rS = str.map((v) => 24 + v / 5 * (R - 24));
+    const pts = (r) => `${cx},${cy - r[0]} ${cx + r[1]},${cy} ${cx},${cy + r[2]} ${cx - r[3]},${cy}`;
+    const first = (S.profile.first || '').trim().split(' ')[0];
+    const vals = named(M.VALUES, S.values).join(' · ');
+    const stars = Array.from({ length: 46 }, (_, k) => { const x = (k * 233 + 71) % W, y = (k * 151 + 37) % 420 + (k % 3) * 300; return `<circle cx="${x}" cy="${y}" r="${(1 + (k % 3) * 0.8).toFixed(1)}" fill="${k % 5 ? '#A9C0D9' : '#D6BF8F'}" opacity="${(0.3 + (k % 4) * 0.15).toFixed(2)}"/>`; }).join('');
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Your North Star card">
+      <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E1C2B"/><stop offset="1" stop-color="#1B2B40"/></linearGradient>
+        <radialGradient id="cgl"><stop offset="0" stop-color="#6F93B8" stop-opacity=".35"/><stop offset="1" stop-color="#6F93B8" stop-opacity="0"/></radialGradient></defs>
+      <rect width="${W}" height="${H}" fill="url(#cg)"/>${stars}
+      <rect x="36" y="36" width="${W - 72}" height="${H - 72}" rx="28" fill="none" stroke="#D6BF8F" stroke-opacity=".55" stroke-width="2"/>
+      <text x="${cx}" y="128" text-anchor="middle" fill="#D6BF8F" font-family="Inter, Arial, sans-serif" font-size="26" letter-spacing="8" font-weight="600">THE LEADER’S NORTH STAR</text>
+      <text x="${cx}" y="208" text-anchor="middle" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="68">${first ? esc(first) + '’s North Star' : 'My North Star'}</text>
+      <text x="${cx}" y="258" text-anchor="middle" fill="#A9C0D9" font-family="Newsreader, Georgia, serif" font-style="italic" font-size="32">${esc(E.STAGES[c.here].name)}${c.goal >= 0 && c.goal !== c.here ? ' → ' + esc(E.STAGES[c.goal].name) : ''}</text>
+      <circle cx="${cx}" cy="${cy}" r="${R + 60}" fill="url(#cgl)"/>
+      <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#2A3A50" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="${R / 2}" fill="none" stroke="#2A3A50" stroke-width="2"/>
+      <line x1="${cx}" y1="${cy - R - 20}" x2="${cx}" y2="${cy + R + 20}" stroke="#2A3A50" stroke-width="2"/><line x1="${cx - R - 20}" y1="${cy}" x2="${cx + R + 20}" y2="${cy}" stroke="#2A3A50" stroke-width="2"/>
+      <polygon points="${pts(rS)}" fill="none" stroke="#EEF2F7" stroke-width="3" stroke-dasharray="12 9" opacity=".8"/>
+      <polygon points="${pts(rA)}" fill="rgba(111,147,184,.4)" stroke="#6F93B8" stroke-width="5" stroke-linejoin="round"/>
+      <circle cx="${cx}" cy="${cy - rA[0]}" r="12" fill="#E0A282"/><circle cx="${cx + rA[1]}" cy="${cy}" r="12" fill="#9BC0A1"/><circle cx="${cx}" cy="${cy + rA[2]}" r="12" fill="#91B8D5"/><circle cx="${cx - rA[3]}" cy="${cy}" r="12" fill="#DDBD69"/>
+      <path d="${starPath(cx, cy, 26)}" fill="#EEF2F7"/>
+      <g font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="3">
+        <text x="${cx}" y="${cy - R - 34}" text-anchor="middle" fill="#E0A282">LEAD YOURSELF</text>
+        <text x="${cx}" y="${cy + R + 56}" text-anchor="middle" fill="#91B8D5">LEAD YOUR BUSINESS</text>
+        <text x="${cx + R + 30}" y="${cy - 14}" fill="#9BC0A1">LEAD YOUR</text><text x="${cx + R + 30}" y="${cy + 18}" fill="#9BC0A1">PEOPLE</text>
+        <text x="${cx - R - 30}" y="${cy - 14}" text-anchor="end" fill="#DDBD69">LEAD THE</text><text x="${cx - R - 30}" y="${cy + 18}" text-anchor="end" fill="#DDBD69">MARKET</text>
+      </g>
+      <g font-family="Inter, Arial, sans-serif">
+        <text x="120" y="1012" fill="#A9C0D9" font-size="22" letter-spacing="4" font-weight="600">STRONGEST</text>
+        <text x="120" y="1056" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="40">${esc(D[c.rd.hi].name)}</text>
+        <text x="580" y="1012" fill="#E0A282" font-size="22" letter-spacing="4" font-weight="600">NEEDS ME FIRST</text>
+        <text x="580" y="1056" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="40">${esc(D[c.rd.lo].name)}</text>
+        ${vals ? `<text x="120" y="1132" fill="#D6BF8F" font-size="22" letter-spacing="4" font-weight="600">WHAT I CARE ABOUT</text><text x="120" y="1176" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="40">${esc(vals)}</text>` : ''}
+        <text x="${cx}" y="1268" text-anchor="middle" fill="#A9C0D9" font-size="24" letter-spacing="2">Take yours, free · linktolead.exploraself.com/northstar</text>
+      </g>
+    </svg>`;
+  }
+  /** The card as a PNG: shared through the phone's share sheet when it can
+   *  take files, downloaded otherwise. */
+  async function cardImage() {
+    const svg = document.querySelector('#nscard svg');
+    if (!svg) return null;
+    const url = URL.createObjectURL(new Blob([svg.outerHTML], { type: 'image/svg+xml' }));
+    try {
+      const img = new Image(); img.decoding = 'async';
+      await new Promise((ok, no) => { img.onload = ok; img.onerror = no; img.src = url; });
+      const cv = document.createElement('canvas'); cv.width = 1080; cv.height = 1350;
+      cv.getContext('2d').drawImage(img, 0, 0, 1080, 1350);
+      return await new Promise((ok) => cv.toBlob(ok, 'image/png'));
+    } finally { URL.revokeObjectURL(url); }
+  }
+  async function cardOut(share) {
+    let png = null;
+    try { png = await cardImage(); } catch { png = null; }
+    if (!png) { toast('Your browser would not make the image. Try Print → Save as PDF.'); return; }
+    const file = new File([png], 'my-north-star.png', { type: 'image/png' });
+    if (share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], text: shareText(context(), 'reading', 'card') }); return; } catch { /* closed: fine */ return; }
+    }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(png); a.download = 'my-north-star.png'; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+    toast(share ? 'Saved as an image. Send it with the link below.' : 'Saved as an image: my-north-star.png');
+  }
+
+  const pSave = (c) => `<div class="nscard-wrap">${c && c.rd && c.rd.any ? `<div class="nscard" id="nscard">${cardSVG(c)}</div>` : '<div class="nscard empty"><span>Your card appears once you have answered Part 1.</span></div>'}</div>
+    <div class="nscard-side">
+      <span class="eb">Your North Star card</span>
+      <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 38px); line-height: 1.1">Keep it. <span class="sfi" style="color: var(--goldink)">Share it.</span></h2>
+      <p style="color: var(--muted); font-size: 15px">One picture of where you stand today. Send it to someone who should see it, or keep it for the day you look back and see how far you came.</p>
+      ${c && c.rd && c.rd.any ? `<div class="no-print" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+        <button type="button" class="go" data-act="card-share" data-f="card-share" style="min-height: 50px; border-radius: 5px; border: 0; background: #D6BF8F; color: #1C1309; font-weight: 600; font-size: 15px; cursor: pointer">Share my card</button>
+        <button type="button" data-act="card-dl" data-f="card-dl" style="min-height: 50px; border-radius: 5px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 520; cursor: pointer">Download image</button></div>` : ''}
+      <div class="no-print" style="display: flex; flex-direction: column; gap: 10px; padding-top: 10px; border-top: 1px solid var(--line)">
+        ${c && c.rd && c.rd.any ? shareRow(c, 'reading', 'SEND THE LINK WITH IT') : ''}
         ${shareRow(c, 'invite', 'INVITE SOMEONE TO TAKE IT')}
+      </div>
+      <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px">
+        <button type="button" data-act="email" data-f="email" ${UI.sending ? 'disabled' : ''} class="nslink">${UI.sending ? 'Sending…' : 'Email me my results'}</button>
+        <button type="button" data-act="print" data-f="print" class="nslink">Print</button>
+        <button type="button" data-act="print" data-f="pdf" class="nslink">Save as PDF</button>
       </div>
       <span role="status" style="font-size: 13px; color: ${UI.mail.startsWith('Sent') ? 'var(--people)' : 'var(--muted)'}; font-weight: 520">${esc(UI.mail)}</span>
     </div>`;
@@ -1139,7 +1331,7 @@
     const WC = D.map((d) => d.hex), f = S.lean !== null ? S.lean : (c.rd.any ? c.rd.lo : null);
     const row = (d, i) => `<div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; align-items: center; padding: 4px 0; border-radius: 6px; outline: ${f === i ? '1px solid rgba(111,147,184,.55)' : '1px solid transparent'}; outline-offset: 3px; transition: outline-color .4s ease">
         <span style="font-size: 12px; font-weight: 520; letter-spacing: .1em; text-transform: uppercase; color: ${f === i ? '#EEF2F7' : '#B8C6D6'}; display: inline-flex; align-items: center; gap: 8px">${d.name}${f === i ? '<span style="font-size: 10px; color: #0E1C2B; background: #6F93B8; border-radius: 3px; padding: 1px 5px">LEAN</span>' : ''}</span>
-        ${Array.from({ length: 12 }, (_, k) => (k < 3 ? `<span class="cellin wfree" style="animation-delay: ${(k * 0.06 + i * 0.04).toFixed(2)}s, ${(k * 0.25 + i * 0.12).toFixed(2)}s"><b>FREE</b></span>`
+        ${Array.from({ length: 12 }, (_, k) => (k < 3 ? `<span class="cellin wfree" style="--wc: ${WC[i]}; animation-delay: ${(k * 0.06 + i * 0.04).toFixed(2)}s, ${(k * 0.25 + i * 0.12).toFixed(2)}s"><b>FREE</b></span>`
           : `<span class="cellin" style="height: 34px; border-radius: 3px; background: ${WC[i]}; opacity: ${Math.min(1, (0.28 + k * 0.055) * (f === null ? 1 : f === i ? 1.25 : 0.8)).toFixed(2)}; animation-delay: ${(k * 0.06 + i * 0.04).toFixed(2)}s; transition: opacity .5s ease"></span>`)).join('')}</div>`;
     const band = (span, text, on, br) => `<span style="grid-column: span ${span}; border-top: 2px solid ${br ? '#B4703F' : on ? '#6F93B8' : '#2A3A50'}; padding-top: 8px; text-align: center; font-size: 11px; font-weight: 520; letter-spacing: .1em; color: ${br ? '#D6BF8F' : on ? '#A9C0D9' : '#B8C6D6'}">${text}</span>`;
     return `<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
@@ -1147,7 +1339,7 @@
           <span class="eb" style="color: #D6BF8F">What comes after your North Star</span>
           <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; color: #EEF2F7">You know where you stand. <span class="sfi" style="color: #D6BF8F">Here is the road from here.</span></h2>
           <p style="color: #D9E2EC; font-size: 16px; line-height: 1.7">It is called <b style="color: #F6EEDD">The Founder’s Blueprint</b>: twelve weeks, built on the same four domains you just looked at. Every week works all four, and leans on the one you are thinnest in${f === null ? '' : ': for you, ' + D[f].name.toLowerCase()}.</p>
-          <p class="wfree-line"><span class="wfree-dot" aria-hidden="true"></span><span><b>The gold weeks are free.</b> Weeks 1 to 3, the Founder Launchpad, open the moment you start. No card.</span></p>
+          <p class="wfree-line"><span class="wfree-dot" aria-hidden="true"></span><span><b>The weeks framed in gold are free.</b> Weeks 1 to 3, the Founder Launchpad, open the moment you start. No card.</span></p>
         </div>
         <div class="no-print" style="display: flex; flex-direction: column; gap: 6px">
           <span style="font-size: 11px; letter-spacing: .14em; color: #B8C6D6" id="lean-h">PREVIEW A DIFFERENT LEAN</span>
@@ -1179,27 +1371,8 @@
     { n: '4', short: 'Business HUB', unlock: 'Joining unlocks modules 10–12.', name: 'The Business HUB', tag: 'Build the business', line: 'Build the business that carries it.', modules: '10–12', sessions: '3 in total (incl. 1 from the LAB)', price: '$397', cta: 'Join the HUB', href: HUB_URL, ext: true, x: 285, y: 160, lx: 301, ly: 164, anchor: 'start' },
     { n: '5', short: 'The Summit', unlock: 'Every module, with Alexandru every week.', name: 'The Summit', tag: 'The top', line: 'The whole Blueprint, with Alexandru every week.', modules: 'All', sessions: 'Every week', price: '$1,989', cta: 'Talk about The Summit', href: '/northstar/summit', x: 230, y: 58, lx: 258, ly: 62, anchor: 'start' },
   ];
-  function pClimb() {
-    const si = S.stop, sv = STOPS[si];
-    return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 720px">
-        <span class="eb" style="color: #A9C0D9">Link to Lead · The Founder’s Blueprint</span>
-        <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; color: #EEF2F7">Your climb. <span class="sfi" style="color: #A9C0D9">One step at a time.</span></h2>
-        <p style="color: #B8C6D6; font-size: 15px; line-height: 1.7">Five stops, one at a time. The first one is free. Tap a stop to see what opens there.</p></div>
-      <div style="display: flex; flex-wrap: wrap; gap: 26px; align-items: center">
-        <svg viewBox="0 0 460 420" style="flex: 1 1 340px; max-width: 520px; height: auto" role="img" aria-label="A mountain trail from The Founder Launchpad at the bottom to The Summit at the top">
-          <circle cx="60" cy="60" r="1.5" fill="#A9C0D9" opacity=".7"/><circle cx="400" cy="90" r="1.2" fill="#A9C0D9" opacity=".6"/><circle cx="350" cy="40" r="1" fill="#EEF2F7" opacity=".5"/><circle cx="110" cy="130" r="1" fill="#EEF2F7" opacity=".4"/>
-          <polygon points="20,395 230,40 440,395" fill="rgba(111,147,184,.08)" stroke="#8A7A5E" stroke-width="1.2"/>
-          <polyline points="140,395 230,40 320,395" fill="none" stroke="#2A3A50" stroke-width="1"/>
-          <polyline points="200,96 230,40 262,96" fill="none" stroke="#EEF2F7" stroke-width="1.6" opacity=".6"/>
-          <polyline class="trail" points="190,395 150,360 290,300 175,235 285,160 230,58" fill="none" stroke="#6F93B8" stroke-width="2.2" stroke-dasharray="6 6" stroke-linecap="round"/>
-          <g class="flagw"><path d="M230 58V26" stroke="#EEF2F7" stroke-width="1.6"/><path d="M230 27h20l-6 6 6 6h-20z" fill="#6F93B8"/></g>
-          ${STOPS.map((t, i) => `<g>${i === si ? `<circle class="halo" cx="${t.x}" cy="${t.y}" r="20" fill="none" stroke="#D6BF8F" stroke-width="1.5"/>` : ''}
-            <circle class="stopc" cx="${t.x}" cy="${t.y}" r="${i === si ? 11 : 8}" fill="${i === si ? '#B4703F' : i === 4 ? '#A9C0D9' : '#0E1C2B'}" stroke="${i === si ? '#F6EEDD' : '#EEF2F7'}" stroke-width="1.5" style="animation-delay: ${(0.2 + i * 0.15).toFixed(2)}s"/>
-            <text x="${t.lx}" y="${t.ly}" text-anchor="${t.anchor}" fill="${i === si ? '#D6BF8F' : '#B8C6D6'}" font-family="Inter" font-weight="520" font-size="12.5">${t.short}</text>${i === 1 ? `<g transform="translate(${t.lx + 101} ${t.ly - 11})" aria-hidden="true"><rect x="1" y="5" width="10" height="8" rx="1.5" fill="#B4703F"/><path d="M3.5 5V3.5a2.5 2.5 0 0 1 5 0" fill="none" stroke="#D6BF8F" stroke-width="1.3"/></g>` : ''}</g>`).join('')}
-        </svg>
-        <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
-          <div class="climbstops no-print" role="group" aria-label="Stops on the climb">${STOPS.map((t, i) => `<button type="button" data-act="stop" data-i="${i}" data-f="stop-${i}" aria-pressed="${i === si}" class="${i === 0 ? 'cfree' : ''}"><span class="cn">${t.n}</span><span><b>${t.name}${i === 0 ? ' <em>Free</em>' : i === 1 ? ' <em class="cg">Unlocks 04–05</em>' : ''}</b><i>${t.line}</i></span></button>`).join('')}</div>
-          <div class="pop" style="background: linear-gradient(120deg, rgba(43,27,18,.85), rgba(28,19,9,.85)); border: 1px solid rgba(214,191,143,.5); border-radius: 9px; padding: 20px; display: flex; flex-direction: column; gap: 10px" aria-live="polite">
+  /* The chosen stop opens right under it (31 Oct, round 4): no scrolling on a phone. */
+  const climbCard = (sv, si) => `<div class="pop climbcard" style="background: linear-gradient(120deg, rgba(43,27,18,.85), rgba(28,19,9,.85)); border: 1px solid rgba(214,191,143,.5); border-radius: 9px; padding: 20px; display: flex; flex-direction: column; gap: 10px" aria-live="polite">
             <span class="eb" style="color: #D6BF8F">${sv.tag}</span>
             <span class="sf" style="font-size: 28px; color: #EEF2F7; line-height: 1.15">${sv.name}</span>
             <span class="sfi" style="font-size: 18px; color: #D6BF8F; line-height: 1.35">${sv.line}</span>
@@ -1208,7 +1381,25 @@
               ${[['MODULES', sv.modules], ['WITH ALEXANDRU', sv.sessions], ['PRICE', sv.price]].map(([k, v]) => `<div style="border: 1px solid rgba(214,191,143,.28); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 11px; color: #CDBB97; letter-spacing: .1em">${k}</span><span style="font-weight: 520; color: #EEF2F7">${v}</span></div>`).join('')}
             </div>
             <a href="${sv.href}" class="go no-print"${sv.ext ? ' target="_blank" rel="noopener"' : ''} style="align-self: flex-start; margin-top: 6px; display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 4px; background: #D6BF8F; color: #1C1309; font-weight: 520; text-decoration: none">${sv.cta} <span class="arr" aria-hidden="true">${sv.ext ? '↗' : '→'}</span></a>
-          </div>
+          </div>`;
+  function pClimb() {
+    const si = S.stop, sv = STOPS[si];
+    return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 720px">
+        <span class="eb" style="color: #A9C0D9">Link to Lead · The Founder’s Blueprint</span>
+        <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; color: #EEF2F7">Your climb. <span class="sfi" style="color: #A9C0D9">One step at a time.</span></h2>
+        <p style="color: #B8C6D6; font-size: 15px; line-height: 1.7">Five stops, one at a time. The first one is free. Tap a stop to see what opens there.</p></div>
+      <div style="display: flex; flex-wrap: wrap; gap: 26px; align-items: center">
+        <svg viewBox="0 0 460 420" style="flex: 1 1 340px; max-width: 520px; height: auto" role="img" aria-label="A constellation from The Founder Launchpad at the bottom to The Summit, the North Star, at the top">
+          ${[[40, 40], [120, 110], [400, 70], [350, 30], [70, 200], [420, 220], [30, 330], [410, 360], [210, 140], [330, 260], [100, 280], [260, 380]].map(([x, y], k) => `<circle class="twinkle${k % 3 ? ' t' + (k % 3 + 1) : ''}" cx="${x}" cy="${y}" r="${(0.8 + (k % 3) * 0.4).toFixed(1)}" fill="${k % 4 ? '#A9C0D9' : '#D6BF8F'}" opacity=".7"/>`).join('')}
+          <polyline class="trail" points="${STOPS.map((t) => t.x + ',' + t.y).join(' ')}" fill="none" stroke="#A9C0D9" stroke-width="1.2" opacity=".55"/>
+          <polyline points="${STOPS.slice(0, si + 1).map((t) => t.x + ',' + t.y).join(' ')}" fill="none" stroke="#D6BF8F" stroke-width="1.8" style="filter: drop-shadow(0 0 4px rgba(214,191,143,.8))"/>
+          ${STOPS.map((t, i) => `<g>${i === si ? `<circle class="halo" cx="${t.x}" cy="${t.y}" r="20" fill="none" stroke="#D6BF8F" stroke-width="1.5"/>` : ''}
+            <path class="stopc" d="${starPath(t.x, t.y, i === 4 ? 16 : i === si ? 12 : 9)}" fill="${i <= si ? '#D6BF8F' : '#A9C0D9'}" style="animation-delay: ${(0.2 + i * 0.15).toFixed(2)}s"/>
+            <text x="${t.lx}" y="${t.ly}" text-anchor="${t.anchor}" fill="${i === si ? '#D6BF8F' : '#B8C6D6'}" font-family="Inter" font-weight="520" font-size="12.5">${t.short}</text>${i === 1 ? `<g transform="translate(${t.lx + 101} ${t.ly - 11})" aria-hidden="true"><rect x="1" y="5" width="10" height="8" rx="1.5" fill="#B4703F"/><path d="M3.5 5V3.5a2.5 2.5 0 0 1 5 0" fill="none" stroke="#D6BF8F" stroke-width="1.3"/></g>` : ''}</g>`).join('')}
+        </svg>
+        <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+          <div class="climbstops no-print" role="group" aria-label="Stops on the climb">${STOPS.map((t, i) => `<button type="button" data-act="stop" data-i="${i}" data-f="stop-${i}" aria-pressed="${i === si}" class="${i === 0 ? 'cfree' : ''}"><span class="cn">${t.n}</span><span><b>${t.name}${i === 0 ? ' <em>Free</em>' : i === 1 ? ' <em class="cg">Unlocks 04–05</em>' : ''}</b><i>${t.line}</i></span></button>${i === si ? climbCard(sv, si) : ''}`).join('')}</div>
+
         </div>
       </div>`;
   }
@@ -1269,15 +1460,17 @@
         <input class="inp" type="text" inputmode="decimal" data-lab="${key}" data-f="lab-${key}" value="${esc(S.lab[key])}" placeholder="${hint}" style="background: #121E2D; color: #EEF2F7; border-color: #2A3A50"></label>`;
     const missing = L.locked ? L.need : [];
     const chips = [...missing.map((x) => x.label), ...(L.locked && L.planned ? ['Customers a month you plan for (below)'] : [])];
-    const lock = L.locked ? `<div class="wlock" role="status">
+    const lock = L.locked ? `<div class="wlock open" id="wlock" role="status">
         <div class="wlock-msg">
-          <strong>See your real situation, from left to right.</strong>
-          <span>Fill ${NUMW[Math.min(4, chips.length)]} ${chips.length === 1 ? 'box' : 'boxes'} ${missing.length ? 'in Part 3 · Your numbers' : 'below'}. A range is enough. Then come back and every slider moves on your own month.</span>
+          <strong>Go on, move a lever. Then make it yours.</strong>
+          <span>It answers only with your own month. Fill ${NUMW[Math.min(4, chips.length)]} ${chips.length === 1 ? 'box' : 'boxes'} ${missing.length ? 'in Part 3 · Your numbers' : 'below'} (a range is enough), and every slider moves your cash, clients, time and people.</span>
           <div class="wchips">${chips.map((c) => `<span class="wchip"><i aria-hidden="true"></i>${esc(c)}</span>`).join('')}</div>
         </div>
         ${missing.length ? '<button type="button" class="go" data-act="lab-take" data-f="lab-take" style="min-height: 48px; padding: 0 20px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; font-size: 15px; cursor: pointer">Take me there ↑</button>' : ''}
       </div>` : '';
-    const dis = L.locked ? ' disabled' : '';
+    // Open to everyone (31 Oct, round 4): before the numbers, the levers move
+    // but nothing answers; everything flashes red and points up to Part 3.
+    const dis = '';
     const rows = PAIRS.map((x) => `<div class="wpair">
         <div class="wcard">
           <div class="wrow"><label for="w-${x.k}" class="wname"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${x.icon}" fill="none" stroke="#6F93B8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>${x.name}</label><span class="wbig" id="lv-val-${x.k}">—</span></div>
@@ -1460,10 +1653,13 @@
       <div class="jny-head"><span class="eb" style="color: #A9C0D9">Your journey · ${esc(LV.name.toLowerCase())}</span><span class="sf">From where you are to where this change takes you. <b>${n} of ${steps.length}</b> stops done.</span></div>
       <ol class="jny-road" style="--p: ${steps.length > 1 ? Math.min(1, n / (steps.length - 1)) : 1}">${steps.map((st, k) => `<li class="${done[k] ? 'done' : ''}${k === next ? ' next' : ''}">
         <span class="jn" aria-hidden="true">${done[k] ? '✓' : k + 1}</span>
+        <span class="jstop">Stop ${k + 1}${st.domainName ? ` · <i>${esc(st.domainName)}</i>` : ''}</span>
         <b>${esc(st.title)}</b>
-        <p>${esc(st.what || '')}</p>
-        ${st.about ? `<p class="jt">About ${esc(st.about)}</p>` : ''}
-        ${st.done ? `<p class="jd"><small>You will have</small>${esc(st.done)}</p>` : ''}
+        ${st.why ? `<p><em>Why it matters:</em> ${esc(st.why)}</p>` : ''}
+        ${st.what ? `<p><em>What to do:</em> ${esc(st.what)}</p>` : ''}
+        ${st.about ? `<p class="jt"><em>About:</em> ${esc(st.about)}</p>` : ''}
+        ${st.ask ? `<p class="sfi jask">“${esc(st.ask)}”</p>` : ''}
+        ${st.done ? `<p class="jd"><small>Done looks like</small>${esc(st.done)}</p>` : ''}
         <label class="jtick"><input type="checkbox" data-tick="${esc(st.id)}" data-f="tick-${esc(st.id)}"${done[k] ? ' checked' : ''}>Done</label></li>`).join('')}</ol>
       <p class="jny-end">${end}</p></div>`;
   }
@@ -1479,6 +1675,17 @@
     return parts.join(' ');
   }
 
+  /** A lever moved before the numbers: everything flashes red three times and
+   *  says where to go. Once per gesture, not on every step of the slider. */
+  let nudging = 0;
+  function labNudge() {
+    if (Date.now() - nudging < 2400) return;
+    nudging = Date.now();
+    const w = document.querySelector('.wlab'), l = document.getElementById('wlock');
+    [w, l].forEach((el) => { if (el) { el.classList.remove('wred'); void el.offsetWidth; el.classList.add('wred'); } });
+    setTimeout(() => { [w, l].forEach((el) => el && el.classList.remove('wred')); document.querySelectorAll('[data-lever]').forEach((x) => { x.value = 0; }); }, 2300);
+    toast('Nice try! Go up and put your numbers in Part 3 first, then this runs on your own month.');
+  }
   /** "Take me there": up to Part 3, the right group open, the missing boxes
    *  glowing for about four seconds. */
   function takeToNumbers() {
@@ -1501,7 +1708,7 @@
   }
 
   const pMbar = (c) => `${emblem(c.pc.per, 40, { small: true })}
-    <span style="flex: 1; font-size: 12px; color: #B8C6D6; line-height: 1.3"><b style="color: #EEF2F7">${c.pc.total}/16</b> pieces in place</span>
+    <span style="flex: 1; font-size: 12px; color: #B8C6D6; line-height: 1.3"><b style="color: #EEF2F7">${c.pc.total}/16</b> stars lit</span>
     <button type="button" data-act="print" data-f="m-print" aria-label="Print or save as PDF" style="width: 44px; height: 44px; border-radius: 50%; border: 1px solid #2A3A50; background: transparent; color: #EEF2F7; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
     <button type="button" data-act="email" data-f="m-email" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; cursor: pointer">Email me</button>`;
 
@@ -1663,8 +1870,12 @@
     sync(); // the end of a section
     UI.page = page in SECTION && page !== 'journey' ? page : page === 'journey' ? 'clear' : UI.page;
     render();
-    const el = document.getElementById(SECTION[page]);
-    if (el) el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' });
+    // A part opens at its dividing line, with its title, just under the top bar (31 Oct).
+    const el = document.getElementById({ people: 'nsdiv-2', numbers: 'nsdiv-3', plan: 'nsdiv-4' }[page] || SECTION[page]);
+    if (!el) return;
+    const ban = document.getElementById('banner'), banH = ban && ban.classList.contains('stuck') ? ban.offsetHeight : ban && !document.body.classList.contains('ns-qview') ? Math.min(ban.offsetHeight, 64) : 0;
+    const top = el.getBoundingClientRect().top + scrollY - ((($('.topwrap') || {}).offsetHeight) || 0) - banH - 12;
+    window.scrollTo({ top: Math.max(0, top), behavior: reduced() ? 'auto' : 'smooth' });
   }
   function toast(msg) {
     const t = $('#toast'); t.textContent = msg; t.style.display = 'block';
@@ -1722,7 +1933,7 @@
   document.addEventListener('click', (e) => {
     const c = context(), P = partState(c);
     const go = e.target.closest && e.target.closest('[data-go]');
-    const want = go ? { people: 2, numbers: 3, plan: 4 }[go.dataset.go] : 0;
+    const want = go ? { people: 2, numbers: 3 }[go.dataset.go] : 0;
     const inLocked = e.target.closest && e.target.closest('.nslocked');
     const need = want ? want : inLocked ? +inLocked.dataset.part : 0;
     if (!need) return;
@@ -1757,7 +1968,9 @@
       case 'mode': S.mode = v; S.group = 0; S.lab.p = 0; S.lab.m = 0; S.lab.f = 0; S.lab.d = 0; save(); render(); return;
       case 'lab-mode': S.lab.mode = v === 'money' ? 'money' : 'time'; save(); renderLab(); return;
       case 'lab-take': takeToNumbers(); return;
-      case 'ans': gated(() => { S.ans[t.dataset.q] = Number(v); }); return;
+      case 'ans': gated(() => { S.ans[t.dataset.q] = Number(v); }); fullscreenTip(); return;
+      case 'nsq-full': enterFull(true); return;
+      case 'nsq-exit': exitFull(); return;
       case 'nsq': qi = i; document.body.classList.remove('nsb-open'); put('questions', pQuestions(context())); placeCrown(); { const r = document.getElementById('nsb-r'); if (r) r.focus({ preventScroll: true }); } return;
       case 'nsmove': nsMove(Number(v)); return;
       case 'nsb-steps': document.body.classList.toggle('nsb-open'); if (document.body.classList.contains('nsb-open')) { const n = document.querySelector('.nsb-s.now'); if (n) n.focus({ preventScroll: true }); } return;
@@ -1768,12 +1981,18 @@
       case 'p2team': gated(() => { S.p2.team = v; }); return;
       case 'p2ans': gated(() => { S.p2.ans[t.dataset.q] = Number(v); }); return;
       case 'pmore': S.pmore[i] = !S.pmore[i]; save(); render(); return;
+      case 'num-chip': S.nums[t.dataset.k] = { pick: v, own: '' }; save(); render(); return;
+      case 'num-unsure': S.nums[t.dataset.k] = { pick: 'unsure', own: '' }; save(); render(); return;
+      case 'num-own': { const k = t.dataset.k, cur = S.nums[k] || {}; S.nums[k] = { pick: 'own', own: cur.pick === 'own' ? cur.own : '' }; save(); render(); const o = document.querySelector(`[data-own="${k}"]`); if (o) o.focus(); return; }
       case 'grp': S.group = i; save(); render(); sync(); return;
       case 'more': S.more[i] = !S.more[i]; save(); render(); return;
       case 'lean': S.lean = i; save(); render(); return;
       case 'stop': S.stop = i; save(); render(); return;
       case 'print': try { window.print(); } catch { /* no print dialog here */ } return;
       case 'email': sendEmail(); return;
+      case 'card-share': cardOut(true); return;
+      case 'card-dl': cardOut(false); return;
+      case 'alloptions': { const o = document.getElementById('s-options'), open = o && o.hidden; if (o) o.hidden = !open; t.setAttribute('aria-expanded', String(!!open)); t.textContent = open ? 'Hide the options ↑' : 'See all options ↓'; if (open) { render(); o.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); } return; }
       case 'regate': fullAccount(); return;
       case 'account': {
         // Locked plans: make the free account, or sign in to the one there is.
@@ -1818,13 +2037,25 @@
     }
     // A lever let go of: send the move with the next quiet moment, not per step.
     if (t.dataset.lever) { clearTimeout(leverTimer); leverTimer = setTimeout(sync, 4000); return; }
+    if (t.dataset.numr) { render(); return; }
     if (t.dataset.num) { const k = t.dataset.num, cur = S.nums[k] || { pick: '', own: '' }; S.nums[k] = { pick: t.value, own: cur.own }; save(); render(); if (t.value === 'own') { const o = document.querySelector(`[data-own="${k}"]`); if (o) o.focus(); } return; }
     // Wait for focus to settle on the next field, then redraw and keep it there.
     if (t.dataset.own || t.dataset.lab) setTimeout(render, 0);
   });
   document.addEventListener('input', (e) => {
     const t = e.target;
-    if (t.dataset.lever) { S.lab[t.dataset.lever] = Number(t.value); save(); renderLab(); return; }
+    // A number slider: the big value follows the thumb; the page redraws on release.
+    if (t.dataset.numr) {
+      const k = t.dataset.numr, ch = (E.fieldsFor(S.mode).find(([key]) => S.mode + '.' + key === k) || [])[2] || [], lab = ch[Number(t.value)] ? ch[Number(t.value)][0] : '';
+      S.nums[k] = { pick: String(t.value), own: '' }; save();
+      const v = document.getElementById('nv-' + k); if (v) v.textContent = lab;
+      t.classList.remove('unset'); t.setAttribute('aria-valuetext', lab); t.closest('.nslide')?.classList.add('set');
+      return;
+    }
+    if (t.dataset.lever) {
+      if (labCalc().locked) { labNudge(); return; }
+      S.lab[t.dataset.lever] = Number(t.value); save(); renderLab(); return;
+    }
     if (t.dataset.own) { S.nums[t.dataset.own] = { pick: 'own', own: t.value.slice(0, 80) }; save(); return; }
     if (t.dataset.lab) { S.lab[t.dataset.lab] = t.value.replace(/[^\d.]/g, '').slice(0, 12); save(); }
   });
@@ -1855,6 +2086,7 @@
     if (e.key === 'Escape') {
       if (body.classList.contains('crownopen')) { crownOpen(false); const c = document.getElementById('crownb'); if (c) c.focus(); }
       else if (body.classList.contains('nsb-open')) body.classList.remove('nsb-open');
+      else if (body.classList.contains('nsq-full')) exitFull();
       return;
     }
     const t = e.target;
@@ -1922,7 +2154,7 @@
  * the twelve weeks, and keeps glowing: there it is (31 Oct). */
 (() => {
   try {
-    const sec = document.getElementById('s-weeks'), link = document.querySelector('.incub-link');
+    const sec = document.getElementById('s-next'), link = document.querySelector('.incub-link');
     if (!sec || !link || !('IntersectionObserver' in window)) return;
     const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { link.classList.add('nsbeckon'); io.disconnect(); } }, { threshold: 0.25 });
     io.observe(sec);

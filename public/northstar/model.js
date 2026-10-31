@@ -81,12 +81,13 @@
   /* A word between questions, shown on six of the eleven pages once answered.
    * The lines marked `by` are Alexandru's own principles. */
   const SPARKS = {
-    1: { t: 'Honest beats impressive. Nobody is grading this, not even us.' },
-    3: { t: 'Business is life, and life is business.', by: 'Alexandru' },
-    5: { t: 'Halfway. Coffee is optional; honesty is not.' },
-    7: { t: 'There is a time to push, and a time to help.', by: 'Alexandru' },
-    8: { t: 'Stick to what you do best, and serve people.', by: 'Alexandru' },
-    10: { t: 'Unbalance for the balance.', by: 'Alexandru', sub: 'Sometimes you tip the scale on purpose, to find your balance.' },
+    1: [{ t: 'Honest beats impressive. Nobody is grading this, not even us.' }, { t: 'Answer for the week you had, not the week you planned.' }, { t: 'Ambition is good. Let’s give it a road.' }],
+    3: [{ t: 'Business is life, and life is business.', by: 'Alexandru' }, { t: 'Stick to what you do best, and serve people.', by: 'Alexandru' }],
+    5: [{ t: 'Halfway. Coffee is optional; honesty is not.' }, { t: 'Halfway there. The “Not yet” answers are where the gold is.' }, { t: 'Halfway. Every honest answer saves you a month of guessing.' }],
+    7: [{ t: 'There is a time to push, and a time to help.', by: 'Alexandru' }, { t: 'Half what you are good at, half what earns. Lean toward serving others.', by: 'Alexandru' }],
+    8: [{ t: 'Stick to what you do best, and serve people.', by: 'Alexandru' }, { t: 'Naming the pain is the first step out of it.' }],
+    9: [{ t: 'Two goals, not ten. Clear wins over busy.' }, { t: 'Start tonight. By Tuesday, you’ll be ahead.' }],
+    10: [{ t: 'Unbalance for the balance.', by: 'Alexandru', sub: 'Sometimes you tip the scale on purpose, to find your balance.' }, { t: 'Business is life, and life is business.', by: 'Alexandru', sub: 'So what you care about belongs in the plan.' }],
   };
 
   const api = { Q, P2, VALUES, SPARKS };

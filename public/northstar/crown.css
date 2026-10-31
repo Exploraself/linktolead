@@ -367,11 +367,149 @@ body:not(.ns-p1done) .mbar{display:none !important}
 .jny-road li.next .jn{box-shadow:0 0 0 6px rgba(111,147,184,.3);animation:fbhere 2.4s ease-in-out infinite}
 .jny-road b{font:500 18px/1.25 Newsreader,Georgia,serif}
 .jny-road p{margin:0;font-size:13.5px;line-height:1.5;color:#B8C6D6}
-.jny-road .jt{font-size:12px;color:#A9C0D9}
+.jny-road .jt{font-size:12.5px;color:#A9C0D9}
+.jny-road em{font-style:normal;font-weight:600;color:#EEF2F7}
+.jstop{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#A9C0D9}
+.jstop i{font-style:normal;color:#D6BF8F}
+.jask{font-size:16px !important;color:#EEF2F7 !important}
+.jny-road li{padding:48px 14px 14px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid #2A3A50}
+.jny-road li.done{border-color:rgba(214,191,143,.45)}
+.jny-road li.next{border-color:#6F93B8;box-shadow:0 10px 26px rgba(0,0,0,.25)}
+.jny-road .jn{left:14px;top:-2px}
 .jny-road .jd{padding:8px 10px;border-radius:6px;background:rgba(214,191,143,.08);border:1px solid rgba(214,191,143,.25);color:#F6EEDD}
 .jny-road .jd small{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#D6BF8F}
 .jtick{display:flex;align-items:center;gap:8px;align-self:flex-start;margin-top:4px;padding:8px 10px;border:1px solid #2A3A50;border-radius:6px;cursor:pointer;font-size:14px}
 .jtick input{width:20px;height:20px;accent-color:#D6BF8F}
 .jny-end{margin:0;font:italic 400 17px/1.4 Newsreader,Georgia,serif;color:#D6BF8F}
-@media(max-width:860px){.jny-road{grid-template-columns:1fr}.jny-road::before,.jny-road::after{left:18px;top:18px;bottom:18px;right:auto;width:3px;height:auto}.jny-road::after{height:calc((100% - 36px) * var(--p));width:3px}.jny-road li{padding:0 0 0 54px}.wswitch{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:860px){.jny-road{grid-template-columns:1fr}.jny-road::before,.jny-road::after{left:30px;top:30px;bottom:30px;right:auto;width:3px;height:auto}.jny-road::after{height:calc((100% - 36px) * var(--p));width:3px}.jny-road li{padding:14px 14px 14px 64px}.jny-road .jn{left:12px;top:12px}.wswitch{grid-template-columns:1fr 1fr 1fr}}
 @media(prefers-reduced-motion:reduce){.nsseal,.fbroad li.here .fbn,.wfree,.incub-link.nsbeckon,.wcard.wbump,.jny-road li.next .jn,.nsspark{animation:none}}
+
+/* ── 31 Oct, round 4 ─────────────────────────────────────────────────────── */
+/* Handwritten notes, easier to read (Caveat). */
+.nsb-note,.p2note{font-family:Caveat,'Segoe Print','Bradley Hand',cursive !important;font-weight:500;font-size:25px !important;line-height:1.22 !important;transform:none !important;letter-spacing:.005em}
+.nsb-note small,.p2note small{transform:none}
+/* Your shape, growing live in the corner of the question page. */
+.nsb-r{position:relative}
+.nsmini{position:absolute;top:22px;right:26px;width:92px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--qink);pointer-events:none}
+.nsmini svg{width:100%;height:auto}
+.nsmini span{font:500 9.5px Inter,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.nsmini-p{transition:all .5s ease}
+.nsq-x,.nsq-start{display:none}
+/* The feedback letter. */
+.fbletter{position:relative;display:flex;flex-direction:column;gap:10px;max-width:720px;padding:26px 28px 20px;border-radius:4px;background:#FFFDF8;border:1px solid var(--fbline);box-shadow:0 1px 0 rgba(0,0,0,.03),0 18px 40px rgba(62,46,20,.10);color:#2A2216}
+.cf[data-theme="dark"] .fbletter{background:#F7F1E3;color:#2A2216}
+.fbletter p{margin:0;font:400 18px/1.55 Newsreader,Georgia,serif}
+.fbletter .fbl-hi{font-style:italic;color:#6B5A3C}
+.fbletter .fbl-ps{font-size:16.5px;color:#4A3D28}
+.fbletter .fbl-ps b{font-family:Inter,Arial,sans-serif;font-size:12px;letter-spacing:.1em;color:#8A6A2F}
+.fbl-sign{display:flex;align-items:center;gap:12px;margin-top:2px}
+.fbl-sign img{height:52px;width:auto}
+.fbl-sign span{font-size:12px;color:#8A7A5E;letter-spacing:.04em}
+.fbletter .fbgot{border:0;padding:6px 0 0;color:#2A2216;margin-top:4px}
+.nsfbw.inner{border:0;padding:0;background:none;margin-top:6px}
+/* The road, as stars. */
+.fbn{background:none !important;border:0 !important;box-shadow:none !important;width:40px;height:40px;animation:none !important;display:inline-flex;align-items:center;justify-content:center;position:relative}
+.fbn svg{position:absolute;inset:0;width:40px;height:40px;fill:var(--fbbg);stroke:var(--fbline);stroke-width:1.5}
+.fbn i{position:relative;font:600 11px Inter,Arial,sans-serif;font-style:normal;color:var(--fbsoft)}
+.fbroad li.done .fbn svg{fill:#D6BF8F;stroke:#B4975F}
+.fbroad li.done .fbn i{color:#1C1309}
+.fbroad li.here .fbn svg{fill:#6F93B8;stroke:#A9C0D9;filter:drop-shadow(0 0 8px rgba(111,147,184,.8));animation:fbstar 2.4s ease-in-out infinite}
+.fbroad li.here .fbn i{color:#0E1C2B}
+@keyframes fbstar{0%,100%{filter:drop-shadow(0 0 4px rgba(111,147,184,.6))}50%{filter:drop-shadow(0 0 14px rgba(111,147,184,.95))}}
+.fbroad::before{background:linear-gradient(90deg,#D6BF8F,rgba(214,191,143,.25)) !important;height:1.5px !important;top:20px !important}
+@media(max-width:900px){.fbroad::before{width:1.5px !important;height:auto !important;left:19px !important;background:linear-gradient(180deg,#D6BF8F,rgba(214,191,143,.25)) !important}}
+/* Lighter ticks: no heavy frames around Done and Got it. */
+.fbgot{border:0 !important;padding:6px 0 !important}
+.jtick{border:0 !important;padding:6px 0 !important}
+/* The full-screen button, flashed once a few minutes into the questions. */
+[data-fs].fsflash{animation:fsflash .8s ease-in-out 4}
+@keyframes fsflash{0%,100%{box-shadow:0 0 0 0 rgba(111,147,184,0)}50%{box-shadow:0 0 0 5px rgba(111,147,184,.75),0 0 20px rgba(111,147,184,.55)}}
+/* The lab before the numbers: open, and a red flash that points up. */
+.wlab.locked .wpair{opacity:1 !important;filter:none !important}
+.wlab.wred .wcard{animation:wred .7s ease-in-out 3}
+.wlab.wred input[type=range]{accent-color:#D9534F}
+#wlock.wred{animation:wred .7s ease-in-out 3;border-color:#D9534F}
+@keyframes wred{0%,100%{box-shadow:0 0 0 0 rgba(217,83,79,0)}50%{box-shadow:0 0 0 3px rgba(217,83,79,.9),0 0 26px rgba(217,83,79,.5);background-color:rgba(217,83,79,.12)}}
+/* Numbers on sliders. */
+.nslide{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:8px;border:1px solid var(--line);background:var(--paper)}
+.nslide.set{border-color:#6F93B8}
+.nsl-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.nsl-top label{font-size:13px;font-weight:520}
+.nsl-val{font-size:22px;line-height:1.1;color:var(--goldink);text-align:right}
+.nslide:not(.set) .nsl-val{font:italic 400 15px Newsreader,Georgia,serif;color:var(--muted)}
+.nsl-range{width:100%;accent-color:#6F93B8;height:30px;cursor:pointer}
+.nsl-range.unset{accent-color:#A9B6C6;opacity:.75}
+.nsl-ends{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:-4px}
+.nsl-chips{display:flex;flex-wrap:wrap;gap:6px}
+.nsl-chips button{min-height:38px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:13px;cursor:pointer}
+.nsl-chips button[aria-pressed="true"]{background:#6F93B8;border-color:#6F93B8;color:#0E1C2B;font-weight:600}
+.nsl-alt{display:flex;gap:14px;flex-wrap:wrap}
+.nsl-alt button{border:0;background:none;padding:4px 0;font-size:12px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.nsl-alt button[aria-pressed="true"]{color:var(--goldink);font-weight:600}
+.nslide.glowbox{animation:wglow 1s ease-in-out 4;border-color:#6F93B8}
+/* Your North Star card. */
+.nscardsec{background:var(--paper)}
+.nscard-wrap{flex:0 1 380px;min-width:240px;max-width:100%}
+.nscard svg{display:block;width:100%;height:auto;border-radius:14px;box-shadow:0 24px 50px rgba(14,28,43,.28)}
+.nscard.empty{aspect-ratio:4/5;border-radius:14px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--muted);background:linear-gradient(#0E1C2B,#1B2B40);color:#A9C0D9}
+.nscard-side{flex:1 1 320px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.nslink{border:0;background:none;padding:6px 0;color:var(--goldink);font-weight:520;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+/* One ending, one button. */
+.nsnext{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:46px 24px;border-radius:14px;background:radial-gradient(ellipse at top,#1B2B40,#0E1C2B 70%);color:#EEF2F7;border:1px solid rgba(214,191,143,.45)}
+.nsnext h2{font-size:clamp(30px,4.4vw,48px);line-height:1.05;color:#EEF2F7}
+.nsnext h2 .sfi{color:#D6BF8F}
+.nsnext p{max-width:560px;color:#D9E2EC;font-size:16px;line-height:1.6;margin:0}
+.nsnext-go{display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:0 28px;border-radius:5px;background:#D6BF8F;color:#1C1309;font-weight:600;font-size:16px;text-decoration:none;box-shadow:0 12px 28px rgba(214,191,143,.25)}
+.nsnext-all{border:0;background:none;color:#A9C0D9;font-size:14px;padding:8px 0;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+#s-options[hidden]{display:none !important}
+/* The free weeks keep their colour, framed in gold. */
+.wfree{background:var(--wc) !important;border:2px solid #D6BF8F;box-sizing:border-box}
+.wfree b{background:#D6BF8F;color:#1C1309;border-radius:3px;padding:2px 5px;font-size:8px}
+.wfree-dot{background:transparent !important;border:2px solid #D6BF8F}
+/* The chosen stop on the climb opens right under it. */
+.climbcard{margin:2px 0 6px}
+/* The phone: one question per screen, full screen, like the Blueprint. */
+@media(max-width:760px){
+  .nsq-start{display:flex;flex-direction:column;gap:8px;padding:22px 20px;border-radius:12px;background:radial-gradient(ellipse at top,#1B2B40,#0E1C2B 75%);color:#EEF2F7;border:1px solid rgba(111,147,184,.5);box-shadow:0 18px 40px rgba(14,28,43,.25)}
+  .nsq-start .eb{color:#A9C0D9}
+  .nsq-start b{font:400 26px/1.15 Newsreader,Georgia,serif}
+  .nsq-start b .sfi{color:#A9C0D9}
+  .nsq-start>span:not(.eb){font-size:14.5px;color:#D9E2EC}
+  .nsq-start .go{margin-top:6px;min-height:52px;border:0;border-radius:6px;background:#6F93B8;color:#0E1C2B;font-weight:600;font-size:16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+  body:not(.nsq-full) .nsb{display:none}
+  body.nsq-full .nsb{position:fixed;inset:0;z-index:80;margin:0;overflow-y:auto;overscroll-behavior:contain;background:var(--rt);display:block}
+  body.nsq-full .nsb-r{min-height:100svh;border:0;border-radius:0;padding:12px 18px 128px}
+  body.nsq-full{overflow:hidden}
+  body.nsq-full #acct-gate{z-index:99}
+  body.nsq-full #toast{z-index:100}
+  .nsq-x{display:block;position:absolute;top:8px;right:8px;z-index:2;width:44px;height:44px;border:0;border-radius:50%;background:none;color:var(--qink);font-size:28px;line-height:1;cursor:pointer}
+  .nsb-phone{padding-right:44px}
+  .nsmini{top:52px;right:14px;width:56px}
+  .nsmini span{display:none}
+  .nsb-lab{margin-top:10px;padding-right:62px}
+  .nsb-q{font-size:22px !important;line-height:1.25 !important;padding-right:52px}
+  .nsb-p{font-size:14px;margin-top:4px}
+  .nsb-opts{margin-top:10px}
+  .nsb-o{min-height:48px;padding:4px 10px}
+  .nsb-note{margin-top:12px !important;font-size:23px !important}
+  .nsspark{margin-top:10px;padding:10px 12px}
+  .nsspark p{font-size:16px}
+  .nscard-wrap{flex:1 1 100%}
+}
+@media(prefers-reduced-motion:reduce){.fbroad li.here .fbn svg,[data-fs].fsflash,.wlab.wred .wcard,#wlock.wred,.nslide.glowbox{animation:none}}
+/* Unused potential: the gold between their strengths and their answers. */
+.nsgap{opacity:.55;animation:nsgap 2.8s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(214,191,143,.7))}
+@keyframes nsgap{0%,100%{opacity:.35}50%{opacity:.85}}
+.nsgap-tag{animation:nsgapt 2.8s ease-in-out infinite}
+@keyframes nsgapt{0%,100%{opacity:.85}50%{opacity:1}}
+.k-gap{background:#D6BF8F;box-shadow:0 0 10px rgba(214,191,143,.8)}
+.nsgapmsg{display:flex;flex-direction:column;gap:6px;max-width:760px;padding:18px 20px;border-radius:10px;border:1px solid #D6BF8F;border-left:5px solid #D6BF8F;background:rgba(214,191,143,.12)}
+.nsgapmsg .eb{color:#8A6A2F}
+.cf[data-theme="dark"] .nsgapmsg .eb{color:#D6BF8F}
+.nsgapmsg>b{font-size:clamp(22px,2.6vw,28px);line-height:1.2;font-weight:440}
+.nsgapmsg>b .sfi{color:#8A6A2F}
+.cf[data-theme="dark"] .nsgapmsg>b .sfi{color:#D6BF8F}
+.nsgapmsg p{margin:0;font-size:15.5px;line-height:1.6}
+@media(prefers-reduced-motion:reduce){.nsgap,.nsgap-tag{animation:none}}
+#toast{pointer-events:none}
+@media(max-width:760px){.nsb-keys{display:none !important}}
