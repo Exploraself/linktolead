@@ -330,7 +330,7 @@ function homeView() {
   const first = firstName();
   return `<div class="gp">
     ${cabinetHTML(cabinetData(st, gp, first))}
-    ${compassStripHTML(!!compassRec)}
+    ${compassStripHTML(!!compassRec, compassRec && compassRec.taken ? compassRec.taken.length : 1)}
     ${notesHTML()}
     ${nudgeHTML(st)}
     ${gp ? planHTML(gp, st) : `<section class="gp-wrap gp-two gp-grid">${standHTML(st)}</section>${howItWorks(st)}`}

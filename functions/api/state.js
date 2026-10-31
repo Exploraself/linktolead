@@ -21,7 +21,7 @@ export async function onRequestGet({ request, env }) {
   const [answers, sheets, compass, auth, chose, prof] = await Promise.all([
     D.prepare('SELECT stage,level,domain,step,body FROM answer WHERE student_id = ?').bind(me.id).all(),
     D.prepare('SELECT key,value FROM sheet WHERE student_id = ?').bind(me.id).all(),
-    D.prepare('SELECT stage,results_json,flags_json,updated_at FROM compass WHERE student_id = ?').bind(me.id).first(),
+    D.prepare('SELECT stage,results_json,flags_json,updated_at,answers_json FROM compass WHERE student_id = ?').bind(me.id).first(),
     D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(me.id).first(),
     D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'stage-change' LIMIT 1").bind(me.id).first(),
     D.prepare('SELECT signup_type, consent, unsubscribed, avatar FROM student_profile WHERE student_id = ?').bind(me.id).first(),
@@ -30,6 +30,14 @@ export async function onRequestGet({ request, env }) {
   await keepTz(D, me.id, new URL(request.url).searchParams.get('tz'));
   const mentor = await mentorFor(D, me.id);
 
+  // The dates the North Star was taken (round 6): the earlier ones kept in its
+  // history, then the current one. The full answers stay out of this reply.
+  if (compass) {
+    let hist = [];
+    try { const j = compass.answers_json ? JSON.parse(compass.answers_json) : null; hist = Array.isArray(j && j.history) ? j.history.map((h) => h && h.at).filter((x) => typeof x === 'string') : []; } catch { hist = []; }
+    compass.taken = [...hist, compass.updated_at].filter(Boolean);
+    delete compass.answers_json;
+  }
   const a = {};
   for (const r of answers.results || []) a[`${r.stage}.${r.level}.${r.domain}.${r.step}`] = r.body;
   const w = {};

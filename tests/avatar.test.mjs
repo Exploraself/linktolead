@@ -27,4 +27,9 @@ s = await (await stateGet({ request: get(`/api/state?t=${ana}`), env })).json();
 ok(s.me.avatar === '', 'removed');
 const pm = fs.readFileSync('public/profile-menu.js', 'utf8');
 ok(pm.includes('squarePhoto') && pm.includes("position: 'fixed', left: '10px', right: '10px'"), 'profile menu: photo cut square; on a phone the menu stays inside the screen');
+// Round 6: /api/state says when the North Star was taken (the dates only, not the answers).
+import { onRequestPost as compassPost } from '../functions/api/compass.js';
+await compassPost({ request: post('/api/compass', { token: ana, stage: 'build', answers: { ans: { 0: 3 }, history: [{ at: '2026-09-01T10:00:00.000Z', sc: [50, 40, 30, 20] }] }, results: { answered: [1, 0, 0, 0] } }), env, waitUntil: () => {} });
+s = await (await stateGet({ request: get(`/api/state?t=${ana}`), env })).json();
+ok(Array.isArray(s.compass.taken) && s.compass.taken.length === 2 && s.compass.taken[0] === '2026-09-01T10:00:00.000Z' && !('answers_json' in s.compass), '/api/state: the North Star taken twice, dates only');
 done();

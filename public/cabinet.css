@@ -129,3 +129,8 @@
 .cstrip-t b{display:block;font:440 16px/1.35 Newsreader,Georgia,serif}
 .cstrip-go{flex:none;display:inline-flex;align-items:center;min-height:42px;padding:0 18px;border-radius:999px;background:#B4975F;color:#14100B;font:600 13.5px 'Inter',Arial,sans-serif}
 @media(max-width:640px){.cstrip{margin:12px 12px 0;flex-wrap:wrap}.cstrip-go{width:100%;justify-content:center}}
+/* North Star taken N times, check it again (31 Oct, round 6) */
+.cstrip-again{max-width:1200px;margin:14px auto 0;padding:0 18px;font-size:14px;color:var(--muted,#5b6472)}
+.cstrip-again a{color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.cstrip-again + .cstrip{margin-top:8px}
+@media(max-width:640px){.cstrip-again{margin:12px 12px 0;padding:0 6px}}

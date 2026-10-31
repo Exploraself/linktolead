@@ -40,4 +40,13 @@ const NM = (await import('node:module')).createRequire(import.meta.url)('../publ
 ok(NM.P2.questions('yes', 'team').length === 6 && NM.P2.questions('idea', 'solo').every((q) => q.lo && q.hi && q.prompt) && NM.VALUES.length === 8, 'North Star Part 2: six questions for every founder (customers or not yet, team or just me), and eight values to pick two from');
 ok(!nsi.includes('still being written') && nsi.includes('id="p2"') && ns.includes('function pPeople(') && ns.includes('function fbWindow('), 'North Star: Part 2 is written, and every part ends in the same feedback window');
 ok(ns.includes('sealed until Part 1') && !nsi.includes('>Ask “what if?” →<'), 'North Star: answers sealed on the compass before Part 1; no early jump to the lab');
+// Round 6 (31 Oct): the gap says what it costs; the Action Plan PDF; check it again and compare.
+ok(ns.includes('function pGap(') && ns.includes('data-act="why"') && ns.includes('class="gapfeel') && !ns.includes('UNUSED POTENTIAL</text>'), 'North Star: the unused-potential message is a full block with Find out why (no label over the picture)');
+const pdf = read('public/northstar/plan-pdf.js');
+ok(nsi.includes('id="s-plan"') && ns.includes("import('./plan-pdf.js')") && pdf.includes('export async function makePlanPDF') && pdf.includes('%PDF-1.4') && !/import .* from ['"](?!\.)/.test(pdf), 'North Star Action Plan: a PDF made in the browser, no library');
+ok(/const actions = \[/.test(ns) && ['Lead yourself', 'Lead your business', 'Lead the market', 'Lead your people'].every((d) => ns.includes(d)), 'Action Plan: five actions across all four domains');
+ok(ns.includes('function retake(') && ns.includes('history: []') && ns.includes('.slice(-12)') && ns.includes("location.hash === '#again'") && ns.includes("location.hash === '#compare'") && !/assessment/i.test(ns.split('function retake(')[1].split('function pCompare(')[0]), 'Check your North Star again: the last one is kept (up to 12), never called an assessment');
+ok(ns.includes('function pCompare(') && ns.includes('stroke-dasharray="2 6"'), 'Compare: the last shape dotted on the compass, a row per domain');
+const pmenu = read('public/profile-menu.js');
+ok(pmenu.includes('/northstar/#again') && pmenu.includes('Check your North Star again') && pmenu.includes('/northstar/#compare'), 'profile menu: Check your North Star again, and Compare with last time');
 done();
