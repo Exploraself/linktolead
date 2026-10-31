@@ -181,7 +181,7 @@ const noRun = baseOf({ ...EXAMPLE, run: null, rate: null, hire: null }), nm = E.
 ok(noRun.fixed === 0 && nm.cash === null && nm.people === null && Number.isFinite(nm.mine), 'empty Fine-tune boxes: no money figure invented, the hours still move');
 
 // ── Mailchimp landing tags ──────────────────────────────────────────────────
-ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', road4: 'linktolead-road4', compass: 'linktolead-northstar', summit: 'linktolead-summitpage' }), 'landing tags: the linktolead-… system');
+ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', road4: 'linktolead-road4', compass: 'linktolead-northstar', summit: 'linktolead-summit' }), 'landing tags: the linktolead-… system');
 // Road 2.1 (30 Oct): its own tag, no empty old tag, the FULL form, and road2 untouched beside it.
 {
   const { tagsFor } = await import('../functions/_mailchimp.js');
@@ -219,7 +219,7 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
   ok(all.every((x) => /^linktolead(-[a-z0-9.]+)*$/.test(x.name)), 'every tag follows linktolead-<group>-<value>');
   ok(!all.some((x) => /Industry|Interest|Signup|sales-page/.test(x.name)), 'industry, interest, form and source are not tags');
 }
-ok(!tagsFor({ landing: 'toString' }).some((x) => /road|northstar|summitpage/.test(x.name)), 'an unknown landing gets no landing tag');
+ok(!tagsFor({ landing: 'toString' }).some((x) => /road|north|summit/.test(x.name)), 'an unknown landing gets no landing tag');
 
 // ── /start: the greeting ────────────────────────────────────────────────────
 const APP = read('public/app.js');
