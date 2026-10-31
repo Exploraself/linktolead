@@ -38,7 +38,18 @@ const STYLE = `.ab-pw{display:flex;gap:6px}.ab-pw .inp{flex:1;min-width:0}
 .abox .ab-go{min-height:52px;border:0;border-radius:5px;background:#B4975F;color:#14100B;font:600 15px 'Inter',Arial,sans-serif;letter-spacing:.04em;cursor:pointer}
 .abox .ab-go:hover{background:#D6BF8F}
 .abox .ab-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:420px){.abox .ab-two{grid-template-columns:1fr}}`;
+@media(max-width:420px){.abox .ab-two{grid-template-columns:1fr}}
+/* The site at night (theme.js): the box turns midnight with ivory text, the
+   same on every page, whatever the page's own dark rules do (31 Oct). */
+:root[data-theme="dark"] .abox{background:#141E36!important;color:#E9ECF3!important;color-scheme:dark;box-shadow:0 30px 70px rgba(0,0,0,.55)!important}
+:root[data-theme="dark"] .abox h2,:root[data-theme="dark"] .abox label{color:#E9ECF3!important}
+:root[data-theme="dark"] .abox .ab-k,:root[data-theme="dark"] .abox .ab-link{color:#D6BF8F!important}
+:root[data-theme="dark"] .abox .ab-sub,:root[data-theme="dark"] .abox .ab-fine{color:#B9C1D3!important}
+:root[data-theme="dark"] .abox .ab-err{color:#F0A27E!important}
+:root[data-theme="dark"] .abox .inp,:root[data-theme="dark"] .abox .ab-eye{background:#0F1830!important;color:#E9ECF3!important;border-color:#3A4A6E!important}
+:root[data-theme="dark"] .abox .inp::placeholder{color:#8F9AB3}
+:root[data-theme="dark"] .abox .ab-eye[aria-pressed="true"]{background:#1E2A46!important}
+:root[data-theme="dark"] .abox .ab-x,:root[data-theme="dark"] .abox .ab-no{background:transparent!important;color:#E9ECF3!important;border-color:#3A4A6E!important}`;
 
 // The words at the top of the box. The North Star sales page carries the
 // visitor's answers into the account; the home page has none to carry.
@@ -52,11 +63,11 @@ const HEAD = {
 
 const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpop abox" role="dialog" aria-modal="true" aria-labelledby="gate-h" style="position: relative; width: 100%; max-width: 480px; background: #FFFDF8; color: #121C2D; border-radius: 10px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.4); margin: auto; font-family: 'Inter', Arial, sans-serif; box-sizing: border-box">
     <style>${STYLE}</style>
-    <button type="button" data-close aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #D8CDBB; background: #FFFFFF; color: #121C2D; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <button type="button" class="ab-x" data-close aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #D8CDBB; background: #FFFFFF; color: #121C2D; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
     <form id="gate-form" novalidate style="display: flex; flex-direction: column; gap: 14px">
-      <span style="font-size: 12px; font-weight: 600; letter-spacing: .16em; color: #7A5E26; padding-right: 44px">${head[0]}</span>
+      <span class="ab-k" style="font-size: 12px; font-weight: 600; letter-spacing: .16em; color: #7A5E26; padding-right: 44px">${head[0]}</span>
       <h2 id="gate-h" style="margin: 0; font:440 26px/1.25 Newsreader, Georgia, serif; padding-right: 40px">${head[1]}</h2>
-      <span style="font-size: 14px; color: #3D4966">${head[2]}</span>
+      <span class="ab-sub" style="font-size: 14px; color: #3D4966">${head[2]}</span>
       <div class="ab-two">
         <label style="${LAB}">First name<input class="inp" id="j-first" type="text" autocomplete="given-name" maxlength="60"></label>
         <label style="${LAB}">Surname<input class="inp" id="j-last" type="text" autocomplete="family-name" maxlength="60"></label>
@@ -65,12 +76,12 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
       ${variant === 'full' ? detailFields('j', LAB) + `
       <label style="${LAB}">Password${pwInput('j-pw')}</label>
       <label style="${LAB}">Confirm password${pwInput('j-pw2')}</label>
-      <span style="font-size: 12px; color: #5A6580; margin-top: -6px">At least 10 characters. You sign in with your email and this password.</span>` : ''}
-      <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: #3D4966"><input type="checkbox" id="j-consent" style="width: 18px; height: 18px; margin-top: 1px; accent-color: #B4975F; flex: none">${CONSENT}</label>
-      <span id="gate-err" role="alert" style="font-size: 13px; color: #B5512E; font-weight: 600"></span>
+      <span class="ab-fine" style="font-size: 12px; color: #5A6580; margin-top: -6px">At least 10 characters. You sign in with your email and this password.</span>` : ''}
+      <label class="ab-fine" style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: #3D4966"><input type="checkbox" id="j-consent" style="width: 18px; height: 18px; margin-top: 1px; accent-color: #B4975F; flex: none">${CONSENT}</label>
+      <span id="gate-err" class="ab-err" role="alert" style="font-size: 13px; color: #B5512E; font-weight: 600"></span>
       <button type="submit" class="ab-go">${stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →'}</button>
-      ${stay ? '' : '<button type="button" data-close style="min-height: 44px; border-radius: 5px; border: 1px solid #D8CDBB; background: transparent; color: #121C2D; font-weight: 600; cursor: pointer">Not now · keep reading</button>'}
-      <a href="/ground-plan/#signin" style="font-size: 13px; text-align: center; font-weight: 600; color: #7A5E26">Already have an account? Sign in</a>
+      ${stay ? '' : '<button type="button" class="ab-no" data-close style="min-height: 44px; border-radius: 5px; border: 1px solid #D8CDBB; background: transparent; color: #121C2D; font-weight: 600; cursor: pointer">Not now · keep reading</button>'}
+      <a class="ab-link" href="/ground-plan/#signin" style="font-size: 13px; text-align: center; font-weight: 600; color: #7A5E26">Already have an account? Sign in</a>
     </form>
   </div>`;
 
