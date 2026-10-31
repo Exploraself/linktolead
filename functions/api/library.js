@@ -32,7 +32,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
   const D = db(env);
   if (!D) return bad('The library is not available right now.', 503);
   const me = await studentBy(D, url.searchParams.get('t'));
-  if (!me) return go(request, '/road2/#join');
+  if (!me) return go(request, '/north/#join');
   await accountTables(D);
   const before = await D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'library-download' AND detail = ? LIMIT 1").bind(me.id, key).first();
   await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(me.id, 'library-download', now(), key).run();

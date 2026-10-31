@@ -5,7 +5,7 @@
 // or a division by zero, whatever the founder slides or types.
 
 import { createRequire } from 'node:module';
-const { ladder, posOf, dream, plan } = createRequire(import.meta.url)('../public/road2/sales.js');
+const { ladder, posOf, dream, plan } = createRequire(import.meta.url)('../public/north/sales.js');
 
 let passed = 0, failed = 0;
 const ok = (cond, msg) => { if (cond) passed++; else { failed++; console.error('FAIL:', msg); } };

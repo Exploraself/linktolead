@@ -2,7 +2,7 @@
 // (the full form), and where they came from.
 //
 // Two forms make the same student record:
-//   FULL   (/road1/, landing "road1"; /road2/, the North Star sales page,
+//   FULL   (/road1/, landing "road1"; /north/, the North Star sales page,
 //          landing "road2"): first name, surname, email, company (or "No
 //          company yet"), interest, industry, a password (required), consent.
 //   SIMPLE (/road3/, the 12 Scrolls page, landing "road3", and the North Star's

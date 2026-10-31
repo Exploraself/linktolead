@@ -1,5 +1,5 @@
 // Three sales pages, the three roads, one account, all ending at /start:
-// Road 1 (/road1/, the long page, with the What-if Lab) and Road 2 (/road2/,
+// Road 1 (/road1/, the long page, with the What-if Lab) and Road 2 (/north/,
 // the North Star sales page) with the FULL form, Road 3 (/road3/, the 12 Scrolls
 // page) with the SIMPLE form. The forms (POST /api/signup): no password on
 // simple, ever; a password required on full; the landing and the utm_* tags
@@ -23,14 +23,14 @@ import * as F from '../public/forms.js';
 import { summary, filter, byLanding } from '../public/mentor/dash.js';
 import { levelsHTML, band } from '../public/road3/page.js';
 import { weekTitle } from '../public/content.js';
-import { baseFrom } from '../public/road2/lab.js';
+import { baseFrom } from '../public/north/lab.js';
 import { baseOf, EXAMPLE, num } from '../public/road1/lab.js';
 import { tagsFor, LANDING_TAGS } from '../functions/_mailchimp.js';
 import { fakeD1, fakeResend, post, get, tally } from './_d1.mjs';
 
 const require = createRequire(import.meta.url);
 const E = require('../public/northstar/engine.js');
-const SalesMath = require('../public/road2/sales.js');
+const SalesMath = require('../public/north/sales.js');
 const read = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const { ok, done } = tally('forms');
 
@@ -112,8 +112,8 @@ ok(/"Sign-up form","Landing","utm_source"/.test(csv) && csv.includes('"Fay & Co"
 
 // ── The three roads, the old addresses and the 404 ─────────────────────────
 const assets = { ASSETS: { fetch: () => new Response('asset') } };
-const OLD = [['/', '/road1/'], ['/b', '/road1/'], ['/b/', '/road1/'], ['/compass/welcome', '/road2/'], ['/compass/welcome/', '/road2/'], ['/compass/welcome-a', '/road2/'],
-  ['/compass/welcome-a/', '/road2/'], ['/c', '/road2/'], ['/c/', '/road2/'], ['/a', '/road3/'], ['/a/', '/road3/']];
+const OLD = [['/', '/road1/'], ['/b', '/road1/'], ['/b/', '/road1/'], ['/compass/welcome', '/north/'], ['/compass/welcome/', '/north/'], ['/compass/welcome-a', '/north/'],
+  ['/compass/welcome-a/', '/north/'], ['/c', '/north/'], ['/c/', '/north/'], ['/a', '/road3/'], ['/a/', '/road3/']];
 for (const [from, to] of OLD) {
   const q = '?utm_source=exploraself&utm_medium=banner&utm_content=home-3';
   const w = await worker.fetch(get(from + q), assets, {});
@@ -121,7 +121,7 @@ for (const [from, to] of OLD) {
   ok(w.status === 302 && w.headers.get('location') === to + q && pg.status === 302 && pg.headers.get('location') === to + q, `${from} → ${to}, utm kept (Worker and Pages)`);
 }
 ok((await worker.fetch(get('/b'), assets, {})).headers.get('location') === '/road1/', 'no query string: none added');
-for (const p of ['/road1/', '/road2/', '/road3/', '/northstar', '/northstar/summit', '/ground-plan/']) ok(await (await worker.fetch(get(p), assets, {})).text() === 'asset' && await (await pagesRedirect({ request: get(p), next: () => new Response('asset') })).text() === 'asset', `${p} is served, not redirected`);
+for (const p of ['/road1/', '/north/', '/road3/', '/northstar', '/northstar/summit', '/ground-plan/']) ok(await (await worker.fetch(get(p), assets, {})).text() === 'asset' && await (await pagesRedirect({ request: get(p), next: () => new Response('asset') })).text() === 'asset', `${p} is served, not redirected`);
 { const r = await pagesRedirect({ request: get('/start?signin=abc'), next: () => new Response('asset') }); ok(r.status === 302 && r.headers.get('location') === '/ground-plan/?signin=abc', '/start (old links, old emails) lands on /ground-plan/, sign-in code kept'); }
 for (const d of ['index.html', 'page.js', 'lab.js', 'a', 'b', 'compass/welcome', 'compass/welcome-a']) ok(!existsSync(new URL('../public/' + d, import.meta.url)), `public/${d}: no copy left at the old address`);
 const W = read('wrangler.toml');
@@ -142,12 +142,12 @@ for (const [n, p] of [['The Founder Launchpad', 'No cost'], ['The Boardroom', 'O
 ok(!['$97', '$397', '$1,989'].some((p) => A.includes(`<span class="pr">${p}</span>`)) && A.includes('Start free. When you’re ready, one hour with Alexandru opens the next two weeks.'), 'Road 3: only the next step, no LAB, HUB or Summit prices');
 ok(A.includes('Your business can’t grow <em>past you.</em>') && A.includes('The Founder’s Blueprint · Link to Lead') && !/incubator/i.test(A), 'Road 3: its own headline, and no "Incubator"');
 ok(A.includes('Start tonight, free. <em>By Tuesday, you’ll be ahead.</em>') && A.includes('>Start free →</button>') && A.includes('Levels 01–03 free · Instant access') && !/ten questions/i.test(A), 'Road 3: the close');
-ok(!/PHOTO/.test(A) && read('public/road3/page.js').includes("variant: 'simple', landing: 'road3'") && A.includes('src="/road3/page.js"') && A.includes('<a href="/road2/">The Leader’s North Star</a>'), 'Road 3: no photo placeholder; Join opens the simple form, landing road3; its footer links to Road 2');
+ok(!/PHOTO/.test(A) && read('public/road3/page.js').includes("variant: 'simple', landing: 'road3'") && A.includes('src="/road3/page.js"') && A.includes('<a href="/north/">The Leader’s North Star</a>'), 'Road 3: no photo placeholder; Join opens the simple form, landing road3; its footer links to Road 2');
 ok(levelsHTML('build').includes(`<p>${weekTitle('build', 1)}</p>`) && (levelsHTML('grow').match(/<li/g) || []).length === 12, 'Road 3: level names come from content.js');
 ok([1, 3, 4, 5, 6, 11, 12].map(band).join() === 'free,free,with,with,,,last', 'Road 3: the levels’ bands');
-const WB = read('public/road2/index.html');
+const WB = read('public/north/index.html');
 for (const W of [WB]) ok(W.includes('<button type="button" data-gate class="cta gold-btn" style="min-height: 56px; padding: 0 32px; font-size: 17px">Show me my road →</button>') && !W.includes('href="#dream"') && !/<a [^>]*href="\/(?!compass\/assets|assets)/.test(W), 'Road 2: "Show me my road" opens the full form; no link leaves the page');
-ok(read('public/road2/sales.js').includes("variant: 'full', landing: 'road2'") && WB.includes('src="/road2/sales.js"') && WB.includes('content="https://linktolead.exploraself.com/road2/"') && read('public/northstar/app.js').includes("type: 'simple', landing: 'compass'"), 'Road 2 stays FULL, landing road2; the /northstar box stays SIMPLE');
+ok(read('public/north/sales.js').includes("variant: 'full', landing: 'road2'") && WB.includes('src="/north/sales.js"') && WB.includes('content="https://linktolead.exploraself.com/north/"') && read('public/northstar/app.js').includes("type: 'simple', landing: 'compass'"), 'Road 2 stays FULL, landing road2; the /northstar box stays SIMPLE');
 const box = read('public/account-box.js');
 ok(/pwInput\('j-pw'\)/.test(box) && /pwInput\('j-pw2'\)/.test(box) && /data-eye=/.test(box) && /variant === 'full' \? detailFields/.test(box) && /landing: ctx\.landing, utm: utm\(\)/.test(box), 'the account box: a password (with the show-password eye) on the full form only, landing and utm sent');
 
@@ -156,15 +156,15 @@ const P = SalesMath.plan({ goal: 6000, price: 400, keep: 60, hps: 8, avail: 140 
 ok(P.badge === 'OVER YOUR HOURS' && P.over === 60, 'badge: over the hours you want is "OVER YOUR HOURS", 60 h over');
 ok(P.paysAtHours === 4080, 'lever 1: 6,000 / 400 / 60% / 8 h / 140 h → 4,080');
 ok(SalesMath.plan({ goal: 1000, price: 400, keep: 60, hps: 8, avail: 140 }).badge === 'IT FITS' && SalesMath.plan({ goal: 3900, price: 400, keep: 60, hps: 8, avail: 140 }).badge === 'TIGHT', 'badge: IT FITS and TIGHT unchanged');
-ok(!read('public/road2/sales.js').includes('IN THE RED'), 'no "IN THE RED" left');
+ok(!read('public/north/sales.js').includes('IN THE RED'), 'no "IN THE RED" left');
 ok(WB.includes('1 · What do you want the business to pay you each month (before tax)?') && WB.includes('Not counted: the hours you spend finding clients and running the business.') && WB.includes('At your hours, this plan pays about <b data-out="paysAtHours"></b>.'), 'plan live: the new question, the note under the bar, the lever-1 line');
-ok(WB.includes('<h2 class="h2 win4-h">A win has four sides.</h2>') && (WB.match(/<button type="button" data-dom=/g) || []).length === 4 && WB.includes('A win is where all four meet.') && read('public/road2/sales.css').includes('prefers-reduced-motion:reduce){.win4-box'), 'four sides: overlapping circles, four buttons, the caption, reduced motion');
+ok(WB.includes('<h2 class="h2 win4-h">A win has four sides.</h2>') && (WB.match(/<button type="button" data-dom=/g) || []).length === 4 && WB.includes('A win is where all four meet.') && read('public/north/sales.css').includes('prefers-reduced-motion:reduce){.win4-box'), 'four sides: overlapping circles, four buttons, the caption, reduced motion');
 ok(WB.includes('That was five sliders. Now pull the four levers.'), 'a look inside: the new heading');
 const b = baseFrom({ goal: 6000, price: 400, keep: 60, hps: 8, avail: 140 });
 const t = E.month(b, {}, 'time');
 ok(b.clients === 25 && t.cash === 6000 && t.mine === 200 && b.limit === 140, 'the lab starts from the five numbers: 25 sales, 6,000 left, 200 hours, 140 wanted');
 ok(E.month(b, { p: 50 }, 'time').mine < t.mine && E.month(b, { p: 50 }, 'money').cash > t.cash, 'the levers move it through the North Star engine');
-ok(/E\.month\(/.test(read('public/road2/lab.js')) && !/function month\(/.test(read('public/road2/lab.js')), 'the lab reuses engine.js, it does not copy the logic');
+ok(/E\.month\(/.test(read('public/north/lab.js')) && !/function month\(/.test(read('public/north/lab.js')), 'the lab reuses engine.js, it does not copy the logic');
 
 // ── The What-if Lab on Road 1 ────────────────────────────────────────────────
 const LB = read('public/road1/lab.js');
@@ -193,6 +193,7 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
   ok(labels.size === 1 && labels.has('Start my North Star →'), 'road2.1: one button label, everywhere');
   const AB = read('public/account-box.js');
   ok(AB.includes("const NS_HOME = ['road21'];") && AB.includes("? '/northstar/' : '/ground-plan/#home'") && J21.includes("location.replace('/northstar/')") && read('functions/_landing.js').includes("'/road2.1': '/north2/'"), 'north2 (was road2.1): Start my North Star opens the North Star, and the old address still lands');
+  ok(read('public/north/sales.js').includes("landing: 'road2', next: opener ? '/northstar/' : ''") && AB.includes('const after = () => ctx.next ||') && read('functions/_landing.js').includes("'/road2': '/north/'") && read('public/ground-plan/index.html').includes("/north/#join"), 'north (was road2): its buttons open the North Star; sign-ups sent from the Blueprint still land on Base Camp; the old address still lands');
   ok(!/most founders|incubator/i.test(R21.replace(/<!--[\s\S]*?-->/g, '')), 'road2.1: no banned words on the page');
 }
 // Road 4 (31 Oct): the sales page for The Founder's Blueprint, taps only.
