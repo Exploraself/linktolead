@@ -1232,8 +1232,8 @@
   const shareLink = (src, what) => `${SHARE_URL}?utm_source=${src}&utm_medium=share&utm_content=${what}`;
   function shareText(c, what, src) {
     const url = shareLink(src, what);
-    if (what === 'reading' && c && c.rd && c.rd.any) return `I just took The Leader’s North Star. My strongest side: ${D[c.rd.hi].name}. The one that needs me first: ${D[c.rd.lo].name}. Eight honest questions, free. Take yours: ${url}`;
-    return `Eight honest questions about how you lead yourself, your people, your business and the market. Free, about 10 minutes. Take The Leader’s North Star: ${url}`;
+    if (what === 'reading' && c && c.rd && c.rd.any) return `My Leader’s North Star says I am ${ARCH[c.rd.hi][0]}: ${ARCH[c.rd.hi][1].toLowerCase()} Strongest: ${D[c.rd.hi].name}. Next summit: ${D[c.rd.lo].name}. A few honest questions, free. Find yours: ${url}`;
+    return `A few honest questions about how you lead yourself, your people, your business and the market. Free, about 10 minutes. Take The Leader’s North Star: ${url}`;
   }
   const WA = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.8 8.2c.2-.4.5-.4.8-.4h.5c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .5-.1.6l-.5.6c.6 1.2 1.6 2.1 2.8 2.7l.6-.6c.2-.2.4-.2.6-.1l1.6.7c.2.1.4.3.4.6v.5c0 .3-.1.6-.4.8-.6.4-1.4.5-2.2.2-2.3-.9-4.1-2.7-5-5-.3-.8-.2-1.6.2-2.2z" fill="currentColor"/></svg>';
   const LI = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4M12 10v7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
@@ -1243,45 +1243,53 @@
         <a href="https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(shareText(c, what, 'linkedin'))}" target="_blank" rel="noopener" data-f="share-${what}-li" style="min-height: 44px; border-radius: 5px; border: 1px solid #0A66C2; color: var(--ink); background: var(--paper); font-weight: 520; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px"><span style="color: #0A66C2; display: inline-flex">${LI}</span>LinkedIn</a>
       </div></div>`;
 
-  /* ── Your North Star card (31 Oct, round 4): one picture to keep and share.
-   * Built from their own answers; it downloads as an image, or opens the
-   * phone's share sheet, so it can go to WhatsApp or LinkedIn with the link. */
+  /* ── Your North Star card (31 Oct, round 4): something to be proud of and
+   * to pass on. Their name, a leader title drawn from their strongest side,
+   * their shape as a constellation, what they lead for, the next summit, and
+   * at the bottom the link and their mentor. Downloads as an image, or opens
+   * the phone's share sheet. ── */
+  const ARCH = [['The Steady Compass', 'Knows why, and keeps going when it gets hard.'],
+    ['The Trusted Captain', 'People follow, because they are trusted to lead.'],
+    ['The Quiet Builder', 'Builds what lasts, one honest number at a time.'],
+    ['The Voice People Find', 'Speaks so clearly the right people come looking.']];
+  let LOGO = '';
+  try { fetch('/northstar/assets/logo.webp').then((r) => (r.ok ? r.blob() : null)).then((b) => b && new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); }))
+    .then((d) => { if (d) { LOGO = d; cache['s-save'] = null; if (typeof render === 'function') render(); } }).catch(() => {}); } catch { /* no logo: the card still works */ }
   function cardSVG(c) {
-    const W = 1080, H = 1350, cx = 540, cy = 610, R = 250, sc = c.sc.map((x) => x.score), str = c.rd.str;
-    const rA = sc.map((v) => 24 + v / 6 * (R - 24)), rS = str.map((v) => 24 + v / 5 * (R - 24));
-    const pts = (r) => `${cx},${cy - r[0]} ${cx + r[1]},${cy} ${cx},${cy + r[2]} ${cx - r[3]},${cy}`;
-    const first = (S.profile.first || '').trim().split(' ')[0];
-    const vals = named(M.VALUES, S.values).join(' · ');
-    const stars = Array.from({ length: 46 }, (_, k) => { const x = (k * 233 + 71) % W, y = (k * 151 + 37) % 420 + (k % 3) * 300; return `<circle cx="${x}" cy="${y}" r="${(1 + (k % 3) * 0.8).toFixed(1)}" fill="${k % 5 ? '#A9C0D9' : '#D6BF8F'}" opacity="${(0.3 + (k % 4) * 0.15).toFixed(2)}"/>`; }).join('');
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Your North Star card">
-      <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E1C2B"/><stop offset="1" stop-color="#1B2B40"/></linearGradient>
-        <radialGradient id="cgl"><stop offset="0" stop-color="#6F93B8" stop-opacity=".35"/><stop offset="1" stop-color="#6F93B8" stop-opacity="0"/></radialGradient></defs>
+    const W = 1080, H = 1350, cx = 540, cy = 715, R = 205, sc = c.sc.map((x) => x.score), str = c.rd.str;
+    const rA = sc.map((v) => 34 + v / 6 * (R - 34)), rS = str.map((v) => 34 + v / 5 * (R - 34));
+    const P = (r) => [[cx, cy - r[0]], [cx + r[1], cy], [cx, cy + r[2]], [cx - r[3], cy]];
+    const pts = (r) => P(r).map((p) => p.join(',')).join(' ');
+    const first = (S.profile.first || '').trim().split(' ')[0], A = ARCH[c.rd.hi];
+    const vals = named(M.VALUES, S.values);
+    const stars = Array.from({ length: 70 }, (_, k) => { const x = (k * 233 + 71) % W, y = (k * 151 + 37) % H; return `<circle cx="${x}" cy="${y}" r="${(0.8 + (k % 3) * 0.7).toFixed(1)}" fill="${k % 5 ? '#A9C0D9' : '#D6BF8F'}" opacity="${(0.2 + (k % 4) * 0.12).toFixed(2)}"/>`; }).join('');
+    const hex = ['#E0A282', '#9BC0A1', '#91B8D5', '#DDBD69'];
+    const vtx = P(rA).map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="26" fill="${hex[i]}" opacity=".18"/><path d="${starPath(x, y, 17)}" fill="${hex[i]}"/>`).join('');
+    const lab = [[cx, cy - R - 26, 'middle', 'YOURSELF'], [cx + R + 26, cy + 8, 'start', 'PEOPLE'], [cx, cy + R + 44, 'middle', 'BUSINESS'], [cx - R - 26, cy + 8, 'end', 'MARKET']]
+      .map(([x, y, a, t], i) => `<text x="${x}" y="${y}" text-anchor="${a}" fill="${hex[i]}" font-family="Inter, Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="4">${t}</text>`).join('');
+    const col = (x, k, v, color) => `<text x="${x}" y="1052" text-anchor="middle" fill="${color}" font-family="Inter, Arial, sans-serif" font-size="19" letter-spacing="4" font-weight="700">${k}</text><text x="${x}" y="1094" text-anchor="middle" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="${v.length > 18 ? 30 : 36}">${esc(v)}</text>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${first ? esc(first) + '’s' : 'My'} North Star card: ${esc(A[0])}">
+      <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0B1522"/><stop offset=".55" stop-color="#132338"/><stop offset="1" stop-color="#1E2F45"/></linearGradient>
+        <radialGradient id="cgl"><stop offset="0" stop-color="#D6BF8F" stop-opacity=".22"/><stop offset=".5" stop-color="#6F93B8" stop-opacity=".16"/><stop offset="1" stop-color="#6F93B8" stop-opacity="0"/></radialGradient></defs>
       <rect width="${W}" height="${H}" fill="url(#cg)"/>${stars}
-      <rect x="36" y="36" width="${W - 72}" height="${H - 72}" rx="28" fill="none" stroke="#D6BF8F" stroke-opacity=".55" stroke-width="2"/>
-      <text x="${cx}" y="128" text-anchor="middle" fill="#D6BF8F" font-family="Inter, Arial, sans-serif" font-size="26" letter-spacing="8" font-weight="600">THE LEADER’S NORTH STAR</text>
-      <text x="${cx}" y="208" text-anchor="middle" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="68">${first ? esc(first) + '’s North Star' : 'My North Star'}</text>
-      <text x="${cx}" y="258" text-anchor="middle" fill="#A9C0D9" font-family="Newsreader, Georgia, serif" font-style="italic" font-size="32">${esc(E.STAGES[c.here].name)}${c.goal >= 0 && c.goal !== c.here ? ' → ' + esc(E.STAGES[c.goal].name) : ''}</text>
-      <circle cx="${cx}" cy="${cy}" r="${R + 60}" fill="url(#cgl)"/>
-      <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#2A3A50" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="${R / 2}" fill="none" stroke="#2A3A50" stroke-width="2"/>
-      <line x1="${cx}" y1="${cy - R - 20}" x2="${cx}" y2="${cy + R + 20}" stroke="#2A3A50" stroke-width="2"/><line x1="${cx - R - 20}" y1="${cy}" x2="${cx + R + 20}" y2="${cy}" stroke="#2A3A50" stroke-width="2"/>
-      <polygon points="${pts(rS)}" fill="none" stroke="#EEF2F7" stroke-width="3" stroke-dasharray="12 9" opacity=".8"/>
-      <polygon points="${pts(rA)}" fill="rgba(111,147,184,.4)" stroke="#6F93B8" stroke-width="5" stroke-linejoin="round"/>
-      <circle cx="${cx}" cy="${cy - rA[0]}" r="12" fill="#E0A282"/><circle cx="${cx + rA[1]}" cy="${cy}" r="12" fill="#9BC0A1"/><circle cx="${cx}" cy="${cy + rA[2]}" r="12" fill="#91B8D5"/><circle cx="${cx - rA[3]}" cy="${cy}" r="12" fill="#DDBD69"/>
-      <path d="${starPath(cx, cy, 26)}" fill="#EEF2F7"/>
-      <g font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="3">
-        <text x="${cx}" y="${cy - R - 34}" text-anchor="middle" fill="#E0A282">LEAD YOURSELF</text>
-        <text x="${cx}" y="${cy + R + 56}" text-anchor="middle" fill="#91B8D5">LEAD YOUR BUSINESS</text>
-        <text x="${cx + R + 30}" y="${cy - 14}" fill="#9BC0A1">LEAD YOUR</text><text x="${cx + R + 30}" y="${cy + 18}" fill="#9BC0A1">PEOPLE</text>
-        <text x="${cx - R - 30}" y="${cy - 14}" text-anchor="end" fill="#DDBD69">LEAD THE</text><text x="${cx - R - 30}" y="${cy + 18}" text-anchor="end" fill="#DDBD69">MARKET</text>
-      </g>
-      <g font-family="Inter, Arial, sans-serif">
-        <text x="120" y="1012" fill="#A9C0D9" font-size="22" letter-spacing="4" font-weight="600">STRONGEST</text>
-        <text x="120" y="1056" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="40">${esc(D[c.rd.hi].name)}</text>
-        <text x="580" y="1012" fill="#E0A282" font-size="22" letter-spacing="4" font-weight="600">NEEDS ME FIRST</text>
-        <text x="580" y="1056" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="40">${esc(D[c.rd.lo].name)}</text>
-        ${vals ? `<text x="120" y="1132" fill="#D6BF8F" font-size="22" letter-spacing="4" font-weight="600">WHAT I CARE ABOUT</text><text x="120" y="1176" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="40">${esc(vals)}</text>` : ''}
-        <text x="${cx}" y="1268" text-anchor="middle" fill="#A9C0D9" font-size="24" letter-spacing="2">Take yours, free · linktolead.exploraself.com/northstar</text>
-      </g>
+      <rect x="34" y="34" width="${W - 68}" height="${H - 68}" rx="30" fill="none" stroke="#D6BF8F" stroke-opacity=".5" stroke-width="2"/>
+      ${LOGO ? `<image href="${LOGO}" xlink:href="${LOGO}" x="${cx - 160}" y="76" width="64" height="64" preserveAspectRatio="xMidYMid meet"/>` : ''}
+      <text x="${LOGO ? cx - 82 : cx}" y="118" text-anchor="${LOGO ? 'start' : 'middle'}" fill="#EEF2F7" font-family="Inter, Arial, sans-serif" font-size="26" letter-spacing="7" font-weight="600">EXPLORASELF</text>
+      <text x="${cx}" y="200" text-anchor="middle" fill="#D6BF8F" font-family="Inter, Arial, sans-serif" font-size="22" letter-spacing="8" font-weight="600">${first ? esc(first.toUpperCase()) + ' · ' : ''}THE LEADER’S NORTH STAR</text>
+      <text x="${cx}" y="300" text-anchor="middle" fill="#F6EEDD" font-family="Newsreader, Georgia, serif" font-style="italic" font-size="78">${esc(A[0])}</text>
+      <text x="${cx}" y="352" text-anchor="middle" fill="#A9C0D9" font-family="Newsreader, Georgia, serif" font-size="31">${esc(A[1])}</text>
+      ${vals.length ? `<text x="${cx}" y="410" text-anchor="middle" fill="#D6BF8F" font-family="Inter, Arial, sans-serif" font-size="22" letter-spacing="5" font-weight="600">LEADING FOR ${esc(vals.join(' & ').toUpperCase())}</text>` : ''}
+      <circle cx="${cx}" cy="${cy}" r="${R + 90}" fill="url(#cgl)"/>
+      <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#2A3A50" stroke-width="1.5" stroke-dasharray="3 9"/>
+      <polygon points="${pts(rS)}" fill="none" stroke="#EEF2F7" stroke-width="2.5" stroke-dasharray="10 9" opacity=".55"/>
+      <polygon points="${pts(rA)}" fill="rgba(214,191,143,.12)" stroke="#D6BF8F" stroke-width="3" stroke-linejoin="round" opacity=".9"/>
+      ${vtx}
+      <path d="${starPath(cx, cy, 34)}" fill="#F6EEDD"/><path d="${starPath(cx, cy, 15)}" fill="#6F93B8" transform="rotate(45 ${cx} ${cy})"/>
+      ${lab}
+      ${col(270, 'STRONGEST', D[c.rd.hi].name, '#9BC0A1')}${col(810, 'NEXT SUMMIT', D[c.rd.lo].name, '#E0A282')}
+      <text x="${cx}" y="1180" text-anchor="middle" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="34">Find your North Star, free.</text>
+      <text x="${cx}" y="1224" text-anchor="middle" fill="#A9C0D9" font-family="Inter, Arial, sans-serif" font-size="25" letter-spacing="1">linktolead.exploraself.com/northstar</text>
+      <text x="${cx}" y="1276" text-anchor="middle" fill="#D6BF8F" font-family="Inter, Arial, sans-serif" font-size="19" letter-spacing="5" font-weight="600">MENTOR · ALEXANDRU COJOCARI</text>
     </svg>`;
   }
   /** The card as a PNG: shared through the phone's share sheet when it can
