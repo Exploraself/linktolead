@@ -1499,7 +1499,7 @@
       actions,
       closing: { title: 'If the free North Star gave you this, imagine twelve weeks with Alexandru beside you.',
         lines: ['The Founder’s Blueprint takes these five actions and turns them into a road: twelve weeks, the same four domains, one step at a time, with the manuals beside you and Alexandru and the team when it gets hard.',
-          'Weeks 1–3, the Founder Launchpad, are free and open tonight. Your account is already made: sign in with your email.'],
+          'Weeks 1–3, the Founder Launchpad, are free and open tonight, with the full action plan: five actions in every domain. Your account is already made: sign in with your email.'],
         url: 'linktolead.exploraself.com', mentor: 'ExploraSelf · exploraself.com · Mentor: Alexandru Cojocari' } };
   }
   async function downloadPlan(btn) {
