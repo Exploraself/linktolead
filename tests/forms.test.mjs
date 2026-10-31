@@ -51,7 +51,7 @@ const S = async (body) => { const r = await signup({ request: post('/api/signup'
 const prof = (id) => env.DB.raw.prepare('SELECT signup_type, company, interest, industry, landing, utm_source, utm_content FROM student_profile WHERE student_id = ?').get(id);
 const hasPw = (id) => !!env.DB.raw.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ? AND pass_hash IS NOT NULL').get(id);
 const mcLog = (id) => env.DB.raw.prepare('SELECT detail FROM mailchimp_log WHERE student_id = ? ORDER BY id').all(id).map((r) => r.detail).join(' ');
-const FULL = { first: 'Fay', last: 'Full', email: 'fay@example.com', consent: true, source: 'sales-page', type: 'full', landing: 'road2', company: 'Fay & Co', interest: 'Higher income', industry: 'Real estate', utm: { utm_source: 'meta', utm_content: 'home-c' } };
+const FULL = { first: 'Fay', last: 'Full', email: 'fay@example.com', consent: true, source: 'sales-page', type: 'full', landing: 'north3', company: 'Fay & Co', interest: 'Higher income', industry: 'Real estate', utm: { utm_source: 'meta', utm_content: 'home-c' } };
 
 let [st, out] = await S({ ...FULL, company: '', password: 'a-long-password', confirm: 'a-long-password' });
 ok(st === 400 && /company/.test(out.error), 'full form: no company and no tick is refused');
@@ -63,8 +63,8 @@ ok(env.DB.raw.prepare("SELECT COUNT(*) n FROM student WHERE email = 'fay@example
 [st, out] = await S({ ...FULL, password: 'a-long-password', confirm: 'a-long-password' });
 const fay = out.token;
 ok(st === 200 && fay && hasPw(fay), 'full form: one record, signed in, with its password');
-ok(JSON.stringify(prof(fay)) === JSON.stringify({ signup_type: 'full', company: 'Fay & Co', interest: 'Higher income', industry: 'Real estate', landing: 'road2', utm_source: 'meta', utm_content: 'home-c' }), 'full form: company, interest, industry, landing Road 2 and the utm tags stored');
-ok(/"linktolead-road2"/.test(mcLog(fay)) && /"COMPANY":"Fay & Co"/.test(mcLog(fay)) && /"INDUSTRY":"Real estate"/.test(mcLog(fay)) && /"INTEREST":"Higher income"/.test(mcLog(fay)) && !/Industry - |Interest - |Signup - |salespageincubator/.test(mcLog(fay)), 'Mailchimp (TEST): tag linktolead-road2; company, industry and interest as contact fields, not tags');
+ok(JSON.stringify(prof(fay)) === JSON.stringify({ signup_type: 'full', company: 'Fay & Co', interest: 'Higher income', industry: 'Real estate', landing: 'north3', utm_source: 'meta', utm_content: 'home-c' }), 'full form: company, interest, industry, landing Road 2 and the utm tags stored');
+ok(/"linktolead-north3"/.test(mcLog(fay)) && /"COMPANY":"Fay & Co"/.test(mcLog(fay)) && /"INDUSTRY":"Real estate"/.test(mcLog(fay)) && /"INTEREST":"Higher income"/.test(mcLog(fay)) && !/Industry - |Interest - |Signup - |salespageincubator/.test(mcLog(fay)), 'Mailchimp (TEST): tag linktolead-road2; company, industry and interest as contact fields, not tags');
 
 [st, out] = await S({ first: 'Sam', last: 'Simple', email: 'sam@example.com', consent: true, source: 'home', type: 'simple', landing: 'road3', password: 'a-long-password', confirm: 'a-long-password', utm: { utm_source: 'exploraself', utm_medium: 'banner' } });
 const sam = out.token;
@@ -81,10 +81,10 @@ ok(st === 200 && prof(cora).landing === 'compass' && /"linktolead-northstar"/.te
 ok(st === 200 && prof(out.token).landing === 'road3', 'a page loaded before the rename sends "a": stored as road3');
 // Landings stored before the roads move to the road their page became, once.
 const D2 = fakeD1();
-D2.raw.exec(`CREATE TABLE student_profile (student_id TEXT PRIMARY KEY, landing TEXT);
-  INSERT INTO student_profile VALUES ('s1', 'a'), ('s2', 'b'), ('s3', 'c'), ('s4', 'compass'), ('s5', NULL);`);
+D2.raw.exec(`CREATE TABLE student_profile (student_id TEXT PRIMARY KEY, landing TEXT, source TEXT);
+  INSERT INTO student_profile (student_id, landing) VALUES ('s1', 'a'), ('s2', 'b'), ('s3', 'c'), ('s4', 'compass'), ('s5', NULL);`);
 await accountTables(D2);
-ok(D2.raw.prepare('SELECT landing FROM student_profile ORDER BY student_id').all().map((x) => x.landing).join() === 'road3,road1,road2,compass,', 'stored landings a, b, c become road3, road1, road2; compass and none stay');
+ok(D2.raw.prepare('SELECT landing FROM student_profile ORDER BY student_id').all().map((x) => x.landing).join() === 'road3,road1,north3,compass,', 'stored landings a, b, c become road3, road1, north3; compass and none stay');
 [st, out] = await S({ first: 'Nia', last: 'None', email: 'nia@example.com', consent: false, type: 'simple', landing: 'nowhere' });
 ok(st === 200 && out.token && mcLog(out.token) === '' && prof(out.token).landing === null, 'no consent: the account is made, nothing goes to Mailchimp; an unknown landing is not stored');
 
@@ -102,9 +102,9 @@ ok((await stateGet({ request: get('/api/state?t=nobody-at-all-here-0000'), env }
 // ── /mentor ─────────────────────────────────────────────────────────────────
 const L = await (await mGet({ request: new Request('https://x/api/mentor', { headers: { 'x-mentor-key': 'mentor-key-123' } }), env })).json();
 const row = (e) => L.students.find((s) => s.email === e);
-ok(row('fay@example.com').signup_type === 'full' && row('fay@example.com').landing === 'road2' && row('fay@example.com').company === 'Fay & Co' && row('fay@example.com').interest === 'Higher income' && row('sam@example.com').landing === 'road3', '/mentor: signup type, landing, company, interest per founder');
+ok(row('fay@example.com').signup_type === 'full' && row('fay@example.com').landing === 'north3' && row('fay@example.com').company === 'Fay & Co' && row('fay@example.com').interest === 'Higher income' && row('sam@example.com').landing === 'road3', '/mentor: signup type, landing, company, interest per founder');
 const BL = Object.fromEntries(byLanding(L.students).map((x) => [x.k, x]));
-ok(BL.road3.total === 2 && BL.road1.total === 1 && BL.road1.full === 1 && BL.road2.total === 1 && BL.road2.full === 1 && BL.compass.total === 1 && BL.road3.week === 2, '/mentor: sign-ups per landing (Roads 1, 2, 3, the North Star box)');
+ok(BL.road3.total === 2 && BL.road1.total === 1 && BL.road1.full === 1 && BL.north3.total === 1 && BL.north3.full === 1 && BL.road2.total === 0 && BL.compass.total === 1 && BL.road3.week === 2, '/mentor: sign-ups per landing (Roads 1, 3, North 3, the North Star box)');
 const Sm = summary(L.students, []);
 ok(Sm.full === 2 && Sm.simple === 4 && filter(L.students, { tile: 'full' }).length === 2, '/mentor: Full / Simple filters');
 const csv = await (await mGet({ request: new Request('https://x/api/mentor?csv=1', { headers: { 'x-mentor-key': 'mentor-key-123' } }), env })).text();
@@ -153,7 +153,7 @@ ok(!/PHOTO/.test(A) && read('public/road3/page.js').includes("variant: 'simple',
 ok([1, 3, 4, 5, 6, 11, 12].map(band).join() === 'free,free,with,with,,,last', 'Road 3: the levels’ bands');
 const WB = read('public/north3/index.html');
 for (const W of [WB]) ok(W.includes('<button type="button" data-gate class="cta gold-btn" style="min-height: 56px; padding: 0 32px; font-size: 17px">Show me my road →</button>') && !W.includes('href="#dream"') && !/<a [^>]*href="\/(?!compass\/assets|assets)/.test(W), 'Road 2: "Show me my road" opens the full form; no link leaves the page');
-ok(read('public/north3/sales.js').includes("variant: 'full', landing: 'road2'") && WB.includes('src="/north3/sales.js"') && WB.includes('content="https://linktolead.exploraself.com/north3/"') && read('public/northstar/app.js').includes("type: 'simple', landing: 'compass'"), 'Road 2 stays FULL, landing road2; the /northstar box stays SIMPLE');
+ok(read('public/north3/sales.js').includes("variant: 'full', landing: 'north3'") && WB.includes('src="/north3/sales.js"') && WB.includes('content="https://linktolead.exploraself.com/north3/"') && read('public/northstar/app.js').includes("type: 'simple', landing: 'compass'"), 'Road 2 stays FULL, landing road2; the /northstar box stays SIMPLE');
 const box = read('public/account-box.js');
 ok(/pwInput\('j-pw'\)/.test(box) && /pwInput\('j-pw2'\)/.test(box) && /data-eye=/.test(box) && /variant === 'full' \? detailFields/.test(box) && /landing: ctx\.landing, utm: utm\(\)/.test(box), 'the account box: a password (with the show-password eye) on the full form only, landing and utm sent');
 
@@ -187,19 +187,19 @@ const noRun = baseOf({ ...EXAMPLE, run: null, rate: null, hire: null }), nm = E.
 ok(noRun.fixed === 0 && nm.cash === null && nm.people === null && Number.isFinite(nm.mine), 'empty Fine-tune boxes: no money figure invented, the hours still move');
 
 // ── Mailchimp landing tags ──────────────────────────────────────────────────
-ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', road4: 'linktolead-road4', compass: 'linktolead-northstar', summit: 'linktolead-summit' }), 'landing tags: the linktolead-… system');
-// Road 2.1 (30 Oct): its own tag, no empty old tag, the FULL form, and road2 untouched beside it.
+ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-road2', road3: 'linktolead-road3', road4: 'linktolead-road4', north2: 'linktolead-north2', north3: 'linktolead-north3', compass: 'linktolead-northstar', summit: 'linktolead-summit' }), 'landing tags: linktolead- + the page address');
+// North 2 (was Road 2.1): its own tag, no empty tag, the FULL form.
 {
   const { tagsFor } = await import('../functions/_mailchimp.js');
-  const t = tagsFor({ landing: 'road21', signupType: 'full' });
-  ok(t.some((x) => x.name === 'linktolead-road2.1' && x.status === 'active') && t.every((x) => typeof x.name === 'string' && x.name), 'road2.1: tagged linktolead-road2.1, no empty tag');
+  const t = tagsFor({ landing: 'north2', signupType: 'full' });
+  ok(t.some((x) => x.name === 'linktolead-north2' && x.status === 'active') && t.every((x) => typeof x.name === 'string' && x.name), 'north2: tagged linktolead-north2, no empty tag');
   const R21 = read('public/north2/index.html'), J21 = read('public/north2/page.js');
-  ok(J21.includes("variant: 'full', landing: 'road21'") && R21.includes('src="/north2/page.js"') && !/PHOTO OF/.test(R21) && R21.includes('/cabinet/alexandru.jpg'), 'road2.1: full form, landing road21, the real photo');
+  ok(J21.includes("variant: 'full', landing: 'north2'") && R21.includes('src="/north2/page.js"') && !/PHOTO OF/.test(R21) && R21.includes('/cabinet/alexandru.jpg'), 'north2: full form, landing north2, the real photo');
   const labels = new Set((R21.match(/<button type="button" data-gate[^>]*>([^<]+)/g) || []).map((m) => m.replace(/.*>/, '').trim()));
   ok(labels.size === 1 && labels.has('Start my North Star →'), 'road2.1: one button label, everywhere');
   const AB = read('public/account-box.js');
-  ok(AB.includes("const NS_HOME = ['road21'];") && AB.includes("? '/northstar/' : '/ground-plan/#home'") && J21.includes("location.replace('/northstar/')") && read('functions/_landing.js').includes("'/road2.1': '/north2/'"), 'north2 (was road2.1): Start my North Star opens the North Star, and the old address still lands');
-  ok(read('public/north3/sales.js').includes("landing: 'road2', next: opener ? '/northstar/' : ''") && AB.includes('const after = () => ctx.next ||') && read('functions/_landing.js').includes("'/road2': '/north3/'") && read('public/ground-plan/index.html').includes("/north3/#join"), 'north (was road2): its buttons open the North Star; sign-ups sent from the Blueprint still land on Base Camp; the old address still lands');
+  ok(AB.includes("const NS_HOME = ['north2'];") && AB.includes("? '/northstar/' : '/ground-plan/#home'") && J21.includes("location.replace('/northstar/')") && read('functions/_landing.js').includes("'/road2.1': '/north2/'"), 'north2 (was road2.1): Start my North Star opens the North Star, and the old address still lands');
+  ok(read('public/north3/sales.js').includes("landing: 'north3', next: opener ? '/northstar/' : ''") && AB.includes('const after = () => ctx.next ||') && !read('functions/_landing.js').includes("'/road2': '/north3/'") && read('public/ground-plan/index.html').includes("/north3/#join"), 'north3 (was road2): its buttons open the North Star; sign-ups sent from the Blueprint still land on Base Camp; /road2/ is a page again, not a redirect');
   ok(!/most founders|incubator/i.test(R21.replace(/<!--[\s\S]*?-->/g, '')), 'road2.1: no banned words on the page');
 }
 // Road 4 (31 Oct): the sales page for The Founder's Blueprint, taps only.
@@ -267,7 +267,7 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
 }
 // The tag system (30 Oct): every tag is "linktolead" or "linktolead-<group>-<value>", lowercase, no spaces.
 {
-  const all = tagsFor({ landing: 'road21', tier: 'premium', stage: 'growing', weakest: 'lead-your-people', interest: 'Higher income', industry: 'Real estate', source: 'sales-page', signupType: 'full' });
+  const all = tagsFor({ landing: 'north2', tier: 'premium', stage: 'growing', weakest: 'lead-your-people', interest: 'Higher income', industry: 'Real estate', source: 'sales-page', signupType: 'full' });
   ok(all.every((x) => /^linktolead(-[a-z0-9.]+)*$/.test(x.name)), 'every tag follows linktolead-<group>-<value>');
   ok(!all.some((x) => /Industry|Interest|Signup|sales-page/.test(x.name)), 'industry, interest, form and source are not tags');
 }

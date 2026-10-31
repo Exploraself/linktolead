@@ -86,7 +86,10 @@ export async function accountTables(D) {
       // The founder's mentor (functions/_mentor.js) and their time zone.
       'mentor_id TEXT', 'tz TEXT',
       // The founder's profile picture, a small data: URL (functions/api/avatar.js).
-      'avatar TEXT']) {
+      'avatar TEXT',
+      // The landing tag a founder already carries when their page was renamed
+      // after they joined (see the move below): sent instead of the new one.
+      'landing_tag TEXT']) {
     try { await D.prepare(`ALTER TABLE student_profile ADD COLUMN ${col}`).run(); } catch { /* already there */ }
   }
   // An answer in "Ask Alexandru" is a message that points at the question
@@ -94,9 +97,38 @@ export async function accountTables(D) {
   try { await D.prepare('ALTER TABLE message ADD COLUMN note_id TEXT').run(); } catch { /* already there */ }
   // The sales pages became roads: landings stored as a, b or c move to the
   // road their page became (functions/_profile.js OLD_LANDINGS).
-  await D.prepare(`UPDATE student_profile SET landing = CASE landing WHEN 'b' THEN 'road1' WHEN 'c' THEN 'road2' WHEN 'a' THEN 'road3' END
+  await D.prepare(`UPDATE student_profile SET landing = CASE landing WHEN 'b' THEN 'road1' WHEN 'c' THEN 'north3' WHEN 'a' THEN 'road3' END
     WHERE landing IN ('a', 'b', 'c')`).run();
+  // The move never stops an account from opening: if it fails, it runs
+  // again the next time the database opens.
+  try { await northMove(D); } catch (e) { console.error('landing move', e && e.message); }
   READY.add(D);
+}
+
+/** The North Star sales pages get their own landing keys (31 Oct 2026). Until
+ *  then /north3/ sent 'road2' and /north2/ sent 'road21'; now /road2/ is a
+ *  Blueprint page. Every founder stored as 'road2' or 'road21' before this
+ *  move came from a North Star page, so they become 'north3' / 'north2' and
+ *  stay North Star (origin, welcome, /mentor). Their Mailchimp tag does not
+ *  change: the tag they already carry is kept in landing_tag and sent instead
+ *  of the new one.
+ *  The first time it runs it writes a dated row to `migration`; it moves only
+ *  founders who joined before that moment, so a sign-up on the new /road2/ is
+ *  never moved. One more guard: an old /north3/ tab still open after the
+ *  deploy sends 'road2' with source 'sales-page', which the new /road2/ never
+ *  sends (it sends 'home'); that founder is North Star too, and moves the
+ *  next time the database opens. Nobody is moved twice: after the move their
+ *  landing is no longer 'road2' or 'road21'. */
+export const NORTH_MOVE = 'landing-north-2026-10-31';
+async function northMove(D) {
+  await D.prepare('CREATE TABLE IF NOT EXISTS migration (name TEXT PRIMARY KEY, at TEXT NOT NULL)').run();
+  await D.prepare('INSERT OR IGNORE INTO migration (name, at) VALUES (?, ?)').bind(NORTH_MOVE, now()).run();
+  const { at } = await D.prepare('SELECT at FROM migration WHERE name = ?').bind(NORTH_MOVE).first();
+  await D.prepare(`UPDATE student_profile
+    SET landing_tag = COALESCE(landing_tag, CASE landing WHEN 'road2' THEN 'linktolead-road2' ELSE 'linktolead-road2.1' END),
+        landing = CASE landing WHEN 'road2' THEN 'north3' ELSE 'north2' END
+    WHERE landing = 'road21'
+       OR (landing = 'road2' AND (source = 'sales-page' OR student_id IN (SELECT id FROM student WHERE joined_at < ?)))`).bind(at).run();
 }
 
 /** The founder a token belongs to, or null. */

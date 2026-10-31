@@ -113,6 +113,10 @@ export const cross = (to, first, last) => post('/api/cross', { token: token(), t
 /** The profile picture: a small square data: URL, or '' to remove it. */
 export const setAvatar = (image) => post('/api/avatar', { token: token(), image });
 
+/** Complete the account with only what it lacks (31 Oct): company or
+ *  noCompany, interest, industry, password. */
+export const complete = (fields) => post('/api/complete', { token: token(), ...fields });
+
 /** Change the password, once signed in. */
 export const setPassword = (password, confirm) => post('/api/password', { token: token(), password, confirm });
 

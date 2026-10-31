@@ -32,6 +32,7 @@ import * as thread from './functions/api/thread.js';
 import * as letters from './functions/api/letters.js';
 import * as avatar from './functions/api/avatar.js';
 import * as cross from './functions/api/cross.js';
+import * as complete from './functions/api/complete.js';
 import * as accountDelete from './functions/api/account-delete.js';
 import * as count from './functions/api/count.js';
 
@@ -57,6 +58,7 @@ export const ROUTES = {
   '/api/letters': letters,
   '/api/avatar': avatar,
   '/api/cross': cross,
+  '/api/complete': complete,
   '/api/account-delete': accountDelete,
   '/api/count': count,
 };

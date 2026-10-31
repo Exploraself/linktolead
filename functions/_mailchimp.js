@@ -97,8 +97,9 @@ export function mailchimpState(env = {}) {
 }
 
 /** The Mailchimp tag for each sales page (the landing key stored on the
- *  profile): /road1/, /north3/ (the North Star sales page) and /road3/ (the 12
- *  Scrolls page). Founders tagged before the roads keep their old tags. */
+ *  profile): 'linktolead-' + the page's address (Alexandru, 31 Oct 2026). The
+ *  North Star box is linktolead-northstar. Founders tagged before a page was
+ *  renamed keep the tag they already carry (student_profile.landing_tag). */
 /** Which sales page a founder signed up on (Alexandru, 30 Oct 2026). The old
  *  names ('Landing - Road 1' …) are sent as inactive, so a founder whose tags
  *  are sent again loses the old one (API mode). */
@@ -106,20 +107,24 @@ export function mailchimpState(env = {}) {
 export const CROSS_TAGS = { blueprint: 'linktolead-crossed-blueprint', northstar: 'linktolead-crossed-northstar' };
 /** Which door a founder came in through: the North Star (its box or its sales
  *  pages) or the Blueprint (the road pages, The Summit). */
-export const originOf = ({ landing, source } = {}) => (['compass', 'road2', 'road21'].includes(landing) || (!landing && source === 'compass') ? 'northstar' : 'blueprint');
-export const LANDING_TAGS = { road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', road4: 'linktolead-road4', compass: 'linktolead-northstar', summit: 'linktolead-summit' };
+export const NORTH_STAR_DOORS = ['compass', 'north1', 'north2', 'north3'];
+export const originOf = ({ landing, source } = {}) => (NORTH_STAR_DOORS.includes(landing) || (!landing && source === 'compass') ? 'northstar' : 'blueprint');
+export const LANDING_TAGS = { road1: 'linktolead-road1', road2: 'linktolead-road2', road3: 'linktolead-road3', road4: 'linktolead-road4', north2: 'linktolead-north2', north3: 'linktolead-north3', compass: 'linktolead-northstar', summit: 'linktolead-summit' };
 
 /** The tags for one founder. In API mode each stage and domain tag is sent as
  *  active or inactive, so a founder who moves on loses the old one. Step tags
  *  only accumulate: the founder's step and every step before it, always
  *  active and never sent as inactive, so a step lowered by mistake takes
  *  nothing away. */
-export function tagsFor({ source, stage, weakest, tier, signupType, interest, industry, landing }) {
+export function tagsFor({ source, stage, weakest, tier, signupType, interest, industry, landing, landingTag }) {
   const st = PROGRAMME[stage] || null;
   const out = [{ name: 'linktolead', status: 'active' }];
-  // Where they signed up: the page they used, or the North Star box.
+  // Where they signed up: the page they used, or the North Star box. A
+  // founder whose page was renamed after they joined keeps the tag they
+  // already carry (landingTag), so a renamed page never retags anyone.
   const door = Object.hasOwn(LANDING_TAGS, landing) ? landing : !landing && source === 'compass' ? 'compass' : null;
-  if (door) out.push({ name: LANDING_TAGS[door], status: 'active' });
+  if (landingTag) out.push({ name: landingTag, status: 'active' });
+  else if (door) out.push({ name: LANDING_TAGS[door], status: 'active' });
   const reached = Math.max(0, TIER_ORDER.indexOf(tier || 'free'));
   for (const t of TIER_ORDER.slice(0, reached + 1)) out.push({ name: STEP_TAGS[t], status: 'active' });
   if (st) for (const [k, name] of Object.entries(STAGE_TAGS)) out.push({ name, status: k === st ? 'active' : 'inactive' });
@@ -305,7 +310,7 @@ export async function record(D, { studentId, email, action, mode, status, detail
 export async function syncFounder(env, D, studentId, action = 'join', { keepLog = true, tag = '' } = {}) {
   const s = await D.prepare('SELECT id, email, name, stage, tier FROM student WHERE id = ?').bind(studentId).first();
   if (!s) return { status: 'skipped', detail: 'No such founder.' };
-  const p = await D.prepare('SELECT consent, unsubscribed, source, signup_type, company, interest, industry, landing FROM student_profile WHERE student_id = ?').bind(studentId).first();
+  const p = await D.prepare('SELECT consent, unsubscribed, source, signup_type, company, interest, industry, landing, landing_tag FROM student_profile WHERE student_id = ?').bind(studentId).first();
   if (!p || !p.consent) return { status: 'skipped', detail: 'No consent.' };
   if (action !== 'unsubscribe') {
     if (p.unsubscribed) return { status: 'skipped', detail: 'Unsubscribed.' };
@@ -321,7 +326,7 @@ export async function syncFounder(env, D, studentId, action = 'join', { keepLog 
   const [first, ...rest] = String(s.name || '').split(' ');
   const member = { email: s.email, first, last: rest.join(' '), source: p.source || 'compass',
     stage: (chose && s.stage) || (c && c.stage) || s.stage, weakest: c ? weakestTag(c.results_json) : null, tier: s.tier || 'free', tag,
-    signupType: p.signup_type, interest: p.interest, industry: p.industry, company: p.company, landing: p.landing };
+    signupType: p.signup_type, interest: p.interest, industry: p.industry, company: p.company, landing: p.landing, landingTag: p.landing_tag || null };
   const out = await push(env, member, action);
   if (keepLog) await record(D, { studentId, email: s.email, action, mode: st.mode, status: out.status, detail: out.detail });
   // Which step's tags went with it, so the backfill knows who still needs
