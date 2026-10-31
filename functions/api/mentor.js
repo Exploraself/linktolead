@@ -62,6 +62,8 @@ async function roster(D) {
       (SELECT COUNT(*) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS written,
       (SELECT COUNT(*) FROM note n WHERE n.student_id = s.id AND n.status = 'new') AS open_notes,
       (SELECT updated_at FROM compass c WHERE c.student_id = s.id) AS compass_at,
+      (SELECT c.flags_json FROM compass c WHERE c.student_id = s.id) AS ns_flags,
+      (SELECT c.results_json FROM compass c WHERE c.student_id = s.id) AS ns_results,
       (SELECT COUNT(*) FROM plan_tick t WHERE t.student_id = s.id) AS plan_ticks,
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'library-download') AS library,
       (SELECT COUNT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS levels,
@@ -81,7 +83,27 @@ const LANDING_NAMES = { road1: 'Road 1', road2: 'Road 2', road3: 'Road 3', road4
 const CSV_COLS = [['name', 'Name'], ['email', 'Email'], ['joined_at', 'Joined'], ['last_seen_at', 'Last seen'], ['stage', 'Stage'], ['step', 'Step'],
   ['signup', 'Sign-up form'], ['landing_name', 'Landing'], ['utm_source', 'utm_source'], ['utm_medium', 'utm_medium'], ['utm_campaign', 'utm_campaign'], ['utm_content', 'utm_content'], ['company_name', 'Company'], ['interest', 'Interest'], ['industry', 'Industry'],
   ['compass', 'North Star done'], ['plan_ticks', 'Plan steps done'], ['library_names', 'Library'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp'],
+  ['ns_wants', 'Wants (North Star)'], ['ns_pains', 'Hurts (North Star)'], ['ns_values', 'Cares about (North Star)'], ['ns_first', 'Needs them first'], ['ns_team', 'Works with'],
   ['group', 'Group'], ['levels', 'Blueprint levels'], ['crossed_names', 'Crossed']];
+const NS = {
+  pains: { clients: 'Not enough clients', cash: 'Cash is tight', time: 'No time for myself', alone: 'Doing everything myself', team: 'Team not stepping up', direction: 'Unclear direction', price: 'Prices feel too low', switch: 'I can’t switch off' },
+  wants: { freedom: 'More free time', income: 'Higher income', steady: 'Steady clients', team: 'A team I trust', clarity: 'Clarity on direction', grow: 'A new market' },
+  values: { family: 'Family', faith: 'Faith', freedom: 'Freedom', health: 'Health', integrity: 'Integrity', growth: 'Growth', service: 'Service', legacy: 'Legacy' },
+  team: { solo: 'Just me', help: 'Me and some help', team: 'A team' },
+  sides: ['Lead yourself', 'Lead your people', 'Lead your business', 'Lead the market'] };
+/** What one founder told the North Star, as words for the CSV (same rule as
+ *  told() in public/mentor/dash.js). */
+export function nsWords(s) {
+  let f = {}, r = {};
+  try { f = JSON.parse(s.ns_flags || 'null') || {}; } catch { f = {}; }
+  try { r = JSON.parse(s.ns_results || 'null') || {}; } catch { r = {}; }
+  const names = (list, map) => (Array.isArray(list) ? list : []).filter((k, i, a) => map[k] && a.indexOf(k) === i).map((k) => map[k]).join('; ');
+  const sc = Array.isArray(r.scores) ? r.scores : [], an = Array.isArray(r.answered) ? r.answered : [];
+  let first = -1;
+  sc.forEach((v, i) => { if (an[i] && Number.isFinite(Number(v)) && (first < 0 || v < sc[first])) first = i; });
+  return { ns_wants: names([f.want, f.want2], NS.wants), ns_pains: names(f.pains, NS.pains), ns_values: names(f.values, NS.values),
+    ns_first: first >= 0 ? NS.sides[first] : '', ns_team: NS.team[f.team] || '' };
+}
 /** The cockpit's groups, the same rule as groupOf in public/mentor/dash.js
  *  (a test holds them equal): North Star done = compass_at; Blueprint
  *  started = an answer written. */
@@ -97,7 +119,7 @@ export function toCSV(list) {
   const books = (v) => String(v || '').split(',').filter((k) => LIBRARY_ITEMS[k]).map((k) => LIBRARY_ITEMS[k].name).join('; ');
   const row = (s) => ({ ...s, step: STEPS[s.tier || 'free'] || s.tier, library_names: books(s.library), signup: s.signup_type || '',
     company_name: s.company === '' ? 'No company yet' : s.company || '', landing_name: LANDING_NAMES[s.landing] || '', compass: yes(s.compass_at), has_password: yes(s.has_password), consent: yes(s.consent), unsubscribed: yes(s.unsubscribed), paused: yes(s.paused),
-    group: groupName(s), levels: s.levels || 0, crossed_names: String(s.crossed || '').split(',').filter((k) => CROSSED[k]).map((k) => CROSSED[k]).join('; ') });
+    ...nsWords(s), group: groupName(s), levels: s.levels || 0, crossed_names: String(s.crossed || '').split(',').filter((k) => CROSSED[k]).map((k) => CROSSED[k]).join('; ') });
   return [CSV_COLS.map(([, h]) => cell(h)).join(','), ...list.map((s) => { const r = row(s); return CSV_COLS.map(([k]) => cell(r[k])).join(','); })].join('\r\n') + '\r\n';
 }
 
@@ -145,7 +167,11 @@ export async function onRequestGet({ request, env }) {
   const mcLog = await D.prepare('SELECT student_id, email, action, mode, status, detail, at FROM mailchimp_log ORDER BY id DESC LIMIT 20').all();
   const waitingJoin = (await backfillList(D, 5000, mc.mode)).length;
   const waitingTags = canTag(env) ? (await stepsBackfillList(D, 5000, mc.mode)).length : 0;
-  return json({ ok: true, students, waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
+  // Their own words: the newest Blueprint (Version 4) worksheet answers; the
+  // page builds whole sentences from them (theirWords in dash.js).
+  const words = await D.prepare(`SELECT w.student_id, w.key, w.value, w.updated_at, s.name, s.email FROM sheet w JOIN student s ON s.id = w.student_id
+      WHERE w.key LIKE 'w.v4.%' AND w.value <> '' ORDER BY w.updated_at DESC LIMIT 600`).all();
+  return json({ ok: true, students, words: words.results || [], waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
     mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags } });
 }
 

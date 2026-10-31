@@ -196,3 +196,76 @@ export function needsYou(students, waiting, now = Date.now()) {
   const quiet = (students || []).filter((s) => isQuiet(s, now)).map((s) => ({ kind: 'quiet', id: s.id, name: s.name, email: s.email, days: Math.floor((now - seen(s)) / DAY) }));
   return [...notes, ...quiet];
 }
+
+// ── What founders told the North Star (31 Oct, Alexandru: "add more data
+// you think can be useful") ─────────────────────────────────────────────────
+// From the North Star's own flags and results, saved with the account: what
+// hurts, what they want (two), what they care about (two), who works with
+// them, and the side that needs them first (their lowest answered score).
+// Counts are real answers only; a founder who answered none of it is left out.
+
+export const PAIN_NAMES = { clients: 'Not enough clients', cash: 'Cash is tight', time: 'No time for myself', alone: 'Doing everything myself', team: 'Team not stepping up', direction: 'Unclear direction', price: 'Prices feel too low', switch: 'I can’t switch off' };
+export const WANT_NAMES = { freedom: 'More free time', income: 'Higher income', steady: 'Steady clients', team: 'A team I trust', clarity: 'Clarity on direction', grow: 'A new market' };
+export const VALUE_NAMES = { family: 'Family', faith: 'Faith', freedom: 'Freedom', health: 'Health', integrity: 'Integrity', growth: 'Growth', service: 'Service', legacy: 'Legacy' };
+export const TEAM_NAMES = { solo: 'Just me', help: 'Me and some help', team: 'A team' };
+export const SIDES = ['Lead yourself', 'Lead your people', 'Lead your business', 'Lead the market'];
+const parseJSON = (v) => { if (v && typeof v === 'object') return v; try { return JSON.parse(v || 'null') || {}; } catch { return {}; } };
+
+/** One founder's answers, as names. first/best: index into SIDES, or -1. */
+export function told(s) {
+  const f = parseJSON(s && s.ns_flags), r = parseJSON(s && s.ns_results);
+  const pains = (Array.isArray(f.pains) ? f.pains : []).filter((k, i, a) => PAIN_NAMES[k] && a.indexOf(k) === i);
+  const wants = [f.want, f.want2].filter((k, i, a) => WANT_NAMES[k] && a.indexOf(k) === i);
+  const values = (Array.isArray(f.values) ? f.values : []).filter((k, i, a) => VALUE_NAMES[k] && a.indexOf(k) === i);
+  const team = TEAM_NAMES[f.team] ? f.team : '';
+  const sc = Array.isArray(r.scores) ? r.scores : [], an = Array.isArray(r.answered) ? r.answered : [];
+  let first = -1, best = -1;
+  sc.forEach((v, i) => { if (!an[i] || !Number.isFinite(Number(v))) return; if (first < 0 || v < sc[first]) first = i; if (best < 0 || v > sc[best]) best = i; });
+  return { pains, wants, values, team, first, best, any: !!(pains.length || wants.length || values.length || team || first >= 0) };
+}
+
+/** Across the roster: each list ranked, most named first. */
+export function toldTally(students) {
+  const T = { pains: {}, wants: {}, values: {}, team: {}, first: [0, 0, 0, 0] };
+  let people = 0;
+  for (const s of students || []) {
+    const t = told(s);
+    if (!t.any) continue;
+    people++;
+    for (const k of t.pains) T.pains[k] = (T.pains[k] || 0) + 1;
+    for (const k of t.wants) T.wants[k] = (T.wants[k] || 0) + 1;
+    for (const k of t.values) T.values[k] = (T.values[k] || 0) + 1;
+    if (t.team) T.team[t.team] = (T.team[t.team] || 0) + 1;
+    if (t.first >= 0) T.first[t.first]++;
+  }
+  const rank = (obj, names) => Object.entries(obj).map(([k, n]) => ({ k, name: names[k] || k, n })).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name));
+  return { people, pains: rank(T.pains, PAIN_NAMES), wants: rank(T.wants, WANT_NAMES), values: rank(T.values, VALUE_NAMES), team: rank(T.team, TEAM_NAMES),
+    first: T.first.map((n, i) => ({ k: String(i), name: SIDES[i], n })).filter((x) => x.n).sort((a, b) => b.n - a.n) };
+}
+
+/** Their own sentences from the Blueprint (Version 4), newest first. rows:
+ *  worksheet rows { student_id, key, value, updated_at, name, email } with
+ *  keys w.v4.<level>.<domain 0–3>.<field>; levels: LEVELS4 from
+ *  /levels-v4.js. Only sentences with every blank filled are shown. */
+export function theirWords(rows, levels, limit = 12) {
+  const groups = new Map();
+  for (const r of rows || []) {
+    const m = /^w\.v4\.(\d{1,2})\.([0-3])\.([A-Za-z0-9_]+)$/.exec(String((r && r.key) || ''));
+    if (!m) continue;
+    const id = `${r.student_id}|${m[1]}|${m[2]}`;
+    const g = groups.get(id) || { id: r.student_id, name: r.name || '', email: r.email || '', lv: Number(m[1]), d: Number(m[2]), f: {}, at: '' };
+    g.f[m[3]] = String(r.value ?? '');
+    if (String(r.updated_at || '') > g.at) g.at = String(r.updated_at || '');
+    groups.set(id, g);
+  }
+  const out = [];
+  for (const g of groups.values()) {
+    const L = (levels || [])[g.lv - 1], D = L && L.d && L.d[g.d];
+    if (!D || !Array.isArray(D.f)) continue;
+    const fields = D.f.filter((p) => typeof p !== 'string');
+    if (!fields.length || !fields.every((p) => String(g.f[p[0]] || '').trim())) continue;
+    const text = D.f.map((p) => (typeof p === 'string' ? p : String(g.f[p[0]]).trim())).join('').replace(/<[^>]*>/g, '');
+    out.push({ id: g.id, name: g.name, email: g.email, lv: g.lv, word: L.word || '', side: SIDES[g.d], text, at: g.at });
+  }
+  return out.sort((a, b) => b.at.localeCompare(a.at)).slice(0, limit);
+}

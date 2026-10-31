@@ -143,6 +143,51 @@ button{font:inherit}
 #gate[hidden]{display:none}
 @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
+/* 1 Nov: the cost of waiting, Alexandru's face and story, the risk line, motion. */
+.sl{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:baseline;font-weight:600;font-size:15px;max-width:440px}
+.sl output{font:500 22px/1 Newsreader,Georgia,serif;color:#7A5C16;font-variant-numeric:tabular-nums}
+.sl input{grid-column:1/-1;width:100%;accent-color:#B4975F;min-height:32px}
+.yr{width:100%;max-width:420px;padding:28px;background:#1C1309;color:#F3EBDA;display:flex;flex-direction:column;gap:10px;box-shadow:0 30px 50px -24px rgba(0,0,0,.6)}
+.yr .big{margin:0;font:500 clamp(56px,9vw,88px)/1 Newsreader,Georgia,serif;color:#E3C47E;font-variant-numeric:tabular-nums}
+.yr .eq{margin:0;color:#C9BDA6}
+.yr .ask{margin:0;font:italic 400 clamp(19px,2.3vw,22px)/1.4 Newsreader,Georgia,serif}
+.face{margin:0;flex:0 1 300px;min-width:0}
+.face img{display:block;width:100%;height:auto;aspect-ratio:5/4;object-fit:cover;filter:saturate(.9)}
+.face figcaption{margin-top:10px;font-size:13px;color:#9D917E}
+.story{margin:0;max-width:52ch;font:italic 400 clamp(18px,2vw,21px)/1.5 Newsreader,Georgia,serif;color:#E8DFCB;border-left:3px solid #B4975F;padding-left:18px}
+.risk{margin:6px 0 0;max-width:70ch;padding:18px 20px;border:1px dashed #B4975F;background:#FFFDF7;font-size:15.5px;color:#5E5446}
+.risk b{display:block;font:500 19px/1.35 Newsreader,Georgia,serif;color:#1C1309;margin-bottom:4px}
+.levels .ch{grid-column:1/-1;margin:10px 0 0;font:700 11px/1.4 'Inter',Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#7A5C16;background:none;border:0;padding:0}
+.levels li p small{display:block;margin-top:4px;font:400 13px/1.35 'Inter',Arial,sans-serif;color:#6B6153}
+.levels .free p small,.levels .last p small{color:inherit;opacity:.8}
+.close .mine{margin:0 auto;font:italic 400 clamp(19px,2.2vw,22px)/1.45 Newsreader,Georgia,serif;color:#E3C47E;max-width:44ch}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.enter > *{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
+.enter > :nth-child(2){animation-delay:.15s}.enter > :nth-child(3){animation-delay:.45s}.enter > :nth-child(4){animation-delay:.65s}
+.rv{transition:opacity .8s ease,transform .8s ease}
+.rv.wait{opacity:0;transform:translateY(18px)}
+.cta{transition:background .2s}
+.close .cta{animation:beckon 2.6s ease-in-out 1s 3}
+@keyframes beckon{0%{box-shadow:0 0 0 0 rgba(227,196,126,.55)}70%{box-shadow:0 0 0 16px rgba(227,196,126,0)}100%{box-shadow:0 0 0 0 rgba(227,196,126,0)}}
+@media (prefers-reduced-motion: reduce){.rv.wait{opacity:1;transform:none}}
+html.rk-bar-on .foot{padding-bottom:84px}
+/* 1 Nov, round 2: the after, the Boardroom door, readable, fast */
+.back{margin:4px 0 0;padding:10px 14px;border-left:3px solid #B4975F;background:rgba(180,151,95,.12);font-size:15px;max-width:46ch}
+.back b{color:#D6BF8F;font-weight:600}
+.yr .after{margin:0;padding-top:12px;border-top:1px solid rgba(180,151,95,.35);color:#E3C47E;font-size:16px}
+.sun3{padding:20px 22px;background:#1E1710;border:1px solid #3A3022;max-width:620px}
+.sun3 ul{margin:10px 0 0;padding-left:20px;display:grid;gap:4px;font:500 18px/1.4 Newsreader,Georgia,serif;color:#F3EBDA}
+.soon{display:inline-flex;align-items:center;min-height:42px;padding:0 16px;border:1px dashed #B4975F;font:600 14px/1 'Inter',Arial,sans-serif;color:#7A5C16;cursor:not-allowed}
+.ladder .nm span,.face figcaption{font-size:14px}
+.sc:not(:first-of-type){content-visibility:auto;contain-intrinsic-size:auto 760px}
+:root[data-theme="light"] .back{color:#1C1309}:root[data-theme="light"] .back b{color:#7A5C16}
+:root[data-theme="light"] .sun3{background:#FFFDF7;border-color:#DFD3B8}:root[data-theme="light"] .sun3 ul{color:#1C1309}
+:root[data-theme="light"] .yr{background:#1C1309}
+:root[data-theme="light"] .story{color:#3A2F20}
+:root[data-theme="light"] .close .mine{color:#7A5C16}
+:root[data-theme="light"] .close .note{color:#5E5446}
+:root[data-theme="light"] .foot strong{color:#7A5C16!important}
+
 /* Light (public/theme.js): the dark scrolls become a warm second paper, so
    the page still alternates; gold turns a shade deeper to keep its contrast. */
 :root[data-theme="light"] body{background:#F6EFE2;color:#1C1309}
@@ -197,11 +242,12 @@ button{font:inherit}
     <div class="in">
       <ol class="jm" aria-label="Where you are on this page"><li class="nw">Arrive</li><li>Understand</li><li>See your path</li><li>Choose</li><li>Begin</li></ol>
       <div class="row">
-        <div class="tx">
+        <div class="tx enter">
           <div style="display: flex; align-items: center; gap: 12px"><svg width="28" height="28" viewBox="0 0 34 34" aria-hidden="true"><rect x="7" y="7" width="20" height="20" transform="rotate(45 17 17)" fill="none" stroke="#B4975F" stroke-width="1.6"></rect><rect x="13" y="13" width="8" height="8" transform="rotate(45 17 17)" fill="#B4975F"></rect></svg><div><p style="margin: 0; font: 500 24px/1 Newsreader, Georgia, serif; color: #D6BF8F">Link to Lead</p><p class="k" style="margin: 5px 0 0; font-size: 10px">The Founder’s Blueprint · Link to Lead</p></div></div>
           <h1 class="h1">Your business can’t grow <em>past you.</em></h1>
-          <p class="sub">Twelve weeks that take the business out of your head and onto paper. Start free tonight.</p>
-          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 8px"><button type="button" class="cta" data-join>Join →</button><span class="note">3 levels · Instant access</span></div>
+          <p class="sub">Twelve weeks that take the business out of your head and onto paper. The first three are free, and stay free.</p>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 8px"><button type="button" class="cta" data-join>Start my free three weeks →</button><span class="note">Name and email · No card · Stop any week</span></div>
+          <p class="back" id="back" hidden></p>
         </div>
         <div class="vz">
           <!-- Hero image (30 Oct, Alexandru picked option D): every road runs through you.
@@ -268,32 +314,37 @@ button{font:inherit}
       <div class="row">
         <div class="tx">
           <h2 class="h2">Four things hold your business up. <em>One is costing you most.</em></h2>
-          <p class="sub">Work the wrong one and nothing moves.</p>
+          <p class="sub">Work the wrong one and nothing moves. Three taps show you which one to start with. No sign-up to look.</p>
         </div>
         <div class="vz">
-          <div class="four" role="img" aria-label="The four domains around you: Lead yourself, Lead your people, Lead your business and Lead the market, with one highlighted">
-            <div>Lead yourself</div>
-            <div style="justify-content: flex-end; text-align: right">Lead your people</div>
-            <div style="align-items: flex-end">Lead your business</div>
-            <div style="align-items: flex-end; justify-content: flex-end; text-align: right; border: 1.5px solid #B4975F; background: rgba(180,151,95,.16); color: #D6BF8F">Lead the market</div>
-            <span class="you">YOU</span>
-          </div>
+          <!-- The quick mirror (road-kit.js): three taps before any form. -->
+          <div id="mm" aria-live="polite"></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 4 · UNDERSTAND · your stage -->
+  <!-- 4 · UNDERSTAND · what waiting costs, counted by the founder (nothing invented, nothing sent) -->
   <section class="sc lt">
     <div class="in">
       <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="nw">Understand</li><li>See your path</li><li>Choose</li><li>Begin</li></ol>
-      <h2 class="h2">Your stage decides <em>what comes first.</em></h2>
-      <ol class="stairs">
-        <li class="s1"><b>Building</b><span>Finding the offer and the first clients</span></li>
-        <li class="s2"><b>Growing</b><span>Clients repeat, everything runs through you</span></li>
-        <li class="s3"><b>Scaling</b><span>There is a team, and your job has changed</span></li>
-      </ol>
-      <p class="sub">The Leader’s North Star shows which one you are in.</p>
+      <div class="row">
+        <div class="tx">
+          <h2 class="h2">What another year like this <em>costs you.</em></h2>
+          <p class="sub">Two numbers only you know. Drag them to your real week.</p>
+          <label class="sl">Hours you actually work in a week <output id="o-now">55 h</output><input type="range" id="s-now" min="20" max="90" value="55"></label>
+          <label class="sl">Hours you would choose to work <output id="o-want">40 h</output><input type="range" id="s-want" min="10" max="70" value="40"></label>
+        </div>
+        <div class="vz">
+          <div class="yr">
+            <p class="k">Beyond the week you want, every year</p>
+            <p class="big" id="o-year">780 h</p>
+            <p class="eq" id="o-eq">That is 20 of your chosen weeks, every year.</p>
+            <p class="ask" id="r-ask">Who got those hours last year, and who went without them?</p>
+            <p class="after" id="o-after">One protected three-hour block a week takes back 156 of them, every year.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -305,8 +356,9 @@ button{font:inherit}
       <ol class="steps">
         <li><span class="n" aria-hidden="true">1</span><b>Your free account</b><span>One minute. Name and email.</span></li>
         <li><span class="n" aria-hidden="true">2</span><b>Your Base Camp</b><span>Your stage and your first three moves.</span></li>
-        <li><span class="n on" aria-hidden="true">3</span><b>One level a week</b><span>Open it, count it, write it down.</span></li>
+        <li><span class="n on" aria-hidden="true">3</span><b>One level a week</b><span>Tap, slide, write one sentence, read four lines back.</span></li>
       </ol>
+      <div id="fl"></div>
       <p style="margin: 8px 0 0; max-width: 52ch; font: 500 clamp(18px,2vw,21px)/1.5 Newsreader, Georgia, serif; color: #F3EBDA">The numbers are never the point. They help you <b style="color: #D6BF8F; font-weight: 600">decide</b>, <b style="color: #D6BF8F; font-weight: 600">lead a person</b> or <b style="color: #D6BF8F; font-weight: 600">hand something over</b>.</p>
     </div>
   </section>
@@ -316,14 +368,10 @@ button{font:inherit}
     <div class="in">
       <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="nw">See your path</li><li>Choose</li><li>Begin</li></ol>
       <div class="lvhead">
-        <h2 class="h2" id="lv-h">Your twelve levels.</h2>
-        <div class="tabs" role="tablist" aria-label="Your stage">
-          <button type="button" role="tab" id="tab-build" aria-selected="true" aria-controls="levels" data-stage="build">Building</button>
-          <button type="button" role="tab" id="tab-grow" aria-selected="false" aria-controls="levels" data-stage="grow" tabindex="-1">Growing</button>
-          <button type="button" role="tab" id="tab-scale" aria-selected="false" aria-controls="levels" data-stage="scale" tabindex="-1">Scaling</button>
-        </div>
+        <h2 class="h2" id="lv-h">Your twelve levels. <em>One word each.</em></h2>
+        <p class="sub" style="max-width: 40ch">Each word has four letters, one for each part of the business. Each week ends with things you can point at on Sunday.</p>
       </div>
-      <ol class="levels" id="levels" role="tabpanel" aria-labelledby="tab-build"></ol>
+      <ol class="levels" id="levels" aria-labelledby="lv-h"></ol>
       <p class="note legend"><span><i style="background: #B4975F"></i>Open the day you join</span><span><i style="border: 1px solid #B4975F"></i>With Alexandru</span><span><i style="border: 1px solid #DFD3B8"></i>LAB and HUB</span></p>
     </div>
   </section>
@@ -345,11 +393,9 @@ button{font:inherit}
             </svg>
         </div>
       </div>
-      <ul class="change">
-        <li><s>A week you can’t account for</s><span aria-hidden="true" style="color: #B4975F; text-align: center">→</span><b>Last week’s hours, visible</b></li>
-        <li><s>Customers you guess at</s><span aria-hidden="true" style="color: #B4975F; text-align: center">→</span><b>Ten real names</b></li>
-        <li><s>Everything runs through you</s><span aria-hidden="true" style="color: #B4975F; text-align: center">→</span><b>One process someone else ran</b></li>
-      </ul>
+      <div id="nt"></div>
+      <div id="nt-case" hidden></div>
+      <div class="sun3"><p class="k">It is Sunday, week three. On paper:</p><ul><li>One task handed over</li><li>Your “enough” as a number</li><li>Three people asked to buy</li><li>Your five numbers read</li></ul></div>
     </div>
   </section>
 
@@ -380,13 +426,29 @@ button{font:inherit}
   <section class="sc dk">
     <div class="in">
       <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="dn">See your path</li><li class="nw">Choose</li><li>Begin</li></ol>
+      <div class="row" style="align-items: flex-start">
+        <figure class="face"><img src="/cabinet/alexandru.jpg" alt="Alexandru Cojocari" width="640" height="512" loading="lazy" decoding="async"><figcaption>Alexandru Cojocari · Founder, ExploraSelf</figcaption></figure>
+        <div class="tx">
       <h2 class="h2">Alexandru and the team <em>read what you write.</em></h2>
       <p class="sub">Before you ever speak.</p>
+      <p class="story">“In my late teens I built made-to-measure kitchens and wardrobes. I loved it. I also did everything myself, and I didn’t watch the money. Orders came late, and the business closed. The Blueprint is what I wish someone had put in front of me then.”</p>
       <ol class="line">
         <li><b>Levels 01–03</b><br><span>You work. They read.</span></li>
         <li><b>One hour with Alexandru</b><br><span>Your Intelligence Report, read first.</span></li>
         <li class="open"><b>Then, as far as you choose</b></li>
       </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9b · CHOOSE · three Sundays later: MODEL stories, tagged, until real founders' words replace them -->
+  <section class="sc lt">
+    <div class="in">
+      <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="dn">See your path</li><li class="nw">Choose</li><li>Begin</li></ol>
+      <h2 class="h2">Three Sundays later. <em>What it can look like.</em></h2>
+      <p class="sub">Illustrations of what the work asks for, not reviews.</p>
+      <div id="story-list"></div>
     </div>
   </section>
 
@@ -401,6 +463,8 @@ button{font:inherit}
         <li><span class="nm"><b>The Founder Launchpad</b><span>On your own</span></span><span class="bars" role="img" aria-label="Levels 01 to 03" data-on="3"></span><span class="pr">No cost</span></li>
         <li><span class="nm"><b>The Boardroom</b><span>With Alexandru</span></span><span class="bars" role="img" aria-label="Levels 01 to 05" data-on="5"></span><span class="pr">One 1:1 session</span></li>
       </ul>
+      <p><span class="soon" aria-disabled="true">Book the Boardroom · booking link coming up</span></p>
+      <p class="risk"><b>The whole risk is three weeks of honest work.</b> If they don’t show you something about your business you couldn’t see before, stop there. You’ve paid nothing, and everything you wrote is still yours.</p>
     </div>
   </section>
 
@@ -430,13 +494,15 @@ button{font:inherit}
     <div class="in" style="align-items: center">
       <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="dn">See your path</li><li class="dn">Choose</li><li class="nw">Begin</li></ol>
       <h2 class="h2">Start tonight, free. <em>By Tuesday, you’ll be ahead.</em></h2>
-      <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 22px"><button type="button" class="cta" data-join>Start free →</button><span class="note">Levels 01–03 free · Instant access</span></div>
+      <p class="sub mine" id="close-mine" hidden></p>
+      <p class="sub" style="margin: 0 auto; text-align: center">By your first Sunday: one task off your desk, your “enough” as a number.</p>
+      <div id="close-cta" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 22px"><button type="button" class="cta" data-join>Start my free three weeks →</button><span class="note">Name and email · No card · Stop any week</span></div>
     </div>
   </section>
 </main>
 
 <footer class="foot"><strong style="color: #C9BCA4">ExploraSelf</strong> · A Good People Company · Lead yourself. Grow your business.<br>
-<a href="/ground-plan/#signin">Sign in</a> · <a href="/north3/">The Leader’s North Star</a></footer>
+<a href="/ground-plan/#signin">Sign in</a></footer>
 
 <!-- The simple account form (/account-box.js), loaded the
      first time a "Join" opens it. -->
