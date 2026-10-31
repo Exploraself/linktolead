@@ -26,7 +26,7 @@
     <nav class="tnav" aria-label="This page">
       <a href="#mirror">The mirror</a>
       <a href="#climb">The twelve weeks</a>
-      <a href="#price">Price</a>
+      <a href="#price">What it costs</a>
       <a href="/ground-plan/#signin">Sign in</a>
       <a class="cta" href="#join" data-join>Start free</a>
       <span id="themehost"></span>
@@ -39,14 +39,17 @@
 <!-- 1 · The hook. -->
 <section class="dark hero">
   <div class="wrap">
-    <div>
+    <div class="enter">
+      <p class="eyebrow">The Founder’s Blueprint · the first three weeks free</p>
       <h1>You can feel it.<br><i>You just can’t see it yet.</i></h1>
       <p class="lede hook">You call it a busy season. Count how long it has lasted.</p>
+      <p class="lede offer">Eight taps show where your business leaks. Then twelve practical weeks take it out of your head and onto paper, one Sunday at a time.</p>
+      <p class="back" id="back" hidden></p>
       <div class="acts">
         <a class="cta" href="#mirror">Look in the mirror <span class="ar" aria-hidden="true">↓</span></a>
         <a class="ghost" href="#join" data-join>Start my free three weeks</a>
       </div>
-      <p class="fine">Eight questions. Tap only.</p>
+      <p class="fine">Eight questions, one tap each. No sign-up to look.</p>
     </div>
 
     <figure class="berg-wrap">
@@ -193,7 +196,7 @@
       <div class="mcard" id="m-card" hidden></div>
       <div class="mresult" id="m-result" hidden></div>
     </div>
-    <p class="honest">A mirror, not a diagnosis. Nothing you tap leaves this page.</p>
+    <p class="honest">A mirror, not a diagnosis. What you tap stays on this device.</p>
   </div>
 </section>
 
@@ -279,12 +282,43 @@
   <div class="wrap">
     <div class="head split">
       <div>
-        <p class="eyebrow" id="week-eyebrow">Week one · Lead yourself · Building</p>
-        <h2 id="week-h">What the work looks like. One week, drawn.</h2>
+        <p class="eyebrow" id="week-eyebrow">Week one · SEED · What you believe</p>
+        <h2 id="week-h">What the work looks like. <i>Four moves, no lectures.</i></h2>
       </div>
-      <p class="lede">No lectures, no theory. Every step sends you to something you can open, count or say. This is one way your first week can run.</p>
+      <p class="lede">In each of the four parts of the business you make the same four moves. You never face a blank page, and every line you read back is built only from your own answers.</p>
     </div>
-    <ol class="days" id="days"></ol>
+    <ol class="moves" aria-label="The four moves">
+      <li><span>1</span><b>Tap</b> the line that sounds like you</li>
+      <li><span>2</span><b>Slide</b> to the honest number</li>
+      <li><span>3</span><b>Write once</b>, one sentence with blanks</li>
+      <li><span>4</span><b>Read four lines</b> back: admit it, don’t fight it, don’t ignore it, do it exactly</li>
+    </ol>
+    <ol class="days four" id="days"></ol>
+    <div class="after3">
+      <div class="lines4 rv">
+        <p class="eyebrow">Example · the four lines you read back</p>
+        <p class="ex">A founder taps “If I hit my numbers, then I’m worth something”, slides to <b>8</b>, and fills one sentence. This is what comes back, built only from those answers:</p>
+        <ol>
+          <li><small>Admit it</small>Last month the rule “If I hit my numbers, then I’m worth something” ran your day most days.</li>
+          <li><small>Don’t fight it</small>It was learned, so it can be tested. Don’t argue with it. Test it once, on purpose.</li>
+          <li><small>Don’t ignore it</small>You named your rule in one sentence. That is the first lever, and you pulled it.</li>
+          <li><small>Exactly</small>On Thursday you will take the evening off, phone in a drawer, and write what really happened.</li>
+        </ol>
+      </div>
+      <div class="sunday3 rv">
+        <p class="eyebrow">It is Sunday, week three</p>
+        <h3>On paper. Not in your head.</h3>
+        <ul>
+          <li>One task handed over</li>
+          <li>Your “enough” written as a number</li>
+          <li>Three people asked to buy</li>
+          <li>Your five numbers read, not guessed</li>
+          <li>One customer signal tested</li>
+          <li>A storm rule for the bad week</li>
+        </ul>
+        <p class="fine">Straight from the promises of levels 01 to 03. All free.</p>
+      </div>
+    </div>
     <div class="machine rv">
       <p>A machine can add up your week in seconds. It cannot decide what you will stop doing, or say the sentence to the person who needs to hear it. That part is yours.</p>
     </div>
@@ -296,19 +330,16 @@
   <div class="wrap">
     <div class="head split">
       <div>
-        <p class="eyebrow" data-stage-eyebrow>Your Building climb</p>
+        <p class="eyebrow">The climb</p>
         <h2 id="climb-h">Twelve weeks. Each one ends with something you can point at.</h2>
       </div>
       <p class="lede">Every week opens with a promise for Sunday: things that happened, not things you thought about. Tap a camp to read it.</p>
     </div>
-    <div class="stagepick">
-      <span id="stage-l2">Your stage</span>
-      <div class="seg" role="group" aria-labelledby="stage-l2" data-stages>
-        <button type="button" data-stage="build" aria-pressed="true">Building</button>
-        <button type="button" data-stage="grow" aria-pressed="false">Growing</button>
-        <button type="button" data-stage="scale" aria-pressed="false">Scaling</button>
-      </div>
-    </div>
+    <ol class="chapters" aria-label="Three chapters">
+      <li><small>Weeks 1–5</small><b>The Inner Pyramid</b><span>You, from the base up</span></li>
+      <li><small>Weeks 6–9</small><b>The Engine Room</b><span>The business inside</span></li>
+      <li><small>Weeks 10–12</small><b>The Open Market</b><span>The business outside</span></li>
+    </ol>
     <div class="climb">
       <svg class="mountain" id="mountain" viewBox="0 0 520 450" role="group" aria-label="Twelve weeks as a climb. Tap a week to read its promise.">
         <defs>
@@ -327,13 +358,13 @@
       </svg>
       <div class="sunday" aria-live="polite">
         <p class="eyebrow" id="wk-band">Week 1 · Free</p>
-        <h3 id="wk-name">Count your week</h3>
-        <p class="p" id="wk-promise">By Sunday you will have four things that did not exist on Monday.</p>
+        <h3 id="wk-name">SEED · What you believe</h3>
+        <p class="p" id="wk-promise">By Sunday: one old rule tested, one task handed over, your enough as a number, three people asked to buy.</p>
         <div class="wknav"><button type="button" id="wk-prev" aria-label="Previous week">←</button><button type="button" id="wk-next" aria-label="Next week">→</button></div>
       </div>
     </div>
     <div class="bands" aria-hidden="true"><span class="b1">Weeks 1–3 · free</span><span class="b2">4–5 · the Boardroom</span><span class="b3">6–9 · the LAB</span><span class="b4">10–12 · the HUB</span></div>
-    <div class="midcta rv"><a class="cta" href="#join" data-join>Start the climb, free <span class="ar" aria-hidden="true">→</span></a><span class="fine">Weeks 1–3 free. No card.</span></div>
+    <div class="midcta rv"><a class="cta" href="#join" data-join>Start the climb, free <span class="ar" aria-hidden="true">→</span></a><span class="fine">Weeks 1–3 free. No card. Stop any week.</span></div>
   </div>
 </section>
 
@@ -355,6 +386,9 @@
       <div class="cal" id="cal" role="img" aria-label="Fifty-two weeks of the year; the gold ones are how many of your chosen weeks those extra hours add up to."></div>
       <p class="eq" id="o-eq">That is 20 of your chosen weeks, every year.</p>
       <p class="ask" id="r-ask">Who got those hours last year, and who went without them?</p>
+      <p class="after" id="o-after">One protected three-hour block a week takes back 156 of them, every year. Week seven, HOUR, builds that block.</p>
+      <div class="acts"><a class="cta" href="#join" data-join>Start taking them back, free <span class="ar" aria-hidden="true">→</span></a></div>
+      <p class="fine">Week one starts by counting where last week went.</p>
     </div>
   </div>
 </section>
@@ -369,22 +403,23 @@
       </div>
       <p class="lede">Not promises about revenue. Things you will have done if you do the work. Each one written down, checked on a Sunday, and still there on Monday.</p>
     </div>
-    <div class="ba" id="ba">
-      <div class="ba-switch seg" role="group" aria-label="Today or week twelve">
-        <button type="button" data-ba="now" aria-pressed="true">Today</button>
-        <button type="button" data-ba="then" aria-pressed="false">Week twelve</button>
-      </div>
-      <ul class="ba-rows" data-ba-state="now">
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><b>Your week</b><span class="now">Spent by whoever asks first.</span><span class="then">A shape you chose, with one block defended every week.</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8l7-5 7 5"/></svg><b>Your reason</b><span class="now">Hard to say out loud.</span><span class="then">One sentence you would say to a customer.</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10l2 4H5Z"/><path d="M5 8v12h14V8M10 13h4"/></svg><b>Your price</b><span class="now">Quoted from fear.</span><span class="then">The worth of your hour, written as a number and said out loud.</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3"/><circle cx="16" cy="10" r="2.4"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5M14.5 15c2.6-.4 4.8 1 5.4 4"/></svg><b>Your people</b><span class="now">Waiting, guessing what you expect.</span><span class="then">Told plainly what you expect, and what they may decide without you.</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16H6z"/><path d="M9 9h6M9 12h6M9 15h4"/></svg><b>The work</b><span class="now">Lives in your head.</span><span class="then">Written down, run by somebody else, and corrected where it was wrong.</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/></svg><b>Your customers</b><span class="now">Whoever happens to find you.</span><span class="then">A hundred real names and an order to approach them in.</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20 12 5l7 15"/><path d="M9 13h6"/></svg><b>Your next ninety days</b><span class="now">The next fire.</span><span class="then">One page: one outcome, three priorities, one number you check weekly.</span></li>
-      </ul>
-    </div>
+    <div id="nt"></div>
+    <div id="nt-case" style="margin-top:14px" hidden></div>
     <div class="midcta rv"><a class="cta" href="#join" data-join>Start my free three weeks <span class="ar" aria-hidden="true">→</span></a><span class="fine">Your first Sunday is never more than seven days away.</span></div>
+  </div>
+</section>
+
+<!-- 8b · Three Sundays later: MODEL stories, tagged on the page, until real founders' words replace them. -->
+<section class="sec navy" id="stories" aria-labelledby="st-h">
+  <div class="wrap">
+    <div class="head split">
+      <div>
+        <p class="eyebrow">Three Sundays later</p>
+        <h2 id="st-h">What the first three weeks <i>can look like.</i></h2>
+      </div>
+      <p class="lede">Three kinds of founder, three different weeks. The same four moves, and something on paper by the third Sunday. These are illustrations of what the work asks for, not reviews.</p>
+    </div>
+    <div id="story-list"></div>
   </div>
 </section>
 
@@ -406,6 +441,7 @@
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg><span>You leave knowing which part of the business is costing you most, why it is that one, and with weeks four and five open.</span></li>
       </ul>
       <p class="sig">Alexandru</p>
+      <p class="book"><img src="/library/cover-a-new-way-of-winning.jpg" alt="" width="56" height="56" loading="lazy" decoding="async"><span>Free with your account: Alexandru’s book <b>A New Way of Winning</b>, the principles the twelve weeks are built on.</span></p>
     </div>
   </div>
 </section>
@@ -418,15 +454,21 @@
         <p class="eyebrow">What it costs</p>
         <h2 id="lad-h">Start free. Pay only to go higher.</h2>
       </div>
-      <p class="lede">All twelve weeks are written. What you choose decides how far you climb and how much of Alexandru is with you. It never decides whether the work exists. The first three weeks are free, and they stay free.</p>
+      <p class="lede">The first three weeks are free and stay free. Finish them, and one hour with Alexandru opens the next two, at no cost. That is the whole decision for now.</p>
     </div>
     <div class="ladder">
-      <div class="rung here rv"><small>Weeks 1–3 · you start here</small><b>The Founder Launchpad</b><span class="pr">Free</span><p>All four parts of the business, your working notes and your stage’s questions, saved and waiting on any device. No card, now or later.</p></div>
-      <div class="rung rv"><small>Opens weeks 4–5</small><b>The Boardroom — an hour with Alexandru</b><span class="pr">No cost</span><p>Finish week three and book it. Alexandru names the part of the business costing you most, having read everything you wrote.</p></div>
-      <div class="rung rv"><small>Opens weeks 6–9</small><b>Personal Leadership LAB</b><span class="pr">$97</span><p>Self-paced, with two sessions with Alexandru. One process somebody else runs, the worth of your hour, and the work you finally put down.</p></div>
-      <div class="rung rv"><small>Opens weeks 10–12</small><b>Business Growth HUB</b><span class="pr">$397</span><p>The full twelve weeks, the LAB included, and three sessions with Alexandru in total. A hundred named prospects, your weekly number, and a quarter with dates.</p></div>
-      <div class="rung rv"><small>All twelve, with a mentor</small><b>The Summit</b><span class="pr">$1,989</span><p>Everything above, with Alexandru beside you every week, and the team who help you put each system into the business so it runs rather than sits on paper.</p></div>
+      <div class="rung here rv"><small>Weeks 1–3 · you start here</small><b>The Founder Launchpad</b><span class="pr">Free</span><p>All four parts of the business, your working notes and your answers, saved and waiting on any device. No card, now or later.</p></div>
+      <div class="rung rv"><small>Then · opens weeks 4–5</small><b>The Boardroom — an hour with Alexandru</b><span class="pr">No cost</span><p>Finish week three and book it. Alexandru names the part of the business costing you most, having read everything you wrote.</p><span class="soon" aria-disabled="true">Book the Boardroom · booking link coming up</span></div>
     </div>
+    <details class="later rv">
+      <summary>See where the climb goes after week five</summary>
+      <p class="lede">All twelve weeks are written. What you choose decides how far you climb and how much of Alexandru is with you. It never decides whether the work exists.</p>
+      <div class="ladder">
+        <div class="rung"><small>Opens weeks 6–9</small><b>Personal Leadership LAB</b><span class="pr">$97</span><p>Self-paced, with two sessions with Alexandru. One process somebody else runs, the worth of your hour, and the work you finally put down.</p></div>
+        <div class="rung"><small>Opens weeks 10–12</small><b>Business Growth HUB</b><span class="pr">$397</span><p>The full twelve weeks, the LAB included, and three sessions with Alexandru in total. A hundred named prospects, your weekly number, and a quarter with dates.</p></div>
+        <div class="rung"><small>All twelve, with a mentor</small><b>The Summit</b><span class="pr">$1,989</span><p>Everything above, with Alexandru beside you every week, and the team who help you put each system into the business so it runs rather than sits on paper.</p></div>
+      </div>
+    </details>
     <div class="risk rv">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
       <p><b>The whole risk is three weeks of honest work.</b> If the first three weeks don’t show you something about your business you couldn’t see before, stop there. You’ve paid nothing, and everything you wrote is still yours.</p>
@@ -477,10 +519,12 @@
       <p class="eyebrow">Two Sundays from now</p>
       <h2 id="close-h">The same week, the same fires. <i>Or one thing you can point at.</i></h2>
       <p class="lede">You already know which one you will get if nothing changes. Start with three free weeks, and see your business from a side you haven’t seen it from.</p>
+      <p class="mine" id="close-mine" hidden></p>
     </div>
-    <div class="side">
+    <div class="side" id="close-cta">
       <a class="cta" href="#join" data-join>Start my free three weeks <span class="ar" aria-hidden="true">→</span></a>
-      <p class="fine">No card. Weeks 1–3 stay free. Your work is yours to keep.</p>
+      <p class="fine">By your first Sunday: one task off your desk, your “enough” as a number.</p>
+      <p class="fine">No card. Your work stays yours. Stop any week.</p>
     </div>
   </div>
 </section>
