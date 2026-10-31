@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import { onRequestGet as gGet, onRequestPost as gPost } from '../functions/api/google.js';
 import { onRequestPost as signup } from '../functions/api/signup.js';
 import { onRequestGet as stateGet } from '../functions/api/state.js';
-import { verifyGoogle } from '../functions/_google.js';
+import { verifyGoogle, CLIENT_ID } from '../functions/_google.js';
 import { fakeD1, post, get, tally } from './_d1.mjs';
 
 const { ok, done } = tally('google');
@@ -36,11 +36,13 @@ globalThis.fetch = async (url, opts = {}) => {
 };
 const J = async (r) => [r.status, await r.json()];
 
-// ── Off until the client id is set ──────────────────────────────────────────
+// ── On by default (the public id lives in _google.js); off when set empty ───
 const DB = fakeD1();
 let [code, out] = await J(gGet({ env: { DB } }));
-ok(code === 200 && out.ready === false && !out.clientId, 'GET: off without GOOGLE_CLIENT_ID, so no button shows');
-[code] = await J(await gPost({ request: post('/api/google', { credential: 'tok-new-founder-000000001' }), env: { DB } }));
+ok(out.ready === true && out.clientId === CLIENT_ID && /\.apps\.googleusercontent\.com$/.test(CLIENT_ID), 'GET: on with no variable at all (the live Pages site sets none)');
+[code, out] = await J(gGet({ env: { DB, GOOGLE_CLIENT_ID: '' } }));
+ok(code === 200 && out.ready === false && !out.clientId, 'GET: GOOGLE_CLIENT_ID set empty switches the button off');
+[code] = await J(await gPost({ request: post('/api/google', { credential: 'tok-new-founder-000000001' }), env: { DB, GOOGLE_CLIENT_ID: '' } }));
 ok(code === 503, 'POST: refused while it is off');
 
 const env = { DB, GOOGLE_CLIENT_ID: CID, RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Via Esempio 1, Rome' };
