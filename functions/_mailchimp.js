@@ -102,7 +102,7 @@ export function mailchimpState(env = {}) {
 /** Which sales page a founder signed up on (Alexandru, 30 Oct 2026). The old
  *  names ('Landing - Road 1' …) are sent as inactive, so a founder whose tags
  *  are sent again loses the old one (API mode). */
-export const LANDING_TAGS = { road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', compass: 'linktolead-northstar', summit: 'linktolead-summitpage' };
+export const LANDING_TAGS = { road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', road4: 'linktolead-road4', compass: 'linktolead-northstar', summit: 'linktolead-summitpage' };
 
 /** The tags for one founder. In API mode each stage and domain tag is sent as
  *  active or inactive, so a founder who moves on loses the old one. Step tags

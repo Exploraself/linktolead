@@ -181,7 +181,7 @@ const noRun = baseOf({ ...EXAMPLE, run: null, rate: null, hire: null }), nm = E.
 ok(noRun.fixed === 0 && nm.cash === null && nm.people === null && Number.isFinite(nm.mine), 'empty Fine-tune boxes: no money figure invented, the hours still move');
 
 // ── Mailchimp landing tags ──────────────────────────────────────────────────
-ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', compass: 'linktolead-northstar', summit: 'linktolead-summitpage' }), 'landing tags: the linktolead-… system');
+ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', road4: 'linktolead-road4', compass: 'linktolead-northstar', summit: 'linktolead-summitpage' }), 'landing tags: the linktolead-… system');
 // Road 2.1 (30 Oct): its own tag, no empty old tag, the FULL form, and road2 untouched beside it.
 {
   const { tagsFor } = await import('../functions/_mailchimp.js');
@@ -192,6 +192,21 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
   const labels = new Set((R21.match(/<button type="button" data-gate[^>]*>([^<]+)/g) || []).map((m) => m.replace(/.*>/, '').trim()));
   ok(labels.size === 1 && labels.has('Start my North Star →'), 'road2.1: one button label, everywhere');
   ok(!/most founders|incubator/i.test(R21.replace(/<!--[\s\S]*?-->/g, '')), 'road2.1: no banned words on the page');
+}
+// Road 4 (31 Oct): the sales page for The Founder's Blueprint, led by what a founder feels.
+{
+  const R4 = read('public/road4/index.html'), R4J = read('public/road4/page.js'), R4C = read('public/road4/road4.css');
+  const R4T = R4.replace(/<!--[\s\S]*?-->/g, '');
+  ok(tagsFor({ landing: 'road4', signupType: 'full' }).some((x) => x.name === 'linktolead-road4' && x.status === 'active'), 'road4: tagged linktolead-road4');
+  ok(R4J.includes("variant: 'full', landing: 'road4'") && R4.includes('<script type="module" src="/road4/page.js"></script>') && (R4.match(/<a [^>]*class="cta"[^>]*>/g) || []).every((x) => x.includes('data-join')), 'road4: every call to action opens the FULL form, landing road4');
+  for (const [n, p] of [['The Founder Launchpad', 'Free'], ['The Boardroom — an hour with Alexandru', 'No cost'], ['Personal Leadership LAB', '$97'], ['Business Growth HUB', '$397'], ['The Summit', '$1,989']]) ok(R4.includes(`<b>${n}</b><span class="pr">${p}</span>`), `road4: ${n} · ${p}`);
+  ok(R4C.includes('prefers-reduced-motion') && R4C.includes('html.still') && R4.includes('id="still"'), 'road4: motion stops for reduced motion and for the Pause button');
+  ok(!/\b(99|32) (tools|frameworks)\b|P\.A\.C\.E|most founders|incubator/i.test(R4T + R4J), 'road4: no tool or framework names, no banned words');
+  ok(!/\/start[#/"']/.test(R4 + R4J), 'road4: links go to /ground-plan/, not the old /start');
+  ok(R4J.includes('lv[1][f.k].steps.slice(0, 2)') && R4J.includes("'/levels-build.js'") && R4J.includes('L[week].promise') && R4J.includes('LEVEL_NAMES[stage]'), 'road4: week one and the twelve promises come from the level files');
+  ok((R4J.match(/\{ k: '(self|people|work|market)', feel: /g) || []).length === 8 && ['self', 'people', 'work', 'market'].every((k) => (R4J.match(new RegExp(`\\{ k: '${k}', feel: `, 'g')) || []).length === 2), 'road4: eight symptoms, two in each domain');
+  ok(R4J.includes("const NOTES = 'ftb-sample'") && /try \{ localStorage\.setItem\(NOTES/.test(R4J), 'road4: sample notes save to this device, in try/catch');
+  ok(R4.includes('/cabinet/alexandru.jpg') && R4.includes('I was the business, too.') && !/PHOTO OF/.test(R4), 'road4: Alexandru, in his own story, with his photo');
 }
 // The tag system (30 Oct): every tag is "linktolead" or "linktolead-<group>-<value>", lowercase, no spaces.
 {
@@ -204,5 +219,6 @@ ok(!tagsFor({ landing: 'toString' }).some((x) => /road|northstar|summitpage/.tes
 // ── /start: the greeting ────────────────────────────────────────────────────
 const APP = read('public/app.js');
 ok(/const firstName = \(\) => \(pulled && state\.me/.test(APP) && /if \(r && r\.gone\) \{ account\.signOut\(\); state\.me = null/.test(APP), '/start greets with the first name of the account read on this visit, never a cached one');
+ok(/adoptSample\(\);\n    compassRec/.test(APP) && APP.includes("const SAMPLE_KEY = 'ftb-sample'") && /account\.touch\('answers', k, state\.answers\[k\]\)/.test(APP) && /\|\| \(state\.answers\[k\] \|\| ''\)\.trim\(\)\) continue/.test(APP), '/ground-plan/: notes from the Road 4 sample move into the account on coming home, never over an answer');
 
 done();

@@ -88,6 +88,7 @@ Three sales pages, the roads, all ending at `/start`:
 | Road 1 | `/road1/` (the long page, with the What-if Lab before the close) | `/`, `/b` | FULL | `road1` |
 | Road 2 | `/road2/` (the North Star sales page) | `/compass/welcome`, `/compass/welcome-a`, `/c` | FULL | `road2` |
 | Road 3 | `/road3/` (the 12 Scrolls page) | `/a` | SIMPLE | `road3` |
+| Road 4 | `/road4/` (the long sales page for The Founder's Blueprint, led by what a founder feels: symptoms, the two kinds of stuck, the twelve weeks of their stage, a real piece of week one) | — | FULL | `road4` |
 
 The redirects live in `functions/_landing.js` (the Worker and Pages both use
 it), and every old address is in `run_worker_first` in `wrangler.toml`.
@@ -98,6 +99,12 @@ the SIMPLE form (landing `compass`, no landing tag). SIMPLE: first name, surname
 these founders sign in by email link. FULL: also company (or "No company yet"),
 what they want most, industry and a password (required, at least 10
 characters). Either way the founder is signed in at once and lands on `/start`.
+
+Road 4's week-one sample saves the founder's notes to the device as they type
+(`ftb-sample`, keyed like the programme's answers). The first time they come
+home to `/ground-plan/` signed in, `app.js` moves those notes into week one and
+the account, never over an answer already written. Its motion stops under
+`prefers-reduced-motion` and with the **Pause motion** button in its footer.
 `student_profile` keeps `signup_type`, `landing` and the `utm_*` tags they
 arrived with. Mailchimp gets `Signup - Full` / `Signup - Simple`,
 `salespageincubator1` / `salespageincubator2` / `salespageincubator3`,
