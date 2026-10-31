@@ -154,7 +154,7 @@ details[data-step] summary::-webkit-details-marker{display:none}
 .whead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,360px);gap:24px;align-items:center}
 .whub{width:100%;max-width:360px;height:auto;justify-self:end}
 .whub .node{transition:fill .5s}
-.wswitch{display:inline-grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border:1px solid #3A2F20;border-radius:999px;align-self:flex-start}
+.wswitch{display:inline-grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:4px;border:1px solid #3A2F20;border-radius:999px;align-self:flex-start}
 .wswitch button{min-height:44px;padding:0 18px;border-radius:999px;border:0;background:transparent;color:#EEF2F7;font-weight:520;font-size:14px;cursor:pointer}
 .wswitch button[aria-pressed="true"]{background:#6F93B8;color:#0E1C2B}
 .wswitch button:disabled{cursor:not-allowed;opacity:.6}

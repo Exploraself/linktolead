@@ -407,6 +407,12 @@ function mount() {
     else if (/^mp-(light|energy|vol)$/.test(t.id)) tell();
   });
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) { open = false; paintPlayer(); const p = root.querySelector('.mp-pill'); if (p) p.focus(); } });
+  // A click anywhere outside the open player closes it (31 Oct). Not the
+  // Crown's own buttons: they open it.
+  document.addEventListener('pointerdown', (e) => {
+    if (!open || !e.target.closest || e.target.closest('#mp, .crown-wrap, .cw-wrap, [data-mp]')) return;
+    open = false; paintPlayer();
+  });
   // The Lamp follows the question being written.
   document.addEventListener('focusin', (e) => { const f = e.target.closest && e.target.closest('textarea, input.wcell'); if (f) { target = f.closest('.step, .cw-write') || f; reAim(); } });
   window.addEventListener('scroll', reAim, { passive: true });

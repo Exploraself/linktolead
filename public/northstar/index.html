@@ -83,7 +83,7 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
         <p class="hz-sub">For solopreneurs and small businesses. Understand where you are, see what needs your attention, and build your next move with clarity.</p>
         <div class="hz-cta">
           <button type="button" data-go="clear" class="go hz-go" id="continue">Show me my road <span class="arr" aria-hidden="true">↓</span></button>
-          <span class="hz-meta">Free · Eight plain questions · Saves as you go</span>
+          <span class="hz-meta">Free · About ten minutes · Saves as you go</span>
         </div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 14px">
@@ -118,11 +118,12 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
     </section>
 
     <!-- ===== PART 1 · YOURSELF ===== -->
+    <div class="nsdiv" role="separator" aria-label="Part 1, Yourself"><span class="nsdiv-n">Part 1</span><span class="nsdiv-t sf">Yourself</span><span class="nsdiv-l">Eleven questions about you and your business.</span></div>
     <section id="s-part1" class="nspart" data-part="1" style="display: flex; flex-direction: column; gap: 20px">
       <div class="rise" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap">
         <div style="display: flex; flex-direction: column; gap: 8px; max-width: 640px">
           <span class="eb">Part 1 · Yourself</span>
-          <h1 class="sf" style="font-size: clamp(30px, 4vw, 44px); line-height: 1.05">Eight questions. <span class="sfi" style="color: var(--goldink)">One page.</span></h1>
+          <h1 class="sf" style="font-size: clamp(30px, 4vw, 44px); line-height: 1.05">Eleven questions. <span class="sfi" style="color: var(--goldink)">One page.</span></h1>
           <p style="color: var(--muted)">Answer from what really happened, not from what you hope.</p>
         </div>
         <div id="ring"></div>
@@ -130,21 +131,28 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
       <div id="questions" style="display: flex; flex-direction: column; gap: 12px"></div>
       <!-- Your North Star: your answers beside your strengths, once Part 1 is done. -->
       <section id="s-reading" style="display: flex; flex-direction: column; gap: 20px"></section>
+      <div id="fbw-1"></div>
     </section>
 
-    <!-- ===== PART 2 · YOUR PEOPLE: not written yet, and says so ===== -->
+    <!-- ===== PART 2 · YOUR PEOPLE (31 Oct): customers and team ===== -->
+    <div class="nsdiv" role="separator" aria-label="Part 2, Your people"><span class="nsdiv-n">Part 2</span><span class="nsdiv-t sf">Your people</span><span class="nsdiv-l">Your customers, and the people who do the work with you.</span></div>
     <div class="nspart" data-part="2" style="display: flex; flex-direction: column; gap: 16px">
-      <section id="s-people" class="card" style="padding: 20px; display: flex; gap: 14px; align-items: center; border-style: dashed">
-        <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2 20c1-3.5 3.5-5 7-5s6 1.5 7 5M16 4.5a3.5 3.5 0 0 1 0 6.5M18 15c2 .6 3.4 2.3 4 5" fill="none" stroke="var(--goldink)" stroke-width="1.6" stroke-linecap="round"/></svg>
-        <div style="display: flex; flex-direction: column; gap: 2px"><span class="eb">Part 2 · Your people</span><span style="font-size: 14px; color: var(--muted)">Customers and team, and for founders without a team yet, how to build one. These questions are still being written. Go on to Part 3 · Your numbers.</span></div>
+      <section id="s-people" style="display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; flex-direction: column; gap: 8px; max-width: 640px">
+          <h1 class="sf" style="font-size: clamp(30px, 4vw, 44px); line-height: 1.05">Who you serve. <span class="sfi" style="color: var(--goldink)">Who serves with you.</span></h1>
+          <p style="color: var(--muted)">One tap, then six questions. No team yet? Then the questions are about building one.</p>
+        </div>
+        <div id="p2" style="display: flex; flex-direction: column; gap: 12px"></div>
       </section>
+      <div id="fbw-2"></div>
     </div>
 
     <!-- ===== PART 3 · YOUR NUMBERS ===== -->
+    <div class="nsdiv" role="separator" aria-label="Part 3, Your numbers"><span class="nsdiv-n">Part 3</span><span class="nsdiv-t sf">Your numbers</span><span class="nsdiv-l">One month, roughly. A range is enough.</span></div>
     <div class="nspart" data-part="3" style="display: flex; flex-direction: column; gap: 64px">
       <section id="s-numbers" style="display: flex; flex-direction: column; gap: 20px"></section>
 
-      <section id="s-feedback" style="display: flex; flex-direction: column; gap: 20px">
+      <section id="s-feedback" class="nsfbw" style="display: flex; flex-direction: column; gap: 20px">
         <div style="display: flex; flex-direction: column; gap: 8px; max-width: 760px">
           <span class="eb">Part 3 · Your numbers · what they mean</span>
           <h1 class="sf" style="font-size: clamp(30px, 4vw, 44px); line-height: 1.05">What it means, <span class="sfi" style="color: var(--goldink)">in all four domains.</span></h1>
@@ -152,11 +160,11 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
         <div style="display: flex; flex-direction: column; gap: 16px">
           <div id="fb-0"></div><div id="fb-1"></div><div id="fb-2"></div><div id="fb-3"></div>
         </div>
-        <div class="deep" style="border-radius: 9px; padding: 26px; display: flex; flex-wrap: wrap; gap: 22px; align-items: center">
-          <svg class="spin" width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="none" stroke="#6F93B8" stroke-width="1.5" stroke-dasharray="2 6"/><path d="M32 10l5 22-5 4-5-4z" fill="#6F93B8"/></svg>
-          <div style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 6px"><span class="eb" style="color: #A9C0D9">Self-leadership is all four at once</span><span class="sf" style="font-size: 22px; line-height: 1.3">You just looked at yourself, your people, your business and your market together. The future needs a plan — and a plan needs all four.</span><span style="font-size: 14px; color: #A9B6C6">Link to Lead walks you through it, level by level, with Alexandru and the team.</span></div>
-          <div class="no-print" style="display: flex; flex-direction: column; gap: 8px"><button type="button" data-go="plan" style="display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; cursor: pointer">Ask “what if?” →</button><a href="/road1/" style="text-align: center; color: #A9C0D9; font-weight: 520; font-size: 14px; padding: 8px 0">See Link to Lead</a></div>
+        <div class="deep fbtease" style="border-radius: 9px; padding: 24px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center">
+          <svg class="spin" width="56" height="56" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="none" stroke="#6F93B8" stroke-width="1.5" stroke-dasharray="2 6"/><path d="M32 10l5 22-5 4-5-4z" fill="#6F93B8"/></svg>
+          <div style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 6px"><span class="eb" style="color: #D6BF8F">A bonus is waiting further down</span><span class="sf" style="font-size: 22px; line-height: 1.3">The what-if lab. Four levers, your own numbers: raise a price, sharpen a message, cut hours, hand work over, and watch your cash, clients, time and people answer.</span><span style="font-size: 14px; color: #A9B6C6">It opens in Part 4, once you have read all four domains above. Read them first: the lab works best when you know where you stand.</span></div>
         </div>
+        <div id="fbw-3"></div>
       </section>
     </div>
 
@@ -172,6 +180,7 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
     <div class="breath" aria-hidden="true"><svg viewBox="0 0 120 14" width="120" height="14"><line x1="0" y1="7" x2="48" y2="7" stroke="#6F93B8" stroke-width="1"/><path d="M60 1l6 6-6 6-6-6z" fill="#6F93B8"/><line x1="72" y1="7" x2="120" y2="7" stroke="#6F93B8" stroke-width="1"/></svg></div>
 
     <!-- ===== PART 4 · YOUR NEXT STEPS: the what-if lab ===== -->
+    <div class="nsdiv" role="separator" aria-label="Part 4, Your next steps"><span class="nsdiv-n">Part 4</span><span class="nsdiv-t sf">Your next steps</span><span class="nsdiv-l">The what-if lab: your numbers, four levers.</span></div>
     <section id="s-whatif" class="deep nspart" data-part="4" style="border-radius: 12px; padding: 32px 26px; display: flex; flex-direction: column; gap: 24px">
       <div class="whead">
         <div style="display: flex; flex-direction: column; gap: 10px; min-width: 0">
@@ -184,6 +193,7 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
       <div id="lab-in" style="display: flex; flex-direction: column; gap: 22px"></div>
       <div class="wverdict" id="lab-head" aria-live="polite"></div>
       <div id="lab-deep"></div>
+      <div id="fbw-4"></div>
       <p style="font-size: 13px; color: #A9B6C6; border-top: 1px solid #3A2F20; padding-top: 14px" id="labfoot"></p>
     </section>
 

@@ -33,8 +33,9 @@
 
   /* ── State ──────────────────────────────────────────────────────────────── */
   const blank = () => ({ v: 2, theme: 'light', profile: { first: '', last: '', email: '', business: '', type: '', industry: '', currency: 'USD', consent: false },
-    skipped: false, stage: 'building', goal: '', mode: 'yes', ans: {}, str: {}, pains: [], want: '', nums: {}, group: 0,
-    got: {}, more: {}, lean: null, stop: 0, lab: { p: 0, m: 0, f: 0, d: 0, mode: 'time', rate: '', hire: '', plan: '' }, acct: { email: '', state: '' } });
+    skipped: false, stage: 'building', goal: '', mode: 'yes', ans: {}, str: {}, pains: [], want: '', want2: '', values: [], nums: {}, group: 0,
+    p2: { team: '', ans: {} }, pgot: {}, pmore: {},
+    got: {}, more: {}, lean: null, stop: 0, lab: { v: 2, p: 0, m: 0, f: 0, d: 0, mode: 'both', rate: '', hire: '', plan: '' }, acct: { email: '', state: '' } });
   const read = (k) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } };
 
   /** Keep only what this version knows, in the shapes it expects. */
@@ -55,13 +56,20 @@
     for (let i = 0; i < 4; i++) { const v = raw.str?.[i]; if (Number.isInteger(v) && v >= 1 && v <= 5) s.str[i] = v; }
     s.pains = (Array.isArray(raw.pains) ? raw.pains : []).filter((x) => E.PAINS.some((p2) => p2[0] === x)).slice(0, 2);
     if (E.GOALS.some((g) => g[0] === raw.want)) s.want = raw.want;
+    if (E.GOALS.some((g) => g[0] === raw.want2) && raw.want2 !== s.want) s.want2 = raw.want2;
+    s.values = (Array.isArray(raw.values) ? raw.values : []).filter((x) => M.VALUES.some((v) => v[0] === x)).slice(0, 2);
+    const p2 = raw.p2 || {};
+    if (M.P2.team.some((t) => t[0] === p2.team)) s.p2.team = p2.team;
+    for (const id of M.P2.ids()) { const v = p2.ans && p2.ans[id]; if (Number.isInteger(v) && v >= 0 && v <= 3) s.p2.ans[id] = v; }
+    for (let i = 1; i <= 4; i++) { if (raw.pgot?.[i] === true) s.pgot[i] = true; if (raw.pmore?.[i] === true) s.pmore[i] = true; }
     for (const [k, v] of Object.entries(raw.nums || {})) if (/^(yes|offer|idea)\.\w+$/.test(k) && v && typeof v === 'object') s.nums[k] = { pick: str(v.pick, 8), own: str(v.own, 80) };
     s.group = Number.isInteger(raw.group) && raw.group >= 0 && raw.group <= 4 ? raw.group : 0;
     for (let i = 0; i < 4; i++) { if (raw.got?.[i] === true) s.got[i] = true; if (raw.more?.[i] === true) s.more[i] = true; }
     s.lean = Number.isInteger(raw.lean) && raw.lean >= 0 && raw.lean < 4 ? raw.lean : null;
     s.stop = Number.isInteger(raw.stop) && raw.stop >= 0 && raw.stop < 5 ? raw.stop : 0;
     const lab = raw.lab || {};
-    s.lab = { p: clampN(lab.p, 0, 200), m: clampN(lab.m, 0, 100), f: clampN(lab.f, 0, 50), d: clampN(lab.d, 0, 60), mode: lab.mode === 'money' ? 'money' : 'time', rate: str(lab.rate, 12), hire: str(lab.hire, 12), plan: str(lab.plan, 12) };
+    // Since 31 Oct the lab opens on "Both" (half time, half money), so every lever moves all four.
+    s.lab = { v: 2, p: clampN(lab.p, 0, 200), m: clampN(lab.m, 0, 100), f: clampN(lab.f, 0, 50), d: clampN(lab.d, 0, 60), mode: lab.v === 2 && ['time', 'money', 'both'].includes(lab.mode) ? lab.mode : 'both', rate: str(lab.rate, 12), hire: str(lab.hire, 12), plan: str(lab.plan, 12) };
     // What happened when this browser last tried to make an account for this email.
     if (raw.acct && ['yes', 'existing'].includes(raw.acct.state)) s.acct = { email: str(raw.acct.email, 120), state: raw.acct.state };
     return s;
@@ -135,7 +143,7 @@
     const sc = E.scores(M, S);
     return { stage: S.stage, answers: S,
       results: { scores: sc.map((x) => x.score), answered: sc.map((x) => x.answered), bands: sc.map((x) => (x.answered ? E.BANDS[x.band] : null)) },
-      flags: { pains: S.pains, want: S.want, lab: { p: S.lab.p, m: S.lab.m, f: S.lab.f, d: S.lab.d } } };
+      flags: { pains: S.pains, want: S.want, want2: S.want2, values: S.values, team: S.p2.team, lab: { p: S.lab.p, m: S.lab.m, f: S.lab.f, d: S.lab.d } } };
   }
   /** Send the batch, if there is one. The device copy is already safe, so a
    *  failure only means it goes with the next batch. */
@@ -183,7 +191,9 @@
     }
     UI.signinBusy = false; render();
   }
-  const hasWork = (s) => Object.keys(s.ans).length > 0 || Object.keys(s.str).length > 0 || Object.keys(s.nums).length > 0 || s.pains.length > 0 || !!s.want;
+  const hasWork = (s) => Object.keys(s.ans).length > 0 || Object.keys(s.str).length > 0 || Object.keys(s.nums).length > 0 || s.pains.length > 0 || !!s.want || Object.keys(s.p2.ans).length > 0;
+  /* The two things they want most (31 Oct: pick two), first pick first. */
+  const wants = () => [S.want, S.want2].filter(Boolean);
   /** Arriving from a sign-in link: spend the code, then bring the account's
    *  North Star here if this browser has none. If both have answers, this
    *  browser's copy comes first and goes up to the account. */
@@ -339,9 +349,9 @@
   const NAV = [['overview', '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><g><polygon points="12,4 14,12 12,13.5 10,12" fill="#6F93B8"/><polygon points="12,20 14,12 12,10.5 10,12" fill="currentColor" opacity=".5"/><animateTransform attributeName="transform" type="rotate" values="20 12 12;34 12 12;20 12 12" dur="7s" repeatCount="indefinite"/></g></svg>', 'Your North Star'],
     ['clear', '1', 'Yourself'], ['people', '2', 'Your people'], ['numbers', '3', 'Your numbers'], ['plan', '4', 'Your next steps'], ['method', '⌘', 'How it works']];
   const navOn = () => (typeof window !== 'undefined' && window.__nsSpy) || UI.page; // spy.js: the section on screen
-  const pNav = (c) => NAV.map(([id, ni, t]) => `<button type="button" class="nl ${navOn() === id ? 'on' : ''}" data-go="${id}" data-f="nav-${id}"${navOn() === id ? ' aria-current="true"' : ''}><span class="ni">${ni}</span>${t}${id === 'clear' ? `<small style="margin-left: auto; font-size: 9px">${c.answered}/8</small>` : ''}</button>`).join('');
+  const pNav = (c) => NAV.map(([id, ni, t]) => `<button type="button" class="nl ${navOn() === id ? 'on' : ''}" data-go="${id}" data-f="nav-${id}"${navOn() === id ? ' aria-current="true"' : ''}><span class="ni">${ni}</span>${t}${id === 'clear' ? `<small style="margin-left: auto; font-size: 9px">${p1Count(c).done}/${p1Count(c).total}</small>` : ''}</button>`).join('');
 
-  const STEP_CARDS = [['1', 'Yourself', 'Eight plain questions', 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'clear'],
+  const STEP_CARDS = [['1', 'Yourself', 'Eleven quick questions', 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'clear'],
     ['2', 'Your people', 'Customers and team', D[1].icon, 'people'], ['3', 'Your numbers', 'One month, roughly', 'M4 20V10M10 20V4M16 20v-7M22 20H2', 'numbers'],
     ['4', 'Your next steps', 'Your road and the what-if lab', 'M6 21V4M6 4h11l-3 4 3 4H6', 'plan']];
   const pStepcards = () => STEP_CARDS.map(([n, t, k, icon, go], i) => `<button type="button" data-go="${go}" data-f="card-${go}" class="card lift stepc rise" style="animation-delay: ${(i + 1) / 10}s; text-align: left; padding: 18px; cursor: pointer; color: var(--ink); display: flex; flex-direction: column; gap: 8px; min-height: 150px">
@@ -363,10 +373,15 @@
       ${ready ? '<a class="pop cta" href="/ground-plan/#home" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 18px; border-radius: 5px; background: #6F93B8; color: #0E1C2B; font-weight: 520; text-decoration: none">You’re ready · Enter the Founder Launchpad →</a>' : ''}`;
   }
 
-  const pRing = (c) => `<svg width="74" height="74" viewBox="0 0 74 74" role="img" aria-label="${c.answered} of 8 answered">
+  /* Part 1's questions: the eight, then three pages of taps (31 Oct: eleven in all). */
+  function p1Count(c) {
+    const qs = c.qs, done = qs.filter((q) => Number.isInteger(S.ans[q.id])).length + (S.pains.length ? 1 : 0) + (S.want ? 1 : 0) + (S.values.length ? 1 : 0);
+    return { done, total: qs.length + TAPS.length };
+  }
+  const pRing = (c) => { const k = p1Count(c); return `<svg width="74" height="74" viewBox="0 0 74 74" role="img" aria-label="${k.done} of ${k.total} answered">
       <circle cx="37" cy="37" r="31" fill="none" stroke="var(--cream)" stroke-width="7"/>
-      <circle class="ringp" cx="37" cy="37" r="31" fill="none" stroke="#6F93B8" stroke-width="7" stroke-linecap="round" stroke-dasharray="194.8" style="stroke-dashoffset: ${(194.8 * (1 - c.answered / 8)).toFixed(1)}" transform="rotate(-90 37 37)"/>
-      <text x="37" y="43" text-anchor="middle" font-family="Newsreader" font-size="19" fill="currentColor">${c.answered}/8</text></svg>`;
+      <circle class="ringp" cx="37" cy="37" r="31" fill="none" stroke="#6F93B8" stroke-width="7" stroke-linecap="round" stroke-dasharray="194.8" style="stroke-dashoffset: ${(194.8 * (1 - k.done / k.total)).toFixed(1)}" transform="rotate(-90 37 37)"/>
+      <text x="37" y="43" text-anchor="middle" font-family="Newsreader" font-size="19" fill="currentColor">${k.done}/${k.total}</text></svg>`; };
 
   const pNotice = () => (UI.note ? `<div class="card pop" role="status" style="padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-color: #6F93B8">
       <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="#6F93B8" stroke-width="1.8"/><path d="M3 7l9 6 9-6" fill="none" stroke="#6F93B8" stroke-width="1.8"/></svg>
@@ -463,25 +478,30 @@
   const noteFor = (q, a) => (a < 2 ? q.lo : q.hi);
   let qi = null;
   const firstOpenQ = (qs) => { const i = qs.findIndex((q) => !Number.isInteger(S.ans[q.id])); return i < 0 ? qs.length - 1 : i; };
-  /* After the eight questions, two pages of taps: what hurts most (up to two)
-   * and what they want most (one). They shape the feedback. */
-  const TAPS = [['What hurts most right now', 'Pick up to two'], ['What you want most', 'Pick one']];
+  /* After the eight questions, three pages of taps: what hurts most (up to
+   * two), what they want most (two) and what they care about most (two). They
+   * shape the feedback, and tell Alexandru who he is talking to. */
+  const TAPS = [['What hurts most right now', 'Pick up to two'], ['What you want most', 'Pick two'], ['What you care about most', 'Pick two']];
+  const tapOf = (k) => [
+    { act: 'pain', list: E.PAINS, q: 'What hurts most right now?', pick: 'Pick up to two.', on: (id) => S.pains.includes(id), n: S.pains.length, note: 'Named. Your feedback starts here.' },
+    { act: 'want', list: E.GOALS, q: 'And what do you want most?', pick: 'Pick two.', on: (id) => wants().includes(id), n: wants().length, note: wants().length === 2 ? 'Two goals. Your plan will point at both.' : 'One more, if there is one.' },
+    { act: 'val', list: M.VALUES.map(([id, t]) => [id, t, -1]), q: 'Last one. What do you care about most?', pick: 'Pick two.', on: (id) => S.values.includes(id), n: S.values.length, note: 'Every step we suggest must protect these.' },
+  ][k];
+  /* A word between questions (model.js SPARKS), once the page is answered. */
+  const spark = (i) => { const x = M.SPARKS && M.SPARKS[i]; return x ? `<div class="nsspark"><small>${x.by ? 'A word from ' + esc(x.by) : 'A small note'}</small><p class="sf">${esc(x.t)}</p>${x.sub ? `<span>${esc(x.sub)}</span>` : ''}</div>` : ''; };
   function tapsPage(k, qn, total) {
-    const pains = k === 0;
-    const list = pains ? E.PAINS : E.GOALS;
-    const on = (id) => (pains ? S.pains.includes(id) : S.want === id);
-    const chosen = pains ? S.pains.length : S.want ? 1 : 0;
-    return `<span class="eb nsb-lab">${String(qn).padStart(2, '0')} · Two more taps · they shape your feedback</span>
+    const T = tapOf(k);
+    return `<span class="eb nsb-lab">${String(qn).padStart(2, '0')} · ${k === 2 ? 'The last tap' : 'Taps that shape your feedback'}</span>
       <div class="nsb-body">
         <div class="nsb-col">
-          <h3 class="sf nsb-q" id="taps-h">${pains ? 'What hurts most right now?' : 'And what do you want most?'} <span class="sfi" style="color: var(--acc)">${pains ? 'Pick up to two.' : 'Pick one.'}</span></h3>
+          <h3 class="sf nsb-q" id="taps-h">${T.q} <span class="sfi" style="color: var(--acc)">${T.pick}</span></h3>
           <div class="nsb-opts" role="group" aria-labelledby="taps-h">
-            ${list.map(([id, t, di], i) => `<button type="button" class="nsb-o" data-act="${pains ? 'pain' : 'want'}" data-v="${id}" data-f="${pains ? 'pain' : 'want'}-${id}" aria-pressed="${on(id)}">
-              <kbd aria-hidden="true">${i + 1}</kbd><span class="nsb-dot" style="background: ${D[di].hex}"></span><span><b>${esc(t)}</b></span></button>`).join('')}
+            ${T.list.map(([id, t, di], i) => `<button type="button" class="nsb-o" data-act="${T.act}" data-v="${id}" data-f="${T.act}-${id}" aria-pressed="${T.on(id)}">
+              <kbd aria-hidden="true">${i + 1}</kbd><span class="nsb-dot" style="background: ${di >= 0 ? D[di].hex : '#B4975F'}"></span><span><b>${esc(t)}</b></span></button>`).join('')}
           </div>
-          <p class="nsb-keys"><kbd>1–${list.length}</kbd> choose · <kbd>Enter ↵</kbd> ${qn === total ? 'see my North Star' : 'next'}</p>
+          <p class="nsb-keys"><kbd>1–${T.list.length}</kbd> choose · <kbd>Enter ↵</kbd> ${qn === total ? 'see my North Star' : 'next'}</p>
         </div>
-        ${chosen ? `<p class="nsb-note">${pains ? 'Named. Your feedback starts here.' : 'Your plan will point here.'}</p>` : ''}
+        ${T.n ? `<div><p class="nsb-note">${T.note}</p>${spark(qn - 1)}</div>` : ''}
       </div>`;
   }
   function pQuestions(c) {
@@ -496,25 +516,25 @@
         <span class="nsb-n">${Number.isInteger(a) ? '✓' : i + 1}</span>
         <span class="nsb-st"><b>${esc(q.short || q.text)}</b><i>${now ? 'Answering now' : Number.isInteger(a) ? `Answered · ${esc(E.ANSWERS[a][0])}` : missed ? 'Not answered yet' : ''}</i></span></button></li>`;
     }).join('') + TAPS.map(([t], k) => {
-      const i = qs.length + k, now = i === qi, picked = k === 0 ? S.pains.length : S.want ? 1 : 0;
-      return `<li><button type="button" class="nsb-s${picked ? ' done' : ''}${now ? ' now' : ''}" data-act="nsq" data-i="${i}" data-f="nsq-${i}"${now ? ' aria-current="step"' : ''}>
+      const i = qs.length + k, now = i === qi, picked = tapOf(k).n, missed = !now && !picked && i < qi && k > 0;
+      return `<li><button type="button" class="nsb-s${picked ? ' done' : ''}${missed ? ' missed' : ''}${now ? ' now' : ''}" data-act="nsq" data-i="${i}" data-f="nsq-${i}"${now ? ' aria-current="step"' : ''}>
         <span class="nsb-n">${picked ? '✓' : i + 1}</span>
-        <span class="nsb-st"><b>${t}</b><i>${now ? 'Choosing now' : picked ? `${picked} chosen` : 'Two more taps'}</i></span></button></li>`;
+        <span class="nsb-st"><b>${t}</b><i>${now ? 'Choosing now' : picked ? `${picked} chosen` : missed ? 'Not chosen yet' : k === 0 ? 'Optional' : 'One tap'}</i></span></button></li>`;
     }).join('');
     const tap = qi >= qs.length ? qi - qs.length : -1;
     const q = qs[Math.min(qi, qs.length - 1)], di = D.findIndex((d) => d.id === q.domain), a = S.ans[q.id];
     const last = qi === total - 1;
     const seg = qs.map((x, i) => `<i class="${Number.isInteger(S.ans[x.id]) ? 'done' : ''}${i === qi ? ' now' : ''}"></i>`).join('')
-      + TAPS.map((_, k) => `<i class="${(k === 0 ? S.pains.length : S.want) ? 'done' : ''}${qs.length + k === qi ? ' now' : ''}"></i>`).join('');
+      + TAPS.map((_, k) => `<i class="${tapOf(k).n ? 'done' : ''}${qs.length + k === qi ? ' now' : ''}"></i>`).join('');
     return `<div class="nsb" id="nsb">
       <aside class="nsb-l" aria-label="Part 1, Yourself, and its questions">
         <button type="button" class="nsb-x" data-act="nsb-steps" aria-label="Close the questions">×</button>
         <span class="eb">Your questions · ${esc(stg)}</span>
-        <p class="nsb-c">${done} of ${qs.length} answered${S.want ? ' · and what you want most' : ''}</p>
-        <ol class="nsb-list" style="--fill: ${Math.round((done + (S.pains.length ? 1 : 0) + (S.want ? 1 : 0)) / total * 100)}%">${rows}</ol>
+        <p class="nsb-c">${p1Count(c).done} of ${total} answered</p>
+        <ol class="nsb-list" style="--fill: ${Math.round(p1Count(c).done / total * 100)}%">${rows}</ol>
       </aside>
       <section class="nsb-r" id="nsb-r" tabindex="-1" aria-label="The question" aria-keyshortcuts="1 2 3 4 Enter">
-        <button type="button" class="nsb-phone" data-act="nsb-steps" aria-label="Show all eight questions"><span><i aria-hidden="true"></i>Part 1 · Question ${qi + 1} of ${total}</span><span aria-hidden="true">Questions ▾</span></button>
+        <button type="button" class="nsb-phone" data-act="nsb-steps" aria-label="Show all the questions"><span><i aria-hidden="true"></i>Part 1 · Question ${qi + 1} of ${total}</span><span aria-hidden="true">Questions ▾</span></button>
         <div class="nsb-seg" aria-hidden="true">${seg}</div>
         ${tap >= 0 ? tapsPage(tap, qi + 1, total) : `<span class="eb nsb-lab">0${qi + 1} · ${esc(D[di].name)}</span>
         <div class="nsb-body">
@@ -527,7 +547,7 @@
             </div>
             <p class="nsb-keys"><kbd>1–4</kbd> choose · <kbd>Enter ↵</kbd> next</p>
           </div>
-          ${Number.isInteger(a) ? `<p class="nsb-note" role="status"><small>${a < 2 ? 'Your next step' : 'Keep going'}</small>${esc(noteFor(q, a))}</p>` : ''}
+          ${Number.isInteger(a) ? `<div><p class="nsb-note" role="status"><small>${a < 2 ? 'Your next step' : 'Keep going'}</small>${esc(noteFor(q, a))}</p>${spark(qi)}</div>` : ''}
         </div>`}
         <footer class="nsb-foot">
           <button type="button" class="nsb-back" data-act="nsmove" data-v="-1" data-f="ns-back"${qi === 0 ? ' disabled' : ''}>← Back</button>
@@ -543,7 +563,7 @@
     if (d > 0 && qi === total - 1) {
       // The last page: on to the North Star reading, once nothing is open.
       document.body.classList.remove('nsb-open');
-      if (guide(context(), 1)) return;
+      if (guide(context(), 2)) return;
       const el = document.getElementById('s-reading');
       if (el) { el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: true }); }
       return;
@@ -664,6 +684,11 @@
       ${anyS ? `<polygon points="${pts(rS)}" fill="none" stroke="#EEF2F7" stroke-width="2" stroke-dasharray="7 5"/>` : ''}
       ${withAnswers ? `<polygon points="${pts(rA)}" fill="rgba(111,147,184,.35)" stroke="#6F93B8" stroke-width="3" stroke-linejoin="round"/>
       <circle cx="${cx}" cy="${cy - rA[0]}" r="7" fill="#E0A282"/><circle cx="${cx + rA[1]}" cy="${cy}" r="7" fill="#9BC0A1"/><circle cx="${cx}" cy="${cy + rA[2]}" r="7" fill="#91B8D5"/><circle cx="${cx - rA[3]}" cy="${cy}" r="7" fill="#DDBD69"/>` : ''}
+      ${withAnswers ? '' : `<g class="nsseal" aria-hidden="true"><polygon points="${pts([96, 96, 96, 96])}" fill="rgba(111,147,184,.10)" stroke="#6F93B8" stroke-width="2" stroke-dasharray="3 7"/>
+        <rect x="${cx - 92}" y="${cy + 30}" width="184" height="46" rx="23" fill="#0E1C2B" stroke="#6F93B8" stroke-width="1.2"/>
+        <g transform="translate(${cx - 76} ${cy + 42})" fill="none" stroke="#A9C0D9" stroke-width="1.6"><rect x="0" y="9" width="16" height="12" rx="2"/><path d="M3.5 9V6a4.5 4.5 0 0 1 9 0v3"/></g>
+        <text x="${cx + 10}" y="${cy + 51}" text-anchor="middle" fill="#EEF2F7" font-size="12" font-weight="600" letter-spacing="1.6">YOUR ANSWERS</text>
+        <text x="${cx + 10}" y="${cy + 67}" text-anchor="middle" fill="#A9C0D9" font-size="11.5">sealed until Part 1</text></g>`}
       <circle cx="${cx}" cy="${cy}" r="7" fill="#0E1C2B" stroke="#6F93B8" stroke-width="2"/>
       <text x="${cx}" y="62" fill="#E0A282" class="cl" text-anchor="middle">LEAD YOURSELF</text>
       <text x="${cx + 166}" y="${cy - 8}" fill="#9BC0A1" class="cl">LEAD YOUR</text><text x="${cx + 166}" y="${cy + 16}" fill="#9BC0A1" class="cl">PEOPLE</text>
@@ -672,9 +697,9 @@
     </svg>`;
   }
   const compassKey = (withAnswers) => `<div class="nskey">
-      <span><i class="k-ans"></i><b>Your answers</b><small>from the eight questions</small></span>
-      <span><i class="k-str"></i><b>Your strengths</b><small>as you rated yourself</small></span>
-      ${withAnswers ? '<p>Where the two lines part, look twice: that gap is your first lesson.</p>' : '<p>After Part 1, your answers join this compass, so you can compare the two.</p>'}
+      <span><i class="k-str"></i><b>Your strengths</b><small>as you rate yourself, now</small></span>
+      <span><i class="k-ans${withAnswers ? '' : ' sealed'}"></i><b>Your answers</b><small>${withAnswers ? 'from the questions in Part 1' : 'sealed: they appear after Part 1'}</small></span>
+      ${withAnswers ? '<p>Where the two lines part, look twice: that gap is your first lesson.</p>' : '<p class="nsdare"><b>A small dare.</b> Rate yourself now, honestly. After the questions we open the seal and lay your answers over your rating. Will the two shapes agree?</p>'}
     </div>`;
 
   /* Before you start: your four strengths, and the compass drawing them. */
@@ -709,6 +734,150 @@
       </div>`;
   }
 
+  /* ── The feedback window after every part (31 Oct) ───────────────────────
+   * One shape for all four parts, in its own warm colour: the founder's road
+   * in five steps, in the order every business walks them, with where their
+   * answers put them; two or three short cards; "Got it"; more feedback for
+   * whoever wants it; then a push on to the next part. */
+  const ROAD = [['The idea', 'Something you care about, and the talent to build it.'],
+    ['The problem it solves', 'You understand the problem well enough to solve it.'],
+    ['The people who need it', 'You reach the people who have that problem, in their words.'],
+    ['The first yes', 'People start to pay. Interest turns into customers.'],
+    ['More, and better', 'You multiply what works, and improve the rest.']];
+  const roadPos = () => (S.mode === 'idea' ? 0 : S.mode === 'offer' ? 2 : S.stage === 'building' ? 3 : 4);
+  const BAND_INK = ['#B4703F', '#9A7418', '#4C7355'];
+  const chip = (bi, t) => `<span class="fbchip" style="--c: ${bi === null ? '#8A7A5E' : BAND_INK[bi]}">${esc(t)}</span>`;
+  /** notes: one line per step from the founder's answers ('' = nothing yet);
+   *  bands: the band behind each line, or null. */
+  function roadHTML(notes, bands) {
+    const pos = roadPos();
+    return `<ol class="fbroad" aria-label="Your road in five steps">${ROAD.map(([t, l], i) => {
+      const st = i < pos ? 'done' : i === pos ? 'here' : 'next';
+      return `<li class="${st}"><span class="fbn" aria-hidden="true">${i < pos ? '✓' : i + 1}</span>
+        <div><span class="fbst">${st === 'here' ? 'You are here' : st === 'done' ? 'Behind you' : 'Ahead'}</span><b class="sf">${t}</b><span class="fbl">${l}</span>
+        ${notes[i] ? `<span class="fbnote">${bands && bands[i] !== null && bands[i] !== undefined ? chip(bands[i], E.BANDS[bands[i]]) : ''}${esc(notes[i])}</span>` : ''}</div></li>`;
+    }).join('')}</ol>`;
+  }
+  /** The window itself. o = { n, eyebrow, title, intro, road, cards, ask, more, next } */
+  function fbWindow(o) {
+    const open = !!S.pmore[o.n];
+    return `<div class="nsfbw pop" id="fbw-in-${o.n}">
+      <div class="fbhead"><span class="eb fbeb">${o.eyebrow}</span><h2 class="sf">${o.title}</h2>${o.intro ? `<p>${o.intro}</p>` : ''}</div>
+      ${o.road}
+      <div class="fbcards">${o.cards}
+        <div class="fbcard fbask"><span class="eb fbeb">Ask yourself</span><span class="sfi">“${esc(o.ask)}”</span>
+          <label class="fbgot"><input type="checkbox" data-act="pgot" data-i="${o.n}" data-f="pgot-${o.n}"${S.pgot[o.n] ? ' checked' : ''}>Got it, I’ve read this</label></div>
+      </div>
+      <button type="button" class="fbmore no-print" data-act="pmore" data-i="${o.n}" data-f="pmore-${o.n}" aria-expanded="${open}">${open ? 'Less feedback ↑' : 'More feedback ↓'}</button>
+      ${open ? `<div class="fbdeep pop">${o.more}</div>` : ''}
+      ${o.next ? `<div class="fbnext">${o.next}</div>` : ''}
+    </div>`;
+  }
+  const fbList = (rows) => `<ol class="fblist">${rows.map(([k, a, note]) => `<li><b>${esc(k)}</b><span>${esc(a)}</span><i>${esc(note)}</i></li>`).join('')}</ol>`;
+  const nextBtn = (line, label, go) => `<p class="sf">${line}</p><button type="button" class="go fbgo" data-go="${go}" data-f="fbgo-${go}">${label} <span class="arr" aria-hidden="true">→</span></button>`;
+  const named = (list, ids) => list.filter((x) => ids.includes(x[0])).map((x) => x[1]);
+
+  /* Part 1 · Yourself: the window, once Part 1 is done. */
+  function pFb1(c) {
+    if (!partState(c).fin[0]) return '';
+    const rd = c.rd, sc = c.sc, f = (i) => E.feedback(i, sc[i], S.pains, wants());
+    const bi = (i) => (sc[i].answered ? sc[i].band : null);
+    const notes = [`Lead yourself: ${f(0).big}`, `Lead your business: ${f(2).big}`, `Lead the market: ${f(3).big}`,
+      S.mode === 'yes' ? 'People already pay you. That is your proof.' : S.mode === 'offer' ? 'Your offer is ready. The first yes is your next milestone.' : 'Not yet. First the problem, then the people, then the yes.',
+      `Lead your people: ${f(1).big}`];
+    const bands = [bi(0), bi(2), bi(3), null, bi(1)];
+    const said = [['It hurts', named(E.PAINS, S.pains)], ['You want', named(E.GOALS, wants())], ['You care about', named(M.VALUES, S.values)]].filter((x) => x[1].length);
+    // Where their rating and their answers part by more than a third.
+    const gaps = D.map((d, i) => [d.name, rd.str[i] / 5 - sc[i].score / 6]).filter(([, g]) => Math.abs(g) > 0.33);
+    const more = `<div class="fbcols"><div><span class="eb fbeb">Your ${c.qs.length} answers</span>${fbList(c.qs.filter((q) => Number.isInteger(S.ans[q.id])).map((q) => [q.short, E.ANSWERS[S.ans[q.id]][0], noteFor(q, S.ans[q.id])]))}</div>
+      <div><span class="eb fbeb">Your rating against your answers</span>${gaps.length ? gaps.map(([n, g]) => `<p>${g > 0 ? `You rate yourself higher in <b>${n}</b> than your answers do. Look twice: a strength you feel is not yet a strength you can show.` : `Your answers in <b>${n}</b> are stronger than your rating. You do better than you give yourself credit for.`}</p>`).join('') : '<p>Your rating and your answers agree. You see yourself clearly, and that is a strength in itself.</p>'}
+        <span class="eb fbeb" style="margin-top: 10px">This week</span><p>${esc(f(rd.lo).week)}</p></div></div>`;
+    return fbWindow({ n: 1, eyebrow: 'Part 1 done · your feedback', title: 'Your road so far.',
+      intro: 'Every business walks the same five steps, in this order. Here is where your answers put you, and what each step says about you.',
+      road: roadHTML(notes, bands),
+      cards: `<div class="fbcard"><span class="eb fbeb">What your answers say</span>
+          <p><small>Strongest</small><b class="sf">${D[rd.hi].name}</b></p><p><small>Needs you first</small><b class="sf">${D[rd.lo].name}</b></p><p><small>Start here</small>${esc(D[rd.lo].step)}</p></div>
+        <div class="fbcard"><span class="eb fbeb">What you told us</span>${said.map(([k, v]) => `<p><small>${k}</small>${esc(v.join(' · '))}</p>`).join('')}
+          ${S.values.length ? '<p class="fbsoft">Every step we suggest from here must protect what you care about.</p>' : ''}</div>`,
+      ask: f(rd.lo).ask, more,
+      next: nextBtn('You looked at yourself honestly. That is the hardest part, and it is done. Now the people around you: your customers and your team.', 'Go to Part 2 · Your people', 'people') });
+  }
+
+  /* Part 2 · Your people: who works with you, then six questions, then the window. */
+  const P2FB = {
+    yes: [{ big: 'Your customers are still a crowd, not names.', ask: 'Who are the five customers you most want more of?' },
+      { big: 'You know your customers. Now let their words lead.', ask: 'What did your best customer say the last time they thanked you?' },
+      { big: 'Your customers are clear. Grow toward them.', ask: 'Which of them would introduce you to someone just like them?' }],
+    plan: [{ big: 'The people who need you have no names yet.', ask: 'Who are five real people with this problem?' },
+      { big: 'You have met the problem. Now ask for the first yes.', ask: 'Who will you ask for a small yes this month?' },
+      { big: 'You have evidence. Keep asking, the same way.', ask: 'Who are the next five people to ask?' }],
+    solo: [{ big: 'You are the whole team, and your week shows it.', ask: 'What is the first task you would give away?' },
+      { big: 'Your first helper is closer than it feels.', ask: 'Which page could you write this week, so someone else can do the task?' },
+      { big: 'You are ready for help. Set the date.', ask: 'In which month does your first helper start?' }],
+    team: [{ big: 'People help, but the decisions still come back to you.', ask: 'What does a good week look like for each person?' },
+      { big: 'Your team is taking shape. Now give them room.', ask: 'Which decision could someone make without you next week?' },
+      { big: 'Your people can lead. Let them.', ask: 'Who is ready to own something you still hold?' }],
+  };
+  function p2Read() {
+    const qs = M.P2.questions(S.mode, S.p2.team), cq = qs.slice(0, 3), tq = qs.slice(3);
+    const sum = (l) => l.reduce((a, q) => a + (S.p2.ans[q.id] || 0), 0), bandOf = (v) => (v <= 3 ? 0 : v <= 6 ? 1 : 2);
+    const cb = bandOf(sum(cq)), tb = bandOf(sum(tq));
+    return { qs, cq, tq, cb, tb, cust: P2FB[S.mode === 'yes' ? 'yes' : 'plan'][cb], team: P2FB[S.p2.team === 'solo' ? 'solo' : 'team'][tb] };
+  }
+  function pPeople(c) {
+    const T = S.p2.team, R = T ? p2Read() : null;
+    const card = (q, k) => { const a = S.p2.ans[q.id];
+      return `<div class="p2q card" id="p2-${q.id}">
+        <span class="eb">${String(k + 1).padStart(2, '0')} · ${esc(q.short)}</span>
+        <h3 class="sf" id="p2t-${q.id}">${esc(q.text)}</h3><p class="p2p">${esc(q.prompt)}</p>
+        <div class="p2opts" role="group" aria-labelledby="p2t-${q.id}">${E.ANSWERS.map(([label, sub], v) => `<button type="button" class="nsb-o" data-act="p2ans" data-q="${q.id}" data-v="${v}" data-f="p2-${q.id}-${v}" aria-pressed="${a === v}"><span><b>${label}</b> <span>· ${sub}</span></span></button>`).join('')}</div>
+        ${Number.isInteger(a) ? `<p class="p2note pop"><small>${a < 2 ? 'Your next step' : 'Keep going'}</small>${esc(a < 2 ? q.lo : q.hi)}</p>` : ''}</div>`; };
+    return `<div class="card p2team" id="p2-team"><h3 class="sf" id="p2team-h">First: who does the work with you today?</h3>
+        <div class="p2opts" role="group" aria-labelledby="p2team-h">${M.P2.team.map(([id, t, sub]) => `<button type="button" class="nsb-o" data-act="p2team" data-v="${id}" data-f="p2team-${id}" aria-pressed="${T === id}"><span><b>${t}</b> <span>· ${sub}</span></span></button>`).join('')}</div></div>
+      ${T ? `<span class="eb p2grp">${S.mode === 'yes' ? 'Your customers' : 'Your first customers'}</span>${R.cq.map((q, k) => card(q, k)).join('')}
+        <span class="eb p2grp">${T === 'solo' ? 'Your first team, before you have one' : 'Your team'}</span>${R.tq.map((q, k) => card(q, k + 3)).join('')}` : ''}`;
+  }
+  function pFb2(c) {
+    if (!partState(c).fin[1]) return '';
+    const R = p2Read(), last = S.p2.ans[R.cq[2].id];
+    const notes = ['', '', R.cust.big, S.mode === 'yes' ? (last >= 2 ? 'You listen, and you change. That keeps the yes coming.' : 'The yes is there. Listening keeps it.') : (last >= 2 ? 'Someone said yes with money. That is evidence.' : 'The first yes is the next thing to ask for.'), R.team.big];
+    const bands = [null, null, R.cb, null, R.tb];
+    return fbWindow({ n: 2, eyebrow: 'Part 2 done · your feedback', title: 'Your people, on your road.',
+      intro: 'Customers carry the third and fourth steps. Your team carries the fifth.', road: roadHTML(notes, bands),
+      cards: `<div class="fbcard"><span class="eb fbeb">Your customers</span>${chip(R.cb, E.BANDS[R.cb])}<b class="sf">${esc(R.cust.big)}</b><span class="fbsoft">${esc(R.cust.ask)}</span></div>
+        <div class="fbcard"><span class="eb fbeb">${S.p2.team === 'solo' ? 'Your first team' : 'Your team'}</span>${chip(R.tb, E.BANDS[R.tb])}<b class="sf">${esc(R.team.big)}</b><span class="fbsoft">${esc(R.team.ask)}</span></div>`,
+      ask: (R.cb <= R.tb ? R.cust : R.team).ask,
+      more: `<span class="eb fbeb">Your six answers</span>${fbList(R.qs.map((q) => [q.short, E.ANSWERS[S.p2.ans[q.id]][0], S.p2.ans[q.id] < 2 ? q.lo : q.hi]))}`,
+      next: nextBtn('You know who you serve, and who serves with you. Next: the numbers that hold it all together. Rough is fine.', 'Go to Part 3 · Your numbers', 'numbers') });
+  }
+
+  /* Part 3 · Your numbers: the road, read through the numbers, under the four domain cards. */
+  function pFb3(c) {
+    if (!partState(c).fin[2]) return '';
+    const n = c.n;
+    const nl = S.mode === 'yes' ? E.numberLines(n, money) : ['', '', '', ''];
+    const ins = (k) => E.insight(k, n, S.mode, money) || '';
+    const notes = S.mode === 'yes'
+      ? [nl[0] ? 'Your hours: ' + nl[0] + '.' : '', nl[2] ? 'Your month: ' + nl[2] + '.' : '', nl[3] ? 'Your customers: ' + nl[3] + '.' : '', n.newc ? `${n.newc.est ? 'About ' : ''}${whole(n.newc.v)} new paying customers this month.` : '', nl[1] ? 'Your time: ' + nl[1] + '.' : '']
+      : [ins('road'), ins('offer'), ins('market'), '', ''];
+    return `<div class="fbroadwrap"><span class="eb fbeb">Your road, read through your numbers</span>${roadHTML(notes, null)}</div>
+      <div class="fbnext">${nextBtn('Your numbers are on paper now, not in your head. Keep what you found, then see the road ahead and ask “what if?”.', 'Keep what I found', 'save')}</div>`;
+  }
+
+  /* Part 4 · Your next steps: once a lever has moved. */
+  function pFb4(c) {
+    const { p = 0, m = 0, f = 0, d = 0 } = S.lab, dom = E.strongestLever(p, m, f, d);
+    if (dom < 0 || labCalc().locked) return '';
+    const LV = E.LEVERS[dom];
+    const notes = ['', '', '', '', `You tried: ${LV.name.toLowerCase()}. ${LV.first}`];
+    return fbWindow({ n: 4, eyebrow: 'Part 4 · your feedback', title: 'One lever, and the whole road moves.',
+      intro: 'Every step of the road gets easier when one change answers in all four domains.', road: roadHTML(notes, null),
+      cards: `<div class="fbcard"><span class="eb fbeb">What you tried</span><b class="sf">${esc(LV.name)}</b><span class="fbsoft">Watch out: ${esc(LV.watch)}</span></div>`,
+      ask: 'Which one lever will you move this month, and on which day will you start?',
+      more: `<span class="eb fbeb">Your first step this week</span><p>${esc(LV.first)}</p>`,
+      next: '<p class="sf">Your North Star is complete. The next step is free, and it opens tonight.</p><a class="go fbgo" href="/ground-plan/#home">Open the Founder Launchpad · free <span class="arr" aria-hidden="true">→</span></a>' });
+  }
+
   /* ── The path through the North Star (31 Oct) ───────────────────────────
    * Before you start, then four parts. What is done, what is open, and the
    * first thing still open, so the founder never has to remember. */
@@ -717,12 +886,15 @@
     const qs = c.qs, G = E.groupsFor(S.mode);
     const strDone = [0, 1, 2, 3].filter((i) => (Number(S.str[i]) || 0) > 0).length;
     const ansDone = qs.filter((q) => Number.isInteger(S.ans[q.id])).length;
-    const p1 = { done: (S.goal ? 1 : 0) + strDone + ansDone + (S.want ? 1 : 0), total: 1 + 4 + qs.length + 1 };
+    const p1 = { done: (S.goal ? 1 : 0) + strDone + ansDone + (S.want ? 1 : 0) + (S.values.length ? 1 : 0), total: 1 + 4 + qs.length + 2 };
+    const p2qs = M.P2.questions(S.mode, S.p2.team);
+    const p2 = { done: (S.p2.team ? 1 : 0) + (S.p2.team ? p2qs.filter((q) => Number.isInteger(S.p2.ans[q.id])).length : 0), total: 1 + p2qs.length };
     const p3 = { done: Math.min(S.group, G.length) + [0, 1, 2, 3].filter((i) => S.got[i]).length, total: G.length + 4 };
     const p4 = { done: S.lab && (S.lab.p || S.lab.m || S.lab.f || S.lab.d) ? 1 : 0, total: 1 };
-    const all = p1.done + p3.done + p4.done, tot = p1.total + p3.total + p4.total;
-    const part = p1.done < p1.total ? 0 : p3.done < p3.total ? 2 : 3;
-    return { p1, p3, p4, pct: Math.round(all / tot * 100), part, open: [p1.done < p1.total, false, p3.done < p3.total, p4.done < p4.total] };
+    const all = p1.done + p2.done + p3.done + p4.done, tot = p1.total + p2.total + p3.total + p4.total;
+    const fin = [p1, p2, p3, p4].map((x) => x.done >= x.total);
+    const part = fin.indexOf(false) < 0 ? 3 : fin.indexOf(false);
+    return { p1, p2, p3, p4, fin, pct: Math.round(all / tot * 100), part, open: fin.map((f) => !f) };
   }
   /* The first thing still open in a part, and where it is on the page. */
   function firstOpenItem(c, upTo) {
@@ -732,13 +904,18 @@
     const qi0 = qs.findIndex((q) => !Number.isInteger(S.ans[q.id]));
     if (qi0 >= 0) return { el: '#nsb-r', label: `question ${qi0 + 1}`, q: qi0 };
     if (!S.want) return { el: '#nsb-r', label: 'what you want most', q: qs.length + 1 };
+    if (!S.values.length) return { el: '#nsb-r', label: 'what you care about most', q: qs.length + 2 };
     if (upTo <= 2) return null;
+    if (!S.p2.team) return { el: '#p2-team', label: 'who works with you' };
+    const p2q = M.P2.questions(S.mode, S.p2.team).find((q) => !Number.isInteger(S.p2.ans[q.id]));
+    if (p2q) return { el: `#p2-${p2q.id}`, label: 'Part 2 · ' + p2q.short.toLowerCase() };
+    if (upTo <= 3) return null;
     const G = E.groupsFor(S.mode);
     if (S.group < G.length) return { el: `[data-f="grp-${Math.min(S.group, G.length - 1)}"]`, label: 'your numbers' };
     return null;
   }
   const pProg = (c) => {
-    const P = partState(c), done = [P.p1.done === P.p1.total, P.p1.done === P.p1.total, P.p3.done === P.p3.total, P.p4.done === P.p4.total];
+    const P = partState(c), done = P.fin;
     const cur = done.indexOf(false);
     return `<div class="nsprog-in">
       <ol class="nsprog-parts" aria-label="Your path through the North Star">${PARTS.map(([n, go], i) => {
@@ -779,24 +956,28 @@
   /* A part finished: say so, warmly, once. */
   let lastDone = null;
   function celebrate(c) {
-    const P = partState(c), now = [P.p1.done === P.p1.total, P.p3.done === P.p3.total, P.p4.done === P.p4.total];
+    const P = partState(c), now = P.fin;
     if (lastDone) {
-      if (now[0] && !lastDone[0]) toast(`Part 1 · Yourself done. ${P.pct}% of your North Star. Next: Part 3 · Your numbers.`);
-      else if (now[1] && !lastDone[1]) toast(`Part 3 · Your numbers done. ${P.pct}%. Next: Part 4 · Your next steps.`);
-      else if (now[2] && !lastDone[2]) toast(`Your North Star is complete. ${P.pct}%.`);
+      if (now[0] && !lastDone[0]) toast(`Part 1 · Yourself done. ${P.pct}% of your North Star. Your feedback is just below.`);
+      else if (now[1] && !lastDone[1]) toast(`Part 2 · Your people done. ${P.pct}%. Your feedback is just below.`);
+      else if (now[2] && !lastDone[2]) toast(`Part 3 · Your numbers done. ${P.pct}%. Next: Part 4 · Your next steps.`);
+      else if (now[3] && !lastDone[3]) toast(`Your North Star is complete. ${P.pct}%.`);
     }
     lastDone = now;
   }
   /* Later parts wait, visibly, until the one before is done. */
   function lockParts(c) {
-    const P = partState(c), p1 = P.p1.done === P.p1.total, p3 = P.p3.done === P.p3.total;
-    const locked = { 2: !p1, 3: !p1, 4: !p1 || !p3 };
+    const P = partState(c), [p1, p2, p3] = P.fin;
+    const locked = { 2: !p1, 3: !p1 || !p2, 4: !p1 || !p2 || !p3 };
+    const NAMES = ['', 'Part 1 · Yourself', 'Part 2 · Your people', 'Part 3 · Your numbers'];
     document.querySelectorAll('.nspart').forEach((el) => {
       const n = +el.dataset.part, on = !!locked[n];
       el.classList.toggle('nslocked', on);
       let note = el.querySelector(':scope > .nslocknote');
       if (on && !note) { note = document.createElement('p'); note.className = 'nslocknote'; el.prepend(note); }
-      if (note) note.textContent = on ? (n === 4 && p1 ? `Opens after Part 3 · Your numbers (${P.p3.done} of ${P.p3.total} done)` : `Opens after Part 1 · Yourself (${P.p1.done} of ${P.p1.total} done)`) : '';
+      // The first part still open, and how far it is.
+      const w = !p1 ? 1 : !p2 ? 2 : 3, x = [null, P.p1, P.p2, P.p3][w];
+      if (note) note.textContent = on ? `Opens after ${NAMES[w]} (${x.done} of ${x.total} done)` : '';
       if (!on && note) note.remove();
     });
     document.body.classList.toggle('ns-p1done', p1);
@@ -858,11 +1039,12 @@
         <label style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid #2A3A50; border-radius: 6px; cursor: pointer; font-size: 14px; align-self: flex-start"><input type="checkbox" data-tick="${esc(st.id)}" data-f="tick-${esc(st.id)}"${done ? ' checked' : ''} style="width: 20px; height: 20px; accent-color: #6F93B8">Done</label>
       </div></details>`;
   }
-  const planCount = () => (UI.plans ? `${UI.plans.count} of ${UI.plans.total} steps done` : '');
+  /* The count is this plan's own steps (31 Oct: never all 32 at once). */
+  const planCount = (steps) => (UI.plans && steps ? `${steps.filter((st) => UI.plans.done[st.id]).length} of ${steps.length} done` : '');
   /** The four steps for a domain card, or a What-if lever: open when signed
    *  in and loaded, the locked titles otherwise. */
   function planBlock(titles, steps, eyebrow, cta) {
-    if (signedIn() && steps) return `<span class="eb" style="color: #A9C0D9">${eyebrow} · ${planCount()}</span>
+    if (signedIn() && steps) return `<span class="eb" style="color: #A9C0D9">${eyebrow} · ${planCount(steps)}</span>
       ${steps.map(stepOpen).join('')}
       <span style="font-size: 13px; color: #A9B6C6">Times are about, not promises. Tick a step when it is done; the count is your plans’ own.</span>`;
     if (signedIn()) return `<span class="eb" style="color: #A9C0D9">${eyebrow}</span>
@@ -876,7 +1058,7 @@
 
   /* Part 3, what they mean: one card per domain. "Got it" opens the next. */
   function pFeedback(c, i) {
-    const s = c.sc[i], f = E.feedback(i, s, S.pains, S.want), locked = i > 0 && !S.got[i - 1];
+    const s = c.sc[i], f = E.feedback(i, s, S.pains, wants()), locked = i > 0 && !S.got[i - 1];
     // Before either question is answered there is nothing to read back yet.
     if (!s.answered) Object.assign(f, { big: `Answer the two ${D[i].name.toLowerCase()} questions in Part 1, and this card fills in.`, why: 'Nothing here is said about you before you have said it yourself.', feel: [] });
     const nums = S.mode === 'yes' ? E.numberLines(c.n, money)[i] : '';
@@ -957,13 +1139,15 @@
     const WC = D.map((d) => d.hex), f = S.lean !== null ? S.lean : (c.rd.any ? c.rd.lo : null);
     const row = (d, i) => `<div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; align-items: center; padding: 4px 0; border-radius: 6px; outline: ${f === i ? '1px solid rgba(111,147,184,.55)' : '1px solid transparent'}; outline-offset: 3px; transition: outline-color .4s ease">
         <span style="font-size: 12px; font-weight: 520; letter-spacing: .1em; text-transform: uppercase; color: ${f === i ? '#EEF2F7' : '#B8C6D6'}; display: inline-flex; align-items: center; gap: 8px">${d.name}${f === i ? '<span style="font-size: 10px; color: #0E1C2B; background: #6F93B8; border-radius: 3px; padding: 1px 5px">LEAN</span>' : ''}</span>
-        ${Array.from({ length: 12 }, (_, k) => `<span class="cellin" style="height: 34px; border-radius: 3px; background: ${WC[i]}; opacity: ${Math.min(1, (0.28 + k * 0.055) * (f === null ? 1 : f === i ? 1.25 : 0.8)).toFixed(2)}; animation-delay: ${(k * 0.06 + i * 0.04).toFixed(2)}s; transition: opacity .5s ease"></span>`).join('')}</div>`;
+        ${Array.from({ length: 12 }, (_, k) => (k < 3 ? `<span class="cellin wfree" style="animation-delay: ${(k * 0.06 + i * 0.04).toFixed(2)}s, ${(k * 0.25 + i * 0.12).toFixed(2)}s"><b>FREE</b></span>`
+          : `<span class="cellin" style="height: 34px; border-radius: 3px; background: ${WC[i]}; opacity: ${Math.min(1, (0.28 + k * 0.055) * (f === null ? 1 : f === i ? 1.25 : 0.8)).toFixed(2)}; animation-delay: ${(k * 0.06 + i * 0.04).toFixed(2)}s; transition: opacity .5s ease"></span>`)).join('')}</div>`;
     const band = (span, text, on, br) => `<span style="grid-column: span ${span}; border-top: 2px solid ${br ? '#B4703F' : on ? '#6F93B8' : '#2A3A50'}; padding-top: 8px; text-align: center; font-size: 11px; font-weight: 520; letter-spacing: .1em; color: ${br ? '#D6BF8F' : on ? '#A9C0D9' : '#B8C6D6'}">${text}</span>`;
     return `<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
-        <div style="display: flex; flex-direction: column; gap: 8px; max-width: 680px">
-          <span class="eb" style="color: #A9C0D9">How twelve weeks run · your version</span>
-          <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; color: #EEF2F7">All four, every week. <span class="sfi" style="color: #A9C0D9">${f === null ? 'Leaning where you need it.' : 'Leaning on ' + D[f].name.toLowerCase() + '.'}</span></h2>
-          <p style="color: #B8C6D6; font-size: 15px; line-height: 1.7">Not a module on mindset, then a module on sales. Every week works all four and leans on the one you are thinnest in.</p>
+        <div style="display: flex; flex-direction: column; gap: 8px; max-width: 700px">
+          <span class="eb" style="color: #D6BF8F">What comes after your North Star</span>
+          <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; color: #EEF2F7">You know where you stand. <span class="sfi" style="color: #D6BF8F">Here is the road from here.</span></h2>
+          <p style="color: #D9E2EC; font-size: 16px; line-height: 1.7">It is called <b style="color: #F6EEDD">The Founder’s Blueprint</b>: twelve weeks, built on the same four domains you just looked at. Every week works all four, and leans on the one you are thinnest in${f === null ? '' : ': for you, ' + D[f].name.toLowerCase()}.</p>
+          <p class="wfree-line"><span class="wfree-dot" aria-hidden="true"></span><span><b>The gold weeks are free.</b> Weeks 1 to 3, the Founder Launchpad, open the moment you start. No card.</span></p>
         </div>
         <div class="no-print" style="display: flex; flex-direction: column; gap: 6px">
           <span style="font-size: 11px; letter-spacing: .14em; color: #B8C6D6" id="lean-h">PREVIEW A DIFFERENT LEAN</span>
@@ -973,20 +1157,23 @@
       <div style="overflow-x: auto" role="img" aria-label="Twelve weeks across, the four domains down. Every week works all four${f === null ? '' : ', with more weight on ' + D[f].name}.">
         <div style="min-width: 760px; display: flex; flex-direction: column; gap: 8px">
           <div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; align-items: end"><span></span>
-            ${Array.from({ length: 12 }, (_, k) => `<span style="text-align: center; font-size: 12px; font-weight: 520; color: ${k < 3 ? '#A9C0D9' : '#8A7A5E'}; display: flex; flex-direction: column; align-items: center; gap: 4px">${k + 1}${k === 0 ? '<span class="pinp" style="width: 8px; height: 8px; border-radius: 50%; background: #6F93B8"></span>' : ''}</span>`).join('')}</div>
+            ${Array.from({ length: 12 }, (_, k) => `<span style="text-align: center; font-size: 12px; font-weight: 520; color: ${k < 3 ? '#D6BF8F' : '#8A7A5E'}; display: flex; flex-direction: column; align-items: center; gap: 4px">${k < 3 ? 'Week ' : ''}${k + 1}${k === 0 ? '<span class="pinp" style="width: 8px; height: 8px; border-radius: 50%; background: #D6BF8F"></span>' : ''}</span>`).join('')}</div>
           ${D.map(row).join('')}
           <div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; margin-top: 8px"><span></span>
-            ${band(3, 'FOUNDER LAUNCHPAD · FREE', true)}${band(2, 'BOOK THE BOARDROOM · UNLOCKS 04–05', false, true)}${band(4, 'PERSONAL LEADERSHIP LAB · $97 · 2 SESSIONS')}${band(3, 'BUSINESS HUB · $397 · 3 SESSIONS IN TOTAL')}</div>
+            ${band(3, 'FOUNDER LAUNCHPAD · FREE · OPEN NOW', false, true)}${band(2, 'BOOK THE BOARDROOM · UNLOCKS 04–05', false, true)}${band(4, 'PERSONAL LEADERSHIP LAB · $97 · 2 SESSIONS')}${band(3, 'BUSINESS HUB · $397 · 3 SESSIONS IN TOTAL')}</div>
         </div>
       </div>
-      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; border-top: 1px solid #3A2F20; padding-top: 16px">
-        <p style="flex: 1 1 360px; font-size: 14px; color: #B8C6D6; line-height: 1.7">Every column is one week, and every week works all four. The weight shifts toward ${f === null ? 'the domain that needs you most' : D[f].name}. The coverage never drops. You are at week 1. The Summit ($1,989): the whole Blueprint, with Alexandru every week.</p>
-        <a href="/ground-plan/#home" class="go no-print" style="display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 4px; background: #6F93B8; color: #0E1C2B; font-weight: 520; text-decoration: none">Start week 1 free · The Founder Launchpad <span class="arr" aria-hidden="true">→</span></a>
+      <div class="wfree-cta">
+        <div style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 6px">
+          <span class="sf" style="font-size: 22px; line-height: 1.3; color: #F6EEDD">Right now you are one click from three of the twelve weeks. Free.</span>
+          <span style="font-size: 15px; color: #D9E2EC; line-height: 1.6">You will settle what you believe about your business, learn to read it clearly, and stay steady when it pushes back. Then build on that, instead of starting over every Monday.</span>
+        </div>
+        <a href="/ground-plan/#home" class="go no-print" style="display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 22px; border-radius: 4px; background: #D6BF8F; color: #1C1309; font-weight: 600; text-decoration: none">Open my 3 free weeks <span class="arr" aria-hidden="true">→</span></a>
       </div>`;
   }
 
   const STOPS = [
-    { n: '1', short: 'Founder Launchpad', unlock: 'Free. Modules 01–03 open the moment you sign up.', name: 'The Founder Launchpad', tag: 'Start here', line: 'Know yourself before you build.', modules: '01–03', sessions: '—', price: 'Free', cta: 'Start free', href: '/ground-plan/', x: 150, y: 360, lx: 136, ly: 364, anchor: 'end' },
+    { n: '1', short: 'Founder Launchpad', unlock: 'You are one click from 3 of the 12 modules, free. You will know what you believe, read your business clearly and stay steady under pressure.', name: 'The Founder Launchpad', tag: 'Start here · free', line: 'Stop circling yourself. Settle who you are, then build.', modules: '01–03', sessions: '—', price: 'Free', cta: 'Start free', href: '/ground-plan/', x: 150, y: 360, lx: 136, ly: 364, anchor: 'end' },
     { n: '2', short: 'The Boardroom', unlock: 'Book one session with Alexandru. It unlocks modules 04–05 and the full North Star.', name: 'The Boardroom', tag: 'You and Alexandru', line: 'Sit at the table with Alexandru.', modules: '04–05', sessions: '1 session', price: '[YOUR PRICE]', cta: 'Book the Boardroom · unlock 04–05', href: BOOKING, ext: true, x: 290, y: 300, lx: 306, ly: 304, anchor: 'start' },
     { n: '3', short: 'Leadership LAB', unlock: 'Joining unlocks modules 06–09.', name: 'The Personal Leadership LAB', tag: 'Go deeper', line: 'Lead yourself first.', modules: '06–09', sessions: '2 sessions', price: '$97', cta: 'Join the LAB', href: LAB_URL, ext: true, x: 175, y: 235, lx: 161, ly: 239, anchor: 'end' },
     { n: '4', short: 'Business HUB', unlock: 'Joining unlocks modules 10–12.', name: 'The Business HUB', tag: 'Build the business', line: 'Build the business that carries it.', modules: '10–12', sessions: '3 in total (incl. 1 from the LAB)', price: '$397', cta: 'Join the HUB', href: HUB_URL, ext: true, x: 285, y: 160, lx: 301, ly: 164, anchor: 'start' },
@@ -997,7 +1184,7 @@
     return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 720px">
         <span class="eb" style="color: #A9C0D9">Link to Lead · The Founder’s Blueprint</span>
         <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; color: #EEF2F7">Your climb. <span class="sfi" style="color: #A9C0D9">One step at a time.</span></h2>
-        <p style="color: #B8C6D6; font-size: 15px; line-height: 1.7">Tap a stop on the trail to see what opens there.</p></div>
+        <p style="color: #B8C6D6; font-size: 15px; line-height: 1.7">Five stops, one at a time. The first one is free. Tap a stop to see what opens there.</p></div>
       <div style="display: flex; flex-wrap: wrap; gap: 26px; align-items: center">
         <svg viewBox="0 0 460 420" style="flex: 1 1 340px; max-width: 520px; height: auto" role="img" aria-label="A mountain trail from The Founder Launchpad at the bottom to The Summit at the top">
           <circle cx="60" cy="60" r="1.5" fill="#A9C0D9" opacity=".7"/><circle cx="400" cy="90" r="1.2" fill="#A9C0D9" opacity=".6"/><circle cx="350" cy="40" r="1" fill="#EEF2F7" opacity=".5"/><circle cx="110" cy="130" r="1" fill="#EEF2F7" opacity=".4"/>
@@ -1011,7 +1198,7 @@
             <text x="${t.lx}" y="${t.ly}" text-anchor="${t.anchor}" fill="${i === si ? '#D6BF8F' : '#B8C6D6'}" font-family="Inter" font-weight="520" font-size="12.5">${t.short}</text>${i === 1 ? `<g transform="translate(${t.lx + 101} ${t.ly - 11})" aria-hidden="true"><rect x="1" y="5" width="10" height="8" rx="1.5" fill="#B4703F"/><path d="M3.5 5V3.5a2.5 2.5 0 0 1 5 0" fill="none" stroke="#D6BF8F" stroke-width="1.3"/></g>` : ''}</g>`).join('')}
         </svg>
         <div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
-          <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 6px" role="group" aria-label="Stops on the climb">${STOPS.map((t, i) => `<button type="button" data-act="stop" data-i="${i}" data-f="stop-${i}" aria-pressed="${i === si}" style="min-height: 40px; padding: 0 12px; border-radius: 4px; border: 1px solid ${i === si ? '#D6BF8F' : '#2A3A50'}; background: ${i === si ? 'linear-gradient(120deg,#2B1B12,#1C1309)' : 'transparent'}; color: ${i === si ? '#F6EEDD' : '#EEF2F7'}; font-size: 12px; font-weight: 520; cursor: pointer">${t.n} · ${t.short}${i === 1 ? ' <span aria-hidden="true" style="color: #D6BF8F">· unlocks 04–05</span>' : ''}</button>`).join('')}</div>
+          <div class="climbstops no-print" role="group" aria-label="Stops on the climb">${STOPS.map((t, i) => `<button type="button" data-act="stop" data-i="${i}" data-f="stop-${i}" aria-pressed="${i === si}" class="${i === 0 ? 'cfree' : ''}"><span class="cn">${t.n}</span><span><b>${t.name}${i === 0 ? ' <em>Free</em>' : i === 1 ? ' <em class="cg">Unlocks 04–05</em>' : ''}</b><i>${t.line}</i></span></button>`).join('')}</div>
           <div class="pop" style="background: linear-gradient(120deg, rgba(43,27,18,.85), rgba(28,19,9,.85)); border: 1px solid rgba(214,191,143,.5); border-radius: 9px; padding: 20px; display: flex; flex-direction: column; gap: 10px" aria-live="polite">
             <span class="eb" style="color: #D6BF8F">${sv.tag}</span>
             <span class="sf" style="font-size: 28px; color: #EEF2F7; line-height: 1.15">${sv.name}</span>
@@ -1042,7 +1229,7 @@
       out: { k: 'people', name: 'People · help you can afford', d: 1 } },
   ];
   const WHATIF_IDS = ['price', 'message', 'hours', 'handover'];
-  const labMode = () => (S.lab.mode === 'money' ? 'money' : 'time');
+  const labMode = () => (['money', 'both'].includes(S.lab.mode) ? S.lab.mode : 'time');
   const NUMW = ['no', 'this', 'these two', 'these three', 'these four'];
 
   /** Everything the lab shows, from the state. */
@@ -1052,7 +1239,15 @@
       const names = Object.fromEntries(E.fieldsFor(S.mode).map(([k, l]) => [k, l]));
       return { locked: true, b, need: (b.need || []).map((k) => ({ k, label: names[k] })), planned: !!b.planned };
     }
+    // Without a helper rate or the cost of one more person, the lab assumes
+    // what one hour of the founder's own work earns today, and says so. The
+    // founder can change both in Fine-tune.
+    const own = b.hours > 0 ? (b.sales - b.deliv) / b.hours : 0;
+    if (b.rate === null && own > 0) { b.rate = Math.round(own); b.rateAssumed = true; }
+    if (b.hire === null && b.rate) { b.hire = Math.round(b.rate * 160); b.hireAssumed = true; }
     const mode = labMode(), t = E.month(b, {}, mode), s = E.month(b, S.lab, mode);
+    // What each lever does on its own, to all four answers.
+    const alone = PAIRS.map((x) => E.month(b, { [x.k]: S.lab[x.k] || 0 }, mode));
     const scale = {
       cash: t.cash > 0 ? t.cash * 4 : Math.max(b.sales * 0.5, 1),
       clients: t.clients ? t.clients * 3 : 1,
@@ -1063,7 +1258,7 @@
     const better = (o) => { const [v, w] = vals[o.k]; if (v === null || w === null) return false; return o.lower ? v < w - 0.5 : o.k === 'people' ? v > w + 0.05 : v > w + (o.k === 'cash' ? 1 : 0.05); };
     const worse = (o) => { const [v, w] = vals[o.k]; if (v === null || w === null) return false; return o.lower ? v > w + 0.5 : v < w - (o.k === 'cash' ? 1 : 0.05); };
     const improved = PAIRS.map((x) => better(x.out));
-    return { locked: false, b, mode, t, s, scale, vals, improved, worsened: PAIRS.map((x) => worse(x.out)), count: improved.filter(Boolean).length };
+    return { locked: false, b, mode, t, s, scale, vals, alone, improved, worsened: PAIRS.map((x) => worse(x.out)), count: improved.filter(Boolean).length };
   }
 
   /** The parts of the lab that only change with its shape (locked or not, the
@@ -1088,6 +1283,7 @@
           <div class="wrow"><label for="w-${x.k}" class="wname"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="${x.icon}" fill="none" stroke="#6F93B8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>${x.name}</label><span class="wbig" id="lv-val-${x.k}">—</span></div>
           <input id="w-${x.k}" type="range" min="0" max="${E.LEVER_RANGE[x.k]}" step="5" value="${L.locked ? 0 : S.lab[x.k] || 0}" data-lever="${x.k}" data-f="w-${x.k}"${dis}>
           <span class="wnote" id="lv-note-${x.k}"></span>
+          <div class="wmoves" id="lv-moves-${x.k}" aria-live="polite"></div>
         </div>
         <div class="warrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="wcard" role="meter" id="out-${x.out.k}" aria-labelledby="out-name-${x.out.k}" aria-valuemin="0">
@@ -1100,6 +1296,7 @@
       ${plan ? `<div style="max-width: 320px">${input('plan', 'Customers a month you plan for', 'Your plan, a number')}</div>` : ''}
       <div class="wswitch" role="group" aria-label="What should the gain go to?">
         <button type="button" data-act="lab-mode" data-v="time" data-f="lab-mode-time"${dis}>Give me back time</button>
+        <button type="button" data-act="lab-mode" data-v="both" data-f="lab-mode-both"${dis}>A bit of both</button>
         <button type="button" data-act="lab-mode" data-v="money" data-f="lab-mode-money"${dis}>Give me more money</button>
       </div>
       <div class="wlab${L.locked ? ' locked' : ''}">
@@ -1108,9 +1305,10 @@
       </div>
       <details class="wfine" data-fine${UI.fine ? ' open' : ''}><summary>Fine-tune (optional)</summary>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding-top: 12px">
-          ${input('rate', `Helper rate per hour (${cur})`, 'What you would pay')}
-          ${input('hire', `Monthly cost of one more person (${cur})`, 'Your estimate')}
+          ${input('rate', `Helper rate per hour (${cur})`, L.b && L.b.rateAssumed ? `Now assumed: ${money(L.b.rate)}` : 'What you would pay')}
+          ${input('hire', `Monthly cost of one more person (${cur})`, L.b && L.b.hireAssumed ? `Now assumed: ${money(L.b.hire)}` : 'Your estimate')}
         </div>
+        ${L.b && (L.b.rateAssumed || L.b.hireAssumed) ? '<p style="font-size: 13px; color: #A9B6C6; margin-top: 8px">Until you type your own, help is assumed to cost what one hour of your work earns today, and one more person 160 of those hours a month.</p>' : ''}
       </details>`;
   }
 
@@ -1155,11 +1353,22 @@
     }
     const { b, s, t, scale, vals, mode } = L, plan = S.mode !== 'yes', { p = 0, m = 0, f = 0, d = 0 } = S.lab;
     const ab = (v) => (b.est || Math.abs(v - Math.round(v)) > 0.05 ? 'about ' : '');
-    set('lv-val-p', '+' + p + '%'); set('lv-val-m', '+' + m + '%'); set('lv-val-f', '−' + f + '%'); set('lv-val-d', d + '%');
+    set('lv-val-p', p ? '+' + p + '% price' : 'Today'); set('lv-val-m', m ? '+' + m + '% say yes' : 'Today'); set('lv-val-f', f ? '−' + f + '% hours' : 'Today'); set('lv-val-d', d ? d + '% handed over' : 'Today');
     set('lv-note-p', plan ? `Each customer: ${money(b.sales / b.clients)} → ${money(b.sales / b.clients * (1 + p / 100))}` : `Your sales for the same work: ${money(b.sales)} → ${money(b.sales * (1 + p / 100))}`);
     set('lv-note-m', b.clients ? `Ready to buy: ${whole(b.clients)} → ${ab(b.clients * s.demand)}${whole(b.clients * s.demand)} a month, same marketing spend` : `${m ? '+' + m + '% more people say yes' : 'As many say yes as today'}, for the same marketing spend`);
-    set('lv-note-f', plan ? `Hours to serve one customer: ${Math.round(b.hours / b.clients * 10) / 10} h → ${Math.round(b.hours / b.clients * (1 - f / 100) * 10) / 10} h` : `Hours for today's work: ${whole(b.hours)} h → ${ab(b.hours * (1 - f / 100))}${whole(b.hours * (1 - f / 100))} h`);
-    set('lv-note-d', !d ? 'You do all the work yourself.' : b.rate !== null ? `${d}% of delivery hours go to a helper at ${money(b.rate)} an hour.` : `${d}% of delivery hours go to a helper. Set the rate in Fine-tune.`);
+    set('lv-note-f', plan ? `One customer takes ${Math.round(b.hours / b.clients * (1 - f / 100) * 10) / 10} hours of your time instead of ${Math.round(b.hours / b.clients * 10) / 10}.` : `Today’s work in ${ab(b.hours * (1 - f / 100))}${whole(b.hours * (1 - f / 100))} hours instead of ${whole(b.hours)}.`);
+    set('lv-note-d', !d ? 'You do all the work yourself.' : b.rate !== null ? `${d}% of the work goes to a helper at ${money(b.rate)} an hour${b.rateAssumed ? ' (assumed: what your own hour earns; change it in Fine-tune)' : ''}.` : `${d}% of the work goes to a helper. Set the rate in Fine-tune.`);
+    // Under each lever: what it alone does to all four answers.
+    const dl = (a, z, fmt, unit, lowerGood) => { if (a === null || z === null) return ['—', '']; const x = a - z; if (Math.abs(x) < (unit === 'cash' ? 1 : 0.05)) return ['same', ''];
+      return [(x > 0 ? '+' : '−') + fmt(Math.abs(x)), (lowerGood ? x < 0 : x > 0) ? 'up' : 'down']; };
+    PAIRS.forEach((x, i) => {
+      const el = document.getElementById('lv-moves-' + x.k); if (!el) return;
+      if (!S.lab[x.k]) { el.innerHTML = ''; return; }
+      const a = L.alone[i], cells = [['Cash', dl(a.cash, t.cash, money, 'cash')], ['Clients', dl(a.clients, t.clients, (v) => (Math.round(v * 10) / 10).toString())],
+        ['Time', dl(a.mine, t.mine, (v) => whole(v) + ' h', 'time', true)], ['People', dl(a.people, t.people, (v) => (Math.round(v * 10) / 10).toFixed(1))]];
+      const html = `<span class="wm-k">On its own:</span>${cells.map(([n, [v, cl]]) => `<span class="wm ${cl}">${n} <b>${v}</b></span>`).join('')}`;
+      if (el.dataset.h !== html) { el.innerHTML = html; el.dataset.h = html; }
+    });
 
     PAIRS.forEach((x, i) => {
       const o = x.out, [v, w] = vals[o.k], max = scale[o.k];
@@ -1169,7 +1378,11 @@
       if (fl) { fl.style.width = (v === null ? 0 : pct(v)) + '%'; fl.style.background = col || '#8A7A5E'; }
       if (th) { th.style.left = (v === null ? 50 : pct(v)) + '%'; th.style.color = col || '#EEF2F7'; }
       if (td) { td.style.left = (w === null ? 50 : pct(w)) + '%'; td.hidden = w === null; }
-      if (card) { card.setAttribute('aria-valuemax', String(Math.round(max))); if (v !== null) card.setAttribute('aria-valuenow', String(Math.round(v))); }
+      if (card) { card.setAttribute('aria-valuemax', String(Math.round(max))); if (v !== null) card.setAttribute('aria-valuenow', String(Math.round(v)));
+        // A visible pulse on every answer that moved.
+        const key = v === null ? 'x' : (Math.round(v * 10) / 10).toString();
+        if (card.dataset.last !== undefined && card.dataset.last !== key && !reduced()) { card.classList.remove('wbump'); void card.offsetWidth; card.classList.add('wbump'); }
+        card.dataset.last = key; }
     });
     const lim = document.getElementById('limit-time');
     if (lim) { lim.hidden = !b.limit; if (b.limit) lim.style.left = Math.min(100, b.limit / scale.time * 100) + '%'; }
@@ -1216,9 +1429,8 @@
       'Each sale asks less of you. Those hours are yours to choose: rest, better work, or more customers.',
       delta === null ? 'You buy back your time. Set a helper rate to see what the trade costs.' : delta >= 0 ? 'You buy back your time and the business still grows. This is where leading starts.' : 'You buy back your time, and it costs money at first. Decide whether that trade is worth it to you.',
     ][dom];
-    const g = E.GOALS.find((x) => x[0] === S.want);
-    const goalLine = g ? 'Your goal, ' + g[1].toLowerCase() + ': ' + (E.goalHelped(g[0], t, s, d) ? 'this change moves you toward it.' : 'this change alone does not get you there. Try another lever with it.') : '';
-    return `<div class="pop" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px">
+    const goalLine = wants().map((w) => E.GOALS.find((x) => x[0] === w)).filter(Boolean).map((g) => 'Your goal, ' + g[1].toLowerCase() + ': ' + (E.goalHelped(g[0], t, s, d) ? 'this change moves you toward it.' : 'this change alone does not get you there. Try another lever with it.')).join(' ');
+    return `<div class="pop labdeep"><div class="labdeep-2">
       <div style="background: rgba(247,242,231,.05); border: 1px solid #3A2F20; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
         <span class="eb" style="color: #A9C0D9">The chain reaction</span>
         <span style="display: inline-flex; align-self: flex-start; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 16px; background: #6F93B8; color: #0E1C2B; font-weight: 520; font-size: 13px">${LV.name}</span>
@@ -1231,9 +1443,29 @@
         <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: #B8C6D6; border-top: 1px solid #3A2F20; padding-top: 10px"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M12 3l9 16H3z" fill="none" stroke="#DDBD69" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4M12 16.5v.5" stroke="#DDBD69" stroke-width="2" stroke-linecap="round"/></svg><span><b style="color: #EEF2F7">Watch out:</b> ${LV.watch}</span></div>
         <div style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: #B8C6D6"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#9BC0A1" stroke-width="2.2" stroke-linecap="round"/></svg><span><b style="color: #EEF2F7">First step this week:</b> ${LV.first}</span></div>
       </div>
-      <div style="border: 1px solid #6F93B8; border-radius: 9px; padding: 18px; display: flex; flex-direction: column; gap: 10px; background: rgba(111,147,184,.08)">
-        ${planBlock(LV.steps, UI.plans && UI.plans.whatif && UI.plans.whatif.id === WHATIF_IDS[dom] ? UI.plans.whatif.steps : null, 'Your plan for this change', 'Open my step-by-step plan')}
+      </div>
+      <div class="jnywrap">
+        ${signedIn() && UI.plans && UI.plans.whatif && UI.plans.whatif.id === WHATIF_IDS[dom] ? journey(UI.plans.whatif.steps, LV)
+          : planBlock(LV.steps, null, 'Your plan for this change', 'Open my step-by-step plan')}
       </div></div>`;
+  }
+  /* The plan for a change, as one journey across the screen (31 Oct): four
+   * stops in a row, what to do at each and what you have once it is done.
+   * The trail lights up as stops are ticked. */
+  function journey(steps, LV) {
+    const done = steps.map((st) => !!UI.plans.done[st.id]), n = done.filter(Boolean).length, next = done.indexOf(false);
+    const end = n === steps.length ? 'Road walked. Run the lab again with your new numbers, and pick the next lever.'
+      : n >= 2 ? 'Halfway. The last stops are where the change sticks.' : n === 1 ? 'One stop behind you. Keep the pace: one stop a week.' : 'Start at stop 1, this week.';
+    return `<div class="jny">
+      <div class="jny-head"><span class="eb" style="color: #A9C0D9">Your journey · ${esc(LV.name.toLowerCase())}</span><span class="sf">From where you are to where this change takes you. <b>${n} of ${steps.length}</b> stops done.</span></div>
+      <ol class="jny-road" style="--p: ${steps.length > 1 ? Math.min(1, n / (steps.length - 1)) : 1}">${steps.map((st, k) => `<li class="${done[k] ? 'done' : ''}${k === next ? ' next' : ''}">
+        <span class="jn" aria-hidden="true">${done[k] ? '✓' : k + 1}</span>
+        <b>${esc(st.title)}</b>
+        <p>${esc(st.what || '')}</p>
+        ${st.about ? `<p class="jt">About ${esc(st.about)}</p>` : ''}
+        ${st.done ? `<p class="jd"><small>You will have</small>${esc(st.done)}</p>` : ''}
+        <label class="jtick"><input type="checkbox" data-tick="${esc(st.id)}" data-f="tick-${esc(st.id)}"${done[k] ? ' checked' : ''}>Done</label></li>`).join('')}</ol>
+      <p class="jny-end">${end}</p></div>`;
   }
   function labFoot() {
     const b = E.labBase(S);
@@ -1241,7 +1473,8 @@
     if (b.ready) parts.push(b.plan ? 'Built from your offer in Part 3 and the customers a month you plan for.' : 'Built from your month in Part 3.');
     if (b.ready && b.est) parts.push('Some of it comes from ranges, so read every figure as “about”.');
     if (b.ready && b.acqMissing) parts.push('Spending to win customers was not entered, so it counts as nothing here.');
-    parts.push(labMode() === 'time' ? '“Give me back time” serves only the work needed to keep today’s money.' : '“Give me more money” serves everyone who wants to buy.');
+    parts.push(labMode() === 'time' ? '“Give me back time” serves only the work needed to keep today’s money.' : labMode() === 'both' ? '“A bit of both” splits every gain: half goes to your time, half to your money.' : '“Give me more money” serves everyone who wants to buy.');
+    if (b.ready && (S.lab.rate === '' || S.lab.hire === '')) parts.push('Help is assumed to cost what one hour of your work earns today, until you set your own figures in Fine-tune.');
     parts.push('A higher price may change demand, and help costs money before it saves time. Check both before acting.');
     return parts.join(' ');
   }
@@ -1388,6 +1621,10 @@
     put('questions', pQuestions(c));
     put('s-strengths', pStrengths(c));
     put('s-reading', pReading(c));
+    put('fbw-1', pFb1(c));
+    put('p2', pPeople(c));
+    put('fbw-2', pFb2(c));
+    put('fbw-3', pFb3(c));
     put('nsprog', pProg(c));
     put('s-numbers', pNumbers(c));
     for (let i = 0; i < 4; i++) put('fb-' + i, pFeedback(c, i));
@@ -1397,6 +1634,7 @@
     put('lab-in', pLabIn());
     updateLab();
     put('lab-deep', pLabDeep());
+    put('fbw-4', pFb4(c));
     $('#labtag').textContent = S.mode === 'yes' ? 'Part 4 · Your next steps · the what-if lab' : 'Part 4 · Your next steps · the what-if lab';
     $('#labfoot').textContent = labFoot();
     put('mbar', pMbar(c));
@@ -1416,10 +1654,11 @@
     cache['lab-in'] = pLabIn();
     updateLab();
     put('lab-deep', pLabDeep());
+    put('fbw-4', pFb4(context()));
     $('#labfoot').textContent = labFoot();
   }
 
-  const SECTION = { overview: 's-overview', clear: 's-clear', people: 's-people', numbers: 's-numbers', plan: 's-whatif', method: 's-method', journey: 's-journey', weeks: 's-weeks' };
+  const SECTION = { overview: 's-overview', clear: 's-clear', people: 's-people', numbers: 's-numbers', plan: 's-whatif', method: 's-method', journey: 's-journey', weeks: 's-weeks', save: 's-save' };
   function go(page) {
     sync(); // the end of a section
     UI.page = page in SECTION && page !== 'journey' ? page : page === 'journey' ? 'clear' : UI.page;
@@ -1435,7 +1674,7 @@
   /* ── Email: sent once through /api/send-plan, only when asked ─────────────── */
   function planForEmail() {
     const c = context(), n = c.n;
-    const domains = D.map((d, i) => { const f = E.feedback(i, c.sc[i], S.pains, S.want);
+    const domains = D.map((d, i) => { const f = E.feedback(i, c.sc[i], S.pains, wants());
       return c.sc[i].answered ? { know: d.name, lead: f.band, label: f.big, strengthen: [f.ask], steps: [f.week], level: '' }
         : { know: d.name, lead: f.band, label: 'Not answered yet', strengthen: [], steps: [], level: '' }; });
     const rows = [];
@@ -1453,7 +1692,7 @@
       if (n.talked) add('People you talked to', ab('talked') + whole(n.talked.v));
     }
     const order = c.rd.any ? c.rd.combo.map((v, i) => [v, i]).sort((a, b) => a[0] - b[0]).map((x) => x[1]) : [0, 1, 2, 3];
-    const next = order.slice(0, 3).map((i) => ({ title: D[i].name, text: E.feedback(i, c.sc[i], S.pains, S.want).week }));
+    const next = order.slice(0, 3).map((i) => ({ title: D[i].name, text: E.feedback(i, c.sc[i], S.pains, wants()).week }));
     const st = E.STAGES[c.here];
     return { name: S.profile.first, business: S.profile.business, stage: st.name, focus: st.focus, domains, numbers: rows.slice(0, 6), next, strategy: [] };
   }
@@ -1487,8 +1726,8 @@
     const inLocked = e.target.closest && e.target.closest('.nslocked');
     const need = want ? want : inLocked ? +inLocked.dataset.part : 0;
     if (!need) return;
-    const p1 = P.p1.done === P.p1.total, p3 = P.p3.done === P.p3.total;
-    if ((need >= 2 && !p1) || (need === 4 && !p3)) { e.preventDefault(); e.stopPropagation(); guide(c, need === 4 && p1 ? 4 : 1); }
+    const [p1, p2, p3] = P.fin;
+    if ((need >= 2 && !p1) || (need >= 3 && !p2) || (need === 4 && !p3)) { e.preventDefault(); e.stopPropagation(); guide(c, need); }
   }, true);
   document.addEventListener('click', (e) => {
     const t = e.target.closest('[data-go],[data-act]');
@@ -1524,7 +1763,11 @@
       case 'nsb-steps': document.body.classList.toggle('nsb-open'); if (document.body.classList.contains('nsb-open')) { const n = document.querySelector('.nsb-s.now'); if (n) n.focus({ preventScroll: true }); } return;
       case 'str': gated(() => { S.str[i] = Number(v); }); return;
       case 'pain': gated(() => { const cur = S.pains.slice(), ix = cur.indexOf(v); if (ix >= 0) cur.splice(ix, 1); else { cur.push(v); if (cur.length > 2) cur.shift(); } S.pains = cur; }); return;
-      case 'want': gated(() => { S.want = S.want === v ? '' : v; }); return;
+      case 'want': gated(() => { const cur = wants(), ix = cur.indexOf(v); if (ix >= 0) cur.splice(ix, 1); else { cur.push(v); if (cur.length > 2) cur.shift(); } S.want = cur[0] || ''; S.want2 = cur[1] || ''; }); return;
+      case 'val': gated(() => { const cur = S.values.slice(), ix = cur.indexOf(v); if (ix >= 0) cur.splice(ix, 1); else { cur.push(v); if (cur.length > 2) cur.shift(); } S.values = cur; }); return;
+      case 'p2team': gated(() => { S.p2.team = v; }); return;
+      case 'p2ans': gated(() => { S.p2.ans[t.dataset.q] = Number(v); }); return;
+      case 'pmore': S.pmore[i] = !S.pmore[i]; save(); render(); return;
       case 'grp': S.group = i; save(); render(); sync(); return;
       case 'more': S.more[i] = !S.more[i]; save(); render(); return;
       case 'lean': S.lean = i; save(); render(); return;
@@ -1564,6 +1807,7 @@
   document.addEventListener('change', (e) => {
     const t = e.target;
     if (t.dataset.act === 'got') { S.got[Number(t.dataset.i)] = t.checked; save(); render(); sync(); return; }
+    if (t.dataset.act === 'pgot') { S.pgot[Number(t.dataset.i)] = t.checked; save(); render(); sync(); return; }
     if (t.dataset.tick && signedIn() && UI.plans) {
       const id = t.dataset.tick, on = t.checked, was = UI.plans.done[id];
       if (on) UI.plans.done[id] = new Date().toISOString(); else delete UI.plans.done[id];
@@ -1672,4 +1916,15 @@
     if (window.ResizeObserver) new ResizeObserver(place).observe(bar);
     place();
   } catch { /* old browser: the banner simply sticks at the top */ }
+})();
+
+/* The Blueprint button in the menu starts to glow once the founder reaches
+ * the twelve weeks, and keeps glowing: there it is (31 Oct). */
+(() => {
+  try {
+    const sec = document.getElementById('s-weeks'), link = document.querySelector('.incub-link');
+    if (!sec || !link || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { link.classList.add('nsbeckon'); io.disconnect(); } }, { threshold: 0.25 });
+    io.observe(sec);
+  } catch { /* old browser: no glow */ }
 })();
