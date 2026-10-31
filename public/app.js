@@ -455,7 +455,49 @@ const stepAt = (i) => STEPS4[i] || [-1, 'reading'];
 const ready = (i) => { const [d, k] = stepAt(i); return k !== 'tap' || tapOf(state.work, level, d) != null; };
 const lastStep = () => (CLOSES[level] != null ? STEPS4.length : STEPS4.length - 1);
 /** Keep one answer: on this device first, then the account, in batches. */
+// ── One step before the first answer (31 Oct 2026, Alexandru) ──────────────
+// One universal rule, whatever sales page a founder came from: an account
+// without its full details (company, what they want most, industry,
+// password; /api/state says which) is asked once, at its first answer, for
+// only what it lacks. The answer they were giving is held and applied after
+// the save, so nothing is lost. Accounts that are complete never see it.
+let missing = [];
+const needsAccount = () => account.joined() && pulled && missing.length > 0;
+let heldAnswer = null;
+function askAccount(then) {
+  heldAnswer = then || null;
+  import('/reset-box.js').then((m) => m.openComplete({ name: state.me && state.me.name, email: state.me && state.me.email, missing,
+    done: () => {
+      missing = []; signupType = 'full'; hasPassword = true;
+      const go = heldAnswer; heldAnswer = null;
+      if (go) go();
+      saidNote('Your account is complete. Your answer is saved.');
+    } })).catch(() => { heldAnswer = null; });
+}
+function saidNote(msg) {
+  const n = document.createElement('div');
+  n.setAttribute('role', 'status'); n.textContent = msg;
+  Object.assign(n.style, { position: 'fixed', left: '50%', bottom: '28px', transform: 'translateX(-50%)', zIndex: 130, background: '#14100B', color: '#F6EEDD', padding: '12px 18px', borderRadius: '999px', font: '600 14px Inter, Arial, sans-serif', boxShadow: '0 10px 30px rgba(0,0,0,.35)', maxWidth: 'calc(100vw - 32px)', textAlign: 'center' });
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 3200);
+}
+// The slider and the sentence: asked before the first move, not after.
+document.addEventListener('pointerdown', (e) => {
+  const v = e.target && e.target.closest && e.target.closest('input[data-v4s]');
+  if (!v || !needsAccount()) return;
+  e.preventDefault();
+  askAccount(() => { const x = document.getElementById(v.id); if (x) x.focus(); });
+}, true);
+document.addEventListener('focusin', (e) => {
+  const v = e.target && e.target.closest && e.target.closest('input[data-v4s], input[data-v4f]');
+  if (!v || !needsAccount()) return;
+  v.blur();
+  askAccount(() => { const x = document.getElementById(v.id); if (x) x.focus(); });
+});
+
 function keep4(d, k, v) {
+  // Safety net: a move that reached here some other way waits for the account too.
+  if (needsAccount()) { askAccount(() => keep4(d, k, v)); return; }
   const key = wkey(level, d, k);
   state.work[key] = String(v);
   save();
@@ -920,6 +962,11 @@ document.addEventListener('click', (e) => {
   }
   if (b.dataset.qmove) { moveQ(+b.dataset.qmove); return; }
   if (b.dataset.qd) { qi = STEPS4.findIndex((x) => x[0] === +b.dataset.qd); document.body.classList.remove('stepsopen'); drawBook(); return; }
+  if (b.dataset.v4t && needsAccount()) {
+    const k = b.dataset.v4t;
+    askAccount(() => { const x = document.querySelector(`.cw-o[data-v4t="${k}"]`); if (x) x.click(); });
+    return;
+  }
   if (b.dataset.v4t) {
     const d = stepAt(qi)[0], st = state.stage || 'build', had = answered(st, level, dom);
     keep4(d, 't', +b.dataset.v4t);
@@ -1192,6 +1239,7 @@ async function comeHome() {
       if (r.me.tier) state.tier = r.me.tier;
       hasPassword = !!r.me.hasPassword;
       signupType = r.me.signupType || null;
+      missing = Array.isArray(r.me.missing) ? r.me.missing.filter((k) => ['company', 'interest', 'industry', 'password'].includes(k)) : [];
       if (r.me.mentor && r.me.mentor.first) mentor = r.me.mentor;
       pulled = true;
     }

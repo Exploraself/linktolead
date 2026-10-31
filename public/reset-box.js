@@ -14,6 +14,8 @@
  * it, never because a drag or a text selection ended outside. Nothing here
  * says whether an address has an account: the answer is the same either way. */
 
+import { INTERESTS, INDUSTRIES } from '/forms.js';
+
 const OK_EMAIL = /^[^@\s]+@[^@\s.]+\.[^@\s]+$/;
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const EYE = '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
@@ -223,5 +225,47 @@ export function openConfirm({ to = 'blueprint', first = '', last = '', email = '
     b.disabled = true; b.textContent = 'One moment…';
     try { const A = await import('/account.js'); await A.cross(to); } catch { /* the founder still goes on */ }
     close(); if (done) done({ first, last });
+  });
+}
+
+/** One step before the first answer (31 Oct 2026, Alexandru). Any account
+ *  without its full details is asked once, at its first answer in the
+ *  Blueprint, for only what it lacks (missing: 'company', 'interest',
+ *  'industry', 'password', from /api/state). Name and email are known and only
+ *  shown. done() runs after the save, and the page then applies the answer
+ *  the founder was giving, so nothing they tapped is lost. */
+export function openComplete({ name = '', email = '', missing = [], done = null } = {}) {
+  const need = (k) => missing.includes(k);
+  const inner = shell('');
+  put(inner, `<span class="rbx-k">Your Base Camp</span>
+    <h2 id="rbx-h">One step before your first answer</h2>
+    <p>Your answers are the most valuable thing here. Complete your free account once, so they are safe and follow you to any device.</p>
+    ${email ? `<p class="rbx-tip" style="margin:-4px 0 4px">${name ? esc(name) + ' · ' : ''}<b>${esc(email)}</b></p>` : ''}
+    <form class="rbx-form" novalidate style="display:flex;flex-direction:column;gap:12px">
+      ${need('company') ? `<label>Company<input class="inp" id="rbx-co" autocomplete="organization" maxlength="120" placeholder="Your business name"></label>
+        <label style="display:flex;flex-direction:row;align-items:center;gap:8px;font-weight:400"><input type="checkbox" id="rbx-noco" style="width:auto;min-height:0;margin:0"> No company yet</label>` : ''}
+      ${need('interest') ? `<label>What do you want most?<select class="inp" id="rbx-int"><option value="">Choose…</option>${INTERESTS.map((x) => `<option>${esc(x)}</option>`).join('')}</select></label>` : ''}
+      ${need('industry') ? `<label>Industry<select class="inp" id="rbx-ind"><option value="">Choose…</option>${INDUSTRIES.map((x) => `<option>${esc(x)}</option>`).join('')}</select></label>` : ''}
+      ${need('password') ? pw('rbx-pw1', 'Password · at least 10 characters') : ''}
+      <div class="rbx-err" role="alert"></div>
+      <button type="submit" class="rbx-go">Save and answer</button>
+    </form>
+    <p class="rbx-tip" style="text-align:center">Your answer is kept. Free, as before.</p>`);
+  const nc = inner.querySelector('#rbx-noco'), co = inner.querySelector('#rbx-co');
+  if (nc && co) nc.addEventListener('change', () => { co.disabled = nc.checked; if (nc.checked) co.value = ''; });
+  inner.querySelector('.rbx-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const v = (id) => { const el = inner.querySelector('#' + id); return el ? el.value.trim() : ''; };
+    const f = {};
+    if (need('company')) { f.noCompany = !!(nc && nc.checked); f.company = v('rbx-co'); if (!f.noCompany && !f.company) return say(inner, 'Your company’s name, or tick “No company yet”.'); }
+    if (need('interest')) { f.interest = v('rbx-int'); if (!f.interest) return say(inner, 'Choose what you want most from the business.'); }
+    if (need('industry')) { f.industry = v('rbx-ind'); if (!f.industry) return say(inner, 'Choose your industry.'); }
+    if (need('password')) { const p = inner.querySelector('#rbx-pw1').value; if (p.length < 10) return say(inner, 'At least 10 characters, please.'); f.password = p; f.confirm = p; }
+    const go = inner.querySelector('.rbx-go'); go.disabled = true; go.textContent = 'Saving…'; say(inner, '');
+    try {
+      const A = await import('/account.js');
+      await A.complete(f);
+      close(); if (done) done();
+    } catch (ex) { say(inner, (ex && ex.message) || 'It did not save. Try again in a minute.'); go.disabled = false; go.textContent = 'Save and answer'; }
   });
 }
