@@ -159,7 +159,7 @@ async function reading() {
   const worst = total ? order.reduce((a, k) => (by[k] > by[a] ? k : a), order[0]) : 'self';
   const type = total <= 1 ? 'leader' : L[4] ? 'grinder' : 'hoper';
   const L1 = LEVELS4[0], di = DOMAINS.findIndex((d) => d.k === worst), one = L1.d[di];
-  remember('road4', { stage, worst, leaking: total, word: L1.word, letter: one.l, part: one.name });
+  remember('road4', { stage, worst, leaking: total, word: L1.word, letter: one.l, part: one.name, result: RESULTS[di] });
   count('road4', 'mirror_done');
   // The diamond: one corner per domain, pulled in by every leak.
   const pts = { self: [0, -1], people: [1, 0], work: [0, 1], market: [-1, 0] };
@@ -183,8 +183,8 @@ async function reading() {
       <p class="rtype">This week you sound like <a href="#types" data-show-type="${type}">${esc(TYPES[type].name)}</a>.</p>
     </div>
   </div>
-  <div class="rstart"><p class="mtag">Where your week one would start · ${esc(dname(worst))} · ${esc(L1.word)}, letter ${esc(one.l)}</p>
-    <h4>${esc(one.name)}</h4><ol><li><b>Tap.</b> ${plain(one.t.q)}</li><li><b>Slide.</b> ${esc(one.s.q)}</li></ol>
+  <div class="rstart"><p class="mtag">Where your week one would start · ${esc(dname(worst))}</p>
+    <h4>${esc(RESULTS[di])}</h4><ol><li><b>Tap.</b> ${plain(one.t.q)}</li><li><b>Slide.</b> ${esc(one.s.q)}</li></ol>
     <p class="rprom">By Sunday of week one: ${esc(L1.promise.charAt(0).toLowerCase() + L1.promise.slice(1))}</p>
     <div class="acts"><a class="cta" href="#join" data-join>Start week one on ${esc(dname(worst))}, free <span class="ar" aria-hidden="true">→</span></a><button type="button" class="ghost" data-again>Look again</button></div></div>`;
   result.querySelectorAll('[data-join]').forEach(wireJoin);
@@ -199,6 +199,10 @@ async function reading() {
 }
 /** A question from the levels file, as plain text (its emphasis kept as words). */
 const plain = (h) => esc(String(h).replace(/<[^>]+>/g, ''));
+/** Level one's promise, one result per part of the business, in order
+ *  (yourself, people, business, market): what a card leads with, so the
+ *  four-letter word stays a small label and never has to be decoded. */
+const RESULTS = LEVELS4[0].promise.replace(/\.$/, '').split(/,\s*/).map((x) => x.charAt(0).toUpperCase() + x.slice(1));
 
 // ── Two kinds of stuck ──────────────────────────────────────────────────────
 const TYPES = {
@@ -244,7 +248,7 @@ function drawDays() {
   $('#week-eyebrow').textContent = `Week one · ${L1.word} · ${L1.title}`;
   $('#days').innerHTML = L1.d.map((x, i) => { const k = DOMAINS[i].k, mine = k === week.dom && week.set;
     return `<li class="day${i === today ? ' on' : ''}" style="--dc:${DCOL[k]}">
-    <span class="lt" aria-hidden="true">${esc(x.l)}</span><span class="dk">${esc(DOMAINS[i].n)} · ${esc(x.name)}</span>
+    <span class="dk">${esc(DOMAINS[i].n)}</span><span class="res">${esc(RESULTS[i])}</span><span class="lbl">${esc(L1.word)} · ${esc(x.l)} for ${esc(x.name)}</span>
     ${mine ? '<span class="yours">Where your mirror points</span>' : ''}
     <p class="tq">${plain(x.t.q)}</p><p class="sq">Then slide: ${esc(x.s.q)}</p></li>`; }).join('');
 }

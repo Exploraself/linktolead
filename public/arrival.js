@@ -20,7 +20,7 @@ export function noteFor(a) {
     const d = DOMAINS.find((x) => x.k === a.worst);
     if (!d) return '';
     return a.leaking
-      ? `Your mirror said the business leaks most through <b>${esc(d.n)}</b>. ${a.letter && a.part ? `Level 01 starts you there: <b>${esc(a.word || 'SEED')}</b>, the ${esc(a.letter)} for <b>${esc(a.part)}</b>.` : 'Start level 01 there.'}`
+      ? `Your mirror said the business leaks most through <b>${esc(d.n)}</b>. ${a.result ? `Level 01 starts you there: <b>${esc(String(a.result).toLowerCase())}</b>.` : 'Start level 01 there.'}`
       : 'Your mirror held on all eight questions. Level 01 checks that against your calendar, not your memory.';
   }
   const h = Number(a.extraYear);
