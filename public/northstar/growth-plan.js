@@ -6,11 +6,13 @@
  * Blanks are runs of underscores (draw them as a line to write on).
  * "(day)" and "(date)" after a blank are hints, drawn small.
  * Step ids mgp-1 to mgp-21 are what a tick saves. Never renumber them.
- * plus.downloads: one product, The Leader's Growth Planner 2027. When its
- * PDF is in the Library, it gets a "file". */
+ * "item" is a Library key (functions/api/library.js): the plan itself (mgp)
+ * and plus.downloads (lgp, The Leader's Growth Planner 2027). Every download
+ * goes through /api/library?item=<key>&t=<token>, never the PDF directly. */
 (function () {
   window.GrowthPlan = {
     "name": "Massive Growth Plan",
+    "item": "mgp",
     "subtitle": "20 + 1 steps to accelerate your growth and win with grace",
     "tagline": "For leaders who are dreamers at heart, critics in the head, <i>realistic</i> sometimes, and always ready to serve.",
     "mantra": "Inform. Reform. Transform.",
@@ -312,6 +314,7 @@
       "downloads": [
         {
           "title": "The Leader’s Growth Planner 2027",
+          "item": "lgp",
           "text": "Your year, your months and 52 weeks. Each week, plan it on the left and hold your Sunday boardroom on the right: what you planned, what really happened, and your one move for the week ahead."
         }
       ],

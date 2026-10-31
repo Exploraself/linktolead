@@ -14,6 +14,7 @@ import { onRequestGet as plansGet } from '../functions/api/plans.js';
 import { onRequestGet as mGet } from '../functions/api/mentor.js';
 import worker, { ROUTES } from '../worker.js';
 import { growthDone, growthGroups } from '../public/mentor/dash.js';
+import { LIBRARY_ITEMS } from '../functions/api/library.js';
 import { fakeD1, fakeResend, post, get, tally } from './_d1.mjs';
 
 const { ok, done } = tally('growth');
@@ -59,13 +60,25 @@ ok(h.includes(`>${GP.lead}<`) && GP.moves.every((m) => h.includes(`<li>${m}</li>
 ok(GP.domains.every((d) => h.includes(`--c:${d.col}`) && h.includes(d.name) && h.includes(d.sub)), 'each domain in its colour, with its name and sub');
 ok(/class="gp-n">1</.test(h) && /class="gp-n">20</.test(h) && /class="gp-n">21</.test(h), 'steps numbered 1 to 21');
 ok(GP.plus.voices.every((v) => h.includes(v.name) && h.includes(v.q)), 'step 21: the four voices, name and question');
-const nDl = GP.plus.downloads.length, noFile = GP.plus.downloads.filter((d) => !d.file).length;
-ok(nDl >= 1 && GP.plus.downloads.every((d) => h.includes(d.title) && h.includes(d.text)), `step 21: its download${nDl > 1 ? 's' : ''}, title and text`);
-ok((h.match(/Coming soon to your Library/g) || []).length === noFile && (!noFile || h.includes(`href="${GP.plus.library}"`)), 'a download without a file: “Coming soon to your Library”, linked to the Library');
-const withFile = JSON.parse(JSON.stringify(GP)); withFile.plus.downloads.forEach((d, i) => { d.file = i ? undefined : '/library/planner-2027.pdf'; });
-withFile.plus.downloads.push({ title: 'A second', text: 'Without a file yet.' });
-const hf = GV.html(withFile, { done: {} });
-ok(hf.includes('href="/library/planner-2027.pdf"') && (hf.match(/Coming soon to your Library/g) || []).length === withFile.plus.downloads.length - 1, 'a download with a file links the file; the others still say coming soon');
+ok(GP.plus.downloads.length >= 1 && GP.plus.downloads.every((d) => h.includes(d.title) && h.includes(d.text)), 'step 21: its download, title and text');
+
+// ── The two PDFs: through /api/library, never the file (PR #97 put them in
+// the Library as mgp and lgp) ───────────────────────────────────────────────
+ok(GP.item === 'mgp' && GP.plus.downloads.map((d) => d.item).join() === 'lgp' && LIBRARY_ITEMS.mgp && LIBRARY_ITEMS.lgp, 'the plan is Library item mgp, the planner lgp, and both are in the Library');
+const lib = (k) => `/api/library?item=${encodeURIComponent(k)}&t=${encodeURIComponent('tok-123')}`;  // as A.libraryHref
+const hin = GV.html(GP, { done: {}, lib }), hout = GV.html(GP, { done: {} });
+const hrefs = (x) => [...x.matchAll(/<a [^>]*href="([^"]*)"/g)].map((m) => m[1]);
+ok(hin.includes('>Download the plan (PDF)</a>') && hin.indexOf('Download the plan (PDF)') < hin.indexOf('class="gp-dom'), 'the top of the section: “Download the plan (PDF)”');
+ok(hrefs(hin).includes('/api/library?item=mgp&amp;t=tok-123') && hrefs(hin).includes('/api/library?item=lgp&amp;t=tok-123') && (hin.match(/ download data-act="gp-dl"/g) || []).length === 2, 'signed in: the plan → /api/library?item=mgp&t=<token>, the planner → item=lgp');
+ok(!hout.includes('/api/library') && (hout.match(/data-act="gp-dl"/g) || []).length === 2 && !/ download data-act/.test(hout), 'signed out: no download link, each one opens the sign-in (data-act gp-dl)');
+ok(!/Coming soon/.test(hin + hout), 'no “Coming soon to your Library” any more');
+// Never a direct PDF link for these two, anywhere in the North Star.
+const direct = /\/library\/[^"'\s)]*\.pdf/;
+const northstar = ['public/northstar/index.html', 'public/northstar/app.js', 'public/northstar/growth.js', 'public/northstar/growth-plan.js'].map(read).join('\n');
+ok(!direct.test(northstar) && !direct.test(hin) && !direct.test(hout), 'the North Star never links /library/*.pdf directly');
+ok(![LIBRARY_ITEMS.mgp.file, LIBRARY_ITEMS.lgp.file].some((f) => northstar.includes(f) || hin.includes(f)), `neither ${LIBRARY_ITEMS.mgp.file} nor ${LIBRARY_ITEMS.lgp.file} is linked from the North Star`);
+ok(J.includes("case 'gp-dl': if (!signedIn()) { e.preventDefault(); menuSignin(); } return;") && J.includes('lib: signedIn() && A.libraryHref ? (k) => A.libraryHref(k) : null') && read('public/account.js').includes('export const libraryHref = (item) => `/api/library?item=${encodeURIComponent(item)}&t=${encodeURIComponent(token())}`'),
+  'app.js: signed in, the links are A.libraryHref (the token from ftb-token); signed out, a tap opens the North Star sign-in')
 const L = GV.line('The first time I keep it: ______________ (day). Next “________”.');
 ok(!L.includes('___') && (L.match(/class="gp-blank"/g) || []).length === 2 && L.includes('<small class="gp-hint">(day)</small>'), 'a run of ___ is a line to write on; (day) and (date) are small');
 ok(/<span class="gp-bw">“<span class="gp-blank"[^]*?<\/span><\/span>”\.<\/span>/.test(L), 'a quote round a blank stays on its line');

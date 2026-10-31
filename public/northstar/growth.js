@@ -3,7 +3,10 @@
  * never copied into code. app.js puts it at the end of the North Star results
  * and handles the ticks; the tests run these same functions in Node.
  *
- * GrowthView.html(plan, { done, signedIn }) → the whole section
+ * GrowthView.html(plan, { done, lib })      → the whole section; lib(key)
+ *                                             gives a Library download link
+ *                                             (/api/library), or is null
+ *                                             when signed out
  * GrowthView.line(text)                     → one line: runs of ___ become a
  *                                             line to write on; "(day)" and
  *                                             "(date)" are drawn small
@@ -25,6 +28,10 @@
 
   const ids = (plan) => [...plan.domains.flatMap((d) => d.steps.map((s) => s.id)), plan.plus.id];
 
+  /** A Library download: through /api/library when signed in (lib gives the
+   *  link); signed out, a plain link that app.js turns into the sign-in. */
+  const pdf = (item, text, lib, cls) => `<a class="${cls} no-print" href="${esc(lib ? lib(item) : '#gp-h')}"${lib ? ' download' : ''} data-act="gp-dl" data-v="${esc(item)}" data-f="gp-dl-${esc(item)}">${text}</a>`;
+
   function tick(step, at) {
     const on = !!at;
     return `<button type="button" class="gp-tick no-print" data-act="gp-tick" data-v="${esc(step.id)}" data-f="gp-${esc(step.id)}" aria-pressed="${on}"
@@ -36,7 +43,7 @@
       <p class="gp-truth"><i>${esc(step.truth)}</i></p>`;
 
   function html(plan, st) {
-    const done = (st && st.done) || {}, all = ids(plan), count = all.filter((id) => done[id]).length;
+    const done = (st && st.done) || {}, lib = (st && st.lib) || null, all = ids(plan), count = all.filter((id) => done[id]).length;
     let n = 0;
     const steps = plan.domains.map((d) => `<div class="gp-dom" style="--c:${esc(d.col)}" data-k="${esc(d.k)}">
       <div class="gp-dh"><h3 class="sf">${esc(d.name)}</h3><span class="gp-ds">${esc(d.sub)}</span></div>
@@ -51,11 +58,12 @@
         <ul class="gp-voices">${P.voices.map((v) => `<li><b class="sf">${esc(v.name)}</b><span>${esc(v.q)}</span></li>`).join('')}</ul>
         ${foot(plan, P, done[P.id])}
         <ul class="gp-dls">${P.downloads.map((d) => `<li><b class="sf">${esc(d.title)}</b><span>${esc(d.text)}</span>
-          ${d.file ? `<a class="gp-dl" href="${esc(d.file)}">Download</a>` : `<a class="gp-soon" href="${esc(P.library)}">Coming soon to your Library</a>`}</li>`).join('')}</ul>
+          ${d.item ? pdf(d.item, 'Download (PDF)', lib, 'gp-dl') : ''}</li>`).join('')}</ul>
       </li></ol></div>`;
     return `<div class="gp-head">
       <h2 class="sf" id="gp-h">${esc(plan.name)}</h2>
       <p class="gp-sub">${esc(plan.subtitle)}</p>
+      ${plan.item ? pdf(plan.item, 'Download the plan (PDF)', lib, 'gp-pdf') : ''}
       <p class="gp-tag">${plan.tagline}</p>
       <p class="gp-lead sf">${esc(plan.lead)}</p>
       <ol class="gp-moves">${plan.moves.map((m) => `<li>${esc(m)}</li>`).join('')}</ol>

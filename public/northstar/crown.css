@@ -717,7 +717,9 @@ body:not(.ns-p1done) .mbar{display:none !important}
 .gp-dls li{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid var(--line);border-radius:7px}
 .gp-dls b{font-size:19px;color:var(--ink)}
 .gp-dls span{font-size:14px;line-height:1.5;color:var(--muted)}
-.gp-dl,.gp-soon{align-self:flex-start;font-size:13.5px;font-weight:600;color:var(--goldink);text-underline-offset:4px}
+.gp-dl{align-self:flex-start;display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:600;color:var(--goldink);text-underline-offset:4px}
+.gp-pdf{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:5px;background:#D6BF8F;color:#0E1C2B !important;font-size:14.5px;font-weight:600;text-decoration:none}
+.gp-pdf:hover,.gp-pdf:focus-visible{background:#E6D3AA}
 @media(min-width:760px){
   .gp-head{padding:36px 34px}
   .gp-prog{flex-direction:row;align-items:center;gap:14px}.gp-bar{flex:1 1 auto}

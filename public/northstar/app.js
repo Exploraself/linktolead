@@ -153,13 +153,14 @@
     const r = await A.growthPlan();
     if (r && r.done) { GP_DONE = r.done; render(); }
   }
+  /** The North Star's own sign-in box ("Sign in to your account"). */
+  function menuSignin() {
+    UI.signinFor = 'menu'; UI.signin = ''; openGate('account'); render();
+    setTimeout(() => { const f = $('#g-email'); if (f && !f.value) f.focus(); else { const p = $('#si-pw-gate'); if (p) p.focus(); } }, 0);
+  }
   /** Tick or untick one step. Signed out: the sign-in box opens instead. */
   async function growthTick(id) {
-    if (!signedIn()) {
-      UI.signinFor = 'menu'; UI.signin = ''; openGate('account'); render();
-      setTimeout(() => { const f = $('#g-email'); if (f && !f.value) f.focus(); else { const p = $('#si-pw-gate'); if (p) p.focus(); } }, 0);
-      return;
-    }
+    if (!signedIn()) { menuSignin(); return; }
     const was = GP_DONE[id], on = !was;
     GP_DONE = { ...GP_DONE };
     if (on) GP_DONE[id] = new Date().toISOString(); else delete GP_DONE[id];
@@ -174,7 +175,11 @@
       toast(e && e.message ? e.message : 'That tick did not save. Try again in a minute.');
     }
   }
-  const pGrowth = () => (window.GrowthPlan && window.GrowthView ? window.GrowthView.html(window.GrowthPlan, { done: GP_DONE }) : '');
+  /* Its two PDFs (the plan, mgp; the planner, lgp) are study material: every
+   * download goes through /api/library with the founder's token (the same
+   * link as the Library, A.libraryHref), never the PDF itself. */
+  const pGrowth = () => (window.GrowthPlan && window.GrowthView
+    ? window.GrowthView.html(window.GrowthPlan, { done: GP_DONE, lib: signedIn() && A.libraryHref ? (k) => A.libraryHref(k) : null }) : '');
   /** What the account keeps: this whole state (so another device can carry
    *  on), plus the scores and choices the Account Plans are ordered by. */
   function payload() {
@@ -2326,6 +2331,8 @@
       case 'card-dl': cardOut(false); return;
       case 'plan-pdf': downloadPlan(t); return;
       case 'gp-tick': growthTick(v); return;
+      // Signed in, the link downloads; signed out, the sign-in opens instead.
+      case 'gp-dl': if (!signedIn()) { e.preventDefault(); menuSignin(); } return;
       case 'alloptions': { UI.opts = !UI.opts; const o = document.getElementById('s-options'); if (o) o.hidden = !UI.opts; render(); if (UI.opts && o) o.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); return; }
       case 'regate': fullAccount(); return;
       case 'account': {
