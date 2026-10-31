@@ -5,7 +5,7 @@
 
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { TIER_ORDER, holds, SECTIONS, LADDER, LIBRARY } from '../public/content.js';
-import { markup, items } from '../public/north/kit.js';
+import { markup, items } from '../public/north3/kit.js';
 import { ALL_STEP_IDS } from '../functions/_plans.js';
 import { onRequestGet as plansGet } from '../functions/api/plans.js';
 
@@ -37,7 +37,7 @@ for (const f of files('public')) {
 
 // Road 2, the North Star sales page (/compass/welcome-a, its old version A, is a
 // redirect to it now).
-const B = read('public/north/index.html');
+const B = read('public/north3/index.html');
 ok(B.includes('Your business, on paper.'), 'Road 2 has its headline');
 ok(B.includes('[PHOTO OF ALEXANDRU]'), 'photo placeholder kept');
 
@@ -48,7 +48,7 @@ ok(!Su.includes('[YOUR BOOKING LINK]') && (Su.match(/data-join/g) || []).length 
 ok(read('public/northstar/app.js').includes('[YOUR PRICE]'), 'Boardroom price placeholder kept');
 
 // Every North Star page carries the favicon and the share image.
-for (const f of ['public/northstar/index.html', 'public/northstar/summit/index.html', 'public/north/index.html']) {
+for (const f of ['public/northstar/index.html', 'public/northstar/summit/index.html', 'public/north3/index.html']) {
   const s = read(f);
   ok(s.includes('favicon.svg') && s.includes('og:image') && s.includes('twitter:card'), `${f}: favicon and share image`);
 }
@@ -59,20 +59,20 @@ ok(L.includes('<h1>What is your business <em>for?</em></h1>') && L.includes('You
 
 // The four domains are always named in full on screen: no SELF / PEOPLE /
 // WORK / MARKET labels, and no Archivo or Libre Caslon left on the sales pages.
-for (const f of ['public/northstar/index.html', 'public/north/index.html', 'public/road1/index.html']) {
+for (const f of ['public/northstar/index.html', 'public/north3/index.html', 'public/road1/index.html']) {
   const s = read(f);
   ok(!/>\s*(SELF|PEOPLE|WORK|MARKET|YOURSELF|BUSINESS)\s*</.test(s), `${f}: no short domain labels`);
   ok(!/LEAD YOURSELF<\/text>|LEAD THE MARKET<\/text>/.test(s), `${f}: no duplicate small domain lines`);
 }
-for (const f of ['public/north/index.html', 'public/north/sales.css']) {
+for (const f of ['public/north3/index.html', 'public/north3/sales.css']) {
   ok(!/Archivo|Caslon/.test(read(f)), `${f}: North Star fonts only`);
 }
 // Fonts load once, from this site: no Google Fonts, no old .ttf files.
-for (const f of ['public/road1/index.html', 'public/ground-plan/index.html', 'public/mentor/index.html', 'public/northstar/index.html', 'public/northstar/summit/index.html', 'public/north/index.html']) {
+for (const f of ['public/road1/index.html', 'public/ground-plan/index.html', 'public/mentor/index.html', 'public/northstar/index.html', 'public/northstar/summit/index.html', 'public/north3/index.html']) {
   const s = read(f);
   ok(s.includes('href="/assets/fonts.css"') && !s.includes('fonts.googleapis.com') && s.includes('rel="preload" href="/assets/fonts/newsreader.woff2"'), `${f}: fonts once, self-hosted, preloaded`);
 }
-for (const f of ['public/northstar/style.css', 'public/north/sales.css', 'public/style.css']) ok(!/\.ttf|googleapis/.test(read(f)), `${f}: no duplicate font source`);
+for (const f of ['public/northstar/style.css', 'public/north3/sales.css', 'public/style.css']) ok(!/\.ttf|googleapis/.test(read(f)), `${f}: no duplicate font source`);
 for (const d of ['self', 'people', 'work', 'market']) ok(!/n: '(Self|People|Work|Market)'/.test(read('public/content.js')), 'programme domain names in full');
 
 // PR 3: breathing space, the lab, then the dawn before The Summit.
@@ -125,15 +125,15 @@ ok(items(LIBRARY, null).tools[2].desc.startsWith('Short steps in your own order'
 for (const b of LIBRARY.books) ok(K.includes(`src="${b.cover}"`) && /loading="lazy" decoding="async"/.test(K) && K.includes('width="480" height="480"'), `${b.n}: real cover, lazy, sized`);
 ok((K.match(/data-gate class="gold-btn">Create my free account →/g) || []).length === 1, 'the closing button opens the account box (data-gate)');
 ok(!/<a\s/i.test(K), 'no links to other offers in the section');
-const SJ = read('public/north/sales.js');
+const SJ = read('public/north3/sales.js');
 ok(/kit\.querySelectorAll\('\[data-gate\]'\)\.forEach\(\(b\) => b\.addEventListener\('click', openGate\)\)/.test(SJ), 'the section’s buttons are wired to the same account box');
-ok(!/mailchimp/i.test(SJ + read('public/north/kit.js') + read('public/account-box.js') + read('public/northstar/app.js')), 'no Mailchimp code on the sales pages or the North Star');
-ok(read('public/north/kit.css').includes('prefers-reduced-motion') && read('public/north/kit.css').includes('overflow-x:auto'), 'kit.css: reduced motion, the shelf scrolls inside itself');
+ok(!/mailchimp/i.test(SJ + read('public/north3/kit.js') + read('public/account-box.js') + read('public/northstar/app.js')), 'no Mailchimp code on the sales pages or the North Star');
+ok(read('public/north3/kit.css').includes('prefers-reduced-motion') && read('public/north3/kit.css').includes('overflow-x:auto'), 'kit.css: reduced motion, the shelf scrolls inside itself');
 const T = await (await plansGet({ request: new Request('https://x/api/plans?total'), env: {} })).json();
 ok(T.ok && T.total === ALL_STEP_IDS.length, 'the step count comes from the live plans data');
 
 // Light and dark on every page: theme.js loads first, before any style.
-for (const f of ['public/ground-plan/index.html', 'public/road1/index.html', 'public/north/index.html', 'public/road3/index.html', 'public/northstar/index.html', 'public/northstar/summit/index.html', 'public/404.html', 'public/mentor/index.html']) {
+for (const f of ['public/ground-plan/index.html', 'public/road1/index.html', 'public/north3/index.html', 'public/road3/index.html', 'public/northstar/index.html', 'public/northstar/summit/index.html', 'public/404.html', 'public/mentor/index.html']) {
   const h = read(f);
   ok(h.indexOf('<script src="/theme.js"></script>') > 0 && h.indexOf('<script src="/theme.js"></script>') < h.indexOf('stylesheet'), `${f}: light and dark (theme.js before the styles)`);
 }

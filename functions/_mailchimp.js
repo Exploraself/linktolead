@@ -97,7 +97,7 @@ export function mailchimpState(env = {}) {
 }
 
 /** The Mailchimp tag for each sales page (the landing key stored on the
- *  profile): /road1/, /north/ (the North Star sales page) and /road3/ (the 12
+ *  profile): /road1/, /north3/ (the North Star sales page) and /road3/ (the 12
  *  Scrolls page). Founders tagged before the roads keep their old tags. */
 /** Which sales page a founder signed up on (Alexandru, 30 Oct 2026). The old
  *  names ('Landing - Road 1' …) are sent as inactive, so a founder whose tags

@@ -46,7 +46,7 @@ export function filter(students, { tile = 'all', q = '' } = {}, now = Date.now()
 
 /** Sign-ups per landing: Roads 1, 2 and 3, and the North Star box. Each
  *  row: all of them, the last 7 days, and how many used the full form. */
-export const LANDINGS = [['road1', 'Road 1 · /road1/'], ['road2', 'North · /north/'], ['road21', 'North 2 · /north2/'], ['road3', 'Road 3 · /road3/'], ['road4', 'Road 4 · /road4/'], ['compass', 'North Star box']];
+export const LANDINGS = [['road1', 'Road 1 · /road1/'], ['road2', 'North 3 · /north3/'], ['road21', 'North 2 · /north2/'], ['road3', 'Road 3 · /road3/'], ['road4', 'Road 4 · /road4/'], ['compass', 'North Star box']];
 export function byLanding(students, now = Date.now()) {
   return LANDINGS.map(([k, name]) => {
     const rows = (students || []).filter((s) => s.landing === k);

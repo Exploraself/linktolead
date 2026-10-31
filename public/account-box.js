@@ -1,7 +1,7 @@
 /* The account box on the sales pages: makes the free account and opens the
  * founder's Base Camp at /start, signed in at once.
  *
- *   'full'   (/north/, the North Star sales page, landing "road2"; /road1/,
+ *   'full'   (/north3/, the North Star sales page, landing "road2"; /road1/,
  *            landing "road1"): first name, surname, email, company (or "No
  *            company yet"), interest, industry, a password (required: at
  *            least 10 characters, typed twice), consent.
@@ -12,7 +12,7 @@
  * The consent box starts unticked; without it the account is still made, and
  * nothing is emailed but what the founder asks for. The landing page and the
  * utm_* tags the founder arrived with go with the sign-up. Loaded the first
- * time a box opens (/road1/, /north/, /road3/), then open() each time.
+ * time a box opens (/road1/, /north3/, /road3/), then open() each time.
  *
  * On /northstar (landing "compass", `stay`): a visitor from outside makes the
  * full account here, then stays on the North Star, signed in, with everything

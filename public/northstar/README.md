@@ -7,7 +7,7 @@ pages beside it. Plain HTML, CSS and JavaScript; no build, no dependencies.
 | --- | --- |
 | `/northstar` | The North Star: one continuous page; the menu scrolls to each section. |
 | `/northstar/summit` | The Summit, the top of Link to Lead ($1,989). |
-| `/north/` | Road 2, the North Star sales page: “Your business, on paper. Not in your head.” `/compass/welcome` and `/compass/welcome-a` redirect there. |
+| `/north3/` | Road 2, the North Star sales page: “Your business, on paper. Not in your head.” `/compass/welcome` and `/compass/welcome-a` redirect there. |
 
 ## Where the intelligence lives
 

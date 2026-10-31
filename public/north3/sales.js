@@ -163,7 +163,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
   const ctx = { val, RANGES, LADDER, PERCENT, posOf: SalesMath.posOf, redraw: (k) => redraw(k) };
   document.querySelectorAll('[data-edit]').forEach((span) => {
     span.setAttribute('role', 'button'); span.setAttribute('tabindex', '0'); span.title = 'Tap to type an exact number';
-    const open = () => import('/north/edit.js').then((m) => m.edit(span, ctx)).catch(() => {});
+    const open = () => import('/north3/edit.js').then((m) => m.edit(span, ctx)).catch(() => {});
     span.addEventListener('click', open);
     span.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('input')) { e.preventDefault(); open(); } });
   });
@@ -230,7 +230,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
   const engine = () => (window.CompassEngine ? Promise.resolve(window.CompassEngine) : new Promise((ok, no) => {
     const s = document.createElement('script'); s.src = '/northstar/engine.js'; s.onload = () => ok(window.CompassEngine); s.onerror = no; document.head.appendChild(s);
   }));
-  const fillVid = () => Promise.all([engine(), import('/north/lab.js')])
+  const fillVid = () => Promise.all([engine(), import('/north3/lab.js')])
     .then(([E, m]) => { labApi = m.fill(vid, { E, get: () => ({ ...val }), openGate }); }).catch(() => {});
   try {
     const io = new IntersectionObserver((es) => { if (es.some((x) => x.isIntersecting)) { io.disconnect(); fillVid(); } }, { rootMargin: '900px 0px' });
@@ -242,11 +242,11 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
    * steps. Its buttons open the same account box. */
   const kit = $('#kit-body');
   const kitCss = () => new Promise((ok) => {
-    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/north/kit.css';
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/north3/kit.css';
     l.onload = l.onerror = ok; document.head.appendChild(l);
   });
   const fillKit = () => Promise.all([
-    import('/north/kit.js'), import('/content.js'), kitCss(),
+    import('/north3/kit.js'), import('/content.js'), kitCss(),
     fetch('/api/plans?total').then((r) => r.json()).then((j) => j.total).catch(() => null),
   ]).then(([m, c, , steps]) => { m.fill(kit, c.LIBRARY, steps); kit.querySelectorAll('[data-gate]').forEach((b) => b.addEventListener('click', openGate)); }).catch(() => {});
   if (kit) {
@@ -257,7 +257,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
   }
 
   /* The account box. Its markup and code (account-box.js) load the first time
-   * it opens, so the page itself stays light. /north/#join opens it
+   * it opens, so the page itself stays light. /north3/#join opens it
    * (where /start sends visitors without an account): they came for the
    * Blueprint, so they land on Your Base Camp. A founder who taps a button
    * on this page came for the North Star, and lands on it (31 Oct). */

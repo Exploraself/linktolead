@@ -30,7 +30,7 @@ ok(/signupType === 'simple' && !me\.hasPassword/.test(src) && src.includes("'Cha
 ok(/key === 'Escape'/.test(src) && /!root\.contains\(e\.target\)/.test(src), 'Escape and a click outside close it');
 
 // One share preview everywhere.
-for (const f of ['public/road1/index.html', 'public/north/index.html', 'public/road3/index.html', 'public/ground-plan/index.html', 'public/northstar/index.html']) {
+for (const f of ['public/road1/index.html', 'public/north3/index.html', 'public/road3/index.html', 'public/ground-plan/index.html', 'public/northstar/index.html']) {
   const h = read(f);
   ok(h.includes('https://linktolead.exploraself.com/northstar/assets/og-image.png') && h.includes('assets/favicon.svg') && h.includes('summary_large_image'), `${f}: the North Star share image and icon`);
 }
