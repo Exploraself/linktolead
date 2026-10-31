@@ -1,15 +1,21 @@
-// The Massive Growth Plan's ticks, for the founder signed in. Each step is
-// ticked when its "Done when" is true.
+// The Massive Growth Plan, for the founder signed in: their ticks, and what
+// they write in its blanks.
 //
-// GET  ?t=token                      → { done: { id: done_at }, count, total }
-// POST { token, step, done }          tick (done true) or untick (done false),
-//                                     then the same answer as GET
+// GET  ?t=token                → { done: { step id: done_at }, count, total,
+//                                  words: { blank id: text } }
+// POST { token, step, done }   tick (done true) or untick (done false)
+// POST { token, blank, text }  write one blank; an empty text deletes it.
+//                              Full accounts only (missingOf, the rule from
+//                              api/complete.js): the plan is theirs to keep.
 //
-// Kept in plan_tick with the ids from public/northstar/growth-plan.js, and
-// counted apart from the Account Plans (functions/_growth.js).
+// Ticks stay in plan_tick, counted apart from the Account Plans; words in
+// growth_word. Writing every blank of a step never ticks it: the founder
+// ticks when its "Done when" is true. Blank and step ids are checked against
+// the server's own lists (functions/_growth.js).
 
-import { json, bad, db, now, accountTables, studentBy } from '../_shared.js';
-import { GROWTH_IDS, GROWTH_SQL } from '../_growth.js';
+import { json, bad, db, now, clean, accountTables, studentBy } from '../_shared.js';
+import { GROWTH_IDS, GROWTH_SQL, GROWTH_BLANK_IDS, BLANK_MAX } from '../_growth.js';
+import { missingOf } from '../_profile.js';
 
 /** This founder's Growth Plan ticks, and how many of the steps are done. */
 export async function growthTicks(D, studentId) {
@@ -19,13 +25,30 @@ export async function growthTicks(D, studentId) {
   return { done, count: Object.keys(done).length, total: GROWTH_IDS.length };
 }
 
+/** What this founder wrote: { blank id: text }, the plan's blanks only. */
+export async function growthWords(D, studentId) {
+  const rows = await D.prepare('SELECT blank_id, text FROM growth_word WHERE student_id = ?').bind(studentId).all();
+  const words = {};
+  for (const r of rows.results || []) if (GROWTH_BLANK_IDS.includes(r.blank_id)) words[r.blank_id] = r.text;
+  return words;
+}
+
+/** What the account still lacks to be full ([] when it is full). */
+async function missing(D, studentId) {
+  const [prof, auth] = await Promise.all([
+    D.prepare('SELECT company, interest, industry FROM student_profile WHERE student_id = ?').bind(studentId).first(),
+    D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(studentId).first(),
+  ]);
+  return missingOf({ ...(prof || {}), hasPassword: !!(auth && auth.pass_hash) });
+}
+
 export async function onRequestGet({ request, env }) {
   const D = db(env);
   if (!D) return bad('Not configured.', 503);
   const me = await studentBy(D, new URL(request.url).searchParams.get('t'));
   if (!me) return bad('Sign in to tick your Growth Plan.', 401);
   await accountTables(D);
-  return json({ ok: true, ...await growthTicks(D, me.id) });
+  return json({ ok: true, ...await growthTicks(D, me.id), words: await growthWords(D, me.id) });
 }
 
 export async function onRequestPost({ request, env }) {
@@ -34,6 +57,23 @@ export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); } catch { return bad('Could not read that.'); }
   const me = await studentBy(D, body.token);
+
+  // One blank written.
+  if (body.blank !== undefined) {
+    if (!me) return bad('Sign in to write in your Growth Plan.', 401);
+    if (!GROWTH_BLANK_IDS.includes(body.blank)) return bad('Unknown blank.');
+    await accountTables(D);
+    if ((await missing(D, me.id)).length) return bad('Complete your account to write in your Growth Plan.', 403);
+    const text = clean(body.text, BLANK_MAX), at = now();
+    if (!text) await D.prepare('DELETE FROM growth_word WHERE student_id = ? AND blank_id = ?').bind(me.id, body.blank).run();
+    else {
+      await D.prepare(`INSERT INTO growth_word (student_id, blank_id, text, updated_at) VALUES (?,?,?,?)
+        ON CONFLICT(student_id, blank_id) DO UPDATE SET text = excluded.text, updated_at = excluded.updated_at`).bind(me.id, body.blank, text, at).run();
+    }
+    return json({ ok: true, blank: body.blank, text, at: text ? at : null });
+  }
+
+  // One step ticked or unticked.
   if (!me) return bad('Sign in to tick your Growth Plan.', 401);
   if (!GROWTH_IDS.includes(body.step)) return bad('Unknown step.');
   await accountTables(D);

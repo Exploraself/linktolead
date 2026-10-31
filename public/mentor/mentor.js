@@ -9,7 +9,7 @@
 // one-founder view, one(id).
 
 import { STEP_KEYS, STEP_NAMES, STEP_SHORT, GROUPS, LANDING_SHORT, summary, filter, byLanding, groupOf, nextAction, funnel, today, levelSet, levelCount, launchpadDone, crossedOf,
-  told, toldTally, theirWords, SIDES, PAIN_NAMES, WANT_NAMES, VALUE_NAMES, TEAM_NAMES, growthDone, growthGroups } from './dash.js';
+  told, toldTally, theirWords, SIDES, PAIN_NAMES, WANT_NAMES, VALUE_NAMES, TEAM_NAMES, growthDone, growthGroups, growthWritten } from './dash.js';
 import { LEVELS4, wordOf } from '/levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
@@ -59,6 +59,23 @@ function gpList(s) {
   const G = growthGroups(window.GrowthPlan, growthDone(s));
   if (!G.length) return '';
   return `<div class="gpl">${G.map((g) => `<div><h4${g.col ? ` style="--c:${esc(g.col)}"` : ''}>${esc(g.name)}</h4><ul>${g.steps.map((x) => `<li><b style="font-weight:500">${x.n}. ${esc(x.title)}</b><span>${esc(day(x.at))}</span></li>`).join('')}</ul></div>`).join('')}</div>`;
+}
+/** What they wrote, under each step: their words in bold inside the plan's
+ *  own lines, the tick's date, and the date of the last change. */
+function gpWords(G) {
+  if (!G.length) return '<p class="tiny">Nothing written or ticked yet.</p>';
+  return `<div class="gpl">${G.map((g) => `<div><h4${g.col ? ` style="--c:${esc(g.col)}"` : ''}>${esc(g.name)}</h4>${g.steps.map((x) => `<div class="gpw">
+    <p class="gpw-t"><b>${x.n}. ${esc(x.title)}</b><span>${x.at ? 'ticked ' + esc(day(x.at)) : 'not ticked'}${x.changed ? ' · last change ' + esc(day(x.changed)) : ''}</span></p>
+    ${x.lines.some((l) => l.some((p) => p.w)) ? `<ul>${x.lines.map((l) => `<li>${l.map((p) => (p.w ? `<b>${esc(p.t)}</b>` : esc(p.t))).join('')}</li>`).join('')}</ul>` : ''}</div>`).join('')}</div>`).join('')}</div>`;
+}
+/** The drawer's Growth Plan, fetched when it opens (GET ?growth=id). */
+async function loadGrowthWords(id) {
+  const box = document.getElementById('gpw-' + id);
+  if (!box) return;
+  const r = await api('?growth=' + encodeURIComponent(id));
+  if (!r.ok || openId !== id || !document.getElementById('gpw-' + id)) return;
+  const done = Object.fromEntries((r.data.ticks || []).map((t) => [t.step_id, t.done_at]));
+  box.innerHTML = gpWords(growthWritten(window.GrowthPlan, done, r.data.words || []));
 }
 
 function gate(msg) {
@@ -319,7 +336,7 @@ function drawerHTML(s) {
       ${lv ? `<li>Blueprint: ${lv} of 12 levels${lp ? ' · Launchpad done' : ''}</li>` : ''}
       ${(s.tier || 'free') !== 'free' ? `<li>Step: ${esc(STEP_NAMES[s.tier] || s.tier)}</li>` : ''}
       ${s.paused ? '<li>Paused</li>' : ''}</ul></div>
-    ${Number(s.growth_ticks) ? `<div><p class="lbl">Growth plan · ${esc(gpCount(s))}</p>${gpList(s)}</div>` : ''}
+    ${Number(s.growth_ticks) || Number(s.growth_words) ? `<div><p class="lbl">Growth plan · ${esc(gpCount(s))}${Number(s.growth_words) ? ` · ${esc(plural(Number(s.growth_words), 'blank', 'blanks'))} written` : ''}</p><div id="gpw-${id}">${gpList(s)}</div></div>` : ''}
     <div><p class="lbl">All actions</p><div class="acts" style="margin-top:8px">
       <button class="btn" data-open="${id}">Open their work</button>
       <button class="btn" data-msg="${id}">Send a message</button>
@@ -344,6 +361,7 @@ function openDrawer(id, focus) {
   document.querySelectorAll('.ftable tr.on').forEach((r) => r.classList.remove('on'));
   const row = document.querySelector(`.ftable tr[data-drawer="${CSS.escape(id)}"]`); if (row) row.classList.add('on');
   if (focus) d.querySelector('[data-xdrawer]').focus();
+  if (Number(s.growth_ticks) || Number(s.growth_words)) loadGrowthWords(id);
 }
 function closeDrawer() {
   const d = $('#drawer');

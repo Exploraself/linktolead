@@ -178,6 +178,8 @@ export async function growthPlan() {
   try { const r = await fetch(`/api/growth-plan?t=${encodeURIComponent(t)}`); return r.ok ? await r.json() : null; } catch { return null; }
 }
 export const growthTick = (step, done) => post('/api/growth-plan', { token: token(), step, done });
+/** One blank of the Growth Plan written (full accounts); an empty text clears it. */
+export const growthWrite = (blank, text, keepalive = false) => post('/api/growth-plan', { token: token(), blank, text }, keepalive);
 
 /** "Change where I stand": the stage on the account, with the one it replaced. */
 export const setStage = (stage, from) => post('/api/stage', { token: token(), stage, from });

@@ -7,6 +7,8 @@
 // GET ?csv=1       the same list as a CSV file
 // GET ?student=id  one founder's work, climb, stage changes, library
 //                  downloads and their "Ask Alexandru" thread
+// GET ?growth=id   one founder's Massive Growth Plan: ticks and what they
+//                  wrote in its blanks, with the date of each change
 // POST { action }  reply (an answer in the thread, emailed as a letter) · tier (change step, and its step tags in Mailchimp) ·
 //                  pause · delete · signin-link · message · mc-test ·
 //                  mc-backfill. Every action is logged as an event; every
@@ -14,7 +16,7 @@
 
 import { json, bad, db, now, mentorOk, clean, looksLikeEmail, accountTables, newToken } from '../_shared.js';
 import { DOMAIN_STEPS, WHATIF_STEPS, ALL_STEP_IDS } from '../_plans.js';
-import { GROWTH_IDS, GROWTH_SQL } from '../_growth.js';
+import { GROWTH_IDS, GROWTH_SQL, GROWTH_BLANK_IDS } from '../_growth.js';
 import { sendLink } from './signin.js';
 import { send, origin, mailState } from '../_mail.js';
 import { mentorLetter, answerLetter } from '../_letters.js';
@@ -69,6 +71,7 @@ async function roster(D) {
       (SELECT COUNT(*) FROM plan_tick t WHERE t.student_id = s.id AND t.step_id NOT IN (${GROWTH_SQL})) AS plan_ticks,
       (SELECT COUNT(*) FROM plan_tick t WHERE t.student_id = s.id AND t.step_id IN (${GROWTH_SQL})) AS growth_ticks,
       (SELECT GROUP_CONCAT(t.step_id || '|' || t.done_at) FROM plan_tick t WHERE t.student_id = s.id AND t.step_id IN (${GROWTH_SQL})) AS growth_list,
+      (SELECT COUNT(*) FROM growth_word g WHERE g.student_id = s.id) AS growth_words,
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'library-download') AS library,
       (SELECT COUNT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS levels,
       (SELECT GROUP_CONCAT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS level_list,
@@ -135,6 +138,16 @@ export async function onRequestGet({ request, env }) {
   await accountTables(D);
   const url = new URL(request.url);
   const one = url.searchParams.get('student');
+
+  // The drawer's Growth Plan: ticks and words, nothing else.
+  const gp = url.searchParams.get('growth');
+  if (gp) {
+    const [ticks, words] = await Promise.all([
+      D.prepare(`SELECT step_id, done_at FROM plan_tick WHERE student_id = ? AND step_id IN (${GROWTH_SQL}) ORDER BY done_at`).bind(gp).all(),
+      D.prepare('SELECT blank_id, text, updated_at FROM growth_word WHERE student_id = ? ORDER BY updated_at').bind(gp).all(),
+    ]);
+    return json({ ok: true, ticks: ticks.results || [], words: (words.results || []).filter((w) => GROWTH_BLANK_IDS.includes(w.blank_id)) });
+  }
 
   if (one) {
     const me = await D.prepare('SELECT * FROM student WHERE id = ?').bind(one).first();
