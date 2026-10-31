@@ -28,7 +28,9 @@ const LAB = 'display: flex; flex-direction: column; gap: 6px; font-size: 13px; f
 
 // The show-password eye (30 Oct): shows or hides what was typed, one per field.
 const EYE = '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
-const pwInput = (id) => `<span class="ab-pw"><input class="inp" id="${id}" type="password" autocomplete="new-password" minlength="10" maxlength="200"><button type="button" class="ab-eye" data-eye="${id}" aria-pressed="false" aria-label="Show password">${EYE}</button></span>`;
+const COPY = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+// Show and copy (31 Oct): a hidden password cannot be copied, so each has a copy button.
+const pwInput = (id) => `<span class="ab-pw"><input class="inp" id="${id}" type="password" autocomplete="new-password" minlength="10" maxlength="200"><button type="button" class="ab-eye" data-eye="${id}" aria-pressed="false" aria-label="Show password">${EYE}</button><button type="button" class="ab-eye" data-copy="${id}" aria-label="Copy password">${COPY}</button></span>`;
 const STYLE = `.ab-pw{display:flex;gap:6px}.ab-pw .inp{flex:1;min-width:0}
 .ab-eye{flex:none;width:46px;min-height:46px;border:1px solid #D8CDBB;border-radius:5px;background:#FFFFFF;color:#121C2D;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0}
 .ab-eye[aria-pressed="true"]{background:#F3EBDA}.ab-eye:focus-visible{outline:2px solid #B4975F;outline-offset:2px}
@@ -81,7 +83,7 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
       <span id="gate-err" class="ab-err" role="alert" style="font-size: 13px; color: #B5512E; font-weight: 600"></span>
       <button type="submit" class="ab-go">${stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →'}</button>
       ${stay ? '' : '<button type="button" class="ab-no" data-close style="min-height: 44px; border-radius: 5px; border: 1px solid #D8CDBB; background: transparent; color: #121C2D; font-weight: 600; cursor: pointer">Not now · keep reading</button>'}
-      <a class="ab-link" href="/ground-plan/#signin" style="font-size: 13px; text-align: center; font-weight: 600; color: #7A5E26">Already have an account? Sign in</a>
+      <span style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap"><a class="ab-link" href="/ground-plan/#signin" style="font-size: 13px; font-weight: 600; color: #7A5E26">Already have an account? Sign in</a><button type="button" class="ab-link" data-reset style="border: 0; background: none; padding: 0; font: 600 13px Inter, Arial, sans-serif; color: #7A5E26; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">Forgot your password?</button></span>
     </form>
   </div>`;
 
@@ -103,8 +105,19 @@ function wire(gate, variant, landing) {
     b.setAttribute('aria-pressed', String(show));
     b.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
   }));
+  gate.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const f = gate.querySelector('#' + b.dataset.copy); if (!f || !f.value) return;
+    let ok = true; try { await navigator.clipboard.writeText(f.value); } catch { ok = false; }
+    b.textContent = ok ? '✓' : '—'; setTimeout(() => { b.innerHTML = COPY; }, 1400);
+  }));
   if (!gate.dataset.wired) {
-    gate.addEventListener('click', (e) => { if (e.target === gate) close(); });
+    // Closes only when a press starts AND ends outside the box (31 Oct): a
+    // drag or a text selection that ends outside never closes it.
+    let downOut = false;
+    gate.addEventListener('pointerdown', (e) => { downOut = e.target === gate; });
+    gate.addEventListener('click', (e) => { if (e.target === gate && downOut) close(); downOut = false; });
+    gate.addEventListener('click', (e) => { const b = e.target.closest('[data-reset]'); if (!b) return; e.preventDefault(); const em = gate.querySelector('#j-email'); import('/reset-box.js').then((m) => m.openReset({ email: em ? em.value.trim() : '' })); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !gate.hidden) close(); });
     gate.dataset.wired = '1';
   }
@@ -136,7 +149,7 @@ function wire(gate, variant, landing) {
       if (out.token) { if (ctx.stay) location.reload(); else location.href = after(); return; }
       if (ctx.onExisting) { close(); ctx.onExisting(email); return; }
       // An address that already has an account is never handed its key here.
-      $('#gate-err').innerHTML = 'This email already has an account. Sign in to open your plans. <a href="/ground-plan/#signin">Sign in →</a>';
+      $('#gate-err').innerHTML = 'This email already has an account. Sign in to open your plans. <a href="/ground-plan/#signin">Sign in →</a> or <button type="button" data-reset style="border: 0; background: none; padding: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer">reset your password</button>.';
     } catch (ex) {
       err(ex && ex.message && !/fetch|network|load failed|import/i.test(ex.message) ? ex.message : 'We could not reach the account service just now. Try again in a minute.');
     }

@@ -1543,7 +1543,7 @@
   /** Sign in: email and password; "Forgot your password? Email me a sign-in link" sends a one-time link. */
   const pSignin = (where) => `${pwInput('si-pw-' + where, 'Password', 'current-password')}
     <button type="button" data-act="pw-in" data-v="${where}" data-f="pw-in-${where}" ${UI.signinBusy ? 'disabled' : ''} style="min-height: 46px; border-radius: 5px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 520; cursor: pointer">Sign in</button>
-    <span style="display: flex; gap: 14px; flex-wrap: wrap">${linkBtn(where, 'Forgot your password? Email me a sign-in link')}</span>
+    <span style="display: flex; gap: 14px; flex-wrap: wrap"><button type="button" data-act="reset-open" data-v="${where}" data-f="reset-${where}" style="border: 0; background: none; padding: 6px 0; color: var(--goldink); font-size: 13px; font-weight: 520; text-decoration: underline; text-underline-offset: 4px; cursor: pointer">Forgot your password?</button></span>
     ${UI.signin ? `<span role="status" style="font-size: 13px; color: var(--ink)">${esc(UI.signin)}</span>` : ''}`;
   const pPassword = () => `<details${UI.pwmsg ? ' open' : ''}><summary style="cursor: pointer; font-weight: 520; color: var(--goldink); min-height: 32px">${UI.hasPw ? 'Change your password' : 'Set a password (optional)'}</summary>
     <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 8px; max-width: 420px">${pwInput('pw-1', 'Password', 'new-password')}${pwInput('pw-2', 'Confirm password', 'new-password')}
@@ -1787,6 +1787,7 @@
       case 'si-x': UI.signinFor = null; UI.signin = ''; closeGate(); return;
       case 'note-x': UI.note = ''; render(); return;
       case 'signin-gate': { const el = $('#g-email'); askLink(el ? el.value.trim() : '', 'gate'); return; }
+      case 'reset-open': { const el = $(v === 'gate' ? '#g-email' : '#ws-signin'); const email = el ? el.value.trim() : S.profile.email; import('/reset-box.js').then((m) => m.openReset({ email })).catch(() => askLink(email, v)); return; }
       case 'signin-ws': { const el = $('#ws-signin'); askLink(el ? el.value.trim() : '', 'ws'); return; }
       case 'signin-open': UI.signinOpen = true; render(); return;
       case 'pw-in': pwSignIn(v); return;

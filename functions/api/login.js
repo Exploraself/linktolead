@@ -11,7 +11,7 @@
 import { json, bad, db, now, clean, looksLikeEmail, accountTables } from '../_shared.js';
 import { verifyPassword, hashPassword, PAUSED } from '../_auth.js';
 
-const NO = 'That email and password do not match. If you are not sure, use “Forgot your password? Email me a sign-in link”.';
+const NO = 'That email and password do not match. Check them, or use “Forgot your password?” to get a reset link.';
 export const LIMIT = { email: 5, ip: 20, windowMs: 3600_000 };
 
 export async function onRequestPost({ request, env }) {

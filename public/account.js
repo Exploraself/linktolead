@@ -23,7 +23,11 @@ export const tz = () => { try { return Intl.DateTimeFormat().resolvedOptions().t
 async function post(path, body, keepalive = false) {
   const r = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...body, tz: tz() }), keepalive });
   const data = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(data.error || 'That did not go through.');
+  if (!r.ok) {
+    // A preview copy (*.pages.dev) has no account database: say so plainly.
+    if (r.status === 503 && typeof location !== 'undefined' && /pages\.dev$/.test(location.hostname)) throw new Error('This is a preview copy of the site, so accounts are switched off here. On linktolead.exploraself.com it works.');
+    throw new Error(data.error || 'That did not go through.');
+  }
   return data;
 }
 
