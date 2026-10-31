@@ -1,0 +1,371 @@
+<!doctype html>
+<!-- Road 2 (31 Oct 2026): the Blueprint page for the founder who builds,
+     polishes and rebuilds, and keeps the selling for later. Road 3's design
+     system (Newsreader + Inter, gold on dark, paper scrolls, the light/dark
+     switch), one offer only: the free Founder Launchpad. Every button opens
+     the FULL account form, landing "road2" (Mailchimp tag linktolead-road2),
+     and the founder lands on Your Base Camp. The only numbers on the page are
+     the founder's own: their taps and their two sliders, never saved or sent.
+     Until 31 Oct this address was the North Star sales page, now /north3/. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<script src="/theme.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>You built the house. You forgot the door. | The Founder’s Blueprint | ExploraSelf</title>
+<meta name="description" content="For founders who build, polish and rebuild, and keep the selling for later. Three free weeks to open the door and let the right people in.">
+<meta name="theme-color" content="#14100B">
+<link rel="icon" href="/northstar/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/northstar/assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/northstar/assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ExploraSelf">
+<meta property="og:title" content="You built the house. You forgot the door. | ExploraSelf">
+<meta property="og:description" content="For founders who build, polish and rebuild, and keep the selling for later. Three free weeks to open the door and let the right people in.">
+<meta property="og:url" content="https://linktolead.exploraself.com/road2/">
+<meta property="og:image" content="https://linktolead.exploraself.com/northstar/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="From founder to intentional leader. ExploraSelf.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="You built the house. You forgot the door. | ExploraSelf">
+<meta name="twitter:description" content="For founders who build, polish and rebuild, and keep the selling for later. Three free weeks to open the door and let the right people in.">
+<meta name="twitter:image" content="https://linktolead.exploraself.com/northstar/assets/og-image.png">
+<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts.css">
+<style>
+/* Road 3's system, as it is: dark and paper scrolls in turn, gold #B4975F,
+   champagne #D6BF8F, Newsreader for what is said, Inter for the rest. */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#14100B;color:#F3EBDA;font-family:'Inter',Arial,sans-serif;overflow-x:hidden}
+a{color:#D6BF8F}a:hover{color:#F6EEDD}
+button,input{font:inherit}
+:focus-visible{outline:3px solid #B4975F;outline-offset:3px}
+.skip{position:absolute;left:-999px;top:8px;background:#B4975F;color:#14100B;padding:10px 14px;z-index:90}
+.skip:focus{left:8px}
+.backbar{position:sticky;top:0;z-index:40;background:#B4975F;color:#14100B;text-align:center;padding:10px 16px;font:600 14px/1.3 'Inter',Arial,sans-serif}
+.backbar a{color:#14100B;text-decoration:underline;text-underline-offset:3px}
+.sc{padding:clamp(56px,8vw,96px) 16px;display:flex;align-items:center}
+.dk{background:#14100B;color:#F3EBDA}.lt{background:#F6EFE2;color:#1C1309}
+.in{width:100%;max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(22px,3vw,34px)}
+.row{display:flex;flex-wrap:wrap;gap:clamp(28px,5vw,64px);align-items:center}
+.row>.tx{flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.row>.vz{flex:1 1 340px;min-width:0;display:flex;justify-content:center}
+.h1{margin:0;font:500 clamp(40px,6.4vw,76px)/1.03 Newsreader,Georgia,serif;letter-spacing:-.02em}
+.h2{margin:0;font:500 clamp(30px,4.6vw,54px)/1.08 Newsreader,Georgia,serif;letter-spacing:-.015em}
+.h1 em,.h2 em{font-style:italic;font-weight:500;color:#B4975F}
+.lt .h2 em{color:#7A5C16}
+.sub{margin:0;font-size:clamp(17px,1.8vw,20px);line-height:1.55;color:#C9BDA6;max-width:46ch}
+.lt .sub{color:#5E5446}
+.cta{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:0 32px;border:0;background:#B4975F;color:#14100B;font:700 18px/1 'Inter',Arial,sans-serif;text-decoration:none;cursor:pointer}
+.cta:hover,.cta:focus-visible{background:#D6BF8F;color:#14100B}
+.go{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;margin-top:8px}
+.note{font-size:14.5px;letter-spacing:.04em;color:#B7AB93}
+.lt .note{color:#5E5446}
+.k{margin:0;font:700 11px/1.4 'Inter',Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#B4975F}
+.lt .k{color:#7A5C16}
+.mark{display:flex;align-items:center;gap:12px}
+.mark .k{font-size:10.5px}.nw{white-space:nowrap}
+.hero{min-height:min(760px,100svh);background:radial-gradient(90% 90% at 20% 0%,#2A2014 0%,#14100B 60%);border-bottom:3px solid #B4975F}
+.close{background:radial-gradient(80% 120% at 50% 0%,#2A2014 0%,#14100B 65%);text-align:center}
+.foot{background:#0E0B07;color:#9D917E;font-size:13px;line-height:1.7;padding:28px 16px 84px;text-align:center}
+#gate{position:fixed;inset:0;z-index:60;background:rgba(16,13,9,.65);display:flex;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}
+#gate[hidden]{display:none}
+
+/* 1 · The house. Antique gold lines on midnight navy, drawn line by line;
+   the front wall has no door until the door draws in and the light spills
+   out. Still (reduced motion, or no script): the door is already there. */
+.plate{width:100%;max-width:500px;background:#0E1C2B;border:1px solid rgba(180,151,95,.38);box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+.house{display:block;width:100%;height:auto}
+.house .ln{fill:none;stroke:#B4975F;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:0}
+.house .fine{stroke-width:1.2;opacity:.75}
+.house .grid{stroke:#B4975F;stroke-width:.5;opacity:.09}
+.house .door{stroke:#D6BF8F}
+.house .lit,.house .spill,.house .glow{opacity:1}
+.house .cap{font:600 8.5px 'Inter',Arial,sans-serif;letter-spacing:.24em;fill:#B4975F;opacity:.7}
+@media (prefers-reduced-motion:no-preference){
+  .house.play .ln{animation:draw .8s cubic-bezier(.45,.05,.3,1) var(--d,0s) both}
+  .house.play .cap{animation:fade 1s ease 1.2s both}
+  .house.wait .ln,.house.wait .cap{animation-play-state:paused}
+  .house.play .door{animation:none;transition:stroke-dashoffset 1s cubic-bezier(.45,.05,.3,1),opacity .15s}
+  .house.play .lit,.house.play .spill,.house.play .glow{transition:opacity 1.4s ease .7s}
+  .house.play:not(.open) .door{stroke-dashoffset:1;opacity:0}
+  .house.play:not(.open) .lit,.house.play:not(.open) .spill,.house.play:not(.open) .glow{opacity:0}
+  @keyframes draw{0%{stroke-dashoffset:1;opacity:0}6%{opacity:1}100%{stroke-dashoffset:0;opacity:1}}
+  @keyframes fade{from{opacity:0}}
+}
+
+/* 2 · The mirror: six cards to tap; the line under them reads the count. */
+.taps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
+.tap{width:100%;height:100%;min-height:104px;display:flex;gap:14px;align-items:flex-start;text-align:left;padding:20px;background:#FFFDF7;color:#1C1309;border:1.5px solid #DFD3B8;cursor:pointer;font:500 18.5px/1.35 Newsreader,Georgia,serif;transition:background .2s,border-color .2s}
+.tap:hover{border-color:#B4975F}
+.tap i{flex:none;width:24px;height:24px;margin-top:1px;border-radius:50%;border:1.5px solid #B4975F;display:flex;align-items:center;justify-content:center}
+.tap i svg{width:14px;height:14px;opacity:0}
+.tap[aria-pressed="true"]{background:#1C1309;color:#F3EBDA;border-color:#1C1309}
+.tap[aria-pressed="true"] i{background:#B4975F;border-color:#B4975F}
+.tap[aria-pressed="true"] i svg{opacity:1}
+.read{margin:0;min-height:2.9em;padding-top:20px;border-top:3px solid #B4975F;max-width:40ch;font:500 clamp(21px,2.4vw,27px)/1.4 Newsreader,Georgia,serif}
+.read b{font-weight:600;color:#7A5C16}
+
+/* 3 · The reframe: three things that move a business now. */
+.three{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
+.three li{padding:24px 22px;border:1px solid #3A3022;background:#1E1710;display:flex;flex-direction:column;gap:10px}
+.three b{font:500 23px/1.2 Newsreader,Georgia,serif;color:#D6BF8F}
+.three span{font-size:16px;line-height:1.5;color:#C9BDA6}
+
+/* 4 · The cost: two sliders, the founder's own week. */
+.week{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:18px 40px;padding:26px 24px;background:#FFFDF7;border:1px solid #DFD3B8}
+.sl{display:flex;flex-direction:column;gap:12px}
+.sl label{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font:600 15px/1.35 'Inter',Arial,sans-serif}
+.sl output{flex:none;font:500 30px/1 Newsreader,Georgia,serif;color:#7A5C16}
+.sl output small{font:600 12px 'Inter',Arial,sans-serif;letter-spacing:.06em;color:#5E5446;margin-left:4px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:44px;margin:0;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:6px;background:linear-gradient(90deg,#B4975F var(--p,0%),#E6DCC5 var(--p,0%))}
+input[type=range]::-moz-range-track{height:6px;background:#E6DCC5}
+input[type=range]::-moz-range-progress{height:6px;background:#B4975F}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;margin-top:-11px;border-radius:50%;background:#1C1309;border:3px solid #B4975F}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#1C1309;border:3px solid #B4975F}
+.sl .ends{display:flex;justify-content:space-between;font-size:12.5px;color:#7D7262;margin-top:-8px}
+.said{display:flex;flex-direction:column;gap:10px;max-width:48ch}
+.said p{margin:0}
+.said .wk{font:600 16px/1.5 'Inter',Arial,sans-serif;color:#5E5446}
+.said .hit{font:500 clamp(22px,2.6vw,30px)/1.3 Newsreader,Georgia,serif}
+.said .ask{font:italic 500 clamp(19px,2vw,23px)/1.4 Newsreader,Georgia,serif;color:#7A5C16}
+
+/* 5 · What the three weeks work toward. */
+.toward{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
+.toward li{display:flex;flex-direction:column;gap:14px;padding:24px 22px;border:1px solid #3A3022;background:#1E1710;font:500 20px/1.35 Newsreader,Georgia,serif}
+.toward svg{width:34px;height:34px;fill:none;stroke:#B4975F;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* 6 · The Founder Launchpad, three free weeks. */
+.weeks{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
+.weeks li{display:flex;flex-direction:column;gap:12px;padding:24px 22px;background:#FFFDF7;border:1px solid #DFD3B8}
+.weeks .n{width:46px;height:46px;border-radius:50%;background:#B4975F;color:#14100B;display:flex;align-items:center;justify-content:center;font:500 21px/1 Newsreader,Georgia,serif}
+.weeks .t{margin:0;font:700 11px/1.4 'Inter',Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#7A5C16}
+.weeks b{font:500 23px/1.2 Newsreader,Georgia,serif}
+.weeks span{font-size:16px;line-height:1.55;color:#5E5446}
+.rule{margin:0;padding-top:20px;border-top:3px solid #B4975F;max-width:44ch;font:500 clamp(19px,2.2vw,24px)/1.45 Newsreader,Georgia,serif}
+
+/* 7 · The guide. */
+.guide{display:flex;flex-wrap:wrap;gap:clamp(28px,5vw,56px);align-items:center}
+.guide img{flex:1 1 300px;min-width:0;max-width:460px;width:100%;height:auto;aspect-ratio:5/4;object-fit:cover;filter:saturate(.85) contrast(1.02);border:1px solid #3A3022}
+.guide .tx{flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.guide .story{margin:0;font-size:clamp(17px,1.8vw,19px);line-height:1.65;color:#C9BDA6;max-width:52ch}
+.guide .end{margin:0;font:italic 500 clamp(24px,3vw,32px)/1.25 Newsreader,Georgia,serif;color:#D6BF8F}
+
+/* 8 · Four honest answers. */
+.qa{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px}
+.qa li{display:flex;flex-direction:column;gap:10px;padding:24px 22px;background:#FFFDF7;border:1px solid #DFD3B8}
+.qa q{font:500 22px/1.25 Newsreader,Georgia,serif;quotes:"“" "”"}
+.qa span{font-size:16px;line-height:1.55;color:#5E5446}
+
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Light (public/theme.js): the dark scrolls become a warm second paper, so
+   the page still alternates; gold turns a shade deeper to keep its contrast.
+   The house stays a drawing on navy in both lights. */
+:root[data-theme="light"] body{background:#F6EFE2;color:#1C1309}
+:root[data-theme="light"] a{color:#7A5C16}:root[data-theme="light"] a:hover{color:#1C1309}
+:root[data-theme="light"] .dk{background:#ECE2CC;color:#1C1309}
+:root[data-theme="light"] .hero{background:radial-gradient(90% 90% at 20% 0%,#FFF8EA 0%,#ECE2CC 60%)}
+:root[data-theme="light"] .dk .h1 em,:root[data-theme="light"] .dk .h2 em,:root[data-theme="light"] .dk .k{color:#7A5C16}
+:root[data-theme="light"] .dk .sub,:root[data-theme="light"] .dk .note{color:#5E5446}
+:root[data-theme="light"] .three li,:root[data-theme="light"] .toward li{background:#FFFDF7;border-color:#DFD3B8}
+:root[data-theme="light"] .three b{color:#7A5C16}:root[data-theme="light"] .three span{color:#5E5446}
+:root[data-theme="light"] .toward svg{stroke:#7A5C16}
+:root[data-theme="light"] .guide img{border-color:#DFD3B8}
+:root[data-theme="light"] .guide .story{color:#5E5446}:root[data-theme="light"] .guide .end{color:#7A5C16}
+:root[data-theme="light"] .close{background:radial-gradient(80% 120% at 50% 0%,#FFF8EA 0%,#ECE2CC 65%)}
+:root[data-theme="light"] .foot{background:#E3D8C1;color:#5E5446}
+:root[data-theme="light"] .foot strong{color:#1C1309!important}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="backbar" id="backbar" hidden><a href="/ground-plan/#home">Go to your Base Camp →</a></div>
+<main id="main">
+
+  <!-- 1 · HERO -->
+  <section class="sc dk hero">
+    <div class="in">
+      <div class="row">
+        <div class="tx">
+          <div class="mark"><svg width="26" height="26" viewBox="0 0 34 34" aria-hidden="true"><rect x="7" y="7" width="20" height="20" transform="rotate(45 17 17)" fill="none" stroke="#B4975F" stroke-width="1.6"></rect><rect x="13" y="13" width="8" height="8" transform="rotate(45 17 17)" fill="#B4975F"></rect></svg><p class="k">The Founder’s Blueprint · <span class="nw">Link to Lead</span></p></div>
+          <h1 class="h1">You built the house. <em>You forgot the door.</em></h1>
+          <p class="sub">For founders who build, polish and rebuild, and keep the selling for later. Three free weeks to open the door and let the right people in.</p>
+          <div class="go"><button type="button" class="cta" data-join id="hero-go">Start free tonight</button><span class="note">Free · no card · start tonight</span></div>
+        </div>
+        <div class="vz">
+          <div class="plate">
+            <svg class="house" id="house" viewBox="0 0 480 380" role="img" aria-label="A house drawn in gold lines: walls, roof and windows, built with care. Then a door is drawn in the front wall and warm light spills out of it.">
+              <defs>
+                <linearGradient id="spill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D6BF8F" stop-opacity=".55"/><stop offset="1" stop-color="#D6BF8F" stop-opacity="0"/></linearGradient>
+                <radialGradient id="glow" cx="50%" cy="60%" r="50%"><stop offset="0" stop-color="#D6BF8F" stop-opacity=".45"/><stop offset="1" stop-color="#D6BF8F" stop-opacity="0"/></radialGradient>
+                <linearGradient id="lit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E9D7AE"/><stop offset="1" stop-color="#D6BF8F"/></linearGradient>
+              </defs>
+              <path class="grid" d="M0 40H480M0 80H480M0 120H480M0 160H480M0 200H480M0 240H480M0 280H480M0 320H480M0 360H480M40 0V380M80 0V380M120 0V380M160 0V380M200 0V380M240 0V380M280 0V380M320 0V380M360 0V380M400 0V380M440 0V380"/>
+              <!-- The light, behind the lines: a glow round the door, the opening, the spill on the ground. -->
+              <ellipse class="glow" cx="240" cy="270" rx="110" ry="80" fill="url(#glow)"/>
+              <path class="spill" d="M215 304 H265 L338 372 H142 Z" fill="url(#spill)"/>
+              <path class="lit" d="M215 304 V226 H265 V304 Z" fill="url(#lit)"/>
+              <!-- The house, line by line. -->
+              <path class="ln fine" pathLength="1" style="--d:0s" d="M24 304 H456"/>
+              <path class="ln" pathLength="1" style="--d:.12s" d="M112 304 V178"/>
+              <path class="ln" pathLength="1" style="--d:.22s" d="M368 304 V178"/>
+              <path class="ln" pathLength="1" style="--d:.38s" d="M92 186 L240 76 L388 186"/>
+              <path class="ln fine" pathLength="1" style="--d:.6s" d="M112 178 H368"/>
+              <path class="ln" pathLength="1" style="--d:.72s" d="M318 128 V88 H342 V145"/>
+              <path class="ln" pathLength="1" style="--d:.82s" d="M136 206 H186 V252 H136 Z"/>
+              <path class="ln fine" pathLength="1" style="--d:1s" d="M161 206 V252 M136 229 H186"/>
+              <path class="ln" pathLength="1" style="--d:.9s" d="M294 206 H344 V252 H294 Z"/>
+              <path class="ln fine" pathLength="1" style="--d:1.08s" d="M319 206 V252 M294 229 H344"/>
+              <path class="ln fine" pathLength="1" style="--d:1.05s" d="M226 140 a14 14 0 1 1 28 0 a14 14 0 1 1 -28 0"/>
+              <!-- The door: missing until it is drawn. -->
+              <path class="ln door" pathLength="1" d="M215 304 V226 H265 V304"/>
+              <path class="ln door fine" pathLength="1" d="M215 226 L201 234 V312 L215 304"/>
+              <path class="ln door fine" pathLength="1" d="M205 312 H275"/>
+              <text class="cap" x="24" y="30">FRONT ELEVATION</text>
+            </svg>
+            <!-- Drawn when it comes into view (on a phone it sits below the
+                 button); the door follows 2.5 s later, or at once when the
+                 founder reaches for the button (page.js). Reduced motion: the
+                 finished drawing, door and light, and nothing moves. -->
+            <script>(function(){var h=document.getElementById('house');try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;}catch(e){return;}h.classList.add('play','wait');function go(){if(!h.classList.contains('wait'))return;h.classList.remove('wait');setTimeout(function(){h.classList.add('open');},2500);}if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){if(es[0].isIntersecting){io.disconnect();go();}},{threshold:.35});io.observe(h);}else go();})();</script>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · THE MIRROR -->
+  <section class="sc lt" id="mirror">
+    <div class="in">
+      <p class="k">Does this sound like your week?</p>
+      <h2 class="h2">Tap what’s true.<br> <em>Nobody sees it but you.</em></h2>
+      <ul class="taps" aria-label="Six things that may be true for you">
+        <li><button type="button" class="tap" aria-pressed="false"><i><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.5" fill="none" stroke="#14100B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>I have rewritten the same page more times than I have asked someone to buy.</button></li>
+        <li><button type="button" class="tap" aria-pressed="false"><i><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.5" fill="none" stroke="#14100B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>I know my subject better than people who earn more from it.</button></li>
+        <li><button type="button" class="tap" aria-pressed="false"><i><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.5" fill="none" stroke="#14100B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>Every name, decision and detail still waits for me.</button></li>
+        <li><button type="button" class="tap" aria-pressed="false"><i><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.5" fill="none" stroke="#14100B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>My best hours go to the screen, not to the people who would pay.</button></li>
+        <li><button type="button" class="tap" aria-pressed="false"><i><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.5" fill="none" stroke="#14100B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>The thing I sell most still has no price I say out loud.</button></li>
+        <li><button type="button" class="tap" aria-pressed="false"><i><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.5l2.6 2.6L11 4.5" fill="none" stroke="#14100B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>I work late because the day went to things anyone could do.</button></li>
+      </ul>
+      <p class="read" id="mirror-read" aria-live="polite">You’re closer than you think. Three weeks can open the door.</p>
+    </div>
+  </section>
+
+  <!-- 3 · THE REFRAME -->
+  <section class="sc dk">
+    <div class="in">
+      <h2 class="h2">Building feels like progress.<br> <em>A yes is progress.</em></h2>
+      <p class="sub" style="max-width: 54ch">You can make the product better forever. It will not be bought until someone is asked. What moves the business now is not more building. It is a number, a sentence and a conversation.</p>
+      <ul class="three">
+        <li><b>Your number</b><span>What one sale leaves you.</span></li>
+        <li><b>Your sentence</b><span>Your offer, in your customer’s words.</span></li>
+        <li><b>Your conversations</b><span>Three asks a week. A yes and a no both count.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 4 · THE COST -->
+  <section class="sc lt" id="cost">
+    <div class="in">
+      <h2 class="h2">Last week, <em>where did your hours go?</em></h2>
+      <div class="week">
+        <div class="sl">
+          <label for="h-build">Hours building, polishing, fixing <output id="o-build" for="h-build">0<small>h</small></output></label>
+          <input type="range" id="h-build" min="0" max="80" step="1" value="0" aria-valuetext="0 hours">
+          <div class="ends" aria-hidden="true"><span>0</span><span>80</span></div>
+        </div>
+        <div class="sl">
+          <label for="h-sell">Hours talking to people who could buy <output id="o-sell" for="h-sell">0<small>h</small></output></label>
+          <input type="range" id="h-sell" min="0" max="20" step="1" value="0" aria-valuetext="0 hours">
+          <div class="ends" aria-hidden="true"><span>0</span><span>20</span></div>
+        </div>
+      </div>
+      <div class="said" id="cost-said" aria-live="polite">
+        <p class="wk" id="cost-hint">Slide each one to last week’s real hours.</p>
+        <p class="wk" id="cost-week" hidden></p>
+        <p class="hit" id="cost-hit" hidden></p>
+        <p class="ask" id="cost-ask" hidden>If next month looks the same, what will you have built, and who will have paid for it?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · WHAT THE THREE WEEKS WORK TOWARD -->
+  <section class="sc dk">
+    <div class="in">
+      <h2 class="h2">What the three weeks <em>work toward.</em></h2>
+      <ul class="toward">
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Evenings back, because the day goes to what only you can do.</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12.5V4h8.5L21 13.5 13.5 21z"/><circle cx="7.5" cy="8" r="1.5"/></svg>A price you say out loud without flinching.</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h11v8H9l-4 3v-3H4z"/><path d="M15 9h5v8h-1v3l-4-3h-4v-2"/></svg>Conversations every week with people who need what you built.</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 11h7M9 14.5h7M9 18h4"/></svg>A business that runs on paper, not only in your head.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6 · THE FIRST STEP IS SMALL (levels 1–3 of public/levels-v4.js) -->
+  <section class="sc lt" id="launchpad">
+    <div class="in">
+      <p class="k">The first step is small</p>
+      <h2 class="h2">The Founder Launchpad.<br> <em>Three free weeks.</em></h2>
+      <ol class="weeks">
+        <li><span class="n">1</span><p class="t">Week 1</p><b>What you believe</b><span>One old rule tested, one task handed over, your enough as a number, three people asked to buy.</span></li>
+        <li><span class="n">2</span><p class="t">Week 2</p><b>How you read it</b><span>One event written as facts, one person asked instead of judged, your five numbers read, one customer signal tested.</span></li>
+        <li><span class="n">3</span><p class="t">Week 3</p><b>What you feel</b><span>One feeling named under the stress, one new first reaction, a storm rule written, one client’s fear in their own words.</span></li>
+      </ol>
+      <p class="rule">Every step names what to open, what to count and what to write. You fill in the blanks. The answers are yours.</p>
+      <div class="go"><button type="button" class="cta" data-join>Start free tonight</button><span class="note">Free · no card · start tonight</span></div>
+    </div>
+  </section>
+
+  <!-- 7 · THE GUIDE -->
+  <section class="sc dk">
+    <div class="in">
+      <div class="guide">
+        <img src="/cabinet/alexandru.jpg" alt="Alexandru Cojocari" width="640" height="512" loading="lazy">
+        <div class="tx">
+          <h2 class="h2" style="font-size: clamp(28px,3.6vw,42px)">Alexandru and the team <em>have walked this road.</em></h2>
+          <p class="story">Alexandru’s first business made kitchens and wardrobes to measure. The work was good. The money side was not, and the business closed. ExploraSelf is built on that lesson: the craft is half of it. The other half is the door.</p>
+          <p class="end">Ambition is good — let’s give it a road.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · FOUR HONEST ANSWERS -->
+  <section class="sc lt">
+    <div class="in">
+      <h2 class="h2">Four honest <em>answers.</em></h2>
+      <ul class="qa">
+        <li><q>I have no time.</q><span>Each step names one thing to open, count and write. Start tonight with the first one.</span></li>
+        <li><q>I need clients, not leadership.</q><span>Lead the market is one of the four domains, and in week 1 you ask three people to buy.</span></li>
+        <li><q>I tried coaching. It was talk.</q><span>Your own numbers are the only standard here. No grading.</span></li>
+        <li><q>Is this for someone like me?</q><span>If you tapped two or more cards above, it was written for you.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 9 · FINAL CALL -->
+  <section class="sc dk close">
+    <div class="in" style="align-items: center">
+      <h2 class="h2">Open the door <em>tonight.</em></h2>
+      <p class="sub" style="text-align: center">Start free. When you’re ready, one hour with Alexandru opens the next two weeks.</p>
+      <div class="go" style="justify-content: center"><button type="button" class="cta" data-join>Start free tonight</button><span class="note">Free · no card · start tonight</span></div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot"><strong style="color: #C9BCA4">ExploraSelf</strong> · A Good People Company · Lead yourself. Grow your business.<br>
+<a href="/ground-plan/#signin">Sign in</a></footer>
+
+<!-- The full account form (/account-box.js), loaded the first time a button
+     opens it. -->
+<div id="gate" hidden></div>
+<script type="module" src="/road2/page.js"></script>
+</body>
+</html>
