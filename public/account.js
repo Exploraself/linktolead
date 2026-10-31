@@ -107,6 +107,9 @@ export async function login(email, password) {
   return out;
 }
 
+/** The profile picture: a small square data: URL, or '' to remove it. */
+export const setAvatar = (image) => post('/api/avatar', { token: token(), image });
+
 /** Change the password, once signed in. */
 export const setPassword = (password, confirm) => post('/api/password', { token: token(), password, confirm });
 

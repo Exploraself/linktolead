@@ -935,15 +935,39 @@
   function pPeople(c) {
     const T = S.p2.team, R = T ? p2Read() : null;
     const card = (q, k) => { const a = S.p2.ans[q.id];
-      return `<div class="p2q card" id="p2-${q.id}">
+      return `<div class="p2q card${p2At() === k + 1 ? ' cur' : ''}" id="p2-${q.id}">
         <span class="eb">${String(k + 1).padStart(2, '0')} · ${esc(q.short)}</span>
         <h3 class="sf" id="p2t-${q.id}">${esc(q.text)}</h3><p class="p2p">${esc(q.prompt)}</p>
         <div class="p2opts" role="group" aria-labelledby="p2t-${q.id}">${E.ANSWERS.map(([label, sub], v) => `<button type="button" class="nsb-o" data-act="p2ans" data-q="${q.id}" data-v="${v}" data-f="p2-${q.id}-${v}" aria-pressed="${a === v}"><span><b>${label}</b> <span>· ${sub}</span></span></button>`).join('')}</div>
         ${Number.isInteger(a) ? `<p class="p2note pop"><small>${a < 2 ? 'Your next step' : 'Keep going'}</small>${esc(a < 2 ? q.lo : q.hi)}</p>` : ''}</div>`; };
-    return `<div class="card p2team" id="p2-team"><h3 class="sf" id="p2team-h">First: who does the work with you today?</h3>
+    const n2 = T ? 1 + R.qs.length : 7, d2 = (T ? 1 : 0) + (T ? R.qs.filter((q) => Number.isInteger(S.p2.ans[q.id])).length : 0), at = p2At();
+    return `<div class="nsq-start p2-start" role="group" aria-label="Part 2, Your people">
+      <span class="eb">Part 2 · Your people</span>
+      <b class="sf">${d2 ? `${d2} of ${n2} answered.` : `${n2} quick questions.`} <span class="sfi">One per screen.</span></b>
+      <span>${d2 ? 'Pick up where you left off.' : 'Your customers, and the people who do the work with you.'}</span>
+      <button type="button" class="go" data-act="p2-full" data-f="p2-full">${d2 ? 'Continue' : 'Start'} <span class="arr" aria-hidden="true">→</span></button></div>
+    <div class="p2nav" aria-live="polite"><span>Part 2 · Question ${Math.min(at + 1, n2)} of ${n2}</span><button type="button" class="nsq-x" data-act="p2-exit" aria-label="Close the questions">×</button>
+      <i class="p2seg">${Array.from({ length: n2 }, (_, k) => `<b class="${k < at ? 'done' : k === at ? 'now' : ''}"></b>`).join('')}</i></div>
+    <div class="card p2team${at === 0 ? ' cur' : ''}" id="p2-team"><h3 class="sf" id="p2team-h">First: who does the work with you today?</h3>
         <div class="p2opts" role="group" aria-labelledby="p2team-h">${M.P2.team.map(([id, t, sub]) => `<button type="button" class="nsb-o" data-act="p2team" data-v="${id}" data-f="p2team-${id}" aria-pressed="${T === id}"><span><b>${t}</b> <span>· ${sub}</span></span></button>`).join('')}</div></div>
       ${T ? `<span class="eb p2grp">${S.mode === 'yes' ? 'Your customers' : 'Your first customers'}</span>${R.cq.map((q, k) => card(q, k)).join('')}
-        <span class="eb p2grp">${T === 'solo' ? 'Your first team, before you have one' : 'Your team'}</span>${R.tq.map((q, k) => card(q, k + 3)).join('')}` : ''}`;
+        <span class="eb p2grp">${T === 'solo' ? 'Your first team, before you have one' : 'Your team'}</span>${R.tq.map((q, k) => card(q, k + 3)).join('')}` : ''}
+      <div class="p2foot"><button type="button" class="nsb-back" data-act="p2move" data-v="-1"${at === 0 ? ' disabled' : ''}>← Back</button><button type="button" class="nsb-next" data-act="p2move" data-v="1">${at >= n2 - 1 ? 'See my feedback' : 'Next ↵'}</button></div>`;
+  }
+  /* Part 2 on the phone (31 Oct, round 5): one question per full screen, like
+   * Part 1. p2i is the card on screen: 0 = who works with you, 1–6 the questions. */
+  let p2i = null;
+  const p2At = () => { if (p2i !== null) return p2i; if (!S.p2.team) return 0; const qs = M.P2.questions(S.mode, S.p2.team), k = qs.findIndex((q) => !Number.isInteger(S.p2.ans[q.id])); return k < 0 ? qs.length : k + 1; };
+  function p2Full(on) {
+    document.body.classList.toggle('p2-full', on);
+    if (on) { p2i = Math.min(p2At(), 6); put('p2', pPeople(context())); const el = document.getElementById('p2'); if (el) el.scrollTop = 0; }
+    else { p2i = null; const d = document.getElementById('nsdiv-2'); if (d) d.scrollIntoView({ block: 'start' }); }
+  }
+  function p2Move(d) {
+    const n = S.p2.team ? 1 + M.P2.questions(S.mode, S.p2.team).length : 1, at = p2At();
+    if (d > 0 && at >= n - 1) { p2Full(false); render(); const w = document.getElementById('fbw-2'); if (w && w.innerHTML) setTimeout(() => w.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }), 60); return; }
+    p2i = Math.max(0, Math.min(n - 1, at + d)); put('p2', pPeople(context()));
+    const el = document.getElementById('p2'); if (el) el.scrollTop = 0;
   }
   function pFb2(c) {
     if (!partState(c).fin[1]) return '';
@@ -1287,7 +1311,7 @@
       <path d="${starPath(cx, cy, 34)}" fill="#F6EEDD"/><path d="${starPath(cx, cy, 15)}" fill="#6F93B8" transform="rotate(45 ${cx} ${cy})"/>
       ${lab}
       ${col(270, 'STRONGEST', D[c.rd.hi].name, '#9BC0A1')}${col(810, 'NEXT SUMMIT', D[c.rd.lo].name, '#E0A282')}
-      <text x="${cx}" y="1180" text-anchor="middle" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="34">Find your North Star, free.</text>
+      <text x="${cx}" y="1180" text-anchor="middle" fill="#EEF2F7" font-family="Newsreader, Georgia, serif" font-size="28">Find your own North Star · at no cost</text>
       <text x="${cx}" y="1224" text-anchor="middle" fill="#A9C0D9" font-family="Inter, Arial, sans-serif" font-size="25" letter-spacing="1">linktolead.exploraself.com/northstar</text>
       <text x="${cx}" y="1276" text-anchor="middle" fill="#D6BF8F" font-family="Inter, Arial, sans-serif" font-size="19" letter-spacing="5" font-weight="600">MENTOR · ALEXANDRU COJOCARI</text>
     </svg>`;
@@ -1822,6 +1846,73 @@
     </div>`;
   }
 
+  /* ── The printed North Star (31 Oct, round 5): its own clean pages, in black
+   * and white, built from the founder's answers when they print (the Print
+   * and Save as PDF buttons, or the browser's own print). Page 1 their
+   * reading, then each part, and on the last page the road ahead: The
+   * Founder's Blueprint. The screen page itself never prints. ── */
+  function printHTML() {
+    const c = context(), rd = c.rd, sc = c.sc, first = (S.profile.first || '').trim();
+    const f = (i) => E.feedback(i, sc[i], S.pains, wants());
+    const date = (() => { try { return new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { return ''; } })();
+    const R = 120, cx = 160, cy = 150, rA = sc.map((x) => 10 + x.score / 6 * (R - 10)), rS = rd.str.map((v) => 10 + v / 5 * (R - 10));
+    const pts = (r) => `${cx},${cy - r[0]} ${cx + r[1]},${cy} ${cx},${cy + r[2]} ${cx - r[3]},${cy}`;
+    const shape = `<svg viewBox="-50 0 420 300" width="300" height="214" aria-hidden="true"><defs><pattern id="pg" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#000" stroke-width="1.2"/></pattern></defs>
+      <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#999"/><circle cx="${cx}" cy="${cy}" r="${R / 2}" fill="none" stroke="#ccc"/><line x1="${cx}" y1="${cy - R - 8}" x2="${cx}" y2="${cy + R + 8}" stroke="#ccc"/><line x1="${cx - R - 8}" y1="${cy}" x2="${cx + R + 8}" y2="${cy}" stroke="#ccc"/>
+      ${rd.str.some((v) => v) ? `<polygon points="${pts(rS)}" fill="url(#pg)" stroke="#000" stroke-width="1.5" stroke-dasharray="5 4"/>` : ''}
+      ${rd.any ? `<polygon points="${pts(rA)}" fill="#fff" stroke="#000" stroke-width="2.5"/><polygon points="${pts(rA)}" fill="#ddd" opacity=".6"/>` : ''}
+      <g font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#000" letter-spacing="1"><text x="${cx}" y="${cy - R - 14}" text-anchor="middle">LEAD YOURSELF</text><text x="${cx}" y="${cy + R + 22}" text-anchor="middle">LEAD YOUR BUSINESS</text><text x="${cx + R + 10}" y="${cy + 4}">PEOPLE</text><text x="${cx - R - 10}" y="${cy + 4}" text-anchor="end">MARKET</text></g></svg>`;
+    const sec = (eb, h, body, br = true) => `<section class="pp${br ? ' br' : ''}"><p class="pp-eb">${eb}</p><h2>${h}</h2>${body}</section>`;
+    const rows = (list) => `<table class="pp-t">${list.map(([a, b, n]) => `<tr><th>${esc(a)}</th><td><b>${esc(b)}</b>${n ? `<br><span>${esc(n)}</span>` : ''}</td></tr>`).join('')}</table>`;
+    const P = partState(c);
+    let out = `<header class="pp-head"><p class="pp-eb">ExploraSelf · The Leader’s North Star${date ? ' · ' + date : ''}</p>
+      <h1>${first ? esc(first) + '’s North Star' : 'My North Star'}</h1>
+      ${rd.any ? `<p class="pp-arch">${esc(ARCH[rd.hi][0])} <span>· ${esc(ARCH[rd.hi][1])}</span></p>` : ''}
+      <p>${esc(E.STAGES[c.here].name)}${c.goal >= 0 && c.goal !== c.here ? ' → ' + esc(E.STAGES[c.goal].name) : ''}${S.values.length ? ' · Leading for ' + esc(named(M.VALUES, S.values).join(' & ')) : ''}</p></header>`;
+    out += `<section class="pp"><div class="pp-row"><div>${shape}<p class="pp-key"><span class="k1"></span> Your answers <span class="k2"></span> Your strengths, as you rated them (the hatched space between is unused potential)</p></div>
+      <div>${rd.any ? `<p class="pp-k">Strongest</p><p class="pp-v">${D[rd.hi].name}</p><p class="pp-k">Needs you first</p><p class="pp-v">${D[rd.lo].name}</p><p class="pp-k">Start here</p><p>${esc(D[rd.lo].step)}</p>` : '<p>Answer the questions in Part 1 to see your reading.</p>'}</div></div>
+      ${P.fin[0] ? pGap(c).replace(/<span class="eb">[^<]*<\/span>/, '').replace('The gold below is that gap', 'The hatched space in the picture is that gap') : ''}</section>`;
+    // Part 1: the answers and their next steps.
+    const qa = c.qs.filter((q) => Number.isInteger(S.ans[q.id])).map((q) => [q.short, E.ANSWERS[S.ans[q.id]][0], noteFor(q, S.ans[q.id])]);
+    const told = [['What hurts most', named(E.PAINS, S.pains).join(' · ')], ['What you want most', named(E.GOALS, wants()).join(' · ')], ['What you care about most', named(M.VALUES, S.values).join(' · ')]].filter((x) => x[1]);
+    if (qa.length) out += sec('Part 1 · Yourself', 'Your answers, and the next step for each', rows(qa) + (told.length ? rows(told.map(([a, b]) => [a, b, ''])) : '')
+      + (rd.any ? `<div class="pp-box"><p class="pp-k">Ask yourself</p><p class="pp-q">“${esc(f(rd.lo).ask)}”</p></div>` : ''));
+    // Part 2.
+    if (S.p2.team) {
+      const R2 = p2Read(), a2 = R2.qs.filter((q) => Number.isInteger(S.p2.ans[q.id])).map((q) => [q.short, E.ANSWERS[S.p2.ans[q.id]][0], S.p2.ans[q.id] < 2 ? q.lo : q.hi]);
+      if (a2.length) out += sec('Part 2 · Your people', 'Who you serve, and who serves with you', `<p><b>Your customers:</b> ${esc(R2.cust.big)} <b>${S.p2.team === 'solo' ? 'Your first team' : 'Your team'}:</b> ${esc(R2.team.big)}</p>` + rows(a2));
+    }
+    // Part 3: the four domains, with the numbers.
+    const anyNum = E.groupsFor(S.mode).some((g) => E.insight(g.key, c.n, S.mode, money));
+    out += sec('Part 3 · Your numbers', 'What it means, in all four domains',
+      (anyNum ? `<ul class="pp-l">${E.groupsFor(S.mode).map((g) => [g.title, E.insight(g.key, c.n, S.mode, money)]).filter((x) => x[1]).map(([t, v]) => `<li><b>${esc(t)}:</b> ${esc(v)}</li>`).join('')}</ul>` : '')
+      + D.map((d, i) => { const fb = f(i); return `<div class="pp-dom"><p class="pp-k">${d.name} · ${sc[i].answered ? esc(fb.band) + ` · ${sc[i].score} of 6` : 'not answered yet'}</p><p class="pp-v">${esc(fb.big)}</p><p>${esc(fb.why)} <b>This week:</b> ${esc(fb.week)}</p></div>`; }).join(''));
+    // Part 4: the lever, if one moved.
+    const dom = E.strongestLever(S.lab.p || 0, S.lab.m || 0, S.lab.f || 0, S.lab.d || 0);
+    if (dom >= 0 && !labCalc().locked) { const LV = E.LEVERS[dom];
+      out += sec('Part 4 · Your next steps', `The lever you tried: ${esc(LV.name.toLowerCase())}`, `<p><b>Watch out:</b> ${esc(LV.watch)}</p><p><b>Your first step this week:</b> ${esc(LV.first)}</p><ol class="pp-l">${LV.steps.map((t) => `<li>${esc(t)}</li>`).join('')}</ol>`, false); }
+    // The last page: the road ahead.
+    out += `<section class="pp br pp-promo"><p class="pp-eb">Your next step</p>
+      <h2>The Founder’s Blueprint</h2>
+      <p class="pp-big">Twelve weeks that take your business out of your head and onto paper, built on the same four domains you just read: lead yourself, lead your people, lead your business, lead the market.</p>
+      <table class="pp-t pp-ladder">
+        <tr><th>Weeks 1–3</th><td><b>The Founder Launchpad · free</b><br><span>Settle what you believe about your business, learn to read it clearly, and stay steady when it pushes back.</span></td></tr>
+        <tr><th>Weeks 4–5</th><td><b>The Boardroom</b><br><span>One session with Alexandru. It opens the next two weeks and the full North Star.</span></td></tr>
+        <tr><th>Weeks 6–9</th><td><b>The Personal Leadership LAB · $97</b><br><span>Lead yourself first.</span></td></tr>
+        <tr><th>Weeks 10–12</th><td><b>The Business HUB · $397</b><br><span>Build the business that carries it.</span></td></tr>
+        <tr><th>All twelve</th><td><b>The Summit · $1,989</b><br><span>The whole Blueprint, with Alexandru beside you every week.</span></td></tr>
+      </table>
+      <div class="pp-cta"><p class="pp-k">Start tonight, at no cost</p><p class="pp-url">linktolead.exploraself.com</p><p>Your account is already open: sign in with ${S.profile.email ? '<b>' + esc(S.profile.email) + '</b>' : 'your email'} and the Founder Launchpad is waiting.</p></div>
+      <p class="pp-foot">ExploraSelf · exploraself.com · Mentor: Alexandru Cojocari<br>Every figure here comes from what you entered. A planning aid, not financial, tax or legal advice.</p></section>`;
+    return out;
+  }
+  function preparePrint() {
+    let el = document.getElementById('nsprint');
+    if (!el) { el = document.createElement('div'); el.id = 'nsprint'; el.setAttribute('aria-hidden', 'true'); document.body.appendChild(el); }
+    try { el.innerHTML = printHTML(); } catch { el.innerHTML = ''; }
+  }
+  window.addEventListener('beforeprint', preparePrint);
+
   /* ── Drawing ─────────────────────────────────────────────────────────────── */
   const cache = {};
   /* When a part is replaced, the parts inside it start again from nothing. */
@@ -2013,6 +2104,9 @@
       case 'want': gated(() => { const cur = wants(), ix = cur.indexOf(v); if (ix >= 0) cur.splice(ix, 1); else { cur.push(v); if (cur.length > 2) cur.shift(); } S.want = cur[0] || ''; S.want2 = cur[1] || ''; }); return;
       case 'val': gated(() => { const cur = S.values.slice(), ix = cur.indexOf(v); if (ix >= 0) cur.splice(ix, 1); else { cur.push(v); if (cur.length > 2) cur.shift(); } S.values = cur; }); return;
       case 'p2team': gated(() => { S.p2.team = v; }); return;
+      case 'p2-full': p2Full(true); return;
+      case 'p2-exit': p2Full(false); render(); return;
+      case 'p2move': p2Move(Number(v)); return;
       case 'p2ans': gated(() => { S.p2.ans[t.dataset.q] = Number(v); }); return;
       case 'pmore': S.pmore[i] = !S.pmore[i]; save(); render(); return;
       case 'num-chip': S.nums[t.dataset.k] = { pick: v, own: '' }; save(); render(); return;
@@ -2022,7 +2116,7 @@
       case 'more': S.more[i] = !S.more[i]; save(); render(); return;
       case 'lean': S.lean = i; save(); render(); return;
       case 'stop': S.stop = i; save(); render(); return;
-      case 'print': try { window.print(); } catch { /* no print dialog here */ } return;
+      case 'print': preparePrint(); try { window.print(); } catch { /* no print dialog here */ } return;
       case 'email': sendEmail(); return;
       case 'card-share': cardOut(true); return;
       case 'card-dl': cardOut(false); return;
@@ -2122,6 +2216,7 @@
       if (body.classList.contains('crownopen')) { crownOpen(false); const c = document.getElementById('crownb'); if (c) c.focus(); }
       else if (body.classList.contains('nsb-open')) body.classList.remove('nsb-open');
       else if (body.classList.contains('nsq-full')) exitFull();
+      else if (body.classList.contains('p2-full')) { p2Full(false); render(); }
       return;
     }
     const t = e.target;

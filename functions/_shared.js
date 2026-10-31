@@ -84,7 +84,9 @@ export async function accountTables(D) {
   for (const col of ['mailchimp_status TEXT', 'mailchimp_at TEXT', 'mailchimp_steps TEXT', 'signup_type TEXT', 'company TEXT', 'interest TEXT', 'landing TEXT',
       'utm_source TEXT', 'utm_medium TEXT', 'utm_campaign TEXT', 'utm_content TEXT', 'utm_term TEXT',
       // The founder's mentor (functions/_mentor.js) and their time zone.
-      'mentor_id TEXT', 'tz TEXT']) {
+      'mentor_id TEXT', 'tz TEXT',
+      // The founder's profile picture, a small data: URL (functions/api/avatar.js).
+      'avatar TEXT']) {
     try { await D.prepare(`ALTER TABLE student_profile ADD COLUMN ${col}`).run(); } catch { /* already there */ }
   }
   // An answer in "Ask Alexandru" is a message that points at the question

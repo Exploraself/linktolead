@@ -24,7 +24,7 @@ export async function onRequestGet({ request, env }) {
     D.prepare('SELECT stage,results_json,flags_json,updated_at FROM compass WHERE student_id = ?').bind(me.id).first(),
     D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(me.id).first(),
     D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'stage-change' LIMIT 1").bind(me.id).first(),
-    D.prepare('SELECT signup_type, consent, unsubscribed FROM student_profile WHERE student_id = ?').bind(me.id).first(),
+    D.prepare('SELECT signup_type, consent, unsubscribed, avatar FROM student_profile WHERE student_id = ?').bind(me.id).first(),
   ]);
   await D.prepare('UPDATE student SET last_seen_at=? WHERE id=?').bind(now(), me.id).run();
   await keepTz(D, me.id, new URL(request.url).searchParams.get('tz'));
@@ -40,6 +40,7 @@ export async function onRequestGet({ request, env }) {
   // 'simple' founders never have a password, so /start offers none.
   return json({ ok: true, me: { name: me.name, email: me.email, stage: me.stage, stageChosen: !!chose, tier: me.tier, thin: me.thin_domain, hasPassword: !!(auth && auth.pass_hash),
     signupType: (prof && prof.signup_type) || null,
+    avatar: (prof && prof.avatar) || '',
     // "Letters from your mentor": on when they gave consent and did not unsubscribe.
     letters: !!(prof && prof.consent && !prof.unsubscribed),
     mentor: { name: mentor.name, first: mentor.first, photo: mentor.photo } },

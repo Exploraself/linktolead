@@ -39,6 +39,13 @@ const STYLE = `.pm{position:relative;font-family:'Inter',Arial,sans-serif}
 .pm.fixed{position:fixed;top:14px;right:16px;z-index:55}
 .pm-b{width:44px;height:44px;border-radius:50%;border:1px solid #B4975F;background:radial-gradient(circle at 35% 30%,#E6D6AE,#A88B55 55%,#6E5A32);color:#1C1309;font:440 15px/1 Newsreader,Georgia,serif;letter-spacing:.04em;cursor:pointer;box-shadow:0 0 0 3px rgba(180,151,95,.22),0 6px 16px -8px rgba(0,0,0,.6)}
 .pm-b:focus-visible{outline:2px solid #B4975F;outline-offset:3px}
+.pm-b.pic{background-size:cover;background-position:center;color:transparent}
+.pm-who{display:flex;align-items:center;gap:12px}
+.pm-av{flex:none;width:52px;height:52px;border-radius:50%;border:1px solid #B4975F;background:radial-gradient(circle at 35% 30%,#E6D6AE,#A88B55 55%,#6E5A32);background-size:cover;background-position:center;display:inline-flex;align-items:center;justify-content:center;font:440 17px Newsreader,Georgia,serif;color:#1C1309}
+.pm-who-t{min-width:0}
+.pm-pic{display:flex;gap:10px;flex-wrap:wrap;padding:0 12px 6px}
+.pm-pic button{border:0;background:none;padding:2px 0;font:520 12.5px 'Inter',Arial,sans-serif;color:#6E5213;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+:root[data-theme="dark"] .pm-pic button{color:#D6BF8F}
 .pm-m{position:absolute;right:0;top:54px;width:min(290px,calc(100vw - 24px));max-height:calc(100vh - 90px);overflow:auto;z-index:60;background:#FFFDF8;color:#14100B;border:1px solid #D6C9AC;border-radius:14px;box-shadow:0 24px 50px -20px rgba(20,16,11,.55);padding:8px;display:none}
 .pm.open .pm-m{display:block}
 .pm-who{padding:10px 12px;border-bottom:1px solid #D6C9AC;margin-bottom:6px}
@@ -141,12 +148,30 @@ function deleteDialog(me) {
   const first = d.querySelector('[data-d="keep"]'); if (first) first.focus();
 }
 
+/** A photo cut to a square and shrunk to 192 px, as a JPEG data: URL. */
+async function squarePhoto(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    await new Promise((ok, no) => { img.onload = ok; img.onerror = no; img.src = url; });
+    const side = Math.min(img.naturalWidth, img.naturalHeight), c = document.createElement('canvas');
+    c.width = 192; c.height = 192;
+    c.getContext('2d').drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, 192, 192);
+    return c.toDataURL('image/jpeg', 0.85);
+  } finally { URL.revokeObjectURL(url); }
+}
+const picStyle = (me) => (me && me.avatar && /^data:image\//.test(me.avatar) ? ` style="background-image:url('${me.avatar}')"` : '');
+let picNote = '';
+
 function draw(root, me) {
   const name = (me && me.name) || '';
   const step = STEPS[(me && me.tier) || 'free'] || STEPS.free;
-  root.innerHTML = `<button type="button" class="pm-b" aria-haspopup="menu" aria-expanded="false" aria-label="Your profile menu${name ? ', ' + esc(name) : ''}">${esc(initials(name))}</button>
+  const pic = !!(me && me.avatar);
+  root.innerHTML = `<button type="button" class="pm-b${pic ? ' pic' : ''}"${picStyle(me)} aria-haspopup="menu" aria-expanded="false" aria-label="Your profile menu${name ? ', ' + esc(name) : ''}">${esc(initials(name))}</button>
     <div class="pm-m" role="menu" aria-label="Your profile">
-      <div class="pm-who"><b>${esc(name || 'Your account')}</b><span>Your step: ${esc(step)}</span></div>
+      <div class="pm-who"><span class="pm-av"${picStyle(me)}>${pic ? '' : esc(initials(name))}</span><span class="pm-who-t"><b>${esc(name || 'Your account')}</b><span>Your step: ${esc(step)}</span></span></div>
+      <div class="pm-pic"><button type="button" data-pm="pic">${pic ? 'Change my photo' : 'Add a profile photo'}</button>${pic ? '<button type="button" data-pm="nopic">Remove</button>' : ''}<input type="file" accept="image/*" data-pm-file hidden></div>
+      ${picNote ? `<p class="pm-note" role="status">${esc(picNote)}</p>` : ''}
       <a role="menuitem" class="pm-compass" href="/northstar/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 5.5l2 6.5-2 1.2-2-1.2z" fill="currentColor" stroke="none"/><path d="M12 18.5l2-6.5-2-1.2-2 1.2z"/></svg><span><b>Leader’s North Star</b><small>Your direction in all four domains</small></span></a>
       ${items(me).map(([href, label, d]) => `<a role="menuitem" href="${href}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>${esc(label)}</a>`).join('')}
       <div class="pm-sep" role="separator"></div>
@@ -171,10 +196,20 @@ export async function mount(host, { fixed = false } = {}) {
   draw(root, cached());
   const set = (open) => {
     root.classList.toggle('open', open); const b = root.querySelector('.pm-b'); if (b) b.setAttribute('aria-expanded', String(open));
-    // On a phone the circle can sit at the left of the header: open the menu
-    // towards the screen, never off it.
-    const m = root.querySelector('.pm-m');
-    if (open && m) { m.style.left = ''; m.style.right = ''; const r = m.getBoundingClientRect(); if (r.left < 8) { m.style.right = 'auto'; m.style.left = '0'; } }
+    // Always inside the screen (31 Oct): on a phone the menu is a sheet just
+    // under the circle, the width of the screen; elsewhere it never runs off.
+    const m = root.querySelector('.pm-m'), b2 = root.querySelector('.pm-b');
+    if (open && m) {
+      Object.assign(m.style, { position: '', left: '', right: '', top: '', width: '', maxHeight: '' });
+      if (window.innerWidth < 600 && b2) {
+        const top = Math.round(b2.getBoundingClientRect().bottom + 8);
+        Object.assign(m.style, { position: 'fixed', left: '10px', right: '10px', top: top + 'px', width: 'auto', maxHeight: `calc(100vh - ${top + 96}px)` });
+      } else {
+        const r = m.getBoundingClientRect();
+        if (r.left < 8) { m.style.right = 'auto'; m.style.left = '0'; }
+        else if (r.right > window.innerWidth - 8) { m.style.right = '0'; m.style.left = 'auto'; }
+      }
+    }
   };
   root.addEventListener('click', (e) => {
     const t = e.target.closest('button, a');
@@ -189,6 +224,13 @@ export async function mount(host, { fixed = false } = {}) {
       const again = root.querySelector('[data-pm="letters"]'); if (again) again.focus();
       return;
     }
+    if (t.dataset.pm === 'pic') { e.stopPropagation(); const f = root.querySelector('[data-pm-file]'); if (f) f.click(); return; }
+    if (t.dataset.pm === 'nopic') {
+      e.stopPropagation();
+      const me = cached() || {}, was = me.avatar; me.avatar = ''; keep(me); picNote = 'Photo removed.'; draw(root, me); set(true);
+      A.setAvatar('').catch(() => { me.avatar = was; keep(me); picNote = 'That did not save. Try again in a minute.'; draw(root, me); set(true); });
+      return;
+    }
     if (t.hasAttribute('data-theme-set')) { e.stopPropagation(); if (window.ESTheme) window.ESTheme.set(t.getAttribute('data-theme-set')); return; }
     if (t.dataset.pm === 'ws') { root.classList.remove('open'); const w = document.querySelector('[data-act="ws"]'); if (w) w.click(); return; }
     if (t.dataset.pm === 'delete') { root.classList.remove('open'); deleteDialog(cached()); return; }
@@ -198,7 +240,16 @@ export async function mount(host, { fixed = false } = {}) {
     if (u.pathname === location.pathname && u.hash) { e.preventDefault(); location.hash = u.hash; location.reload(); }
   });
   document.addEventListener('click', (e) => { if (!root.contains(e.target)) set(false); });
+  // A new photo: cut, shrunk, shown at once, then saved to the account.
+  root.addEventListener('change', async (e) => {
+    const f = e.target.closest && e.target.closest('[data-pm-file]'); if (!f || !f.files || !f.files[0]) return;
+    const me = cached() || {}, was = me.avatar;
+    try { me.avatar = await squarePhoto(f.files[0]); } catch { picNote = 'That file is not a photo we can read. Try a JPEG or PNG.'; draw(root, me); set(true); return; }
+    keep(me); picNote = 'Saving your photo…'; draw(root, me); set(true);
+    try { await A.setAvatar(me.avatar); picNote = 'Your photo is saved.'; } catch (ex) { me.avatar = was; keep(me); picNote = (ex && ex.message) || 'That did not save. Try again in a minute.'; }
+    draw(root, me); set(true);
+  });
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { set(false); const b = root.querySelector('.pm-b'); if (b) b.focus(); } });
   const r = await A.pull();
-  if (r && r.me) { const me = { name: r.me.name, tier: r.me.tier, signupType: r.me.signupType, hasPassword: r.me.hasPassword, letters: r.me.letters }; keep(me); draw(root, me); }
+  if (r && r.me) { const me = { name: r.me.name, tier: r.me.tier, signupType: r.me.signupType, hasPassword: r.me.hasPassword, letters: r.me.letters, avatar: r.me.avatar || '' }; keep(me); draw(root, me); }
 }
