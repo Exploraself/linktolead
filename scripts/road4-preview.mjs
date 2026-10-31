@@ -1,10 +1,10 @@
 // Builds /road4/ as one self-contained page, for sharing a preview where the
-// site cannot be served (a claude.ai artifact). The stylesheet, the photo and
-// the programme data it shows are inlined; the fonts come from Google Fonts;
-// the two blocks of page.js marked "@site" are replaced: the data block by the
-// same data, taken from the programme files here, and the join block by a note
-// saying where the button leads on the live page. Nothing else changes, so
-// the preview is the page.
+// site cannot be served (a claude.ai artifact). The stylesheet, the light
+// switch (theme.js), the photo and the programme data it shows are inlined;
+// the fonts come from Google Fonts; the two blocks of page.js marked "@site"
+// are replaced: the data block by the same data, taken from the programme
+// files here, and the join block by a note saying where the button leads on
+// the live page. Nothing else changes, so the preview is the page.
 //
 // Run: node scripts/road4-preview.mjs <output.html>
 import { readFile, writeFile } from 'node:fs/promises';
@@ -53,12 +53,14 @@ swap('join', join);
 js = js.replace(/^export /gm, '');
 
 const css = await read('road4/road4.css');
+const theme = await read('theme.js');
 const photo = (await readFile(new URL('../public/cabinet/alexandru.jpg', import.meta.url))).toString('base64');
 let html = await read('road4/index.html');
 html = html
   .replace(/<link rel="(icon|preload)"[^>]*>\n/g, '')
   .replace('<link rel="stylesheet" href="/assets/fonts.css">', '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&display=swap">')
   .replace('<link rel="stylesheet" href="/road4/road4.css">', () => `<style>\n${css}</style>`)
+  .replace('<script src="/theme.js"></script>', () => `<script>\n${theme}</script>`)
   .replace('src="/cabinet/alexandru.jpg"', `src="data:image/jpeg;base64,${photo}"`)
   .replace(/href="\/ground-plan\//g, `href="${SITE}/ground-plan/`)
   .replace('<script type="module" src="/road4/page.js"></script>', () => `<script type="module">\n${js}</script>`)

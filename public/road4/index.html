@@ -11,6 +11,7 @@
 <link rel="preload" href="/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/road4/road4.css">
+<script src="/theme.js"></script>
 <script>try { if (localStorage.getItem('ftb-still') === '1') document.documentElement.classList.add('still'); } catch (e) { /* private mode */ }</script>
 </head>
 <body>
@@ -28,6 +29,7 @@
       <a href="#price">Price</a>
       <a href="/ground-plan/#signin">Sign in</a>
       <a class="cta" href="#join" data-join>Start free</a>
+      <span id="themehost"></span>
     </nav>
   </div>
 </header>
@@ -38,46 +40,125 @@
 <section class="dark hero">
   <div class="wrap">
     <div>
-      <p class="eyebrow">The Founder’s Blueprint · for founders and small business owners</p>
       <h1>You can feel it.<br><i>You just can’t see it yet.</i></h1>
       <p class="lede hook">You call it a busy season. Count how long it has lasted.</p>
-      <p class="lede">The late nights, the team waiting on you, the months that look fine until they don’t: those are symptoms. Underneath each one is a decision you haven’t made yet.</p>
       <div class="acts">
         <a class="cta" href="#mirror">Look in the mirror <span class="ar" aria-hidden="true">↓</span></a>
         <a class="ghost" href="#join" data-join>Start my free three weeks</a>
       </div>
-      <p class="fine">Eight questions. Tap only. Nothing to type, nothing sent.</p>
+      <p class="fine">Eight questions. Tap only.</p>
     </div>
 
-    <svg class="berg" viewBox="0 0 420 440" role="img" aria-labelledby="berg-t">
-      <title id="berg-t">An iceberg. Above the water float the things you feel: late nights, a team waiting, sales in waves. Below the water, a lamp finds what is underneath: the decision you haven’t made.</title>
+    <figure class="berg-wrap">
+    <svg class="berg" viewBox="0 0 560 520" role="img" aria-labelledby="berg-t">
+      <title id="berg-t">An iceberg. Above the water, what you feel: late nights, a team waiting, sales in waves. Below it, far larger, lit from within: the decision you haven’t made.</title>
       <defs>
-        <linearGradient id="bg-deep" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1D2C3B"/><stop offset=".7" stop-color="#0B1621" stop-opacity=".7"/><stop offset="1" stop-color="#0B1621" stop-opacity="0"/></linearGradient>
-        <linearGradient id="bg-tip" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFCF4"/><stop offset="1" stop-color="#D9CBAA"/></linearGradient>
-        <radialGradient id="bg-lamp"><stop offset="0" stop-color="#E3C47E" stop-opacity=".55"/><stop offset="1" stop-color="#E3C47E" stop-opacity="0"/></radialGradient>
-        <linearGradient id="bg-fade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".18" stop-color="#fff"/><stop offset=".82" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
-        <mask id="bg-water"><rect x="0" y="190" width="420" height="250" fill="url(#bg-fade)"/></mask>
-        <clipPath id="bg-mass"><path d="M96 190 L320 190 L366 268 L338 352 L246 412 L150 396 L74 316 L58 246 Z"/></clipPath>
+        <linearGradient id="bg-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#18425E" stop-opacity=".38"/><stop offset=".45" stop-color="#0D2638" stop-opacity=".72"/><stop offset=".82" stop-color="#08121B" stop-opacity=".9"/><stop offset="1" stop-color="#0E0B08" stop-opacity="1"/></linearGradient>
+        <linearGradient id="bg-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2731" stop-opacity="0"/><stop offset="1" stop-color="#2B3E4C" stop-opacity=".55"/></linearGradient>
+        <linearGradient id="bg-edge" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".14" stop-color="#fff"/><stop offset=".86" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+        <linearGradient id="bg-low" x1="0" y1="0" x2="0" y2="1"><stop offset=".8" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000"/></linearGradient>
+        <mask id="bg-fade"><rect width="560" height="520" fill="url(#bg-edge)"/><rect width="560" height="520" fill="url(#bg-low)"/></mask>
+        <linearGradient id="bg-ray" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D9ECF5" stop-opacity=".13"/><stop offset="1" stop-color="#D9ECF5" stop-opacity="0"/></linearGradient>
+        <linearGradient id="bg-surf" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#CFE4EE" stop-opacity="0"/><stop offset=".5" stop-color="#E8F3F8" stop-opacity=".9"/><stop offset="1" stop-color="#CFE4EE" stop-opacity="0"/></linearGradient>
+        <radialGradient id="bg-core"><stop offset="0" stop-color="#F2D38B" stop-opacity=".85"/><stop offset=".35" stop-color="#D9AE55" stop-opacity=".35"/><stop offset="1" stop-color="#C9A24A" stop-opacity="0"/></radialGradient>
+        <filter id="bg-refract" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".008 .045" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="9"/></filter>
+        <filter id="bg-soft"><feGaussianBlur stdDeviation="2.2"/></filter>
+        <clipPath id="bg-below"><rect x="0" y="210" width="560" height="310"/></clipPath>
       </defs>
-      <rect x="0" y="190" width="420" height="250" fill="url(#bg-deep)" opacity=".8" mask="url(#bg-water)"/>
-      <g class="bob">
-        <path d="M96 190 L320 190 L366 268 L338 352 L246 412 L150 396 L74 316 L58 246 Z" fill="#14202C" stroke="#C9A24A" stroke-opacity=".35"/>
-        <g clip-path="url(#bg-mass)"><circle class="lamp" cx="210" cy="300" r="95" fill="url(#bg-lamp)"/></g>
-        <text class="deep reveal-text" x="210" y="292" text-anchor="middle">The decision</text>
-        <text class="deep reveal-text" x="210" y="318" text-anchor="middle">you haven’t made</text>
-        <path d="M128 190 L176 104 L204 132 L236 64 L270 128 L292 190 Z" fill="url(#bg-tip)"/>
-        <path d="M236 64 L250 190 M176 104 L190 190" stroke="#C9A24A" stroke-opacity=".45" fill="none"/>
+      <g mask="url(#bg-fade)">
+        <rect width="560" height="210" fill="url(#bg-sky)"/>
+        <g class="drift">
+          <g clip-path="url(#bg-below)" filter="url(#bg-refract)">
+          <polygon class="u1" points="118,210 80,262 200,300"/>
+          <polygon class="u1" points="118,210 200,300 290,210"/>
+          <polygon class="u2" points="290,210 200,300 290,280"/>
+          <polygon class="u2" points="290,210 290,280 380,300"/>
+          <polygon class="u1" points="290,210 380,300 462,210"/>
+          <polygon class="u2" points="462,210 380,300 490,262"/>
+          <polygon class="u3" points="490,262 380,300 504,340"/>
+          <polygon class="u2" points="80,262 66,338 200,300"/>
+          <polygon class="u3" points="66,338 160,370 200,300"/>
+          <polygon class="u4" points="66,338 102,414 160,370"/>
+          <polygon class="u4" points="102,414 250,400 160,370"/>
+          <polygon class="u5" points="102,414 176,474 250,400"/>
+          <polygon class="u3" points="160,370 250,400 200,300"/>
+          <polygon class="u3" points="200,300 250,400 290,280"/>
+          <polygon class="u4" points="290,280 250,400 350,410"/>
+          <polygon class="u3" points="290,280 350,410 380,300"/>
+          <polygon class="u4" points="380,300 350,410 440,350"/>
+          <polygon class="u4" points="380,300 440,350 504,340"/>
+          <polygon class="u5" points="504,340 440,350 462,424"/>
+          <polygon class="u4" points="440,350 350,410 462,424"/>
+          <polygon class="u5" points="462,424 350,410 380,482"/>
+          <polygon class="u5" points="350,410 250,400 278,500"/>
+          <polygon class="u5" points="250,400 176,474 278,500"/>
+          <polygon class="u5" points="350,410 278,500 380,482"/>
+            <circle class="core" cx="292" cy="352" r="118" fill="url(#bg-core)"/>
+          </g>
+          <g clip-path="url(#bg-below)"><use href="#bg-tipshape" class="reflect" transform="translate(0 420) scale(1 -1)"/></g>
+        </g>
+        <rect class="water" x="0" y="210" width="560" height="310" fill="url(#bg-water)"/>
+        <g class="rays">
+          <polygon class="ray" style="--i:0" points="150,211 196,211 150,520 40,520"/>
+          <polygon class="ray" style="--i:1" points="258,211 290,211 330,520 230,520"/>
+          <polygon class="ray" style="--i:2" points="372,211 408,211 540,520 430,520"/>
+        </g>
+        <g class="motes">
+        <circle class="mote" style="--i:0" cx="50" cy="300" r="1.0"/>
+        <circle class="mote" style="--i:1" cx="91" cy="353" r="1.6"/>
+        <circle class="mote" style="--i:2" cx="132" cy="406" r="2.2"/>
+        <circle class="mote" style="--i:3" cx="173" cy="459" r="1.0"/>
+        <circle class="mote" style="--i:4" cx="214" cy="322" r="1.6"/>
+        <circle class="mote" style="--i:5" cx="255" cy="375" r="2.2"/>
+        <circle class="mote" style="--i:6" cx="296" cy="428" r="1.0"/>
+        <circle class="mote" style="--i:7" cx="337" cy="481" r="1.6"/>
+        <circle class="mote" style="--i:8" cx="378" cy="344" r="2.2"/>
+        <circle class="mote" style="--i:9" cx="419" cy="397" r="1.0"/>
+        <circle class="mote" style="--i:10" cx="460" cy="450" r="1.6"/>
+        <circle class="mote" style="--i:11" cx="501" cy="313" r="2.2"/>
+        <circle class="mote" style="--i:12" cx="22" cy="366" r="1.0"/>
+        <circle class="mote" style="--i:13" cx="63" cy="419" r="1.6"/>
+        </g>
+        <g class="drift">
+          <g id="bg-tipshape">
+          <polygon class="i2" points="150,210 186,168 226,210"/>
+          <polygon class="i3" points="186,168 208,176 226,210"/>
+          <polygon class="i3" points="208,176 252,166 226,210"/>
+          <polygon class="i1" points="208,176 242,112 252,166"/>
+          <polygon class="i2" points="242,112 262,122 252,166"/>
+          <polygon class="i2" points="252,166 262,122 296,150"/>
+          <polygon class="i1" points="262,122 292,46 296,150"/>
+          <polygon class="i4" points="292,46 318,98 296,150"/>
+          <polygon class="i3" points="318,98 330,150 296,150"/>
+          <polygon class="i2" points="318,98 338,88 330,150"/>
+          <polygon class="i4" points="338,88 372,150 330,150"/>
+          <polygon class="i3" points="252,166 296,150 268,210"/>
+          <polygon class="i4" points="226,210 252,166 268,210"/>
+          <polygon class="i3" points="268,210 296,150 304,210"/>
+          <polygon class="i4" points="296,150 330,150 304,210"/>
+          <polygon class="i5" points="330,150 346,210 304,210"/>
+          <polygon class="i4" points="330,150 372,150 346,210"/>
+          <polygon class="i3" points="372,150 402,160 396,210"/>
+          <polygon class="i5" points="372,150 396,210 346,210"/>
+          <polygon class="i4" points="402,160 436,210 396,210"/>
+          </g>
+          <path class="ridge" d="M242 112 L262 122 L292 46 M186 168 L208 176"/>
+        </g>
+        <rect x="0" y="208" width="560" height="4" fill="url(#bg-surf)" opacity=".55"/>
+        <path class="swell" d="M-80 210 q35 -5 70 0 t70 0 t70 0 t70 0 t70 0 t70 0 t70 0 t70 0 t70 0 t70 0"/>
+        <path class="swell s2" d="M-80 214 q35 -4 70 0 t70 0 t70 0 t70 0 t70 0 t70 0 t70 0 t70 0 t70 0 t70 0"/>
       </g>
-      <g aria-hidden="true">
-        <path class="wave" d="M0 190 q20 -7 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#C9A24A" stroke-width="1.5" fill="none"/>
-        <path class="wave w2" d="M0 196 q20 -5 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#C9A24A" stroke-width="1" fill="none"/>
-        <text class="wl" x="16" y="178">WHAT YOU FEEL</text>
+      <g class="notes" aria-hidden="true">
+        <path class="bracket" d="M14 40 V204 M14 216 V500"/>
+        <text class="side" transform="translate(30 122) rotate(-90)" text-anchor="middle">WHAT YOU FEEL</text>
+        <text class="side" transform="translate(30 358) rotate(-90)" text-anchor="middle">WHAT IT IS</text>
+        <path class="lead" d="M186 168 L136 130 H52"/><circle class="pin" cx="186" cy="168" r="3"/><text class="lbl" x="52" y="122">Late nights</text>
+        <path class="lead" d="M296 52 L336 24 H446"/><circle class="pin" cx="296" cy="52" r="3"/><text class="lbl" x="342" y="16">Team waiting</text>
+        <path class="lead" d="M402 160 L440 128 H552"/><circle class="pin" cx="402" cy="160" r="3"/><text class="lbl" x="552" y="120" text-anchor="end">Sales in waves</text>
+        <path class="lead gold" d="M292 352 L380 440 H552"/><circle class="pin gold" cx="292" cy="352" r="3.5"/><text class="lbl gold" x="552" y="432" text-anchor="end">The decision you</text><text class="lbl gold" x="552" y="466" text-anchor="end">haven’t made</text>
       </g>
-      <g class="tag float"><rect x="18" y="58" width="112" height="30" rx="15"/><text x="74" y="78" text-anchor="middle">Late nights</text></g>
-      <g class="tag float d2"><rect x="292" y="40" width="118" height="30" rx="15"/><text x="351" y="60" text-anchor="middle">Team waiting</text></g>
-      <g class="tag float d3"><rect x="290" y="120" width="124" height="30" rx="15"/><text x="352" y="140" text-anchor="middle">Sales in waves</text></g>
-      <text class="wl" x="404" y="430" text-anchor="end">WHAT IT IS</text>
     </svg>
+    </figure>
   </div>
 </section>
 
