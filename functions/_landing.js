@@ -18,8 +18,9 @@ export const REDIRECTS = {
   '/summit': '/northstar/summit/',
   '/north-star': '/northstar/',
   '/blueprint': '/road1/',
-  // Road 2 became /north3/ (31 Oct): the North Star sales page.
-  '/road2': '/north3/',
+  // /road2/ was the North Star sales page until 31 Oct; that page lives at
+  // /north3/ (landing "road2"). /road2/ is now The Founder's Blueprint as a
+  // thermal scan (landing "scan"), served as a page, not a redirect.
   // Road 2.1 became /north2/ (31 Oct): it sells the North Star.
   '/road2.1': '/north2/',
 };
