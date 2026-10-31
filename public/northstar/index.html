@@ -31,6 +31,8 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
 <link rel="preload" href="/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="/music.css">
+<link rel="stylesheet" href="crown.css">
 <style>#acct-gate{position:fixed;inset:0;z-index:60;background:rgba(16,13,9,.65);display:flex;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}#acct-gate[hidden]{display:none}</style>
 </head>
 <body>
@@ -237,6 +239,7 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
 <div id="toast" role="status" aria-live="polite" style="position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #0E1C2B; color: #EEF2F7; border: 1px solid #6F93B8; border-radius: 5px; padding: 12px 20px; font: 13px 'Inter', Arial, sans-serif; z-index: 90; max-width: 90vw; display: none"></div>
 <script src="model.js"></script>
 <script src="engine.js"></script>
+<script type="module">/* The music player, opened from the Crown (Music, Focus, Light). */ import * as M from '/music.js'; window.ESMusic = M;</script>
 <script src="app.js"></script>
 <script src="dawn.js"></script>
 <script src="spy.js"></script>
