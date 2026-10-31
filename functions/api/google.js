@@ -9,9 +9,10 @@
 // account is told so. A new address gets the same free account as the simple
 // sign-up form (signup.js): name and email from Google, the consent the founder
 // ticked, the landing page and utm tags, the welcome letter and Mailchimp only
-// with consent. No password is made: `missing` lists what the account still
-// lacks (company, interest, industry, password), and the Blueprint asks for it
-// once, at the first answer (api/complete.js), as for every other account.
+// with consent. No password is made, and none is ever asked: Google is their
+// way in (student_profile.google_at). `missing` lists what the account still
+// lacks (company, interest, industry), and the Blueprint asks for it once, at
+// the first answer (api/complete.js), as for every other account.
 
 import { json, bad, db, now, newToken, accountTables } from '../_shared.js';
 import { profile, sendWelcome, SOURCES } from '../_account.js';
@@ -29,7 +30,7 @@ export const onRequestGet = ({ env }) => {
 
 /** What a full account still lacks, for the reply. */
 async function missingFor(D, id) {
-  const prof = await D.prepare('SELECT company, interest, industry FROM student_profile WHERE student_id = ?').bind(id).first();
+  const prof = await D.prepare('SELECT company, interest, industry, google_at FROM student_profile WHERE student_id = ?').bind(id).first();
   const auth = await D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(id).first();
   return missingOf({ ...(prof || {}), hasPassword: !!(auth && auth.pass_hash) });
 }
@@ -48,6 +49,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (found) {
     if (found.paused) return bad(PAUSED, 403);
     await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(found.id, 'login', now(), 'google').run();
+    await profile(D, found.id);
+    await D.prepare('UPDATE student_profile SET google_at = ? WHERE student_id = ?').bind(now(), found.id).run();
     const [first, ...rest] = String(found.name || '').split(' ');
     return json({ ok: true, token: found.id, existing: true, me: { first: first || who.first, last: rest.join(' ') || who.last, email: found.email }, missing: await missingFor(D, found.id) });
   }
@@ -61,9 +64,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
       VALUES (?,?,?,?,?,?,?,?,?)`).bind(id, who.email, name, '', '', null, 'free', now(), now()).run();
   const p = await profile(D, id, { industry: null, consent, source });
   await keepTz(D, id, body.tz);
-  await D.prepare(`UPDATE student_profile SET signup_type = 'simple', landing = ?,
+  await D.prepare(`UPDATE student_profile SET signup_type = 'simple', landing = ?, google_at = ?,
       utm_source = ?, utm_medium = ?, utm_campaign = ?, utm_content = ?, utm_term = ? WHERE student_id = ?`)
-    .bind(landing, utm.utm_source, utm.utm_medium, utm.utm_campaign, utm.utm_content, utm.utm_term, id).run();
+    .bind(landing, now(), utm.utm_source, utm.utm_medium, utm.utm_campaign, utm.utm_content, utm.utm_term, id).run();
   await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(id, 'signup', now(), `${source} · google`).run();
 
   // After the reply, as in signup.js: the welcome letter, then Mailchimp.

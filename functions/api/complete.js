@@ -25,7 +25,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const me = await studentBy(D, clean(body.token, 80));
   if (!me) return bad('Sign in first.', 401);
   await profile(D, me.id);
-  const p = (await D.prepare('SELECT company, interest, industry FROM student_profile WHERE student_id = ?').bind(me.id).first()) || {};
+  const p = (await D.prepare('SELECT company, interest, industry, google_at FROM student_profile WHERE student_id = ?').bind(me.id).first()) || {};
   const auth = await D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(me.id).first();
   const missing = missingOf({ ...p, hasPassword: !!(auth && auth.pass_hash) });
   if (!missing.length) return json({ ok: true, complete: true, missing: [] });

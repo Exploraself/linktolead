@@ -58,11 +58,12 @@ export function details(body = {}) {
  *  one universal rule, whatever sales page a founder came from). Any of
  *  'company' (never asked: NULL; '' means "No company yet" and counts),
  *  'interest', 'industry', 'password'. Empty: the account is complete. */
-export function missingOf({ company, interest, industry, hasPassword } = {}) {
+export function missingOf({ company, interest, industry, hasPassword, google_at: google } = {}) {
   const out = [];
   if (company === null || company === undefined) out.push('company');
   if (!INTERESTS.includes(interest)) out.push('interest');
   if (!INDUSTRIES.includes(industry)) out.push('industry');
-  if (!hasPassword) out.push('password');
+  // Google is a way in of its own (31 Oct 2026): no password asked of them.
+  if (!hasPassword && !google) out.push('password');
   return out;
 }

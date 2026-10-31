@@ -36,7 +36,7 @@ export async function growthWords(D, studentId) {
 /** What the account still lacks to be full ([] when it is full). */
 async function missing(D, studentId) {
   const [prof, auth] = await Promise.all([
-    D.prepare('SELECT company, interest, industry FROM student_profile WHERE student_id = ?').bind(studentId).first(),
+    D.prepare('SELECT company, interest, industry, google_at FROM student_profile WHERE student_id = ?').bind(studentId).first(),
     D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(studentId).first(),
   ]);
   return missingOf({ ...(prof || {}), hasPassword: !!(auth && auth.pass_hash) });

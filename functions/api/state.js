@@ -26,7 +26,7 @@ export async function onRequestGet({ request, env }) {
     D.prepare('SELECT stage,results_json,flags_json,updated_at,answers_json FROM compass WHERE student_id = ?').bind(me.id).first(),
     D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(me.id).first(),
     D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'stage-change' LIMIT 1").bind(me.id).first(),
-    D.prepare('SELECT signup_type, consent, unsubscribed, avatar, landing, source, industry, company, interest FROM student_profile WHERE student_id = ?').bind(me.id).first(),
+    D.prepare('SELECT signup_type, consent, unsubscribed, avatar, landing, source, industry, company, interest, google_at FROM student_profile WHERE student_id = ?').bind(me.id).first(),
   ]);
   const crossed = ((await D.prepare("SELECT detail FROM event WHERE student_id = ? AND kind = 'crossed'").bind(me.id).all()).results || []).map((r) => r.detail);
   await D.prepare('UPDATE student SET last_seen_at=? WHERE id=?').bind(now(), me.id).run();
