@@ -226,17 +226,18 @@ export function miniMirror(host, { page, first, onJoin }) {
  * Model stories (1 Nov): what a founder's first three Sundays can look like,
  * written as the model Alexandru will replace with real founders' words. They
  * are NOT real people, and every one carries the visible "Model story" tag
- * until a real one, with written permission, takes its place
+ * until a real one, with written permission, takes its place. No names:
+ * the quote, and the role of the person it models (Alexandru, 1 Nov)
  * (AGENTS.md §6, 01 START HERE §5). Swap `model: true` for a real story only.
  */
 export const STORIES = [
-  { model: true, name: 'Dana K.', who: 'Bookkeeping practice, two staff · Austin, Texas', stage: 'Growing', pain: 'Doing everything myself',
+  { model: true, title: 'Owner of a bookkeeping practice', who: 'Two staff', stage: 'Growing', pain: 'Doing everything myself',
     quote: 'I counted my week for the first time: 61 hours, and 19 of them were work my assistant could do. By the third Sunday I had handed her the invoicing, and I said my new price out loud to two clients. Neither of them blinked.',
     proof: ['19 hours a week found', 'Invoicing handed over', 'New price said to 2 clients'] },
-  { model: true, name: 'Luis M.', who: 'Landscaping company, crew of four · Phoenix, Arizona', stage: 'Growing', pain: 'Team not stepping up',
+  { model: true, title: 'Founder of a landscaping company', who: 'A crew of four', stage: 'Growing', pain: 'Team not stepping up',
     quote: 'My crew waited for me on every job. In week one I wrote what I expect in ten lines and read it to them on the Monday. That Friday was the first Friday in two years my phone didn’t ring.',
-    proof: ['Ten lines of what he expects', 'Read to the crew on Monday', 'A Friday without a call'] },
-  { model: true, name: 'Priya S.', who: 'Brand designer, working alone · Denver, Colorado', stage: 'Building', pain: 'Not enough clients',
+    proof: ['Ten lines on what is expected', 'Read to the crew on Monday', 'A Friday without a call'] },
+  { model: true, title: 'Independent brand designer', who: 'Working alone', stage: 'Building', pain: 'Not enough clients',
     quote: 'The mirror asked me to name the last ten people who paid me. I could name four. By week three I had asked three people to buy, out loud, with a price. Two said yes.',
     proof: ['Four names became ten', 'Three people asked to buy', 'Two said yes'] },
 ];
@@ -244,7 +245,6 @@ const SCSS = `.rk-st{display:grid;gap:14px;grid-template-columns:repeat(auto-fit
 .rk-st article{position:relative;display:grid;gap:12px;align-content:start;background:#FFFCF4;color:#1C1309;border:1px solid #D6C9AC;border-top:4px solid #B4975F;padding:22px 20px 20px;font-family:Inter,system-ui,Arial,sans-serif}
 .rk-st .tag{justify-self:start;line-height:1.3!important;font:700 10.5px/1 Inter,system-ui,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8A3B12;background:#F6E2D3;border:1px dashed #C2643A;padding:5px 8px}
 .rk-st blockquote{margin:0;font:400 18.5px/1.5 Newsreader,Georgia,serif;color:#1C1309}
-.rk-st blockquote::before{content:"“";display:block;font:500 48px/.6 Newsreader,Georgia,serif;color:#B4975F;margin-bottom:6px}
 .rk-st ul{list-style:none;margin:0;padding:12px 0 0;border-top:1px dashed #D6C9AC;display:grid;gap:4px;font-size:14px;color:#4A4033}
 .rk-st li::before{content:"✓ ";color:#4C7355;font-weight:700}
 .rk-st .by b{display:block;font:600 15px/1.3 Inter,system-ui,Arial,sans-serif}
@@ -255,9 +255,9 @@ export function stories(host) {
   const s = document.createElement('style'); s.textContent = SCSS; document.head.appendChild(s);
   host.classList.add('rk-st');
   host.innerHTML = STORIES.map((x) => `<article>${x.model ? '<span class="tag">Model story · not a real founder yet</span>' : ''}
-    <p class="pn">${esc(x.stage)} · ${esc(x.pain)}</p><blockquote>${esc(x.quote)}</blockquote>
+    <p class="pn">${esc(x.stage)} · ${esc(x.pain)}</p><blockquote>“${esc(x.quote)}”</blockquote>
     <ul>${x.proof.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
-    <p class="by"><b>${esc(x.name)}</b><span>${esc(x.who)}</span></p></article>`).join('');
+    <p class="by"><b>${esc(x.title)}</b><span>${esc(x.who)}</span></p></article>`).join('');
 }
 
 // ── 1 Nov, round 3: today and week twelve, and the founder's own case ──────

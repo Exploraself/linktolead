@@ -235,7 +235,7 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
   const B1 = read('public/road1/index.html');
   // Round 2 (1 Nov): model stories always carry their tag; the counter counts only known moments; the Boardroom door says its link is coming.
   const KIT = await import('../public/road-kit.js');
-  ok(KIT.STORIES.length === 3 && KIT.STORIES.every((x) => x.model === true) && K.includes("x.model ? '<span class=\"tag\">Model story · not a real founder yet</span>'"), 'model stories: every one is marked model, and the tag is printed on the page');
+  ok(KIT.STORIES.length === 3 && KIT.STORIES.every((x) => x.model === true && !('name' in x) && x.title) && K.includes("x.model ? '<span class=\"tag\">Model story · not a real founder yet</span>'"), 'model stories: every one is marked model, and the tag is printed on the page');
   ok(KIT.painFromUrl('https://x/road4/?pain=alone') === 'alone' && KIT.painFromUrl('https://x/?utm_content=ad3-pain-price') === 'price' && KIT.painFromUrl('https://x/?pain=nonsense') === '' && Object.values(KIT.PAINS).every((p) => p.hook && p.pain), 'message match: only the approved hooks, unknown pains leave the page as written');
   for (const r of ['road1', 'road3', 'road4']) ok(read(`public/${r}/index.html`).includes('Book the Boardroom · booking link coming up') && read(`public/${r}/index.html`).includes('id="story-list"'), `${r}: the Boardroom door says its link is coming up; the model stories have their place`);
   {
