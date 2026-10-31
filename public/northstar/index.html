@@ -44,7 +44,7 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
     <a href="#s-overview" data-go="overview" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #EEF2F7"><img src="assets/logo.webp" alt="" style="width: 38px; height: auto"><span style="font-size: 12px; letter-spacing: .13em; font-weight: 520">EXPLORASELF<small style="display: block; font-size: 8px; letter-spacing: .16em; font-weight: 400; color: #B8C6D6; margin-top: 3px">LEADER’S NORTH STAR</small></span></a>
     <div class="side-extra" style="font-size: 9px; letter-spacing: .17em; color: #B8C6D6; margin: 44px 12px 12px">YOUR NEXT CHAPTER</div>
     <nav class="navl" aria-label="Main navigation" id="nav"></nav>
-    <a class="incub-link" href="/ground-plan/#programme"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12Z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m12 5.7 2 4.3 4.3 2-4.3 2-2 4.3-2-4.3-4.3-2 4.3-2Z" fill="currentColor"/></svg><span><small>The incubator</small><b>The Founder’s Blueprint</b></span><i aria-hidden="true">→</i></a>
+    <a class="incub-link" href="/ground-plan/#programme"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12Z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m12 5.7 2 4.3 4.3 2-4.3 2-2 4.3-2-4.3-4.3-2 4.3-2Z" fill="currentColor"/></svg><span><small>Your programme</small><b>The Founder’s Blueprint</b></span><i aria-hidden="true">→</i></a>
     <div class="side-extra" style="margin-top: auto; padding: 30px 12px 0">
       <p style="font-family: Newsreader, Georgia, serif; font-size: 22px; line-height: 1.4; color: #A9C0D9">Lead yourself.<br>Build what matters.</p>
       <small style="font-size: 10px; color: #B8C6D6">Four domains. One whole picture.</small>
@@ -68,6 +68,7 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
           <button type="button" data-act="ws" data-f="ws" id="ws-btn" aria-expanded="false" aria-label="Your workspace" title="Your workspace" style="width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
         </div>
       </header>
+      <div id="nsprog" class="nsprog no-print" aria-live="polite"></div>
     </div>
     <div id="how"></div>
     <div id="ws"></div>
@@ -86,7 +87,7 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
         </div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 14px">
-        <h2 class="sf" style="font-size: 30px">Four steps. <span class="sfi" style="color: var(--goldink)">In this order.</span></h2>
+        <h2 class="sf" style="font-size: 30px">Four parts. <span class="sfi" style="color: var(--goldink)">In this order.</span></h2>
         <div id="stepcards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px"></div>
       </div>
     </section>
@@ -98,52 +99,54 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
       <span class="eb">How it works</span>
       <h1 class="sf" style="font-size: clamp(30px, 4vw, 44px); line-height: 1.05">Four domains. <span class="sfi" style="color: var(--goldink)">One whole picture.</span></h1>
       <p style="color: var(--muted); font-size: 16px; line-height: 1.8">Lead yourself, your people, your business and your market. Answer from real life, add rough numbers, read your North Star, and choose your next steps. Everything saves as you go.</p>
-      <button type="button" data-go="clear" style="align-self: flex-start; min-height: 46px; padding: 0 18px; border-radius: 4px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 520; cursor: pointer">Start with step 01 →</button>
+      <button type="button" data-go="clear" style="align-self: flex-start; min-height: 46px; padding: 0 18px; border-radius: 4px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 520; cursor: pointer">Start →</button>
     </section>
 
-    <!-- ===== STEP 01 · GET CLEAR ===== -->
-    <div style="display: flex; flex-direction: column; gap: 64px">
-      <section id="s-clear" style="display: flex; flex-direction: column; gap: 20px">
-        <div class="rise" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap">
-          <div style="display: flex; flex-direction: column; gap: 8px; max-width: 640px">
-            <span class="eb">Step 01 · Get clear · Know yourself</span>
-            <h1 class="sf" style="font-size: clamp(30px, 4vw, 44px); line-height: 1.05">Eight questions. <span class="sfi" style="color: var(--goldink)">One page.</span></h1>
-            <p style="color: var(--muted)">Answer from what really happened, not from what you hope.</p>
-          </div>
-          <div id="ring"></div>
+    <!-- ===== BEFORE YOU START (31 Oct): where you are, where you want to get,
+         paying customers yet, your four strengths. Not a part: it sets the road. ===== -->
+    <section id="s-clear" style="display: flex; flex-direction: column; gap: 28px">
+      <div style="display: flex; flex-direction: column; gap: 8px; max-width: 640px">
+        <span class="eb">Before you start</span>
+        <h1 class="sf" style="font-size: clamp(30px, 4vw, 44px); line-height: 1.05">Where you are. <span class="sfi" style="color: var(--goldink)">Where you want to get.</span></h1>
+        <p style="color: var(--muted)">A few taps. They set your road and the questions you get.</p>
+      </div>
+      <div id="skipnote"></div>
+      <div id="s-journey" class="j" style="display: flex; flex-direction: column; gap: 40px"></div>
+      <div id="herebar"></div>
+      <div id="modes"></div>
+      <section id="s-strengths" style="display: flex; flex-direction: column; gap: 16px"></section>
+    </section>
+
+    <!-- ===== PART 1 · YOURSELF ===== -->
+    <section id="s-part1" class="nspart" data-part="1" style="display: flex; flex-direction: column; gap: 20px">
+      <div class="rise" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap">
+        <div style="display: flex; flex-direction: column; gap: 8px; max-width: 640px">
+          <span class="eb">Part 1 · Yourself</span>
+          <h1 class="sf" style="font-size: clamp(30px, 4vw, 44px); line-height: 1.05">Eight questions. <span class="sfi" style="color: var(--goldink)">One page.</span></h1>
+          <p style="color: var(--muted)">Answer from what really happened, not from what you hope.</p>
         </div>
-        <div id="skipnote"></div>
-        <div id="s-journey" class="j" style="display: flex; flex-direction: column; gap: 40px"></div>
-        <div id="herebar"></div>
-        <div id="modes"></div>
-        <div id="dombars"></div>
-        <div id="questions" style="display: flex; flex-direction: column; gap: 12px"></div>
-      </section>
-
-      <!-- Pains and goals are pages 09 and 10 of the questions notebook (31 Oct). -->
-
-      <!-- ===== STRENGTHS + NORTH STAR READING ===== -->
+        <div id="ring"></div>
+      </div>
+      <div id="questions" style="display: flex; flex-direction: column; gap: 12px"></div>
+      <!-- Your North Star: your answers beside your strengths, once Part 1 is done. -->
       <section id="s-reading" style="display: flex; flex-direction: column; gap: 20px"></section>
+    </section>
 
-      <button type="button" data-go="people" style="align-self: flex-end; min-height: 48px; padding: 0 20px; border-radius: 4px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 520; cursor: pointer">Next: lead your people →</button>
-    </div>
-
-    <!-- ===== STEP 02 · not written yet, and says so ===== -->
-    <div style="display: flex; flex-direction: column; gap: 16px">
+    <!-- ===== PART 2 · YOUR PEOPLE: not written yet, and says so ===== -->
+    <div class="nspart" data-part="2" style="display: flex; flex-direction: column; gap: 16px">
       <section id="s-people" class="card" style="padding: 20px; display: flex; gap: 14px; align-items: center; border-style: dashed">
-        <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2 20c1-3.5 3.5-5 7-5s6 1.5 7 5M16 4.5a3.5 3.5 0 0 1 0 6.5M18 15c2 .6 3.4 2.3 4 5" fill="none" stroke="var(--people)" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <div style="display: flex; flex-direction: column; gap: 2px"><span class="eb">Step 02 · Lead your people · Know your people</span><span style="font-size: 14px; color: var(--muted)">Customers and team. For founders without a team yet: how to build one. Questions to be written next.</span></div>
+        <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2 20c1-3.5 3.5-5 7-5s6 1.5 7 5M16 4.5a3.5 3.5 0 0 1 0 6.5M18 15c2 .6 3.4 2.3 4 5" fill="none" stroke="var(--goldink)" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <div style="display: flex; flex-direction: column; gap: 2px"><span class="eb">Part 2 · Your people</span><span style="font-size: 14px; color: var(--muted)">Customers and team, and for founders without a team yet, how to build one. These questions are still being written. Go on to Part 3 · Your numbers.</span></div>
       </section>
-      <button type="button" data-go="numbers" style="align-self: flex-end; min-height: 48px; padding: 0 20px; border-radius: 4px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 520; cursor: pointer">Next: count what matters →</button>
     </div>
 
-    <!-- ===== STEP 03 · COUNT WHAT MATTERS ===== -->
-    <div style="display: flex; flex-direction: column; gap: 64px">
+    <!-- ===== PART 3 · YOUR NUMBERS ===== -->
+    <div class="nspart" data-part="3" style="display: flex; flex-direction: column; gap: 64px">
       <section id="s-numbers" style="display: flex; flex-direction: column; gap: 20px"></section>
 
       <section id="s-feedback" style="display: flex; flex-direction: column; gap: 20px">
         <div style="display: flex; flex-direction: column; gap: 8px; max-width: 760px">
-          <span class="eb">Step 03 · Count what matters · Part 2 of 2</span>
+          <span class="eb">Part 3 · Your numbers · what they mean</span>
           <h1 class="sf" style="font-size: clamp(30px, 4vw, 44px); line-height: 1.05">What it means, <span class="sfi" style="color: var(--goldink)">in all four domains.</span></h1>
         </div>
         <div style="display: flex; flex-direction: column; gap: 16px">
@@ -168,11 +171,11 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
 
     <div class="breath" aria-hidden="true"><svg viewBox="0 0 120 14" width="120" height="14"><line x1="0" y1="7" x2="48" y2="7" stroke="#6F93B8" stroke-width="1"/><path d="M60 1l6 6-6 6-6-6z" fill="#6F93B8"/><line x1="72" y1="7" x2="120" y2="7" stroke="#6F93B8" stroke-width="1"/></svg></div>
 
-    <!-- ===== STEP 04 · WHAT IF? ===== -->
-    <section id="s-whatif" class="deep" style="border-radius: 12px; padding: 32px 26px; display: flex; flex-direction: column; gap: 24px">
+    <!-- ===== PART 4 · YOUR NEXT STEPS: the what-if lab ===== -->
+    <section id="s-whatif" class="deep nspart" data-part="4" style="border-radius: 12px; padding: 32px 26px; display: flex; flex-direction: column; gap: 24px">
       <div class="whead">
         <div style="display: flex; flex-direction: column; gap: 10px; min-width: 0">
-          <span class="eb" style="color: #A9C0D9" id="labtag">Step 04 · The what-if lab</span>
+          <span class="eb" style="color: #A9C0D9" id="labtag">Part 4 · Your next steps · the what-if lab</span>
           <h1 class="sfi" style="font-size: clamp(64px, 10vw, 112px); line-height: .9; color: #6F93B8">What if?</h1>
           <span class="sf" style="font-size: 21px; line-height: 1.35; max-width: 34ch">You want to grow. So ask it. Move one of four levers and watch your cash, clients, time and people answer.</span>
         </div>
@@ -219,7 +222,7 @@ if(location.protocol!=='file:'&&/\/northstar$/.test(location.pathname)){const b=
           <div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 14px">
             <span style="font-size: 12px; letter-spacing: .32em; color: #A9C0D9">LINK TO LEAD · THE TOP</span>
             <h2 class="sf foil" style="font-size: clamp(44px, 6vw, 76px); line-height: .98">The Summit</h2>
-            <p class="sfi" style="font-size: 22px; line-height: 1.4; color: #E3EAF2">The whole incubator. With Alexandru beside you, every week.</p>
+            <p class="sfi" style="font-size: 22px; line-height: 1.4; color: #E3EAF2">The whole Blueprint. With Alexandru beside you, every week.</p>
             <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 6px">
               <a href="/northstar/summit" class="go" style="min-height: 52px; padding: 0 26px; border-radius: 3px; border: 1px solid #A9C0D9; background: #6F93B8; color: #0E1C2B; font-weight: 520; font-size: 15px; letter-spacing: .04em; text-decoration: none; display: inline-flex; align-items: center; gap: 10px">Open The Summit <span class="arr" aria-hidden="true">→</span></a>
               <span style="font-family: Newsreader, Georgia, serif; font-size: 26px; color: #EEF2F7">$1,989</span>

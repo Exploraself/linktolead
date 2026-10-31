@@ -139,3 +139,97 @@ body.ns-qview #banner{opacity:0;visibility:hidden;pointer-events:none;transition
 @media(prefers-reduced-motion:reduce){#banner{transition:none !important}}
 #s-reading{scroll-margin-top:150px}
 @media(max-width:860px){#s-reading{scroll-margin-top:20px}}
+
+/* ── The path (31 Oct): Before you start, then Parts 1–4 ───────────────── */
+/* One fewer thing on the top bar: with an account, light/dark and Make it
+   yours live in the initials menu. */
+#top-tools:has(.pm) [data-theme-switch],#top-tools:has(.pm) #ws-btn{display:none !important}
+.nsprog:empty{display:none}
+.nsprog{margin:0 -22px;padding:8px 28px 10px;border-bottom:1px solid var(--line);background:var(--panel)}
+.nsprog-in{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"parts pct" "bar bar";gap:6px 14px;align-items:center}
+.nsprog-parts{grid-area:parts;list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:6px;min-width:0;overflow-x:auto;scrollbar-width:none}
+.nsprog-parts::-webkit-scrollbar{display:none}
+.nsprog-parts li{flex:none}
+.nsprog-parts li.arr{width:18px;height:1px;background:var(--line);position:relative}
+.nsprog-parts li.arr::after{content:"";position:absolute;right:-1px;top:-3px;border:3.5px solid transparent;border-left:5px solid var(--line)}
+.nsprog-parts button{display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:2px 10px 2px 3px;border:1px solid transparent;border-radius:999px;background:none;color:var(--muted);font:500 12.5px Inter,Arial,sans-serif;cursor:pointer;white-space:nowrap}
+.nsprog-parts i{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font:600 11px Inter,Arial,sans-serif;font-style:normal;border:1.5px solid var(--line);color:var(--muted)}
+.nsprog-parts li.now button{color:var(--ink);border-color:#6F93B8;background:rgba(111,147,184,.1)}
+.nsprog-parts li.now i{background:#6F93B8;border-color:#6F93B8;color:#0E1C2B;animation:nsbeat 2.4s ease-in-out infinite}
+.nsprog-parts li.done button{color:var(--ink)}
+.nsprog-parts li.done i{background:#3E6A94;border-color:#3E6A94;color:#fff}
+@keyframes nsbeat{0%,100%{box-shadow:0 0 0 0 rgba(111,147,184,.5)}50%{box-shadow:0 0 0 5px rgba(111,147,184,0)}}
+.nsprog-bar{grid-area:bar;height:4px;border-radius:4px;background:var(--cream);overflow:hidden}
+.nsprog-bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#3E6A94,#6F93B8);transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.nsprog-pct{grid-area:pct;font:500 20px Newsreader,Georgia,serif;color:var(--goldink);font-variant-numeric:tabular-nums}
+
+/* Later parts wait, visibly, until the one before is done. */
+.nslocked>*:not(.nslocknote){opacity:.38;filter:saturate(.4);transition:opacity .5s ease}
+.nslocked{cursor:not-allowed}
+.nslocknote{display:flex;align-items:center;gap:8px;margin:0;padding:10px 14px;border-radius:999px;border:1px dashed var(--line);font-size:13px;color:var(--muted);align-self:flex-start;background:var(--paper)}
+.nslocknote::before{content:"";width:12px;height:12px;flex:none;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 11V8a5 5 0 0 1 10 0v3h1v10H6V11zm2 0h6V8a3 3 0 0 0-6 0z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 11V8a5 5 0 0 1 10 0v3h1v10H6V11zm2 0h6V8a3 3 0 0 0-6 0z'/%3E%3C/svg%3E") center/contain no-repeat}
+
+/* The thing still open, pulsing three times when the guide arrives. */
+.nsflash{animation:nsflash .7s ease-in-out 3;border-radius:10px}
+@keyframes nsflash{0%,100%{box-shadow:0 0 0 0 rgba(196,84,58,0)}50%{box-shadow:0 0 0 4px rgba(196,84,58,.75),0 0 24px rgba(196,84,58,.35)}}
+
+/* The road: a hand that swipes until a goal is chosen. */
+.nshand{position:absolute;top:58%;left:var(--from);z-index:3;pointer-events:none;animation:nshand 2.6s ease-in-out infinite;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
+@keyframes nshand{0%{left:var(--from);opacity:0}15%{opacity:1}55%{left:var(--to);opacity:1}75%{left:var(--to);opacity:0}100%{left:var(--from);opacity:0}}
+
+/* The compass, readable: names outside the circle, a big key. */
+.nscompbox{border-radius:10px;padding:18px;display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+.nscompass{flex:1 1 300px;max-width:460px;height:auto}
+.nscompass .cl{font:700 19px Inter,Arial,sans-serif;letter-spacing:.04em}
+.nskey{flex:1 1 220px;display:flex;flex-direction:column;gap:10px;color:#EEF2F7}
+.nskey span{display:grid;grid-template-columns:30px 1fr;column-gap:10px;align-items:center}
+.nskey b{font:500 20px/1.2 Newsreader,Georgia,serif}
+.nskey small{grid-column:2;font-size:13px;color:#A9B6C6}
+.nskey i{grid-row:span 2;width:30px;height:16px;border-radius:3px}
+.nskey .k-ans{background:rgba(111,147,184,.4);border:2.5px solid #6F93B8}
+.nskey .k-str{border:2px dashed #EEF2F7}
+.nskey p{margin:4px 0 0;font:italic 400 16px/1.45 Newsreader,Georgia,serif;color:#E3EAF2}
+.nsreading{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+.nsread{display:flex;flex-direction:column;gap:2px;color:#EEF2F7}
+.nsread b{font-size:20px;font-weight:440}
+.nsread span:not(.eb){font-size:14px;color:#E3EAF2}
+@media(max-width:860px){.nsreading{grid-template-columns:1fr}}
+
+/* The notebook's list: a line that fills as questions are answered. */
+.nsb-list{position:relative}
+.nsb-list::before,.nsb-list::after{content:"";position:absolute;left:10px;top:18px;width:2px;border-radius:2px}
+.nsb-list::before{bottom:18px;background:var(--edge)}
+.nsb-list::after{height:calc((100% - 36px) * var(--fill, 0%) / 100%);max-height:calc(100% - 36px);background:#6F93B8;transition:height .6s cubic-bezier(.2,.8,.2,1)}
+.nsb-list .nsb-s{position:relative;z-index:1}
+.nsb-n{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font:600 11px Inter,Arial,sans-serif !important;background:var(--lf);border:1.5px solid var(--edge);color:var(--soft) !important;margin-left:-1px}
+.nsb-s.done .nsb-n{background:#3E6A94;border-color:#3E6A94;color:#fff !important}
+.nsb-s.now .nsb-n{background:#6F93B8;border-color:#6F93B8;color:#0E1C2B !important}
+.nsb-s.missed .nsb-n{border-color:#C4543A;color:#C4543A !important}
+.nsb-s.missed .nsb-st i{color:#C4543A;font-style:normal;font-size:12px;font-weight:600}
+.nsb-s.done .nsb-st i{color:#3E6A94}
+.cf[data-theme="dark"] .nsb-s.done .nsb-st i{color:#A9C0D9}
+
+/* A domain's level on its feedback card, read as a level, not progress. */
+.nslevel{display:inline-flex;align-items:baseline;gap:4px;padding:3px 10px;border-radius:999px;border:1px solid var(--c);color:var(--c);font-size:12px;font-weight:520}
+.nslevel b{font:500 16px Newsreader,Georgia,serif}
+
+/* The save bar waits until Part 1 is done. */
+body:not(.ns-p1done) .mbar{display:none !important}
+
+@media(max-width:760px){
+  .nsprog{margin:0 -16px;padding:6px 12px 8px}
+  .nsprog-parts li:not(.now) span{display:none}
+  .nsprog-parts li:not(.now) button{padding:2px}
+  .nsprog-pct{font-size:17px}
+}
+@media(prefers-reduced-motion:reduce){.nshand,.nsprog-parts li.now i,.nsflash{animation:none !important}.nsflash{box-shadow:0 0 0 3px #C4543A}.nsb-list::after,.nsprog-bar i{transition:none}}
+/* The path bar replaces the old sticky launchpad banner (it sat over the page). */
+#banner{position:static !important}
+@media(max-width:860px){.side .navl{display:none}}
+/* Before you start, on a phone: the four stages as small taps, two by two. */
+@media(max-width:760px){
+  [role="group"][aria-label="Where are you today?"]{grid-template-columns:1fr 1fr !important;gap:8px !important}
+  [data-act="here"]{padding:10px 12px !important;min-height:0 !important;gap:2px !important}
+  [data-act="here"] .serif{display:none}
+  [data-act="here"] .stname{font-size:19px !important}
+}
