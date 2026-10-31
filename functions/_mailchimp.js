@@ -99,10 +99,14 @@ export function mailchimpState(env = {}) {
 /** The Mailchimp tag for each sales page (the landing key stored on the
  *  profile): /road1/, /north3/ (the North Star sales page) and /road3/ (the 12
  *  Scrolls page). Founders tagged before the roads keep their old tags. */
-/** Which sales page a founder signed up on (Alexandru, 30 Oct 2026). The old
+/** Which sales page a founder signed up on (Alexandru, 30 Oct 2026). The rule
+ *  (31 Oct): every sales page's tag is linktolead- plus its address, so
+ *  /north3/ (landing key road2) is linktolead-north3 and /north2/ (road21) is
+ *  linktolead-north2. /north1/ links into the North Star with utm_source=north1,
+ *  so a sign-up from there is landing north1. The old
  *  names ('Landing - Road 1' …) are sent as inactive, so a founder whose tags
  *  are sent again loses the old one (API mode). */
-export const LANDING_TAGS = { road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', road4: 'linktolead-road4', compass: 'linktolead-northstar', summit: 'linktolead-summitpage' };
+export const LANDING_TAGS = { road1: 'linktolead-road1', road2: 'linktolead-north3', road21: 'linktolead-north2', north1: 'linktolead-north1', road3: 'linktolead-road3', road4: 'linktolead-road4', compass: 'linktolead-northstar', summit: 'linktolead-summitpage' };
 
 /** The tags for one founder. In API mode each stage and domain tag is sent as
  *  active or inactive, so a founder who moves on loses the old one. Step tags

@@ -155,13 +155,19 @@
    *  account at once and this browser's answers go into it. An email that
    *  already has one is never handed its token: unless this is the silent
    *  carry-over, a sign-in link is sent instead. */
+  /* Which sales page sent the founder here. /north1/ links in with
+   * utm_source=north1: a sign-up after that counts as North 1, so it gets its
+   * own tag (linktolead-north1). Kept for this browser session. */
+  const DOOR_KEY = 'ftb-door';
+  try { if (new URLSearchParams(location.search).get('utm_source') === 'north1') sessionStorage.setItem(DOOR_KEY, 'north1'); } catch { /* private mode */ }
+  const door = () => { try { return sessionStorage.getItem(DOOR_KEY) === 'north1' ? 'north1' : 'compass'; } catch { return 'compass'; } };
   async function createAccount(source, silent) {
     if (!A || signedIn() || !identified()) return signedIn();
     const P = S.profile;
     let out;
     let utm = {};
     try { utm = (await import('/forms.js')).utm(); } catch { /* no tags kept */ }
-    try { out = await A.signup({ first: P.first, last: P.last, email: P.email, industry: P.industry, consent: P.consent, source, stage: S.stage, type: 'simple', landing: 'compass', utm }); }
+    try { out = await A.signup({ first: P.first, last: P.last, email: P.email, industry: P.industry, consent: P.consent, source, stage: S.stage, type: 'simple', landing: door(), utm }); }
     catch { return false; }
     S.acct = { email: P.email, state: out.token ? 'yes' : out.existing ? 'existing' : '' };
     save();

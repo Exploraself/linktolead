@@ -196,7 +196,7 @@ export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {
 /** Sign-ups from a North Star page (road2, north2 (landing road21), the North Star box) came
  *  for the North Star, so their welcome opens it; the Launchpad is the next
  *  step, not the subject (Alexandru, 30 Oct). */
-export const NORTH_STAR_LANDINGS = ['road2', 'road21', 'compass'];
+export const NORTH_STAR_LANDINGS = ['road2', 'road21', 'compass', 'north1'];
 
 /** "northstar-welcome": sent once, when an account is made on a North Star page. */
 export function northStarWelcome(base, { first, to = '', tier, offer, ...o } = {}) {

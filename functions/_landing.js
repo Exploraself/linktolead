@@ -18,10 +18,8 @@ export const REDIRECTS = {
   '/summit': '/northstar/summit/',
   '/north-star': '/northstar/',
   '/blueprint': '/road1/',
-  // Road 2 became /north3/ (31 Oct): the North Star sales page.
-  '/road2': '/north3/',
-  // Road 2.1 became /north2/ (31 Oct): it sells the North Star.
-  '/road2.1': '/north2/',
+  // /road2/ and /road2.1/ became /north3/ and /north2/ (31 Oct). Their old
+  // addresses are kept free on purpose, for new road pages.
 };
 
 /** The redirect for this request, or null when its address is not an old one. */

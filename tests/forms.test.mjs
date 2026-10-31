@@ -64,7 +64,7 @@ ok(env.DB.raw.prepare("SELECT COUNT(*) n FROM student WHERE email = 'fay@example
 const fay = out.token;
 ok(st === 200 && fay && hasPw(fay), 'full form: one record, signed in, with its password');
 ok(JSON.stringify(prof(fay)) === JSON.stringify({ signup_type: 'full', company: 'Fay & Co', interest: 'Higher income', industry: 'Real estate', landing: 'road2', utm_source: 'meta', utm_content: 'home-c' }), 'full form: company, interest, industry, landing Road 2 and the utm tags stored');
-ok(/"linktolead-road2"/.test(mcLog(fay)) && /"COMPANY":"Fay & Co"/.test(mcLog(fay)) && /"INDUSTRY":"Real estate"/.test(mcLog(fay)) && /"INTEREST":"Higher income"/.test(mcLog(fay)) && !/Industry - |Interest - |Signup - |salespageincubator/.test(mcLog(fay)), 'Mailchimp (TEST): tag linktolead-road2; company, industry and interest as contact fields, not tags');
+ok(/"linktolead-north3"/.test(mcLog(fay)) && /"COMPANY":"Fay & Co"/.test(mcLog(fay)) && /"INDUSTRY":"Real estate"/.test(mcLog(fay)) && /"INTEREST":"Higher income"/.test(mcLog(fay)) && !/Industry - |Interest - |Signup - |salespageincubator/.test(mcLog(fay)), 'Mailchimp (TEST): tag linktolead-north3 (the page /north3/); company, industry and interest as contact fields, not tags');
 
 [st, out] = await S({ first: 'Sam', last: 'Simple', email: 'sam@example.com', consent: true, source: 'home', type: 'simple', landing: 'road3', password: 'a-long-password', confirm: 'a-long-password', utm: { utm_source: 'exploraself', utm_medium: 'banner' } });
 const sam = out.token;
@@ -147,7 +147,7 @@ ok(levelsHTML('build').includes(`<p>${weekTitle('build', 1)}</p>`) && (levelsHTM
 ok([1, 3, 4, 5, 6, 11, 12].map(band).join() === 'free,free,with,with,,,last', 'Road 3: the levels’ bands');
 const WB = read('public/north3/index.html');
 for (const W of [WB]) ok(W.includes('<button type="button" data-gate class="cta gold-btn" style="min-height: 56px; padding: 0 32px; font-size: 17px">Show me my road →</button>') && !W.includes('href="#dream"') && !/<a [^>]*href="\/(?!compass\/assets|assets)/.test(W), 'Road 2: "Show me my road" opens the full form; no link leaves the page');
-ok(read('public/north3/sales.js').includes("variant: 'full', landing: 'road2'") && WB.includes('src="/north3/sales.js"') && WB.includes('content="https://linktolead.exploraself.com/north3/"') && read('public/northstar/app.js').includes("type: 'simple', landing: 'compass'"), 'Road 2 stays FULL, landing road2; the /northstar box stays SIMPLE');
+ok(read('public/north3/sales.js').includes("variant: 'full', landing: 'road2'") && WB.includes('src="/north3/sales.js"') && WB.includes('content="https://linktolead.exploraself.com/north3/"') && read('public/northstar/app.js').includes("type: 'simple', landing: door()"), 'Road 2 stays FULL, landing road2; the /northstar box stays SIMPLE');
 const box = read('public/account-box.js');
 ok(/pwInput\('j-pw'\)/.test(box) && /pwInput\('j-pw2'\)/.test(box) && /data-eye=/.test(box) && /variant === 'full' \? detailFields/.test(box) && /landing: ctx\.landing, utm: utm\(\)/.test(box), 'the account box: a password (with the show-password eye) on the full form only, landing and utm sent');
 
@@ -181,19 +181,20 @@ const noRun = baseOf({ ...EXAMPLE, run: null, rate: null, hire: null }), nm = E.
 ok(noRun.fixed === 0 && nm.cash === null && nm.people === null && Number.isFinite(nm.mine), 'empty Fine-tune boxes: no money figure invented, the hours still move');
 
 // ── Mailchimp landing tags ──────────────────────────────────────────────────
-ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-road2', road21: 'linktolead-road2.1', road3: 'linktolead-road3', road4: 'linktolead-road4', compass: 'linktolead-northstar', summit: 'linktolead-summitpage' }), 'landing tags: the linktolead-… system');
+ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-north3', road21: 'linktolead-north2', north1: 'linktolead-north1', road3: 'linktolead-road3', road4: 'linktolead-road4', compass: 'linktolead-northstar', summit: 'linktolead-summitpage' }), 'landing tags: the linktolead-… system');
 // Road 2.1 (30 Oct): its own tag, no empty old tag, the FULL form, and road2 untouched beside it.
 {
   const { tagsFor } = await import('../functions/_mailchimp.js');
   const t = tagsFor({ landing: 'road21', signupType: 'full' });
-  ok(t.some((x) => x.name === 'linktolead-road2.1' && x.status === 'active') && t.every((x) => typeof x.name === 'string' && x.name), 'road2.1: tagged linktolead-road2.1, no empty tag');
+  ok(t.some((x) => x.name === 'linktolead-north2' && x.status === 'active') && t.every((x) => typeof x.name === 'string' && x.name), 'north2: tagged linktolead-north2, no empty tag');
   const R21 = read('public/north2/index.html'), J21 = read('public/north2/page.js');
   ok(J21.includes("variant: 'full', landing: 'road21'") && R21.includes('src="/north2/page.js"') && !/PHOTO OF/.test(R21) && R21.includes('/cabinet/alexandru.jpg'), 'road2.1: full form, landing road21, the real photo');
   const labels = new Set((R21.match(/<button type="button" data-gate[^>]*>([^<]+)/g) || []).map((m) => m.replace(/.*>/, '').trim()));
   ok(labels.size === 1 && labels.has('Start my North Star →'), 'road2.1: one button label, everywhere');
   const AB = read('public/account-box.js');
-  ok(AB.includes("const NS_HOME = ['road21'];") && AB.includes("? '/northstar/' : '/ground-plan/#home'") && J21.includes("location.replace('/northstar/')") && read('functions/_landing.js').includes("'/road2.1': '/north2/'"), 'north2 (was road2.1): Start my North Star opens the North Star, and the old address still lands');
-  ok(read('public/north3/sales.js').includes("landing: 'road2', next: opener ? '/northstar/' : ''") && AB.includes('const after = () => ctx.next ||') && read('functions/_landing.js').includes("'/road2': '/north3/'") && read('public/ground-plan/index.html').includes("/north3/#join"), 'north (was road2): its buttons open the North Star; sign-ups sent from the Blueprint still land on Base Camp; the old address still lands');
+  ok(AB.includes("const NS_HOME = ['road21'];") && AB.includes("? '/northstar/' : '/ground-plan/#home'") && J21.includes("location.replace('/northstar/')") && !read('functions/_landing.js').includes("'/road2.1':"), 'north2 (was road2.1): Start my North Star opens the North Star; /road2.1/ is kept free');
+  ok(tagsFor({ landing: 'north1' }).some((x) => x.name === 'linktolead-north1') && read('public/northstar/app.js').includes("get('utm_source') === 'north1'"), 'north1: a sign-up after /north1/ is tagged linktolead-north1');
+  ok(read('public/north3/sales.js').includes("landing: 'road2', next: opener ? '/northstar/' : ''") && AB.includes('const after = () => ctx.next ||') && !read('functions/_landing.js').includes("'/road2':") && read('public/ground-plan/index.html').includes("/north3/#join"), 'north3 (was road2): its buttons open the North Star; sign-ups sent from the Blueprint still land on Base Camp; /road2/ is kept free');
   ok(!/most founders|incubator/i.test(R21.replace(/<!--[\s\S]*?-->/g, '')), 'road2.1: no banned words on the page');
 }
 // Road 4 (31 Oct): the sales page for The Founder's Blueprint, taps only.
