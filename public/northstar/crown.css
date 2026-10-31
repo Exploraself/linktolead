@@ -126,3 +126,13 @@ body.crownopen .jw{opacity:1;visibility:visible;pointer-events:auto;transform:tr
 @media(max-width:360px){.crown-arc{--r:136px}.jw{width:66px;left:-33px}}
 @media(prefers-reduced-motion:reduce){.jw,.crown,.crown-row,.crown-veil,.crown-hint,.nsb-l,.nsb-s,.nsb-o{transition:none !important}}
 @media print{.crown-wrap{display:none !important}.nsb{box-shadow:none}}
+
+/* While the questions are on screen, the launchpad banner steps aside so it
+   never sits over the book (31 Oct). It returns below the questions. */
+#banner{transition:opacity .3s ease,visibility 0s linear 0s}
+body.ns-qview #banner{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility 0s linear .3s}
+.nsb-dot{flex:none;width:9px;height:9px;border-radius:50%}
+[data-fs][hidden]{display:none !important}
+@media(prefers-reduced-motion:reduce){#banner{transition:none !important}}
+#s-reading{scroll-margin-top:150px}
+@media(max-width:860px){#s-reading{scroll-margin-top:20px}}

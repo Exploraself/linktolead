@@ -47,7 +47,7 @@ try { if (!localStorage.getItem('ftb-token') && location.hash !== '#signin' && !
       <span class="btext"><span class="bsmall">EXPLORASELF</span><span class="bname">The Founder&rsquo;s Blueprint</span></span>
     </a>
     <nav class="tnav" id="tnav" aria-label="Programme"></nav>
-    <div class="topend"><span id="themehost"></span><div id="pmhost"></div></div>
+    <div class="topend"><button type="button" class="es-ts" data-fs aria-label="Full screen" aria-pressed="false"></button><span id="themehost"></span><div id="pmhost"></div></div>
   </div>
 </header>
 
@@ -62,6 +62,7 @@ try { if (!localStorage.getItem('ftb-token') && location.hash !== '#signin' && !
 </footer>
 
 <script src="/northstar/engine.js" defer></script>
+<script src="/fullscreen.js" defer></script>
 <script src="/app.js" type="module"></script>
 </body>
 </html>

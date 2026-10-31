@@ -16,6 +16,7 @@
 }
 
 body.inwork{background:var(--desk)}
+[data-fs][hidden]{display:none!important}
 body.inwork .top,body.inwork .mp{transition:opacity .6s ease}
 body.cw-hushed .top,body.cw-hushed .mp{opacity:.25}
 /* The music lives in the Crown here; the player opens from it. */
