@@ -272,6 +272,14 @@
     }
     render();
     if (signedIn()) import('/profile-menu.js').then((m) => m.mount(document.getElementById('top-tools'))).catch(() => {});
+    // Came in through the Blueprint and opening the North Star for the first
+    // time: confirm name and email once (tag linktolead-crossed-northstar).
+    if (signedIn()) A.pull().then((r) => {
+      if (!r || !r.me || r.me.origin !== 'blueprint' || (r.me.crossed || []).includes('northstar')) return;
+      const [first, ...rest] = String(r.me.name || '').split(' ');
+      import('/reset-box.js').then((m) => m.openConfirm({ to: 'northstar', first, last: rest.join(' '), email: r.me.email,
+        done: ({ first: f, last: l }) => { S.profile.first = f; S.profile.last = l; save(); render(); } }));
+    }).catch(() => {});
     // From outside, with answers already on this browser: the account first.
     if (!signedIn() && !code && hasWork(S)) fullAccount();
   }

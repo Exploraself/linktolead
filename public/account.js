@@ -107,6 +107,9 @@ export async function login(email, password) {
   return out;
 }
 
+/** Confirmed name and email on first opening the other door (api/cross.js). */
+export const cross = (to, first, last) => post('/api/cross', { token: token(), to, first, last });
+
 /** The profile picture: a small square data: URL, or '' to remove it. */
 export const setAvatar = (image) => post('/api/avatar', { token: token(), image });
 
