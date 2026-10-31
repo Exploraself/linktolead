@@ -152,7 +152,7 @@ ok(r.status === 200 && sent[0].body.text.includes('For you that’s Lead your bu
   ok(!launchpadWelcome(B, { first: 'Ana' }).attachments, 'the Launchpad welcome attaches nothing');
   const sent = fakeResend();
   const r = await sendMail({ RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'Via Roma 1, Rome' }, { to: 'a@x.y', ...N, why: 'test' });
-  ok(r.ok && JSON.stringify(sent[0].body.attachments) === JSON.stringify([{ filename: 'Massive-Growth-Plan.pdf', path: GROWTH_PLAN_PDF.path }]), 'send() hands the attachment to Resend');
+  ok(r.ok && JSON.stringify(sent[0].body.attachments) === JSON.stringify([{ filename: 'North-Star-Massive-Growth-Plan.pdf', path: GROWTH_PLAN_PDF.path }]), 'send() hands the attachment to Resend');
   const sent2 = fakeResend();
   await sendMail({ RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'Via Roma 1, Rome' }, { to: 'a@x.y', ...launchpadWelcome(B, { first: 'Ana' }), why: 'test' });
   ok(!('attachments' in sent2[0].body), 'no attachment field when there is nothing to attach');
