@@ -475,18 +475,9 @@
    * The step and its eight questions on the left page, one question on the
    * right. Keys 1–4 choose, Enter moves on, and the tools wait in the Crown
    * at the bottom while the questions are on screen. */
-  const SHORT = {
-    q1: 'What the business is for', q2: 'What you can put at risk', q3: 'The people affected', q4: 'Someone who tells you the truth',
-    q5: 'What you sell and what it costs', q6: 'What you need each month', q7: 'Their problem, tested', q8: 'Who your offer helps',
-    q9: 'Where your week went', q10: 'Income without wearing out', q11: 'What is included, and if things change', q12: 'Feedback and hard conversations',
-    q13: 'What is left after costs', q14: 'Delivery without starting over', q15: 'Where customers come from', q16: 'Why they come back, or stop',
-    q17: 'Letting a decision go', q18: 'When your way slows things', q19: 'Who can decide what', q20: 'Saying something is wrong',
-    q21: 'What more work will cost', q22: 'The work without you', q23: 'A new group, tested for profit', q24: 'If the biggest customer left',
-    q25: 'What enough looks like', q26: 'Questioning your plans', q27: 'Growing other leaders', q28: 'Who steps in',
-    q29: 'Comparing options first', q30: 'A serious disruption, tested', q31: 'Your effect on others', q32: 'Changing customer needs',
-  };
-  /* A note in the margin for each answer: what it means, never a verdict. */
-  const NOTES = ['Honest. This is where your first step will lean.', 'A guess is a fine start. We’ll make it a number.', 'Good ground. Keep one dated example.', 'Checked, not hoped. That’s a strength.'];
+  /* The feedback the moment a question is answered: the question's own line,
+   * for Not yet / I think so (lo) or Mostly / Yes, I’ve checked (hi). */
+  const noteFor = (q, a) => (a < 2 ? q.lo : q.hi);
   let qi = null;
   const firstOpenQ = (qs) => { const i = qs.findIndex((q) => !Number.isInteger(S.ans[q.id])); return i < 0 ? qs.length - 1 : i; };
   /* After the eight questions, two pages of taps: what hurts most (up to two)
@@ -519,7 +510,7 @@
       const di = D.findIndex((d) => d.id === q.domain), a = S.ans[q.id], now = i === qi;
       return `<li><button type="button" class="nsb-s${Number.isInteger(a) ? ' done' : ''}${now ? ' now' : ''}" data-act="nsq" data-i="${i}" data-f="nsq-${i}"${now ? ' aria-current="step"' : ''}>
         <span class="nsb-n" style="color: ${CSSV[di]}">0${i + 1}</span>
-        <span class="nsb-st"><b>${esc(SHORT[q.id] || q.text)}</b><i>${now ? 'Answering now' : Number.isInteger(a) ? esc(E.ANSWERS[a][0]) : ''}</i></span></button></li>`;
+        <span class="nsb-st"><b>${esc(q.short || q.text)}</b><i>${now ? 'Answering now' : Number.isInteger(a) ? esc(E.ANSWERS[a][0]) : ''}</i></span></button></li>`;
     }).join('') + TAPS.map(([t], k) => {
       const i = qs.length + k, now = i === qi, picked = k === 0 ? S.pains.length : S.want ? 1 : 0;
       return `<li><button type="button" class="nsb-s${picked ? ' done' : ''}${now ? ' now' : ''}" data-act="nsq" data-i="${i}" data-f="nsq-${i}"${now ? ' aria-current="step"' : ''}>
@@ -553,7 +544,7 @@
             </div>
             <p class="nsb-keys"><kbd>1–4</kbd> choose · <kbd>Enter ↵</kbd> next</p>
           </div>
-          ${Number.isInteger(a) ? `<p class="nsb-note">${esc(NOTES[a])}</p>` : ''}
+          ${Number.isInteger(a) ? `<p class="nsb-note" role="status"><small>${a < 2 ? 'Your next step' : 'Keep going'}</small>${esc(noteFor(q, a))}</p>` : ''}
         </div>`}
         <footer class="nsb-foot">
           <button type="button" class="nsb-back" data-act="nsmove" data-v="-1" data-f="ns-back"${qi === 0 ? ' disabled' : ''}>← Back</button>
