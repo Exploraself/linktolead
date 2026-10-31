@@ -78,13 +78,13 @@ for (const d of ['self', 'people', 'work', 'market']) ok(!/n: '(Self|People|Work
 // PR 3: breathing space, the lab, then the dawn before The Summit.
 const C = read('public/northstar/index.html');
 const at = (id) => C.indexOf(id);
-ok(at('id="s-climb"') < at('class="breath"') && at('class="breath"') < at('id="s-whatif"'), 'gold divider between your climb and the lab');
-ok(at('id="s-whatif"') < C.lastIndexOf('class="breath"') && C.lastIndexOf('class="breath"') < at('id="s-dawn"') && at('id="s-dawn"') < at('id="s-summit"'), 'divider, then the dawn, then The Summit');
+ok(at('id="s-whatif"') < at('id="s-save"') && at('id="s-save"') < at('id="s-next"') && at('id="s-next"') < at('id="s-options"'), 'round 4: the lab, then your card, then one next step');
+ok(at('id="s-options" hidden') > 0 && at('id="s-options"') < at('id="s-weeks"') && at('id="s-weeks"') < at('id="s-climb"') && at('id="s-climb"') < at('id="s-summit"') && !C.includes('id="s-dawn"'), 'round 4: the twelve weeks, the climb and The Summit sit behind "See all options"');
 ok(C.includes('Move one of four levers and watch your cash, clients, time and people answer.'), 'lab header copy');
-ok(C.includes('<script src="dawn.js"></script>'), 'dawn script loaded');
+ok(C.includes('Open the Founder Launchpad · free') && (C.match(/class="go nsnext-go/g) || []).length === 1, 'round 4: one ending, one button');
 const LAB = read('public/northstar/app.js') + read('public/northstar/engine.js');
 ok(!/\$250|price: 250|n: 20, price/.test(LAB), 'no example month shipped');
-for (const t of ['See your real situation, from left to right.', 'Take me there ↑', 'Give me back time', 'Give me more money', 'Fine-tune (optional)', 'Each sale takes fewer hours']) ok(LAB.includes(t), `lab copy: ${t}`);
+for (const t of ['Go on, move a lever. Then make it yours.', 'function labNudge(', 'Take me there ↑', 'Give me back time', 'Give me more money', 'Fine-tune (optional)', 'Each sale takes fewer hours']) ok(LAB.includes(t), `lab copy: ${t}`);
 ok(read('public/northstar/dawn.js').includes('prefers-reduced-motion'), 'dawn respects reduced motion');
 
 // PR 5: "What opens with your free account", on Road 2, right after

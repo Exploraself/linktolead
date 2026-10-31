@@ -12,3 +12,6 @@
    notebook (the Crown, 31 Oct 2026). Latin subset; SIL Open Font Licence,
    copyright 2010 Kimberly Geswein. Only downloaded where it is used. */
 @font-face{font-family:'La Belle Aurore';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/fonts/la-belle-aurore.woff2) format('woff2')}
+/* Caveat (SIL Open Font License 1.1), 31 Oct 2026: the North Star's handwritten
+ * notes, easier to read on a phone than La Belle Aurore. */
+@font-face{font-family:Caveat;font-style:normal;font-weight:400 700;font-display:swap;src:url(/assets/fonts/caveat.woff2) format('woff2')}
