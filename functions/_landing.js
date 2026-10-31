@@ -18,6 +18,8 @@ export const REDIRECTS = {
   '/summit': '/northstar/summit/',
   '/north-star': '/northstar/',
   '/blueprint': '/road1/',
+  // Road 2.1 became /north2/ (31 Oct): it sells the North Star.
+  '/road2.1': '/north2/',
 };
 
 /** The redirect for this request, or null when its address is not an old one. */

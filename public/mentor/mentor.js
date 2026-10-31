@@ -253,7 +253,7 @@ async function one(id) {
         <div class="k"><b>Step</b><span>${esc(STEP_NAMES[s.tier || 'free'] || s.tier)}</span></div>
         <div class="k"><b>Answers written</b><span>${A.filter((a) => a.body).length}</span></div>
         <div class="k"><b>Signed up with</b><span>${esc(P.signup_type ? P.signup_type + ' form' : '—')}</span></div>
-        <div class="k"><b>Landing</b><span>${esc(({ road1: 'Road 1 (/road1/)', road2: 'Road 2 (/road2/)', road21: 'Road 2.1 (/road2.1/)', road3: 'Road 3 (/road3/)', road4: 'Road 4 (/road4/)', compass: 'The North Star box' })[P.landing] || '—')}${P.utm_source ? ' · ' + esc([P.utm_source, P.utm_medium, P.utm_campaign, P.utm_content, P.utm_term].filter(Boolean).join(' / ')) : ''}</span></div>
+        <div class="k"><b>Landing</b><span>${esc(({ road1: 'Road 1 (/road1/)', road2: 'Road 2 (/road2/)', road21: 'North 2 (/north2/, was Road 2.1)', road3: 'Road 3 (/road3/)', road4: 'Road 4 (/road4/)', compass: 'The North Star box' })[P.landing] || '—')}${P.utm_source ? ' · ' + esc([P.utm_source, P.utm_medium, P.utm_campaign, P.utm_content, P.utm_term].filter(Boolean).join(' / ')) : ''}</span></div>
         <div class="k"><b>Company</b><span>${P.company === '' ? 'No company yet' : esc(P.company || '—')}</span></div>
         <div class="k"><b>Interest</b><span>${esc(P.interest || '—')}</span></div>
         <div class="k"><b>Industry</b><span>${esc(P.industry || '—')}</span></div>

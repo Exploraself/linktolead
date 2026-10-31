@@ -187,10 +187,12 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
   const { tagsFor } = await import('../functions/_mailchimp.js');
   const t = tagsFor({ landing: 'road21', signupType: 'full' });
   ok(t.some((x) => x.name === 'linktolead-road2.1' && x.status === 'active') && t.every((x) => typeof x.name === 'string' && x.name), 'road2.1: tagged linktolead-road2.1, no empty tag');
-  const R21 = read('public/road2.1/index.html'), J21 = read('public/road2.1/page.js');
-  ok(J21.includes("variant: 'full', landing: 'road21'") && R21.includes('src="/road2.1/page.js"') && !/PHOTO OF/.test(R21) && R21.includes('/cabinet/alexandru.jpg'), 'road2.1: full form, landing road21, the real photo');
+  const R21 = read('public/north2/index.html'), J21 = read('public/north2/page.js');
+  ok(J21.includes("variant: 'full', landing: 'road21'") && R21.includes('src="/north2/page.js"') && !/PHOTO OF/.test(R21) && R21.includes('/cabinet/alexandru.jpg'), 'road2.1: full form, landing road21, the real photo');
   const labels = new Set((R21.match(/<button type="button" data-gate[^>]*>([^<]+)/g) || []).map((m) => m.replace(/.*>/, '').trim()));
   ok(labels.size === 1 && labels.has('Start my North Star →'), 'road2.1: one button label, everywhere');
+  const AB = read('public/account-box.js');
+  ok(AB.includes("const NS_HOME = ['road21'];") && AB.includes("? '/northstar/' : '/ground-plan/#home'") && J21.includes("location.replace('/northstar/')") && read('functions/_landing.js').includes("'/road2.1': '/north2/'"), 'north2 (was road2.1): Start my North Star opens the North Star, and the old address still lands');
   ok(!/most founders|incubator/i.test(R21.replace(/<!--[\s\S]*?-->/g, '')), 'road2.1: no banned words on the page');
 }
 // Road 4 (31 Oct): the sales page for The Founder's Blueprint, taps only.

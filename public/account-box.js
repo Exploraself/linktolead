@@ -74,12 +74,17 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
     </form>
   </div>`;
 
+/** Where the founder lands after the box. A North Star sales page (/north2/)
+ *  opens the North Star itself; every other page opens Your Base Camp. */
+const NS_HOME = ['road21'];
+const after = () => (NS_HOME.includes(ctx.landing) ? '/northstar/' : '/ground-plan/#home');
 let ctx = { opener: null, stage: null, variant: 'full', landing: 'road2', stay: false, onExisting: null };
 function close() { if (ctx.gate) ctx.gate.hidden = true; if (ctx.opener && ctx.opener.focus) ctx.opener.focus(); }
 
 function wire(gate, variant, landing) {
   gate.innerHTML = markup(variant, HEAD[ctx.stay ? 'stay' : landing === 'summit' ? 'summit' : variant === 'full' && (landing === 'road2' || landing === 'road21') ? 'compass' : variant], ctx.stay);
   gate.dataset.variant = variant + ' ' + landing;
+  if (NS_HOME.includes(landing)) { const g = gate.querySelector('.ab-go'); if (g) g.textContent = 'OPEN MY NORTH STAR →'; }
   gate.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
   gate.querySelectorAll('[data-eye]').forEach((b) => b.addEventListener('click', (e) => {
     e.preventDefault();
@@ -118,14 +123,14 @@ function wire(gate, variant, landing) {
       const out = A.joined() ? { token: A.token() } : await A.signup({ first, last, email, consent, source, stage: p.stage, type: variant,
         landing: ctx.landing, utm: utm(),
         ...(d ? { company: d.company, noCompany: d.noCompany, interest: d.interest, industry: d.industry, password: pw, confirm: pw2 } : {}) });
-      if (out.token) { if (ctx.stay) location.reload(); else location.href = '/ground-plan/#home'; return; }
+      if (out.token) { if (ctx.stay) location.reload(); else location.href = after(); return; }
       if (ctx.onExisting) { close(); ctx.onExisting(email); return; }
       // An address that already has an account is never handed its key here.
       $('#gate-err').innerHTML = 'This email already has an account. Sign in to open your plans. <a href="/ground-plan/#signin">Sign in →</a>';
     } catch (ex) {
       err(ex && ex.message && !/fetch|network|load failed|import/i.test(ex.message) ? ex.message : 'We could not reach the account service just now. Try again in a minute.');
     }
-    go.disabled = false; go.textContent = ctx.stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →';
+    go.disabled = false; go.textContent = ctx.stay || NS_HOME.includes(ctx.landing) ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →';
   });
 }
 
@@ -136,7 +141,7 @@ export function open({ gate, opener, stage, variant = 'full', landing = variant 
   if (hasAccount() && stay) return;
   if (hasAccount()) {
     if (stage) { const p = known() || {}; p.stage = stage.id; try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* private mode */ } }
-    location.href = '/ground-plan/#home';
+    location.href = after();
     return;
   }
   if (gate.dataset.variant !== variant + ' ' + landing) wire(gate, variant, landing);

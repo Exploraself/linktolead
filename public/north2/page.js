@@ -1,4 +1,4 @@
-/* Road 2.1 (30 Oct): the hours slider, the first question, and the account
+/* North 2 (was /road2.1/ until 31 Oct): the hours slider, the first question, and the account
  * box. Light on purpose: no dependencies; the account box (account-box.js)
  * loads the first time it opens. Nothing slid or tapped here is saved or sent. */
 (function () {
@@ -40,7 +40,7 @@
     catch (e) { four.classList.add('run'); }
   }
 
-  /* The account box: the FULL form, landing "road21". /road2.1/#join opens it. */
+  /* The account box: the FULL form, landing "road21" (its name in the account records and Mailchimp is unchanged). /north2/#join opens it. */
   var gate = $('#gate'), box = null;
   try { import('/forms.js').then(function (m) { m.rememberUtm(); }).catch(function () {}); } catch (e) { /* old browser */ }
   function loadBox() { return box || (box = import('/account-box.js').catch(function () { box = null; })); }
@@ -52,6 +52,6 @@
   document.querySelectorAll('[data-gate]').forEach(function (b) { b.addEventListener('click', openGate); });
   if (location.hash === '#join') {
     var has = false; try { has = !!localStorage.getItem('ftb-token'); } catch (e) { /* private mode */ }
-    if (has) location.replace('/ground-plan/#home'); else openGate();
+    if (has) location.replace('/northstar/'); else openGate();
   }
 })();
