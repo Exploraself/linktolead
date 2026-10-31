@@ -370,6 +370,15 @@ function paintPlayer() {
   root.innerHTML = playerHTML(S, isOn(), open);
   if (focusIn) { const f = root.querySelector(`#${CSS.escape(focusIn)}, [data-mp="${focusIn}"], [data-mp-mode="${focusIn}"]`); if (f) f.focus({ preventScroll: true }); }
 }
+/** Open the player from elsewhere (the Crown's Music and Light). With an id,
+ *  that control takes the focus, e.g. 'mp-light' for the light slider. */
+export function openPlayer(focusId) {
+  if (typeof document === 'undefined') return;
+  mount(); open = true; paintPlayer();
+  const root = document.getElementById('mp'); if (!root) return;
+  const f = (focusId && root.querySelector(`#${CSS.escape(focusId)}`)) || root.querySelector('.mp-play');
+  if (f) f.focus({ preventScroll: true });
+}
 function mount() {
   if (mounted || typeof document === 'undefined') return;
   mounted = true;
@@ -399,7 +408,7 @@ function mount() {
   });
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) { open = false; paintPlayer(); const p = root.querySelector('.mp-pill'); if (p) p.focus(); } });
   // The Lamp follows the question being written.
-  document.addEventListener('focusin', (e) => { const f = e.target.closest && e.target.closest('textarea, input.wcell'); if (f) { target = f.closest('.step') || f; reAim(); } });
+  document.addEventListener('focusin', (e) => { const f = e.target.closest && e.target.closest('textarea, input.wcell'); if (f) { target = f.closest('.step, .cw-write') || f; reAim(); } });
   window.addEventListener('scroll', reAim, { passive: true });
   window.addEventListener('resize', reAim);
   document.addEventListener('visibilitychange', () => {
