@@ -34,7 +34,7 @@
   /* ── State ──────────────────────────────────────────────────────────────── */
   const blank = () => ({ v: 2, theme: 'light', profile: { first: '', last: '', email: '', business: '', type: '', industry: '', currency: 'USD', consent: false },
     skipped: false, stage: 'building', goal: '', mode: 'yes', ans: {}, str: {}, pains: [], want: '', want2: '', values: [], nums: {}, group: 0,
-    p2: { team: '', ans: {} }, pgot: {}, pmore: {},
+    p2: { team: '', ans: {} }, pgot: {}, pmore: {}, fromBP: false,
     got: {}, more: {}, lean: null, stop: 0, lab: { v: 2, p: 0, m: 0, f: 0, d: 0, mode: 'both', rate: '', hire: '', plan: '' }, acct: { email: '', state: '' } });
   const read = (k) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } };
 
@@ -62,6 +62,7 @@
     if (M.P2.team.some((t) => t[0] === p2.team)) s.p2.team = p2.team;
     for (const id of M.P2.ids()) { const v = p2.ans && p2.ans[id]; if (Number.isInteger(v) && v >= 0 && v <= 3) s.p2.ans[id] = v; }
     for (let i = 1; i <= 4; i++) { if (raw.pgot?.[i] === true) s.pgot[i] = true; if (raw.pmore?.[i] === true) s.pmore[i] = true; }
+    s.fromBP = raw.fromBP === true;
     for (const [k, v] of Object.entries(raw.nums || {})) if (/^(yes|offer|idea)\.\w+$/.test(k) && v && typeof v === 'object') s.nums[k] = { pick: str(v.pick, 8), own: str(v.own, 80) };
     s.group = Number.isInteger(raw.group) && raw.group >= 0 && raw.group <= 4 ? raw.group : 0;
     for (let i = 0; i < 4; i++) { if (raw.got?.[i] === true) s.got[i] = true; if (raw.more?.[i] === true) s.more[i] = true; }
@@ -116,6 +117,9 @@
     if (E.STAGES.some((x) => x.id === pre.stage) && !Object.keys(S.ans).length) S.stage = pre.stage;
   })();
 
+  /* Came here from the Blueprint (Your Base Camp on this site): the ending
+   * then speaks to someone already on the road. */
+  try { const r = document.referrer ? new URL(document.referrer) : null; if (r && r.host === location.host && /^\/ground-plan/.test(r.pathname)) S.fromBP = true; } catch { /* no referrer */ }
   let stored = true, saveTimer;
   function save() {
     dirty = true;
@@ -1327,6 +1331,27 @@
       <span role="status" style="font-size: 13px; color: ${UI.mail.startsWith('Sent') ? 'var(--people)' : 'var(--muted)'}; font-weight: 520">${esc(UI.mail)}</span>
     </div>`;
 
+  /* ── Your next step (31 Oct, round 4): one ending, one button, said for who
+   * is here. From the Blueprint: unlock more. New and mostly "Not yet": you
+   * need a guided road, and the Launchpad is where the work is done. Others:
+   * the Launchpad, free. ── */
+  function pNext(c) {
+    const a = c.qs.map((q) => S.ans[q.id]).filter((v) => Number.isInteger(v));
+    const early = S.mode === 'idea' || (a.length >= 4 && a.filter((v) => v < 2).length / a.length >= 0.6);
+    const head = (eb, h, em, p) => `<span class="eb" style="color: #D6BF8F">${eb}</span><h2 class="sf">${h} <span class="sfi">${em}</span></h2><p>${p}</p>`;
+    const all = `<button type="button" class="nsnext-all no-print" data-act="alloptions" aria-expanded="${!!UI.opts}" aria-controls="s-options">${UI.opts ? 'Hide the options ↑' : 'See all options ↓'}</button>`;
+    if (S.fromBP) return head('Your next step · you are already on the road', 'You have done the free part.', 'Now unlock the next stretch.',
+      'Your North Star shows where to push next. One session with Alexandru, The Boardroom, opens modules 04–05 and the full North Star, so the work you started keeps going.')
+      + `<a class="go nsnext-go no-print" href="${BOOKING}" target="_blank" rel="noopener">Book the Boardroom · unlock 04–05 <span class="arr" aria-hidden="true">↗</span></a>`
+      + '<a class="nsnext-all no-print" href="/ground-plan/#home">Back to my Base Camp</a>' + all;
+    if (early) return head('Your next step · what your answers ask for', 'You do not need more information.', 'You need a guided road.',
+      'Many of your answers are still “not yet”. That is exactly what the Founder Launchpad is for. Week by week: tap what sounds like you, slide to the honest number, write one sentence with the blanks filled in, and read back exactly what to do. The manuals sit beside you. Free.')
+      + '<a class="go nsnext-go no-print" href="/ground-plan/#home">Start the Founder Launchpad · free <span class="arr" aria-hidden="true">→</span></a>' + all;
+    return head('Your next step', 'The Founder Launchpad.', 'Free, and open tonight.',
+      'The first three weeks of The Founder’s Blueprint: settle what you believe about your business, learn to read it clearly, and stay steady when it pushes back.')
+      + '<a class="go nsnext-go no-print" href="/ground-plan/#home">Open the Founder Launchpad · free <span class="arr" aria-hidden="true">→</span></a>' + all;
+  }
+
   function pWeeks(c) {
     const WC = D.map((d) => d.hex), f = S.lean !== null ? S.lean : (c.rd.any ? c.rd.lo : null);
     const row = (d, i) => `<div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; align-items: center; padding: 4px 0; border-radius: 6px; outline: ${f === i ? '1px solid rgba(111,147,184,.55)' : '1px solid transparent'}; outline-offset: 3px; transition: outline-color .4s ease">
@@ -1836,6 +1861,7 @@
     put('s-numbers', pNumbers(c));
     for (let i = 0; i < 4; i++) put('fb-' + i, pFeedback(c, i));
     put('s-save', pSave(c));
+    put('s-next', pNext(c));
     put('s-weeks', pWeeks(c));
     put('s-climb', pClimb());
     put('lab-in', pLabIn());
@@ -1992,7 +2018,7 @@
       case 'email': sendEmail(); return;
       case 'card-share': cardOut(true); return;
       case 'card-dl': cardOut(false); return;
-      case 'alloptions': { const o = document.getElementById('s-options'), open = o && o.hidden; if (o) o.hidden = !open; t.setAttribute('aria-expanded', String(!!open)); t.textContent = open ? 'Hide the options ↑' : 'See all options ↓'; if (open) { render(); o.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); } return; }
+      case 'alloptions': { UI.opts = !UI.opts; const o = document.getElementById('s-options'); if (o) o.hidden = !UI.opts; render(); if (UI.opts && o) o.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); return; }
       case 'regate': fullAccount(); return;
       case 'account': {
         // Locked plans: make the free account, or sign in to the one there is.
