@@ -7,7 +7,7 @@ const V = await import('../public/levels-v4.js');
 const { LEVELS4: L, CHAPTERS4: C } = V;
 
 ok(L.length === 12 && L.every((x, i) => x.n === i + 1), 'twelve levels, in order');
-ok(L.map((x) => x.word).join(' ') === 'SEED LENS CALM STEP FACT TALK HOUR GOLD FLOW NAME EDGE RISE', 'the twelve words, all singular, four letters');
+ok(L.map((x) => x.word).join(' ') === 'SEED VIEW CALM STEP FACT TALK HOUR GOLD FLOW NAME EDGE RISE', 'the twelve words, all singular, four letters');
 ok(L.every((x) => x.word.length === 4 && x.d.length === 4 && x.d.every((D, d) => D.l === x.word[d])), 'each letter is one domain: yourself, people, business, market');
 ok(C.map((c) => c.name).join(' / ') === 'The Inner Pyramid / The Engine Room / The Open Market' && C.flatMap((c) => c.lv).join() === '0,1,2,3,4,5,6,7,8,9,10,11', 'three chapters cover the twelve levels');
 ok(V.STEPS4.length === 17 && V.UNITS === 12 && V.CLOSES[5] === 0 && V.CLOSES[9] === 1 && V.CLOSES[12] === 2, 'four moves per domain and a credo; chapter readings after 05, 09 and 12');
