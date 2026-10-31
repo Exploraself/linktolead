@@ -172,7 +172,9 @@ function draw(root, me) {
       <div class="pm-who"><span class="pm-av"${picStyle(me)}>${pic ? '' : esc(initials(name))}</span><span class="pm-who-t"><b>${esc(name || 'Your account')}</b><span>Your step: ${esc(step)}</span></span></div>
       <div class="pm-pic"><button type="button" data-pm="pic">${pic ? 'Change my photo' : 'Add a profile photo'}</button>${pic ? '<button type="button" data-pm="nopic">Remove</button>' : ''}<input type="file" accept="image/*" data-pm-file hidden></div>
       ${picNote ? `<p class="pm-note" role="status">${esc(picNote)}</p>` : ''}
-      <a role="menuitem" class="pm-compass" href="/northstar/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 5.5l2 6.5-2 1.2-2-1.2z" fill="currentColor" stroke="none"/><path d="M12 18.5l2-6.5-2-1.2-2 1.2z"/></svg><span><b>Leader’s North Star</b><small>Your direction in all four domains</small></span></a>
+      <a role="menuitem" class="pm-compass" href="/northstar/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 5.5l2 6.5-2 1.2-2-1.2z" fill="currentColor" stroke="none"/><path d="M12 18.5l2-6.5-2-1.2-2 1.2z"/></svg><span><b>Leader’s North Star</b><small>${me && me.northstars ? `Taken ${me.northstars === 1 ? 'once' : me.northstars + ' times'}${me.northstarAt ? ' · last ' + esc(me.northstarAt) : ''}` : 'Your direction in all four domains'}</small></span></a>
+      <a role="menuitem" href="/northstar/#again"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>Check your North Star again</a>
+      ${me && me.northstars > 1 ? '<a role="menuitem" href="/northstar/#compare"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Compare with last time</a>' : ''}
       ${items(me).map(([href, label, d]) => `<a role="menuitem" href="${href}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>${esc(label)}</a>`).join('')}
       <div class="pm-sep" role="separator"></div>
       <div class="pm-look" role="group" aria-label="Light and dark"><span>Light</span>${[['device', 'Device'], ['light', 'Light'], ['dark', 'Dark']].map(([k, n]) => `<button type="button" data-theme-set="${k}" aria-pressed="${themePick() === k}">${n}</button>`).join('')}</div>
@@ -251,5 +253,10 @@ export async function mount(host, { fixed = false } = {}) {
   });
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { set(false); const b = root.querySelector('.pm-b'); if (b) b.focus(); } });
   const r = await A.pull();
-  if (r && r.me) { const me = { name: r.me.name, tier: r.me.tier, signupType: r.me.signupType, hasPassword: r.me.hasPassword, letters: r.me.letters, avatar: r.me.avatar || '' }; keep(me); draw(root, me); }
+  if (r && r.me) {
+    const taken = (r.compass && r.compass.taken) || [], last = taken[taken.length - 1];
+    let at = ''; try { at = last ? new Date(last).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''; } catch { /* old browser */ }
+    const me = { name: r.me.name, tier: r.me.tier, signupType: r.me.signupType, hasPassword: r.me.hasPassword, letters: r.me.letters, avatar: r.me.avatar || '', northstars: taken.length, northstarAt: at };
+    keep(me); draw(root, me);
+  }
 }

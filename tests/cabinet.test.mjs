@@ -44,7 +44,8 @@ ok(!full.includes('class="incub"') && !C.cabinetHTML({ tier: 'free', band: null 
 ok(!/animation/.test(read('public/cabinet.css').split('.incub{')[1].split('/* The Leader’s North Star')[0]), 'the band is static');
 ok(/full = pulled && signupType !== 'simple'/.test(app), 'band only once the account is read, and never for simple accounts');
 // The North Star strip, and the music module.
-ok(C.compassStripHTML(true).includes('Open my North Star →') && C.compassStripHTML(false).includes('Take my North Star →') && app.includes('compassStripHTML(!!compassRec)'), 'the Leader’s North Star has its own strip');
+ok(C.compassStripHTML(true).includes('Open my North Star →') && C.compassStripHTML(false).includes('Take my North Star →') && app.includes('compassStripHTML(!!compassRec'), 'the Leader’s North Star has its own strip');
+ok(C.compassStripHTML(true, 3).includes('taken 3 times') && C.compassStripHTML(true, 3).includes('/northstar/#again') && C.compassStripHTML(true, 3).includes('/northstar/#compare') && !C.compassStripHTML(true, 1).includes('#compare') && !C.compassStripHTML(false).includes('cstrip-again'), 'Base Camp shows how many times the North Star was taken, with Check it again');
 const Mu = await import('../public/music.js');
 const { readFileSync: rfMu } = await import('node:fs');
 ok(!/crackle/.test(rfMu(new URL('../public/music.js', import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')), 'no vinyl crackle in the music');

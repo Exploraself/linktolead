@@ -52,8 +52,8 @@ const DOT_NAMES = { done: 'finished', here: 'you are here', open: 'open', gate: 
 
 /** The Leader’s North Star, in its own small place under the Cabinet: one
  *  slim strip, always there. `read`: the founder has a reading. */
-export function compassStripHTML(read) {
-  return `<a class="cstrip" href="/northstar/" aria-label="${read ? 'Open your Leader’s North Star reading' : 'Take your Leader’s North Star'}">
+export function compassStripHTML(read, taken = 0) {
+  return `${read ? `<p class="cstrip-again">Your North Star: taken ${taken > 1 ? taken + ' times' : 'once'}. <a href="/northstar/#again">Check it again</a>${taken > 1 ? ' · <a href="/northstar/#compare">Compare with last time</a>' : ''}</p>` : ''}<a class="cstrip" href="/northstar/" aria-label="${read ? 'Open your Leader’s North Star reading' : 'Take your Leader’s North Star'}">
     <span class="cstrip-dial" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="none" stroke="#B4975F" stroke-width="1.4"/><circle cx="20" cy="7" r="2" fill="#A8623A"/><circle cx="33" cy="20" r="2" fill="#4C7355"/><circle cx="20" cy="33" r="2" fill="#36607F"/><circle cx="7" cy="20" r="2" fill="#9A7418"/><path d="M20 9l3 11-3 2-3-2z" fill="#D6BF8F"/><path d="M20 31l3-11-3-2-3 2z" fill="#6E5A36"/><circle cx="20" cy="20" r="2.2" fill="#B4975F"/></svg></span>
     <span class="cstrip-t"><span class="cstrip-k">Leader’s North Star</span><b>${read ? 'Your direction in all four domains, any time you need it.' : 'Find where you stand in all four domains. Eight plain questions.'}</b></span>
     <span class="cstrip-go">${read ? 'Open my North Star →' : 'Take my North Star →'}</span>

@@ -34,7 +34,7 @@
   /* ── State ──────────────────────────────────────────────────────────────── */
   const blank = () => ({ v: 2, theme: 'light', profile: { first: '', last: '', email: '', business: '', type: '', industry: '', currency: 'USD', consent: false },
     skipped: false, stage: 'building', goal: '', mode: 'yes', ans: {}, str: {}, pains: [], want: '', want2: '', values: [], nums: {}, group: 0,
-    p2: { team: '', ans: {} }, pgot: {}, pmore: {}, fromBP: false,
+    p2: { team: '', ans: {} }, pgot: {}, pmore: {}, fromBP: false, history: [],
     got: {}, more: {}, lean: null, stop: 0, lab: { v: 2, p: 0, m: 0, f: 0, d: 0, mode: 'both', rate: '', hire: '', plan: '' }, acct: { email: '', state: '' } });
   const read = (k) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } };
 
@@ -63,6 +63,10 @@
     for (const id of M.P2.ids()) { const v = p2.ans && p2.ans[id]; if (Number.isInteger(v) && v >= 0 && v <= 3) s.p2.ans[id] = v; }
     for (let i = 1; i <= 4; i++) { if (raw.pgot?.[i] === true) s.pgot[i] = true; if (raw.pmore?.[i] === true) s.pmore[i] = true; }
     s.fromBP = raw.fromBP === true;
+    // Earlier North Stars, each with its date (round 6).
+    const n4 = (a, hi) => (Array.isArray(a) ? a.slice(0, 4).map((v) => clampN(v, 0, hi)) : [0, 0, 0, 0]);
+    s.history = (Array.isArray(raw.history) ? raw.history : []).filter((h) => h && typeof h.at === 'string').slice(-12)
+      .map((h) => ({ at: str(h.at, 40), stage: E.STAGES.some((x) => x.id === h.stage) ? h.stage : 'building', sc: n4(h.sc, 6), n: n4(h.n, 2), str: n4(h.str, 5), pct: clampN(h.pct, 0, 100), values: (Array.isArray(h.values) ? h.values : []).filter((x) => M.VALUES.some((v) => v[0] === x)).slice(0, 2) }));
     for (const [k, v] of Object.entries(raw.nums || {})) if (/^(yes|offer|idea)\.\w+$/.test(k) && v && typeof v === 'object') s.nums[k] = { pick: str(v.pick, 8), own: str(v.own, 80) };
     s.group = Number.isInteger(raw.group) && raw.group >= 0 && raw.group <= 4 ? raw.group : 0;
     for (let i = 0; i < 4; i++) { if (raw.got?.[i] === true) s.got[i] = true; if (raw.more?.[i] === true) s.more[i] = true; }
@@ -195,7 +199,7 @@
     }
     UI.signinBusy = false; render();
   }
-  const hasWork = (s) => Object.keys(s.ans).length > 0 || Object.keys(s.str).length > 0 || Object.keys(s.nums).length > 0 || s.pains.length > 0 || !!s.want || Object.keys(s.p2.ans).length > 0;
+  const hasWork = (s) => Object.keys(s.ans).length > 0 || Object.keys(s.str).length > 0 || Object.keys(s.nums).length > 0 || s.pains.length > 0 || !!s.want || Object.keys(s.p2.ans).length > 0 || (Array.isArray(s.history) && s.history.length > 0);
   /* The two things they want most (31 Oct: pick two), first pick first. */
   const wants = () => [S.want, S.want2].filter(Boolean);
   /** Arriving from a sign-in link: spend the code, then bring the account's
@@ -271,6 +275,7 @@
       } else { dirty = true; await sync(); }
     }
     render();
+    if (UI.cmp) { const r = document.getElementById('s-reading'); if (r) r.scrollIntoView({ block: 'start' }); }
     if (signedIn()) import('/profile-menu.js').then((m) => m.mount(document.getElementById('top-tools'))).catch(() => {});
     // From outside, with answers already on this browser: the account first.
     if (!signedIn() && !code && hasWork(S)) fullAccount();
@@ -742,7 +747,7 @@
   /* The compass (31 Oct): the four domains with their names outside the
    * circle, in readable type. Solid: your answers to the questions; dashed:
    * your strengths as you rated them. The gap between the two is the point. */
-  function pCompass(c, withAnswers) {
+  function pCompass(c, withAnswers, prev = null) {
     const R = 150, cx = 280, cy = 250, sc = c.sc.map((s) => s.score), str = c.rd.str;
     const rA = sc.map((v) => 14 + v / 6 * (R - 14)), rS = str.map((v) => 14 + v / 5 * (R - 14));
     const pts = (r) => `${cx},${cy - r[0]} ${cx + r[1]},${cy} ${cx},${cy + r[2]} ${cx - r[3]},${cy}`;
@@ -753,19 +758,14 @@
       ${withAnswers && anyS ? `<polygon class="nsgap" points="${pts(rS)}" fill="#D6BF8F" stroke="#D6BF8F" stroke-width="2" stroke-linejoin="round"/>` : ''}
       ${anyS ? `<polygon points="${pts(rS)}" fill="none" stroke="#EEF2F7" stroke-width="2" stroke-dasharray="7 5"/>` : ''}
       ${withAnswers ? `<polygon points="${pts(rA)}" fill="${anyS ? '#22405F' : 'rgba(111,147,184,.35)'}" stroke="#6F93B8" stroke-width="3" stroke-linejoin="round"/>
-      ${(() => { // "Unused potential", where the strengths reach furthest past the answers.
-        if (!anyS) return '';
-        const g = [0, 1, 2, 3].map((i) => rS[i] - rA[i]), i = g.indexOf(Math.max(...g));
-        if (g[i] < 22) return '';
-        const m = (rS[i] + rA[i]) / 2, [x, y] = [[cx, cy - m], [cx + m, cy], [cx, cy + m], [cx - m, cy]][i];
-        return `<g class="nsgap-tag"><rect x="${x - 66}" y="${y - 13}" width="132" height="26" rx="13" fill="#1C1309" stroke="#D6BF8F"/><text x="${x}" y="${y + 4.5}" text-anchor="middle" fill="#F6EEDD" font-size="11.5" font-weight="600" letter-spacing="1.2">UNUSED POTENTIAL</text></g>`;
-      })()}
+
       <circle cx="${cx}" cy="${cy - rA[0]}" r="7" fill="#E0A282"/><circle cx="${cx + rA[1]}" cy="${cy}" r="7" fill="#9BC0A1"/><circle cx="${cx}" cy="${cy + rA[2]}" r="7" fill="#91B8D5"/><circle cx="${cx - rA[3]}" cy="${cy}" r="7" fill="#DDBD69"/>` : ''}
       ${withAnswers ? '' : `<g class="nsseal" aria-hidden="true"><polygon points="${pts([96, 96, 96, 96])}" fill="rgba(111,147,184,.10)" stroke="#6F93B8" stroke-width="2" stroke-dasharray="3 7"/>
         <rect x="${cx - 92}" y="${cy + 30}" width="184" height="46" rx="23" fill="#0E1C2B" stroke="#6F93B8" stroke-width="1.2"/>
         <g transform="translate(${cx - 76} ${cy + 42})" fill="none" stroke="#A9C0D9" stroke-width="1.6"><rect x="0" y="9" width="16" height="12" rx="2"/><path d="M3.5 9V6a4.5 4.5 0 0 1 9 0v3"/></g>
         <text x="${cx + 10}" y="${cy + 51}" text-anchor="middle" fill="#EEF2F7" font-size="12" font-weight="600" letter-spacing="1.6">YOUR ANSWERS</text>
         <text x="${cx + 10}" y="${cy + 67}" text-anchor="middle" fill="#A9C0D9" font-size="11.5">sealed until Part 1</text></g>`}
+      ${prev ? `<polygon points="${pts(prev.map((v) => 14 + v / 6 * (R - 14)))}" fill="none" class="nsprev" stroke="#C9D3DE" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round"/>` : ''}
       <circle cx="${cx}" cy="${cy}" r="7" fill="#0E1C2B" stroke="#6F93B8" stroke-width="2"/>
       <text x="${cx}" y="62" fill="#E0A282" class="cl" text-anchor="middle">LEAD YOURSELF</text>
       <text x="${cx + 166}" y="${cy - 8}" fill="#9BC0A1" class="cl">LEAD YOUR</text><text x="${cx + 166}" y="${cy + 16}" fill="#9BC0A1" class="cl">PEOPLE</text>
@@ -802,8 +802,9 @@
         <span class="eb">${done ? 'Part 1 done · your North Star' : 'Your North Star · fills in as you answer'}</span>
         <h2 class="sf" style="font-size: clamp(28px, 3.6vw, 40px); line-height: 1.05">Your answers <span class="sfi" style="color: var(--goldink)">beside your strengths.</span></h2></div>
       ${done ? pGap(c) : ''}
+      ${done ? pCompare(c) : ''}
       <div class="deep nscompbox nsreading">
-        ${pCompass(c, true)}
+        ${pCompass(c, true, UI.cmp && S.history.length ? S.history[S.history.length - 1].sc : null)}
         <div style="display: flex; flex-direction: column; gap: 14px">
           ${compassKey(true)}
           <div class="nsread"><span class="eb" style="color: #9BC0A1">Strongest</span><b class="sf">${any ? D[hi].name : 'Answer to see it'}</b></div>
@@ -813,18 +814,81 @@
       </div>`;
   }
 
-  /* The message of Part 1 (31 Oct, round 4): you have more in you than you
-   * are using. Built only from their own rating and their own answers. */
-  function pGap(c) {
+  /* The message of Part 1 (31 Oct, rounds 4 and 6): you have more in you than
+   * you are using. Built only from their own rating and their own answers:
+   * the share of the strength they see in themselves that their answers do
+   * not show at work yet. Then "Find out why": what they are probably feeling,
+   * so they feel understood, and the Blueprint as the way to close it. */
+  const GAP_WHY = [
+    { why: 'You know what matters, but your week is run by what is urgent.', feel: ['You start the week with a plan and end it with someone else’s', 'You say yes before you check what it costs you', 'Rest feels like falling behind', 'You are busy all day and still not sure you moved forward'], cost: 'Every week your strength stays unused, the business decides your life instead of you.' },
+    { why: 'You are good with people, but you still carry what others could hold.', feel: ['You redo work rather than explain it again', 'You put off the honest conversation until it becomes a problem', 'People wait for you before they decide anything', 'You feel alone with the hard calls'], cost: 'Your people, or your first helper, cannot grow while you hold everything.' },
+    { why: 'You can handle numbers and systems, but they are not steering your decisions yet.', feel: ['You look at the numbers only when you are worried', 'A busy month still leaves less than you expected', 'Your price was set by fear, not by your time', 'The system lives in your head, so it breaks when you are away'], cost: 'Without the numbers leading, every decision is a guess, and guesses cost money.' },
+    { why: 'You can speak and sell, but the right people do not hear you often enough.', feel: ['Some months are full, others empty, and you are not sure why', 'You explain your offer differently every time', 'You wait for referrals instead of asking', 'You compete on price because the value is not clear'], cost: 'The right customers cannot choose you if they never hear you clearly.' },
+  ];
+  function gapOf(c) {
     const str = c.rd.str, sc = c.sc.map((x) => x.score);
     const gap = D.map((_, i) => (str[i] ? str[i] / 5 - sc[i] / 6 : 0));
     const order = [0, 1, 2, 3].filter((i) => gap[i] > 0.08).sort((a, b) => gap[b] - gap[a]);
-    const strong = [0, 1, 2, 3].filter((i) => str[i] >= 4).map((i) => D[i].name);
-    const list = (a) => (a.length > 1 ? a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1] : a[0] || '');
-    if (!order.length) return `<div class="nsgapmsg"><span class="eb">What your North Star says</span><b class="sf">You use what you have. <span class="sfi">Now aim higher.</span></b>
+    const seen = str.reduce((a, v) => a + v / 5, 0), unused = D.reduce((a, _, i) => a + Math.max(0, gap[i]), 0);
+    return { order, pct: seen > 0 ? Math.round(unused / seen * 100) : 0, strong: [0, 1, 2, 3].filter((i) => str[i] >= 4).map((i) => D[i].name) };
+  }
+  function pGap(c) {
+    const G = gapOf(c), list = (a) => (a.length > 1 ? a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1] : a[0] || '');
+    if (!G.order.length) return `<div class="nsgapmsg calm"><span class="eb">What your North Star says</span><b class="sf">You use what you have. <span class="sfi">Now aim higher.</span></b>
       <p>Your answers keep up with how you rate yourself. That is a strength in itself. The next step is to raise both: more of what you are good at, in more of your week.</p></div>`;
-    return `<div class="nsgapmsg"><span class="eb">What your North Star says</span><b class="sf">You have more in you <span class="sfi">than you are using.</span></b>
-      <p>${strong.length ? `You see real strength in ${list(strong)}. ` : 'The strengths you rated are real. '}Your answers show they are not all at work yet, most of all in <b>${D[order[0]].name}</b>. The gold below is that gap. It is not a weakness: the strengths are already yours. You can do much more with what you have.</p></div>`;
+    const open = !!UI.why, top = G.order.slice(0, 2);
+    return `<div class="nsgapmsg alarm" role="region" aria-label="Your unused potential">
+      <span class="eb">What your North Star says</span>
+      <div class="gapbig"><b class="gappct">${G.pct}%</b><b class="sf">of the strength you see in yourself <span class="sfi">is not at work yet.</span></b></div>
+      <p>${G.strong.length ? `You see real strength in ${list(G.strong)}. ` : 'The strengths you rated are real. '}Your answers show they are not all at work, most of all in <b>${D[G.order[0]].name}</b>. The gold in your North Star is that gap. It is not a weakness: the strengths are already yours. You can do much more with what you have.</p>
+      <button type="button" class="gapwhy no-print" data-act="why" data-f="why" aria-expanded="${open}">${open ? 'Hide this ↑' : 'Find out why, and what you are probably feeling →'}</button>
+      ${open ? `<div class="gapfeel pop">${top.map((i) => `<div class="gapdom"><span class="eb" style="color: ${LIGHT[i]}">${D[i].name}</span>
+          <b class="sf">${esc(GAP_WHY[i].why)}</b>
+          <p class="gapq">Does this sound like you?</p>
+          <ul>${GAP_WHY[i].feel.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+          <p class="gapcost">${esc(GAP_WHY[i].cost)}</p></div>`).join('')}
+        <div class="gapnext"><p class="sf">This is exactly the work of The Founder’s Blueprint: week by week, from knowing it to doing it, with Alexandru and the team beside you.</p>
+          <a class="go" href="/ground-plan/#home">Start closing the gap · the Launchpad is free <span class="arr" aria-hidden="true">→</span></a></div></div>` : ''}
+    </div>`;
+  }
+
+  /* ── Check your North Star again (31 Oct, round 6) ─────────────────────────
+   * Each finished North Star is kept with its date (S.history, saved with the
+   * account), so a founder can take it again and see how things changed. */
+  function snapshot(c) {
+    return { at: new Date().toISOString(), stage: S.stage, sc: c.sc.map((x) => x.score), n: c.sc.map((x) => x.answered), str: c.rd.str.slice(), pct: c.rd.any ? gapOf(c).pct : 0, values: S.values.slice() };
+  }
+  const dateOf = (iso) => { try { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return ''; } };
+  function retake() {
+    const c = context();
+    if (partState(c).fin[0]) { S.history = [...S.history, snapshot(c)].slice(-12); }
+    Object.assign(S, { ans: {}, str: {}, pains: [], want: '', want2: '', values: [], p2: { team: '', ans: {} }, got: {}, more: {}, pgot: {}, pmore: {}, group: 0, lean: null });
+    S.lab = { ...S.lab, p: 0, m: 0, f: 0, d: 0 };
+    UI.again = false; UI.cmp = false; UI.why = false; qi = null; p2i = null; dirty = true;
+    save(); render(); sync();
+    toast('A fresh North Star. Your last one is kept, so you can compare when you finish.');
+    go('clear');
+  }
+  const pAgain = () => (UI.again ? `<div class="card pop nsagain" role="dialog" aria-labelledby="ag-h">
+      <span class="eb">Check your North Star again</span>
+      <b class="sf" id="ag-h">Start a fresh North Star?</b>
+      <p>${partState(context()).fin[0] ? 'Your current one is kept with today’s date. When you finish the new one, you can lay the two side by side and see what changed.' : 'You have not finished this one yet. Starting fresh clears these answers.'}</p>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap"><button type="button" class="go" data-act="again-go" data-f="again-go">Start fresh</button><button type="button" class="nslink" data-act="again-no">Not now</button></div></div>` : '');
+  /* Side by side with the last one: the shape on the compass, and each domain's change. */
+  function pCompare(c) {
+    const H = S.history, last = H[H.length - 1];
+    if (!last || !partState(c).fin[0]) return '';
+    const now = c.sc.map((x) => x.score), was = last.sc, pct = c.rd.any ? gapOf(c).pct : 0;
+    const arrow = (d) => (d > 0 ? `<b class="up">+${d}</b>` : d < 0 ? `<b class="down">${d}</b>` : '<b class="same">same</b>');
+    return `<div class="nscmp">
+      <div class="nscmp-head"><span class="eb">Your North Stars · ${H.length + 1} taken</span>
+        <button type="button" class="nslink" data-act="cmp" data-f="cmp" aria-expanded="${!!UI.cmp}">${UI.cmp ? 'Hide the comparison' : `Compare with ${dateOf(last.at)}`}</button>
+        <button type="button" class="nslink" data-act="again" data-f="again-2">Check your North Star again</button></div>
+      ${UI.cmp ? `<div class="nscmp-body pop"><table><thead><tr><th></th><th>${dateOf(last.at)}</th><th>Now</th><th>Change</th></tr></thead><tbody>
+        ${D.map((d, i) => `<tr><td style="color: ${CSSV[i]}">${d.name}</td><td>${was[i]} of 6</td><td>${now[i]} of 6</td><td>${arrow(now[i] - was[i])}</td></tr>`).join('')}
+        <tr><td>Unused potential</td><td>${last.pct}%</td><td>${pct}%</td><td>${pct < last.pct ? `<b class="up">${pct - last.pct} points</b>` : pct > last.pct ? `<b class="down">+${pct - last.pct} points</b>` : '<b class="same">same</b>'}</td></tr></tbody></table>
+        <p class="tiny">The dotted grey shape on your North Star is ${dateOf(last.at)}. ${H.length > 1 ? `Earlier: ${H.slice(0, -1).map((h) => dateOf(h.at)).join(', ')}.` : ''}</p></div>` : ''}
+    </div>`;
   }
 
   /* ── The feedback window after every part (31 Oct) ───────────────────────
@@ -1363,6 +1427,92 @@
       <span role="status" style="font-size: 13px; color: ${UI.mail.startsWith('Sent') ? 'var(--people)' : 'var(--muted)'}; font-weight: 520">${esc(UI.mail)}</span>
     </div>`;
 
+  /* ── The North Star Action Plan (31 Oct, round 6) ─────────────────────────
+   * Five actions for one week, one in each domain and a fifth that ties them,
+   * in an order where each one feeds the next: what the business must give
+   * you → what one sale leaves you → who buys, in their words → the hours you
+   * get back to talk to them → the Sunday review that makes it stick. Mostly
+   * fill in the blanks. Downloaded as a real PDF (plan-pdf.js), with their
+   * name, the date and the logo, and the Blueprint at the end. */
+  function planData(c) {
+    const rd = c.rd, n = c.n, first = (S.profile.first || '').trim(), full = [S.profile.first, S.profile.last].filter(Boolean).join(' ').trim();
+    const date = (() => { try { return new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { return ''; } })();
+    const vals = named(M.VALUES, S.values), wl = named(E.GOALS, wants()), G = rd.any ? gapOf(c) : { pct: 0 };
+    const ab = (k) => (n[k] && n[k].est ? 'about ' : '');
+    const leftLine = S.mode === 'yes' && n.sales && n.deliv && n.run ? ` (Your North Star: ${ab('sales')}${money(n.sales.v - n.deliv.v - n.run.v)} left last month.)` : '';
+    const hoursLine = S.mode === 'yes' && n.hrs && n.want ? ` (You told us: ${ab('hrs')}${whole(n.hrs.v)} hours worked last month, ${whole(n.want.v)} wanted.)` : '';
+    const start = rd.any ? ({ 0: 0, 1: 3, 2: 1, 3: 2 })[rd.lo] : -1;
+    const solo = S.p2.team === 'solo' || !S.p2.team;
+    const actions = [
+      { domain: 'Lead yourself', title: 'Name your enough', why: 'Everything else is measured against it. Without it, the business decides for you.',
+        lines: [`This business must give me $________ a month, ________ free evenings a week, and time for ________.${vals.length ? ` (You said you care most about ${vals.join(' and ').toLowerCase()}.)` : ''}`,
+          `I will work at most ________ hours a week.${hoursLine}`,
+          'If by ________ (date) it does not give me this, I will change ________.'],
+        done: 'three lines written, and read out loud to someone close to you.' },
+      { domain: 'Lead your business', title: 'Know your number', why: 'Your enough becomes a target only when you know what one sale leaves you.',
+        lines: ['One sale brings in $________. It costs me $________ and ________ hours of my time.',
+          `So one sale leaves me $________, which is $________ for each hour of mine.${leftLine}`,
+          'To reach my enough I need ________ sales a month. Last month I had ________.'],
+        done: 'one number you will check every Monday, written where you see it.' },
+      { domain: 'Lead the market', title: 'Hear it in their words', why: 'The sales you need come from people who already have the problem. Their words sell better than yours.',
+        lines: [`This week I will ask ________, ________ and ________: “${S.mode === 'yes' ? 'What made you choose me?' : 'What is hardest about this for you, and what have you tried?'}”`,
+          'The words they used: “________________________________”',
+          'My offer, in their words: I help ________ with ________, so they ________.'],
+        done: 'three conversations had, and one sentence you can say the same way every time.' },
+      { domain: 'Lead your people', title: 'Give one thing away', why: 'Those conversations need hours. You get them back by handing over one task.',
+        lines: ['The task that takes my time but not my talent: ________.',
+          `________ will do it starting ________.${solo ? ' (No team yet? A tool, a template, or a freelancer for two hours.)' : ''}`,
+          'Done looks like ________. I step in only if ________.'],
+        done: 'that task done once without you.' },
+      { domain: 'All four domains', title: 'Your Sunday review', why: 'Five minutes that turn this week into the next one. This is how change sticks.',
+        lines: ['Lead yourself: this week I protected ________ hours for what matters.',
+          'Lead your business: my number moved from ________ to ________.',
+          'Lead the market: a customer said “________________”.',
+          'Lead your people: ________ did ________ without me.',
+          'My one move for next week: ________.'],
+        done: 'every Sunday for four weeks. By then you will know what twelve weeks could do.' },
+    ].map((a, i) => ({ ...a, start: i === start }));
+    const recap = [];
+    if (rd.any) recap.push(['Your leader title', `${ARCH[rd.hi][0]}: ${ARCH[rd.hi][1]}`]);
+    recap.push(['Where you are', `${E.STAGES[c.here].name}${c.goal >= 0 && c.goal !== c.here ? ', heading to ' + E.STAGES[c.goal].name : ''}`]);
+    if (rd.any) { recap.push(['Strongest', D[rd.hi].name]); recap.push(['Needs you first', D[rd.lo].name]); }
+    if (G.pct) recap.push(['Unused potential', `${G.pct}% of the strength you see in yourself is not at work yet`]);
+    if (wl.length) recap.push(['What you want most', wl.join(' · ')]);
+    if (vals.length) recap.push(['What you care about most', vals.join(' · ')]);
+    return { name: full, date, logo: LOGO,
+      title: `${first ? first + '’s' : 'Your'} North Star Action Plan`,
+      subtitle: 'Five actions for this week. One in each domain, and one that ties them together.',
+      recap,
+      intro: `Do them in this order: each one feeds the next. Fill in the blanks with a pen, not in your head.${start >= 0 ? ` Start where it says START HERE: that is ${D[rd.lo].name}, the side that needs you first.` : ''} Give it one week.`,
+      actions,
+      closing: { title: 'If the free North Star gave you this, imagine twelve weeks with Alexandru beside you.',
+        lines: ['The Founder’s Blueprint takes these five actions and turns them into a road: twelve weeks, the same four domains, one step at a time, with the manuals beside you and Alexandru and the team when it gets hard.',
+          'Weeks 1–3, the Founder Launchpad, are free and open tonight. Your account is already made: sign in with your email.'],
+        url: 'linktolead.exploraself.com', mentor: 'ExploraSelf · exploraself.com · Mentor: Alexandru Cojocari' } };
+  }
+  async function downloadPlan(btn) {
+    const c = context();
+    if (btn) { btn.disabled = true; btn.dataset.t = btn.textContent; btn.textContent = 'Making your plan…'; }
+    try {
+      const m = await import('./plan-pdf.js');
+      const blob = await m.makePlanPDF(planData(c));
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = `${(S.profile.first || 'my').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-north-star-action-plan.pdf`; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      toast('Your North Star Action Plan is downloaded.');
+    } catch { toast('Your browser would not make the PDF. Try again, or use Print → Save as PDF.'); }
+    if (btn) { btn.disabled = false; btn.textContent = btn.dataset.t || 'Download my North Star Action Plan'; }
+  }
+  const pPlan = (c) => `<div class="plan-l">
+      <span class="eb" style="color: #D6BF8F">Your North Star Action Plan · PDF</span>
+      <h2 class="sf">Five actions for this week. <span class="sfi">Fill in the blanks.</span></h2>
+      <p>One in each domain, in an order where each feeds the next, and a Sunday review that makes it stick. With your name, your reading and today’s date. Yours to keep, at no cost.</p>
+      <ol class="plan-steps">${['Name your enough', 'Know your number', 'Hear it in their words', 'Give one thing away', 'Your Sunday review'].map((t, i) => `<li><b>${i + 1}</b>${t}</li>`).join('')}</ol>
+      <button type="button" class="go plan-go no-print" data-act="plan-pdf" data-f="plan-pdf"${c.rd.any ? '' : ' disabled'}>Download my North Star Action Plan <span class="arr" aria-hidden="true">↓</span></button>
+      ${c.rd.any ? '' : '<span class="plan-wait">Answer Part 1 first: the plan is built from your answers.</span>'}
+    </div>
+    <div class="plan-r" aria-hidden="true"><div class="plan-paper"><i></i><b>${esc((S.profile.first || 'Your').trim())}’s North Star Action Plan</b><span></span><span></span><span class="s"></span><em>1</em><span></span><span class="s"></span><em>2</em><span></span><span class="s"></span></div></div>`;
+
   /* ── Your next step (31 Oct, round 4): one ending, one button, said for who
    * is here. From the Blueprint: unlock more. New and mostly "Not yet": you
    * need a guided road, and the Launchpad is where the work is done. Others:
@@ -1871,7 +2021,7 @@
       <p>${esc(E.STAGES[c.here].name)}${c.goal >= 0 && c.goal !== c.here ? ' → ' + esc(E.STAGES[c.goal].name) : ''}${S.values.length ? ' · Leading for ' + esc(named(M.VALUES, S.values).join(' & ')) : ''}</p></header>`;
     out += `<section class="pp"><div class="pp-row"><div>${shape}<p class="pp-key"><span class="k1"></span> Your answers <span class="k2"></span> Your strengths, as you rated them (the hatched space between is unused potential)</p></div>
       <div>${rd.any ? `<p class="pp-k">Strongest</p><p class="pp-v">${D[rd.hi].name}</p><p class="pp-k">Needs you first</p><p class="pp-v">${D[rd.lo].name}</p><p class="pp-k">Start here</p><p>${esc(D[rd.lo].step)}</p>` : '<p>Answer the questions in Part 1 to see your reading.</p>'}</div></div>
-      ${P.fin[0] ? pGap(c).replace(/<span class="eb">[^<]*<\/span>/, '').replace('The gold below is that gap', 'The hatched space in the picture is that gap') : ''}</section>`;
+      ${P.fin[0] ? pGap(c).replace(/<span class="eb">[^<]*<\/span>/, '').replace('The gold in your North Star is that gap', 'The hatched space in the picture is that gap') : ''}</section>`;
     // Part 1: the answers and their next steps.
     const qa = c.qs.filter((q) => Number.isInteger(S.ans[q.id])).map((q) => [q.short, E.ANSWERS[S.ans[q.id]][0], noteFor(q, S.ans[q.id])]);
     const told = [['What hurts most', named(E.PAINS, S.pains).join(' · ')], ['What you want most', named(E.GOALS, wants()).join(' · ')], ['What you care about most', named(M.VALUES, S.values).join(' · ')]].filter((x) => x[1]);
@@ -1944,7 +2094,7 @@
     const cont = $('#continue'); if (cont) cont.innerHTML = `${c.answered > 0 ? 'Continue my assessment' : 'Show me my road'} <span class="arr" aria-hidden="true">↓</span>`;
     put('banner', pBanner(c));
     put('ring', pRing(c));
-    put('skipnote', pSkip());
+    put('skipnote', pAgain() + pSkip());
     put('s-journey', pJourney(c));
     put('herebar', pHerebar(c));
     put('modes', pModes());
@@ -1960,6 +2110,7 @@
     put('s-numbers', pNumbers(c));
     for (let i = 0; i < 4; i++) put('fb-' + i, pFeedback(c, i));
     put('s-save', pSave(c));
+    put('s-plan', pPlan(c));
     put('s-next', pNext(c));
     put('s-weeks', pWeeks(c));
     put('s-climb', pClimb());
@@ -2109,6 +2260,11 @@
       case 'p2move': p2Move(Number(v)); return;
       case 'p2ans': gated(() => { S.p2.ans[t.dataset.q] = Number(v); }); return;
       case 'pmore': S.pmore[i] = !S.pmore[i]; save(); render(); return;
+      case 'again': UI.again = true; render(); go('clear'); return;
+      case 'again-go': retake(); return;
+      case 'again-no': UI.again = false; try { history.replaceState(null, '', location.pathname); } catch { /* old browser */ } render(); return;
+      case 'cmp': UI.cmp = !UI.cmp; render(); return;
+      case 'why': UI.why = !UI.why; render(); if (UI.why) { const g = document.querySelector('.gapfeel'); if (g) g.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'nearest' }); } return;
       case 'num-chip': S.nums[t.dataset.k] = { pick: v, own: '' }; save(); render(); return;
       case 'num-unsure': S.nums[t.dataset.k] = { pick: 'unsure', own: '' }; save(); render(); return;
       case 'num-own': { const k = t.dataset.k, cur = S.nums[k] || {}; S.nums[k] = { pick: 'own', own: cur.pick === 'own' ? cur.own : '' }; save(); render(); const o = document.querySelector(`[data-own="${k}"]`); if (o) o.focus(); return; }
@@ -2120,6 +2276,7 @@
       case 'email': sendEmail(); return;
       case 'card-share': cardOut(true); return;
       case 'card-dl': cardOut(false); return;
+      case 'plan-pdf': downloadPlan(t); return;
       case 'alloptions': { UI.opts = !UI.opts; const o = document.getElementById('s-options'); if (o) o.hidden = !UI.opts; render(); if (UI.opts && o) o.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); return; }
       case 'regate': fullAccount(); return;
       case 'account': {
@@ -2234,7 +2391,15 @@
     }
   });
 
+  try { if (location.hash === '#again') UI.again = true; if (location.hash === '#compare') UI.cmp = true; } catch { /* no location */ }
   render();
+  if (UI.again) setTimeout(() => go('clear'), 300);
+  if (UI.cmp) setTimeout(() => { const r = document.getElementById('s-reading'); if (r) r.scrollIntoView({ block: 'start' }); }, 300);
+  /* From the profile menu while already on this page: only the address changes. */
+  window.addEventListener('hashchange', () => {
+    if (location.hash === '#again') { UI.again = true; render(); go('clear'); }
+    else if (location.hash === '#compare') { UI.cmp = true; render(); const r = document.getElementById('s-reading'); if (r) r.scrollIntoView({ block: 'start', behavior: reduced() ? 'auto' : 'smooth' }); }
+  });
   setTimeout(() => $('#cf').classList.add('settled'), 1500);
   /* Email works only once the site has its email key and postal address. */
   try { if (location.protocol !== 'file:') fetch('/api/send-plan').then((r) => (r.ok ? r.json() : {})).then((j) => { UI.mailReady = !!j.ready; UI.mailWhy = j.reason || ''; }).catch(() => {}); } catch { /* offline */ }
