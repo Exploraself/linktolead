@@ -919,23 +919,6 @@ document.addEventListener('input', (e) => {
   refreshRail();
 });
 
-/* Notes written in the week-one sample on /road4/ before there was an account
- * (kept on the device as 'ftb-sample', keyed like these answers) move into the
- * programme and the account, never over an answer already written. */
-const SAMPLE_KEY = 'ftb-sample';
-function adoptSample() {
-  let got = null;
-  try { got = JSON.parse(localStorage.getItem(SAMPLE_KEY) || 'null'); } catch { return; }
-  const a = got && got.answers && typeof got.answers === 'object' ? got.answers : {};
-  for (const [k, v] of Object.entries(a)) {
-    if (!/^(build|grow|scale)\.1\.(self|people|work|market)\.[0-6]$/.test(k) || typeof v !== 'string' || !v.trim() || (state.answers[k] || '').trim()) continue;
-    state.answers[k] = v.slice(0, 4000);
-    account.touch('answers', k, state.answers[k]);
-  }
-  save();
-  try { localStorage.removeItem(SAMPLE_KEY); } catch { /* private mode */ }
-}
-
 /* Coming home: spend a sign-in link if there is one, then bring the account's
  * work, North Star, notes and plans here. The device copy wins on conflict — it
  * is the one the founder was just typing into. */
@@ -968,7 +951,6 @@ async function comeHome() {
   if (r && r.ok) {
     for (const [k, v] of Object.entries(r.answers || {})) if (v && !state.answers[k]) state.answers[k] = v;
     for (const [k, v] of Object.entries(r.work || {})) if (v && !state.work[k]) state.work[k] = v;
-    adoptSample();
     compassRec = r.compass || null;
     if (r.me) {
       state.me = { name: r.me.name, email: r.me.email };
