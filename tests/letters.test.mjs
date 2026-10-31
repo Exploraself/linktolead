@@ -14,6 +14,9 @@ import { onRequestPost as password } from '../functions/api/password.js';
 import { onRequestPost as sendPlan } from '../functions/api/send-plan.js';
 import { onRequestPost as compassPost } from '../functions/api/compass.js';
 import { fakeD1, fakeResend, post, tally } from './_d1.mjs';
+import { GROWTH_PLAN_PDF } from '../functions/_letters.js';
+import { send as sendMail } from '../functions/_mail.js';
+import { existsSync } from 'node:fs';
 
 const { ok, done } = tally('letters');
 const B = 'https://linktolead.exploraself.com';
@@ -139,6 +142,20 @@ ok(r.status === 200 && sent[0].body.text.includes('For you that’s Lead your bu
   ok(paras(O.text)[1] === 'Maria from ExploraSelf here.', 'another mentor: only who they are, not Alexandru’s story');
   const Q = questionNotice(B, { name: 'Ana', email: 'a@x.y', question: 'Hi?' });
   ok(!Q.text.includes(OPENER) && !/Free assessments/.test(Q.text), 'the notice to the mentor: no opener, no assessments');
+}
+
+// The North Star welcome carries the Massive Growth Plan as a PDF (31 Oct).
+{
+  const N = northStarWelcome(B, { first: 'Ana' });
+  ok(Array.isArray(N.attachments) && N.attachments.length === 1 && N.attachments[0] === GROWTH_PLAN_PDF && /attached/.test(N.text), 'North Star welcome: the plan is attached, and the letter says so');
+  ok(GROWTH_PLAN_PDF.path === 'https://linktolead.exploraself.com/library/massive-growth-plan.pdf' && existsSync(new URL('../public/library/massive-growth-plan.pdf', import.meta.url)), 'the attachment is the Library file, at its public address');
+  ok(!launchpadWelcome(B, { first: 'Ana' }).attachments, 'the Launchpad welcome attaches nothing');
+  const sent = fakeResend();
+  const r = await sendMail({ RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'Via Roma 1, Rome' }, { to: 'a@x.y', ...N, why: 'test' });
+  ok(r.ok && JSON.stringify(sent[0].body.attachments) === JSON.stringify([{ filename: 'Massive-Growth-Plan.pdf', path: GROWTH_PLAN_PDF.path }]), 'send() hands the attachment to Resend');
+  const sent2 = fakeResend();
+  await sendMail({ RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'Via Roma 1, Rome' }, { to: 'a@x.y', ...launchpadWelcome(B, { first: 'Ana' }), why: 'test' });
+  ok(!('attachments' in sent2[0].body), 'no attachment field when there is nothing to attach');
 }
 
 done();
