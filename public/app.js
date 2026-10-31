@@ -18,6 +18,7 @@ import { result as fwResult } from './frameworks.js';
 import { report } from './feedback.js';
 import * as account from './account.js';
 import { launchpadCardHTML, downloadLaunchpadPlan } from './launchpad-plan.js';
+import { slot as googleSlot } from './google.js';
 import { videoBlock } from './video-talk.js';
 import * as M from './music.js';
 import { LEVELS4, CHAPTERS4, DOMS, UNITS, STEPS4, CLOSES, wkey, tapOf, slideOf, wordOf, shown, domainUnits, levelUnits,
@@ -347,6 +348,7 @@ function signinView() {
     <h1 class="qh">Sign in</h1>
     <p class="sec-lede">Your email and password. Signed up with your name and email only, or forgotten your password? We email you a link that signs you in on this device.</p>
     <form class="joinbox bare" id="signinform" novalidate>
+      ${googleSlot()}
       <div class="joinrow">
         <label><span>Email</span><input id="si-email" type="email" autocomplete="email" required></label>
         ${pwField('si-pw', 'Password', 'current-password')}
@@ -931,6 +933,7 @@ function render() {
     : '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="status">One moment…</p></div></section>';
   if (view === 'home') cabinetShown();
   else if (DASHBOARD.includes(view)) dashboardShown();
+  if (view === 'signin') mountGoogle();
   // The Lamp's candles count the domain on screen, in the programme only.
   M.setCandles(view === 'work' ? answered(st, level, dom) : -1);
   if (view === 'work') document.body.classList.toggle('cw-shut', !writable(st));
@@ -1108,6 +1111,16 @@ const crownUp = (e) => {
 };
 document.addEventListener('pointerup', crownUp);
 document.addEventListener('pointercancel', crownUp);
+
+/** "Continue with Google" on the sign-in page (google.js): signed in, or a new
+ *  free account, then Your Base Camp, like the password sign-in. */
+function mountGoogle() {
+  const el = document.querySelector('#signinform .g-slot');
+  if (!el) return;
+  import('./google.js').then((g) => g.mount(el, { source: 'home',
+    onDone: () => { view = 'home'; try { history.replaceState(null, '', '/ground-plan/#home'); } catch { /* old browser */ } comeHome(); },
+    onError: (m) => { const msg = $('#si-msg'); if (msg) msg.textContent = m; } })).catch(() => {});
+}
 
 async function sendSigninLink() {
   const msg = $('#si-msg'), email = ($('#si-email') || {}).value || '';

@@ -20,6 +20,7 @@
  * full account here, then stays on the North Star, signed in, with everything
  * open. An email that already has an account goes to `onExisting`. */
 import { detailFields, readDetails, CONSENT, utm } from '/forms.js';
+import { slot as googleSlot, mount as mountGoogle } from '/google.js';
 
 /** Inside this box only: the North Star page has its own #gate-form. */
 const $ = (s) => (ctx.gate || document).querySelector(s);
@@ -72,6 +73,7 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
       <span class="ab-k" style="font-size: 12px; font-weight: 600; letter-spacing: .16em; color: #7A5E26; padding-right: 44px">${head[0]}</span>
       <h2 id="gate-h" style="margin: 0; font:440 26px/1.25 Newsreader, Georgia, serif; padding-right: 40px">${head[1]}</h2>
       <span class="ab-sub" style="font-size: 14px; color: #3D4966">${head[2]}</span>
+      ${googleSlot('j-consent')}
       <div class="ab-two">
         <label style="${LAB}">First name<input class="inp" id="j-first" type="text" autocomplete="given-name" maxlength="60"></label>
         <label style="${LAB}">Surname<input class="inp" id="j-last" type="text" autocomplete="family-name" maxlength="60"></label>
@@ -127,6 +129,22 @@ function wire(gate, variant, landing) {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !gate.hidden) close(); });
     gate.dataset.wired = '1';
   }
+  // "Continue with Google" (google.js): the account opens or is made in one
+  // tap. A full-form page then asks once for what the account still lacks
+  // (company, interest, industry, password), like every other account.
+  mountGoogle($('.g-slot'), { landing: ctx.landing, source: ctx.landing === 'compass' ? 'compass' : NS_PAGES.includes(ctx.landing) ? 'sales-page' : 'home',
+    onError: (m) => { $('#gate-err').textContent = m; },
+    onDone: (out) => {
+      const go = () => { if (ctx.stay) location.reload(); else location.href = after(); };
+      const me = out.me || {};
+      try { localStorage.setItem(KEY, JSON.stringify({ first: me.first || '', last: me.last || '', email: me.email || '' })); } catch { /* private mode */ }
+      if (variant === 'full' && out.missing && out.missing.length) {
+        close();
+        import('/reset-box.js').then((m) => m.openComplete({ name: `${me.first || ''} ${me.last || ''}`.trim(), email: me.email || '', missing: out.missing, done: go })).catch(go);
+        return;
+      }
+      go();
+    } });
   const nc = $('#j-nocompany');
   if (nc) nc.addEventListener('change', () => { const c = $('#j-company'); c.disabled = nc.checked; if (nc.checked) c.value = ''; });
   const form = $('#gate-form');
