@@ -30,6 +30,7 @@ import * as library from './functions/api/library.js';
 import * as stage from './functions/api/stage.js';
 import * as thread from './functions/api/thread.js';
 import * as letters from './functions/api/letters.js';
+import * as avatar from './functions/api/avatar.js';
 import * as accountDelete from './functions/api/account-delete.js';
 
 /** One line per route. A new file in functions/api/ needs its line here. */
@@ -52,6 +53,7 @@ export const ROUTES = {
   '/api/stage': stage,
   '/api/thread': thread,
   '/api/letters': letters,
+  '/api/avatar': avatar,
   '/api/account-delete': accountDelete,
 };
 

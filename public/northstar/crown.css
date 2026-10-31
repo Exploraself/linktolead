@@ -513,3 +513,86 @@ body:not(.ns-p1done) .mbar{display:none !important}
 @media(prefers-reduced-motion:reduce){.nsgap,.nsgap-tag{animation:none}}
 #toast{pointer-events:none}
 @media(max-width:760px){.nsb-keys{display:none !important}}
+
+/* ── The printed North Star (31 Oct, round 5): its own pages, black and white ── */
+#nsprint{display:none}
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff !important}
+  body>*:not(#nsprint){display:none !important}
+  #nsprint{display:block !important;color:#000;font:11pt/1.5 Georgia,'Times New Roman',serif;-webkit-print-color-adjust:economy;print-color-adjust:economy}
+  #nsprint *{color:#000 !important;background:transparent !important;box-shadow:none !important;text-shadow:none !important}
+  #nsprint .pp-head{border-bottom:2px solid #000;padding-bottom:8pt;margin-bottom:12pt}
+  #nsprint .pp-head h1{font:400 26pt/1.1 Georgia,serif;margin:2pt 0 4pt}
+  #nsprint .pp-head p{margin:0;font-size:11pt}
+  #nsprint .pp-arch{font:italic 400 15pt/1.3 Georgia,serif;margin:4pt 0 !important}
+  #nsprint .pp-arch span{font-size:11pt}
+  #nsprint .pp-eb,#nsprint .pp-k{font:700 8pt/1.3 Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase;margin:0 0 3pt}
+  #nsprint h2{font:400 18pt/1.2 Georgia,serif;margin:0 0 10pt}
+  #nsprint p{margin:0 0 6pt;orphans:3;widows:3}
+  #nsprint .pp{margin:0 0 14pt}
+  #nsprint .pp.br{break-before:page;page-break-before:always}
+  #nsprint .pp-row{display:flex;gap:16pt;align-items:flex-start}
+  #nsprint .pp-row>div:last-child{flex:1}
+  #nsprint .pp-v{font:400 14pt/1.25 Georgia,serif;margin-bottom:8pt}
+  #nsprint .pp-key{font:9pt Arial,sans-serif}
+  #nsprint .pp-key .k1,#nsprint .pp-key .k2{display:inline-block;width:18pt;height:8pt;border:1.5pt solid #000;vertical-align:middle;margin:0 3pt 0 6pt}
+  #nsprint .pp-key .k2{border-style:dashed}
+  #nsprint .nsgapmsg{border:1pt solid #000;border-left:4pt solid #000;padding:8pt 10pt;margin-top:8pt;break-inside:avoid}
+  #nsprint .nsgapmsg>b{display:block;font:400 14pt Georgia,serif;margin-bottom:4pt}
+  #nsprint .pp-t{width:100%;border-collapse:collapse;margin:0 0 10pt;font-size:10.5pt}
+  #nsprint .pp-t tr{break-inside:avoid}
+  #nsprint .pp-t th{width:32%;text-align:left;vertical-align:top;padding:6pt 10pt 6pt 0;border-top:.75pt solid #999;font:700 9.5pt/1.4 Arial,sans-serif}
+  #nsprint .pp-t td{vertical-align:top;padding:6pt 0;border-top:.75pt solid #999}
+  #nsprint .pp-t td span{font-size:10pt}
+  #nsprint .pp-box{border:1pt solid #000;padding:8pt 10pt;break-inside:avoid}
+  #nsprint .pp-q{font:italic 13pt/1.35 Georgia,serif;margin:0}
+  #nsprint .pp-dom{border-top:.75pt solid #999;padding-top:6pt;margin-top:6pt;break-inside:avoid}
+  #nsprint .pp-l{margin:0 0 10pt;padding-left:16pt}
+  #nsprint .pp-l li{margin-bottom:3pt}
+  #nsprint .pp-promo h2{font-size:26pt}
+  #nsprint .pp-big{font-size:13pt}
+  #nsprint .pp-cta{border:2pt solid #000;padding:12pt 14pt;margin:14pt 0;text-align:center;break-inside:avoid}
+  #nsprint .pp-url{font:700 20pt/1.2 Arial,sans-serif;margin:4pt 0 6pt}
+  #nsprint .pp-foot{margin-top:18pt;font:9pt/1.5 Arial,sans-serif}
+}
+
+/* ── Part 2 on the phone: one question per screen (31 Oct, round 5) ── */
+.p2nav,.p2foot,.p2-start{display:none}
+@media(max-width:760px){
+  .p2-start{display:flex}
+  body:not(.p2-full) #p2>.card,body:not(.p2-full) #p2>.p2grp{display:none}
+  body.p2-full #p2{position:fixed;inset:0;z-index:80;overflow-y:auto;overscroll-behavior:contain;background:var(--paper);padding:12px 16px 30px;display:flex;flex-direction:column;gap:12px}
+  body.p2-full{overflow:hidden}
+  body.p2-full #acct-gate{z-index:99}
+  body.p2-full #p2>.p2-start,body.p2-full #p2>.p2grp,body.p2-full #p2>.card:not(.cur){display:none}
+  body.p2-full #p2>.card.cur{border:0;box-shadow:none;padding:6px 2px;min-height:calc(100svh - 170px)}
+  body.p2-full .p2nav{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;position:relative;font-size:12px;color:var(--muted);padding-right:44px}
+  body.p2-full .p2nav .nsq-x{display:block;top:-6px;right:-4px;color:var(--ink)}
+  .p2seg{display:flex;gap:4px;width:100%}
+  .p2seg b{flex:1;height:2px;background:var(--line)}
+  .p2seg b.done{background:#6F93B8}.p2seg b.now{background:var(--goldink)}
+  body.p2-full .p2foot{display:flex;justify-content:space-between;gap:10px;position:sticky;bottom:0;padding:10px 0 calc(6px + env(safe-area-inset-bottom,0px));background:var(--paper);border-top:1px solid var(--line)}
+  body.p2-full .p2foot button{min-height:48px;padding:0 20px;border-radius:999px;font-weight:600;cursor:pointer}
+  body.p2-full .p2foot .nsb-back{border:1px solid var(--line);background:transparent;color:var(--ink)}
+  body.p2-full .p2foot .nsb-back:disabled{opacity:.4}
+  body.p2-full .p2foot .nsb-next{border:0;background:var(--deep);color:#EEF2F7}
+  body.p2-full .p2opts{grid-template-columns:1fr}
+}
+
+/* ── The letter on a phone (31 Oct, round 5): one light frame, the text the
+   full width, the signature line wrapping instead of running off. ── */
+@media(max-width:760px){
+  .nsfbw{padding:16px 12px;border-left-width:1px;border-radius:10px;gap:16px}
+  .nsfbw.inner{padding:0}
+  #s-whatif{padding:22px 12px !important}
+  #s-whatif .nsfbw{border-color:rgba(214,191,143,.35)}
+  .fbletter{padding:18px 14px 14px;border-radius:8px;box-shadow:none;border:0;max-width:none}
+  .fbletter p{font-size:17px;line-height:1.5}
+  .fbl-sign{flex-wrap:wrap;gap:4px 10px}
+  .fbl-sign img{height:44px}
+  .fbl-sign span{flex-basis:100%;font-size:11.5px}
+  .fbhead h2{font-size:28px}
+  .fbnext{padding:16px 14px}
+  .fbnext p{font-size:18px}
+}
