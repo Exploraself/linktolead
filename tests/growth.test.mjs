@@ -59,9 +59,13 @@ ok(h.includes(`>${GP.lead}<`) && GP.moves.every((m) => h.includes(`<li>${m}</li>
 ok(GP.domains.every((d) => h.includes(`--c:${d.col}`) && h.includes(d.name) && h.includes(d.sub)), 'each domain in its colour, with its name and sub');
 ok(/class="gp-n">1</.test(h) && /class="gp-n">20</.test(h) && /class="gp-n">21</.test(h), 'steps numbered 1 to 21');
 ok(GP.plus.voices.every((v) => h.includes(v.name) && h.includes(v.q)), 'step 21: the four voices, name and question');
-ok((h.match(/Coming soon to your Library/g) || []).length === 2 && h.includes(`href="${GP.plus.library}"`), 'downloads without a file: “Coming soon to your Library”, linked to the Library');
-const withFile = JSON.parse(JSON.stringify(GP)); withFile.plus.downloads[0].file = '/library/agenda-2027.pdf';
-ok(GV.html(withFile, { done: {} }).includes('href="/library/agenda-2027.pdf"') && (GV.html(withFile, { done: {} }).match(/Coming soon/g) || []).length === 1, 'a download with a file links the file');
+const nDl = GP.plus.downloads.length, noFile = GP.plus.downloads.filter((d) => !d.file).length;
+ok(nDl >= 1 && GP.plus.downloads.every((d) => h.includes(d.title) && h.includes(d.text)), `step 21: its download${nDl > 1 ? 's' : ''}, title and text`);
+ok((h.match(/Coming soon to your Library/g) || []).length === noFile && (!noFile || h.includes(`href="${GP.plus.library}"`)), 'a download without a file: “Coming soon to your Library”, linked to the Library');
+const withFile = JSON.parse(JSON.stringify(GP)); withFile.plus.downloads.forEach((d, i) => { d.file = i ? undefined : '/library/planner-2027.pdf'; });
+withFile.plus.downloads.push({ title: 'A second', text: 'Without a file yet.' });
+const hf = GV.html(withFile, { done: {} });
+ok(hf.includes('href="/library/planner-2027.pdf"') && (hf.match(/Coming soon to your Library/g) || []).length === withFile.plus.downloads.length - 1, 'a download with a file links the file; the others still say coming soon');
 const L = GV.line('The first time I keep it: ______________ (day). Next “________”.');
 ok(!L.includes('___') && (L.match(/class="gp-blank"/g) || []).length === 2 && L.includes('<small class="gp-hint">(day)</small>'), 'a run of ___ is a line to write on; (day) and (date) are small');
 ok(/<span class="gp-bw">“<span class="gp-blank"[^]*?<\/span><\/span>”\.<\/span>/.test(L), 'a quote round a blank stays on its line');

@@ -722,6 +722,7 @@ body:not(.ns-p1done) .mbar{display:none !important}
   .gp-head{padding:36px 34px}
   .gp-prog{flex-direction:row;align-items:center;gap:14px}.gp-bar{flex:1 1 auto}
   .gp-step{padding:22px 24px}
-  .gp-voices,.gp-dls{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gp-voices{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .gp-dls{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
 }
 @media (prefers-reduced-motion:reduce){.gp-step,.gp-tick,.gp-bar i{transition:none}}
