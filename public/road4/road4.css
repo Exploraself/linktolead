@@ -416,6 +416,8 @@ section{position:relative}
 .close h2 i{font-style:italic;color:#E3C47E;font-weight:400}
 .close .lede{color:#D8CDB6;margin-top:16px}
 .close .side{display:grid;gap:10px;justify-items:start}
+.close .when{font:500 clamp(22px,2.6vw,27px)/1.3 var(--display);color:#F3EBDA;max-width:22ch}
+.close .when i{font-style:italic;font-weight:400;color:#E3C47E}
 
 .foot{background:#0F0C08;color:#9D917E;font-size:13px}
 .foot .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 24px;padding-block:26px}
@@ -492,7 +494,7 @@ html.rk-bar-on .foot{padding-bottom:76px}
 /* ── 1 Nov, round 2: the after, made visible ─────────────────────────────── */
 .hero .back{margin-top:16px;padding:10px 14px;border-left:3px solid var(--gold);background:rgba(201,162,74,.1);color:#F3EBDA;font-size:15px;max-width:46ch}
 .hero .back b{color:var(--gold-hi);font-weight:600}
-.after3{display:grid;gap:14px;margin-top:18px}
+.after3{display:grid;gap:14px;margin-top:18px;align-items:start}
 @media(min-width:860px){.after3{grid-template-columns:1.25fr .75fr}}
 .lines4,.sunday3{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:clamp(18px,3vw,26px);display:grid;gap:12px;align-content:start}
 .lines4 .ex{font-size:14.5px;color:var(--muted)}

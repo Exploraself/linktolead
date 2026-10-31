@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme-default="dark">
 <head>
 <meta charset="utf-8">
 <meta name="color-scheme" content="light dark">
@@ -187,6 +187,27 @@ html.rk-bar-on .foot{padding-bottom:84px}
 :root[data-theme="light"] .close .mine{color:#7A5C16}
 :root[data-theme="light"] .close .note{color:#5E5446}
 :root[data-theme="light"] .foot strong{color:#7A5C16!important}
+
+/* Dark (1 Nov, dark is this page's default): the paper scrolls become a lifted
+   espresso, so the page still alternates without bright blocks. */
+:root[data-theme="dark"] .lt{background:#1E1710;color:#F3EBDA}
+:root[data-theme="dark"] .lt .h2 em,:root[data-theme="dark"] .lt .k,:root[data-theme="dark"] .levels .ch{color:#D6BF8F}
+:root[data-theme="dark"] .lt .sub,:root[data-theme="dark"] .lt .note,:root[data-theme="dark"] .lt .legend{color:#C9BDA6}
+:root[data-theme="dark"] .lt .jm li{color:#8F8775}:root[data-theme="dark"] .lt .jm .dn{color:#B9AC94}:root[data-theme="dark"] .lt .jm .nw{color:#D6BF8F}
+:root[data-theme="dark"] .cards li,:root[data-theme="dark"] .levels li,:root[data-theme="dark"] .ladder li,:root[data-theme="dark"] .risk{background:#14100B;border-color:#3A3022;color:#F3EBDA}
+:root[data-theme="dark"] .cards span,:root[data-theme="dark"] .ladder .nm span,:root[data-theme="dark"] .risk{color:#C9BDA6}
+:root[data-theme="dark"] .cards svg{stroke:#D6BF8F}:root[data-theme="dark"] .cards svg circle[fill]{fill:#D6BF8F}
+:root[data-theme="dark"] .levels li b{color:#A99C82}:root[data-theme="dark"] .levels li p small{color:#A99C82}
+:root[data-theme="dark"] .levels .free{background:#B4975F;border-color:#B4975F;color:#14100B}:root[data-theme="dark"] .levels .free b,:root[data-theme="dark"] .levels .free p small{color:#14100B}
+:root[data-theme="dark"] .levels .with{border-color:#B4975F}:root[data-theme="dark"] .levels .with b{color:#D6BF8F}
+:root[data-theme="dark"] .levels .last{background:#0B0805;border-color:#B4975F}
+:root[data-theme="dark"] .ladder .bars i{background:#3A3022}:root[data-theme="dark"] .ladder .bars i.on{background:#B4975F}
+:root[data-theme="dark"] .risk b{color:#F3EBDA}
+:root[data-theme="dark"] .soon{color:#D6BF8F}
+:root[data-theme="dark"] .sl output{color:#E3C47E}
+:root[data-theme="dark"] .lt [style*="color: #7A5C16"]{color:#D6BF8F!important}
+:root[data-theme="dark"] .face figcaption{color:#A99C82}
+:root[data-theme="light"] .close .sub{color:#5E5446}
 
 /* Light (public/theme.js): the dark scrolls become a warm second paper, so
    the page still alternates; gold turns a shade deeper to keep its contrast. */
@@ -493,7 +514,7 @@ html.rk-bar-on .foot{padding-bottom:84px}
   <section class="sc close">
     <div class="in" style="align-items: center">
       <ol class="jm" aria-hidden="true"><li class="dn">Arrive</li><li class="dn">Understand</li><li class="dn">See your path</li><li class="dn">Choose</li><li class="nw">Begin</li></ol>
-      <h2 class="h2">Start tonight, free. <em>By Tuesday, you’ll be ahead.</em></h2>
+      <h2 class="h2" data-when>Start tonight, free. <em>By Tuesday, you’ll be ahead.</em></h2>
       <p class="sub mine" id="close-mine" hidden></p>
       <p class="sub" style="margin: 0 auto; text-align: center">By your first Sunday: one task off your desk, your “enough” as a number.</p>
       <div id="close-cta" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px 22px"><button type="button" class="cta" data-join>Start my free three weeks →</button><span class="note">Name and email · No card · Stop any week</span></div>
