@@ -86,7 +86,7 @@ Three sales pages, the roads, all ending at `/start`:
 | Road | Address | Old addresses (302 here, query string kept) | Account form | Landing |
 |---|---|---|---|---|
 | Road 1 | `/road1/` (the long page, with the What-if Lab before the close) | `/`, `/b` | FULL | `road1` |
-| Road 2 | `/road2/` (since 31 Oct, the Blueprint page "You built the house. You forgot the door.": for the founder who builds, polishes and rebuilds, and keeps the selling for later) | — | FULL | `road2` |
+| Road 2 | `/road2/` (since 31 Oct, the Blueprint page "You keep making it better. You keep putting off the selling.": for the founder who builds, polishes and rebuilds; your week as two bars, six taps, four questions of their own answered back and gathered in "Your answers", nothing saved or sent) | — | FULL | `road2` |
 | Road 3 | `/road3/` (the 12 Scrolls page) | `/a` | SIMPLE | `road3` |
 | Road 4 | `/road4/` (the sales page for The Founder's Blueprint: the mirror of eight taps, the two kinds of stuck, week one drawn day by day, the twelve weeks as a climb) | — | FULL | `road4` |
 | North 2 | `/north2/` (a North Star sales page; was `/road2.1/`) | `/road2.1` | FULL | `north2` |
