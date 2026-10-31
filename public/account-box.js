@@ -1,7 +1,7 @@
 /* The account box on the sales pages: makes the free account and opens the
  * founder's Base Camp at /start, signed in at once.
  *
- *   'full'   (/road2/, the North Star sales page, landing "road2"; /road1/,
+ *   'full'   (/north3/, the North Star sales page, landing "road2"; /road1/,
  *            landing "road1"): first name, surname, email, company (or "No
  *            company yet"), interest, industry, a password (required: at
  *            least 10 characters, typed twice), consent.
@@ -12,7 +12,7 @@
  * The consent box starts unticked; without it the account is still made, and
  * nothing is emailed but what the founder asks for. The landing page and the
  * utm_* tags the founder arrived with go with the sign-up. Loaded the first
- * time a box opens (/road1/, /road2/, /road3/), then open() each time.
+ * time a box opens (/road1/, /north3/, /road3/), then open() each time.
  *
  * On /northstar (landing "compass", `stay`): a visitor from outside makes the
  * full account here, then stays on the North Star, signed in, with everything
@@ -74,6 +74,10 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
     </form>
   </div>`;
 
+/** Where the founder lands after the box. A North Star sales page (/north2/)
+ *  opens the North Star itself; every other page opens Your Base Camp. */
+const NS_HOME = ['road21'];
+const after = () => ctx.next || (NS_HOME.includes(ctx.landing) ? '/northstar/' : '/ground-plan/#home');
 let ctx = { opener: null, stage: null, variant: 'full', landing: 'road2', stay: false, onExisting: null };
 function close() { if (ctx.gate) ctx.gate.hidden = true; if (ctx.opener && ctx.opener.focus) ctx.opener.focus(); }
 
@@ -118,28 +122,30 @@ function wire(gate, variant, landing) {
       const out = A.joined() ? { token: A.token() } : await A.signup({ first, last, email, consent, source, stage: p.stage, type: variant,
         landing: ctx.landing, utm: utm(),
         ...(d ? { company: d.company, noCompany: d.noCompany, interest: d.interest, industry: d.industry, password: pw, confirm: pw2 } : {}) });
-      if (out.token) { if (ctx.stay) location.reload(); else location.href = '/ground-plan/#home'; return; }
+      if (out.token) { if (ctx.stay) location.reload(); else location.href = after(); return; }
       if (ctx.onExisting) { close(); ctx.onExisting(email); return; }
       // An address that already has an account is never handed its key here.
       $('#gate-err').innerHTML = 'This email already has an account. Sign in to open your plans. <a href="/ground-plan/#signin">Sign in →</a>';
     } catch (ex) {
       err(ex && ex.message && !/fetch|network|load failed|import/i.test(ex.message) ? ex.message : 'We could not reach the account service just now. Try again in a minute.');
     }
-    go.disabled = false; go.textContent = ctx.stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →';
+    go.disabled = false; go.textContent = ctx.stay || NS_HOME.includes(ctx.landing) || ctx.next === '/northstar/' ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →';
   });
 }
 
 /** Open the box. A founder already signed in on this device goes straight to
  *  their Base Camp. */
-export function open({ gate, opener, stage, variant = 'full', landing = variant === 'full' ? 'road2' : 'road3', stay = false, onExisting = null }) {
-  ctx = { gate, opener, stage, variant, landing, stay, onExisting };
+export function open({ gate, opener, stage, variant = 'full', landing = variant === 'full' ? 'road2' : 'road3', stay = false, onExisting = null, next = '' }) {
+  ctx = { gate, opener, stage, variant, landing, stay, onExisting, next };
   if (hasAccount() && stay) return;
   if (hasAccount()) {
     if (stage) { const p = known() || {}; p.stage = stage.id; try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* private mode */ } }
-    location.href = '/ground-plan/#home';
+    location.href = after();
     return;
   }
   if (gate.dataset.variant !== variant + ' ' + landing) wire(gate, variant, landing);
+  // The button says where it goes.
+  { const g = gate.querySelector('.ab-go'); if (g && !ctx.stay) g.textContent = NS_HOME.includes(landing) || ctx.next === '/northstar/' ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →'; }
   const p = known();
   if (p) { $('#j-first').value = p.first || ''; $('#j-last').value = p.last || ''; $('#j-email').value = p.email || ''; }
   gate.hidden = false;

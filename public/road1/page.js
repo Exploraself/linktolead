@@ -1,7 +1,7 @@
 // "/road1/": Road 1, the long Link to Lead page. Every
 // call to action on it opens the FULL account form (with a password), so a
 // founder who arrives here signs up here (landing "road1") and is never sent
-// to /road2/. / and /b redirect here, query string kept (functions/_landing.js).
+// to /north3/. / and /b redirect here, query string kept (functions/_landing.js).
 //
 // The What-if Lab (lab.js) loads as the visitor scrolls near it.
 import { rememberUtm } from '/forms.js';

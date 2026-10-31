@@ -1,4 +1,4 @@
-// The three sales pages live at /road1/, /road2/ and /road3/; The Leader’s
+// The three sales pages live at /road1/, /north3/ and /road3/; The Leader’s
 // North Star at /northstar/ (it was /compass until 30 Oct). Their old
 // addresses (and the short ones on ads and banners) are 302s that keep the
 // query string (the utm_* tags), so the sign-up on the road they land on still
@@ -8,9 +8,9 @@
 export const REDIRECTS = {
   '': '/road1/',
   '/b': '/road1/',
-  '/compass/welcome': '/road2/',
-  '/compass/welcome-a': '/road2/',
-  '/c': '/road2/',
+  '/compass/welcome': '/north3/',
+  '/compass/welcome-a': '/north3/',
+  '/c': '/north3/',
   '/a': '/road3/',
   // Your Base Camp moved to its own name (30 Oct); old links and emails still land.
   '/start': '/ground-plan/',
@@ -18,6 +18,10 @@ export const REDIRECTS = {
   '/summit': '/northstar/summit/',
   '/north-star': '/northstar/',
   '/blueprint': '/road1/',
+  // Road 2 became /north3/ (31 Oct): the North Star sales page.
+  '/road2': '/north3/',
+  // Road 2.1 became /north2/ (31 Oct): it sells the North Star.
+  '/road2.1': '/north2/',
 };
 
 /** The redirect for this request, or null when its address is not an old one. */

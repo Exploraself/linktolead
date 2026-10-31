@@ -68,7 +68,7 @@ async function roster(D) {
   return rows.results || [];
 }
 
-const LANDING_NAMES = { road1: 'Road 1', road2: 'Road 2', road21: 'Road 2.1', road3: 'Road 3', road4: 'Road 4', compass: 'North Star box', summit: 'The Summit' };
+const LANDING_NAMES = { road1: 'Road 1', road2: 'North 3 (was Road 2)', road21: 'North 2 (was Road 2.1)', road3: 'Road 3', road4: 'Road 4', compass: 'North Star box', summit: 'The Summit' };
 const CSV_COLS = [['name', 'Name'], ['email', 'Email'], ['joined_at', 'Joined'], ['last_seen_at', 'Last seen'], ['stage', 'Stage'], ['step', 'Step'],
   ['signup', 'Sign-up form'], ['landing_name', 'Landing'], ['utm_source', 'utm_source'], ['utm_medium', 'utm_medium'], ['utm_campaign', 'utm_campaign'], ['utm_content', 'utm_content'], ['company_name', 'Company'], ['interest', 'Interest'], ['industry', 'Industry'],
   ['compass', 'North Star done'], ['plan_ticks', 'Plan steps done'], ['library_names', 'Library'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp']];
