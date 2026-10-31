@@ -18,7 +18,11 @@ ok(app.includes("e.key === 'Escape'") && app.includes('aria-expanded'), 'Escape 
 // The North Star: the eight questions as a notebook, keys 1–4 and Enter.
 const ns = read('public/northstar/app.js'), nsh = read('public/northstar/index.html'), nsc = read('public/northstar/crown.css');
 ok(nsh.includes('crown.css') && nsh.includes("import * as M from '/music.js'"), 'North Star: styles linked, the player available to the Crown');
-ok(/\/\^\[1-4\]\$\/\.test\(e\.key\)/.test(ns) && ns.includes('nsMove(1)') && ns.includes("t.closest('#nsb-r')"), 'North Star: 1–4 choose, Enter moves on, only inside the question');
+ok(/\/\^\[1-9\]\$\/\.test\(e\.key\)/.test(ns) && ns.includes('nsMove(1)') && ns.includes("t.closest('#nsb-r')"), 'North Star: number keys choose, Enter moves on, only inside the question');
+ok(ns.includes("data-act=\"${pains ? 'pain' : 'want'}\"") && !nsh.includes('id="s-pains"') && ns.includes("getElementById('s-reading')"), 'North Star: what hurts and what you want are pages 09 and 10; See my North Star opens the reading');
+ok(nsc.includes('body.ns-qview #banner{opacity:0'), 'North Star: the banner never sits over the questions');
+const fs2 = read('public/fullscreen.js');
+ok(html.includes('data-fs') && nsh.includes('data-fs') && html.includes('/fullscreen.js') && nsh.includes('/fullscreen.js') && fs2.includes('requestFullscreen') && fs2.includes('b.hidden = true'), 'full screen on both, hidden where the browser cannot');
 for (const k of ['Steps', 'Download', 'Music', 'Focus', 'Light', 'Blueprint', 'Book 1:1']) ok(ns.includes(`'${k}'`), `North Star Crown keeps ${k}`);
 ok(ns.includes('data-act="ans"') && ns.includes('gated(() => { S.ans[t.dataset.q] = Number(v); })'), 'North Star: answers go through the same path as before');
 ok(read('public/music.js').includes('if (opts.quiet) quiet = true;'), 'the player never starts itself on the North Star');

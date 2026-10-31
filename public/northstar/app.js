@@ -489,9 +489,30 @@
   const NOTES = ['Honest. This is where your first step will lean.', 'A guess is a fine start. We’ll make it a number.', 'Good ground. Keep one dated example.', 'Checked, not hoped. That’s a strength.'];
   let qi = null;
   const firstOpenQ = (qs) => { const i = qs.findIndex((q) => !Number.isInteger(S.ans[q.id])); return i < 0 ? qs.length - 1 : i; };
+  /* After the eight questions, two pages of taps: what hurts most (up to two)
+   * and what they want most (one). They shape the feedback. */
+  const TAPS = [['What hurts most right now', 'Pick up to two'], ['What you want most', 'Pick one']];
+  function tapsPage(k, qn, total) {
+    const pains = k === 0;
+    const list = pains ? E.PAINS : E.GOALS;
+    const on = (id) => (pains ? S.pains.includes(id) : S.want === id);
+    const chosen = pains ? S.pains.length : S.want ? 1 : 0;
+    return `<span class="eb nsb-lab">${String(qn).padStart(2, '0')} · Two more taps · they shape your feedback</span>
+      <div class="nsb-body">
+        <div class="nsb-col">
+          <h3 class="sf nsb-q" id="taps-h">${pains ? 'What hurts most right now?' : 'And what do you want most?'} <span class="sfi" style="color: var(--acc)">${pains ? 'Pick up to two.' : 'Pick one.'}</span></h3>
+          <div class="nsb-opts" role="group" aria-labelledby="taps-h">
+            ${list.map(([id, t, di], i) => `<button type="button" class="nsb-o" data-act="${pains ? 'pain' : 'want'}" data-v="${id}" data-f="${pains ? 'pain' : 'want'}-${id}" aria-pressed="${on(id)}">
+              <kbd aria-hidden="true">${i + 1}</kbd><span class="nsb-dot" style="background: ${D[di].hex}"></span><span><b>${esc(t)}</b></span></button>`).join('')}
+          </div>
+          <p class="nsb-keys"><kbd>1–${list.length}</kbd> choose · <kbd>Enter ↵</kbd> ${qn === total ? 'see my North Star' : 'next'}</p>
+        </div>
+        ${chosen ? `<p class="nsb-note">${pains ? 'Named. Your feedback starts here.' : 'Your plan will point here.'}</p>` : ''}
+      </div>`;
+  }
   function pQuestions(c) {
-    const qs = c.qs;
-    if (qi === null || qi >= qs.length) qi = firstOpenQ(qs);
+    const qs = c.qs, total = qs.length + TAPS.length;
+    if (qi === null || qi >= total) qi = firstOpenQ(qs);
     const stg = (E.STAGES.find((x) => x.id === S.stage) || {}).name || '';
     const done = qs.filter((q) => Number.isInteger(S.ans[q.id])).length;
     const rows = qs.map((q, i) => {
@@ -499,10 +520,17 @@
       return `<li><button type="button" class="nsb-s${Number.isInteger(a) ? ' done' : ''}${now ? ' now' : ''}" data-act="nsq" data-i="${i}" data-f="nsq-${i}"${now ? ' aria-current="step"' : ''}>
         <span class="nsb-n" style="color: ${CSSV[di]}">0${i + 1}</span>
         <span class="nsb-st"><b>${esc(SHORT[q.id] || q.text)}</b><i>${now ? 'Answering now' : Number.isInteger(a) ? esc(E.ANSWERS[a][0]) : ''}</i></span></button></li>`;
+    }).join('') + TAPS.map(([t], k) => {
+      const i = qs.length + k, now = i === qi, picked = k === 0 ? S.pains.length : S.want ? 1 : 0;
+      return `<li><button type="button" class="nsb-s${picked ? ' done' : ''}${now ? ' now' : ''}" data-act="nsq" data-i="${i}" data-f="nsq-${i}"${now ? ' aria-current="step"' : ''}>
+        <span class="nsb-n" style="color: var(--acc)">${String(i + 1).padStart(2, '0')}</span>
+        <span class="nsb-st"><b>${t}</b><i>${now ? 'Choosing now' : picked ? `${picked} chosen` : 'Two more taps'}</i></span></button></li>`;
     }).join('');
-    const q = qs[qi], di = D.findIndex((d) => d.id === q.domain), a = S.ans[q.id];
-    const last = qi === qs.length - 1;
-    const seg = qs.map((x, i) => `<i class="${Number.isInteger(S.ans[x.id]) ? 'done' : ''}${i === qi ? ' now' : ''}"></i>`).join('');
+    const tap = qi >= qs.length ? qi - qs.length : -1;
+    const q = qs[Math.min(qi, qs.length - 1)], di = D.findIndex((d) => d.id === q.domain), a = S.ans[q.id];
+    const last = qi === total - 1;
+    const seg = qs.map((x, i) => `<i class="${Number.isInteger(S.ans[x.id]) ? 'done' : ''}${i === qi ? ' now' : ''}"></i>`).join('')
+      + TAPS.map((_, k) => `<i class="${(k === 0 ? S.pains.length : S.want) ? 'done' : ''}${qs.length + k === qi ? ' now' : ''}"></i>`).join('');
     return `<div class="nsb" id="nsb">
       <aside class="nsb-l" aria-label="Step 01 and its eight questions">
         <button type="button" class="nsb-x" data-act="nsb-steps" aria-label="Close the questions">×</button>
@@ -512,9 +540,9 @@
         <ol class="nsb-list">${rows}</ol>
       </aside>
       <section class="nsb-r" id="nsb-r" tabindex="-1" aria-label="The question" aria-keyshortcuts="1 2 3 4 Enter">
-        <button type="button" class="nsb-phone" data-act="nsb-steps" aria-label="Show all eight questions"><span><i aria-hidden="true"></i>Step 01 · ${esc(D[di].name)} · ${qi + 1} of ${qs.length}</span><span aria-hidden="true">Questions ▾</span></button>
+        <button type="button" class="nsb-phone" data-act="nsb-steps" aria-label="Show all eight questions"><span><i aria-hidden="true"></i>Step 01 · ${tap >= 0 ? 'Two more taps' : esc(D[di].name)} · ${qi + 1} of ${total}</span><span aria-hidden="true">Questions ▾</span></button>
         <div class="nsb-seg" aria-hidden="true">${seg}</div>
-        <span class="eb nsb-lab">0${qi + 1} · ${esc(D[di].name)}</span>
+        ${tap >= 0 ? tapsPage(tap, qi + 1, total) : `<span class="eb nsb-lab">0${qi + 1} · ${esc(D[di].name)}</span>
         <div class="nsb-body">
           <div class="nsb-col">
             <h3 class="sf nsb-q" id="qt-${q.id}">${esc(q.text)}</h3>
@@ -523,10 +551,10 @@
               ${E.ANSWERS.map(([label, sub], k) => `<button type="button" class="nsb-o" data-act="ans" data-q="${q.id}" data-v="${k}" data-f="ans-${q.id}-${k}" aria-pressed="${a === k}">
                 <kbd aria-hidden="true">${k + 1}</kbd><span><b>${label}</b> <span>· ${sub}</span></span></button>`).join('')}
             </div>
-            <p class="nsb-keys"><kbd>1–4</kbd> choose · <kbd>Enter ↵</kbd> next question</p>
+            <p class="nsb-keys"><kbd>1–4</kbd> choose · <kbd>Enter ↵</kbd> next</p>
           </div>
           ${Number.isInteger(a) ? `<p class="nsb-note">${esc(NOTES[a])}</p>` : ''}
-        </div>
+        </div>`}
         <footer class="nsb-foot">
           <button type="button" class="nsb-back" data-act="nsmove" data-v="-1" data-f="ns-back"${qi === 0 ? ' disabled' : ''}>← Back</button>
           <button type="button" class="nsb-next" data-act="nsmove" data-v="1" data-f="ns-next">${last ? 'See my North Star' : 'Next ↵'}</button>
@@ -536,15 +564,16 @@
   }
   /* Turn the page: the next question, or after the eighth, the North Star. */
   function nsMove(d) {
-    const qs = context().qs;
+    const qs = context().qs, total = qs.length + TAPS.length;
     if (qi === null) qi = firstOpenQ(qs);
-    if (d > 0 && qi === qs.length - 1) {
+    if (d > 0 && qi === total - 1) {
+      // The last page: on to the North Star reading.
       document.body.classList.remove('nsb-open');
-      const el = document.getElementById('s-pains');
-      if (el) { el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); const f = el.querySelector('button'); if (f) f.focus({ preventScroll: true }); }
+      const el = document.getElementById('s-reading');
+      if (el) { el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: true }); }
       return;
     }
-    const to = Math.max(0, Math.min(qs.length - 1, qi + d));
+    const to = Math.max(0, Math.min(total - 1, qi + d));
     if (to === qi) return;
     qi = to; put('questions', pQuestions(context())); placeCrown();
     const r = document.getElementById('nsb-r'); if (r) r.focus({ preventScroll: true });
@@ -645,17 +674,6 @@
     let rq = 0; window.addEventListener('scroll', () => { if (!rq) rq = requestAnimationFrame(() => { rq = 0; placeCrown(); }); }, { passive: true });
   }
   let swallowed = false;
-
-  const pPains = () => `<div style="display: flex; flex-direction: column; gap: 6px">
-      <span class="eb">Two more taps · they shape your feedback</span>
-      <h2 class="sf" style="font-size: 26px; line-height: 1.2" id="pains-h">What hurts most right now? <span class="sfi" style="color: var(--goldink)">Pick up to two.</span></h2></div>
-    <div style="display: flex; flex-wrap: wrap; gap: 8px" role="group" aria-labelledby="pains-h">
-      ${E.PAINS.map(([id, t, di]) => { const on = S.pains.includes(id); return `<button type="button" data-act="pain" data-v="${id}" data-f="pain-${id}" aria-pressed="${on}" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); font-size: 14px; font-weight: 520; cursor: pointer; display: inline-flex; align-items: center; gap: 8px"><span style="width: 9px; height: 9px; border-radius: 50%; background: ${D[di].hex}"></span>${t}</button>`; }).join('')}
-    </div>
-    <h2 class="sf" style="font-size: 22px; line-height: 1.2; margin-top: 4px" id="want-h">And what do you want most? <span class="sfi" style="color: var(--goldink)">Pick one.</span></h2>
-    <div style="display: flex; flex-wrap: wrap; gap: 8px" role="group" aria-labelledby="want-h">
-      ${E.GOALS.map(([id, t]) => { const on = S.want === id; return `<button type="button" data-act="want" data-v="${id}" data-f="want-${id}" aria-pressed="${on}" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); font-size: 14px; font-weight: 520; cursor: pointer; display: inline-flex; align-items: center; gap: 8px"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 4h11l-3 4 3 4H6" fill="none" stroke="#6F93B8" stroke-width="2" stroke-linejoin="round"/></svg>${t}</button>`; }).join('')}
-    </div>`;
 
   function pReading(c) {
     const R = 150, sc = c.sc.map((s) => s.score), str = c.rd.str;
@@ -1289,7 +1307,6 @@
     put('modes', pModes());
     put('dombars', pDombars(c));
     put('questions', pQuestions(c));
-    put('s-pains', pPains());
     put('s-reading', pReading(c));
     put('s-numbers', pNumbers(c));
     for (let i = 0; i < 4; i++) put('fb-' + i, pFeedback(c, i));
@@ -1506,14 +1523,15 @@
     }
     const t = e.target;
     if (!t || !t.closest || !t.closest('#nsb-r') || e.altKey || e.ctrlKey || e.metaKey) return;
-    if (/^[1-4]$/.test(e.key)) {
+    if (/^[1-9]$/.test(e.key)) {
+      const b = document.querySelectorAll('#nsb-r .nsb-o')[Number(e.key) - 1];
+      if (!b) return;
       e.preventDefault();
-      const b = document.querySelector(`#nsb-r [data-act="ans"][data-v="${Number(e.key) - 1}"]`);
       if (b) { b.click(); const f = document.querySelector(`[data-f="${b.dataset.f}"]`); if (f && !UI.gate) f.focus({ preventScroll: true }); }
-    } else if (e.key === 'Enter' && !e.shiftKey && (t.id === 'nsb-r' || t.dataset.act === 'ans')) {
+    } else if (e.key === 'Enter' && !e.shiftKey && (t.id === 'nsb-r' || t.classList.contains('nsb-o'))) {
       // Enter on an answer chooses it and moves on; on the page, it moves on.
       e.preventDefault();
-      if (t.dataset.act === 'ans') t.click();
+      if (t.classList.contains('nsb-o') && t.getAttribute('aria-pressed') !== 'true') t.click();
       if (!UI.gate) nsMove(1);
     }
   });
