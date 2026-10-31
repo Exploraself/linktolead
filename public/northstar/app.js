@@ -471,25 +471,180 @@
       <div style="height: 5px; border-radius: 3px; background: var(--cream); overflow: hidden"><div class="bar" style="height: 5px; background: ${CSSV[i]}; width: ${c.sc[i].answered * 50}%"></div></div>
       <span style="font-size: 11px; font-weight: 520; letter-spacing: .08em; color: ${CSSV[i]}">${d.name} · ${c.sc[i].answered}/2</span></div>`).join('')}</div>`;
 
+  /* ── The Crown: the eight questions as a notebook (chosen 30 Oct 2026) ──
+   * The step and its eight questions on the left page, one question on the
+   * right. Keys 1–4 choose, Enter moves on, and the tools wait in the Crown
+   * at the bottom while the questions are on screen. */
+  const SHORT = {
+    q1: 'What the business is for', q2: 'What you can put at risk', q3: 'The people affected', q4: 'Someone who tells you the truth',
+    q5: 'What you sell and what it costs', q6: 'What you need each month', q7: 'Their problem, tested', q8: 'Who your offer helps',
+    q9: 'Where your week went', q10: 'Income without wearing out', q11: 'What is included, and if things change', q12: 'Feedback and hard conversations',
+    q13: 'What is left after costs', q14: 'Delivery without starting over', q15: 'Where customers come from', q16: 'Why they come back, or stop',
+    q17: 'Letting a decision go', q18: 'When your way slows things', q19: 'Who can decide what', q20: 'Saying something is wrong',
+    q21: 'What more work will cost', q22: 'The work without you', q23: 'A new group, tested for profit', q24: 'If the biggest customer left',
+    q25: 'What enough looks like', q26: 'Questioning your plans', q27: 'Growing other leaders', q28: 'Who steps in',
+    q29: 'Comparing options first', q30: 'A serious disruption, tested', q31: 'Your effect on others', q32: 'Changing customer needs',
+  };
+  /* A note in the margin for each answer: what it means, never a verdict. */
+  const NOTES = ['Honest. This is where your first step will lean.', 'A guess is a fine start. We’ll make it a number.', 'Good ground. Keep one dated example.', 'Checked, not hoped. That’s a strength.'];
+  let qi = null;
+  const firstOpenQ = (qs) => { const i = qs.findIndex((q) => !Number.isInteger(S.ans[q.id])); return i < 0 ? qs.length - 1 : i; };
   function pQuestions(c) {
-    const firstOpen = c.qs.findIndex((q) => !Number.isInteger(S.ans[q.id]));
-    return c.qs.map((q, i) => {
-      const di = D.findIndex((d) => d.id === q.domain), done = Number.isInteger(S.ans[q.id]);
-      return `<div style="display: flex; flex-direction: column; gap: 12px">
-        ${i % 2 === 0 ? `<div style="display: flex; align-items: center; gap: 10px; margin-top: 12px">
-          <span style="width: 34px; height: 34px; border-radius: 50%; background: ${TINT[di]}; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="${D[di].icon}" fill="none" stroke="${CSSV[di]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          <h3 class="sf" style="font-size: 20px; font-weight: 440">${D[di].name}</h3><span style="flex: 1; height: 1px; background: var(--line)"></span></div>` : ''}
-        <div style="background: var(--paper); border: 1.5px solid ${i === firstOpen ? '#6F93B8' : done ? 'var(--line)' : 'var(--cream)'}; border-radius: 7px; padding: 18px; display: flex; flex-direction: column; gap: 12px; transition: border-color .3s ease">
-          <div style="display: flex; gap: 12px; align-items: flex-start">
-            <span style="font-family: Newsreader, serif; font-size: 15px; color: ${CSSV[di]}; flex: none; padding-top: 2px">0${i + 1}</span>
-            <div style="display: flex; flex-direction: column; gap: 4px; flex: 1"><span style="font-weight: 520; font-size: 16px; line-height: 1.35" id="qt-${q.id}">${esc(q.text)}</span><span style="font-size: 13px; color: var(--muted)">${esc(q.prompt)}</span></div>
-            ${done ? '<svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Answered" style="flex: none"><circle cx="12" cy="12" r="10" fill="#6F93B8"/><path d="M7 12.5l3.2 3L17 9" fill="none" stroke="#0E1C2B" stroke-width="2.2" stroke-linecap="round"/></svg>' : ''}
-          </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px" role="group" aria-labelledby="qt-${q.id}">
-            ${E.ANSWERS.map(([label, sub], k) => { const on = S.ans[q.id] === k; return `<button type="button" data-act="ans" data-q="${q.id}" data-v="${k}" data-f="ans-${q.id}-${k}" aria-pressed="${on}" style="text-align: left; min-height: 52px; padding: 9px 12px; border-radius: 5px; border: 1.5px solid ${on ? 'var(--ink)' : 'var(--line)'}; background: ${on ? 'var(--cream)' : 'var(--paper)'}; color: var(--ink); cursor: pointer; display: flex; flex-direction: column; gap: 1px"><span style="font-weight: 520; font-size: 14px">${label}</span><span style="font-size: 12px; color: var(--muted)">${sub}</span></button>`; }).join('')}
-          </div></div></div>`;
+    const qs = c.qs;
+    if (qi === null || qi >= qs.length) qi = firstOpenQ(qs);
+    const stg = (E.STAGES.find((x) => x.id === S.stage) || {}).name || '';
+    const done = qs.filter((q) => Number.isInteger(S.ans[q.id])).length;
+    const rows = qs.map((q, i) => {
+      const di = D.findIndex((d) => d.id === q.domain), a = S.ans[q.id], now = i === qi;
+      return `<li><button type="button" class="nsb-s${Number.isInteger(a) ? ' done' : ''}${now ? ' now' : ''}" data-act="nsq" data-i="${i}" data-f="nsq-${i}"${now ? ' aria-current="step"' : ''}>
+        <span class="nsb-n" style="color: ${CSSV[di]}">0${i + 1}</span>
+        <span class="nsb-st"><b>${esc(SHORT[q.id] || q.text)}</b><i>${now ? 'Answering now' : Number.isInteger(a) ? esc(E.ANSWERS[a][0]) : ''}</i></span></button></li>`;
     }).join('');
+    const q = qs[qi], di = D.findIndex((d) => d.id === q.domain), a = S.ans[q.id];
+    const last = qi === qs.length - 1;
+    const seg = qs.map((x, i) => `<i class="${Number.isInteger(S.ans[x.id]) ? 'done' : ''}${i === qi ? ' now' : ''}"></i>`).join('');
+    return `<div class="nsb" id="nsb">
+      <aside class="nsb-l" aria-label="Step 01 and its eight questions">
+        <button type="button" class="nsb-x" data-act="nsb-steps" aria-label="Close the questions">×</button>
+        <span class="eb">Step 01 · Get clear · ${esc(stg)}</span>
+        <h2 class="sf nsb-t">Eight questions. <span class="sfi" style="color: var(--goldink)">One page.</span></h2>
+        <p class="nsb-c">${done} of ${qs.length} answered</p>
+        <ol class="nsb-list">${rows}</ol>
+      </aside>
+      <section class="nsb-r" id="nsb-r" tabindex="-1" aria-label="The question" aria-keyshortcuts="1 2 3 4 Enter">
+        <button type="button" class="nsb-phone" data-act="nsb-steps" aria-label="Show all eight questions"><span><i aria-hidden="true"></i>Step 01 · ${esc(D[di].name)} · ${qi + 1} of ${qs.length}</span><span aria-hidden="true">Questions ▾</span></button>
+        <div class="nsb-seg" aria-hidden="true">${seg}</div>
+        <span class="eb nsb-lab">0${qi + 1} · ${esc(D[di].name)}</span>
+        <div class="nsb-body">
+          <div class="nsb-col">
+            <h3 class="sf nsb-q" id="qt-${q.id}">${esc(q.text)}</h3>
+            <p class="nsb-p">${esc(q.prompt)}</p>
+            <div class="nsb-opts" role="group" aria-labelledby="qt-${q.id}">
+              ${E.ANSWERS.map(([label, sub], k) => `<button type="button" class="nsb-o" data-act="ans" data-q="${q.id}" data-v="${k}" data-f="ans-${q.id}-${k}" aria-pressed="${a === k}">
+                <kbd aria-hidden="true">${k + 1}</kbd><span><b>${label}</b> <span>· ${sub}</span></span></button>`).join('')}
+            </div>
+            <p class="nsb-keys"><kbd>1–4</kbd> choose · <kbd>Enter ↵</kbd> next question</p>
+          </div>
+          ${Number.isInteger(a) ? `<p class="nsb-note">${esc(NOTES[a])}</p>` : ''}
+        </div>
+        <footer class="nsb-foot">
+          <button type="button" class="nsb-back" data-act="nsmove" data-v="-1" data-f="ns-back"${qi === 0 ? ' disabled' : ''}>← Back</button>
+          <button type="button" class="nsb-next" data-act="nsmove" data-v="1" data-f="ns-next">${last ? 'See my North Star' : 'Next ↵'}</button>
+        </footer>
+      </section>
+    </div>`;
   }
+  /* Turn the page: the next question, or after the eighth, the North Star. */
+  function nsMove(d) {
+    const qs = context().qs;
+    if (qi === null) qi = firstOpenQ(qs);
+    if (d > 0 && qi === qs.length - 1) {
+      document.body.classList.remove('nsb-open');
+      const el = document.getElementById('s-pains');
+      if (el) { el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); const f = el.querySelector('button'); if (f) f.focus({ preventScroll: true }); }
+      return;
+    }
+    const to = Math.max(0, Math.min(qs.length - 1, qi + d));
+    if (to === qi) return;
+    qi = to; put('questions', pQuestions(context())); placeCrown();
+    const r = document.getElementById('nsb-r'); if (r) r.focus({ preventScroll: true });
+  }
+  const crownMark = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="m12 4 2 8-2 8-2-8z" fill="currentColor" stroke="none"/></svg>';
+  const crownClose = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+  const JEWELS = [
+    ['steps', 'Steps', '<path d="M4 7h16M4 12h16M4 17h10"/>'],
+    ['download', 'Download', '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'],
+    ['music', 'Music', '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>'],
+    ['focus', 'Focus', '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>'],
+    ['light', 'Light', '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/>'],
+    ['blueprint', 'Blueprint', '<path d="M12 2.5 21.5 12 12 21.5 2.5 12z"/>'],
+    ['book', 'Book 1:1', '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>'],
+  ];
+  function crownHTML() {
+    const jewel = ([k, n, svg], i) => {
+      const ang = Math.PI - (i * Math.PI) / 6;
+      const pos = `style="--cx:${Math.cos(ang).toFixed(3)};--cy:${(-Math.sin(ang)).toFixed(3)}"`;
+      const ico = `<span class="jw-i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${svg}</svg></span>${n}`;
+      if (k === 'book') return `<a class="jw" ${pos} href="${BOOKING}" target="_blank" rel="noopener">${ico}</a>`;
+      if (k === 'blueprint') return `<a class="jw" ${pos} href="/ground-plan/">${ico}</a>`;
+      return `<button type="button" class="jw" ${pos} data-crown="${k}"${k === 'focus' ? ' aria-pressed="false"' : ''}>${ico}</button>`;
+    };
+    return `<button type="button" class="crown-veil" data-crown="close" tabindex="-1" aria-label="Close the Crown"></button>
+      <p class="crown-hint">Turn the Crown: swipe it left or right to move between questions. Hold it for Focus.</p>
+      <nav class="crown-arc" id="crown-arc" aria-label="The Crown">${JEWELS.map(jewel).join('')}</nav>
+      <div class="crown-row">
+        <button type="button" class="cw-pb" data-act="nsmove" data-v="-1" aria-label="Previous question"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button type="button" class="crown" id="crownb" aria-expanded="false" aria-controls="crown-arc" aria-label="The Crown: steps, download, music, focus, light, the Founder’s Blueprint, book a 1:1">${crownMark}</button>
+        <button type="button" class="cw-pb nx" data-act="nsmove" data-v="1" aria-label="Next question"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      </div>`;
+  }
+  /* The Crown sits over the middle of the question page. */
+  function placeCrown() {
+    const w = document.getElementById('crown'), r = document.getElementById('nsb-r');
+    if (!w || !r) return;
+    const phone = matchMedia('(max-width: 760px)').matches, b = r.getBoundingClientRect();
+    w.style.setProperty('--crx', phone ? '50%' : `${Math.round(b.left + b.width / 2)}px`);
+    // On a wide screen it rests between Back and Next while they are in view.
+    const f = !phone && r.querySelector('.nsb-foot'), fb = f && f.getBoundingClientRect();
+    if (fb && fb.bottom > 0 && fb.top < innerHeight) w.style.setProperty('--cb', `${Math.max(22, Math.round(innerHeight - (fb.top + 20 + (fb.height - 20) / 2) - 32))}px`);
+    else w.style.removeProperty('--cb');
+  }
+  const music = () => { const Mu = window.ESMusic; if (Mu) Mu.enter({ quiet: true }); return Mu; };
+  function crownOpen(on) {
+    const b = document.getElementById('crownb'); if (!b) return;
+    document.body.classList.toggle('crownopen', on);
+    b.setAttribute('aria-expanded', String(on));
+    b.setAttribute('aria-label', on ? 'Close the Crown' : 'The Crown: steps, download, music, focus, light, the Founder’s Blueprint, book a 1:1');
+    b.innerHTML = on ? crownClose : crownMark;
+    const f = document.querySelector('.jw[data-crown="focus"]');
+    if (f) f.setAttribute('aria-pressed', String(!!(window.ESMusic && window.ESMusic.current().mode === 'focus')));
+    if (on) { const j = document.querySelector('.jw'); if (j) j.focus({ preventScroll: true }); }
+  }
+  function crownAct(k) {
+    crownOpen(false);
+    if (k === 'steps') { document.body.classList.add('nsb-open'); const n = document.querySelector('.nsb-s.now'); if (n) n.focus({ preventScroll: true }); return; }
+    if (k === 'download') { const d = document.querySelector('[data-act="download"]'); if (d) d.click(); return; }
+    const Mu = music(); if (!Mu) return;
+    if (k === 'music') Mu.openPlayer();
+    else if (k === 'light') Mu.openPlayer('mp-light');
+    else if (k === 'focus') Mu.mode('focus');
+  }
+  function mountCrown() {
+    if (document.getElementById('crown')) return;
+    const w = document.createElement('div');
+    w.id = 'crown'; w.className = 'crown-wrap no-print';
+    w.innerHTML = crownHTML();
+    document.body.appendChild(w);
+    w.addEventListener('click', (e) => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.id === 'crownb') { if (swallowed) { swallowed = false; return; } crownOpen(!document.body.classList.contains('crownopen')); return; }
+      if (b.dataset.crown === 'close') { crownOpen(false); const c = document.getElementById('crownb'); if (c) c.focus(); return; }
+      if (b.dataset.crown) crownAct(b.dataset.crown);
+    });
+    // Swipe the Crown to turn the page; hold it for Focus.
+    let down = null;
+    const swallow = () => { swallowed = true; setTimeout(() => { swallowed = false; }, 400); };
+    w.addEventListener('pointerdown', (e) => {
+      if (!e.target.closest('#crownb') || document.body.classList.contains('crownopen')) return;
+      down = { x: e.clientX, y: e.clientY, held: false, t: setTimeout(() => { if (!down) return; down.held = true; swallow(); const Mu = music(); if (Mu) Mu.mode('focus'); }, 650) };
+    });
+    w.addEventListener('pointermove', (e) => { if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 12) clearTimeout(down.t); });
+    const up = (e) => {
+      if (!down) return; const d = down; down = null; clearTimeout(d.t);
+      if (d.held || e.type === 'pointercancel') return;
+      const dx = e.clientX - d.x, dy = e.clientY - d.y;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { swallow(); nsMove(dx < 0 ? 1 : -1); }
+    };
+    w.addEventListener('pointerup', up); w.addEventListener('pointercancel', up);
+    // Shown while the questions are on screen.
+    const q = document.getElementById('questions');
+    if (q && 'IntersectionObserver' in window) {
+      new IntersectionObserver((es) => es.forEach((x) => { document.body.classList.toggle('ns-qview', x.isIntersecting); if (!x.isIntersecting) crownOpen(false); placeCrown(); }), { rootMargin: '-25% 0px -25% 0px' }).observe(q);
+    } else document.body.classList.add('ns-qview');
+    window.addEventListener('resize', placeCrown);
+    let rq = 0; window.addEventListener('scroll', () => { if (!rq) rq = requestAnimationFrame(() => { rq = 0; placeCrown(); }); }, { passive: true });
+  }
+  let swallowed = false;
 
   const pPains = () => `<div style="display: flex; flex-direction: column; gap: 6px">
       <span class="eb">Two more taps · they shape your feedback</span>
@@ -1152,6 +1307,7 @@
     put('ws', pWs());
     $('#how-btn').setAttribute('aria-expanded', String(UI.how));
     $('#ws-btn').setAttribute('aria-expanded', String(UI.ws));
+    mountCrown(); placeCrown();
     if (keep && (!document.activeElement || document.activeElement === document.body || !document.activeElement.isConnected)) {
       const el = document.querySelector(`[data-f="${keep}"]`);
       if (el) el.focus({ preventScroll: true });
@@ -1254,6 +1410,9 @@
       case 'lab-mode': S.lab.mode = v === 'money' ? 'money' : 'time'; save(); renderLab(); return;
       case 'lab-take': takeToNumbers(); return;
       case 'ans': gated(() => { S.ans[t.dataset.q] = Number(v); }); return;
+      case 'nsq': qi = i; document.body.classList.remove('nsb-open'); put('questions', pQuestions(context())); placeCrown(); { const r = document.getElementById('nsb-r'); if (r) r.focus({ preventScroll: true }); } return;
+      case 'nsmove': nsMove(Number(v)); return;
+      case 'nsb-steps': document.body.classList.toggle('nsb-open'); if (document.body.classList.contains('nsb-open')) { const n = document.querySelector('.nsb-s.now'); if (n) n.focus({ preventScroll: true }); } return;
       case 'str': gated(() => { S.str[i] = Number(v); }); return;
       case 'pain': gated(() => { const cur = S.pains.slice(), ix = cur.indexOf(v); if (ix >= 0) cur.splice(ix, 1); else { cur.push(v); if (cur.length > 2) cur.shift(); } S.pains = cur; }); return;
       case 'want': gated(() => { S.want = S.want === v ? '' : v; }); return;
@@ -1335,6 +1494,29 @@
     createAccount('compass', after === 'email').then(() => { if (after === 'email') sendEmail(); });
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && UI.gate) { S.skipped = true; save(); closeGate(); } });
+  /* The notebook's keys, inside the questions only: 1–4 choose, Enter moves
+   * on, Escape closes the Crown or the list of questions. */
+  document.addEventListener('keydown', (e) => {
+    if (UI.gate) return;
+    const body = document.body;
+    if (e.key === 'Escape') {
+      if (body.classList.contains('crownopen')) { crownOpen(false); const c = document.getElementById('crownb'); if (c) c.focus(); }
+      else if (body.classList.contains('nsb-open')) body.classList.remove('nsb-open');
+      return;
+    }
+    const t = e.target;
+    if (!t || !t.closest || !t.closest('#nsb-r') || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (/^[1-4]$/.test(e.key)) {
+      e.preventDefault();
+      const b = document.querySelector(`#nsb-r [data-act="ans"][data-v="${Number(e.key) - 1}"]`);
+      if (b) { b.click(); const f = document.querySelector(`[data-f="${b.dataset.f}"]`); if (f && !UI.gate) f.focus({ preventScroll: true }); }
+    } else if (e.key === 'Enter' && !e.shiftKey && (t.id === 'nsb-r' || t.dataset.act === 'ans')) {
+      // Enter on an answer chooses it and moves on; on the page, it moves on.
+      e.preventDefault();
+      if (t.dataset.act === 'ans') t.click();
+      if (!UI.gate) nsMove(1);
+    }
+  });
 
   render();
   setTimeout(() => $('#cf').classList.add('settled'), 1500);

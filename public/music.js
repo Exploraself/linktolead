@@ -416,13 +416,13 @@ function mount() {
   });
   // The first click on the dashboard starts the music, if the founder allows it.
   const first = (e) => {
-    if (!here || e.target.closest('#mp, [data-cab="play"], #cab-auto, .mp-ask')) return;
+    if (!here || quiet || e.target.closest('#mp, [data-cab="play"], #cab-auto, .mp-ask')) return;
     if (get('cab-music') !== 'off' && !userPaused && !isOn()) play();
     document.removeEventListener('pointerdown', first); document.removeEventListener('keydown', first);
   };
   document.addEventListener('pointerdown', first); document.addEventListener('keydown', first);
 }
-let resume = false;
+let resume = false, quiet = false;
 
 /* ── The invitation ──────────────────────────────────────────────────────── */
 const ASK_KEY = 'es-focus-ask', ASK_AFTER = 120;
@@ -459,11 +459,14 @@ function startClock() {
 
 /* ── Entering and leaving the dashboard ──────────────────────────────────── */
 /** The founder is on a dashboard view (Your Base Camp, Library, Ask). */
-export function enter() {
+export function enter(opts = {}) {
+  // quiet: a page where the founder opened the player themselves (the North
+  // Star's Crown). No first-click start and no two-minute invitation there.
+  if (opts.quiet) quiet = true;
   mount();
   here = true;
   if (resume) { resume = false; play(); }
-  dim(); paintPlayer(); startClock();
+  dim(); paintPlayer(); if (!quiet) startClock();
 }
 /** The founder left the dashboard (the programme): music fades, light lifts. */
 export function leave() {
