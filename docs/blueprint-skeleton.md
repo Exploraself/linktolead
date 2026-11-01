@@ -7,7 +7,7 @@
 - **The spine stays.** Four domains, four moves (Tap · Slide · Write once · Four lines back), twelve words, three chapters, a reading after Levels 05, 09 and 12, a promise stated as things.
 - **What is new is the end of each domain.** Every action now has a **day** (29 domains get a day screen) and a **Done when** you can check on Sunday, followed by one slide: how sure are you?
 - **Inform, reform, transform.** Each domain now opens with a short insight (why it matters), ends in one action with a day (reform), and gives the founder something to keep, filled with their own words, that goes into their Blueprint (transform).
-- **A true blueprint at week 12.** Everything the founder writes becomes one document in eight parts: leader, people, what you sell, marketing, sales, money, systems, the next ninety days.
+- **A true blueprint at week 12.** Everything the founder writes becomes one document in eight parts: leader, people, what you sell, marketing, sales, money, systems, the next twelve weeks.
 - **One question per screen.** Each blank of the sentence gets its own screen. Days are taps. Enter moves on.
 - **Every Sunday counts.** From Level 02, a level opens by asking about last week’s four actions: Done, Partly, Not yet. The readings show what was done and how good the estimates were.
 - **Nothing is asked twice.** Where the Launchpad plan or the Growth Plan already covers a step, the level shows that answer back or links to it. Seven Launchpad actions that repeat a level become counts (proposal).
@@ -18,10 +18,10 @@
 |  | Question | What I found | My recommendation |
 | --- | --- | --- | --- |
 | D1 | How many 1:1 sessions, and where | The brief says two in Levels 04–12. The ladder on the site (public/content.js) says one in The Boardroom (04–05), two in the LAB, three in total with the HUB. | Two: Session 1 opens Level 04, Session 2 follows the Chapter II reading. Then the ladder copy changes to match (Phase 3). |
-| D2 | Start with the weakest domain? | The level’s word is spelled one letter per domain, in order. | Keep the word order on screen. The weakest domain from the North Star gets the “Start here” mark, and its action becomes the week’s one move on the Planner’s Monday page. |
-| D3 | How long is the weekly review? | Launchpad plan: 5 minutes. Growth Plan step 21: ten minutes. Level 09: 30 minutes. | Ten minutes, everywhere. A short review that happens beats a long one that does not. |
+| D2 | Start with the weakest domain? | The level’s word is spelled one letter per domain, in order. | Keep the word order on screen. The weakest domain from the North Star gets the “Start here” mark, and its action becomes the week’s one move on the Planner’s Monday page. Applied 1 Nov. |
+| D3 | How long is the weekly review? | Launchpad plan: 5 minutes. Growth Plan step 21: ten minutes. Level 09: 30 minutes. | Ten minutes, everywhere. A short review that happens beats a long one that does not. Applied 1 Nov. |
 | D4 | Two things called “boardroom” | “The Boardroom” is the paid session for Levels 04–05. “Your inner boardroom” is the Sunday page of the Planner and Growth Plan step 21. | Keep both, always with their full names: “The Boardroom with Alexandru” and “your Sunday boardroom”. |
-| D5 | Ninety days or twelve weeks? | Level 12 says 90 days. The Planner contract and Growth Plan step 5 say twelve weeks. The Planner’s reviews come every 13 weeks. | Say “twelve weeks” everywhere, Level 12 included. One horizon. |
+| D5 | Ninety days or twelve weeks? | Level 12 says 90 days. The Planner contract and Growth Plan step 5 say twelve weeks. The Planner’s reviews come every 13 weeks. | Say “twelve weeks” everywhere, Level 12 included. One horizon. Applied 1 Nov. |
 | D6 | Level words that are also tool names | The book in public/library/built-to-lead.pdf lists 100 tools; three of its names are SEED, VIEW and FACT, with other meanings. | Keep the level words. The tool names never show on screen (rule 4). Rename the three tools in the book when it is next printed. |
 | D7 | The Leading stage | The North Star has four stages; there are three manuals. Leading uses the Scaling manual today. | Keep it: Leading reads Scaling, with its own stage notes added only when you write them. |
 | D8 | Book file names | public/library/built-to-lead.pdf is titled “100 Frameworks” (no byline); worth-building.pdf is “The Founder’s Manual · 32 frameworks”. | Tell me the right titles; quotes only come from books you confirm are yours. |
@@ -41,7 +41,7 @@
 | 9 | The Engine Room | 09 · FLOW · Your systems | A weekly review held, one area with an owner, one page of cash, your warm list written down. | Personal Leadership LAB | Chapter II reading; then Session 2 |
 | 10 | The Open Market | 10 · NAME · Your first hundred names | Ten people contacted, one partner asked, your best client described, three customer conversations booked. | Business HUB | — |
 | 11 | The Open Market | 11 · EDGE · Your advantage | Three people asked for honest feedback, one open question in a meeting, your advantage written with proof, three testimonials asked for. | Business HUB | — |
-| 12 | The Open Market | 12 · RISE · Your ninety days | Your leader sentence written, one person given something to own, a 90-day number with checkpoints, one market test set. | Business HUB | Chapter III reading |
+| 12 | The Open Market | 12 · RISE · Your twelve weeks | Your leader sentence written, one person given something to own, a twelve-week number with checkpoints, one market test set. | Business HUB | Chapter III reading |
 | 13 | — | The last Sunday | Level 12’s four actions checked, then the North Star again, to compare with where you began. | — | — |
 
 ## How one level runs, one question at a time
@@ -81,20 +81,20 @@ At the end of twelve weeks the founder holds one document, built only from their
 | Your sales | How you ask, follow up, read the signals and say a kind no. | 5: 01 Dignity (asking someone to buy); 02 Watch signals (one customer signal, tested); 04 Pace (a weekly selling hour); 06 Kind no (a kind no, with an alternative); 09 Warm list (a warm list you can see) |
 | Your money | Your enough, the numbers you read, the money owed to you and the cash you watch. | 5: 01 Enough (money: the sentence you grew up with, and your enough); 02 Evidence (your five numbers, on a fixed day); 05 Count (one number that tells the truth); 06 Late money (money that is yours); 09 One page of cash (one page of cash) |
 | Your systems | What runs without you: owners, steps, hand-overs and the weekly review. | 4: 07 Own it (one task, one step up); 08 Others in it (three clear steps after yes); 09 First things weekly (a weekly review you keep); 09 Lean on roles (one area with an owner) |
-| Your next ninety days | What customers told you, the number you aim for, and the test you run. | 3: 10 Engage (customer conversations about their past); 12 Scale the number (one number for the next ninety days); 12 Expand (testing your next market move) |
+| Your next twelve weeks | What customers told you, the number you aim for, and the test you run. | 3: 10 Engage (customer conversations about their past); 12 Scale the number (one number for the next twelve weeks); 12 Expand (testing your next market move) |
 
-### The thinner parts, and the options
+### The thinner parts, and what was built
 
-Your systems (4) and your next ninety days (3) are the thinnest. Ways to make them fuller, for you to choose:
+Your systems (4) and your next twelve weeks (3) were the thinnest. Built on 1 Nov, after “produce all of it”: B, C and D below.
 
 | Option | What changes | Cost |
 | --- | --- | --- |
-| A · Keep it as it is | Your systems has 4 parts and your next ninety days has 3. What the founder keeps (the hand-over note, the welcome message, the owner note, the weekly review page, the three questions) carries the practical depth. | Nothing to build. |
+| A · Keep it as it is | Your systems has 4 parts and your next twelve weeks has 3. What the founder keeps (the hand-over note, the welcome message, the owner note, the weekly review page, the three questions) carries the practical depth. | Nothing to build. |
 | B · Save the Launchpad plan online | Today the twenty Launchpad actions are a PDF. Online, its numbers and its “one process in ten lines” fill the Blueprint too: your money gets last month’s figures, your systems gets a written process. | One small table and a page, like the Growth Plan. |
 | C · One “build it” screen after each reading | Chapter I: one process in ten lines. Chapter II: the client steps and the owner note as a one-page operations sheet. Chapter III: the ninety-day page, with the test and the person you grow. | Three screens, written from the founder’s answers. |
 | D · Show the Growth Plan in the Blueprint | A full account’s Growth Plan words (the truth you hide, the root, the fear) as a ninth part: the inner side of the same twelve weeks. | Reads what is already saved. |
 
-**My recommendation:** B, then C. B puts the Launchpad’s numbers and process into the Blueprint without a single new question; C adds three screens only where the Blueprint is thin.
+**Built:** C (a page after each reading) and D (the inner side). B (the Launchpad plan online) is in the same pull request.
 
 ## The principles underneath
 
@@ -151,7 +151,7 @@ Where each one lives. None is pasted on screen as a slogan.
 - What I feared would happen: ____
 - What really happened: ____
 
-**If Sunday says Partly or Not yet:** Make it smaller: one hour of it, not a whole evening, on the next free day. Then write the line.
+**If Sunday says Partly or Not yet:** Make it smaller: a short version of it, on the next free day. Then write the line.
 
 **Links.** Growth Plan step 4: deepens (the voice that says you are not good enough). Planner: Monday page · The habit I’m fighting: the old rule, word for word. Manual for your stage · Level 01 · Lead yourself · Settled (anchor #l01-self, built in Phase 4).
 
@@ -171,7 +171,7 @@ Where each one lives. None is pasted on screen as a slogan.
    - `who`: a name (e.g. *Marta*)
    - `day`: which day (e.g. *Monday*) · day chips
    - `done`: what finished looks like (e.g. *all sent by 5 pm*)
-4. **Done when** (shown, not typed): *Marta* did *the weekly invoices* once, to “*all sent by 5 pm*”, and you checked it only once.  
+4. **Done when** (shown, not typed): on *Monday* you handed *the weekly invoices* to *Marta*, with “*all sent by 5 pm*” in writing, and checked it only once.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* About *60%* of last week, you held work because nobody else could do it right.
@@ -180,7 +180,7 @@ Where each one lives. None is pasted on screen as a slogan.
    - *What you will do. Exactly.* On *Monday* you hand *the weekly invoices* to *Marta*. Done means *all sent by 5 pm*. You check once, not every hour.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your people*): **The hand-over note**
-- *Marta*, from *Monday*, *the weekly invoices* is yours.
+- *Marta*, from *Monday*, this is yours: *the weekly invoices*.
 - Done means: *all sent by 5 pm*.
 - I will check it once, on ____. Ask me anything before you start.
 
@@ -205,7 +205,7 @@ Where each one lives. None is pasted on screen as a slogan.
    - `enough`: an amount (e.g. *€4,200*)
    - `day`: which day (e.g. *Wednesday*) · day chips
    - `move`: one money move (e.g. *raise my rate for new clients to €75*)
-4. **Done when** (shown, not typed): on *Wednesday* you made one money move: *raise my rate for new clients to €75*.  
+4. **Done when** (shown, not typed): on *Wednesday* you made the money move you wrote: “*raise my rate for new clients to €75*”.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You grew up with *There is never enough*, and you are *mostly guessing* about your own numbers.
@@ -238,7 +238,7 @@ Where each one lives. None is pasted on screen as a slogan.
    - `prob`: which problem (e.g. *empty tables on weekday afternoons*)
    - `day`: which day (e.g. *Friday*) · day chips
    - `names`: three names (e.g. *Luca, Sara and the bakery on Via Roma*)
-4. **Done when** (shown, not typed): you asked *Luca, Sara and the bakery on Via Roma* by *Friday*, and wrote each answer word for word. A yes and a no both count.  
+4. **Done when** (shown, not typed): you asked *Luca, Sara and the bakery on Via Roma* by *Friday*, and wrote each answer word for word. A yes, a no and no answer all count.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* *2 asks* in 30 days, and asking feels like *bothering them*.
@@ -248,7 +248,7 @@ Where each one lives. None is pasted on screen as a slogan.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your sales*): **The ask, ready to send**
 - Hi ____, I help *café owners* with *empty tables on weekday afternoons*.
-- I think it could help you. Would you like to talk for twenty minutes this week?
+- I think I can help you too. Could we talk for twenty minutes this week?
 - Asked: *Luca, Sara and the bakery on Via Roma*. Their answers, word for word: ____
 
 **If Sunday says Partly or Not yet:** Make it smaller: ask one of the three today, by message, with the two lines above.
@@ -377,7 +377,7 @@ Where each one lives. None is pasted on screen as a slogan.
    - `means`: what you think (e.g. *they are close to yes*)
    - `check`: how (e.g. *asking them on Friday*)
 4. **Day** (new screen, day chips): By which day will you have checked it once?
-5. **Done when** (shown, not typed): by *Friday* you checked the signal once, by *asking them on Friday*, and wrote what the customer actually said.  
+5. **Done when** (shown, not typed): by *Friday* you checked the signal once (*asking them on Friday*), and wrote what the customer actually said.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* Of 10 interested people, *2 paid*. When one goes quiet, you think *they didn’t like it*.
@@ -405,7 +405,7 @@ Where each one lives. None is pasted on screen as a slogan.
 
 **Topic:** The feeling under the stress
 
-**Inform. Why it matters** (on the first blank): “Stressed” is a cover word. The feeling under it (fear, shame, anger, loneliness, tiredness) each asks for something different. Name it and you can answer it; leave it unnamed and it decides for you.
+**Inform. Why it matters** (on the first blank): “Stressed” is a cover word. Each feeling that can hide under it (fear, shame, anger, loneliness, tiredness) asks for something different. Name it and you can answer it; leave it unnamed and it decides for you.
 
 1. **Tap.** Under “stressed”, the real feeling is most often…  
    Options: 1 afraid · 2 ashamed · 3 angry · 4 lonely · 5 tired
@@ -417,7 +417,7 @@ Where each one lives. None is pasted on screen as a slogan.
    - `feeling`: the real feeling (e.g. *fear of not paying the rent*)
    - `help`: one thing that helps (e.g. *walk ten minutes before I reply*)
 4. **Day** (new screen, day chips): By which day will you have used it once?
-5. **Done when** (shown, not typed): by *Friday*, the next time *fear of not paying the rent* came, you did this first: *walk ten minutes before I reply*. You wrote the day it happened.  
+5. **Done when** (shown, not typed): by *Friday*, at the first tense moment, you did this before deciding: *walk ten minutes before I reply*. You wrote down the day.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* Under the stress you mostly feel *afraid*, and most days it is *heavy*.
@@ -518,7 +518,7 @@ Where each one lives. None is pasted on screen as a slogan.
    - `hope`: their hope (e.g. *full tables, without discounts*)
    - `day`: which day (e.g. *Thursday*) · day chips
    - `who`: a client (e.g. *Luca*)
-4. **Done when** (shown, not typed): you asked *Luca* by *Thursday*, and wrote their fear and their hope in their own words.  
+4. **Done when** (shown, not typed): you asked *Luca* by *Thursday*, and wrote their fear and their hope in their own words, or that they have not answered yet.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You think your clients fear *wasting money*, and you are *mostly guessing*.
@@ -558,7 +558,7 @@ Where each one lives. None is pasted on screen as a slogan.
 
 **Topic:** Decide once, in advance
 
-**Inform. Why it matters** (on the first blank): Willpower runs out by the afternoon; a decision made in advance does not. An if–then plan works because the hard choice is already made when the moment comes. Plan for the obstacle you know will show up, not for a perfect day.
+**Inform. Why it matters** (on the first blank): Willpower is weakest when you are tired or rushed; a decision made in advance does not need it. An if–then plan works because the hard choice is already made when the moment comes. Plan for the obstacle you know will show up, not for a perfect day.
 
 1. **Tap.** What breaks my plans most  
    Options: 1 messages · 2 other people’s urgencies · 3 my mood · 4 perfectionism · 5 tiredness
@@ -571,7 +571,7 @@ Where each one lives. None is pasted on screen as a slogan.
    - `if`: the obstacle (e.g. *a message pings*)
    - `then`: your answer (e.g. *answer at 11*)
 4. **Day** (new screen, day chips): Which day will you use it first?
-5. **Done when** (shown, not typed): you used the plan on *Friday* and on two more days, and wrote “kept” or “not kept” each time.  
+5. **Done when** (shown, not typed): from *Friday* to Sunday, you used the plan every working day and marked each one “kept” or “not kept”.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* *messages* break your plans, and you kept *a few* of them last week.
@@ -613,7 +613,7 @@ Where each one lives. None is pasted on screen as a slogan.
    - *What you will do. Exactly.* You ask *Andrea* for *the supplier list* by *Wednesday noon*. Done looks like *one page, prices included*.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your people*): **The clear ask, ready to send**
-- *Andrea*, could you do *the supplier list* by *Wednesday noon*?
+- *Andrea*, could I have *the supplier list* by *Wednesday noon*?
 - Done looks like: *one page, prices included*.
 - Is there anything you need from me to do it?
 
@@ -671,7 +671,7 @@ Where each one lives. None is pasted on screen as a slogan.
    - `day`: which day (e.g. *Tuesday*) · day chips
    - `time`: what time (e.g. *9:00*)
    - `n`: how many (e.g. *3*)
-4. **Done when** (shown, not typed): on *Tuesday* at *9:00* you talked with *3* potential buyers, and everyone heard from you twice.  
+4. **Done when** (shown, not typed): on *Tuesday* at *9:00* you contacted *3* potential buyers, and followed up once with everyone who was silent.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You look for clients *only when it’s empty*, about *1 a week*.
@@ -682,6 +682,7 @@ Where each one lives. None is pasted on screen as a slogan.
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your sales*): **My selling hour**
 - Every *Tuesday* at *9:00*: *3* buyer conversations.
 - Everyone hears from me twice.
+- When they say “let me think”: “Of course. What would you need to know to decide?” Then agree a day.
 - This week: talked ____ · asked ____ · yes ____
 
 **If Sunday says Partly or Not yet:** Make it smaller: one conversation this week, at the same day and time, and put next week’s in the calendar now.
@@ -699,7 +700,7 @@ Where each one lives. None is pasted on screen as a slogan.
 
 **Topic:** Proof of who you are becoming
 
-**Inform. Why it matters** (on the first blank): Identity changes after the evidence, not before it. Every dated proof is a vote for who you are becoming, and on a hard day it is the list you read. One proof is a start; a habit is a long list.
+**Inform. Why it matters** (on the first blank): Identity changes after the evidence, not before it. Every dated proof is evidence of who you are becoming, and on a hard day it is the list you read. One proof is a start; a habit is a long list.
 
 1. **Tap.** The proof I see most since Level 01  
    Options: 1 I rest without guilt · 2 I decide faster · 3 I ask for money · 4 I stay calmer · 5 not yet
@@ -775,7 +776,7 @@ Where each one lives. None is pasted on screen as a slogan.
    - `day`: which day (e.g. *Monday*) · day chips
    - `num`: the number (e.g. *cash left*)
    - `belief`: the belief behind it (e.g. *my fear of asking*)
-4. **Done when** (shown, not typed): on *Monday* you read *cash left*, wrote it on your Planner’s Monday page, and, if it missed, one line on the belief behind it.  
+4. **Done when** (shown, not typed): on *Monday* you read *cash left*, wrote it on your Planner’s Monday page (or on paper), and, if it missed, one line on the belief behind it.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* Your truth number is *cash left*, read *2 weeks* in a row.
@@ -808,7 +809,7 @@ Where each one lives. None is pasted on screen as a slogan.
    - `want`: what they want (e.g. *fill them without discounts*)
    - `so`: the result (e.g. *stop worrying about rent*)
 4. **Day** (new screen, day chips): By which day will you ask three clients?
-5. **Done when** (shown, not typed): you asked three clients by *Friday*, and wrote their answers word for word.  
+5. **Done when** (shown, not typed): you asked three clients by *Friday*, and wrote their answers word for word. No answer counts too: write that down.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You think clients choose you for *trust*, and you have *1 in writing*.
@@ -824,6 +825,8 @@ Where each one lives. None is pasted on screen as a slogan.
 **If Sunday says Partly or Not yet:** Make it smaller: ask one client, by message, the first question only.
 
 **Links.** Planner: Monday page, as the one move (Start here) or one of three goals, with its day. Manual for your stage · Level 05 · Lead the market · Testimony (anchor #l05-market, built in Phase 4).
+
+**Stage notes.** *Building:* No clients yet? Ask three people who tried it, or who have the problem you solve.
 
 **Change from Version 4.** The “Exactly” line said “by Friday”. It now says “by {on}”, the day the founder chose.
 
@@ -922,7 +925,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 
 **Topic:** Money that is yours
 
-**Inform. Why it matters** (on the first blank): Money you earned and did not collect is a loan you never agreed to give. Asking for it is part of the work, not a rudeness. A short, polite, firm message with a date works better than a long apology.
+**Inform. Why it matters** (on the first blank): Money you earned and did not collect is a loan you never agreed to give. Asking for it is part of the work, not a rudeness. A short, polite, firm message with a date works better than a long apology, and a deposit before you start means you ask less often.
 
 1. **Tap.** The money talk I avoid is about…  
    Options: 1 an unpaid invoice · 2 a discount I regret · 3 extra work for free · 4 a supplier price
@@ -947,6 +950,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 - Hi *Studio Rossi*, invoice *0412* was due on *1 Oct*.
 - Please pay by *8 Nov*. Thank you.
 - If it is not paid by *8 Nov*, I call on ____.
+- From now on, new work starts with a deposit of ____.
 
 **If Sunday says Partly or Not yet:** Make it smaller: send the two lines exactly as written. No extra sentences, no apology.
 
@@ -970,7 +974,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
    - `fit`: what (e.g. *what you need*)
    - `suggest`: an alternative (e.g. *the smaller package*)
 4. **Day** (new screen, day chips): By which day will you say it?
-5. **Done when** (shown, not typed): you said the kind no about *the 30% discount* by *Friday*, offered *the smaller package*, and added no discount.  
+5. **Done when** (shown, not typed): by *Friday* you said the kind no about *the 30% discount*, offered *the smaller package*, and did not take it back.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* *6 hours* a week go to *a discount request*.
@@ -1044,7 +1048,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
    - `from`: the step now (e.g. *I do it*)
    - `to`: the next step (e.g. *they do it, I check*)
 4. **Day** (new screen, day chips): Which day this week will it run that way for the first time?
-5. **Done when** (shown, not typed): on *Friday*, *the weekly orders* ran once at “*they do it, I check*”, and *30 Nov* is in your calendar as the day it stays there.  
+5. **Done when** (shown, not typed): on *Friday*, *the weekly orders* ran once at “*they do it, I check*”, and you wrote down what you checked.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* Your biggest task is at “*I do it*”, and it takes *5 hours* a week.
@@ -1080,8 +1084,8 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
    - `rate`: my hour (e.g. *€35*)
    - `total`: the total (e.g. *€290*)
    - `floor`: your floor (e.g. *€350*)
-4. **Day** (new screen, day chips): By which day will the floor be written next to your prices?
-5. **Done when** (shown, not typed): *€350* is written next to your price list by *Friday*, and your next quote was at or above it.  
+4. **Day** (new screen, day chips): By which day will your lowest price be written next to your prices?
+5. **Done when** (shown, not typed): *€350* is written next to your price list by *Friday*, and every quote you sent this week was at or above it.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You price *by guess*, and a job really takes *6 hours*.
@@ -1143,7 +1147,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 
 **Topic:** What you are best at, and what to stop
 
-**Inform. Why it matters** (on the first blank): Doing a bit of everything feels safe, but it hides your best work and makes you hard to recommend. Half what you are best at, half what the market will pay for, is a good place to stand. Dropping one thing makes room for the better one.
+**Inform. Why it matters** (on the first blank): Doing a bit of everything feels safe, but it hides your best work and makes you hard to recommend. Stand where what you do best meets what people will pay for. Dropping one thing makes room for the better one.
 
 1. **Tap.** What people thank me for most  
    Options: 1 solving problems · 2 teaching · 3 making things · 4 organising · 5 calming people down
@@ -1228,7 +1232,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
    - `e3`: what’s in it (e.g. *done with you, 3 months*)
    - `p3`: price (e.g. *€2,400*)
 4. **Day** (new screen, day chips): By which day will the three levels be on your offer page?
-5. **Done when** (shown, not typed): by *Friday*, the three levels are on your offer page or price list, and you said them out loud once to a buyer.  
+5. **Done when** (shown, not typed): by *Friday*, the three levels are on your offer page, price list or a pinned post, and you said them out loud once to a buyer.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You price *by feel*, and you say it out loud *roughly*.
@@ -1240,6 +1244,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 - Essential: *the plan*, *€390*.
 - Complete: *plan and launch*, *€890*.
 - Premium: *done with you, 3 months*, *€2,400*.
+- After the price: “Which one feels right for you?” Then stop talking.
 
 **If Sunday says Partly or Not yet:** Make it smaller: say the three levels out loud to one person you trust, then to one buyer.
 
@@ -1263,7 +1268,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
    - `gain`: their result (e.g. *stop discounting*)
    - `time`: how long (e.g. *60 days*)
 4. **Day** (new screen, day chips): By which day will you have said it to three people?
-5. **Done when** (shown, not typed): by *Friday*, you said the line to three people the same way, and one could say it back.  
+5. **Done when** (shown, not typed): by *Friday*, you said the line to three people the same way, and asked one of them to say it back.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* Your customer wants *less worry*, and could repeat your offer *roughly*.
@@ -1298,15 +1303,15 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 2. **Slide.** Weekly promises to yourself kept last week, out of 10  
    Scale 0 to 10, step 1; ends “None” and “All ten”; starts at 5. Words: up to 2: almost none · 5: a few · 8: most · 10: all of them.
 3. **Write once**, one blank per screen, the sentence building above it:  
-   “Every ___ at ___ I spend 30 minutes: look back, read the numbers, choose ___ priorities.”
+   “Every ___ at ___ I spend ten minutes: look back, read the numbers, choose ___ priorities.”
    - `day`: which day (e.g. *Friday*) · day chips
    - `time`: what time (e.g. *16:00*)
    - `three`: how many priorities (e.g. *three*)
-4. **Done when** (shown, not typed): on *Friday* at *16:00* you held the review and wrote *three* priorities on your Planner’s Monday page.  
+4. **Done when** (shown, not typed): on *Friday* at *16:00* you held the review and wrote *three* priorities on your Planner’s Monday page (or on paper).  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You plan *as it comes*, and kept *a few* of your promises.
-   - *Where you struggle. Don’t fight it.* Without a review, the week plans you. Don’t fight the mess. Give it 30 minutes.
+   - *Where you struggle. Don’t fight it.* Without a review, the week plans you. Don’t fight the mess. Give it ten minutes.
    - *Where you shine. Don’t ignore it.* You keep most promises. A review will make it all of them.
    - *What you will do. Exactly.* Every *Friday* at *16:00*: look back, read the numbers, choose *three* priorities.
 
@@ -1319,7 +1324,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 
 **Links.** Growth Plan step 21: uses (the inner boardroom is the review). Planner: Sunday page · what really happened; Monday page · three goals. Manual for your stage · Level 09 · Lead yourself · First things weekly (anchor #l09-self, built in Phase 4).
 
-**Change from Version 4.** The sentence said “30 minutes”. Proposed: “ten minutes”, the same as Growth Plan step 21. Decision D3.
+**Change from Version 4.** The sentence said “30 minutes”. Now “ten minutes”, the same as Growth Plan step 21 (D3, applied 1 Nov).
 
 #### L · Lead your people · Lean on roles
 
@@ -1338,7 +1343,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
    - `limit`: a limit (e.g. *€500*)
    - `call`: when (e.g. *a client complains*)
 4. **Day** (new screen, day chips): By which day will Marta know?
-5. **Done when** (shown, not typed): by *Friday*, *Marta* has it in writing: they own *orders and suppliers* up to *€500*, and one decision was made without you.  
+5. **Done when** (shown, not typed): by *Friday*, *Marta* has it in writing: they own *orders and suppliers* up to *€500*, and you passed them the next decision in that area.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* If you were sick, *the business stops*. *9 tasks* sit with you alone.
@@ -1361,7 +1366,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 
 **Topic:** One page of cash
 
-**Inform. Why it matters** (on the first blank): Cash surprises end good businesses, and almost every surprise was visible weeks earlier on a simple page: in, out, left, every week, with an alert line you act on the same day. Software can fill the page; only you can act on it.
+**Inform. Why it matters** (on the first blank): Cash surprises end good businesses, and a surprise often shows weeks earlier on a simple page: in, out, left, every week, with an alert line you act on the same day. Software can fill the page; only you can act on it.
 
 1. **Tap.** What I check every week  
    Options: 1 nothing · 2 the bank balance · 3 sales · 4 money in, out and left
@@ -1374,7 +1379,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
    - `out`: amount (e.g. *€4,900*)
    - `left`: amount (e.g. *€1,300*)
    - `alert`: the minimum (e.g. *€3,000 in the bank*)
-4. **Done when** (shown, not typed): on *Monday* the page shows this week’s in, out and left, and you know what you do below *€3,000 in the bank*.  
+4. **Done when** (shown, not typed): on *Monday* the page shows this week’s in, out and left, and the line “Below *€3,000 in the bank*, the same day I …” is filled in.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You check *the bank balance*, and you have *2 months* of runway.
@@ -1385,6 +1390,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your money*): **My cash page, every Monday**
 - In: *€6,200* · out: *€4,900* · left: *€1,300*
 - Alert line: *€3,000 in the bank*. Below it, the same day I: ____
+- Paid to myself this month: ____ · set aside for tax: ____
 - Next four weeks, expected in: ____ · out: ____
 
 **If Sunday says Partly or Not yet:** Make it smaller: fill only the first line this week, from the bank, on *Monday*.
@@ -1408,7 +1414,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
    - `m`: how many (e.g. *3*)
    - `from`: a step (e.g. *met*)
    - `to`: the next step (e.g. *a call booked*)
-4. **Done when** (shown, not typed): the *12* names are written down, and on *Tuesday* you moved *3* of them one step.  
+4. **Done when** (shown, not typed): the *12* names are written down, and on *Tuesday* you took the next step with *3* of them.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* Your clients come from *referrals*, and you have *3 open*.
@@ -1513,7 +1519,7 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    - `need`: what they need (e.g. *want busier weekdays*)
    - `give`: what you give (e.g. *send clients his way*)
 4. **Day** (new screen, day chips): By which day will you ask Paolo, the coffee supplier?
-5. **Done when** (shown, not typed): you asked *Paolo, the coffee supplier* by *Friday*, and offered your part first.  
+5. **Done when** (shown, not typed): by *Friday*, you asked for two introductions from *Paolo, the coffee supplier*, and offered your part first.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* *a supplier* already meets your clients, and you can name *2 partners*.
@@ -1522,11 +1528,11 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    - *What you will do. Exactly.* You ask *Paolo, the coffee supplier* for two introductions to people who *want busier weekdays*, and you *send clients his way*.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your marketing*): **The partner ask, ready to send**
-- Hi *Paolo, the coffee supplier*, could you introduce me to two people who *want busier weekdays*?
+- Hi ____, could you introduce me to two people who *want busier weekdays*?
 - In return, I *send clients his way*.
 - Introductions received: ____
 
-**If Sunday says Partly or Not yet:** Make it smaller: send the message to *Paolo, the coffee supplier* today. A no is fine; ask the next partner.
+**If Sunday says Partly or Not yet:** Make it smaller: send the message today, to *Paolo, the coffee supplier*. A no is fine; ask the next partner.
 
 **Links.** Planner: Monday page, as the one move (Start here) or one of three goals, with its day. Manual for your stage · Level 10 · Lead your people · Ambassadors (anchor #l10-people, built in Phase 4).
 
@@ -1581,8 +1587,8 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    “I ask ___ people: “When did you last ___? What did you try? What did it cost you?” I write their exact words.”
    - `n`: how many (e.g. *10*)
    - `last`: the problem (e.g. *have an empty Tuesday*)
-4. **Day** (new screen, day chips): By which day will three be booked?
-5. **Done when** (shown, not typed): by *Friday*, three of the *10* conversations are booked or held, and you wrote their exact words.  
+4. **Day** (new screen, day chips): By which day will the invitations be sent?
+5. **Done when** (shown, not typed): by *Friday*, *10* people are invited, and every conversation held so far is written down the same day.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You’ll start with *what they struggle with*, at *3 a week*.
@@ -1590,7 +1596,7 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    - *Where you shine. Don’t ignore it.* You wrote three questions about their past. That is how real demand shows.
    - *What you will do. Exactly.* You ask *10* people: “When did you last *have an empty Tuesday*? What did you try? What did it cost you?”
 
-**Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your next ninety days*): **The three questions**
+**Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your next twelve weeks*): **The three questions**
 - “When did you last *have an empty Tuesday*? What did you try? What did it cost you?”
 - What I heard most: 1 ____ 2 ____ 3 ____
 - What I build or change because of it: ____
@@ -1622,7 +1628,7 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    - `b`: another (e.g. *Sara*)
    - `c`: a third (e.g. *my accountant*)
 4. **Day** (new screen, day chips): By which day will you have asked all three?
-5. **Done when** (shown, not typed): by *Friday* you asked *Luca*, *Sara* and *my accountant*, wrote each answer down, and only said thank you.  
+5. **Done when** (shown, not typed): by *Friday* you asked *Luca*, *Sara* and *my accountant*, wrote each answer down, and only said thank you. No answer counts too.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* With criticism you *defend myself*, and *1 people* told you something hard this month.
@@ -1654,7 +1660,7 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    - `meet`: which meeting (e.g. *Monday check-in*)
    - `do`: what you do first (e.g. *write it down*)
 4. **Day** (new screen, day chips): Which day is the next Monday check-in?
-5. **Done when** (shown, not typed): at the *Monday check-in* on *Monday* you asked “What isn’t working that I don’t know?”, and did this before you answered: *write it down*.  
+5. **Done when** (shown, not typed): at your next *Monday check-in* you asked the question, and before answering you did this: *write it down*.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* People avoid telling you *bad news*, and disagreeing feels *sometimes safe*.
@@ -1690,7 +1696,7 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    - `because`: why you can (e.g. *I know the neighbourhood*)
    - `proof`: one fact (e.g. *Bar Lina, +40% on Tuesdays*)
 4. **Day** (new screen, day chips): By which day will it be where buyers see it?
-5. **Done when** (shown, not typed): by *Friday*, the sentence and its proof are on your offer page or in your next proposal.  
+5. **Done when** (shown, not typed): by *Friday*, the sentence and its proof are on your offer page, or in a message or proposal you sent this week.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You are compared with *a competitor*, and you look *the same*.
@@ -1721,7 +1727,7 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    “By ___ I ask ___ clients for two sentences: what changed for them, and who they would recommend me to.”
    - `day`: a date (e.g. *15 Nov*) · a date: day chips and “A date”
    - `n`: how many (e.g. *3*)
-4. **Done when** (shown, not typed): you asked *3* clients by *15 Nov*, and every answer you got is where buyers decide.  
+4. **Done when** (shown, not typed): you asked *3* clients by *15 Nov*, and every answer received is on your offer page, with their permission.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* Your proof lives *screenshots on my phone*, and you have *2 testimonials*.
@@ -1730,7 +1736,7 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    - *What you will do. Exactly.* By *15 Nov* you ask *3* clients for two sentences, and you put them where buyers decide.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your marketing*): **The testimonial ask, ready to send**
-- “Could you write two sentences: what changed for you, and who you would recommend me to?”
+- “Could you write two sentences: what changed for you, and who you would recommend me to? May I share them with your name?”
 - Asked: *3* clients, by *15 Nov*. Received: ____
 - Where I put them: ____
 
@@ -1738,10 +1744,12 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
 
 **Links.** Shows back: Level 05 · the three clients you asked for their words (Testimony). Planner: Monday page, as the one move (Start here) or one of three goals, with its day. Manual for your stage · Level 11 · Lead the market · Echo (anchor #l11-market, built in Phase 4).
 
-### Week 12 · Level 12 · RISE · Your ninety days
+**Stage notes.** *Building:* No clients yet? Ask three people who tried it, or who have the problem you solve.
 
-**Promise:** By Sunday you will have: Your leader sentence written, one person given something to own, a 90-day number with checkpoints, one market test set.  
-**Floor:** Leadership · your next ninety days · **Part of:** Business HUB  
+### Week 12 · Level 12 · RISE · Your twelve weeks
+
+**Promise:** By Sunday you will have: Your leader sentence written, one person given something to own, a twelve-week number with checkpoints, one market test set.  
+**Floor:** Leadership · your next twelve weeks · **Part of:** Business HUB  
 **Old:** “I am a person with a business.” **New:** “I am a leader who builds people and serves a market.”  
 **First screens:** last week’s four actions (Level 11): Done · Partly · Not yet; then the promise.
 
@@ -1756,21 +1764,21 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
 2. **Slide.** How much do you trust yourself to decide now?  
    Scale 0 to 10, step 1; ends “Not at all” and “Fully”; starts at 7. Words: up to 3: a little · 6: more than before · 8: a lot · 10: fully.
 3. **Write once**, one blank per screen, the sentence building above it:  
-   “I am a leader who ___. In 90 days I will be known for ___.”
+   “I am a leader who ___. In twelve weeks I will be known for ___.”
    - `who`: who you are (e.g. *decides calmly and serves first*)
    - `known`: what for (e.g. *the busiest Tuesdays in Rome*)
 4. **Day** (new screen, day chips): By which day will you read it aloud to someone?
-5. **Done when** (shown, not typed): by *Friday*, the sentence is on the first page of your Planner, and you read it aloud to one person.  
+5. **Done when** (shown, not typed): by *Friday*, the sentence is on the first page of your Planner (or on paper where you see it), and you read it aloud to one person.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* What changed most is *how I decide*, and you trust yourself *a lot*.
    - *Where you struggle. Don’t fight it.* Old doubts return on hard days. Don’t fight them. Read your proof.
    - *Where you shine. Don’t ignore it.* You trust your decisions. That is leadership.
-   - *What you will do. Exactly.* You are a leader who *decides calmly and serves first*. In 90 days, you are known for *the busiest Tuesdays in Rome*.
+   - *What you will do. Exactly.* You are a leader who *decides calmly and serves first*. In twelve weeks, you are known for *the busiest Tuesdays in Rome*.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *You, as a leader*): **Who I am now**
 - I am a leader who *decides calmly and serves first*.
-- In 90 days I will be known for *the busiest Tuesdays in Rome*.
+- In twelve weeks I will be known for *the busiest Tuesdays in Rome*.
 - I read it every Monday, with my proof list.
 
 **If Sunday says Partly or Not yet:** Make it smaller: read the sentence aloud to yourself every morning this week. Then to one person.
@@ -1814,23 +1822,23 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
 
 #### S · Lead your business · Scale the number
 
-**Topic:** One number for the next ninety days
+**Topic:** One number for the next twelve weeks
 
 **Inform. Why it matters** (on the first blank): A big target scares and a small one bores; checkpoints make a big one honest. One number, two checkpoints, read every week, tell you early whether to push on or change course. The number serves the decision, never the other way round.
 
-1. **Tap.** The one number that matters most for 90 days  
+1. **Tap.** The one number that matters most for the next twelve weeks  
    Options: 1 profit · 2 clients · 3 price · 4 cash · 5 my hours
-2. **Slide.** Growth you aim for in 90 days  
+2. **Slide.** Growth you aim for in twelve weeks  
    Scale 0% to 100%, step 5; ends “0%” and “100%”; starts at 20. Words: 0% reads “steady” · 50% reads “bold” · 100% reads “bold”.
 3. **Write once**, one blank per screen, the sentence building above it:  
-   “In 90 days: ___ from ___ to ___ a month. Checkpoints: ___, ___.”
+   “In twelve weeks: ___ from ___ to ___ a month. Checkpoints: ___, ___.”
    - `num`: the number (e.g. *profit*)
    - `from`: today (e.g. *€1,300*)
    - `to`: the target (e.g. *€2,000*)
-   - `c1`: day 30 (e.g. *€1,500*)
-   - `c2`: day 60 (e.g. *€1,750*)
+   - `c1`: week 4 (e.g. *€1,500*)
+   - `c2`: week 8 (e.g. *€1,750*)
 4. **Day** (new screen, day chips): By which day will it be in your Planner?
-5. **Done when** (shown, not typed): by *Friday*, your Planner’s twelve-week contract holds the number (*profit*, from *€1,300* to *€2,000*) and both checkpoints with their dates.  
+5. **Done when** (shown, not typed): by *Friday*, *profit* (from *€1,300* to *€2,000*) and both dated checkpoints are in your Planner, or on paper where you see them.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You chose *profit*, and a *bold* target of *50%*.
@@ -1838,10 +1846,10 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    - *Where you shine. Don’t ignore it.* Bold, with checkpoints. That is how growth stays honest.
    - *What you will do. Exactly.* *profit* from *€1,300* to *€2,000*, via *€1,500* and *€1,750*.
 
-**Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your next ninety days*): **My next 90 days**
-- *profit*: from *€1,300* to *€2,000* a month.
-- Day 30: *€1,500* · day 60: *€1,750*.
-- If day 30 misses, the first thing I look at: ____
+**Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your next twelve weeks*): **My next twelve weeks**
+- The number: *profit*, from *€1,300* to *€2,000*.
+- Week 4: *€1,500* · week 8: *€1,750*.
+- If week 4 misses, the first thing I look at: ____
 
 **If Sunday says Partly or Not yet:** Make it smaller: write the number and the first checkpoint in your Planner today; the second can wait a week.
 
@@ -1867,7 +1875,7 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    - `win`: what counts (e.g. *4 bookings*)
    - `else`: plan B (e.g. *try lunch instead*)
 4. **Day** (new screen, day chips): By which day will the first invitations go out?
-5. **Done when** (shown, not typed): by *Friday*, the first invitations are out, and success (*4 bookings* by *31 Jan*) is written in your Planner.  
+5. **Done when** (shown, not typed): by *Friday*, the first invitations are out, and success (*4 bookings* by *31 Jan*) is written in your Planner or on paper.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* Your next move is *a new customer group*, and you feel *roughly* about it.
@@ -1875,7 +1883,7 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    - *Where you shine. Don’t ignore it.* You’re confident. Test it anyway; confidence isn’t data.
    - *What you will do. Exactly.* By *31 Jan* you test *a supper club for offices* with *10* people. Success: *4 bookings*. If not, *try lunch instead*.
 
-**Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your next ninety days*): **My market test**
+**Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your next twelve weeks*): **My market test**
 - Test: *a supper club for offices*, with *10* people, by *31 Jan*.
 - Success means *4 bookings*. If not: *try lunch instead*.
 - Result: ____
@@ -1914,8 +1922,10 @@ One screen each, in this order. Actions counted: Levels 09 to 11 (12), and the w
 | Levels 01, 06, 10 | Growth Plan words show above the tap when written (steps 12, 16, 6). | Ask once. |
 | Levels 05, 07, 08, 11 | An earlier level’s answer shows back (5.0, 7.1, 8.3, 11.3). | Build on it, never ask again. |
 | Level 05 · Testimony | “by Friday” becomes “by {on}”, the founder’s day. | The founder picks the day. |
-| Level 09 · First things weekly | “30 minutes” becomes “ten minutes”, if D3 is approved. | One rhythm everywhere. |
-| Level 12 | “90 days” becomes “twelve weeks”, if D5 is approved. | One horizon. |
+| Level 09 · First things weekly | “30 minutes” becomes “ten minutes” (D3, applied 1 Nov). | One rhythm everywhere. |
+| Level 12 | “90 days” becomes “twelve weeks”; checkpoints “week 4” and “week 8” (D5, applied 1 Nov). | One horizon. |
+| Levels 05, 09, 12 | After each reading, one page to build: a process in ten lines, the operations page, the twelve-week page (option C). | The thinnest parts of the Blueprint, filled from answers already given. |
+| My Blueprint | A ninth part, the inner side, from the Growth Plan (option D); week 13 asks about Level 12 and offers the North Star again. | The whole of the founder, and the loop closed. |
 | Levels 04 and 10 | Session 1 opens Level 04; Session 2 follows the Chapter II reading. | D1. The sessions had no stated place or purpose. |
 
 **Unchanged:** every tap, option, slide, scale, sentence and four-lines text (except Level 05 · Testimony’s “by Friday”), the twelve words, the three chapters, the promises, the readings after 05, 09 and 12, and the meaning of every saved answer.

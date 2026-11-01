@@ -50,7 +50,7 @@ export const DOMAINS = [
   ['8.1', {  }],
   ['8.2', { gp: [[13, 'feeds', 'saying the price out loud is step 13']] }],
   ['8.3', { uses: 'Level 01 · who you help, and with what (Dignity)' }],
-  ['9.0', { gp: [[21, 'uses', 'the inner boardroom is the review']], pl: 'Sunday page · what really happened; Monday page · three goals', change: 'The sentence said “30 minutes”. Proposed: “ten minutes”, the same as Growth Plan step 21. Decision D3.' }],
+  ['9.0', { gp: [[21, 'uses', 'the inner boardroom is the review']], pl: 'Sunday page · what really happened; Monday page · three goals', change: 'The sentence said “30 minutes”. Now “ten minutes”, the same as Growth Plan step 21 (D3, applied 1 Nov).' }],
   ['9.1', { gp: [[9, 'feeds', 'one decision made without you']] }],
   ['9.2', { lp: ['Read last month’s money', 'deepens', 'once in week 1; here, every week, with an alert line.'] }],
   ['9.3', {  }],
@@ -124,10 +124,10 @@ export const LAUNCHPAD_CHANGES = [
 /** Decisions only Alexandru can make. */
 export const DECISIONS = [
   ['D1', 'How many 1:1 sessions, and where', 'The brief says two in Levels 04–12. The ladder on the site (public/content.js) says one in The Boardroom (04–05), two in the LAB, three in total with the HUB.', 'Two: Session 1 opens Level 04, Session 2 follows the Chapter II reading. Then the ladder copy changes to match (Phase 3).'],
-  ['D2', 'Start with the weakest domain?', 'The level’s word is spelled one letter per domain, in order.', 'Keep the word order on screen. The weakest domain from the North Star gets the “Start here” mark, and its action becomes the week’s one move on the Planner’s Monday page.'],
-  ['D3', 'How long is the weekly review?', 'Launchpad plan: 5 minutes. Growth Plan step 21: ten minutes. Level 09: 30 minutes.', 'Ten minutes, everywhere. A short review that happens beats a long one that does not.'],
+  ['D2', 'Start with the weakest domain?', 'The level’s word is spelled one letter per domain, in order.', 'Keep the word order on screen. The weakest domain from the North Star gets the “Start here” mark, and its action becomes the week’s one move on the Planner’s Monday page. Applied 1 Nov.'],
+  ['D3', 'How long is the weekly review?', 'Launchpad plan: 5 minutes. Growth Plan step 21: ten minutes. Level 09: 30 minutes.', 'Ten minutes, everywhere. A short review that happens beats a long one that does not. Applied 1 Nov.'],
   ['D4', 'Two things called “boardroom”', '“The Boardroom” is the paid session for Levels 04–05. “Your inner boardroom” is the Sunday page of the Planner and Growth Plan step 21.', 'Keep both, always with their full names: “The Boardroom with Alexandru” and “your Sunday boardroom”.'],
-  ['D5', 'Ninety days or twelve weeks?', 'Level 12 says 90 days. The Planner contract and Growth Plan step 5 say twelve weeks. The Planner’s reviews come every 13 weeks.', 'Say “twelve weeks” everywhere, Level 12 included. One horizon.'],
+  ['D5', 'Ninety days or twelve weeks?', 'Level 12 says 90 days. The Planner contract and Growth Plan step 5 say twelve weeks. The Planner’s reviews come every 13 weeks.', 'Say “twelve weeks” everywhere, Level 12 included. One horizon. Applied 1 Nov.'],
   ['D6', 'Level words that are also tool names', 'The book in public/library/built-to-lead.pdf lists 100 tools; three of its names are SEED, VIEW and FACT, with other meanings.', 'Keep the level words. The tool names never show on screen (rule 4). Rename the three tools in the book when it is next printed.'],
   ['D7', 'The Leading stage', 'The North Star has four stages; there are three manuals. Leading uses the Scaling manual today.', 'Keep it: Leading reads Scaling, with its own stage notes added only when you write them.'],
   ['D8', 'Book file names', 'public/library/built-to-lead.pdf is titled “100 Frameworks” (no byline); worth-building.pdf is “The Founder’s Manual · 32 frameworks”.', 'Tell me the right titles; quotes only come from books you confirm are yours.'],
@@ -180,7 +180,7 @@ export const PRINCIPLES = [
 /** The thinner parts of the founder's Blueprint, and the ways to make them
  *  fuller. For Alexandru to choose; nothing here is built yet. */
 export const OPTIONS = [
-  ['A · Keep it as it is', 'Your systems has 4 parts and your next ninety days has 3. What the founder keeps (the hand-over note, the welcome message, the owner note, the weekly review page, the three questions) carries the practical depth.', 'Nothing to build.'],
+  ['A · Keep it as it is', 'Your systems has 4 parts and your next twelve weeks has 3. What the founder keeps (the hand-over note, the welcome message, the owner note, the weekly review page, the three questions) carries the practical depth.', 'Nothing to build.'],
   ['B · Save the Launchpad plan online', 'Today the twenty Launchpad actions are a PDF. Online, its numbers and its “one process in ten lines” fill the Blueprint too: your money gets last month’s figures, your systems gets a written process.', 'One small table and a page, like the Growth Plan.'],
   ['C · One “build it” screen after each reading', 'Chapter I: one process in ten lines. Chapter II: the client steps and the owner note as a one-page operations sheet. Chapter III: the ninety-day page, with the test and the person you grow.', 'Three screens, written from the founder’s answers.'],
   ['D · Show the Growth Plan in the Blueprint', 'A full account’s Growth Plan words (the truth you hide, the root, the fear) as a ninth part: the inner side of the same twelve weeks.', 'Reads what is already saved.'],

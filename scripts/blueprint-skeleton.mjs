@@ -145,7 +145,7 @@ function md() {
     '- **The spine stays.** Four domains, four moves (Tap · Slide · Write once · Four lines back), twelve words, three chapters, a reading after Levels 05, 09 and 12, a promise stated as things.',
     `- **What is new is the end of each domain.** Every action now has a **day** (${ADDED_DAY.length} domains get a day screen) and a **Done when** you can check on Sunday, followed by one slide: how sure are you?`,
     '- **Inform, reform, transform.** Each domain now opens with a short insight (why it matters), ends in one action with a day (reform), and gives the founder something to keep, filled with their own words, that goes into their Blueprint (transform).',
-    '- **A true blueprint at week 12.** Everything the founder writes becomes one document in eight parts: leader, people, what you sell, marketing, sales, money, systems, the next ninety days.',
+    '- **A true blueprint at week 12.** Everything the founder writes becomes one document in eight parts: leader, people, what you sell, marketing, sales, money, systems, the next twelve weeks.',
     '- **One question per screen.** Each blank of the sentence gets its own screen. Days are taps. Enter moves on.',
     '- **Every Sunday counts.** From Level 02, a level opens by asking about last week’s four actions: Done, Partly, Not yet. The readings show what was done and how good the estimates were.',
     '- **Nothing is asked twice.** Where the Launchpad plan or the Growth Plan already covers a step, the level shows that answer back or links to it. Seven Launchpad actions that repeat a level become counts (proposal).',
@@ -177,8 +177,8 @@ function md() {
     ]), '');
   out.push('## Your Blueprint at week 12', '', PARTS_LEDE, '',
     mdTable(['Part', 'What it holds', 'Written by (level · domain)'], PARTS.map((b) => [b.n, b.about, `${b.items.length}: ${b.items.join('; ')}`])), '',
-    '### The thinner parts, and the options', '', 'Your systems (4) and your next ninety days (3) are the thinnest. Ways to make them fuller, for you to choose:', '',
-    mdTable(['Option', 'What changes', 'Cost'], OPTIONS), '', '**My recommendation:** B, then C. B puts the Launchpad’s numbers and process into the Blueprint without a single new question; C adds three screens only where the Blueprint is thin.', '');
+    '### The thinner parts, and what was built', '', 'Your systems (4) and your next twelve weeks (3) were the thinnest. Built on 1 Nov, after “produce all of it”: B, C and D below.', '',
+    mdTable(['Option', 'What changes', 'Cost'], OPTIONS), '', '**Built:** C (a page after each reading) and D (the inner side). B (the Launchpad plan online) is in the same pull request.', '');
   out.push('## The principles underneath', '', 'Where each one lives. None is pasted on screen as a slogan.', '', mdTable(['Principle', 'Where it lives'], PRINCIPLES), '');
   for (const C of CHAPTERS4) {
     out.push(`## ${C.n} · ${C.name}`, '', `*${C.about}*`, '');
@@ -221,8 +221,10 @@ const CHANGES = [
   ['Levels 01, 06, 10', 'Growth Plan words show above the tap when written (steps 12, 16, 6).', 'Ask once.'],
   ['Levels 05, 07, 08, 11', 'An earlier level’s answer shows back (5.0, 7.1, 8.3, 11.3).', 'Build on it, never ask again.'],
   ['Level 05 · Testimony', '“by Friday” becomes “by {on}”, the founder’s day.', 'The founder picks the day.'],
-  ['Level 09 · First things weekly', '“30 minutes” becomes “ten minutes”, if D3 is approved.', 'One rhythm everywhere.'],
-  ['Level 12', '“90 days” becomes “twelve weeks”, if D5 is approved.', 'One horizon.'],
+  ['Level 09 · First things weekly', '“30 minutes” becomes “ten minutes” (D3, applied 1 Nov).', 'One rhythm everywhere.'],
+  ['Level 12', '“90 days” becomes “twelve weeks”; checkpoints “week 4” and “week 8” (D5, applied 1 Nov).', 'One horizon.'],
+  ['Levels 05, 09, 12', 'After each reading, one page to build: a process in ten lines, the operations page, the twelve-week page (option C).', 'The thinnest parts of the Blueprint, filled from answers already given.'],
+  ['My Blueprint', 'A ninth part, the inner side, from the Growth Plan (option D); week 13 asks about Level 12 and offers the North Star again.', 'The whole of the founder, and the loop closed.'],
   ['Levels 04 and 10', 'Session 1 opens Level 04; Session 2 follows the Chapter II reading.', 'D1. The sessions had no stated place or purpose.'],
 ];
 const KEYS = [
@@ -290,7 +292,7 @@ function html() {
 <li><b>The spine stays.</b> Four domains, four moves (Tap · Slide · Write once · Four lines back), twelve words, three chapters, a reading after Levels 05, 09 and 12, a promise stated as things.</li>
 <li><b>What is new is the end of each domain.</b> Every action now has a <b>day</b> (${ADDED_DAY.length} domains get a day screen) and a <b>Done when</b> you can check on Sunday, then one slide: how sure are you?</li>
 <li><b>Inform, reform, transform.</b> Each domain opens with a short insight (why it matters), ends in one action with a day, and gives the founder something to keep, in their own words, that goes into their Blueprint.</li>
-<li><b>A true blueprint at week 12.</b> Everything the founder writes becomes one document in eight parts: leader, people, what you sell, marketing, sales, money, systems, the next ninety days.</li>
+<li><b>A true blueprint at week 12.</b> Everything the founder writes becomes one document in eight parts: leader, people, what you sell, marketing, sales, money, systems, the next twelve weeks.</li>
 <li><b>One question per screen.</b> Each blank of the sentence gets its own screen. Days are taps. Enter moves on.</li>
 <li><b>Every Sunday counts.</b> From Level 02, a level opens with last week’s four actions: Done, Partly, Not yet. The readings show what was done and how good the estimates were.</li>
 <li><b>Nothing is asked twice.</b> Where the Launchpad plan or the Growth Plan already covers a step, the level shows that answer back or links to it.</li>
@@ -324,10 +326,10 @@ ${hTable(['Piece', 'Its one job', 'A level takes', 'A level gives'], [
 <h2 id="bp12">Your Blueprint at week 12</h2>
 <p>${esc(PARTS_LEDE)}</p>
 ${hTable(['Part', 'What it holds', 'Written by'], PARTS.map((b) => [b.n, b.about, `${b.items.length}: ${b.items.join('; ')}`]))}
-<h3>The thinner parts, and the options</h3>
-<p>Your systems (4) and your next ninety days (3) are the thinnest. Ways to make them fuller, for you to choose:</p>
+<h3>The thinner parts, and what was built</h3>
+<p>Your systems (4) and your next twelve weeks (3) were the thinnest. Built on 1 Nov, after “produce all of it”: B, C and D below.</p>
 ${hTable(['Option', 'What changes', 'Cost'], OPTIONS)}
-<p><b>My recommendation:</b> B, then C. B puts the Launchpad’s numbers and process into the Blueprint without a single new question; C adds three screens only where the Blueprint is thin.</p>
+<p><b>Built:</b> C (a page after each reading) and D (the inner side). B (the Launchpad plan online) is in the same pull request.</p>
 <h2 id="principles">The principles underneath</h2>
 <p>Where each one lives. None is pasted on screen as a slogan.</p>
 ${hTable(['Principle', 'Where it lives'], PRINCIPLES)}
@@ -601,7 +603,7 @@ function render() {
       '<p class="lead">Then Level 02 begins: the promise, old and new, and the first tap.</p>';
   } else if (sc.t === 'bp') {
     h = '<p class="dlab">My Blueprint · after one week</p><h2 class="q">Four parts of your Blueprint, already written.</h2>' +
-      '<p class="hint">After twelve weeks: eight parts, all forty-eight in your own words. How you lead, your people, what you sell, your marketing, your sales, your money, your systems and your next ninety days. Printable.</p><div class="wk">' +
+      '<p class="hint">After twelve weeks: eight parts, all forty-eight in your own words. How you lead, your people, what you sell, your marketing, your sales, your money, your systems and your next twelve weeks. Printable.</p><div class="wk">' +
       L.d.map((x, d) => '<div style="--c:var(--' + x.k + ')"><h4>' + esc(x.bp) + '</h4><p><b>' + fill(x.take[0], d) + '</b></p><ol class="bpl">' + x.take.slice(1).map((l) => '<li>' + fill(l, d) + '</li>').join('') + '</ol></div>').join('') +
       '</div><p><button type="button" class="opt" data-restart style="width:auto;margin-top:14px">Start the preview again</button></p>';
   }

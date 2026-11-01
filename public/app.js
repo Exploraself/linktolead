@@ -23,7 +23,7 @@ import { videoBlock } from './video-talk.js';
 import * as M from './music.js';
 import { LEVELS4, CHAPTERS4, DOMS, UNITS, CLOSES, wkey, tapOf, slideOf, wordOf, shown, domainUnits, levelUnits,
   lines4, sentence, reading, fieldsOf, fill, stepsOf, stepDone, firstOf, planOf, plainOf, doneOf, takeOf, notyetOf,
-  sureOf, gotOf, GOT, tally, countedFor, READ_QUOTES, carriedFrom, blueprint } from './levels-v4.js';
+  sureOf, gotOf, GOT, tally, countedFor, READ_QUOTES, carriedFrom, blueprint, BUILD4, fillB, buildPage, stepsWritten } from './levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -460,7 +460,7 @@ const steps = () => stepsOf(level);
 const stepAt = (i) => steps()[i] || [-1, 'week'];
 /** A screen that asks for an answer needs one before Next; the slides keep
  *  where they start, and the screens that only show are always ready. */
-const ASKS = ['got', 'tap', 'blank', 'day', 'carry', 'carryday'];
+const ASKS = ['got', 'tap', 'blank', 'day', 'carry', 'carryday', 'bask', 'bstep', 'bday'];
 const ready = (i) => { const s = stepAt(i); return !ASKS.includes(s[1]) || stepDone(state.work, level, s); };
 const lastStep = () => steps().length - 1;
 /** The domain the North Star found weakest (0 to 3), or -1: it gets the
@@ -482,7 +482,35 @@ let gpWords = null, gpAsked = false;
 function growthWords() {
   if (gpAsked || !account.joined()) return;
   gpAsked = true;
-  account.growthPlan().then((r) => { if (r && r.words && Object.keys(r.words).length) { gpWords = r.words; if (view === 'work') drawBook(false); } }).catch(() => {});
+  account.growthPlan().then((r) => {
+    if (!r || !r.words || !Object.keys(r.words).length) return;
+    gpWords = r.words;
+    if (view === 'work') drawBook(false);
+    if (view === 'blueprint') growthText().then(() => { if (view === 'blueprint') render(); });
+  }).catch(() => {});
+}
+/** The Growth Plan's own words (its steps and lines), loaded only for the
+ *  Blueprint's ninth part. */
+let gpTextP = null;
+function growthText() {
+  if (window.GrowthPlan) return Promise.resolve(window.GrowthPlan);
+  if (!gpTextP) gpTextP = new Promise((ok) => { const sc = document.createElement('script'); sc.src = '/northstar/growth-plan.js'; sc.onload = () => ok(window.GrowthPlan || null); sc.onerror = () => ok(null); document.head.appendChild(sc); });
+  return gpTextP;
+}
+/** The ninth part: the inner side, from the founder's Growth Plan (full
+ *  accounts who wrote in it). Each step with words, its lines filled in. */
+function innerSide() {
+  const G = window.GrowthPlan;
+  if (!G || !gpWords) return '';
+  const steps = G.domains.flatMap((dm) => dm.steps.map((st2) => ({ dm, st: st2 })))
+    .filter(({ st: st2 }) => Object.keys(gpWords).some((k) => k.startsWith(`${st2.id}.`) && String(gpWords[k]).trim()));
+  if (!steps.length) return '';
+  const lineOf = (id, lines) => { let n = 0; return lines.map((l) => esc(l).replace(/_{3,}/g, () => { n += 1; const v = String(gpWords[`${id}.${n}`] || '').trim(); return v ? `<mark>${esc(v)}</mark>` : '<span class="ln"></span>'; })); };
+  return `<section class="bp-sec" id="bp-inner" aria-labelledby="bph-inner">
+    <h2 id="bph-inner">The inner side</h2><p class="bp-about">From your Growth Plan: the truth you hide, the root, out loud, the fear, twelve weeks measured.</p>
+    ${steps.map(({ dm, st: st2 }) => `<article class="bp-it" style="--c:${esc(dm.col)}"><p class="bp-src">${esc(dm.name)} · ${esc(st2.move)}</p><h3>${esc(st2.title)}</h3>
+      <div class="bp-take"><ol>${lineOf(st2.id, st2.lines).map((l) => `<li>${l}</li>`).join('')}</ol></div></article>`).join('')}
+  </section>`;
 }
 /** "From your Growth Plan": their own words, on the screen that asks the same. */
 function gpBack(p, at) {
@@ -604,7 +632,8 @@ function leftHTML(st, x, open) {
  *  with how sure, four lines back; the week as four actions; last week's four
  *  first; the chapter reading and one action carried forward. */
 const KIND = { got: 'Last week', tap: 'Tap', slide: 'Slide', blank: 'Write once', day: 'The day', done: 'Done when',
-  lines: 'Your four lines', week: 'Your week', reading: 'Chapter reading', carry: 'Carry one forward', carryday: 'Its day' };
+  lines: 'Your four lines', week: 'Your week', reading: 'Chapter reading', carry: 'Carry one forward', carryday: 'Its day',
+  bask: 'Build it', bstep: 'Build it', bday: 'Its day', bpage: 'Your page' };
 /** The sentence, with the blank being written lit and the rest as written so far. */
 function sentenceAt(w, lv, d, cur) {
   return LEVELS4[lv - 1].d[d].f.map((p) => {
@@ -629,6 +658,38 @@ function weekList(lv, sh) {
       <p class="cw-dw"><b>Done when</b> ${doneOf(w, lv, k)}${u != null ? ` <span class="cw-u">· ${u}% sure</span>` : ''}</p></li>`;
   }).join('')}</ol>`;
 }
+/** Build it: one page after each chapter reading, mostly from answers
+ *  already given (BUILD4). One field on screen, then the page. */
+function buildHTML(st, kind, key, ci) {
+  const w = state.work, B = BUILD4[level], v = (w[wkey(level, 'b', key)] || '').trim();
+  if (kind === 'bask') {
+    const a = [...B.asks, ...(B.who ? [B.who] : [])].find((x) => x[0] === key);
+    return `${key === B.asks[0][0] ? `<p class="cw-ins"><b>Why it matters</b> ${esc(B.ins)}</p>` : ''}
+      <h3 class="cw-q" id="cwq">${esc(a[1])}</h3>
+      <input id="cwin" class="cw-in" data-v4f="b.${esc(key)}" value="${esc(v)}" placeholder="e.g. ${esc(a[2])}" aria-labelledby="cwq" enterkeyhint="next" autocomplete="off" autocapitalize="sentences">
+      <p class="cw-keys">A few words is enough · <kbd>Enter ↵</kbd> next</p>`;
+  }
+  if (kind === 'bstep') {
+    const n = Number(key.slice(1)), done = stepsWritten(w, level);
+    return `<p class="cw-sent cw-sent-s">${fillB('{task}. It starts when {when}.', w, level)}</p>
+      ${done.length ? `<ol class="cw-steps4">${done.map((x, i) => `<li${i + 1 === n ? ' class="on"' : ''}>${esc(x)}</li>`).join('')}</ol>` : ''}
+      <h3 class="cw-q" id="cwq">Step ${n}${n > 3 ? ' <em>(or leave it empty: that was the last)</em>' : ''}</h3>
+      <input id="cwin" class="cw-in" data-v4f="b.${esc(key)}" value="${esc(v)}" placeholder="${n === 1 ? 'e.g. Open the order list for the week' : 'The next step, as an instruction'}" aria-labelledby="cwq" enterkeyhint="next" autocomplete="off" autocapitalize="sentences">
+      <p class="cw-keys">One step, as an instruction a stranger could follow · up to ten · <kbd>Enter ↵</kbd> next</p>`;
+  }
+  if (kind === 'bday') {
+    return `<h3 class="cw-q" id="cwq">${esc(B.day)}</h3>${dayPick('b', 'day', v)}
+      <p class="cw-keys"><kbd>1–7</kbd> choose a day · <kbd>Enter ↵</kbd> next</p>`;
+  }
+  const next = CHAPTERS4[ci + 1];
+  return `<h3 class="cw-q">${esc(B.title)}. <em>Built from what you wrote.</em></h3>
+    <section class="cw-page" aria-label="${esc(B.title)}">${buildPage(w, level).map(([label, html]) => `<div><h4>${esc(label)}</h4><p>${html}</p></div>`).join('')}</section>
+    <p class="cw-dw"><b>Done when</b> ${fillB(B.done, w, level)}</p>
+    <p class="cw-more"><button type="button" class="cw-copy cw-copyweek" data-copypage>Copy the page</button><button type="button" class="cw-all" data-go="blueprint">See it in your Blueprint</button></p>
+    ${next && LEVELS4[level] ? `<div class="gain"><p class="gaint">${esc(next.n)} · ${esc(next.name)}</p><p class="gainp">${esc(next.about)}</p>
+      <button class="cta" type="button" data-level="${level + 1}">${holds(state.tier, gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button></div>`
+      : `<p class="cw-planner">Twelve weeks, written. <button type="button" class="cw-all" data-go="blueprint">Open your Blueprint</button></p>`}`;
+}
 /** The chapter reading, after the Version 4 reading: what was done, how good
  *  the estimates were, the beliefs, where the founder began, his words. */
 function readingMore(ci) {
@@ -647,7 +708,8 @@ function pageHTML(st, x) {
   const ci = CLOSES[level];
   const seg = Array.from({ length: total }, (_, i) => `<i class="${i < qi ? 'done' : ''}${i === qi ? ' now' : ''}" data-i="${i}"></i>`).join('');
   const label = kind === 'got' ? `Last week · Level ${pad(level - 1)} · ${esc(LEAD[DOMS[d]])}`
-    : D ? `${esc(D.l)} · ${esc(D.name)} · ${esc(LEAD[DOMS[d]])}` : kind === 'week' ? `Level ${pad(level)} · ${esc(x.word)} · your week` : 'Your chapter reading';
+    : D ? `${esc(D.l)} · ${esc(D.name)} · ${esc(LEAD[DOMS[d]])}` : kind === 'week' ? `Level ${pad(level)} · ${esc(x.word)} · your week`
+    : kind[0] === 'b' && BUILD4[level] ? `Build it · ${esc(BUILD4[level].title)}` : 'Your chapter reading';
   const top = `<button type="button" class="cw-phone" data-crown="steps" aria-label="Show the four domains of this level">
       <span><i aria-hidden="true"></i>Level ${pad(level)} · ${esc(x.word)} · ${qi + 1} of ${total}</span><span aria-hidden="true">Domains ▾</span></button>
     <div class="cw-seg" aria-hidden="true">${seg}</div>
@@ -730,10 +792,11 @@ function pageHTML(st, x) {
     body = `${c ? `<div class="cw-was"><p>${fill(LEVELS4[c[0] - 1].d[c[1]].fb[3], w, c[0], c[1])}</p><p class="cw-dw"><b>Done when</b> ${doneOf(w, c[0], c[1])}</p></div>` : ''}
       <h3 class="cw-q" id="cwq">Which day <em>this week?</em></h3>
       ${dayPick('r', 'on', v)}
-      ${CHAPTERS4[ci + 1] && LEVELS4[level] ? `<div class="gain"><p class="gaint">${esc(CHAPTERS4[ci + 1].n)} · ${esc(CHAPTERS4[ci + 1].name)}</p><p class="gainp">${esc(CHAPTERS4[ci + 1].about)}</p>
+      ${BUILD4[level] ? `<p class="cw-planner">Next: one page, built from what you wrote. ${esc(BUILD4[level].title)}.</p>` : CHAPTERS4[ci + 1] && LEVELS4[level] ? `<div class="gain"><p class="gaint">${esc(CHAPTERS4[ci + 1].n)} · ${esc(CHAPTERS4[ci + 1].name)}</p><p class="gainp">${esc(CHAPTERS4[ci + 1].about)}</p>
         <button class="cta" type="button" data-level="${level + 1}">${holds(state.tier, gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button></div>`
         : `<p class="cw-planner">Twelve weeks, written. <button type="button" class="cw-all" data-go="blueprint">Open your Blueprint</button></p>`}`;
   }
+  else if (kind === 'bask' || kind === 'bstep' || kind === 'bday' || kind === 'bpage') body = buildHTML(st, kind, key, ci);
   const last = qi >= lastStep();
   const nextLabel = kind === 'lines' ? (d < 3 ? 'Next domain →' : 'See my week') : kind === 'week' && ci != null ? 'My chapter reading' : 'Next ↵';
   return `${top}${body}
@@ -761,7 +824,7 @@ function readingHTML(ci) {
       <div class="cw-fl"><h4>Where you shine<small>Don’t ignore it.</small></h4><p>${esc(DN[r.hi])} is your strongest, at ${Math.round(r.scores[r.hi] * 10)} out of 10. Lead with it while you build the rest.</p></div>
       <div class="cw-fl"><h4>What you will do<small>Exactly.</small></h4><ol>${r.exact.map((e) => `<li>${e}</li>`).join('')}</ol></div>
     </div></div>
-    <p class="cw-star"><small>Your North Star${r.next ? ` for ${esc(r.next.name)}` : ' for the next ninety days'}</small>${r.star}</p>
+    <p class="cw-star"><small>Your North Star${r.next ? ` for ${esc(r.next.name)}` : ' for the next twelve weeks'}</small>${r.star}</p>
     <p class="cw-note">Read only from what you tapped, slid and wrote. Nothing is assumed about you, and nothing is compared with anybody else.</p>`;
 }
 
@@ -850,8 +913,13 @@ function moveQ(d) {
   const st = state.stage || 'build';
   if (view !== 'work' || !writable(st) || qi === null) return;
   if (d > 0 && !ready(qi)) return;
-  const to = Math.max(0, Math.min(lastStep(), qi + d));
-  if (to === qi) return;
+  let to = Math.max(0, Math.min(lastStep(), qi + d));
+  // Build it: after the third step, an empty step is the end of the process,
+  // and Back skips the empty ones.
+  const emptyStep = (i) => stepAt(i)[1] === 'bstep' && !String(state.work[wkey(level, 'b', stepAt(i)[2])] || '').trim();
+  if (d > 0 && emptyStep(qi)) to = steps().findIndex((x, i) => i > qi && x[1] !== 'bstep');
+  if (d < 0) while (to > 0 && emptyStep(to) && Number(stepAt(to)[2].slice(1)) > 1) to -= 1;
+  if (to < 0 || to === qi) return;
   qi = to;
   drawBook();
 }
@@ -894,7 +962,7 @@ function stageStrip(st) {
 /** The founder's Blueprint (31 Oct 2026, the skeleton's week 12): what the
  *  twelve weeks write, in eight sections, from the founder's own answers and
  *  nothing else: how they lead, their people, what they sell, marketing,
- *  sales, money, systems and the next ninety days. Printable. */
+ *  sales, money, systems and the next twelve weeks. Printable. */
 /** Week 13: Level 12's four actions have no level after them to ask, so the
  *  Blueprint asks; then the North Star again, to compare with where they began. */
 function lastSunday() {
@@ -909,6 +977,8 @@ function lastSunday() {
   </section>`;
 }
 function blueprintView() {
+  growthWords();
+  if (gpWords && !window.GrowthPlan) growthText().then(() => { if (view === 'blueprint') render(); });
   const w = state.work, B = blueprint(w), t = tally(w, LEVELS4.map((L) => L.n));
   const written = B.reduce((n, S) => n + S.items.filter((i) => i.started).length, 0), all = B.reduce((n, S) => n + S.items.length, 0);
   const name = (state.me && state.me.name) || '';
@@ -916,14 +986,16 @@ function blueprintView() {
     <header class="bp-head">
       <p class="eyebrow">${compass} The Founder’s Blueprint</p>
       <h1>${name ? `${esc(name)}’s Blueprint` : 'Your Blueprint'}</h1>
-      <p class="bp-lede">Everything the twelve weeks write, in your own words: how you lead, your people, what you sell, your marketing, your sales, your money, your systems and your next ninety days. It fills in as you go.</p>
+      <p class="bp-lede">Everything the twelve weeks write, in your own words: how you lead, your people, what you sell, your marketing, your sales, your money, your systems and your next twelve weeks. It fills in as you go.</p>
       <p class="bp-stat"><b>${written}</b> of ${all} parts written${t.n ? ` · <b>${t.done}</b> of the ${t.n} actions you checked were done${t.est ? ` · your estimates were ${t.est}` : ''}` : ''}</p>
       <p class="bp-act no-print"><button type="button" class="cta" data-print>Print it, or save it as a PDF</button><button type="button" class="cw-all" data-go="work">Back to the programme</button></p>
     </header>
     ${lastSunday()}
-    <nav class="bp-toc no-print" aria-label="The eight parts of your Blueprint">${B.map((S) => `<a href="#bp-${S.k}">${esc(S.n)}</a>`).join('')}</nav>
+    <nav class="bp-toc no-print" aria-label="The parts of your Blueprint">${B.map((S) => `<a href="#bp-${S.k}">${esc(S.n)}</a>`).join('')}${innerSide() ? '<a href="#bp-inner">The inner side</a>' : ''}</nav>
     ${B.map((S) => `<section class="bp-sec" id="bp-${S.k}" aria-labelledby="bph-${S.k}">
       <h2 id="bph-${S.k}">${esc(S.n)}</h2><p class="bp-about">${esc(S.about)}</p>
+      ${S.builds.map((bd) => bd.started ? `<article class="bp-build"><p class="bp-src">Built after Level ${pad(bd.lv)}</p><h3>${esc(bd.title)}</h3>
+        <dl>${bd.page.map(([label, html]) => `<dt>${esc(label)}</dt><dd>${html}</dd>`).join('')}</dl></article>` : '').join('')}
       ${S.items.map((it) => `<article class="bp-it${it.started ? '' : ' empty'}" style="--c:var(--${DOMS[it.d]})">
         <p class="bp-src">Level ${pad(it.lv)} · ${esc(it.word)} · ${esc(it.name)}</p>
         <h3>${esc(it.topic)}</h3>
@@ -932,6 +1004,7 @@ function blueprintView() {
           : `<p class="bp-wait">Written in Level ${pad(it.lv)}. <button type="button" class="cw-all no-print" data-level="${it.lv}">Open it</button></p>`}
       </article>`).join('')}
     </section>`).join('')}
+    ${innerSide()}
   </div></section>`;
 }
 
@@ -1161,8 +1234,8 @@ document.addEventListener('click', (e) => {
   }
   // A day, as a tap: saved, and on to the next screen.
   if (b.dataset.v4day) {
-    const [d, , k] = stepAt(qi);
-    keep4(d < 0 ? 'r' : d, k || 'on', b.dataset.v4day);
+    const [d, kd, k] = stepAt(qi);
+    keep4(d < 0 ? (kd === 'bday' ? 'b' : 'r') : d, k || 'on', b.dataset.v4day);
     refreshRail();
     const at = qi;
     drawBook(false);
@@ -1181,6 +1254,12 @@ document.addEventListener('click', (e) => {
     const x = LEVELS4[level - 1], items = [...document.querySelectorAll('.cw-week li')].map((li, i) => `${i + 1}. ${li.querySelector('.cw-wk').textContent.trim()}\n   ${li.querySelector('.cw-wa').textContent.replace(/\s+/g, ' ').trim()}\n   ${li.querySelector('.cw-dw').textContent.replace(/\s+/g, ' ').trim()}`);
     const text = [`My week · Level ${pad(level)} · ${x.word}`, ...items].join('\n');
     const doneCopy = (ok) => { b.textContent = ok ? 'Copied' : 'Select and copy'; setTimeout(() => { b.textContent = 'Copy my week'; }, 1600); };
+    try { navigator.clipboard.writeText(text).then(() => doneCopy(true), () => doneCopy(false)); } catch { doneCopy(false); }
+    return;
+  }
+  if (b.hasAttribute('data-copypage')) {
+    const pg = document.querySelector('.cw-page'), text = pg ? [BUILD4[level].title, ...[...pg.querySelectorAll('div')].map((x) => `${x.querySelector('h4').textContent}: ${x.querySelector('p').textContent.replace(/\s+/g, ' ').trim()}`)].join('\n') : '';
+    const doneCopy = (ok) => { b.textContent = ok ? 'Copied' : 'Select and copy'; setTimeout(() => { b.textContent = 'Copy the page'; }, 1600); };
     try { navigator.clipboard.writeText(text).then(() => doneCopy(true), () => doneCopy(false)); } catch { doneCopy(false); }
     return;
   }
@@ -1280,7 +1359,7 @@ document.addEventListener('keydown', (e) => {
   const inPage = t.closest('.leaf-r') || t === document.body;
   if (!inPage || t.closest('.cw-foot, .gain, .gate, .wait')) return;
   // Number keys choose on a tap.
-  if (/^[1-9]$/.test(e.key) && ['tap', 'got', 'day', 'carry', 'carryday'].includes(stepAt(qi)[1]) && t.tagName !== 'INPUT') {
+  if (/^[1-9]$/.test(e.key) && ['tap', 'got', 'day', 'carry', 'carryday', 'bday'].includes(stepAt(qi)[1]) && t.tagName !== 'INPUT') {
     const b = document.querySelectorAll('.leaf-r .cw-o')[Number(e.key) - 1];
     if (b) { e.preventDefault(); b.click(); }
     return;
@@ -1437,7 +1516,7 @@ document.addEventListener('input', (e) => {
     if (wd) wd.textContent = D.s.raw ? '' : wordOf(D.s, n);
   } else {
     const [d, k] = v.dataset.v4f.split('.');
-    keep4(d === 'r' ? 'r' : +d, k, v.value);
+    keep4(d === 'r' || d === 'b' ? d : +d, k, v.value);
     // The sentence above fills in as the founder types; nothing redraws.
     const f = document.querySelector(`.cw-f[data-fk="${k}"]`);
     if (f) { f.textContent = v.value.trim() || (fieldsOf(LEVELS4[level - 1].d[+d] || { f: [] }).find((x) => x[0] === k) || [0, ''])[1]; f.classList.toggle('has', !!v.value.trim()); }

@@ -61,7 +61,9 @@ ok(empty.every((s) => s.items.every((i) => !i.started)) && bp.every((s) => s.ite
 // ── The flow: one field on screen ─────────────────────────────────────────
 const s1 = V.stepsOf(1), s2 = V.stepsOf(2), s5 = V.stepsOf(5);
 ok(s1[0].join() === '0,tap' && s2.slice(0, 4).every((s, i) => s[0] === i && s[1] === 'got') && s2[4].join() === '0,tap', 'Level 01 opens on its first tap; every later level on last week’s four actions');
-ok(s5.slice(-4).map((s) => s[1]).join() === 'week,reading,carry,carryday' && V.stepsOf(4).slice(-1)[0][1] === 'week', 'the week ends a level; after 05, 09 and 12, the reading and one action carried forward');
+{ const k5 = s5.map((s) => s[1]), at = k5.indexOf('week');
+  ok(k5.slice(at, at + 4).join() === 'week,reading,carry,carryday' && k5[k5.length - 1] === 'bpage' && V.stepsOf(4).slice(-1)[0][1] === 'week',
+    'the week ends a level; after 05, 09 and 12, the reading, one action carried forward, and one page to build'); }
 let once = true;
 for (const x of L) x.d.forEach((D, d) => {
   const S = V.stepsOf(x.n).filter((s) => s[0] === d && !['got'].includes(s[1]));
@@ -76,7 +78,9 @@ ok(V.stepsOf(1).filter((s) => s[1] === 'day').every((s) => ['day', 'when', 'on']
 ok(V.firstOf({}, 1) === 0 && V.firstOf({}, 2) === 0, 'a new level opens on its first question');
 const full = { ...w };
 for (const x of L) for (let d = 0; d < 4; d++) { full[V.wkey(x.n, d, 'sure')] = '70'; full[V.wkey(x.n, d, 'got')] = '0'; }
-for (const n of [5, 9, 12]) { full[V.wkey(n, 'r', 'carry')] = '1.0'; full[V.wkey(n, 'r', 'on')] = 'Monday'; }
+for (const n of [5, 9, 12]) { full[V.wkey(n, 'r', 'carry')] = '1.0'; full[V.wkey(n, 'r', 'on')] = 'Monday'; full[V.wkey(n, 'b', 'day')] = 'Friday'; }
+for (const [k, v] of Object.entries({ task: 'invoices', when: 'Friday', s1: 'a', s2: 'b', s3: 'c', who: 'Marta' })) full[V.wkey(5, 'b', k)] = v;
+full[V.wkey(9, 'b', 'who')] = 'Marta'; full[V.wkey(12, 'b', 'no')] = 'new projects'; full[V.wkey(12, 'b', 'life')] = 'Sunday afternoons';
 ok(L.every((x) => V.stepsOf(x.n)[V.firstOf(full, x.n)][1] === 'week'), 'a level fully answered opens on its week');
 ok(V.firstOf({ ...full, [V.wkey(3, 2, 'got')]: '' }, 4) === 2, 'a missing Sunday answer is asked first');
 // Progress still counts only the Version 4 moves: nobody already ahead is held back.
@@ -107,4 +111,21 @@ ok(gps.length === 4 && gps.every(([k, p]) => { const [lv, d] = k.split('.').map(
   'Growth Plan words show back on four screens, at a tap or a blank that exists');
 ok(/function gpBack\(p, at\)/.test(app) && /account\.growthPlan\(\)/.test(app) && /gpAsked = true/.test(app), 'the Growth Plan is read once per visit, never on every screen');
 ok(/data-copyweek/.test(app) && /function lastSunday\(\)/.test(app) && /keep4\(d, 'got', g, 12\)/.test(app) && /href="\/northstar\/">Take the North Star again/.test(app), 'Copy my week; the last Sunday asks about Level 12, then the North Star again');
+// ── Options built (1 Nov): build-it pages, ten minutes, twelve weeks, counts ──
+ok(Object.keys(V.BUILD4).join() === '5,9,12' && V.BUILD4[5].part === 'systems' && V.BUILD4[9].part === 'systems' && V.BUILD4[12].part === 'grow', 'a page after each reading: two for systems, one for the next twelve weeks');
+ok([5, 9, 12].every((n) => V.stepsOf(n).slice(-1)[0][1] === 'bpage' && V.stepsOf(n).some((s) => s[1] === 'bday')), 'each page has its day, and ends the level');
+const bw = { [V.wkey(5, 'b', 'task')]: 'invoices', [V.wkey(5, 'b', 'when')]: 'Friday', [V.wkey(5, 'b', 's1')]: 'a', [V.wkey(5, 'b', 's2')]: 'b', [V.wkey(5, 'b', 's4')]: 'd' };
+ok(V.stepsWritten(bw, 5).join() === 'a,b' && V.buildPage(bw, 5).length === 4, 'the process stops at the first empty step');
+ok(V.stepDone({}, 5, [-1, 'bstep', 's4']) && !V.stepDone({}, 5, [-1, 'bstep', 's3']), 'three steps are needed, the rest are up to the founder');
+ok(V.buildPage(full, 12).length === 6 && V.buildPage(full, 12).some((x) => x[0].startsWith('For my health')) && V.buildPage(full, 9).length === 8 && !/[{}]/.test(V.buildPage(full, 9).map((x) => x[1]).join('')), 'the operations and twelve-week pages are built from answers already given, the personal side included');
+ok(!V.fillB('{who}', { [V.wkey(9, 'b', 'who')]: '<i>' }, 9).includes('<i>'), 'build answers are escaped');
+ok(V.blueprint(full).find((x) => x.k === 'systems').builds.length === 2, 'the build pages sit inside their part of the Blueprint');
+ok(/spend ten minutes/.test(V.LEVELS4[8].d[0].f.join('')) && !/30 minutes/.test(JSON.stringify(V.LEVELS4[8].d[0])), 'one weekly review: ten minutes (D3)');
+ok(!/90 days|ninety/.test(JSON.stringify(V.LEVELS4[11]) + JSON.stringify(V.PLAN4['12.0']) + JSON.stringify(V.PLAN4['12.2']) + JSON.stringify(V.BLUEPRINT4)), 'one horizon: twelve weeks (D5)');
+const LP = await import('../public/launchpad-plan.js');
+const lpt = Object.values(LP.ACTIONS).flat();
+ok(lpt.length === 20 && ['Count your clear asks', 'Count what came back', 'Count the hard truths', 'Count your thanks', 'Count where clients came from', 'Count your asks since Level 01'].every((t) => lpt.some((a) => a.title === t)), 'the Launchpad is the numbers: actions that repeated a level are now counts');
+ok([1, 2, 3].map((n) => lpt.filter((a) => a.w === n).length).join() === '8,8,4', 'the Launchpad keeps its three weeks: 8, 8 and 4');
+ok(!/Say one expectation|Give one thing away|Make three asks|Say your offer in one sentence/.test(fs.readFileSync('public/launchpad-plan.js', 'utf8')) && /Every Sunday, ten minutes/.test(fs.readFileSync('public/launchpad-plan.js', 'utf8')), 'no Launchpad action repeats a level; Sunday is ten minutes');
+ok(/function innerSide\(\)/.test(app) && /\/northstar\/growth-plan\.js/.test(app) && /id="bp-inner"/.test(app), 'the inner side: the Growth Plan as a ninth part, for those who wrote in it');
 done();
