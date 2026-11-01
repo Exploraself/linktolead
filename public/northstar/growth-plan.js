@@ -200,7 +200,7 @@
             "id": "mgp-14",
             "move": "The fear",
             "title": "The fear of it really working",
-            "truth": "Some founders keep the business small because success would change something they are afraid to lose.",
+            "truth": "You may be keeping the business small because success would change something you are afraid to lose.",
             "lines": [
               "If this business really worked, what I am afraid would change: ______________________________",
               "What I protect on purpose from now on, so the business can grow: ______________",

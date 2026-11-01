@@ -39,7 +39,16 @@ for (const f of files('public')) {
 // redirect to it now).
 const B = read('public/north3/index.html');
 ok(B.includes('Your business, on paper.'), 'Road 2 has its headline');
-ok(B.includes('[PHOTO OF ALEXANDRU]'), 'photo placeholder kept');
+ok(B.includes('src="/cabinet/alexandru.jpg"') && !/PHOTO OF/.test(B), 'north3: Alexandru\'s real photo, no placeholder');
+
+// Founder-facing words (1 Nov): no "incubator" on north1 or the Summit page,
+// and no claims about what other founders do in the North Star or its plans.
+const noComments = (s) => s.replace(/<!--[\s\S]*?-->/g, '');
+for (const p of ['public/north1/index.html', 'public/northstar/summit/index.html']) ok(!/incubator/i.test(noComments(read(p))), `${p}: no "incubator"`);
+for (const p of ['public/northstar/engine.js', 'functions/_plans.js', 'public/northstar/growth-plan.js', 'public/feedback.js']) {
+  const s = read(p).replace(/^\s*(\/\/|\*|\/\*).*$/gm, '');
+  ok(!/\b(most|some|many|almost every) founders?\b/i.test(s), `${p}: speaks to the founder, not about other founders`);
+}
 
 // The Summit page keeps its placeholders until Alexandru fills them.
 const Su = read('public/northstar/summit/index.html');

@@ -25,7 +25,7 @@ export const DOMAIN_INTRO = {
   self: 'The business serves a life, not the other way round. These four steps set what success must protect and turn it into how the week is run.',
   people: 'A business is carried by people: the ones at home, the ones who tell you the truth, and the ones who do the work. These steps work for a solo founder and for a team.',
   work: 'Numbers reveal what is happening; leadership decides what to do about it. These steps give the founder four numbers they understand and a habit of using them.',
-  market: 'Most founders know their product better than their customer. These steps put the customer\'s own words at the centre of the offer, and turn growth into a choice.',
+  market: 'You may know your product better than you know your customer. These steps put the customer\'s own words at the centre of the offer, and turn growth into a choice.',
 };
 
 const step = (id, domain, title, why, what, about, done, ask, band, variant = null) =>
