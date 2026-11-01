@@ -116,7 +116,7 @@ export const ACTIONS = {
 };
 
 /** The plan for the PDF builder. `thin`: the domain key that needs them first. */
-export function launchpadPlan({ first = '', full = '', stage = '', thin = '', logo = '' } = {}) {
+export function launchpadPlan({ first = '', full = '', stage = '', thin = '', logo = '', values = null } = {}) {
   const date = (() => { try { return new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); } catch { return ''; } })();
   const start = DOMAIN_NAMES[thin] ? thin : '';
   const actions = [];
@@ -124,7 +124,7 @@ export function launchpadPlan({ first = '', full = '', stage = '', thin = '', lo
     for (const d of ORDER) {
       ACTIONS[d].forEach((a, i) => {
         if (a.w !== wk.n) return;
-        actions.push({ section: wk.name, domain: `${DOMAIN_NAMES[d]} · ${i + 1} of 5`, title: a.title, why: a.why, lines: a.lines, done: a.done,
+        actions.push({ section: wk.name, domain: `${DOMAIN_NAMES[d]} · ${i + 1} of 5`, title: a.title, why: a.why, lines: values ? linesWith(d, i, values) : a.lines, done: a.done,
           start: !!start && d === start && i === 0 });
       });
     }
@@ -150,6 +150,59 @@ export function launchpadPlan({ first = '', full = '', stage = '', thin = '', lo
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+/* ── Online (option B, 1 Nov 2026) ─────────────────────────────────────────
+ * Every blank (a run of four or more underscores) is a field, saved with the
+ * founder's work like any worksheet cell: w.lp.<domain>.<action 0–4>.<blank
+ * 1…>, counted across the action's lines in order, and w.lp.<domain>.<action>.done
+ * (the date its "Done when" came true). Device first, the account in
+ * batches (rule 8); the PDF and the founder's Blueprint use the same words. */
+const BLANK = /_{4,}/g;
+export const lpKey = (d, i, n) => `w.lp.${d}.${i}.${n}`;
+/** The part of the founder's Blueprint each Launchpad action writes. */
+export const LP_PARTS = { self: ['self', 'self', 'self', 'self', 'self'], people: ['people', 'people', 'people', 'people', 'people'],
+  work: ['money', 'money', 'systems', 'offer', 'money'], market: ['marketing', 'marketing', 'sales', 'sales', 'sales'] };
+/** An action's lines with the founder's words in the blanks (plain text, for the PDF). */
+export function linesWith(d, i, values) {
+  let n = 0;
+  return ACTIONS[d][i].lines.map((l) => l.replace(BLANK, (m) => { n += 1; const v = String((values || {})[lpKey(d, i, n)] || '').trim(); return v || m; }));
+}
+/** The same as HTML: their words marked, the rest as lines to fill. */
+export function linesHTML(d, i, values) {
+  let n = 0;
+  return ACTIONS[d][i].lines.map((l) => esc(l).replace(BLANK, () => { n += 1; const v = String((values || {})[lpKey(d, i, n)] || '').trim(); return v ? `<mark>${esc(v)}</mark>` : '<span class="ln"></span>'; }));
+}
+/** Has the founder written anything in this action? */
+export const lpStarted = (d, i, values) => Object.keys(values || {}).some((k) => k.startsWith(`w.lp.${d}.${i}.`) && /\.\d+$/.test(k) && String(values[k]).trim());
+/** For the Blueprint: the Launchpad actions written in, by part. */
+export function launchpadFor(part, values) {
+  return ORDER.flatMap((d) => ACTIONS[d].map((a, i) => ({ d, i, a })))
+    .filter(({ d, i }) => LP_PARTS[d][i] === part && lpStarted(d, i, values))
+    .map(({ d, i, a }) => ({ title: a.title, lines: linesHTML(d, i, values), done: (values || {})[lpKey(d, i, 'done')] || '' }));
+}
+/** The plan, online: the three weeks, each action's lines as fields. */
+export function launchpadOnlineHTML({ values = {}, thin = '' } = {}) {
+  if (typeof document !== 'undefined' && !document.getElementById('lpp-style')) {
+    const st = document.createElement('style'); st.id = 'lpp-style'; st.textContent = STYLE; document.head.appendChild(st);
+  }
+  const field = (d, i, n, l) => { const id = lpKey(d, i, n), v = String(values[id] || ''); return `<input class="lpo-f" data-lp="${esc(id)}" id="lpo-${esc(id.replace(/\./g, '-'))}" value="${esc(v)}" aria-label="${esc(l.replace(BLANK, '…'))}" size="${Math.max(6, Math.min(28, (v || '').length + 2))}" autocomplete="off" enterkeyhint="next">`; };
+  const lineIn = (d, i, l, k) => esc(l).replace(BLANK, () => { k.n += 1; return field(d, i, k.n, l); });
+  const card = (d, i) => {
+    const a = ACTIONS[d][i], k = { n: 0 }, dn = values[lpKey(d, i, 'done')];
+    return `<li class="lpo-a${dn ? ' on' : ''}" style="--c:var(--${d})"><p class="lpo-d">${esc(DOMAIN_NAMES[d])}${d === thin && i === 0 ? ' · <b>Start here</b>' : ''}</p>
+      <h3>${esc(a.title)}</h3><p class="lpo-why">${esc(a.why)}</p>
+      <ul>${a.lines.map((l) => `<li>${lineIn(d, i, l, k)}</li>`).join('')}</ul>
+      <p class="lpo-done"><b>Done when</b> ${esc(a.done)}</p>
+      <button type="button" class="lpo-tick" data-lpdone="${esc(lpKey(d, i, 'done'))}" aria-pressed="${!!dn}">${dn ? 'Done ✓' : 'Mark it done'}</button></li>`;
+  };
+  return `<section class="lpo" aria-labelledby="lpo-h"><div class="lpo-in">
+    <p class="lpp-eb">The Founder Launchpad · your action plan · online</p>
+    <h1 id="lpo-h">Twenty actions. <i>Write in the blanks.</i></h1>
+    <p class="lpp-l">The numbers of your three free weeks. Each blank saves on this device as you type, and to your account. Your Blueprint and your PDF use the same words.</p>
+    <p class="lpo-acts"><button type="button" class="lpp-go" data-lpp>Download it as a PDF, with your words ↓</button><span class="lpp-note" role="status" id="lpp-msg"></span></p>
+    ${WEEKS.map((wk) => `<h2>${esc(wk.name)}</h2><ol class="lpo-list">${ORDER.flatMap((d) => ACTIONS[d].map((a, i) => (a.w === wk.n ? card(d, i) : ''))).join('')}</ol>`).join('')}
+  </div></section>`;
+}
+
 const STYLE = `.lpp{max-width:1080px;margin:0 auto 28px;padding:0 24px}
 .lpp-in{border:1px solid rgba(180,151,95,.55);border-radius:16px;padding:clamp(20px,3.4vw,32px);background:linear-gradient(160deg,#FFFDF8,#F6EEDD);display:flex;flex-direction:column;gap:16px}
 .lpp-eb{margin:0;font:600 11px/1.2 Inter,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#7A5C16}
@@ -167,6 +220,32 @@ const STYLE = `.lpp{max-width:1080px;margin:0 auto 28px;padding:0 24px}
 .lpp-go:hover,.lpp-go:focus-visible{background:#B4975F;color:#14100B;outline:none}
 .lpp-go:disabled{opacity:.6;cursor:wait}
 .lpp-note{font-size:13px;color:#5F5648}
+.lpp-alt{background:transparent;color:#14100B;border:1px solid #B4975F}
+.lpo{max-width:1080px;margin:0 auto;padding:24px 16px 140px}
+.lpo-in{display:flex;flex-direction:column;gap:12px}
+.lpo h1{margin:0;font:440 clamp(28px,6vw,40px)/1.15 Newsreader,Georgia,serif;color:#14100B}.lpo h1 i{color:#8A6A2A}
+.lpo h2{margin:18px 0 0;font:500 22px/1.2 Newsreader,Georgia,serif;color:#14100B;border-top:2px solid #14100B;padding-top:10px}
+.lpo-acts{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:0}
+.lpo-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.lpo-a{min-width:0;padding:14px 16px;border:1px solid #E6DCC9;border-top:3px solid var(--c);border-radius:10px;background:#FFFDF8}
+.lpo-a.on{border-color:#B4975F}
+.lpo-d{margin:0;font:600 11px/1.5 Inter,Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+.lpo-a h3{margin:2px 0;font:500 19px/1.3 Newsreader,Georgia,serif;color:#14100B}
+.lpo-why{margin:0;font:italic 400 15px/1.45 Newsreader,Georgia,serif;color:#5F5648}
+.lpo-a ul{margin:8px 0 0;padding-left:18px;font-size:15px;line-height:2;color:#2B1B12}
+input.lpo-f{max-width:100%;min-width:4em;border:0;border-bottom:1.5px solid #B4975F;background:transparent;color:#7A5C16;font-weight:600;padding:0 4px;font-size:16px}
+input.lpo-f:focus{outline:none;background:rgba(180,151,95,.1);border-bottom-color:#14100B}
+.lpo-done{margin:8px 0 0;font-size:14px;color:#5F5648}.lpo-done b{color:#14100B}
+.lpo-tick{margin-top:8px;min-height:40px;padding:0 14px;border:1px solid #E6DCC9;border-radius:999px;background:transparent;font:500 14px Inter,Arial,sans-serif;color:#14100B;cursor:pointer}
+.lpo-tick[aria-pressed="true"]{background:#B4975F;border-color:#B4975F}
+@media (max-width:760px){.lpo-list{grid-template-columns:1fr}}
+:root[data-theme="dark"] .lpp-alt{color:#F1E8D6;border-color:#D6BF8F;background:transparent}
+:root[data-theme="dark"] .lpo h1,:root[data-theme="dark"] .lpo h2,:root[data-theme="dark"] .lpo-a h3,:root[data-theme="dark"] .lpo-done b,:root[data-theme="dark"] .lpo-tick{color:#F1E8D6}
+:root[data-theme="dark"] .lpo h2{border-top-color:#F1E8D6}
+:root[data-theme="dark"] .lpo-a{background:#1C150E;border-color:#3A2E1F}
+:root[data-theme="dark"] .lpo-a ul{color:#F1E8D6}
+:root[data-theme="dark"] .lpo-why,:root[data-theme="dark"] .lpo-done{color:#CFC3AA}
+:root[data-theme="dark"] input.lpo-f{color:#D6BF8F}
 @media (max-width:860px){.lpp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:520px){.lpp-grid{grid-template-columns:1fr}}
 :root[data-theme="dark"] .lpp-in{background:linear-gradient(160deg,#1C150E,#120D08);border-color:#3A2E1F}
@@ -186,7 +265,7 @@ export function launchpadCardHTML({ thin = '' } = {}) {
     <h2>Twenty actions. Five in each domain. <i>Fill in the blanks.</i></h2>
     <p class="lpp-l">Your three free weeks, in the order they build: what to open, what to count, what to write. With your name and today’s date. Yours to keep, at no cost.</p>
     <div class="lpp-grid">${ORDER.map((d) => `<div class="lpp-d${d === thin ? ' start' : ''}"><h3>${esc(DOMAIN_NAMES[d])}${d === thin ? '<em>Start here</em>' : ''}</h3><ol>${ACTIONS[d].map((a) => `<li>${esc(a.title)}</li>`).join('')}</ol></div>`).join('')}</div>
-    <div class="lpp-acts"><button type="button" class="lpp-go" data-lpp>Download my Launchpad Action Plan ↓</button><span class="lpp-note" role="status" id="lpp-msg"></span></div>
+    <div class="lpp-acts"><button type="button" class="lpp-go" data-go="launchpad">Fill it in online →</button><button type="button" class="lpp-go lpp-alt" data-lpp>Download my Launchpad Action Plan ↓</button><span class="lpp-note" role="status" id="lpp-msg"></span></div>
   </div></section>`;
 }
 

@@ -142,4 +142,13 @@ const st = D.stuckOnSunday(rows);
 ok(st.length === 1 && st[0].id === 'c' && st[0].not === 3, 'stuck on Sunday: only the last checked week counts, two or more “Not yet”');
 const mjs = fs.readFileSync('public/mentor/mentor.js', 'utf8');
 ok(/briefPanel\(d\.work, C\)/.test(mjs) && /stuckHTML\(\)/.test(mjs) && /id="printbrief"/.test(mjs), 'the brief sits on each founder’s page, printable; the stuck list on Today');
+// ── The Launchpad plan online (option B) ─────────────────────────────────
+ok(Object.entries(LP.LP_PARTS).every(([d, parts]) => parts.length === LP.ACTIONS[d].length && parts.every((k) => V.BLUEPRINT4.some((b) => b.k === k))), 'every Launchpad action writes one part of the Blueprint');
+const keyOk = (k) => /^w\.[\w.:-]{1,80}$/.test(k);
+ok(Object.keys(LP.ACTIONS).every((d) => LP.ACTIONS[d].every((_, i) => keyOk(LP.lpKey(d, i, 12)) && keyOk(LP.lpKey(d, i, 'done')))), 'Launchpad blanks save as worksheet cells the account already accepts (no new table)');
+const lv = { [LP.lpKey('work', 1, 1)]: '6,200', [LP.lpKey('work', 1, 2)]: '<b>' };
+ok(LP.linesWith('work', 1, lv)[0].includes('In: $6,200') && LP.linesWith('work', 1, {})[0].includes('____'), 'the PDF carries their words, and keeps the lines where nothing is written');
+ok(!LP.linesHTML('work', 1, lv).join('').includes('<b>') && LP.launchpadFor('money', lv).length === 1 && LP.launchpadFor('money', {}).length === 0, 'their words escaped; the Blueprint shows only what they wrote');
+ok(/view === 'launchpad' \? launchpadOnlineHTML/.test(app) && /input\[data-lp\]/.test(app) && /values: state\.work/.test(app) && /launchpadFor\(S\.k, w\)/.test(app), 'the plan online saves like any answer, and fills the PDF and the Blueprint');
+ok(/'#launchpad'\) return 'launchpad'/.test(fs.readFileSync('public/home.js', 'utf8')) && /data-go="launchpad"/.test(fs.readFileSync('public/launchpad-plan.js', 'utf8')), '#launchpad opens it, and the Base Camp card links to it');
 done();

@@ -17,7 +17,7 @@ import { cabinetHTML, cabinetShown, cabinetHidden, cabinetClick, dashboardShown,
 import { result as fwResult } from './frameworks.js';
 import { report } from './feedback.js';
 import * as account from './account.js';
-import { launchpadCardHTML, downloadLaunchpadPlan } from './launchpad-plan.js';
+import { launchpadCardHTML, downloadLaunchpadPlan, launchpadOnlineHTML, launchpadFor } from './launchpad-plan.js';
 import { slot as googleSlot } from './google.js';
 import { videoBlock } from './video-talk.js';
 import * as M from './music.js';
@@ -554,7 +554,7 @@ document.addEventListener('pointerdown', (e) => {
   askAccount(() => { const x = document.getElementById(v.id); if (x) x.focus(); });
 }, true);
 document.addEventListener('focusin', (e) => {
-  const v = e.target && e.target.closest && e.target.closest('input[data-v4s], input[data-v4f], input[data-v4u]');
+  const v = e.target && e.target.closest && e.target.closest('input[data-v4s], input[data-v4f], input[data-v4u], input[data-lp]');
   if (!v || !needsAccount()) return;
   v.blur();
   askAccount(() => { const x = document.getElementById(v.id); if (x) x.focus(); });
@@ -996,6 +996,8 @@ function blueprintView() {
       <h2 id="bph-${S.k}">${esc(S.n)}</h2><p class="bp-about">${esc(S.about)}</p>
       ${S.builds.map((bd) => bd.started ? `<article class="bp-build"><p class="bp-src">Built after Level ${pad(bd.lv)}</p><h3>${esc(bd.title)}</h3>
         <dl>${bd.page.map(([label, html]) => `<dt>${esc(label)}</dt><dd>${html}</dd>`).join('')}</dl></article>` : '').join('')}
+      ${launchpadFor(S.k, w).map((a) => `<article class="bp-it bp-lp"><p class="bp-src">Launchpad plan${a.done ? ` · done ${esc(a.done)}` : ''}</p><h3>${esc(a.title)}</h3>
+        <div class="bp-take"><ol>${a.lines.map((l) => `<li>${l}</li>`).join('')}</ol></div></article>`).join('')}
       ${S.items.map((it) => `<article class="bp-it${it.started ? '' : ' empty'}" style="--c:var(--${DOMS[it.d]})">
         <p class="bp-src">Level ${pad(it.lv)} · ${esc(it.word)} · ${esc(it.name)}</p>
         <h3>${esc(it.topic)}</h3>
@@ -1167,6 +1169,7 @@ function render() {
     : view === 'home' ? homeView()
     : view === 'library' ? libraryView()
     : view === 'blueprint' ? blueprintView()
+    : view === 'launchpad' ? launchpadOnlineHTML({ values: state.work, thin: (state.me && state.me.thin) || '' })
     : view === 'ask' ? askView()
     : view === 'signin' ? signinView()
     : '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="status">One moment…</p></div></section>';
@@ -1177,7 +1180,7 @@ function render() {
   M.setCandles(view === 'work' ? answered(st, level, dom) : -1);
   if (view === 'work') document.body.classList.toggle('cw-shut', !writable(st));
 }
-const DASHBOARD = ['home', 'work', 'library', 'ask', 'blueprint'];
+const DASHBOARD = ['home', 'work', 'library', 'ask', 'blueprint', 'launchpad'];
 
 /** A new domain or level: redraw the book and what sits under it, so the
  *  page does not jump and the drawer of levels keeps its scroll. */
@@ -1200,7 +1203,7 @@ document.addEventListener('click', (e) => {
   // The Launchpad Action Plan (31 Oct): twenty actions, five per domain, as a PDF.
   if (b.hasAttribute('data-lpp')) {
     const full = (state.me && state.me.name) || '';
-    downloadLaunchpadPlan(b, { first: full.split(' ')[0] || '', full, stage: (STAGES[state.stage || 'build'] || {}).n || '', thin: (state.me && state.me.thin) || '' });
+    downloadLaunchpadPlan(b, { first: full.split(' ')[0] || '', full, stage: (STAGES[state.stage || 'build'] || {}).n || '', thin: (state.me && state.me.thin) || '', values: state.work });
     return;
   }
   if (b.id === 'crownb') { if (crownSwallow) { crownSwallow = false; return; } crownOpen(!document.body.classList.contains('crownopen')); return; }
@@ -1216,6 +1219,14 @@ document.addEventListener('click', (e) => {
   }
   if (b.dataset.qmove) { moveQ(+b.dataset.qmove); return; }
   if (b.hasAttribute('data-print')) { window.print(); return; }
+  if (b.dataset.lpdone) {
+    if (needsAccount()) { const k = b.dataset.lpdone; askAccount(() => { const x = document.querySelector(`[data-lpdone="${k}"]`); if (x) x.click(); }); return; }
+    const on = !state.work[b.dataset.lpdone], v = on ? new Date().toISOString().slice(0, 10) : '';
+    state.work[b.dataset.lpdone] = v; save(); account.touch('work', b.dataset.lpdone, v);
+    b.setAttribute('aria-pressed', String(on)); b.textContent = on ? 'Done ✓' : 'Mark it done';
+    const li = b.closest('.lpo-a'); if (li) li.classList.toggle('on', on);
+    return;
+  }
   if (b.dataset.qd) { qi = steps().findIndex((x) => x[0] === +b.dataset.qd && x[1] === 'tap'); document.body.classList.remove('stepsopen'); drawBook(); return; }
   // Every answer waits for a complete account first (the account box), then lands.
   const ans = ['v4t', 'got', 'v4day', 'carry'].find((k) => b.dataset[k] != null);
@@ -1341,6 +1352,14 @@ document.addEventListener('click', (e) => {
     render(); window.scrollTo({ top: 0, behavior: 'instant' }); return;
   }
   if (b.dataset.dom) { dom = b.dataset.dom; qi = null; redrawModule(); return; }
+});
+
+/* The Launchpad plan online: Enter goes to the next blank. */
+document.addEventListener('keydown', (e) => {
+  if (view !== 'launchpad' || e.key !== 'Enter' || !e.target.matches || !e.target.matches('input[data-lp]')) return;
+  e.preventDefault();
+  const all = [...document.querySelectorAll('input[data-lp]')], i = all.indexOf(e.target);
+  if (all[i + 1]) all[i + 1].focus();
 });
 
 /* The keys of the notebook. Enter: the next question (Shift + Enter, a new
@@ -1484,6 +1503,15 @@ document.addEventListener('change', (e) => {
 });
 
 document.addEventListener('input', (e) => {
+  // The Launchpad plan, online: each blank saves as the founder types.
+  const lp = e.target.closest('input[data-lp]');
+  if (lp) {
+    state.work[lp.dataset.lp] = lp.value;
+    save();
+    account.touch('work', lp.dataset.lp, lp.value);
+    lp.size = Math.max(6, Math.min(28, lp.value.length + 2));
+    return;
+  }
   const w = e.target.closest('input[data-w]');
   if (w) {
     state.work[w.dataset.w] = w.value;
