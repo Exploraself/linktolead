@@ -1,15 +1,15 @@
-# The Founder’s Blueprint · Options, ready to approve
+# The Founder’s Blueprint · Options, all built
 
-*Prepared 1 Nov 2026 for Alexandru. Nothing here is built. Each option is written out in full, so it can be built the day you say yes. Reply with the letters you want (for example “D3 yes, D5 no, LP yes, C yes”).*
+*Prepared 1 Nov 2026 for Alexandru. **All six are now built** (https://github.com/Exploraself/linktolead/pull/109), after “produce all of it”. This page stays as the record of what each one changed. One change since: the page after Level 12 says twelve weeks, not ninety days (D5).*
 
-| | What it is | Where it would change | My recommendation |
+| | What it is | Where it changed | Status |
 | --- | --- | --- | --- |
-| **LP** | The seven Launchpad actions that repeat a level become counts | `public/launchpad-plan.js` (the PDF) | Yes |
-| **B** | Save the Launchpad plan online, so its numbers and process fill the Blueprint | a small table, a page like the Growth Plan | Yes, after LP |
-| **C** | One “build it” screen after each chapter reading | `public/levels-v4.js`, the programme | Yes |
-| **D** | The Growth Plan words as a ninth part of the Blueprint | My Blueprint page | Later |
-| **D3** | One weekly review length: ten minutes everywhere | Level 09 text, Launchpad PDF | Yes |
-| **D5** | One horizon: twelve weeks everywhere, not 90 days | Level 12 text | Yes |
+| **LP** | The seven Launchpad actions that repeat a level become counts | `public/launchpad-plan.js` (the PDF) | Built |
+| **B** | Save the Launchpad plan online, so its numbers and process fill the Blueprint | `public/launchpad-plan.js`, saved like the worksheets (no new table) | Built |
+| **C** | One “build it” screen after each chapter reading | `public/levels-v4.js`, the programme | Built |
+| **D** | The Growth Plan words as a ninth part of the Blueprint | My Blueprint page | Built |
+| **D3** | One weekly review length: ten minutes everywhere | Level 09 text, Launchpad PDF | Built |
+| **D5** | One horizon: twelve weeks everywhere, not 90 days | Level 12 text | Built |
 
 ---
 
@@ -87,7 +87,7 @@ Today the twenty actions are a PDF. Online (like the Growth Plan, for full accou
 | Your people | Who carries the business (the map), and the counts above |
 | Your sales | Your conversations, counted on three Fridays |
 
-Cost: one table (`launchpad_word`, like `growth_word`), one API, the plan drawn as fields. About the size of the Growth Plan online work.
+Built without the table: each blank saves as a worksheet cell (`w.lp.*`), which the account already accepts, so there is no new table and no new API.
 
 ---
 

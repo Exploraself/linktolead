@@ -46,7 +46,7 @@ Use as a list with ticks. All eight are real parts of “My Blueprint”, built 
 >
 > Levels 04 to 12 open step by step, with 1:1 sessions with Alexandru and the team. Before each session they read what you wrote, so the hour starts where you are.
 
-*Keep the number of sessions and the prices exactly as the ladder in `public/content.js` says until decision D1 (how many sessions) is made.*
+*Sessions: three in all, as the ladder in `public/content.js` sells them (decision D1, applied 1 Nov). Keep the prices exactly as the ladder says.*
 
 ---
 
