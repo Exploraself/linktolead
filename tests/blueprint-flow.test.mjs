@@ -130,11 +130,12 @@ ok(!/Say one expectation|Give one thing away|Make three asks|Say your offer in o
 ok(/function innerSide\(\)/.test(app) && /\/northstar\/growth-plan\.js/.test(app) && /id="bp-inner"/.test(app), 'the inner side: the Growth Plan as a ninth part, for those who wrote in it');
 // ── For Alexandru and the team: the session brief, and who is stuck ───────
 const D = await import('../public/mentor/dash.js');
-ok(V.SESSIONS4.length === 2 && V.SESSIONS4[0].levels.join() === '1,2,3' && V.SESSIONS4[1].levels.join() === '5,6,7,8,9', 'two sessions, each reading the levels before it');
+ok(V.SESSIONS4.length === 3 && V.SESSIONS4.map((x) => x.after).join() === '3,9,12' && V.SESSIONS4[0].levels.join() === '1,2,3' && V.SESSIONS4[1].levels.join() === '5,6,7,8,9' && V.SESSIONS4[2].levels.join() === '9,10,11,12', 'three sessions, as the ladder sells them, each reading the levels before it');
 const bw1 = {}; L.slice(0, 3).forEach((x) => x.d.forEach((D2, d) => { V.fieldsOf(D2).forEach((f) => { bw1[V.wkey(x.n, d, f[0])] = f[2]; }); bw1[V.wkey(x.n, d, 'got')] = String(d % 3); bw1[V.wkey(x.n, d, 'sure')] = '80'; }));
 const br = V.briefOf(bw1);
 ok(br.session.n === 1 && br.reached === 3 && br.actions.length === 12 && br.tally.n === 12 && br.ask.length === 3 && br.ask.every((a) => a.got === 2), 'Session 1 brief: twelve promises, Sunday’s answers, the three “Not yet” to ask about');
-ok(V.briefOf({ ...bw1, [V.wkey(6, 0, 'about')]: 'deadlines' }).session.n === 2 && V.briefOf({}).reached === 0, 'past Level 05 the brief turns to Session 2; nothing written, no brief');
+ok(V.briefOf({ ...bw1, [V.wkey(6, 0, 'about')]: 'deadlines' }).session.n === 2 && V.briefOf({ ...bw1, [V.wkey(10, 0, 'say')]: 'hello' }).session.n === 3 && V.briefOf({}).reached === 0, 'past Level 05 the brief turns to Session 2, past Level 09 to Session 3; nothing written, no brief');
+ok(/function sessionCard\(lv\)/.test(app) && /sessionCard\(level\)/.test(app) && /Book Session \$\{S\.n\}/.test(app), 'each session is offered where it comes up: end of Level 03, after the readings of 09 and 12');
 const rows = [[1, 0, 2], [1, 1, 2], [1, 2, 0], [2, 0, 0]].map(([lv, d, g]) => ({ student_id: 'a', name: 'Ana', key: V.wkey(lv, d, 'got'), value: String(g) }))
   .concat([[1, 0, 2], [1, 1, 0]].map(([lv, d, g]) => ({ student_id: 'b', name: 'Bo', key: V.wkey(lv, d, 'got'), value: String(g) })))
   .concat([[3, 0, 2], [3, 1, 2], [3, 2, 2]].map(([lv, d, g]) => ({ student_id: 'c', name: 'Cy', key: V.wkey(lv, d, 'got'), value: String(g) })));

@@ -931,8 +931,10 @@ export function buildPage(work, lv) {
   return out;
 }
 
-/* ── The two 1:1 sessions, and the brief for Alexandru and the team ───────
- * Session 1 opens Level 04; Session 2 follows the Chapter II reading. The
+/* ── The 1:1 sessions, and the brief for Alexandru and the team ───────────
+ * Three, as the ladder sells them (content.js: The Boardroom one, the LAB
+ * two, the HUB three in total). Session 1 opens Level 04; Session 2 follows
+ * the Chapter II reading; Session 3 follows the Chapter III reading. The
  * brief is built only from the founder's own answers (rule 6): what they
  * promised, what happened on Sunday, how good their estimates were. */
 export const SESSIONS4 = [
@@ -955,6 +957,16 @@ export const SESSIONS4 = [
     ],
     show: [[8, 3, 'Their offer in one line'], [8, 2, 'Their three levels'], [7, 2, 'Their price floor'], [9, 3, 'Their warm list'], [9, 2, 'Their cash page'], [9, 1, 'Who owns what']],
     done: 'ten names are chosen for Level 10, and a first draft of the twelve-week number is written.' },
+  { n: 3, at: 'After the Chapter III reading (end of Level 12)', after: 12, name: 'The next twelve weeks', levels: [9, 10, 11, 12],
+    bring: 'The Chapter III reading, your twelve-week page, your market test and your Blueprint.',
+    agenda: [
+      'Read the twelve weeks together: what you did, how good your estimates became, where you began and where you stand now.',
+      'Read your Blueprint part by part, and mark the one part to strengthen next.',
+      'Set the next twelve-week number and its first checkpoint, from your twelve-week page.',
+      'Choose how you keep going: on your own with the Planner, or with Alexandru and the team.',
+    ],
+    show: [[12, 0, 'Who they are now'], [12, 2, 'Their number'], [12, 3, 'Their market test'], [11, 2, 'Their advantage'], [10, 2, 'Their best client']],
+    done: 'the next twelve-week number and its first checkpoint are in your Planner, and you know how you keep going.' },
 ];
 /** The furthest level a founder has written in (0 when none). */
 export function reachedOf(work) {
@@ -965,7 +977,7 @@ export function reachedOf(work) {
 /** The brief for the next session: its agenda, and the founder's record
  *  over the levels it reads. Nothing is guessed: a missing answer stays out. */
 export function briefOf(work) {
-  const reached = reachedOf(work), S = SESSIONS4[reached >= 5 ? 1 : 0];
+  const reached = reachedOf(work), S = SESSIONS4[reached >= 10 ? 2 : reached >= 5 ? 1 : 0];
   const actions = S.levels.flatMap((lv) => [0, 1, 2, 3].map((d) => ({ lv, d, name: LEVELS4[lv - 1].d[d].name, line: fill(LEVELS4[lv - 1].d[d].fb[3], work, lv, d),
     written: fieldsOf(LEVELS4[lv - 1].d[d]).some(([k]) => raw(work, lv, d, k).trim()), got: gotOf(work, lv, d), sure: sureOf(work, lv, d), notyet: notyetOf(work, lv, d) })))
     .filter((a) => a.written);
