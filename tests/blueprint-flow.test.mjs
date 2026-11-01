@@ -128,4 +128,18 @@ ok(lpt.length === 20 && ['Count your clear asks', 'Count what came back', 'Count
 ok([1, 2, 3].map((n) => lpt.filter((a) => a.w === n).length).join() === '8,8,4', 'the Launchpad keeps its three weeks: 8, 8 and 4');
 ok(!/Say one expectation|Give one thing away|Make three asks|Say your offer in one sentence/.test(fs.readFileSync('public/launchpad-plan.js', 'utf8')) && /Every Sunday, ten minutes/.test(fs.readFileSync('public/launchpad-plan.js', 'utf8')), 'no Launchpad action repeats a level; Sunday is ten minutes');
 ok(/function innerSide\(\)/.test(app) && /\/northstar\/growth-plan\.js/.test(app) && /id="bp-inner"/.test(app), 'the inner side: the Growth Plan as a ninth part, for those who wrote in it');
+// ── For Alexandru and the team: the session brief, and who is stuck ───────
+const D = await import('../public/mentor/dash.js');
+ok(V.SESSIONS4.length === 2 && V.SESSIONS4[0].levels.join() === '1,2,3' && V.SESSIONS4[1].levels.join() === '5,6,7,8,9', 'two sessions, each reading the levels before it');
+const bw1 = {}; L.slice(0, 3).forEach((x) => x.d.forEach((D2, d) => { V.fieldsOf(D2).forEach((f) => { bw1[V.wkey(x.n, d, f[0])] = f[2]; }); bw1[V.wkey(x.n, d, 'got')] = String(d % 3); bw1[V.wkey(x.n, d, 'sure')] = '80'; }));
+const br = V.briefOf(bw1);
+ok(br.session.n === 1 && br.reached === 3 && br.actions.length === 12 && br.tally.n === 12 && br.ask.length === 3 && br.ask.every((a) => a.got === 2), 'Session 1 brief: twelve promises, Sunday’s answers, the three “Not yet” to ask about');
+ok(V.briefOf({ ...bw1, [V.wkey(6, 0, 'about')]: 'deadlines' }).session.n === 2 && V.briefOf({}).reached === 0, 'past Level 05 the brief turns to Session 2; nothing written, no brief');
+const rows = [[1, 0, 2], [1, 1, 2], [1, 2, 0], [2, 0, 0]].map(([lv, d, g]) => ({ student_id: 'a', name: 'Ana', key: V.wkey(lv, d, 'got'), value: String(g) }))
+  .concat([[1, 0, 2], [1, 1, 0]].map(([lv, d, g]) => ({ student_id: 'b', name: 'Bo', key: V.wkey(lv, d, 'got'), value: String(g) })))
+  .concat([[3, 0, 2], [3, 1, 2], [3, 2, 2]].map(([lv, d, g]) => ({ student_id: 'c', name: 'Cy', key: V.wkey(lv, d, 'got'), value: String(g) })));
+const st = D.stuckOnSunday(rows);
+ok(st.length === 1 && st[0].id === 'c' && st[0].not === 3, 'stuck on Sunday: only the last checked week counts, two or more “Not yet”');
+const mjs = fs.readFileSync('public/mentor/mentor.js', 'utf8');
+ok(/briefPanel\(d\.work, C\)/.test(mjs) && /stuckHTML\(\)/.test(mjs) && /id="printbrief"/.test(mjs), 'the brief sits on each founder’s page, printable; the stuck list on Today');
 done();

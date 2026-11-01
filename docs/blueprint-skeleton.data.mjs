@@ -68,27 +68,9 @@ export const DOMAINS = [
   ['12.3', {  }],
 ];
 
-/** The two 1:1 sessions with Alexandru and the team. */
-export const SESSIONS = [
-  { n: 1, at: 'Opens Level 04, before its first screen', after: 3, name: 'Set the twelve weeks',
-    bring: 'The North Star result, the answers of Levels 01 to 03, and the Launchpad plan counts. Alexandru and the team read them before the call.',
-    agenda: [
-      'Read the first three weeks together: which actions were Done, Partly, Not yet.',
-      'Name the one domain that costs the business most right now.',
-      'Set one number for the twelve weeks, with a date. It goes into the Planner’s twelve-week contract (Growth Plan step 5).',
-      'Write the first if–then plan of Level 04 together.',
-    ],
-    done: 'the number and its date are in your Planner’s twelve-week contract, and your first if–then is written.' },
-  { n: 2, at: 'After the Chapter II reading (end of Level 09), before Level 10', after: 9, name: 'Open the market',
-    bring: 'The Chapter II reading, your offer line (Level 08), your three price levels and your warm list (Level 09).',
-    agenda: [
-      'Read the Chapter II reading together: what moved, what did not.',
-      'Say the offer line and the three prices out loud, and fix what stumbles.',
-      'Choose the first ten names from the warm list for Level 10.',
-      'Draft the 90-day number that Level 12 makes final.',
-    ],
-    done: 'ten names are chosen for Level 10, and a first draft of the 90-day number is written.' },
-];
+/** The two 1:1 sessions live with the levels now (SESSIONS4), so /mentor
+ *  can build the brief for each from the founder's answers. */
+export { SESSIONS4 as SESSIONS } from '../public/levels-v4.js';
 
 /** The three chapter readings: one screen each, in this order. */
 export const READING_SCREENS = [

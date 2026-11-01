@@ -930,3 +930,47 @@ export function buildPage(work, lv) {
   if (lv === 9) out.push(['A copy goes to', fillB('{who}', work, lv)]);
   return out;
 }
+
+/* ── The two 1:1 sessions, and the brief for Alexandru and the team ───────
+ * Session 1 opens Level 04; Session 2 follows the Chapter II reading. The
+ * brief is built only from the founder's own answers (rule 6): what they
+ * promised, what happened on Sunday, how good their estimates were. */
+export const SESSIONS4 = [
+  { n: 1, at: 'Opens Level 04, before its first screen', after: 3, name: 'Set the twelve weeks', levels: [1, 2, 3],
+    bring: 'The North Star result, the answers of Levels 01 to 03, and the Launchpad plan counts. Alexandru and the team read them before the call.',
+    agenda: [
+      'Read the first three weeks together: which actions were Done, Partly, Not yet.',
+      'Name the one domain that costs the business most right now.',
+      'Set one number for the twelve weeks, with a date. It goes into the Planner’s twelve-week contract (Growth Plan step 5).',
+      'Write the first if–then plan of Level 04 together.',
+    ],
+    done: 'the number and its date are in your Planner’s twelve-week contract, and your first if–then is written.' },
+  { n: 2, at: 'After the Chapter II reading (end of Level 09), before Level 10', after: 9, name: 'Open the market', levels: [5, 6, 7, 8, 9],
+    bring: 'The Chapter II reading, your offer line (Level 08), your three price levels and your warm list (Level 09).',
+    agenda: [
+      'Read the Chapter II reading together: what moved, what did not.',
+      'Say the offer line and the three prices out loud, and fix what stumbles.',
+      'Choose the first ten names from the warm list for Level 10.',
+      'Draft the twelve-week number that Level 12 makes final.',
+    ],
+    show: [[8, 3, 'Their offer in one line'], [8, 2, 'Their three levels'], [7, 2, 'Their price floor'], [9, 3, 'Their warm list'], [9, 2, 'Their cash page'], [9, 1, 'Who owns what']],
+    done: 'ten names are chosen for Level 10, and a first draft of the twelve-week number is written.' },
+];
+/** The furthest level a founder has written in (0 when none). */
+export function reachedOf(work) {
+  let top = 0;
+  for (const k of Object.keys(work || {})) { const m = /^w\.v4\.(\d{1,2})\.[0-3]\./.exec(k); if (m && String(work[k]).trim()) top = Math.max(top, Number(m[1])); }
+  return top;
+}
+/** The brief for the next session: its agenda, and the founder's record
+ *  over the levels it reads. Nothing is guessed: a missing answer stays out. */
+export function briefOf(work) {
+  const reached = reachedOf(work), S = SESSIONS4[reached >= 5 ? 1 : 0];
+  const actions = S.levels.flatMap((lv) => [0, 1, 2, 3].map((d) => ({ lv, d, name: LEVELS4[lv - 1].d[d].name, line: fill(LEVELS4[lv - 1].d[d].fb[3], work, lv, d),
+    written: fieldsOf(LEVELS4[lv - 1].d[d]).some(([k]) => raw(work, lv, d, k).trim()), got: gotOf(work, lv, d), sure: sureOf(work, lv, d), notyet: notyetOf(work, lv, d) })))
+    .filter((a) => a.written);
+  const t = tally(work, S.levels);
+  const ask = actions.filter((a) => a.got === 2).concat(actions.filter((a) => a.got === 1)).slice(0, 3);
+  const show = (S.show || []).map(([lv, d, label]) => ({ label, html: sentence(work, lv, d), written: fieldsOf(LEVELS4[lv - 1].d[d]).some(([k]) => raw(work, lv, d, k).trim()) })).filter((x) => x.written);
+  return { session: S, reached, actions, tally: t, ask, show };
+}

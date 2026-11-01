@@ -72,6 +72,8 @@ main{max-width:1280px;margin:0 auto;padding:20px 22px 40px}
 .g:hover{background:var(--soft)}
 .row2{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;align-items:start}
 @media (max-width:900px){.row2{grid-template-columns:1fr}}
+/* The session brief prints on its own. */
+@media print{body *{visibility:hidden}.brief,.brief *{visibility:visible}.brief{position:absolute;left:0;top:0;width:100%;border:0}#printbrief{display:none}}
 
 /* Needs you today */
 .needs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}

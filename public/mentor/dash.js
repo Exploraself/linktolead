@@ -327,3 +327,25 @@ export function growthWritten(plan, done, words) {
   if (plan.plus) { const p = step(plan.plus); if (p.at || p.any) out.push({ name: plan.plus.move, col: '', steps: [p] }); }
   return out.filter((g) => g.steps.length).map((g) => ({ ...g, steps: g.steps.map(({ any, ...x }) => x) }));
 }
+
+/** Stuck on Sunday: founders whose last checked week had two or more actions
+ *  "Not yet". rows: worksheet rows { student_id, key, value, name, email }
+ *  (keys w.v4.<level>.<domain>.got = 0 Done, 1 Partly, 2 Not yet). Read only
+ *  from their own Sunday answers; nobody is guessed in. Most "Not yet" first. */
+export function stuckOnSunday(rows, limit = 12) {
+  const by = new Map();
+  for (const r of rows || []) {
+    const m = /^w\.v4\.(\d{1,2})\.([0-3])\.got$/.exec(String((r && r.key) || ''));
+    if (!m || !/^[0-2]$/.test(String(r.value))) continue;
+    const p = by.get(r.student_id) || { id: r.student_id, name: r.name || '', email: r.email || '', levels: {} };
+    (p.levels[m[1]] = p.levels[m[1]] || {})[m[2]] = Number(r.value);
+    by.set(r.student_id, p);
+  }
+  const out = [];
+  for (const p of by.values()) {
+    const lv = Math.max(...Object.keys(p.levels).map(Number)), g = Object.values(p.levels[lv]);
+    const not = g.filter((x) => x === 2).length, part = g.filter((x) => x === 1).length, done = g.filter((x) => x === 0).length;
+    if (not >= 2) out.push({ id: p.id, name: p.name, email: p.email, lv, not, part, done, notDomains: Object.entries(p.levels[lv]).filter(([, x]) => x === 2).map(([d]) => Number(d)) });
+  }
+  return out.sort((a, b) => b.not - a.not || b.lv - a.lv).slice(0, limit);
+}

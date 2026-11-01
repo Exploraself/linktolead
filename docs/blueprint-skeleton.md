@@ -1455,9 +1455,9 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
 1. Read the Chapter II reading together: what moved, what did not.
 2. Say the offer line and the three prices out loud, and fix what stumbles.
 3. Choose the first ten names from the warm list for Level 10.
-4. Draft the 90-day number that Level 12 makes final.
+4. Draft the twelve-week number that Level 12 makes final.
 
-**Done when:** ten names are chosen for Level 10, and a first draft of the 90-day number is written.
+**Done when:** ten names are chosen for Level 10, and a first draft of the twelve-week number is written.
 
 ## Chapter III · The Open Market
 
