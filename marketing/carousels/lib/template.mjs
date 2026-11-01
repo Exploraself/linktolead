@@ -11,7 +11,7 @@ export const BRAND = { name: 'Alexandru Cojocari', role: 'Leadership mentor · E
 
 export const CTAS = {
   unshakeable: { action: 'Take the Unshakeable assessment', url: 'exploraself.com/unshakeable', line: 'See how steady you stay when the pressure comes, and where to start building.' },
-  northstar: { action: 'Take the free North Star', url: 'linktolead.exploraself.com/north1', line: 'See which of the four domains needs you first.' },
+  northstar: { action: 'Take The Leader’s North Star', url: 'linktolead.exploraself.com/northstar', line: 'Free. Eight plain questions, about ten minutes. See which of the four domains needs you first.' },
 };
 
 export const W = 1080, H = 1350;
@@ -125,10 +125,10 @@ h2.t.sm{font-size:68px}
 .cta .q{font:500 70px/1.1 Newsreader,serif;font-style:italic;color:var(--ink)}
 .cta .q .acc{color:var(--gold)}
 .mecard{display:grid;grid-template-columns:330px 1fr;gap:40px;align-items:center;padding:34px;border:2px solid var(--line);border-radius:28px;background:var(--card)}
-.mecard img{width:330px;height:380px;object-fit:cover;object-position:52% 18%;border-radius:18px;display:block}
+.mecard img{width:330px;height:420px;object-fit:cover;object-position:52% 18%;border-radius:18px;display:block}
 .mecard h4{font:700 50px/1.05 Newsreader,serif}
 .mecard .role{font:500 25px/1.3 Inter;color:var(--mute);margin-top:10px;letter-spacing:.02em}
-.mecard .act{margin-top:30px;display:inline-block;background:var(--gold);color:#1A130A;font:700 30px/1.25 Inter;padding:22px 28px;border-radius:16px}
+.mecard .act{margin-top:30px;display:inline-block;background:var(--gold);color:#1A130A;font:700 28px/1.25 Inter;padding:20px 26px;border-radius:16px}
 .mecard .url{font:600 27px/1.2 Inter;color:var(--gold);margin-top:18px}
 .mecard .why{font:400 26px/1.4 Inter;color:var(--soft);margin-top:14px}
 .save{display:flex;align-items:center;gap:26px;margin-top:auto}
@@ -205,7 +205,7 @@ const T = {
       <div class="q fit-h" data-min="48">${md(s.question)}</div>
       <div class="mecard"><img src="${photo}" alt="${esc(BRAND.name)}"><div>
         <h4>${esc(BRAND.name)}</h4><div class="role">${esc(BRAND.role)}</div>
-        <div class="act">${esc(C.action)} →</div><div class="url">${esc(C.url)}</div><div class="why">${esc(C.line)}</div></div></div>
+        <div class="act">${esc(C.action)}&nbsp;→</div><div class="url">${esc(C.url)}</div><div class="why">${esc(C.line)}</div></div></div>
       <div class="save">${bookmark}<p>${md(s.save || 'Save it for *Monday*. Send it to one founder who needs it.')}</p></div></div>`;
   },
 };

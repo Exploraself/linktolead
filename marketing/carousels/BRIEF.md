@@ -5,7 +5,7 @@ Read this whole page, then read `data/c01-ai-multiplies.mjs`, `data/c02-checklis
 ## Who it is for, and what it says
 
 - **Voice:** Alexandru Cojocari, leadership mentor and coach (business and life), speaking in the first person (“I”) or to the reader (“you”). UK English. Short sentences someone could say on camera. Direct, warm, clear. Never “he/him” about Alexandru; if a third person is needed, “Alexandru and the team”.
-- **Audience:** early-stage founders and ambitious people who feel called to more but lack direction or confidence.
+- **Audience:** founders and business owners in the USA, under $1M (“the missing middle”), who feel called to more but lack direction or confidence. Money in examples is in **$**, never €. Spelling stays UK English (the brand voice).
 - **Core message, in a new form each time:** *AI multiplies what you do. Leadership decides what is worth doing.* Results = Direction × Execution. Never anti-AI: Alexandru uses AI every day to build ExploraSelf, and speaks as a builder who knows where AI stops. Pattern: concede what AI (or the tool, or the spreadsheet) does well, then turn to what it cannot do.
 - **Arguments bank** (one per carousel): scarcity (same tools for everyone, so the person becomes the advantage) · direction (AI answers the question you ask; leadership decides which question matters) · responsibility (AI suggests; only a person chooses and carries the consequence) · confidence (information never made anyone brave; kept promises do) · trust (in infinite content, people follow the person they trust).
 - **Name the feeling before the argument.** Pain: productive but lost; others moving faster; knowing but not doing; “if AI can do my job, what am I worth?”. Desire: be the one people look to; build something with your name on it that serves people; the peace of a clear direction; confidence from evidence.
@@ -20,7 +20,7 @@ Read this whole page, then read `data/c01-ai-multiplies.mjs`, `data/c02-checklis
 - “Unbalance for the balance”. Lesson: choose a season of focus and own the trade-off.
 - Building ExploraSelf with AI tools. Lesson: he knows what AI cannot do.
 
-The one quote of his you may use (quote card): “I believe each of us has been given talents, and that we are meant to multiply them, not bury them.” No other quotes, from anyone. History is told in your own words, never as a quotation.
+**No quotes at all**, from Alexandru or anyone else: Alexandru has not picked his quotes yet. History is told in your own words, never as a quotation.
 
 ## Rules that are never broken
 
@@ -28,8 +28,9 @@ The one quote of his you may use (quote card): “I believe each of us has been 
 2. **History is exact or absent.** Use only the facts listed for your carousel. Add every fact and every sum to `facts` with where to check it. If unsure of a detail, leave it out.
 3. **A practical step names what to open, count and write.** “Open last week’s calendar and write the three activities that took the most hours” is a step. “Reflect on your time” is not.
 4. **Numbers serve judgement.** Every number points at a decision a person has to own. Say plainly when a machine could do the sum; then move the reader to the part only they can do.
-5. **Calls to action:** `cta: 'unshakeable'` (the Unshakeable assessment, paid: never call it free) or `cta: 'northstar'` (the North Star, free). The slide is built for you; you only write the question.
-6. No emoji. No hashtags on slides. No framework or tool names from Alexandru’s books. No New Age language.
+5. **Calls to action:** `cta: 'unshakeable'` (the Unshakeable assessment, paid: never call it free) or `cta: 'northstar'` (The Leader’s North Star, free). The slide is built for you; you only write the question.
+6. No emoji. No hashtags on slides. No framework, law or concept names (never “Pareto principle”, “Parkinson’s law”, “survivorship bias”), no framework or tool names from Alexandru’s books, no business-author name-dropping. Historical people are fine as the characters of a story. No New Age language.
+7. **Names are final:** “The Leader’s North Star” and “The Founder’s Blueprint”; never “compass” as a product name; no programme level numbers on slides (talk about what the founder gets, not levels).
 
 ## The ten slides (fixed)
 
@@ -65,7 +66,7 @@ The one quote of his you may use (quote card): “I believe each of us has been 
 - `doc`: `head`, `meta`, `rows: [['label', 'value'], ['label', 'value', 'total']]`, optional `stamp` (≤ 20)
 - `note`: `text` (≤ 120), `sign`
 - `list`: `head`, `meta`, `items: [{ t, done, v }]` (`v: ''` draws a blank to fill)
-- `quote`: `text`, `who` (only the one quote above)
+- `quote`: not used until Alexandru picks his quotes
 - `art`: `art` (a name below), `fig`, `caption`
 - `receipt`: `head`, `meta`, `value`, `unit`, `rows: [['label', 'value']]`
 

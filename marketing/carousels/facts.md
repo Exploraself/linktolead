@@ -22,9 +22,9 @@ Every historical fact and number used in the carousels, with where to check it. 
 
 ## c03 · 10% off = 50% more work
 
-- Example: price €1,000, costs €700, left €300 (30% margin). With 10% off: €900 − €700 = €200 left, a third less.  
+- Example: price $1,000, costs $700, left $300 (30% margin). With 10% off: $900 − $700 = $200 left, a third less.  
   *Check:* Arithmetic, illustrative numbers.
-- To keep €3,000: 10 sales at €300, or 15 sales at €200 (50% more).  
+- To keep $3,000: 10 sales at $300, or 15 sales at $200 (50% more).  
   *Check:* Arithmetic: 3,000 ÷ 300 = 10; 3,000 ÷ 200 = 15.
-- Sales needed for €3,000 at a 30% margin: no discount 10; 5% off 12; 10% off 15; 15% off 20; 20% off 30.  
+- Sales needed for $3,000 at a 30% margin: no discount 10; 5% off 12; 10% off 15; 15% off 20; 20% off 30.  
   *Check:* Arithmetic: 3,000 ÷ (300, 250, 200, 150, 100).

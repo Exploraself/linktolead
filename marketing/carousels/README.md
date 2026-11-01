@@ -29,4 +29,4 @@ Builds `marketing/carousels/out/gallery/`: one page with every carousel, its cap
 
 1. Read `facts.md`. Every historical fact has a source to check; every sum is shown.
 2. The footer shows “Alexandru Cojocari”. To show the Instagram handle instead, change `BRAND` in `lib/template.mjs`.
-3. The call to action is one of two, set per carousel: the Unshakeable assessment (`exploraself.com/unshakeable`, paid, never called free) or the free North Star (`linktolead.exploraself.com/north1`).
+3. The call to action is one of two, set per carousel: the Unshakeable assessment (`exploraself.com/unshakeable`, paid, never called free) or the free North Star (`linktolead.exploraself.com/northstar`).
