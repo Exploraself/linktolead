@@ -21,8 +21,9 @@ import { launchpadCardHTML, downloadLaunchpadPlan } from './launchpad-plan.js';
 import { slot as googleSlot } from './google.js';
 import { videoBlock } from './video-talk.js';
 import * as M from './music.js';
-import { LEVELS4, CHAPTERS4, DOMS, UNITS, STEPS4, CLOSES, wkey, tapOf, slideOf, wordOf, shown, domainUnits, levelUnits,
-  firstStep, lines4, sentence, reading, fieldsOf } from './levels-v4.js';
+import { LEVELS4, CHAPTERS4, DOMS, UNITS, CLOSES, wkey, tapOf, slideOf, wordOf, shown, domainUnits, levelUnits,
+  lines4, sentence, reading, fieldsOf, fill, stepsOf, stepDone, firstOf, planOf, plainOf, doneOf, takeOf, notyetOf,
+  sureOf, gotOf, GOT, tally, countedFor, READ_QUOTES, carriedFrom, blueprint } from './levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -404,6 +405,7 @@ function railHTML(st) {
       <p class="eyebrow">${esc(STAGES[st].n)}</p>
       <h2>Your Blueprint</h2>
       <p class="railsub">${esc(STAGES[st].blurb)}</p>
+      <button type="button" class="rbp" data-go="blueprint">Open my Blueprint: everything you have written →</button>
     </div>
     ${libIcons()}
     ${SECTIONS.map((sec) => {
@@ -447,17 +449,33 @@ function railHTML(st) {
 // else (the levels, the library, the music, Focus, the light, Ask Alexandru,
 // a 1:1) waits in the Crown at the bottom of the screen.
 const pad = (n) => String(n).padStart(2, '0');
-/** The move on the right page: an index into STEPS4, or STEPS4.length for
- *  the chapter reading. null: where the founder left off, decided on drawing. */
+/** The screen on the right page: an index into stepsOf(level) (one field on
+ *  screen at a time). null: where the founder left off, decided on drawing. */
 let qi = null;
 /** Can the founder work in this level now? Owned and open. */
 function writable(st) {
   return holds(state.tier, gateFor(level)) && levelState(st, level) !== 'waiting' && !!LEVELS4[level - 1];
 }
-const stepAt = (i) => STEPS4[i] || [-1, 'reading'];
-/** A move is done enough to go on: a tap needs a choice. */
-const ready = (i) => { const [d, k] = stepAt(i); return k !== 'tap' || tapOf(state.work, level, d) != null; };
-const lastStep = () => (CLOSES[level] != null ? STEPS4.length : STEPS4.length - 1);
+const steps = () => stepsOf(level);
+const stepAt = (i) => steps()[i] || [-1, 'week'];
+/** A screen that asks for an answer needs one before Next; the slides keep
+ *  where they start, and the screens that only show are always ready. */
+const ASKS = ['got', 'tap', 'blank', 'day', 'carry', 'carryday'];
+const ready = (i) => { const s = stepAt(i); return !ASKS.includes(s[1]) || stepDone(state.work, level, s); };
+const lastStep = () => steps().length - 1;
+/** The domain the North Star found weakest (0 to 3), or -1: it gets the
+ *  "Start here" mark, and its action is the week's one move. */
+function startHere() {
+  try {
+    const gp = compassRec && window.CompassEngine ? groundPlan(compassRec, window.CompassEngine, { STAGES, weekTitle: titleOf, promise: promise4 }) : null;
+    if (gp && gp.weakest) return DOMS.indexOf(gp.weakest.id);
+  } catch { /* no North Star yet */ }
+  return DOMS.indexOf((state.me && state.me.thin) || '');
+}
+const STAGE_NOTE = { build: 'building', grow: 'growing', scale: 'scaling' };
+const DAYS7 = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const SUREW = [[30, 'a long shot'], [60, 'maybe'], [80, 'likely'], [100, 'certain']];
+const sureWord = (v) => (SUREW.find(([m]) => v <= m) || SUREW[3])[1];
 /** Keep one answer: on this device first, then the account, in batches. */
 // ── One step before the first answer (31 Oct 2026, Alexandru) ──────────────
 // One universal rule, whatever sales page a founder came from: an account
@@ -488,22 +506,22 @@ function saidNote(msg) {
 }
 // The slider and the sentence: asked before the first move, not after.
 document.addEventListener('pointerdown', (e) => {
-  const v = e.target && e.target.closest && e.target.closest('input[data-v4s]');
+  const v = e.target && e.target.closest && e.target.closest('input[data-v4s], input[data-v4u]');
   if (!v || !needsAccount()) return;
   e.preventDefault();
   askAccount(() => { const x = document.getElementById(v.id); if (x) x.focus(); });
 }, true);
 document.addEventListener('focusin', (e) => {
-  const v = e.target && e.target.closest && e.target.closest('input[data-v4s], input[data-v4f]');
+  const v = e.target && e.target.closest && e.target.closest('input[data-v4s], input[data-v4f], input[data-v4u]');
   if (!v || !needsAccount()) return;
   v.blur();
   askAccount(() => { const x = document.getElementById(v.id); if (x) x.focus(); });
 });
 
-function keep4(d, k, v) {
+function keep4(d, k, v, lv = level) {
   // Safety net: a move that reached here some other way waits for the account too.
-  if (needsAccount()) { askAccount(() => keep4(d, k, v)); return; }
-  const key = wkey(level, d, k);
+  if (needsAccount()) { askAccount(() => keep4(d, k, v, lv)); return; }
+  const key = wkey(lv, d, k);
   state.work[key] = String(v);
   save();
   account.touch('work', key, String(v));
@@ -531,7 +549,7 @@ function bookHTML(st) {
       </div>`;
   }
   const open = !right;
-  if (open && (qi === null || qi > lastStep())) qi = firstStep(state.work, level);
+  if (open && (qi === null || qi > lastStep())) qi = firstOf(state.work, level);
   if (open) dom = DOMS[Math.max(0, stepAt(qi)[0])];
   return `<div class="book${open ? '' : ' shut'}">
     <aside class="leaf leaf-l" id="leafl" aria-label="Level ${pad(level)} and its four domains">${leftHTML(st, x, open)}</aside>
@@ -564,23 +582,73 @@ function leftHTML(st, x, open) {
     <ol class="cw-steps cw-doms4">${doms}</ol>
     <p class="cw-promise"><b>By Sunday.</b> ${esc(x.promise)}</p>
     ${CLOSES[level] != null ? `<p class="cw-chapnote">This level closes ${esc(CHAPTERS4[CLOSES[level]].name)}. Your chapter reading comes after it.</p>` : ''}
-    <p class="cw-more"><a href="#cw-video">▶ This level’s teaching</a>${all}</p>`;
+    <p class="cw-more"><a href="#cw-video">▶ This level’s teaching</a><button type="button" class="cw-all" data-go="blueprint">My Blueprint</button>${all}</p>`;
 }
 
-/** The right page: one move. */
+/** The right page: one field on screen (31 Oct 2026, the Blueprint
+ *  skeleton). Tap, slide, one blank at a time, the day as a tap, "Done when"
+ *  with how sure, four lines back; the week as four actions; last week's four
+ *  first; the chapter reading and one action carried forward. */
+const KIND = { got: 'Last week', tap: 'Tap', slide: 'Slide', blank: 'Write once', day: 'The day', done: 'Done when',
+  lines: 'Your four lines', week: 'Your week', reading: 'Chapter reading', carry: 'Carry one forward', carryday: 'Its day' };
+/** The sentence, with the blank being written lit and the rest as written so far. */
+function sentenceAt(w, lv, d, cur) {
+  return LEVELS4[lv - 1].d[d].f.map((p) => {
+    if (typeof p === 'string') return esc(p);
+    const v = (w[wkey(lv, d, p[0])] || '').trim();
+    return `<span class="cw-f${p[0] === cur ? ' on' : ''}${v ? ' has' : ''}" data-fk="${esc(p[0])}">${esc(v || p[1])}</span>`;
+  }).join('');
+}
+/** Seven days as taps, and a date for anything further. */
+function dayPick(d, key, v) {
+  return `<div class="cw-days" role="group" aria-labelledby="cwq">${DAYS7.map((n, k) => `<button type="button" class="cw-o cw-day" data-v4day="${n}" aria-pressed="${v === n}"><kbd aria-hidden="true">${k + 1}</kbd><span>${n.slice(0, 3)}</span></button>`).join('')}</div>
+    <label class="cw-bl" for="cwin">Or a date</label>
+    <input id="cwin" class="cw-in cw-date" data-v4f="${d}.${key}" value="${esc(DAYS7.includes(v) ? '' : v)}" placeholder="e.g. 14 Nov" enterkeyhint="next" autocomplete="off">`;
+}
+/** The four actions of a level, the Start-here one first. */
+function weekList(lv, sh) {
+  const w = state.work, x = LEVELS4[lv - 1], order = sh >= 0 ? [sh, ...[0, 1, 2, 3].filter((k) => k !== sh)] : [0, 1, 2, 3];
+  return `<ol class="cw-week">${order.map((k, i) => {
+    const u = sureOf(w, lv, k);
+    return `<li style="--c:var(--${DOMS[k]})"><p class="cw-wk">${sh >= 0 && i === 0 ? '★ My one move' : `Goal ${sh >= 0 ? i : i + 1}`} · ${esc(LEAD[DOMS[k]])}</p>
+      <p class="cw-wa">${fill(x.d[k].fb[3], w, lv, k)}</p>
+      <p class="cw-dw"><b>Done when</b> ${doneOf(w, lv, k)}${u != null ? ` <span class="cw-u">· ${u}% sure</span>` : ''}</p></li>`;
+  }).join('')}</ol>`;
+}
+/** The chapter reading, after the Version 4 reading: what was done, how good
+ *  the estimates were, the beliefs, where the founder began, his words. */
+function readingMore(ci) {
+  const w = state.work, lvs = countedFor(ci), t = tally(w, lvs), C = CHAPTERS4[ci], Q = READ_QUOTES[ci], sh = startHere(), r = reading(w, ci);
+  return `<div class="cw-rm">
+    <section><h4>What you did</h4><p>${t.n ? `${t.done} done, ${t.part} partly, ${t.not} not yet: the ${t.n} actions you checked on Sunday, levels ${pad(lvs[0])} to ${pad(lvs[lvs.length - 1])}.` : 'No Sunday answers yet. Each level asks about the week before it, first.'}</p></section>
+    <section><h4>How you estimate</h4><p>${t.est ? `Your estimates were <b>${t.est}</b>: on average you were ${Math.round(t.hoped * 100)}% sure, and you did about ${Math.round(t.real * 100)}% of what you set.` : 'Not enough Sunday answers yet to compare.'} The same three words as your Planner’s Sunday page.</p></section>
+    <section><h4>What you believed, what you believe now</h4><ul>${C.lv.map((i) => `<li><s>“${esc(LEVELS4[i].old)}”</s> “${esc(LEVELS4[i].neu)}”</li>`).join('')}</ul></section>
+    <section><h4>Where you began</h4><p>${sh >= 0 ? `Your North Star said start with ${esc(LEAD[DOMS[sh]])}. Across this chapter your answers put ${esc(LEAD[DOMS[r.lo]])} lowest${sh === r.lo ? ', so it is still where you lean.' : '.'}` : 'Take the North Star, and this line will compare where you began with where you are now.'}</p></section>
+    <blockquote class="cw-quote">“${esc(Q.q)}”<cite>Alexandru · ${esc(Q.src)}</cite></blockquote>
+  </div>`;
+}
 function pageHTML(st, x) {
-  const [d, kind] = stepAt(qi), D = d >= 0 ? x.d[d] : null, w = state.work;
-  const total = lastStep() + 1;
+  const [d, kind, key] = stepAt(qi), w = state.work, total = lastStep() + 1;
+  const prev = LEVELS4[level - 2], D = d >= 0 ? (kind === 'got' ? prev.d[d] : x.d[d]) : null, p = d >= 0 && kind !== 'got' ? planOf(level, d) : null;
+  const ci = CLOSES[level];
   const seg = Array.from({ length: total }, (_, i) => `<i class="${i < qi ? 'done' : ''}${i === qi ? ' now' : ''}" data-i="${i}"></i>`).join('');
-  const label = D ? `${esc(D.l)} · ${esc(D.name)} · ${esc(LEAD[DOMS[d]])}` : kind === 'credo' ? `Level ${pad(level)} · ${esc(x.word)} · your credo` : 'Your chapter reading';
+  const label = kind === 'got' ? `Last week · Level ${pad(level - 1)} · ${esc(LEAD[DOMS[d]])}`
+    : D ? `${esc(D.l)} · ${esc(D.name)} · ${esc(LEAD[DOMS[d]])}` : kind === 'week' ? `Level ${pad(level)} · ${esc(x.word)} · your week` : 'Your chapter reading';
   const top = `<button type="button" class="cw-phone" data-crown="steps" aria-label="Show the four domains of this level">
       <span><i aria-hidden="true"></i>Level ${pad(level)} · ${esc(x.word)} · ${qi + 1} of ${total}</span><span aria-hidden="true">Domains ▾</span></button>
     <div class="cw-seg" aria-hidden="true">${seg}</div>
-    <p class="cw-lab"${D ? ` style="color:var(--${DOMS[d]})"` : ''}>${label} <span class="cw-kind">${{ tap: 'Tap', slide: 'Slide', formula: 'Write once', lines: 'Your four lines', credo: 'Your credo', reading: 'Chapter reading' }[kind]}</span></p>`;
+    <p class="cw-lab"${D ? ` style="color:var(--${DOMS[d]})"` : ''}>${label} <span class="cw-kind">${KIND[kind]}</span>${d >= 0 && kind !== 'got' && d === startHere() ? ' <span class="cw-start">★ Start here</span>' : ''}</p>`;
   let body = '';
-  if (kind === 'tap') {
+  if (kind === 'got') {
+    const g = gotOf(w, level - 1, d), u = sureOf(w, level - 1, d);
+    body = `<h3 class="cw-q" id="cwq">Last week: <em>did it happen?</em></h3>
+      <div class="cw-was"><p>${fill(D.fb[3], w, level - 1, d)}</p><p class="cw-dw"><b>Done when</b> ${doneOf(w, level - 1, d)}</p></div>
+      <div class="cw-opts" role="group" aria-labelledby="cwq">${GOT.map((o, k) => `<button type="button" class="cw-o" data-got="${k}" aria-pressed="${g === k}"><kbd aria-hidden="true">${k + 1}</kbd><span>${o}</span></button>`).join('')}</div>
+      ${g == null ? '<p class="cw-keys"><kbd>1–3</kbd> choose · a no is information, not a verdict</p>'
+        : `<p class="cw-said">${u != null ? `You were ${u}% sure. ` : ''}It happened: ${['yes', 'partly', 'not yet'][g]}.</p>${g > 0 ? `<p class="cw-smaller">${notyetOf(w, level - 1, d)}</p>` : ''}`}`;
+  } else if (kind === 'tap') {
     const t = tapOf(w, level, d);
-    body = `<h3 class="cw-q" id="cwq">${D.t.q}</h3>
+    body = `${p ? `<p class="cw-topic">${esc(p.topic)}</p>` : ''}<h3 class="cw-q" id="cwq">${D.t.q}</h3>
       <div class="cw-opts" role="group" aria-labelledby="cwq">${D.t.o.map((o, k) => `<button type="button" class="cw-o" data-v4t="${k}" aria-pressed="${t === k}"><kbd aria-hidden="true">${k + 1}</kbd><span>${esc(o)}</span></button>`).join('')}</div>
       <p class="cw-keys"><kbd>1–${D.t.o.length}</kbd> choose · <kbd>Enter ↵</kbd> next</p>`;
   } else if (kind === 'slide') {
@@ -592,29 +660,66 @@ function pageHTML(st, x) {
       <input type="range" id="cwr" data-v4s="${d}" min="${D.s.min}" max="${D.s.max}" step="${D.s.step}" value="${v}" style="--p:${pc}%" aria-labelledby="cwq">
       <div class="cw-ends"><span>${esc(D.s.e[0])}</span><span>${esc(D.s.e[1])}</span></div></div>
       <p class="cw-keys"><kbd>← →</kbd> slide · <kbd>Enter ↵</kbd> next</p>`;
-  } else if (kind === 'formula') {
-    body = `<h3 class="cw-q" id="cwq">Write it once.</h3>
-      <p class="cw-formula">${D.f.map((p) => {
-        if (typeof p === 'string') return esc(p);
-        const v = w[wkey(level, d, p[0])] || '';
-        return `<input id="cwf-${d}-${p[0]}" data-v4f="${d}.${p[0]}" placeholder="${esc(p[1])}" value="${esc(v)}" size="${Math.max(8, (v || p[1]).length)}" aria-label="${esc(p[1])}" enterkeyhint="next" autocomplete="off">`;
-      }).join('')}</p>
-      <p class="cw-keys"><kbd>Enter ↵</kbd> next blank, then the next move</p>`;
+  } else if (kind === 'blank') {
+    const fs = fieldsOf(D), f = fs.find((x2) => x2[0] === key) || fs[0], first = fs[0][0] === key, v = w[wkey(level, d, key)] || '';
+    const note = p && p.stage && p.stage[STAGE_NOTE[st]];
+    body = `${first && p ? `<p class="cw-ins"><b>Why it matters</b> ${esc(p.ins)}</p>` : ''}
+      <h3 class="cw-sent" id="cwq">${sentenceAt(w, level, d, key)}</h3>
+      <label class="cw-bl" for="cwin">${esc(f[1])}</label>
+      <input id="cwin" class="cw-in" data-v4f="${d}.${esc(key)}" value="${esc(v)}" placeholder="e.g. ${esc(f[2])}" enterkeyhint="next" autocomplete="off" autocapitalize="sentences">
+      ${first && note ? `<p class="cw-stage"><b>${esc(STAGES[st] ? STAGES[st].n : '')}</b> ${esc(note)}</p>` : ''}
+      <p class="cw-keys">A few words is enough · <kbd>Enter ↵</kbd> next</p>`;
+  } else if (kind === 'day') {
+    const v = (w[wkey(level, d, key)] || '').trim();
+    body = `${key === 'on' ? '' : `<p class="cw-sent cw-sent-s">${sentenceAt(w, level, d, key)}</p>`}
+      <h3 class="cw-q" id="cwq">${key === 'on' ? plainOf(p.on, w, level, d) : 'Which day?'}</h3>
+      ${dayPick(d, key, v)}
+      <p class="cw-keys"><kbd>1–7</kbd> choose a day · <kbd>Enter ↵</kbd> next</p>`;
+  } else if (kind === 'done') {
+    let u = sureOf(w, level, d);
+    if (u == null) { u = 50; keep4(d, 'sure', u); }
+    body = `<div class="cw-was cw-donebox"><p class="cw-dw"><b>Done when</b> ${doneOf(w, level, d)}</p></div>
+      <h3 class="cw-q" id="cwq">How sure are you that this is done <em>by Sunday?</em></h3>
+      <div class="cw-slide"><div class="cw-big"><span id="cwbig">${u}%</span><small id="cwword">${esc(sureWord(u))}</small></div>
+      <input type="range" id="cwr" data-v4u="${d}" min="0" max="100" step="10" value="${u}" style="--p:${u}%" aria-labelledby="cwq">
+      <div class="cw-ends"><span>Not sure</span><span>Certain</span></div></div>
+      <p class="cw-keys">On Sunday, the next level asks what happened · <kbd>Enter ↵</kbd> next</p>`;
   } else if (kind === 'lines') {
+    const t = takeOf(w, level, d);
     body = `<h3 class="cw-q">${esc(D.name)}, <em>in four lines.</em></h3>
-      <div class="cw-fb">${lines4(w, level, d).map((l) => `<div class="cw-fl"><h4>${l[0]}<small>${l[1]}</small></h4><p>${l[2]}</p></div>`).join('')}</div>`;
-  } else if (kind === 'credo') {
-    const next = LEVELS4[level];
-    body = `<h3 class="cw-q">Four sentences. <em>Your North Star for this week.</em></h3>
-      <div class="cw-credo">${x.d.map((Dd, k) => `<p><span style="color:var(--${DOMS[k]})">${esc(Dd.l)}</span>${sentence(w, level, k)}</p>`).join('')}</div>
-      ${CLOSES[level] != null ? `<p class="cw-note">This closes ${esc(CHAPTERS4[CLOSES[level]].name)}. Your chapter reading is next.</p>`
+      <div class="cw-fb">${lines4(w, level, d).map((l, i) => `<div class="cw-fl"><h4>${l[0]}<small>${l[1]}</small></h4><div><p>${l[2]}</p>${i === 3 ? `<p class="cw-dw"><b>Done when</b> ${doneOf(w, level, d)}</p>` : ''}</div></div>`).join('')}</div>
+      ${t ? `<section class="cw-take" aria-labelledby="cwtk-${d}"><p class="cw-tk">Yours to keep · it goes into your Blueprint</p>
+        <h4 id="cwtk-${d}">${t.title}</h4><ol>${t.lines.map((l) => `<li>${l}</li>`).join('')}</ol>
+        <button type="button" class="cw-copy" data-copytake="${d}">Copy</button></section>` : ''}`;
+  } else if (kind === 'week') {
+    const sh = startHere(), pc = CLOSES[level - 1] != null ? carriedFrom(w, level - 1) : null, next = LEVELS4[level];
+    body = `<h3 class="cw-q">Your week. <em>Four actions, each with its day.</em></h3>
+      ${weekList(level, sh)}
+      ${pc ? `<p class="cw-carry"><b>Carried forward from your reading</b> ${fill(LEVELS4[pc[0] - 1].d[pc[1]].fb[3], w, pc[0], pc[1])}${w[wkey(level - 1, 'r', 'on')] ? ` · by ${esc(w[wkey(level - 1, 'r', 'on')])}` : ''}</p>` : ''}
+      <p class="cw-planner">Write them on your Planner’s Monday page: ${sh >= 0 ? 'the first as <b>My one move</b>, the other three as <b>Three goals</b>' : 'the one you most want to avoid as <b>My one move</b>, the other three as <b>Three goals</b>'}. On Sunday, the next level asks what happened.</p>
+      <p class="cw-more"><button type="button" class="cw-all" data-go="blueprint">See it in your Blueprint</button></p>
+      ${ci != null ? `<p class="cw-note">This closes ${esc(CHAPTERS4[ci].name)}. Your chapter reading is next.</p>`
         : next ? `<div class="gain"><p class="eyebrow">${compass} What level ${pad(level + 1)} gives you</p><p class="gaint">${esc(next.word)} · ${esc(next.title)}</p><p class="gainp">${esc(next.promise)}</p>
           ${levelDone(st, level) === UNITS ? `<button class="cta" type="button" data-level="${level + 1}">${holds(state.tier, gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button>` : `<p class="cw-note">It opens when all ${UNITS} moves here are done: ${UNITS - levelDone(st, level)} to go.</p>`}</div>` : ''}`;
-  } else {
-    body = readingHTML(CLOSES[level]);
+  } else if (kind === 'reading') {
+    body = `${readingHTML(ci)}${readingMore(ci)}`;
+  } else if (kind === 'carry') {
+    const lvs = countedFor(ci), all = lvs.flatMap((lv) => [0, 1, 2, 3].map((k) => [lv, k, gotOf(w, lv, k)]));
+    const open = all.filter((a) => a[2] === 1 || a[2] === 2), list = open.length ? open : all, cur = w[wkey(level, 'r', 'carry')] || '';
+    body = `<h3 class="cw-q" id="cwq">Carry one forward. <em>${open.length ? 'The undone action that matters most.' : 'Everything you checked was done. Keep one as a habit.'}</em></h3>
+      <div class="cw-opts" role="group" aria-labelledby="cwq">${list.map(([lv, k, g], i) => `<button type="button" class="cw-o cw-co" data-carry="${lv}.${k}" aria-pressed="${cur === `${lv}.${k}`}"><kbd aria-hidden="true">${i < 9 ? i + 1 : ''}</kbd>
+        <span><small>Level ${pad(lv)} · ${esc(LEAD[DOMS[k]])}${g != null ? ` · ${GOT[g].toLowerCase()}` : ''}</small><span>${fill(LEVELS4[lv - 1].d[k].fb[3], w, lv, k)}</span></span></button>`).join('')}</div>`;
+  } else if (kind === 'carryday') {
+    const c = carriedFrom(w, level), v = (w[wkey(level, 'r', 'on')] || '').trim();
+    body = `${c ? `<div class="cw-was"><p>${fill(LEVELS4[c[0] - 1].d[c[1]].fb[3], w, c[0], c[1])}</p><p class="cw-dw"><b>Done when</b> ${doneOf(w, c[0], c[1])}</p></div>` : ''}
+      <h3 class="cw-q" id="cwq">Which day <em>this week?</em></h3>
+      ${dayPick('r', 'on', v)}
+      ${CHAPTERS4[ci + 1] && LEVELS4[level] ? `<div class="gain"><p class="gaint">${esc(CHAPTERS4[ci + 1].n)} · ${esc(CHAPTERS4[ci + 1].name)}</p><p class="gainp">${esc(CHAPTERS4[ci + 1].about)}</p>
+        <button class="cta" type="button" data-level="${level + 1}">${holds(state.tier, gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button></div>`
+        : `<p class="cw-planner">Twelve weeks, written. <button type="button" class="cw-all" data-go="blueprint">Open your Blueprint</button></p>`}`;
   }
   const last = qi >= lastStep();
-  const nextLabel = kind === 'lines' ? (d < 3 ? 'Next domain →' : 'See my credo') : kind === 'credo' && CLOSES[level] != null ? 'My chapter reading' : 'Next ↵';
+  const nextLabel = kind === 'lines' ? (d < 3 ? 'Next domain →' : 'See my week') : kind === 'week' && ci != null ? 'My chapter reading' : 'Next ↵';
   return `${top}${body}
     <footer class="cw-foot">
       <button type="button" class="cw-back" data-qmove="-1"${qi === 0 ? ' disabled' : ''}>← Back</button>
@@ -641,8 +746,6 @@ function readingHTML(ci) {
       <div class="cw-fl"><h4>What you will do<small>Exactly.</small></h4><ol>${r.exact.map((e) => `<li>${e}</li>`).join('')}</ol></div>
     </div></div>
     <p class="cw-star"><small>Your North Star${r.next ? ` for ${esc(r.next.name)}` : ' for the next ninety days'}</small>${r.star}</p>
-    ${r.next && LEVELS4[r.last] ? `<div class="gain"><p class="gaint">${esc(r.next.n)} · ${esc(r.next.name)}</p><p class="gainp">${esc(r.next.about)}</p>
-      <button class="cta" type="button" data-level="${r.last + 1}">${holds(state.tier, gateFor(r.last + 1)) ? `Open level ${pad(r.last + 1)}` : 'See what opens it'}</button></div>` : ''}
     <p class="cw-note">Read only from what you tapped, slid and wrote. Nothing is assumed about you, and nothing is compared with anybody else.</p>`;
 }
 
@@ -720,8 +823,8 @@ function drawBook(focus = true) {
   document.body.classList.toggle('cw-shut', !writable(st));
   if (focus) {
     const r = document.querySelector('.leaf-r');
-    const f = document.querySelector('#cwr') || [...document.querySelectorAll('.cw-formula input')].find((i) => !i.value) || document.querySelector('.cw-formula input')
-      || document.querySelector('.cw-o[aria-pressed="true"]') || document.querySelector('.cw-o') || document.querySelector('.leaf-r .cw-lab');
+    const f = document.querySelector('#cwr') || document.querySelector('.leaf-r .cw-in:not(.cw-date)')
+      || document.querySelector('.leaf-r .cw-o[aria-pressed="true"]') || document.querySelector('.leaf-r .cw-o') || document.querySelector('.leaf-r .cw-lab');
     if (f) { if (!/^(INPUT|BUTTON)$/.test(f.tagName)) f.setAttribute('tabindex', '-1'); f.focus({ preventScroll: true }); }
     if (r && r.getBoundingClientRect().top < 0) r.scrollIntoView({ block: 'start' });
   }
@@ -772,6 +875,36 @@ function stageStrip(st) {
 // ── The library ──────────────────────────────────────────────────────────────
 // Everything that goes with the programme, in one place. Joined founders
 // download; the LAB workbook opens on exploraself.com/lab for LAB members.
+/** The founder's Blueprint (31 Oct 2026, the skeleton's week 12): what the
+ *  twelve weeks write, in eight sections, from the founder's own answers and
+ *  nothing else: how they lead, their people, what they sell, marketing,
+ *  sales, money, systems and the next ninety days. Printable. */
+function blueprintView() {
+  const w = state.work, B = blueprint(w), t = tally(w, LEVELS4.map((L) => L.n));
+  const written = B.reduce((n, S) => n + S.items.filter((i) => i.started).length, 0), all = B.reduce((n, S) => n + S.items.length, 0);
+  const name = (state.me && state.me.name) || '';
+  return `<section class="bp"><div class="bp-in">
+    <header class="bp-head">
+      <p class="eyebrow">${compass} The Founder’s Blueprint</p>
+      <h1>${name ? `${esc(name)}’s Blueprint` : 'Your Blueprint'}</h1>
+      <p class="bp-lede">Everything the twelve weeks write, in your own words: how you lead, your people, what you sell, your marketing, your sales, your money, your systems and your next ninety days. It fills in as you go.</p>
+      <p class="bp-stat"><b>${written}</b> of ${all} parts written${t.n ? ` · <b>${t.done}</b> of the ${t.n} actions you checked were done${t.est ? ` · your estimates were ${t.est}` : ''}` : ''}</p>
+      <p class="bp-act no-print"><button type="button" class="cta" data-print>Print it, or save it as a PDF</button><button type="button" class="cw-all" data-go="work">Back to the programme</button></p>
+    </header>
+    <nav class="bp-toc no-print" aria-label="The eight parts of your Blueprint">${B.map((S) => `<a href="#bp-${S.k}">${esc(S.n)}</a>`).join('')}</nav>
+    ${B.map((S) => `<section class="bp-sec" id="bp-${S.k}" aria-labelledby="bph-${S.k}">
+      <h2 id="bph-${S.k}">${esc(S.n)}</h2><p class="bp-about">${esc(S.about)}</p>
+      ${S.items.map((it) => `<article class="bp-it${it.started ? '' : ' empty'}" style="--c:var(--${DOMS[it.d]})">
+        <p class="bp-src">Level ${pad(it.lv)} · ${esc(it.word)} · ${esc(it.name)}</p>
+        <h3>${esc(it.topic)}</h3>
+        ${it.started ? `<p class="bp-s">${it.sentence}</p>
+          <div class="bp-take"><h4>${it.take.title}</h4><ol>${it.take.lines.map((l) => `<li>${l}</li>`).join('')}</ol></div>`
+          : `<p class="bp-wait">Written in Level ${pad(it.lv)}. <button type="button" class="cw-all no-print" data-level="${it.lv}">Open it</button></p>`}
+      </article>`).join('')}
+    </section>`).join('')}
+  </div></section>`;
+}
+
 function libraryView() {
   const joined = account.joined() || !!state.me;
   const hasLab = holds(state.tier, 'lab');
@@ -930,6 +1063,7 @@ function render() {
     ? workHTML(st)
     : view === 'home' ? homeView()
     : view === 'library' ? libraryView()
+    : view === 'blueprint' ? blueprintView()
     : view === 'ask' ? askView()
     : view === 'signin' ? signinView()
     : '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="status">One moment…</p></div></section>';
@@ -940,7 +1074,7 @@ function render() {
   M.setCandles(view === 'work' ? answered(st, level, dom) : -1);
   if (view === 'work') document.body.classList.toggle('cw-shut', !writable(st));
 }
-const DASHBOARD = ['home', 'work', 'library', 'ask'];
+const DASHBOARD = ['home', 'work', 'library', 'ask', 'blueprint'];
 
 /** A new domain or level: redraw the book and what sits under it, so the
  *  page does not jump and the drawer of levels keeps its scroll. */
@@ -978,10 +1112,47 @@ document.addEventListener('click', (e) => {
     return;
   }
   if (b.dataset.qmove) { moveQ(+b.dataset.qmove); return; }
-  if (b.dataset.qd) { qi = STEPS4.findIndex((x) => x[0] === +b.dataset.qd); document.body.classList.remove('stepsopen'); drawBook(); return; }
-  if (b.dataset.v4t && needsAccount()) {
-    const k = b.dataset.v4t;
-    askAccount(() => { const x = document.querySelector(`.cw-o[data-v4t="${k}"]`); if (x) x.click(); });
+  if (b.hasAttribute('data-print')) { window.print(); return; }
+  if (b.dataset.qd) { qi = steps().findIndex((x) => x[0] === +b.dataset.qd && x[1] === 'tap'); document.body.classList.remove('stepsopen'); drawBook(); return; }
+  // Every answer waits for a complete account first (the account box), then lands.
+  const ans = ['v4t', 'got', 'v4day', 'carry'].find((k) => b.dataset[k] != null);
+  if (ans && needsAccount()) {
+    const v = b.dataset[ans], at = `.leaf-r .cw-o[data-${ans === 'v4t' ? 'v4t' : ans === 'v4day' ? 'v4day' : ans}="${v}"]`;
+    askAccount(() => { const x = document.querySelector(at); if (x) x.click(); });
+    return;
+  }
+  // Last week: Done, Partly, Not yet. Saved on the level it belongs to.
+  if (b.dataset.got != null) {
+    const d = stepAt(qi)[0];
+    keep4(d, 'got', +b.dataset.got, level - 1);
+    drawBook(false);
+    const x = document.querySelector(`.cw-o[data-got="${b.dataset.got}"]`); if (x) x.focus({ preventScroll: true });
+    return;
+  }
+  // A day, as a tap: saved, and on to the next screen.
+  if (b.dataset.v4day) {
+    const [d, , k] = stepAt(qi);
+    keep4(d < 0 ? 'r' : d, k || 'on', b.dataset.v4day);
+    refreshRail();
+    const at = qi;
+    drawBook(false);
+    setTimeout(() => { if (qi === at) moveQ(1); }, 160);
+    return;
+  }
+  if (b.dataset.carry) {
+    keep4('r', 'carry', b.dataset.carry);
+    const at = qi;
+    drawBook(false);
+    setTimeout(() => { if (qi === at) moveQ(1); }, 160);
+    return;
+  }
+  // What the founder keeps, as plain text for a message or a note.
+  if (b.dataset.copytake != null) {
+    const box = b.closest('.cw-take');
+    const lineOf = (li) => { const c = li.cloneNode(true); c.querySelectorAll('.ln').forEach((x) => { x.textContent = '____'; }); return c.textContent.replace(/\s+/g, ' ').trim(); };
+    const text = box ? [box.querySelector('h4').textContent, ...[...box.querySelectorAll('li')].map(lineOf)].join('\n') : '';
+    const doneCopy = (ok) => { b.textContent = ok ? 'Copied' : 'Select and copy'; setTimeout(() => { b.textContent = 'Copy'; }, 1600); };
+    try { navigator.clipboard.writeText(text).then(() => doneCopy(true), () => doneCopy(false)); } catch { doneCopy(false); }
     return;
   }
   if (b.dataset.v4t) {
@@ -1063,21 +1234,21 @@ document.addEventListener('keydown', (e) => {
   const inPage = t.closest('.leaf-r') || t === document.body;
   if (!inPage || t.closest('.cw-foot, .gain, .gate, .wait')) return;
   // Number keys choose on a tap.
-  if (/^[1-9]$/.test(e.key) && stepAt(qi)[1] === 'tap' && t.tagName !== 'INPUT') {
+  if (/^[1-9]$/.test(e.key) && ['tap', 'got', 'day', 'carry', 'carryday'].includes(stepAt(qi)[1]) && t.tagName !== 'INPUT') {
     const b = document.querySelectorAll('.leaf-r .cw-o')[Number(e.key) - 1];
     if (b) { e.preventDefault(); b.click(); }
     return;
   }
   if (e.key !== 'Enter' || e.shiftKey) return;
-  // In the sentence, Enter goes to the next blank, then to the next move.
-  if (t.dataset && t.dataset.v4f) {
+  // In a blank, Enter is the next screen (once something is written).
+  if (t.dataset && t.dataset.v4f) { e.preventDefault(); moveQ(1); return; }
+  // On an answer, Enter chooses it (if it isn't yet) and moves on. A day or
+  // an action carried forward moves on by itself once chosen.
+  if (t.classList && (t.classList.contains('cw-day') || t.classList.contains('cw-co'))) {
     e.preventDefault();
-    const ins = [...document.querySelectorAll('.cw-formula input')], i = ins.indexOf(t);
-    const nextIn = ins.slice(i + 1).find((x) => !x.value.trim()) || ins[i + 1];
-    if (nextIn) { nextIn.focus(); return; }
-    moveQ(1); return;
+    if (t.getAttribute('aria-pressed') !== 'true') t.click(); else moveQ(1);
+    return;
   }
-  // On an answer, Enter chooses it (if it isn't yet) and moves on.
   if (t.classList && t.classList.contains('cw-o')) {
     e.preventDefault();
     if (t.getAttribute('aria-pressed') !== 'true') t.click();
@@ -1199,9 +1370,18 @@ document.addEventListener('input', (e) => {
     return;
   }
   // Version 4: the slider and the sentence save as they move.
-  const v = e.target.closest('input[data-v4s], input[data-v4f]');
+  const v = e.target.closest('input[data-v4s], input[data-v4f], input[data-v4u]');
   if (!v || view !== 'work') return;
   const st = state.stage || 'build', had = answered(st, level, dom);
+  if (v.dataset.v4u != null) {
+    const n = +v.value;
+    keep4(+v.dataset.v4u, 'sure', n);
+    v.style.setProperty('--p', `${n}%`);
+    const big = $('#cwbig'), wd = $('#cwword');
+    if (big) big.textContent = `${n}%`;
+    if (wd) wd.textContent = sureWord(n);
+    return;
+  }
   if (v.dataset.v4s != null) {
     const d = +v.dataset.v4s, D = LEVELS4[level - 1].d[d], n = +v.value;
     keep4(d, 's', n);
@@ -1211,8 +1391,12 @@ document.addEventListener('input', (e) => {
     if (wd) wd.textContent = D.s.raw ? '' : wordOf(D.s, n);
   } else {
     const [d, k] = v.dataset.v4f.split('.');
-    keep4(+d, k, v.value);
-    v.size = Math.max(8, (v.value || v.placeholder).length);
+    keep4(d === 'r' ? 'r' : +d, k, v.value);
+    // The sentence above fills in as the founder types; nothing redraws.
+    const f = document.querySelector(`.cw-f[data-fk="${k}"]`);
+    if (f) { f.textContent = v.value.trim() || (fieldsOf(LEVELS4[level - 1].d[+d] || { f: [] }).find((x) => x[0] === k) || [0, ''])[1]; f.classList.toggle('has', !!v.value.trim()); }
+    // A date written over a day tap: the tap lets go.
+    document.querySelectorAll('.cw-day[aria-pressed="true"]').forEach((x) => x.setAttribute('aria-pressed', 'false'));
     hush();
   }
   // The Lamp: a move newly done plays a chord and lights a candle.

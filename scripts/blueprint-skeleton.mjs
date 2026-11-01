@@ -12,11 +12,11 @@
 //   node scripts/blueprint-skeleton.mjs
 
 import { writeFileSync, mkdirSync } from 'node:fs';
-import { LEVELS4, CHAPTERS4, DOM_NAMES, DOMS, wkey, lines4, wordOf, fieldsOf } from '../public/levels-v4.js';
-import { DOMAINS, SESSIONS, READINGS, READING_SCREENS, LAUNCHPAD_CHANGES, DECISIONS, COVERAGE, GAPS, CONTRADICTIONS, PRINCIPLES } from '../docs/blueprint-skeleton.data.mjs';
+import { LEVELS4, CHAPTERS4, DOM_NAMES, DOMS, wkey, lines4, wordOf, fieldsOf, PLAN4, BLUEPRINT4, takeOf, notyetOf, READ_QUOTES } from '../public/levels-v4.js';
+import { DOMAINS, SESSIONS, READINGS, READING_SCREENS, LAUNCHPAD_CHANGES, DECISIONS, COVERAGE, GAPS, CONTRADICTIONS, PRINCIPLES, OPTIONS } from '../docs/blueprint-skeleton.data.mjs';
 import { SECTIONS } from '../public/content.js';
 
-const OV = new Map(DOMAINS);
+const OV = new Map(DOMAINS.map(([k, ov]) => [k, { ...PLAN4[k], ...ov }]));
 const root = new URL('../', import.meta.url);
 const two = (n) => String(n).padStart(2, '0');
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -56,7 +56,8 @@ const scaleOf = (s) => `${s.raw ? s.w(s.min) : s.min + (s.sfx || '')} to ${s.raw
 
 /** One domain, as plain data for both outputs. */
 function domainModel(L, d) {
-  const D = L.d[d], key = `${L.n}.${d}`, ov = OV.get(key) || {}, ex = exampleWork(L.n);
+  const D = L.d[d], key = `${L.n}.${d}`, ov = OV.get(key) || {}, ex = exampleWork(L.n), tk = takeOf(ex, L.n, d);
+  const md2 = (h) => strip(String(h).replace(/<span class="ln"[^>]*><\/span>/g, '____').replace(/<mark>([^<]*)<\/mark>/g, '⟦$1⟧'));
   const dayKey = ov.on ? 'on' : ov.dayKey || 'day';
   const blanks = fieldsOf(D).map(([k, hint, example]) => ({ k, hint, example,
     day: k === dayKey && (DAYWORDS.test(example) || k === 'day' || k === 'when'),
@@ -71,6 +72,8 @@ function domainModel(L, d) {
     sentence, blanks, on: ov.on ? fillEx(ov.on, L.n, d) : null, dayKey,
     done: ov.done || '', doneEx: fillEx(ov.done || '', L.n, d, (x) => `⟦${x}⟧`),
     four, gp: ov.gp || [], lp: ov.lp || null, uses: ov.uses || null, pl: ov.pl || null, stage: ov.stage || null, change: ov.change || null,
+    ins: ov.ins || '', notyet: md2(notyetOf(ex, L.n, d)), take: { title: md2(tk.title), lines: tk.lines.map(md2) },
+    bp: (BLUEPRINT4.find((b) => b.k === ov.bp) || {}).n || '',
     manual: { label: `Manual for your stage · Level ${two(L.n)} · ${DOM_NAMES[d]} · ${D.name}`, anchor: `l${two(L.n)}-${DOMS[d]}` },
   };
 }
@@ -83,6 +86,9 @@ const MODEL = LEVELS4.map((L) => ({
   d: L.d.map((_, d) => domainModel(L, d)),
 }));
 const ADDED_DAY = MODEL.flatMap((L) => L.d.filter((x) => x.on).map((x) => x.key));
+/** The founder's Blueprint at week 12: each part, and the domains that write it. */
+const PARTS = BLUEPRINT4.map((b) => ({ ...b, items: MODEL.flatMap((L) => L.d.filter((x) => PLAN4[x.key].bp === b.k).map((x) => `${two(L.n)} ${x.name} (${x.topic.toLowerCase()})`)) }));
+const PARTS_LEDE = 'At the end of twelve weeks the founder holds one document, built only from their own answers: a page in the programme (My Blueprint), printable as a PDF. Eight parts, every domain in exactly one. It answers the five questions a founder must be able to answer: how I lead, how I sell and market, what I build and deliver, how the business runs without me, and where it goes next.';
 
 // ── Markdown ───────────────────────────────────────────────────────────────
 const mdEx = (s) => s.replace(/⟦(.*?)⟧/g, '*$1*');
@@ -101,7 +107,7 @@ function linksOf(x) {
 
 function mdDomain(L, x) {
   const s = [];
-  s.push(`#### ${x.letter} · ${x.dom} · ${x.name}`, '', `**Topic:** ${x.topic}`, '');
+  s.push(`#### ${x.letter} · ${x.dom} · ${x.name}`, '', `**Topic:** ${x.topic}`, '', `**Inform. Why it matters** (on the first blank): ${x.ins}`, '');
   s.push(`1. **Tap.** ${x.tap.q}  `, `   Options: ${x.tap.o.map((o, i) => `${i + 1} ${o}`).join(' · ')}`);
   s.push(`2. **Slide.** ${x.slide.q}  `, `   Scale ${x.slide.scale}; ends “${x.slide.ends[0]}” and “${x.slide.ends[1]}”; starts at ${x.slide.d}. Words: ${x.slide.words}.`);
   s.push(`3. **Write once**, one blank per screen, the sentence building above it:  `, `   “${x.sentence}”`);
@@ -111,6 +117,9 @@ function mdDomain(L, x) {
   s.push(`${n++}. **Done when** (shown, not typed): ${mdEx(x.doneEx)}  `, '   Then one slide: “How sure are you that this is done by Sunday?” 0–100%.');
   s.push(`${n}. **Four lines back** (the Version 4 example founder):`);
   for (const [a, b, c] of x.four) s.push(`   - *${a}. ${b}* ${mdEx(c)}`);
+  s.push('', `**Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *${x.bp}*): **${mdEx(x.take.title)}**`);
+  for (const l of x.take.lines) s.push(`- ${mdEx(l)}`);
+  s.push('', `**If Sunday says Partly or Not yet:** ${mdEx(x.notyet)}`);
   s.push('', `**Links.** ${linksOf(x).join(' ')}`);
   if (x.stage) s.push('', `**Stage notes.** ${Object.entries(x.stage).map(([k, v]) => `*${k[0].toUpperCase() + k.slice(1)}:* ${v}`).join(' ')}`);
   if (x.change) s.push('', `**Change from Version 4.** ${x.change}`);
@@ -125,7 +134,7 @@ function mdReading(R) {
   const C = CHAPTERS4[R.ch];
   return [`### ${C.n} reading · ${C.name} (after Level ${two(R.after)})`, '', `One screen each, in this order. ${R.extra}`, '',
     ...READING_SCREENS.map(([t, w], i) => `${i + 1}. **${t}.** ${w}`), '',
-    `**In his words:** “${R.quote}” (${R.source}).`, ''].join('\n');
+    `**In his words:** “${READ_QUOTES[R.ch].q}” (${READ_QUOTES[R.ch].src}).`, ''].join('\n');
 }
 
 function md() {
@@ -135,6 +144,8 @@ function md() {
   out.push('## Read this first', '',
     '- **The spine stays.** Four domains, four moves (Tap · Slide · Write once · Four lines back), twelve words, three chapters, a reading after Levels 05, 09 and 12, a promise stated as things.',
     `- **What is new is the end of each domain.** Every action now has a **day** (${ADDED_DAY.length} domains get a day screen) and a **Done when** you can check on Sunday, followed by one slide: how sure are you?`,
+    '- **Inform, reform, transform.** Each domain now opens with a short insight (why it matters), ends in one action with a day (reform), and gives the founder something to keep, filled with their own words, that goes into their Blueprint (transform).',
+    '- **A true blueprint at week 12.** Everything the founder writes becomes one document in eight parts: leader, people, what you sell, marketing, sales, money, systems, the next ninety days.',
     '- **One question per screen.** Each blank of the sentence gets its own screen. Days are taps. Enter moves on.',
     '- **Every Sunday counts.** From Level 02, a level opens by asking about last week’s four actions: Done, Partly, Not yet. The readings show what was done and how good the estimates were.',
     '- **Nothing is asked twice.** Where the Launchpad plan or the Growth Plan already covers a step, the level shows that answer back or links to it. Seven Launchpad actions that repeat a level become counts (proposal).',
@@ -164,6 +175,10 @@ function md() {
       ['Leader’s Growth Planner 2027', 'The weekly rhythm: Monday plan, Sunday boardroom, estimates against reality.', 'Sunday’s Done · Partly · Not yet; the twelve-week contract.', 'Monday page: one move + three goals; the contract number (Level 12).'],
       ['Library', 'Reading for your stage: 3 manuals, 3 books.', '—', 'Each domain links to its manual section (Phase 4).'],
     ]), '');
+  out.push('## Your Blueprint at week 12', '', PARTS_LEDE, '',
+    mdTable(['Part', 'What it holds', 'Written by (level · domain)'], PARTS.map((b) => [b.n, b.about, `${b.items.length}: ${b.items.join('; ')}`])), '',
+    '### The thinner parts, and the options', '', 'Your systems (4) and your next ninety days (3) are the thinnest. Ways to make them fuller, for you to choose:', '',
+    mdTable(['Option', 'What changes', 'Cost'], OPTIONS), '', '**My recommendation:** B, then C. B puts the Launchpad’s numbers and process into the Blueprint without a single new question; C adds three screens only where the Blueprint is thin.', '');
   out.push('## The principles underneath', '', 'Where each one lives. None is pasted on screen as a slogan.', '', mdTable(['Principle', 'Where it lives'], PRINCIPLES), '');
   for (const C of CHAPTERS4) {
     out.push(`## ${C.n} · ${C.name}`, '', `*${C.about}*`, '');
@@ -233,6 +248,7 @@ function hDomain(L, x) {
   return `<section class="dom" style="--c:var(--${x.domKey})" id="l${two(L.n)}-${x.domKey}">
   <h4><span class="lt">${esc(x.letter)}</span><span>${esc(x.dom)} · <b>${esc(x.name)}</b></span></h4>
   <p class="topic">${esc(x.topic)}</p>
+  <p class="ins"><b>Inform · why it matters</b> ${esc(x.ins)}</p>
   <ol class="moves">
     <li><b>Tap.</b> ${esc(x.tap.q)}<ul class="opts">${x.tap.o.map((o, i) => `<li><kbd>${i + 1}</kbd>${esc(o)}</li>`).join('')}</ul></li>
     <li><b>Slide.</b> ${esc(x.slide.q)}<p class="sm">Scale ${esc(x.slide.scale)} · ends “${esc(x.slide.ends[0])}” and “${esc(x.slide.ends[1])}” · starts at ${esc(x.slide.d)}<br>${esc(x.slide.words)}</p></li>
@@ -241,13 +257,15 @@ function hDomain(L, x) {
     <li class="new"><b>Done when</b> <span class="chip">new</span> ${hEx(x.doneEx)}<p class="sm">Then: “How sure are you that this is done by Sunday?” 0–100%.</p></li>
     <li><b>Four lines back</b><dl class="four">${x.four.map(([a, b, c]) => `<dt>${esc(a)} <i>${esc(b)}</i></dt><dd>${hEx(c)}</dd>`).join('')}</dl></li>
   </ol>
+  <div class="keep"><p class="kp">Transform · yours to keep · Blueprint part: ${esc(x.bp)}</p><h5>${hEx(x.take.title)}</h5><ol>${x.take.lines.map((l) => `<li>${hEx(l)}</li>`).join('')}</ol></div>
+  <p class="ny"><b>If Sunday says Partly or Not yet:</b> ${hEx(x.notyet)}</p>
   <ul class="links">${linksOf(x).map((l) => `<li>${esc(l)}</li>`).join('')}</ul>
   ${x.stage ? `<p class="stage">${Object.entries(x.stage).map(([k, v]) => `<b>${esc(k[0].toUpperCase() + k.slice(1))}:</b> ${esc(v)}`).join(' ')}</p>` : ''}
   ${x.change ? `<p class="chg"><b>Change from Version 4.</b> ${esc(x.change)}</p>` : ''}
 </section>`;
 }
 const hSession = (S) => `<section class="sess"><h3>Session ${S.n} with Alexandru · ${esc(S.name)}</h3><p><b>When:</b> ${esc(S.at)}.</p><p><b>Before the call:</b> ${esc(S.bring)}</p><ol>${S.agenda.map((a) => `<li>${esc(a)}</li>`).join('')}</ol><p class="done"><b>Done when</b> ${esc(S.done)}</p></section>`;
-const hReading = (R) => { const C = CHAPTERS4[R.ch]; return `<section class="read"><h3>${esc(C.n)} reading · ${esc(C.name)}</h3><p class="sm">After Level ${two(R.after)}. ${esc(R.extra)}</p><ol>${READING_SCREENS.map(([t, w]) => `<li><b>${esc(t)}.</b> ${esc(w)}</li>`).join('')}</ol><blockquote>“${esc(R.quote)}”<cite>${esc(R.source)}</cite></blockquote></section>`; };
+const hReading = (R) => { const C = CHAPTERS4[R.ch]; return `<section class="read"><h3>${esc(C.n)} reading · ${esc(C.name)}</h3><p class="sm">After Level ${two(R.after)}. ${esc(R.extra)}</p><ol>${READING_SCREENS.map(([t, w]) => `<li><b>${esc(t)}.</b> ${esc(w)}</li>`).join('')}</ol><blockquote>“${esc(READ_QUOTES[R.ch].q)}”<cite>${esc(READ_QUOTES[R.ch].src)}</cite></blockquote></section>`; };
 
 function html() {
   const lv = (L) => `<details class="lvl" id="level-${two(L.n)}"${L.n === 1 ? ' open' : ''}>
@@ -264,13 +282,15 @@ function html() {
 <header class="top"><p class="kick">Draft for Alexandru’s approval · 31 Oct 2026 · Phase 2 of 4</p>
 <h1>The Founder’s Blueprint<br><em>Skeleton</em></h1>
 <p class="lede">Twelve weeks, week by week. Every question, option, scale and four-lines text is read from Version 4; what is new is marked <span class="chip">new</span>. Nothing here is live.</p>
-<nav class="toc"><a href="#first">Read this first</a><a href="#decide">Your decisions</a><a href="#glance">At a glance</a><a href="#flow">One question at a time</a><a href="#fit">How the pieces fit</a><a href="#principles">Principles</a><a href="#ch-1">Chapter I</a><a href="#ch-2">Chapter II</a><a href="#ch-3">Chapter III</a><a href="#changes">Changes</a><a href="#keys">Saved answers</a><a href="#audit">Audit</a><a href="level-01-one-at-a-time.html">Try Level 01 →</a></nav>
+<nav class="toc"><a href="#first">Read this first</a><a href="#decide">Your decisions</a><a href="#glance">At a glance</a><a href="#flow">One question at a time</a><a href="#fit">How the pieces fit</a><a href="#bp12">Blueprint at week 12</a><a href="#principles">Principles</a><a href="#ch-1">Chapter I</a><a href="#ch-2">Chapter II</a><a href="#ch-3">Chapter III</a><a href="#changes">Changes</a><a href="#keys">Saved answers</a><a href="#audit">Audit</a><a href="level-01-one-at-a-time.html">Try Level 01 →</a><a href="screens.html">The real screens on a phone →</a></nav>
 </header>
 <main>
 <h2 id="first">Read this first</h2>
 <ul class="first">
 <li><b>The spine stays.</b> Four domains, four moves (Tap · Slide · Write once · Four lines back), twelve words, three chapters, a reading after Levels 05, 09 and 12, a promise stated as things.</li>
 <li><b>What is new is the end of each domain.</b> Every action now has a <b>day</b> (${ADDED_DAY.length} domains get a day screen) and a <b>Done when</b> you can check on Sunday, then one slide: how sure are you?</li>
+<li><b>Inform, reform, transform.</b> Each domain opens with a short insight (why it matters), ends in one action with a day, and gives the founder something to keep, in their own words, that goes into their Blueprint.</li>
+<li><b>A true blueprint at week 12.</b> Everything the founder writes becomes one document in eight parts: leader, people, what you sell, marketing, sales, money, systems, the next ninety days.</li>
 <li><b>One question per screen.</b> Each blank of the sentence gets its own screen. Days are taps. Enter moves on.</li>
 <li><b>Every Sunday counts.</b> From Level 02, a level opens with last week’s four actions: Done, Partly, Not yet. The readings show what was done and how good the estimates were.</li>
 <li><b>Nothing is asked twice.</b> Where the Launchpad plan or the Growth Plan already covers a step, the level shows that answer back or links to it.</li>
@@ -301,6 +321,13 @@ ${hTable(['Piece', 'Its one job', 'A level takes', 'A level gives'], [
     ['Planner 2027', 'The weekly rhythm, estimates against reality.', 'Sunday’s Done · Partly · Not yet; the contract.', 'Monday page; the twelve-week number.'],
     ['Library', 'Reading for your stage.', '—', 'A manual section per domain (Phase 4).'],
   ])}
+<h2 id="bp12">Your Blueprint at week 12</h2>
+<p>${esc(PARTS_LEDE)}</p>
+${hTable(['Part', 'What it holds', 'Written by'], PARTS.map((b) => [b.n, b.about, `${b.items.length}: ${b.items.join('; ')}`]))}
+<h3>The thinner parts, and the options</h3>
+<p>Your systems (4) and your next ninety days (3) are the thinnest. Ways to make them fuller, for you to choose:</p>
+${hTable(['Option', 'What changes', 'Cost'], OPTIONS)}
+<p><b>My recommendation:</b> B, then C. B puts the Launchpad’s numbers and process into the Blueprint without a single new question; C adds three screens only where the Blueprint is thin.</p>
 <h2 id="principles">The principles underneath</h2>
 <p>Where each one lives. None is pasted on screen as a slogan.</p>
 ${hTable(['Principle', 'Where it lives'], PRINCIPLES)}
@@ -375,6 +402,9 @@ details.lvl>summary::after{content:'+';margin-left:auto;font-size:20px;color:var
 .sent{font-family:var(--display);font-size:16.5px;margin:4px 0}
 .four{margin:6px 0}.four dt{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--c);margin-top:6px}.four dt i{text-transform:none;letter-spacing:0;color:var(--soft)}.four dd{margin:0}
 .links{font-size:13.5px;color:var(--soft);padding-left:18px}
+.ins{font-size:14.5px;border-left:3px solid var(--gold);padding:6px 10px;background:var(--paper);border-radius:0 6px 6px 0}.ins b{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-ink)}
+.keep{margin:8px 0;padding:8px 12px;border:1px dashed var(--gold);border-radius:8px;background:var(--paper)}.kp{margin:0;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-ink)}.keep h5{margin:2px 0 4px;font:500 16px var(--display)}.keep ol{margin:0;padding-left:18px;font-size:14px}
+.ny{font-size:14px;color:var(--soft)}
 .stage,.chg{font-size:14px;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px 10px}
 .sess,.read{border:2px solid var(--gold);border-radius:10px;padding:4px 14px;margin:14px 0;background:var(--panel)}.sess h3,.read h3{margin-top:12px}
 .done{border-top:1px solid var(--line);padding-top:6px}
@@ -415,7 +445,8 @@ function mockData() {
         s: { q: D.s.q, min: D.s.min, max: D.s.max, step: D.s.step, d: D.s.d, up: D.s.up, e: D.s.e, sfx: D.s.sfx || '', raw: !!D.s.raw,
           word: vals.map((v) => wordOf(D.s, v)),
           text: vals.map((v) => (D.s.raw || (typeof D.s.w === 'function' && !D.s.sfx) ? wordOf(D.s, v) : `${v}${D.s.sfx || ''}`)) },
-        f: D.f, fb: D.fb, ex: D.x, done: x.done, on: OV.get(`1.${d}`).on, dayKey: x.dayKey };
+        f: D.f, fb: D.fb, ex: D.x, done: x.done, on: OV.get(`1.${d}`).on, dayKey: x.dayKey,
+        ins: PLAN4[`1.${d}`].ins, take: PLAN4[`1.${d}`].take, notyet: PLAN4[`1.${d}`].notyet, bp: x.bp };
     }) };
 }
 const MOCK_CSS = `
@@ -456,6 +487,13 @@ input[type=range]{width:100%;accent-color:var(--c,var(--gold));height:32px}
 .next:disabled{opacity:.35;cursor:default}.keys{font-size:12px;color:var(--soft)}
 .ns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.ns .opt{width:auto;padding:8px 12px;font-size:14px}
 .calib{font-family:var(--display);font-size:20px}
+.ins{margin:0 0 14px;padding:10px 14px;border-left:3px solid var(--gold);background:var(--panel);border-radius:0 10px 10px 0;font-size:15px;line-height:1.55}
+.ins b{display:block;font:600 11px/1.5 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink)}
+.take{position:relative;margin-top:14px;padding:12px 14px;border:1.5px dashed var(--gold);border-radius:10px;background:var(--panel)}
+.take h4{margin:2px 0 6px;font:500 18px/1.3 var(--display)}.take ol,.bpl{margin:0;padding-left:20px;font-size:15px;line-height:1.6}
+.tk{margin:0;font:600 11px/1.5 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink)}
+.ln{display:inline-block;width:6em;border-bottom:1px solid var(--soft);vertical-align:-2px}
+.smaller{margin:10px 0 0;padding:10px 12px;border-radius:8px;background:var(--panel);font-size:15px}
 mark{background:none;color:inherit;font-weight:600;border-bottom:1.5px solid var(--c,var(--gold))}
 @media (max-width:420px){.keys{display:none}}
 @media (prefers-reduced-motion:no-preference){.scr{animation:in .22s ease-out}@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}.prog i{transition:width .25s}}`;
@@ -474,7 +512,7 @@ function val(d, k) {
   if (k === 'w') return D.s.word[idx(D, sv(d))];
   return S.f[d + '.' + k] || '';
 }
-const fill = (tpl, d) => tpl.replace(/\{(\w+)\}/g, (_, k) => { const x = val(d, k); return x ? '<mark>' + esc(x) + '</mark>' : '<mark>____</mark>'; });
+const fill = (tpl, d) => tpl.replace(/_{4}/g, '\u0001').replace(/\{(\w+)\}/g, (_, k) => { const x = val(d, k); return x ? '<mark>' + esc(x) + '</mark>' : '<mark>____</mark>'; }).replace(/\u0001/g, '<span class="ln"></span>');
 function strong(d) { const D = L.d[d], r = (sv(d) - D.s.min) / (D.s.max - D.s.min); return D.s.up ? r >= 0.5 : r <= 0.4; }
 // Screens: intro, then per domain tap, slide, one per blank, (day), done, lines; then week, then Level 02's opening.
 const SC = [{ t: 'intro' }];
@@ -486,7 +524,7 @@ L.d.forEach((D, d) => {
 });
 SC.push({ t: 'week' }, { t: 'n2' });
 L.d.forEach((D, d) => SC.push({ t: 'got', d }));
-SC.push({ t: 'calib' });
+SC.push({ t: 'calib' }, { t: 'bp' });
 const order = () => { const w = L.d.findIndex((D) => D.k === S.weak); return [w, ...[0, 1, 2, 3].filter((d) => d !== w)]; };
 
 const $ = (s) => document.querySelector(s);
@@ -522,7 +560,8 @@ function render() {
     h = lab + '<h2 class="q">' + esc(D.s.q) + '</h2><p class="big" aria-live="polite">' + esc(D.s.raw ? D.s.word[idx(D, v)] : v + D.s.sfx) + '</p><p class="word">' + esc(D.s.word[idx(D, v)]) + '</p>' +
       '<input type="range" min="' + D.s.min + '" max="' + D.s.max + '" step="' + D.s.step + '" value="' + v + '" aria-label="' + esc(D.s.q) + '"><div class="ends"><span>' + esc(D.s.e[0]) + '</span><span>' + esc(D.s.e[1]) + '</span></div>';
   } else if (sc.t === 'blank') {
-    h = lab + '<div class="sent big2">' + sentence(sc.d, sc.k) + '</div><label class="lab2" for="in">' + esc(sc.hint) + '</label>' +
+    const first = fields(D)[0][0] === sc.k;
+    h = lab + (first ? '<p class="ins"><b>Why it matters</b>' + esc(D.ins) + '</p>' : '') + '<div class="sent big2">' + sentence(sc.d, sc.k) + '</div><label class="lab2" for="in">' + esc(sc.hint) + '</label>' +
       '<input id="in" class="txt" type="text" autocomplete="off" enterkeyhint="next" value="' + esc(S.f[sc.d + '.' + sc.k] || '') + '" placeholder="e.g. ' + esc(sc.ex) + '">' +
       '<p class="hint">A few words is enough. <span class="pvo">Preview only: <button type="button" data-ex>use the example</button></span></p>';
   } else if (sc.t === 'day') {
@@ -538,7 +577,8 @@ function render() {
   } else if (sc.t === 'lines') {
     const L4 = [['Where you were', 'Admit it.', D.fb[0]], ['Where you struggle', 'Don’t fight it.', D.fb[1]], ['Where you shine', 'Don’t ignore it.', strong(sc.d) ? D.fb[2][0] : D.fb[2][1]], ['What you will do', 'Exactly.', D.fb[3]]];
     h = lab + '<h2 class="q">' + esc(D.name) + ', in four lines</h2><div class="four">' + L4.map(([a, b, c], i) =>
-      '<div><h4>' + a + '<small>' + b + '</small></h4><p>' + fill(c, sc.d) + '</p>' + (i === 3 ? '<p class="dw"><b>Done when</b> ' + fill(D.done, sc.d) + ' · ' + (S.sure[sc.d] == null ? 50 : S.sure[sc.d]) + '% sure</p>' : '') + '</div>').join('') + '</div>';
+      '<div><h4>' + a + '<small>' + b + '</small></h4><p>' + fill(c, sc.d) + '</p>' + (i === 3 ? '<p class="dw"><b>Done when</b> ' + fill(D.done, sc.d) + ' · ' + (S.sure[sc.d] == null ? 50 : S.sure[sc.d]) + '% sure</p>' : '') + '</div>').join('') + '</div>' +
+      '<div class="take"><p class="tk">Yours to keep · it goes into your Blueprint: ' + esc(D.bp) + '</p><h4>' + fill(D.take[0], sc.d) + '</h4><ol>' + D.take.slice(1).map((l) => '<li>' + fill(l, sc.d) + '</li>').join('') + '</ol></div>';
   } else if (sc.t === 'week') {
     h = '<p class="dlab">Your week</p><h2 class="q">Four actions. Each has a day.</h2><div class="wk">' + order().map((d, i) => {
       const x = L.d[d];
@@ -549,7 +589,8 @@ function render() {
   } else if (sc.t === 'got') {
     h = lab + '<p class="done"><b>Last week you said:</b> ' + fill(D.fb[3], sc.d) + '<br><span class="hint"><b>Done when</b> ' + fill(D.done, sc.d) + '</span></p><h2 class="q">Did it happen?</h2><div class="opts">' +
       ['Done', 'Partly', 'Not yet'].map((o, i) => '<button type="button" class="opt" data-got="' + i + '" aria-pressed="' + (S.got[sc.d] === i) + '"><kbd>' + (i + 1) + '</kbd>' + o + '</button>').join('') + '</div>' +
-      (S.got[sc.d] != null ? '<p class="hint">You were ' + (S.sure[sc.d] == null ? 50 : S.sure[sc.d]) + '% sure. It happened: ' + ['yes', 'partly', 'not yet'][S.got[sc.d]] + '.</p>' : '');
+      (S.got[sc.d] != null ? '<p class="hint">You were ' + (S.sure[sc.d] == null ? 50 : S.sure[sc.d]) + '% sure. It happened: ' + ['yes', 'partly', 'not yet'][S.got[sc.d]] + '.</p>' : '') +
+      (S.got[sc.d] > 0 ? '<p class="smaller">' + fill(D.notyet, sc.d) + '</p>' : '');
   } else if (sc.t === 'calib') {
     const n = [0, 1, 2, 3], exp = n.reduce((a, d) => a + (S.sure[d] == null ? 50 : S.sure[d]), 0) / 400,
       real = n.reduce((a, d) => a + [1, 0.5, 0][S.got[d]], 0) / 4, diff = exp - real,
@@ -557,7 +598,12 @@ function render() {
       cnt = (g) => n.filter((d) => S.got[d] === g).length;
     h = '<p class="dlab">Last week, counted</p><h2 class="q">' + cnt(0) + ' done, ' + cnt(1) + ' partly, ' + cnt(2) + ' not yet.</h2>' +
       '<p class="calib">Your estimates were <b>' + word + '</b>.</p><p class="hint">The same three words as the Sunday page of your Planner. The chapter reading after Level 05 adds them up.</p>' +
-      '<p class="lead">Then Level 02 begins: the promise, old and new, and the first tap.</p><p><button type="button" class="opt" data-restart style="width:auto">Start the preview again</button></p>';
+      '<p class="lead">Then Level 02 begins: the promise, old and new, and the first tap.</p>';
+  } else if (sc.t === 'bp') {
+    h = '<p class="dlab">My Blueprint · after one week</p><h2 class="q">Four parts of your Blueprint, already written.</h2>' +
+      '<p class="hint">After twelve weeks: eight parts, all forty-eight in your own words. How you lead, your people, what you sell, your marketing, your sales, your money, your systems and your next ninety days. Printable.</p><div class="wk">' +
+      L.d.map((x, d) => '<div style="--c:var(--' + x.k + ')"><h4>' + esc(x.bp) + '</h4><p><b>' + fill(x.take[0], d) + '</b></p><ol class="bpl">' + x.take.slice(1).map((l) => '<li>' + fill(l, d) + '</li>').join('') + '</ol></div>').join('') +
+      '</div><p><button type="button" class="opt" data-restart style="width:auto;margin-top:14px">Start the preview again</button></p>';
   }
   st.innerHTML = '<div class="scr" tabindex="-1">' + h + '</div>';
   const nx = $('.next'); nx.disabled = !ok(sc) || S.i === SC.length - 1; nx.textContent = S.i === SC.length - 1 ? 'The end' : sc.t === 'intro' ? 'Start' : 'Next';

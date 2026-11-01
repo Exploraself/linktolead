@@ -20,6 +20,7 @@ const COMPASS_STAGE_NAME = { building: 'Building', growing: 'Growing', scaling: 
 export function entry({ joined, old, hash = '' }) {
   if (!joined) return hash === '#signin' ? 'signin' : 'redirect';
   if (hash === '#library') return 'library';
+  if (hash === '#blueprint') return 'blueprint';
   if (hash === '#ask') return 'ask';
   if (hash === '#programme') return 'work';
   if (hash === '#home' || hash === '#account') return 'home';

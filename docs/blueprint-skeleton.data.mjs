@@ -7,194 +7,65 @@
 // docs/level-01-one-at-a-time.html.
 //
 // Per domain, keyed 'level.domain' (domain 0 to 3 = yourself, people,
-// business, market):
-//   topic  the one thing this domain is about, in plain words
-//   on     null when the sentence already has its day (field `dayKey`,
-//          default 'day'); else the question of the added day screen
-//          (new saved key `on`); onEx: its example, default Friday
-//   done   "Done when", checkable on Sunday; {key} is the founder’s answer
+// business, market). The topic, the day, "Done when", the insight, what the
+// founder keeps, the smaller step, the Blueprint part and the stage notes
+// live with the levels, in public/levels-v4.js (PLAN4). Here, only how each
+// domain meets the other pieces:
 //   gp     Growth Plan steps: [step, 'uses' | 'deepens' | 'feeds', note?]
 //   lp     Launchpad plan action this meets: [title, 'uses' | 'deepens' | 'change', note]
-//   uses   an earlier level’s answer this domain shows back
-//   pl     where it lands in The Leader’s Growth Planner 2027
-//   stage  { building | growing | scaling: note } only where truly different
+//   uses   an earlier level's answer this domain shows back
+//   pl     where it lands in The Leader's Growth Planner 2027
 //   change a change to the Version 4 text, with its reason
 
 export const DOMAINS = [
-  // ── Level 01 · SEED ──────────────────────────────────────────────
-  ['1.0', { topic: 'The rule that decides your worth', on: null,
-    done: 'on {day} you did “{act}”, and wrote one line on what really happened.',
-    gp: [[4, 'deepens', 'the voice that says you are not good enough']],
-    pl: 'Monday page · The habit I’m fighting: the old rule, word for word' }],
-  ['1.1', { topic: 'One task out of your hands', on: null,
-    done: '{who} did {task} once, to “{done}”, and you checked it only once.',
-    gp: [[10, 'deepens']],
-    lp: ['Give one thing away', 'change', 'the same hand-over, a week later. The plan counts the hours it gave back instead.'],
-    stage: { building: 'No team yet? Hand it to a tool, a template, or a freelancer for two hours.' } }],
-  ['1.2', { topic: 'Money: the sentence you grew up with, and your enough', on: null,
-    done: 'on {day} you made one money move: {move}.',
-    gp: [[12, 'uses', 'if step 12 is written, its first line shows above the tap']],
-    lp: ['Name your enough', 'change', 'the money amount is asked here the same week. The plan keeps the time: free evenings and most hours a week.'] }],
-  ['1.3', { topic: 'Asking someone to buy', on: null,
-    done: 'you asked {names} by {day}, and wrote each answer word for word. A yes and a no both count.',
-    gp: [[16, 'uses', 'the three names from step 16 are offered as taps'], [17, 'deepens']],
-    lp: ['Make three asks', 'change', 'the same three asks, the same fortnight. The plan counts asks, yes, no and no answer in week 3 instead.'] }],
-
-  // ── Level 02 · VIEW ──────────────────────────────────────────────
-  ['2.0', { topic: 'Facts before the story', on: 'By which day will one more event be written this way?',
-    done: 'by {on}, one more event (the next thing that goes wrong, or the hardest moment of the week) is written as facts, story and a truer reading, before you acted on it.' }],
-  ['2.1', { topic: 'Ask before you judge', on: null,
-    done: 'by {day} you asked {who} the question, only listened, and wrote one line of what you heard.' }],
-  ['2.2', { topic: 'Your five numbers, on a fixed day', on: null,
-    done: 'on {day} at {time} you read all five numbers, {fear} first, and wrote them down.',
-    lp: ['Read last month’s money', 'uses', 'the statement you opened in week 1 holds four of the five.'],
-    stage: { building: 'No sales yet? Money in is zero: read it anyway, and add one more number, conversations held.' } }],
-  ['2.3', { topic: 'One customer signal, tested', on: 'By which day will you have checked it once?',
-    done: 'by {on} you checked the signal once, by {check}, and wrote what the customer actually said.' }],
-
-  // ── Level 03 · CALM ──────────────────────────────────────────────
-  ['3.0', { topic: 'The feeling under the stress', on: 'By which day will you have used it once?',
-    done: 'by {on}, the next time {feeling} came, you did this first: {help}. You wrote the day it happened.' }],
-  ['3.1', { topic: 'Your first five seconds under pressure', on: 'Which day will you ask {who}?',
-    done: 'you asked {who} on {on} to tell you when you slip, and under pressure you did this at least once: {will}.',
-    stage: { building: 'No team yet? The people around you are clients, partners and family. Ask one of them.' } }],
-  ['3.2', { topic: 'A rule for decisions in a storm', on: 'By which day will the rule be where you see it?',
-    done: 'by {on}, the rule is on your phone’s lock screen or on your desk, and one person knows it.' }],
-  ['3.3', { topic: 'Your client’s fear, in their words', on: null,
-    done: 'you asked {who} by {day}, and wrote their fear and their hope in their own words.',
-    lp: ['Hear it in their words', 'uses', 'ask one of the three people you heard in week 1, now about fear and hope.'] }],
-
-  // ── Level 04 · STEP ──────────────────────────────────────────────
-  ['4.0', { topic: 'Decide once, in advance', on: 'Which day will you use it first?',
-    done: 'you used the plan on {on} and on two more days, and wrote “kept” or “not kept” each time.',
-    gp: [[3, 'deepens', 'two habits out']] }],
-  ['4.1', { topic: 'One ask with a date and a done', on: null, dayKey: 'when',
-    done: '{who} has the ask in writing, with the date and the done, and on {when} you checked it once.',
-    lp: ['Say one expectation out loud', 'change', 'this level asks it with a date and a done. The plan counts last week’s clear asks instead.'] }],
-  ['4.2', { topic: 'Your hour has a price', on: 'Which day will you hand back {back}?',
-    done: '{first} came first on three days, and {back} was handed back by {on}.',
-    lp: ['Find your cheapest hour', 'uses', 'the cheapest hour found in week 2 is the first one to hand back.'],
-    stage: { scaling: 'Price your team’s hour too: what one hour of their work costs you.' } }],
-  ['4.3', { topic: 'A weekly selling hour', on: null,
-    done: 'on {day} at {time} you talked with {n} potential buyers, and everyone heard from you twice.',
-    lp: ['Count your conversations', 'uses', 'the Friday count from week 3 is the number to beat.'] }],
-
-  // ── Level 05 · FACT ──────────────────────────────────────────────
-  ['5.0', { topic: 'Proof of who you are becoming', on: 'By which day will you add one more proof?',
-    done: 'by {on}, a second dated proof is written under the first.',
-    uses: 'Level 01 · your new sentence (“I am … before I achieve anything”)' }],
-  ['5.1', { topic: 'Thanks that names the thing', on: 'Which day will you tell {who}?',
-    done: 'you told {who} on {on}, face to face or in writing, what they did and what it changed.',
-    lp: ['Name what someone did well', 'change', 'this level does it. The plan counts specific thanks given in week 3 instead.'] }],
-  ['5.2', { topic: 'One number that tells the truth', on: null,
-    done: 'on {day} you read {num}, wrote it on your Planner’s Monday page, and, if it missed, one line on the belief behind it.',
-    lp: ['Choose your Monday number', 'uses', 'the same number: the slide asks how many weeks in a row you have read it.'],
-    pl: 'Monday page · the number, every week' }],
-  ['5.3', { topic: 'Their words, not yours', on: 'By which day will you ask three clients?',
-    done: 'you asked three clients by {on}, and wrote their answers word for word.',
-    change: 'The “Exactly” line said “by Friday”. It now says “by {on}”, the day the founder chose.' }],
-
-  // ── Level 06 · TALK ──────────────────────────────────────────────
-  ['6.0', { topic: 'The conversation you keep postponing', on: null,
-    done: 'the talk with {who} happened on {day}, and you said the first sentence as you wrote it.',
-    gp: [[6, 'uses', 'the person and the conversation named in step 6 show above the tap'], [8, 'feeds', 'Done here ticks step 8']] }],
-  ['6.1', { topic: 'Ask, then listen', on: 'Which day is the talk with {who}?',
-    done: 'in the talk with {who} on {on} you asked “{ask}”, and spoke less than half the time.' }],
-  ['6.2', { topic: 'Money that is yours', on: null,
-    done: 'the message went to {who} on {day}. Being paid by {by} is theirs to do; sending it was yours.',
-    stage: { building: 'Nothing unpaid? Take the work you did for free, and ask to be paid for it from now on.' } }],
-  ['6.3', { topic: 'A kind no, with an alternative', on: 'By which day will you say it?',
-    done: 'you said the kind no about {what} by {on}, offered {suggest}, and added no discount.' }],
-
-  // ── Level 07 · HOUR ──────────────────────────────────────────────
-  ['7.0', { topic: 'Your best hours, guarded', on: null, dayKey: 'days',
-    done: 'the hours from {from} to {to} are in your calendar for the next four weeks, and you kept them this week, {days}.',
-    gp: [[15, 'deepens', 'a half-day without you']],
-    lp: ['Guard one block', 'deepens', 'one block in week 2; here, your best hours, every week.'] }],
-  ['7.1', { topic: 'One task, one step up', on: 'Which day this week will it run that way for the first time?',
-    done: 'on {on}, {task} ran once at “{to}”, and {day} is in your calendar as the day it stays there.',
-    uses: 'Level 01 · the task you handed over (Entrust)',
-    gp: [[10, 'uses']],
-    stage: { building: 'No team? The next step is a template or a tool doing it, and you checking.' } }],
-  ['7.2', { topic: 'The price you never go below', on: 'By which day will the floor be written next to your prices?',
-    done: '{floor} is written next to your price list by {on}, and your next quote was at or above it.',
-    lp: ['Know your number', 'uses', 'what one sale leaves you, from week 1.'] }],
-  ['7.3', { topic: 'One marketing hour a week', on: null,
-    done: 'on {day}, from {from} to {to}, you did “{act}” on {where}, and the hour is in your calendar for four weeks.' }],
-
-  // ── Level 08 · GOLD ──────────────────────────────────────────────
-  ['8.0', { topic: 'What you are best at, and what to stop', on: 'By which day will you stop selling {stop}?',
-    done: 'by {on}, {stop} came off your price list or offer page, or you said no to one request.',
-    gp: [[11, 'deepens', 'where you play small']] }],
-  ['8.1', { topic: 'Three clear steps after yes', on: 'By which day will the three steps be written?',
-    done: 'by {on}, the three steps are in the message every new client gets, and {who} knows step {which} is theirs.',
-    stage: { building: 'No clients yet? Write the three steps for your first one, and walk a friend through them.' } }],
-  ['8.2', { topic: 'Three price levels', on: 'By which day will the three levels be on your offer page?',
-    done: 'by {on}, the three levels are on your offer page or price list, and you said them out loud once to a buyer.',
-    gp: [[13, 'feeds', 'saying the price out loud is step 13']] }],
-  ['8.3', { topic: 'Your offer in one line', on: 'By which day will you have said it to three people?',
-    done: 'by {on}, you said the line to three people the same way, and one could say it back.',
-    uses: 'Level 01 · who you help, and with what (Dignity)' }],
-
-  // ── Level 09 · FLOW ──────────────────────────────────────────────
-  ['9.0', { topic: 'A weekly review you keep', on: null,
-    done: 'on {day} at {time} you held the review and wrote {three} priorities on your Planner’s Monday page.',
-    gp: [[21, 'uses', 'the inner boardroom is the review']],
-    pl: 'Sunday page · what really happened; Monday page · three goals',
-    change: 'The sentence said “30 minutes”. Proposed: “ten minutes”, the same as Growth Plan step 21. Decision D3.' }],
-  ['9.1', { topic: 'One area with an owner', on: 'By which day will {who} know?',
-    done: 'by {on}, {who} has it in writing: they own {owns} up to {limit}, and one decision was made without you.',
-    gp: [[9, 'feeds', 'one decision made without you']],
-    stage: { building: 'No team? Name the tool, template or freelancer that owns the area, and what you still check.' } }],
-  ['9.2', { topic: 'One page of cash', on: null,
-    done: 'on {day} the page shows this week’s in, out and left, and you know what you do below {alert}.',
-    lp: ['Read last month’s money', 'deepens', 'once in week 1; here, every week, with an alert line.'] }],
-  ['9.3', { topic: 'A warm list you can see', on: null,
-    done: 'the {n} names are written down, and on {day} you moved {m} of them one step.',
-    stage: { scaling: 'Each person who sells keeps their own list; you read the total every week.' } }],
-
-  // ── Level 10 · NAME ──────────────────────────────────────────────
-  ['10.0', { topic: 'People you already know', on: 'By which day will the messages be sent?',
-    done: 'by {on}, {n} messages are sent, starting with {first}, and you counted the replies.',
-    uses: 'Session 2 · the ten names chosen from your warm list',
-    gp: [[16, 'uses'], [19, 'deepens', 'the no you are afraid of']] }],
-  ['10.1', { topic: 'One partner asked', on: 'By which day will you ask {who}?',
-    done: 'you asked {who} by {on}, and offered your part first.' }],
-  ['10.2', { topic: 'Your best client, described', on: 'By which day will you list them?',
-    done: 'by {on}, every current client who shares all three is listed by name.',
-    lp: ['Name your best customer', 'uses', 'the person named in week 1 is the first example.'],
-    stage: { building: 'Fewer than three clients? Describe the one you want most, and the first one who paid.' } }],
-  ['10.3', { topic: 'Customer conversations about their past', on: 'By which day will three be booked?',
-    done: 'by {on}, three of the {n} conversations are booked or held, and you wrote their exact words.' }],
-
-  // ── Level 11 · EDGE ──────────────────────────────────────────────
-  ['11.0', { topic: 'Feedback, asked for', on: 'By which day will you have asked all three?',
-    done: 'by {on} you asked {a}, {b} and {c}, wrote each answer down, and only said thank you.',
-    lp: ['Ask for the truth', 'change', 'this level asks three people. The plan counts the people who told you something hard instead.'] }],
-  ['11.1', { topic: 'One open question, every meeting', on: 'Which day is the next {meet}?', onEx: 'Monday',
-    done: 'at the {meet} on {on} you asked “What isn’t working that I don’t know?”, and did this before you answered: {do}.',
-    stage: { building: 'No team meeting? Ask it of a partner, a supplier, or a client at the end of each job.' } }],
-  ['11.2', { topic: 'Your advantage, with proof', on: 'By which day will it be where buyers see it?',
-    done: 'by {on}, the sentence and its proof are on your offer page or in your next proposal.' }],
-  ['11.3', { topic: 'Testimonials asked for', on: null,
-    done: 'you asked {n} clients by {day}, and every answer you got is where buyers decide.',
-    uses: 'Level 05 · the three clients you asked for their words (Testimony)' }],
-
-  // ── Level 12 · RISE ──────────────────────────────────────────────
-  ['12.0', { topic: 'Who you are now', on: 'By which day will you read it aloud to someone?',
-    done: 'by {on}, the sentence is on the first page of your Planner, and you read it aloud to one person.',
-    gp: [[2, 'deepens', 'the drive behind your desire']] }],
-  ['12.1', { topic: 'Grow one leader', on: null,
-    done: '{who} knows, in writing, that they own {own}, and on {day} you asked “{ask}”',
-    gp: [[10, 'uses']],
-    stage: { building: 'Nobody yet? Pick the freelancer you use most, or the first person you would hire, and give them one decision.' } }],
-  ['12.2', { topic: 'One number for the next ninety days', on: 'By which day will it be in your Planner?',
-    done: 'by {on}, your Planner’s twelve-week contract holds the number ({num}, from {from} to {to}) and both checkpoints with their dates.',
-    gp: [[5, 'feeds', 'twelve weeks of truth']],
-    pl: 'Twelve-week contract (front pages)',
-    stage: { scaling: 'Give each owner from Level 09 their own checkpoint, and read all of them on the same day.' } }],
-  ['12.3', { topic: 'One small market test', on: 'By which day will the first invitations go out?',
-    done: 'by {on}, the first invitations are out, and success ({win} by {day}) is written in your Planner.' }],
+  ['1.0', { gp: [[4, 'deepens', 'the voice that says you are not good enough']], pl: 'Monday page · The habit I’m fighting: the old rule, word for word' }],
+  ['1.1', { gp: [[10, 'deepens']], lp: ['Give one thing away', 'change', 'the same hand-over, a week later. The plan counts the hours it gave back instead.'] }],
+  ['1.2', { gp: [[12, 'uses', 'if step 12 is written, its first line shows above the tap']], lp: ['Name your enough', 'change', 'the money amount is asked here the same week. The plan keeps the time: free evenings and most hours a week.'] }],
+  ['1.3', { gp: [[16, 'uses', 'the three names from step 16 are offered as taps'], [17, 'deepens']], lp: ['Make three asks', 'change', 'the same three asks, the same fortnight. The plan counts asks, yes, no and no answer in week 3 instead.'] }],
+  ['2.0', {  }],
+  ['2.1', {  }],
+  ['2.2', { lp: ['Read last month’s money', 'uses', 'the statement you opened in week 1 holds four of the five.'] }],
+  ['2.3', {  }],
+  ['3.0', {  }],
+  ['3.1', {  }],
+  ['3.2', {  }],
+  ['3.3', { lp: ['Hear it in their words', 'uses', 'ask one of the three people you heard in week 1, now about fear and hope.'] }],
+  ['4.0', { gp: [[3, 'deepens', 'two habits out']] }],
+  ['4.1', { lp: ['Say one expectation out loud', 'change', 'this level asks it with a date and a done. The plan counts last week’s clear asks instead.'] }],
+  ['4.2', { lp: ['Find your cheapest hour', 'uses', 'the cheapest hour found in week 2 is the first one to hand back.'] }],
+  ['4.3', { lp: ['Count your conversations', 'uses', 'the Friday count from week 3 is the number to beat.'] }],
+  ['5.0', { uses: 'Level 01 · your new sentence (“I am … before I achieve anything”)' }],
+  ['5.1', { lp: ['Name what someone did well', 'change', 'this level does it. The plan counts specific thanks given in week 3 instead.'] }],
+  ['5.2', { lp: ['Choose your Monday number', 'uses', 'the same number: the slide asks how many weeks in a row you have read it.'], pl: 'Monday page · the number, every week' }],
+  ['5.3', { change: 'The “Exactly” line said “by Friday”. It now says “by {on}”, the day the founder chose.' }],
+  ['6.0', { gp: [[6, 'uses', 'the person and the conversation named in step 6 show above the tap'], [8, 'feeds', 'Done here ticks step 8']] }],
+  ['6.1', {  }],
+  ['6.2', {  }],
+  ['6.3', {  }],
+  ['7.0', { gp: [[15, 'deepens', 'a half-day without you']], lp: ['Guard one block', 'deepens', 'one block in week 2; here, your best hours, every week.'] }],
+  ['7.1', { gp: [[10, 'uses']], uses: 'Level 01 · the task you handed over (Entrust)' }],
+  ['7.2', { lp: ['Know your number', 'uses', 'what one sale leaves you, from week 1.'] }],
+  ['7.3', {  }],
+  ['8.0', { gp: [[11, 'deepens', 'where you play small']] }],
+  ['8.1', {  }],
+  ['8.2', { gp: [[13, 'feeds', 'saying the price out loud is step 13']] }],
+  ['8.3', { uses: 'Level 01 · who you help, and with what (Dignity)' }],
+  ['9.0', { gp: [[21, 'uses', 'the inner boardroom is the review']], pl: 'Sunday page · what really happened; Monday page · three goals', change: 'The sentence said “30 minutes”. Proposed: “ten minutes”, the same as Growth Plan step 21. Decision D3.' }],
+  ['9.1', { gp: [[9, 'feeds', 'one decision made without you']] }],
+  ['9.2', { lp: ['Read last month’s money', 'deepens', 'once in week 1; here, every week, with an alert line.'] }],
+  ['9.3', {  }],
+  ['10.0', { gp: [[16, 'uses'], [19, 'deepens', 'the no you are afraid of']], uses: 'Session 2 · the ten names chosen from your warm list' }],
+  ['10.1', {  }],
+  ['10.2', { lp: ['Name your best customer', 'uses', 'the person named in week 1 is the first example.'] }],
+  ['10.3', {  }],
+  ['11.0', { lp: ['Ask for the truth', 'change', 'this level asks three people. The plan counts the people who told you something hard instead.'] }],
+  ['11.1', {  }],
+  ['11.2', {  }],
+  ['11.3', { uses: 'Level 05 · the three clients you asked for their words (Testimony)' }],
+  ['12.0', { gp: [[2, 'deepens', 'the drive behind your desire']] }],
+  ['12.1', { gp: [[10, 'uses']] }],
+  ['12.2', { gp: [[5, 'feeds', 'twelve weeks of truth']], pl: 'Twelve-week contract (front pages)' }],
+  ['12.3', {  }],
 ];
 
 /** The two 1:1 sessions with Alexandru and the team. */
@@ -230,14 +101,11 @@ export const READING_SCREENS = [
   ['Your next move', 'New. Tap the one undone action that matters most, pick its day, and read its “Done when”. It is carried into next week next to the new level’s four, and asked about on Sunday like them.'],
 ];
 export const READINGS = [
-  { ch: 0, after: 5, quote: 'The way you run your day is the way you run your company. If you avoid your numbers at home, you will avoid them at work.',
-    source: 'Worth Building (the Library), page “Business is life, and life is business”',
+  { ch: 0, after: 5,
     extra: 'Actions counted: Levels 01 to 04 (16). Level 05’s four are checked when Level 06 opens.' },
-  { ch: 1, after: 9, quote: 'Stick to what you do best, and serve people. The money follows the service, not the other way round.',
-    source: 'Worth Building (the Library), page “The 50/50 rule”',
+  { ch: 1, after: 9,
     extra: 'Actions counted: Levels 05 to 08 (16). Then Session 2.' },
-  { ch: 2, after: 12, quote: 'I believe each of us has been given talents, and that we are meant to multiply them, not bury them.',
-    source: 'Worth Building (the Library), “A word from Alexandru · Allow yourself to rise”',
+  { ch: 2, after: 12,
     extra: 'Actions counted: Levels 09 to 11 (12), and the whole programme. Level 12’s four are checked in week 13, which then opens the North Star again, to compare with where you began.' },
 ];
 
@@ -307,4 +175,13 @@ export const PRINCIPLES = [
   ['A time to push, a time to help', 'The “Done when” pushes: a day, checkable on Sunday. The Sunday check helps: “Not yet” is an answer, never a mark against you, and the next move carries it. The two sessions are where Alexandru and the team help.'],
   ['Achievement is an act of kindness', 'Asking to buy (01), the money owed (06), the warm list moved (09): getting it done serves the people waiting on you.'],
   ['Win with grace', 'The kind no with an alternative (06), feedback answered only with thank you (11), proof asked for in clients’ own words, never written for them (05, 11).'],
+];
+
+/** The thinner parts of the founder's Blueprint, and the ways to make them
+ *  fuller. For Alexandru to choose; nothing here is built yet. */
+export const OPTIONS = [
+  ['A · Keep it as it is', 'Your systems has 4 parts and your next ninety days has 3. What the founder keeps (the hand-over note, the welcome message, the owner note, the weekly review page, the three questions) carries the practical depth.', 'Nothing to build.'],
+  ['B · Save the Launchpad plan online', 'Today the twenty Launchpad actions are a PDF. Online, its numbers and its “one process in ten lines” fill the Blueprint too: your money gets last month’s figures, your systems gets a written process.', 'One small table and a page, like the Growth Plan.'],
+  ['C · One “build it” screen after each reading', 'Chapter I: one process in ten lines. Chapter II: the client steps and the owner note as a one-page operations sheet. Chapter III: the ninety-day page, with the test and the person you grow.', 'Three screens, written from the founder’s answers.'],
+  ['D · Show the Growth Plan in the Blueprint', 'A full account’s Growth Plan words (the truth you hide, the root, the fear) as a ninth part: the inner side of the same twelve weeks.', 'Reads what is already saved.'],
 ];

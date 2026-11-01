@@ -484,7 +484,10 @@ function v4Panel(work) {
         let slide = '';
         if (sv != null && Number.isFinite(Number(sv))) { const w = wordOf(D.s, Number(sv)); slide = `${sv}${D.s.sfx || ''}${w && String(w) !== String(sv) ? ' · ' + w : ''}`; }
         const sent = anyF ? D.f.map((x) => (typeof x === 'string' ? x : (String(g(x[0]) || '').trim() || '____'))).join('') : '';
-        return `<div class="v4d"><b>${esc(SIDES[di])}</b><span>${tap ? `Tapped: “${esc(tap)}”` : ''}${slide ? `${tap ? '<br>' : ''}Slid: ${esc(slide)} <span class="tiny">(${esc(strip(D.s.q))})</span>` : ''}${sent ? `${tap || slide ? '<br>' : ''}<q>${esc(strip(sent))}</q>` : ''}</span></div>`;
+        // The action: its added day, how sure they were, and what Sunday said.
+        const on = String(g('on') || '').trim(), sure = g('sure'), got = g('got');
+        const act = [on ? `Day: ${on}` : '', sure != null && sure !== '' ? `${sure}% sure` : '', got != null && got !== '' ? `Sunday: ${['done', 'partly', 'not yet'][Number(got)] || '—'}` : ''].filter(Boolean).join(' · ');
+        return `<div class="v4d"><b>${esc(SIDES[di])}</b><span>${tap ? `Tapped: “${esc(tap)}”` : ''}${slide ? `${tap ? '<br>' : ''}Slid: ${esc(slide)} <span class="tiny">(${esc(strip(D.s.q))})</span>` : ''}${sent ? `${tap || slide ? '<br>' : ''}<q>${esc(strip(sent))}</q>` : ''}${act ? `<br><span class="tiny">${esc(act)}</span>` : ''}</span></div>`;
       }).join('');
       return doms ? `<div class="v4l"><h3>Level ${String(lv).padStart(2, '0')} · ${esc(L.word)} · ${esc(L.title)}</h3>${doms}</div>` : '';
     }).join('')}</div>`;

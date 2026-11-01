@@ -352,6 +352,293 @@ export const LEVELS4 = [
       ['You’re confident. Test it anyway; confidence isn’t data.', 'You set a test with a number for success. That is how markets are entered.'], 'By {day} you test {test} with {n} people. Success: {win}. If not, {else}.'] }] }
 ];
 
+/* ── The action plan of every domain (Blueprint skeleton, Phase 3) ─────────
+ * Inform, reform, transform. Per domain, keyed 'level.domain' (domain 0 to 3):
+ *   topic   what the domain is about, in plain words
+ *   on      null when the sentence already holds the action's day (its field
+ *           is dayKey, default 'day'); else the question of the added day
+ *           screen, saved as the new key `on` (onEx: its example)
+ *   bp      the section of the founder's Blueprint this domain writes
+ *   ins     the insight: the principle, never the technique (rule 9)
+ *   done    "Done when", checkable on Sunday; {key} is the founder's answer
+ *   take    what the founder keeps: [title, ...lines], filled with their own
+ *           words; ____ is a line to fill in on paper
+ *   notyet  the smaller step, after a Sunday "Partly" or "Not yet"
+ *   stage   a note only where a stage is truly different (Leading reads
+ *           Scaling)
+ * New saved keys, beside the Version 4 ones (none changes meaning):
+ *   w.v4.L.d.on    the added day       w.v4.L.d.sure  how sure, 0 to 100
+ *   w.v4.L.d.got   0 Done, 1 Partly, 2 Not yet (asked when level L+1 opens)
+ *   w.v4.L.r.carry 'level.domain' carried forward from a chapter reading,
+ *   w.v4.L.r.on    and its day (L = 5, 9, 12) */
+export const PLAN4 = {
+  '1.0': { topic: 'The rule that decides your worth', on: null, bp: 'self',
+    ins: 'A rule like this was learned early, often from someone you wanted to please. It still decides how you rest, price and say no. You do not argue a rule away; you test it once and look at what really happens.',
+    done: 'on {day} you did “{act}”, and wrote one line on what really happened.',
+    take: ['The test card', 'Old rule: If I {t}, then I’m worth something.', 'The test: on {day} I {act}.', 'What I feared would happen: ____', 'What really happened: ____'],
+    notyet: 'Make it smaller: one hour of it, not a whole evening, on the next free day. Then write the line.' },
+  '1.1': { topic: 'One task out of your hands', on: null, bp: 'people',
+    ins: 'Every task you keep because “nobody does it right” costs you an hour you needed for the work only you can do. Trust is built in small, checked steps, not in one leap. A clear “done” protects both of you.',
+    done: '{who} did {task} once, to “{done}”, and you checked it only once.',
+    take: ['The hand-over note', '{who}, from {day}, {task} is yours.', 'Done means: {done}.', 'I will check it once, on ____. Ask me anything before you start.'],
+    notyet: 'Make it smaller: hand over one part of {task}, or do it once side by side, then let them do the next one.',
+    stage: { building: 'No team yet? Hand it to a tool, a template, or a freelancer for two hours.' } },
+  '1.2': { topic: 'Money: the sentence you grew up with, and your enough', on: null, bp: 'money',
+    ins: 'Without a number for enough, every month feels short and every price feels too high. Enough is a finish line, not a ceiling: it tells you when to stop chasing and what to charge. The sentence you grew up with is not your business plan.',
+    done: 'on {day} you made one money move: {move}.',
+    take: ['My money line', 'Enough: {enough} a month.', 'Last month in: ____ · fixed costs: ____ · left: ____', 'The money move: {move}, on {day}.'],
+    notyet: 'Make it smaller: open last month’s statement and write the three numbers. The move can wait a week; the looking cannot.' },
+  '1.3': { topic: 'Asking someone to buy', on: null, bp: 'sales',
+    ins: 'If your offer helps, then not asking keeps help from the people who need it. Asking is service; the answer belongs to them. A no tells you something true about the offer or the timing, never about your worth.',
+    done: 'you asked {names} by {day}, and wrote each answer word for word. A yes and a no both count.',
+    take: ['The ask, ready to send', 'Hi ____, I help {whom} with {prob}.', 'I think it could help you. Would you like to talk for twenty minutes this week?', 'Asked: {names}. Their answers, word for word: ____'],
+    notyet: 'Make it smaller: ask one of the three today, by message, with the two lines above.' },
+  '2.0': { topic: 'Facts before the story', on: 'By which day will one more event be written this way?', bp: 'self',
+    ins: 'Your mind writes a story in a second, then acts on it as if it were fact. Most bad decisions in a hard week come from the story, not from the facts. Separate them on paper and the next step usually becomes plain.',
+    done: 'by {on}, one more event (the next thing that goes wrong, or the hardest moment of the week) is written as facts, story and a truer reading, before you acted on it.',
+    take: ['The three-line check, for any hard moment', 'What a camera would have seen: ____', 'The story I told myself: ____', 'What else could be true: ____'],
+    notyet: 'Make it smaller: take the last thing that annoyed you, even a small one, and write the three lines tonight.' },
+  '2.1': { topic: 'Ask before you judge', on: null, bp: 'people',
+    ins: 'When you decide why someone let you down without asking, you lead the person in your head, not the real one. One honest question takes five minutes and saves weeks of quiet resentment. Ask, then only listen.',
+    done: 'by {day} you asked {who} the question, only listened, and wrote one line of what you heard.',
+    take: ['The question, ready to ask', '{who}, when {what}, what was going on for you?', 'Then: “What would help next time?”', 'What I heard: ____'],
+    notyet: 'Make it smaller: send the question as a message today, and read the answer twice before you reply.' },
+  '2.2': { topic: 'Your five numbers, on a fixed day', on: null, bp: 'money',
+    ins: 'Numbers are not a verdict on you. They are the business telling you the truth early, while it is still cheap to act. A machine can add them up in seconds; only you can decide what they mean and what you do on Monday.',
+    done: 'on {day} at {time} you read all five numbers, {fear} first, and wrote them down.',
+    take: ['My five numbers, every {day} at {time}', 'Money in: ____ · money out: ____ · cash left: ____', 'Unpaid invoices: ____ · hours worked: ____', '{fear}, read first. What it tells me: ____'],
+    notyet: 'Make it smaller: read only {fear} this week, on {day}, and write it down.',
+    stage: { building: 'No sales yet? Money in is zero: read it anyway, and add one more number, conversations held.' } },
+  '2.3': { topic: 'One customer signal, tested', on: 'By which day will you have checked it once?', bp: 'sales',
+    ins: 'Praise feels like progress, but only payment is proof. A signal you test turns guessing into knowing, and knowing is what a sales rhythm is built on. One honest check beats a week of worry.',
+    done: 'by {on} you checked the signal once, by {check}, and wrote what the customer actually said.',
+    take: ['The signal test', 'When a customer {does}, I think it means {means}.', 'I check by {check}.', 'What they actually said: ____ · Was I right? ____'],
+    notyet: 'Make it smaller: ask the next person who shows interest one question: “What would make this a yes for you?”' },
+  '3.0': { topic: 'The feeling under the stress', on: 'By which day will you have used it once?', bp: 'self',
+    ins: '“Stressed” is a cover word. The feeling under it (fear, shame, anger, loneliness, tiredness) each asks for something different. Name it and you can answer it; leave it unnamed and it decides for you.',
+    done: 'by {on}, the next time {feeling} came, you did this first: {help}. You wrote the day it happened.',
+    take: ['When it comes', 'Under my {surface} is {feeling}.', 'What helps: {help}.', 'Then I decide. Not before.'],
+    notyet: 'Make it smaller: the next time you feel tense, say the real word to yourself, even silently. That counts as the first time.' },
+  '3.1': { topic: 'Your first five seconds under pressure', on: 'Which day will you ask {who}?', bp: 'people',
+    ins: 'People watch your face in the first five seconds after bad news, and decide whether to bring you the next one. If bad news is not safe with you, you hear it late, when it is expensive. Change the first reaction and the room changes with it.',
+    done: 'you asked {who} on {on} to tell you when you slip, and under pressure you did this at least once: {will}.',
+    take: ['My first five seconds', 'Under pressure I will {will}, instead of {instead}.', '{who} tells me when I slip.', 'Times I slipped this week: ____ · times I kept it: ____'],
+    notyet: 'Make it smaller: tell {who} today, in one sentence, what you are practising. Asking is the first step.',
+    stage: { building: 'No team yet? The people around you are clients, partners and family. Ask one of them.' } },
+  '3.2': { topic: 'A rule for decisions in a storm', on: 'By which day will the rule be where you see it?', bp: 'self',
+    ins: 'The decisions made in a storm are usually the ones you pay for longest: a price cut, a hire, a quit. A rule written while you are calm is a gift to the person you will be on a bad day. You do not have to win the feeling; you only have to wait it out.',
+    done: 'by {on}, the rule is on your phone’s lock screen or on your desk, and one person knows it.',
+    take: ['The rule I wrote while calm', 'When I feel {feel} above 7 out of 10,', 'I wait {hours} hours before I decide about {about}.', 'Who I call while I wait: ____'],
+    notyet: 'Make it smaller: write the rule on a note today and put it where you work.' },
+  '3.3': { topic: 'Your client’s fear, in their words', on: null, bp: 'marketing',
+    ins: 'People buy to move away from a fear and towards a hope, then explain it with logic afterwards. If you guess the fear, your message speaks to the wrong thing. Their own words, written down, are the best marketing you will ever have.',
+    done: 'you asked {who} by {day}, and wrote their fear and their hope in their own words.',
+    take: ['Their fear, their hope', '{who} fears: ____ (their words)', 'And hopes for: ____ (their words)', 'The first line of my next message: “If you’re worried about ____, …”'],
+    notyet: 'Make it smaller: ask one client one question by message: “What almost stopped you from working with me?”' },
+  '4.0': { topic: 'Decide once, in advance', on: 'Which day will you use it first?', bp: 'self',
+    ins: 'Willpower runs out by the afternoon; a decision made in advance does not. An if–then plan works because the hard choice is already made when the moment comes. Plan for the obstacle you know will show up, not for a perfect day.',
+    done: 'you used the plan on {on} and on two more days, and wrote “kept” or “not kept” each time.',
+    take: ['My if–then', 'When {when}, I will {will}.', 'If {if}, then I {then}.', 'Kept: Mon ☐ Tue ☐ Wed ☐ Thu ☐ Fri ☐'],
+    notyet: 'Make it smaller: use the plan once, tomorrow, for ten minutes. One kept plan is the start of the habit.' },
+  '4.1': { topic: 'One ask with a date and a done', on: null, dayKey: 'when', bp: 'people',
+    ins: 'Most frustration with people is a request that was never made clearly: no date, no picture of done. A clear ask is a kindness, because it lets people succeed. If it matters, write it down.',
+    done: '{who} has the ask in writing, with the date and the done, and on {when} you checked it once.',
+    take: ['The clear ask, ready to send', '{who}, could you do {what} by {when}?', 'Done looks like: {done}.', 'Is there anything you need from me to do it?'],
+    notyet: 'Make it smaller: take one request you already made this week, add a date and a “done”, and send it again.' },
+  '4.2': { topic: 'Your hour has a price', on: 'Which day will you hand back {back}?', bp: 'offer',
+    ins: 'Your hour has a price whether you name it or not. Once you know it, cheap work stops looking free: every hour of admin you keep is paid at your rate. The first hour of the day decides what kind of week it becomes.',
+    done: '{first} came first on three days, and {back} was handed back by {on}.',
+    take: ['My hour', 'My hour is worth {hour}.', 'First, every day: {first}.', 'Handed back: {back}. Hours it gives me each week: ____'],
+    notyet: 'Make it smaller: protect the first hour on two days, not every day, and do {first} in it.',
+    stage: { scaling: 'Price your team’s hour too: what one hour of their work costs you.' } },
+  '4.3': { topic: 'A weekly selling hour', on: null, bp: 'sales',
+    ins: 'Delivery fills every free hour, so selling only happens when the work runs out, which is the worst time to start. A fixed selling hour keeps the pipeline full while you are busy. Everyone hears from you twice, because people are busy, not uninterested.',
+    done: 'on {day} at {time} you talked with {n} potential buyers, and everyone heard from you twice.',
+    take: ['My selling hour', 'Every {day} at {time}: {n} buyer conversations.', 'Everyone hears from me twice.', 'This week: talked ____ · asked ____ · yes ____'],
+    notyet: 'Make it smaller: one conversation this week, at the same day and time, and put next week’s in the calendar now.' },
+  '5.0': { topic: 'Proof of who you are becoming', on: 'By which day will you add one more proof?', bp: 'self',
+    ins: 'Identity changes after the evidence, not before it. Every dated proof is a vote for who you are becoming, and on a hard day it is the list you read. One proof is a start; a habit is a long list.',
+    done: 'by {on}, a second dated proof is written under the first.',
+    take: ['My proof list', 'I am becoming someone who {who}.', '1. {proof}', '2. ____ (date) · 3. ____ (date)'],
+    notyet: 'Make it smaller: look back at the last four weeks, write one thing you did that the old you would not have done, and date it.' },
+  '5.1': { topic: 'Thanks that names the thing', on: 'Which day will you tell {who}?', bp: 'people',
+    ins: 'People repeat what gets noticed. A quick thanks is polite; naming exactly what someone did and what it changed teaches them what good looks like. It takes a minute and builds a team that knows your standard.',
+    done: 'you told {who} on {on}, face to face or in writing, what they did and what it changed.',
+    take: ['The thank-you, ready to send', '{who}, thank you for {what}.', 'It changed {changed}.', 'Next person to thank: ____'],
+    notyet: 'Make it smaller: send the two lines above as a message today. In writing counts.' },
+  '5.2': { topic: 'One number that tells the truth', on: null, bp: 'money',
+    ins: 'One number read every week is worth more than ten read once. When it misses, the tactic is rarely the whole story: a belief often sits behind it, like a fear of asking or a price you are ashamed of. Ask both questions.',
+    done: 'on {day} you read {num}, wrote it on your Planner’s Monday page, and, if it missed, one line on the belief behind it.',
+    take: ['My Monday number', 'Every {day}: {num}. This week: ____ · last week: ____', 'If it missed, the belief behind it: ____', 'The one thing I change: ____'],
+    notyet: 'Make it smaller: read {num} once this week and write it on your Planner’s Monday page.' },
+  '5.3': { topic: 'Their words, not yours', on: 'By which day will you ask three clients?', bp: 'marketing',
+    ins: 'When you describe your work, it sounds like selling; when a client describes it, it sounds like proof. Their words also tell you why you are really chosen, which is often not what you think. Ask, and write it down word for word.',
+    done: 'you asked three clients by {on}, and wrote their answers word for word.',
+    take: ['The question for three clients', '“When you came to me, what was going on? What did you want instead? What changed?”', 'My guess: when {when}, they want to {want}, so they can {so}.', 'What they actually said: ____'],
+    notyet: 'Make it smaller: ask one client, by message, the first question only.' },
+  '6.0': { topic: 'The conversation you keep postponing', on: null, bp: 'people',
+    ins: 'A conversation you postpone does not wait. It costs more each week, in rework, tension and decisions left hanging. Saying what you see and what you need, kindly and plainly, is respect, not attack; the first sentence carries most of the courage.',
+    done: 'the talk with {who} happened on {day}, and you said the first sentence as you wrote it.',
+    take: ['The first sentence', '{who}, I need to talk about {about}.', 'What I see is {see}. What I need is {need}.', 'Then: “What do you need from me?”'],
+    notyet: 'Make it smaller: book it today. Send {who} one line asking for twenty minutes, with a day.' },
+  '6.1': { topic: 'Ask, then listen', on: 'Which day is the talk with {who}?', bp: 'people',
+    ins: 'In a hard talk, the one who speaks most usually learns least. A good open question shows respect and gives you what you cannot learn any other way. Ask, then count to three before you speak.',
+    done: 'in the talk with {who} on {on} you asked “{ask}”, and spoke less than half the time.',
+    take: ['The listening card', 'My question: “{ask}”', 'After they answer: “Tell me more.”', 'What I learned that I didn’t know: ____'],
+    notyet: 'Make it smaller: in your next ordinary conversation, ask one open question and let the silence sit for three seconds.' },
+  '6.2': { topic: 'Money that is yours', on: null, bp: 'money',
+    ins: 'Money you earned and did not collect is a loan you never agreed to give. Asking for it is part of the work, not a rudeness. A short, polite, firm message with a date works better than a long apology.',
+    done: 'the message went to {who} on {day}. Being paid by {by} is theirs to do; sending it was yours.',
+    take: ['The payment message, ready to send', 'Hi {who}, invoice {inv} was due on {due}.', 'Please pay by {by}. Thank you.', 'If it is not paid by {by}, I call on ____.'],
+    notyet: 'Make it smaller: send the two lines exactly as written. No extra sentences, no apology.',
+    stage: { building: 'Nothing unpaid? Take the work you did for free, and ask to be paid for it from now on.' } },
+  '6.3': { topic: 'A kind no, with an alternative', on: 'By which day will you say it?', bp: 'sales',
+    ins: 'Every wrong yes is a quiet no to the right client, and often to your own evening. A kind no with an alternative protects the relationship and your standard. You do not need a long reason; you need a better suggestion.',
+    done: 'you said the kind no about {what} by {on}, offered {suggest}, and added no discount.',
+    take: ['The kind no, ready to say', '“This isn’t the right fit for {fit}.', 'What I suggest is {suggest}.”', 'Hours I get back each week: ____'],
+    notyet: 'Make it smaller: the next time a small extra is asked for, say the same two lines.' },
+  '7.0': { topic: 'Your best hours, guarded', on: null, dayKey: 'days', bp: 'self',
+    ins: 'Your best hours are the most valuable thing you own, and the urgent will always try to take them. What you protect on the calendar shows what you really believe matters. Give the urgent a later hour, not your best one.',
+    done: 'the hours from {from} to {to} are in your calendar for the next four weeks, and you kept them this week, {days}.',
+    take: ['My best hours, guarded', '{from} to {to}, {days}: only {what}.', 'If someone asks for that time: “I can do ____ instead.”', 'Kept this week: ____ of ____'],
+    notyet: 'Make it smaller: protect one morning this week, not four, and put it in the calendar now.' },
+  '7.1': { topic: 'One task, one step up', on: 'Which day this week will it run that way for the first time?', bp: 'systems',
+    ins: 'Delegation fails when it jumps from “I do it” to “they own it” in one step. Move one step at a time: I do it, they watch; they do it, I check; they own it. Each step builds the trust the next one needs.',
+    done: 'on {on}, {task} ran once at “{to}”, and {day} is in your calendar as the day it stays there.',
+    take: ['The ladder for {task}', 'Now: “{from}”. Next: “{to}”, by {day}.', 'What I check, and when: ____', 'What they decide alone: ____'],
+    notyet: 'Make it smaller: do {task} once side by side this week, and let them do the last part.',
+    stage: { building: 'No team? The next step is a template or a tool doing it, and you checking.' } },
+  '7.2': { topic: 'The price you never go below', on: 'By which day will the floor be written next to your prices?', bp: 'offer',
+    ins: 'Most underpricing hides in the hours you don’t count: the calls, the changes, the travel. Write down the real cost of one job once, and you know the line you must never sell below; below it, you pay to work. A calculator does the sum in a minute; holding the line is the part only you can do.',
+    done: '{floor} is written next to your price list by {on}, and your next quote was at or above it.',
+    take: ['The line I never sell below', 'One job: {mat} + {hrs} hours × {rate} = {total}.', 'I never sell it below {floor}.', 'If a client asks for less: “At that price I can offer ____ instead.”'],
+    notyet: 'Make it smaller: take your last job, count every hour it really took, and write the real cost.' },
+  '7.3': { topic: 'A fixed hour for marketing', on: null, bp: 'marketing',
+    ins: 'Marketing done only when the diary is empty arrives too late, because buyers take time to decide. One fixed hour a week, where your buyers already gather, adds up. Show your clients’ results more than yourself.',
+    done: 'on {day}, from {from} to {to}, you did “{act}” on {where}, and the hour is in your calendar for four weeks.',
+    take: ['My hour for marketing, every week', 'Every {day}, {from} to {to}: {act} on {where}.', 'Ideas for the next four weeks: 1 ____ 2 ____ 3 ____ 4 ____', 'Replies or enquiries this week: ____'],
+    notyet: 'Make it smaller: one post or message this week, in the same hour, and book next week’s hour now.' },
+  '8.0': { topic: 'What you are best at, and what to stop', on: 'By which day will you stop selling {stop}?', bp: 'offer',
+    ins: 'Doing a bit of everything feels safe, but it hides your best work and makes you hard to recommend. Half what you are best at, half what the market will pay for, is a good place to stand. Dropping one thing makes room for the better one.',
+    done: 'by {on}, {stop} came off your price list or offer page, or you said no to one request.',
+    take: ['My best work', 'I am best at {best}.', 'People pay me for {pay}.', 'I stop selling {stop}. When asked: “I don’t do that any more; ____ does it well.”'],
+    notyet: 'Make it smaller: decline the next request for {stop}, kindly, with a name to send them to.' },
+  '8.1': { topic: 'Three clear steps after yes', on: 'By which day will the three steps be written?', bp: 'systems',
+    ins: 'Clients judge you most in the days right after they say yes. Confusion there costs referrals; clear steps make people feel led and safe. Write the steps once, and anyone on your team can give the same good start.',
+    done: 'by {on}, the three steps are in the message every new client gets, and {who} knows step {which} is theirs.',
+    take: ['The welcome message, ready to send', 'Thank you for saying yes. Here is what happens now:', '1. {s1} · 2. {s2} · 3. {s3}', '{who} looks after step {which}. Any question, just reply.'],
+    notyet: 'Make it smaller: send the three steps to your next client, even if the message is not perfect yet.',
+    stage: { building: 'No clients yet? Write the three steps for your first one, and walk a friend through them.' } },
+  '8.2': { topic: 'Your price, in three levels', on: 'By which day will the three levels be on your offer page?', bp: 'offer',
+    ins: 'One price asks for a yes or a no; three levels ask “which one?”. A higher level shows what your work is worth, even to people who do not buy it. Say the price once, calmly, and then stop talking.',
+    done: 'by {on}, the three levels are on your offer page or price list, and you said them out loud once to a buyer.',
+    take: ['My three levels', 'Essential: {e1}, {p1}.', 'Complete: {e2}, {p2}.', 'Premium: {e3}, {p3}.'],
+    notyet: 'Make it smaller: say the three levels out loud to one person you trust, then to one buyer.' },
+  '8.3': { topic: 'Your offer in one line', on: 'By which day will you have said it to three people?', bp: 'offer',
+    ins: 'A clever offer gets admired; a clear one gets bought and recommended. If a customer can repeat it after hearing it once, they can sell it for you. Say it the same way every time.',
+    done: 'by {on}, you said the line to three people the same way, and one could say it back.',
+    take: ['My offer in one line', 'For {who} who {pain}, I {do}, so they {gain}, within {time}.', 'Said to: 1 ____ 2 ____ 3 ____', 'Who could say it back: ____'],
+    notyet: 'Make it smaller: say the line to one person today and ask them to say it back.' },
+  '9.0': { topic: 'A weekly review you keep', on: null, bp: 'systems',
+    ins: 'Without a weekly review, the week plans you. A short, honest look back (what you promised, what happened, what the numbers say) is how you steer. A short review kept every week beats a long one skipped.',
+    done: 'on {day} at {time} you held the review and wrote {three} priorities on your Planner’s Monday page.',
+    take: ['My weekly review, every {day} at {time}', 'Promised: ____ · happened: ____', 'The numbers: in ____ · out ____ · left ____', 'Next week’s {three} priorities: 1 ____ 2 ____ 3 ____'],
+    notyet: 'Make it smaller: this week, answer only the first line, on paper.' },
+  '9.1': { topic: 'One area with an owner', on: 'By which day will {who} know?', bp: 'systems',
+    ins: 'Being needed for everything feels good, and it is a ceiling on your business. An area with a named owner, a spending limit and a clear “call me when” keeps running on your worst day. Write it down, so it lasts longer than your mood.',
+    done: 'by {on}, {who} has it in writing: they own {owns} up to {limit}, and one decision was made without you.',
+    take: ['The owner note', '{who} owns {owns}.', 'They decide alone up to {limit}.', 'They call me when {call}. Otherwise, I trust their decision.'],
+    notyet: 'Make it smaller: give {who} one decision this week, up to {limit}, and let it stand.',
+    stage: { building: 'No team? Name the tool, template or freelancer that owns the area, and what you still check.' } },
+  '9.2': { topic: 'One page of cash', on: null, bp: 'money',
+    ins: 'Cash surprises end good businesses, and almost every surprise was visible weeks earlier on a simple page: in, out, left, every week, with an alert line you act on the same day. Software can fill the page; only you can act on it.',
+    done: 'on {day} the page shows this week’s in, out and left, and you know what you do below {alert}.',
+    take: ['My cash page, every {day}', 'In: {in} · out: {out} · left: {left}', 'Alert line: {alert}. Below it, the same day I: ____', 'Next four weeks, expected in: ____ · out: ____'],
+    notyet: 'Make it smaller: fill only the first line this week, from the bank, on {day}.' },
+  '9.3': { topic: 'A warm list you can see', on: null, bp: 'sales',
+    ins: 'A pipeline in your head is a pipeline you forget. Written down, every name has a next step, and you can see the list getting thin before the work runs out. Move a few people one step each week.',
+    done: 'the {n} names are written down, and on {day} you moved {m} of them one step.',
+    take: ['My warm list', 'Name · where they are (met → talked → offer → yes) · next step · by when', '{n} names. Every {day}: move {m} from {from} to {to}.', 'The list is thin when fewer than ____ names are open.'],
+    notyet: 'Make it smaller: write down ten names today, with one next step each.',
+    stage: { scaling: 'Each person who sells keeps their own list; you read the total every week.' } },
+  '10.0': { topic: 'People you already know', on: 'By which day will the messages be sent?', bp: 'marketing',
+    ins: 'You know more people than you think, and each of them knows people you don’t. First clients usually come from someone who already trusts you. Asking “who do you know?” is an invitation to help, not a favour.',
+    done: 'by {on}, {n} messages are sent, starting with {first}, and you counted the replies.',
+    take: ['The message to people you know', '“{say}”', 'Sent to: {first}, ____, ____ … ({n} in all)', 'Replies: ____ · introductions: ____'],
+    notyet: 'Make it smaller: send the message to three people today, starting with {first}.' },
+  '10.1': { topic: 'One partner asked', on: 'By which day will you ask {who}?', bp: 'marketing',
+    ins: 'Someone already meets your clients every week: an accountant, a supplier, a past client. One good partner can send more work than months of posting. Make it a fair trade, and offer something first.',
+    done: 'you asked {who} by {on}, and offered your part first.',
+    take: ['The partner ask, ready to send', 'Hi {who}, could you introduce me to two people who {need}?', 'In return, I {give}.', 'Introductions received: ____'],
+    notyet: 'Make it smaller: send the message to {who} today. A no is fine; ask the next partner.' },
+  '10.2': { topic: 'Your best client, described', on: 'By which day will you list them?', bp: 'marketing',
+    ins: 'Your best clients are not random; they share things you can name. Describe them, and you know where to look and what to say. Depending on very few clients feels fine until one leaves.',
+    done: 'by {on}, every current client who shares all three is listed by name.',
+    take: ['My best client', 'They {a}, {b} and {c}.', 'Today they are: ____ (names)', 'I want {more} more by {by}. Where I find them: ____'],
+    notyet: 'Make it smaller: list your current clients and tick those who share all three.',
+    stage: { building: 'Fewer than three clients? Describe the one you want most, and the first one who paid.' } },
+  '10.3': { topic: 'Customer conversations about their past', on: 'By which day will three be booked?', bp: 'grow',
+    ins: 'People are polite about your idea and honest about their past. Ask when they last had the problem, what they tried and what it cost them. Their exact words show you what to build next, and how to sell it.',
+    done: 'by {on}, three of the {n} conversations are booked or held, and you wrote their exact words.',
+    take: ['The three questions', '“When did you last {last}? What did you try? What did it cost you?”', 'What I heard most: 1 ____ 2 ____ 3 ____', 'What I build or change because of it: ____'],
+    notyet: 'Make it smaller: hold one conversation this week and write their words the same day.' },
+  '11.0': { topic: 'Asking for honest feedback', on: 'By which day will you have asked all three?', bp: 'people',
+    ins: 'The people around you see what you cannot see in yourself, and most will only say it if you ask. Asking for feedback, and only saying thank you, is how you hear what competitors never hear. You decide later what to do with it.',
+    done: 'by {on} you asked {a}, {b} and {c}, wrote each answer down, and only said thank you.',
+    take: ['The feedback question', '“What’s one thing I do that makes working with me harder?”', 'Asked: {a}, {b}, {c}.', 'What I heard: ____ · the one thing I change: ____'],
+    notyet: 'Make it smaller: ask one of the three today, and only say thank you.' },
+  '11.1': { topic: 'One open question, every meeting', on: 'Which day is the next {meet}?', onEx: 'Monday', bp: 'people',
+    ins: 'Silence in a meeting looks like agreement, but often it is fear. A question asked every week tells people that bad news and new ideas are welcome. Write down what you hear before you answer, so they see you took it in.',
+    done: 'at the {meet} on {on} you asked “What isn’t working that I don’t know?”, and did this before you answered: {do}.',
+    take: ['The open question, every {meet}', '“What isn’t working that I don’t know?”', 'Before I answer: {do}.', 'What came up this week: ____'],
+    notyet: 'Make it smaller: ask the question once, to one person, at the end of any conversation this week.',
+    stage: { building: 'No team meeting? Ask it of a partner, a supplier, or a client at the end of each job.' } },
+  '11.2': { topic: 'Your advantage, with proof', on: 'By which day will it be where buyers see it?', bp: 'marketing',
+    ins: 'If you look the same as everyone else, price decides. Your advantage is what you do differently, why you can do it, and proof that it works. Put the proof right next to the claim, where buyers decide.',
+    done: 'by {on}, the sentence and its proof are on your offer page or in your next proposal.',
+    take: ['My advantage', 'Others offer {others}. I offer {mine}, because {because}.', 'Proof: {proof}.', 'Where buyers see it: ____'],
+    notyet: 'Make it smaller: add the one proof line to your next proposal or message.' },
+  '11.3': { topic: 'Testimonials asked for', on: null, bp: 'marketing',
+    ins: 'Two sentences in a client’s own words do more than any line you write about yourself. Most clients are glad to help when asked simply, with two clear questions. Put their words where the next buyer decides.',
+    done: 'you asked {n} clients by {day}, and every answer you got is where buyers decide.',
+    take: ['The testimonial ask, ready to send', '“Could you write two sentences: what changed for you, and who you would recommend me to?”', 'Asked: {n} clients, by {day}. Received: ____', 'Where I put them: ____'],
+    notyet: 'Make it smaller: ask one happy client today, by message.' },
+  '12.0': { topic: 'Who you are now', on: 'By which day will you read it aloud to someone?', bp: 'self',
+    ins: 'After twelve weeks you have proof, not only hope. Write who you are now in one sentence and read it every Monday: old doubts come back on hard days, and the sentence and your proof list are the answer. Leadership starts with the leader.',
+    done: 'by {on}, the sentence is on the first page of your Planner, and you read it aloud to one person.',
+    take: ['Who I am now', 'I am a leader who {who}.', 'In 90 days I will be known for {known}.', 'I read it every Monday, with my proof list.'],
+    notyet: 'Make it smaller: read the sentence aloud to yourself every morning this week. Then to one person.' },
+  '12.1': { topic: 'Growing the next leader', on: null, bp: 'people',
+    ins: 'Doing it yourself is faster today and slower for ever. A leader grows leaders by giving real ownership and asking questions instead of handing out answers. One person, one area, one question a week.',
+    done: '{who} knows, in writing, that they own {own}, and on {day} you asked “{ask}”',
+    take: ['Growing {who}', '{who} owns {own}.', 'Every {day} I ask: “{ask}”', 'What they decided well this month: ____'],
+    notyet: 'Make it smaller: ask {who} the question once this week, and only listen.',
+    stage: { building: 'Nobody yet? Pick the freelancer you use most, or the first person you would hire, and give them one decision.' } },
+  '12.2': { topic: 'One number for the next ninety days', on: 'By which day will it be in your Planner?', bp: 'grow',
+    ins: 'A big target scares and a small one bores; checkpoints make a big one honest. One number, two checkpoints, read every week, tell you early whether to push on or change course. The number serves the decision, never the other way round.',
+    done: 'by {on}, your Planner’s twelve-week contract holds the number ({num}, from {from} to {to}) and both checkpoints with their dates.',
+    take: ['My next 90 days', '{num}: from {from} to {to} a month.', 'Day 30: {c1} · day 60: {c2}.', 'If day 30 misses, the first thing I look at: ____'],
+    notyet: 'Make it smaller: write the number and the first checkpoint in your Planner today; the second can wait a week.',
+    stage: { scaling: 'Give each owner from Level 09 their own checkpoint, and read all of them on the same day.' } },
+  '12.3': { topic: 'Testing your next market move', on: 'By which day will the first invitations go out?', bp: 'grow',
+    ins: 'Certainty comes after a test, not before it. A small test with a clear number for success protects your money and your confidence. If it fails, you learned cheaply; if it works, you know what to do next.',
+    done: 'by {on}, the first invitations are out, and success ({win} by {day}) is written in your Planner.',
+    take: ['My market test', 'Test: {test}, with {n} people, by {day}.', 'Success means {win}. If not: {else}.', 'Result: ____'],
+    notyet: 'Make it smaller: invite the first three people this week.' },
+};
+
+/** The founder's Blueprint at week 12: eight sections, every domain in one. */
+export const BLUEPRINT4 = [
+  { k: 'self', n: 'You, as a leader', about: 'How you think, feel, decide and rest.' },
+  { k: 'people', n: 'Your people', about: 'How you trust, ask, listen, thank and grow others.' },
+  { k: 'offer', n: 'What you sell', about: 'Your best work, your offer in one line, your prices and the floor you never go below.' },
+  { k: 'marketing', n: 'Your marketing', about: 'Who you serve, what they fear and hope, your advantage, your proof, and where they hear of you.' },
+  { k: 'sales', n: 'Your sales', about: 'How you ask, follow up, read the signals and say a kind no.' },
+  { k: 'money', n: 'Your money', about: 'Your enough, the numbers you read, the money owed to you and the cash you watch.' },
+  { k: 'systems', n: 'Your systems', about: 'What runs without you: owners, steps, hand-overs and the weekly review.' },
+  { k: 'grow', n: 'Your next ninety days', about: 'What customers told you, the number you aim for, and the test you run.' },
+];
+
 export const CHAPTERS4 = [
   { n: 'Chapter I', name: 'The Inner Pyramid', about: 'The founder, from the base up: what you believe, how you read it, what you feel, what you do, what it makes of you.', lv: [0, 1, 2, 3, 4] },
   { n: 'Chapter II', name: 'The Engine Room', about: 'The business inside: conversations, time, your offer and its price, and systems that run without you.', lv: [5, 6, 7, 8] },
@@ -449,4 +736,120 @@ export function reading(work, ci) {
   return { chapter: C, scores, lo, hi, last,
     exact: LEVELS4[last - 1].d.map((D, d) => fill(D.fb[3], work, last, d)),
     star: sentence(work, last, 0), next: CHAPTERS4[ci + 1] || null };
+}
+
+/* ── The one-question flow (Phase 3) ──────────────────────────────────────
+ * One field on screen. Per domain: tap, slide, one screen per blank (a day
+ * is chosen from chips), the day if the sentence has none, then "Done when"
+ * with how sure, then the four lines. From Level 02 a level opens with last
+ * week's four actions (Done, Partly, Not yet). After the four domains: the
+ * week, as four actions; after 05, 09 and 12, the chapter reading and one
+ * action carried forward. Progress (UNITS) still counts only the tap, the
+ * slide and the Version 4 sentence, so no founder already ahead is held back. */
+export const planOf = (lv, d) => PLAN4[`${lv}.${d}`] || null;
+/** The field that holds the action's day: the added `on`, or one of the sentence. */
+export const dayKeyOf = (lv, d) => { const p = planOf(lv, d); return p && p.on ? 'on' : (p && p.dayKey) || 'day'; };
+const DAYISH = ['day', 'when', 'on'];
+/** Every screen of a level, in order: [domain, kind, key]. Domain -1: the
+ *  whole level. Kinds: got, tap, slide, blank, day, done, lines, week,
+ *  reading, carry, carryday. */
+export function stepsOf(lv) {
+  const L = LEVELS4[lv - 1];
+  if (!L) return [];
+  const out = [];
+  if (lv > 1) for (let d = 0; d < 4; d++) out.push([d, 'got']);
+  L.d.forEach((D, d) => {
+    const dk = dayKeyOf(lv, d), p = planOf(lv, d);
+    out.push([d, 'tap'], [d, 'slide']);
+    for (const [k] of fieldsOf(D)) out.push([d, k === dk && DAYISH.includes(k) ? 'day' : 'blank', k]);
+    if (p && p.on) out.push([d, 'day', 'on']);
+    out.push([d, 'done'], [d, 'lines']);
+  });
+  out.push([-1, 'week']);
+  if (CLOSES[lv] != null) out.push([-1, 'reading'], [-1, 'carry'], [-1, 'carryday']);
+  return out;
+}
+const filled = (work, lv, d, k) => raw(work, lv, d, k).trim() !== '';
+/** Has the founder answered this screen? Screens that only show are always done. */
+export function stepDone(work, lv, s) {
+  const [d, kind, k] = s;
+  if (kind === 'got') return raw(work, lv - 1, d, 'got') !== '';
+  if (kind === 'tap') return tapOf(work, lv, d) != null;
+  if (kind === 'slide') return slideOf(work, lv, d) != null;
+  if (kind === 'blank' || kind === 'day') return filled(work, lv, d, k);
+  if (kind === 'done') return raw(work, lv, d, 'sure') !== '';
+  if (kind === 'carry') return filled(work, lv, 'r', 'carry');
+  if (kind === 'carryday') return filled(work, lv, 'r', 'on');
+  return true;
+}
+/** Where a founder picks up a level: the first screen not yet answered, else the week. */
+export function firstOf(work, lv) {
+  const S = stepsOf(lv), i = S.findIndex((s) => !stepDone(work, lv, s));
+  return i >= 0 ? i : S.findIndex((s) => s[1] === 'week');
+}
+/** A template with the founder's words, and its paper lines (____) drawn as lines. */
+function fillPaper(tpl, work, lv, d) {
+  return fill(String(tpl).replace(/_{4}/g, '\u0001'), work, lv, d).replace(/\u0001/g, '<span class="ln" aria-label="to fill in"></span>');
+}
+/** The same, as plain text for a heading: no marks, a gap as "…". */
+export const plainOf = (tpl, work, lv, d) => fill(tpl, work, lv, d).replace(/<mark class="blank">____<\/mark>/g, '…').replace(/<\/?mark[^>]*>/g, '');
+/** "Done when", with the founder's words. */
+export const doneOf = (work, lv, d) => { const p = planOf(lv, d); return p ? fill(p.done, work, lv, d) : ''; };
+/** What the founder keeps: the title, and its lines with their words. */
+export function takeOf(work, lv, d) {
+  const p = planOf(lv, d);
+  return p ? { title: plainOf(p.take[0], work, lv, d), lines: p.take.slice(1).map((l) => fillPaper(l, work, lv, d)) } : null;
+}
+/** The smaller step, after "Partly" or "Not yet". */
+export const notyetOf = (work, lv, d) => { const p = planOf(lv, d); return p ? fill(p.notyet, work, lv, d) : ''; };
+/** How sure the founder was, 0 to 100, or null. */
+export const sureOf = (work, lv, d) => { const v = raw(work, lv, d, 'sure'); return v === '' ? null : Math.max(0, Math.min(100, Number(v))); };
+/** Sunday's answer about an action of level lv: 0 Done, 1 Partly, 2 Not yet, or null. */
+export const gotOf = (work, lv, d) => { const v = raw(work, lv, d, 'got'); return v === '' ? null : Number(v); };
+export const GOT = ['Done', 'Partly', 'Not yet'];
+
+/** Actions done against actions promised, and how the estimates compare:
+ *  "too hopeful", "about right" or "too careful" (the Planner's three words).
+ *  Read only from the founder's own Sunday answers and their "how sure". */
+export function tally(work, lvs) {
+  let n = 0, done = 0, part = 0, not = 0, sure = 0, sn = 0;
+  for (const lv of lvs) for (let d = 0; d < 4; d++) {
+    const g = gotOf(work, lv, d);
+    if (g == null) continue;
+    n += 1; if (g === 0) done += 1; else if (g === 1) part += 1; else not += 1;
+    const s = sureOf(work, lv, d);
+    if (s != null) { sure += s; sn += 1; }
+  }
+  const real = n ? (done + part / 2) / n : null, hoped = sn ? sure / sn / 100 : null;
+  const est = real == null || hoped == null ? null : hoped - real > 0.15 ? 'too hopeful' : real - hoped > 0.15 ? 'too careful' : 'about right';
+  return { n, done, part, not, real, hoped, est };
+}
+/** The levels whose actions a chapter reading counts: those checked since the
+ *  last reading (Level 05's four are checked when Level 06 opens). */
+export function countedFor(ci) {
+  const last = CHAPTERS4[ci].lv[CHAPTERS4[ci].lv.length - 1] + 1, from = ci ? CHAPTERS4[ci - 1].lv[CHAPTERS4[ci - 1].lv.length - 1] + 1 : 1;
+  const out = [];
+  for (let lv = from; lv < last; lv++) out.push(lv);
+  return out;
+}
+/** One sentence of Alexandru's for each reading, word for word from his book
+ *  Worth Building (public/library/worth-building.pdf). */
+export const READ_QUOTES = [
+  { q: 'The way you run your day is the way you run your company. If you avoid your numbers at home, you will avoid them at work.', src: 'Worth Building · Business is life, and life is business' },
+  { q: 'Stick to what you do best, and serve people. The money follows the service, not the other way round.', src: 'Worth Building · The 50/50 rule' },
+  { q: 'I believe each of us has been given talents, and that we are meant to multiply them, not bury them.', src: 'Worth Building · A word from Alexandru' },
+];
+/** The action a chapter reading carried forward, as [level, domain], or null. */
+export function carriedFrom(work, lv) {
+  const v = raw(work, lv, 'r', 'carry');
+  const m = /^(\d+)\.(\d)$/.exec(v);
+  return m && LEVELS4[+m[1] - 1] ? [+m[1], +m[2]] : null;
+}
+/** The founder's Blueprint: the eight sections, each with its domains, the
+ *  founder's own sentence and what they keep. */
+export function blueprint(work) {
+  return BLUEPRINT4.map((S) => ({ ...S, items: LEVELS4.flatMap((L) => L.d.map((D, d) => ({ L, D, d, p: planOf(L.n, d) })))
+    .filter((x) => x.p && x.p.bp === S.k)
+    .map(({ L, D, d, p }) => ({ lv: L.n, d, name: D.name, topic: p.topic, word: L.word,
+      started: fieldsOf(D).some(([k]) => filled(work, L.n, d, k)), sentence: sentence(work, L.n, d), take: takeOf(work, L.n, d) })) }));
 }
