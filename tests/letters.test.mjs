@@ -42,7 +42,7 @@ ok(!resultsLetter(B, { first: 'Maria', offer: null }).text.includes('For you tha
 L = signinLetter(B, `${B}/start?signin=abc`, { first: 'Maria', offer: 'play' });
 ok(L.subject === 'Your link to get back in' && paras(L.text)[1] === 'Good to see you again. Everything you wrote is right where you left it.' && paras(L.text)[2] === `Sign me back in →: ${B}/start?signin=abc` && paras(L.text)[3] === 'The button works for the next 30 minutes, on your phone or your computer.', 'sign-in: subject, words and the button');
 ok(L.text.includes('P.S. Got ten minutes? Play Leadionaire') && !L.text.includes(OPENER) && /Free assessments/.test(L.text) && GOOD_WORDS.some((g) => L.text.includes(g)) && L.text.includes('Thank you for coming back.'), 'sign-in: thanked, encouraged, a free P.S. and assessments, no first line');
-ok(!signinLetter(B, `${B}/x`, { first: 'Maria', offer: 'unshakeable' }).text.includes('Unshakeable') && !signinLetter(B, `${B}/x`, { first: 'Maria', offer: 'boardroom' }).text.includes('Boardroom: '), 'security letters never sell: a paid P.S. becomes a free gift');
+ok(!signinLetter(B, `${B}/x`, { first: 'Maria', offer: 'unshakeable' }).text.includes('Unshakeable') && !signinLetter(B, `${B}/x`, { first: 'Maria', offer: 'boardroom' }).text.includes('in The Boardroom: '), 'security letters never sell: a paid P.S. becomes a free gift');
 
 L = passwordChangedLetter(B, { first: 'Maria', offer: 'first100' });
 ok(L.subject === 'Your password was changed' && paras(L.text)[1] === 'Your password was just changed. If that was you, all is well and there’s nothing else to do.'
