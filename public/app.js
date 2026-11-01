@@ -476,6 +476,20 @@ const STAGE_NOTE = { build: 'building', grow: 'growing', scale: 'scaling' };
 const DAYS7 = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const SUREW = [[30, 'a long shot'], [60, 'maybe'], [80, 'likely'], [100, 'certain']];
 const sureWord = (v) => (SUREW.find(([m]) => v <= m) || SUREW[3])[1];
+/** The founder's Growth Plan words (full accounts), read once per visit: where
+ *  a domain covers the same ground, the screen shows them back. */
+let gpWords = null, gpAsked = false;
+function growthWords() {
+  if (gpAsked || !account.joined()) return;
+  gpAsked = true;
+  account.growthPlan().then((r) => { if (r && r.words && Object.keys(r.words).length) { gpWords = r.words; if (view === 'work') drawBook(false); } }).catch(() => {});
+}
+/** "From your Growth Plan": their own words, on the screen that asks the same. */
+function gpBack(p, at) {
+  if (!p || !p.gp || p.gp.at !== at || !gpWords) return '';
+  const said = p.gp.ids.map((id) => String(gpWords[id] || '').trim()).filter(Boolean);
+  return said.length ? `<p class="cw-gp"><b>From your Growth Plan · step ${p.gp.step}</b> ${said.map((x) => `“${esc(x)}”`).join(' · ')}</p>` : '';
+}
 /** Keep one answer: on this device first, then the account, in batches. */
 // ── One step before the first answer (31 Oct 2026, Alexandru) ──────────────
 // One universal rule, whatever sales page a founder came from: an account
@@ -648,7 +662,8 @@ function pageHTML(st, x) {
         : `<p class="cw-said">${u != null ? `You were ${u}% sure. ` : ''}It happened: ${['yes', 'partly', 'not yet'][g]}.</p>${g > 0 ? `<p class="cw-smaller">${notyetOf(w, level - 1, d)}</p>` : ''}`}`;
   } else if (kind === 'tap') {
     const t = tapOf(w, level, d);
-    body = `${p ? `<p class="cw-topic">${esc(p.topic)}</p>` : ''}<h3 class="cw-q" id="cwq">${D.t.q}</h3>
+    growthWords();
+    body = `${p ? `<p class="cw-topic">${esc(p.topic)}</p>` : ''}${gpBack(p, 't')}<h3 class="cw-q" id="cwq">${D.t.q}</h3>
       <div class="cw-opts" role="group" aria-labelledby="cwq">${D.t.o.map((o, k) => `<button type="button" class="cw-o" data-v4t="${k}" aria-pressed="${t === k}"><kbd aria-hidden="true">${k + 1}</kbd><span>${esc(o)}</span></button>`).join('')}</div>
       <p class="cw-keys"><kbd>1–${D.t.o.length}</kbd> choose · <kbd>Enter ↵</kbd> next</p>`;
   } else if (kind === 'slide') {
@@ -665,6 +680,7 @@ function pageHTML(st, x) {
     const note = p && p.stage && p.stage[STAGE_NOTE[st]];
     body = `${first && p ? `<p class="cw-ins"><b>Why it matters</b> ${esc(p.ins)}</p>` : ''}
       <h3 class="cw-sent" id="cwq">${sentenceAt(w, level, d, key)}</h3>
+      ${gpBack(p, key)}
       <label class="cw-bl" for="cwin">${esc(f[1])}</label>
       <input id="cwin" class="cw-in" data-v4f="${d}.${esc(key)}" value="${esc(v)}" placeholder="e.g. ${esc(f[2])}" enterkeyhint="next" autocomplete="off" autocapitalize="sentences">
       ${first && note ? `<p class="cw-stage"><b>${esc(STAGES[st] ? STAGES[st].n : '')}</b> ${esc(note)}</p>` : ''}
@@ -697,7 +713,7 @@ function pageHTML(st, x) {
       ${weekList(level, sh)}
       ${pc ? `<p class="cw-carry"><b>Carried forward from your reading</b> ${fill(LEVELS4[pc[0] - 1].d[pc[1]].fb[3], w, pc[0], pc[1])}${w[wkey(level - 1, 'r', 'on')] ? ` · by ${esc(w[wkey(level - 1, 'r', 'on')])}` : ''}</p>` : ''}
       <p class="cw-planner">Write them on your Planner’s Monday page: ${sh >= 0 ? 'the first as <b>My one move</b>, the other three as <b>Three goals</b>' : 'the one you most want to avoid as <b>My one move</b>, the other three as <b>Three goals</b>'}. On Sunday, the next level asks what happened.</p>
-      <p class="cw-more"><button type="button" class="cw-all" data-go="blueprint">See it in your Blueprint</button></p>
+      <p class="cw-more"><button type="button" class="cw-copy cw-copyweek" data-copyweek>Copy my week</button><button type="button" class="cw-all" data-go="blueprint">See it in your Blueprint</button></p>
       ${ci != null ? `<p class="cw-note">This closes ${esc(CHAPTERS4[ci].name)}. Your chapter reading is next.</p>`
         : next ? `<div class="gain"><p class="eyebrow">${compass} What level ${pad(level + 1)} gives you</p><p class="gaint">${esc(next.word)} · ${esc(next.title)}</p><p class="gainp">${esc(next.promise)}</p>
           ${levelDone(st, level) === UNITS ? `<button class="cta" type="button" data-level="${level + 1}">${holds(state.tier, gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button>` : `<p class="cw-note">It opens when all ${UNITS} moves here are done: ${UNITS - levelDone(st, level)} to go.</p>`}</div>` : ''}`;
@@ -879,6 +895,19 @@ function stageStrip(st) {
  *  twelve weeks write, in eight sections, from the founder's own answers and
  *  nothing else: how they lead, their people, what they sell, marketing,
  *  sales, money, systems and the next ninety days. Printable. */
+/** Week 13: Level 12's four actions have no level after them to ask, so the
+ *  Blueprint asks; then the North Star again, to compare with where they began. */
+function lastSunday() {
+  const w = state.work, L = LEVELS4[11];
+  if (!L.d.every((D, d) => fieldsOf(D).some(([k]) => String(w[wkey(12, d, k)] || '').trim()))) return '';
+  const all = L.d.every((_, d) => gotOf(w, 12, d) != null), t = tally(w, LEVELS4.map((x) => x.n));
+  return `<section class="bp-last" id="bp-last" aria-labelledby="bpl-h"><p class="eyebrow">Week 13 · the last Sunday</p>
+    <h2 id="bpl-h">${all ? 'Twelve weeks, counted.' : 'Did Level 12’s four happen?'}</h2>
+    ${all ? `<p>${t.done} of the ${t.n} actions you checked were done, ${t.part} partly${t.est ? `, and your estimates were ${t.est}` : ''}. Now take the North Star again, and see where you stand against where you began.</p>
+      <p class="no-print"><a class="cta" href="/northstar/">Take the North Star again →</a></p>`
+      : `<ol class="bp-lg">${L.d.map((D, d) => { const g = gotOf(w, 12, d); return `<li><p>${fill(D.fb[3], w, 12, d)}</p><div class="bp-lgb no-print" role="group" aria-label="Did it happen?">${GOT.map((o, k) => `<button type="button" data-lastgot="${d}:${k}" aria-pressed="${g === k}">${o}</button>`).join('')}</div></li>`; }).join('')}</ol>`}
+  </section>`;
+}
 function blueprintView() {
   const w = state.work, B = blueprint(w), t = tally(w, LEVELS4.map((L) => L.n));
   const written = B.reduce((n, S) => n + S.items.filter((i) => i.started).length, 0), all = B.reduce((n, S) => n + S.items.length, 0);
@@ -891,6 +920,7 @@ function blueprintView() {
       <p class="bp-stat"><b>${written}</b> of ${all} parts written${t.n ? ` · <b>${t.done}</b> of the ${t.n} actions you checked were done${t.est ? ` · your estimates were ${t.est}` : ''}` : ''}</p>
       <p class="bp-act no-print"><button type="button" class="cta" data-print>Print it, or save it as a PDF</button><button type="button" class="cw-all" data-go="work">Back to the programme</button></p>
     </header>
+    ${lastSunday()}
     <nav class="bp-toc no-print" aria-label="The eight parts of your Blueprint">${B.map((S) => `<a href="#bp-${S.k}">${esc(S.n)}</a>`).join('')}</nav>
     ${B.map((S) => `<section class="bp-sec" id="bp-${S.k}" aria-labelledby="bph-${S.k}">
       <h2 id="bph-${S.k}">${esc(S.n)}</h2><p class="bp-about">${esc(S.about)}</p>
@@ -1144,6 +1174,22 @@ document.addEventListener('click', (e) => {
     const at = qi;
     drawBook(false);
     setTimeout(() => { if (qi === at) moveQ(1); }, 160);
+    return;
+  }
+  // The week, as plain text for the Planner, a calendar or a note.
+  if (b.hasAttribute('data-copyweek')) {
+    const x = LEVELS4[level - 1], items = [...document.querySelectorAll('.cw-week li')].map((li, i) => `${i + 1}. ${li.querySelector('.cw-wk').textContent.trim()}\n   ${li.querySelector('.cw-wa').textContent.replace(/\s+/g, ' ').trim()}\n   ${li.querySelector('.cw-dw').textContent.replace(/\s+/g, ' ').trim()}`);
+    const text = [`My week · Level ${pad(level)} · ${x.word}`, ...items].join('\n');
+    const doneCopy = (ok) => { b.textContent = ok ? 'Copied' : 'Select and copy'; setTimeout(() => { b.textContent = 'Copy my week'; }, 1600); };
+    try { navigator.clipboard.writeText(text).then(() => doneCopy(true), () => doneCopy(false)); } catch { doneCopy(false); }
+    return;
+  }
+  // The last Sunday (after Level 12), asked on the Blueprint.
+  if (b.dataset.lastgot) {
+    const [d, g] = b.dataset.lastgot.split(':').map(Number);
+    keep4(d, 'got', g, 12);
+    render();
+    const h = document.getElementById('bp-last'); if (h) h.scrollIntoView({ block: 'start' });
     return;
   }
   // What the founder keeps, as plain text for a message or a note.

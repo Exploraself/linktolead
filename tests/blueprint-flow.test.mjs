@@ -101,4 +101,10 @@ ok((app.match(/if \(qi === at\) moveQ\(1\)/g) || []).length === 2 && /classList\
 ok(/view === 'blueprint' \? blueprintView\(\)/.test(app) && /data-go="blueprint"/.test(app) && /data-print/.test(app), 'the founder can open, and print, their Blueprint');
 ok(/@media print/.test(css) && /prefers-reduced-motion:reduce\)\{\.cw-days/.test(css), 'print and reduced motion are handled');
 ok(/'#blueprint'\) return 'blueprint'/.test(fs.readFileSync('public/home.js', 'utf8')), '#blueprint opens the Blueprint');
+// Ask once: where the Growth Plan already holds the words, they are shown back.
+const gps = Object.entries(P).filter(([, p]) => p.gp);
+ok(gps.length === 4 && gps.every(([k, p]) => { const [lv, d] = k.split('.').map(Number); return p.gp.ids.every((id) => /^mgp-\d+\.\d+$/.test(id)) && (p.gp.at === 't' || V.fieldsOf(L[lv - 1].d[d]).some((f) => f[0] === p.gp.at)); }),
+  'Growth Plan words show back on four screens, at a tap or a blank that exists');
+ok(/function gpBack\(p, at\)/.test(app) && /account\.growthPlan\(\)/.test(app) && /gpAsked = true/.test(app), 'the Growth Plan is read once per visit, never on every screen');
+ok(/data-copyweek/.test(app) && /function lastSunday\(\)/.test(app) && /keep4\(d, 'got', g, 12\)/.test(app) && /href="\/northstar\/">Take the North Star again/.test(app), 'Copy my week; the last Sunday asks about Level 12, then the North Star again');
 done();

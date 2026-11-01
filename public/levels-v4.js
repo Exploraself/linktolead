@@ -366,6 +366,9 @@ export const LEVELS4 = [
  *   notyet  the smaller step, after a Sunday "Partly" or "Not yet"
  *   stage   a note only where a stage is truly different (Leading reads
  *           Scaling)
+ *   gp      where the founder already wrote this in their Growth Plan (full
+ *           accounts): shown back on the screen `at` ('t', the tap, or a
+ *           field), never asked twice
  * New saved keys, beside the Version 4 ones (none changes meaning):
  *   w.v4.L.d.on    the added day       w.v4.L.d.sure  how sure, 0 to 100
  *   w.v4.L.d.got   0 Done, 1 Partly, 2 Not yet (asked when level L+1 opens)
@@ -384,11 +387,13 @@ export const PLAN4 = {
     notyet: 'Make it smaller: hand over one part of {task}, or do it once side by side, then let them do the next one.',
     stage: { building: 'No team yet? Hand it to a tool, a template, or a freelancer for two hours.' } },
   '1.2': { topic: 'Money: the sentence you grew up with, and your enough', on: null, bp: 'money',
+    gp: { at: 't', step: 12, ids: ['mgp-12.1'] },
     ins: 'Without a number for enough, every month feels short and every price feels too high. Enough is a finish line, not a ceiling: it tells you when to stop chasing and what to charge. The sentence you grew up with is not your business plan.',
     done: 'on {day} you made one money move: {move}.',
     take: ['My money line', 'Enough: {enough} a month.', 'Last month in: ____ · fixed costs: ____ · left: ____', 'The money move: {move}, on {day}.'],
     notyet: 'Make it smaller: open last month’s statement and write the three numbers. The move can wait a week; the looking cannot.' },
   '1.3': { topic: 'Asking someone to buy', on: null, bp: 'sales',
+    gp: { at: 'names', step: 16, ids: ['mgp-16.3', 'mgp-16.4', 'mgp-16.5'] },
     ins: 'If your offer helps, then not asking keeps help from the people who need it. Asking is service; the answer belongs to them. A no tells you something true about the offer or the timing, never about your worth.',
     done: 'you asked {names} by {day}, and wrote each answer word for word. A yes and a no both count.',
     take: ['The ask, ready to send', 'Hi ____, I help {whom} with {prob}.', 'I think it could help you. Would you like to talk for twenty minutes this week?', 'Asked: {names}. Their answers, word for word: ____'],
@@ -477,6 +482,7 @@ export const PLAN4 = {
     take: ['The question for three clients', '“When you came to me, what was going on? What did you want instead? What changed?”', 'My guess: when {when}, they want to {want}, so they can {so}.', 'What they actually said: ____'],
     notyet: 'Make it smaller: ask one client, by message, the first question only.' },
   '6.0': { topic: 'The conversation you keep postponing', on: null, bp: 'people',
+    gp: { at: 't', step: 6, ids: ['mgp-6.1', 'mgp-6.2'] },
     ins: 'A conversation you postpone does not wait. It costs more each week, in rework, tension and decisions left hanging. Saying what you see and what you need, kindly and plainly, is respect, not attack; the first sentence carries most of the courage.',
     done: 'the talk with {who} happened on {day}, and you said the first sentence as you wrote it.',
     take: ['The first sentence', '{who}, I need to talk about {about}.', 'What I see is {see}. What I need is {need}.', 'Then: “What do you need from me?”'],
@@ -562,6 +568,7 @@ export const PLAN4 = {
     notyet: 'Make it smaller: write down ten names today, with one next step each.',
     stage: { scaling: 'Each person who sells keeps their own list; you read the total every week.' } },
   '10.0': { topic: 'People you already know', on: 'By which day will the messages be sent?', bp: 'marketing',
+    gp: { at: 'first', step: 16, ids: ['mgp-16.3', 'mgp-16.4', 'mgp-16.5'] },
     ins: 'You know more people than you think, and each of them knows people you don’t. First clients usually come from someone who already trusts you. Asking “who do you know?” is an invitation to help, not a favour.',
     done: 'by {on}, {n} messages are sent, starting with {first}, and you counted the replies.',
     take: ['The message to people you know', '“{say}”', 'Sent to: {first}, ____, ____ … ({n} in all)', 'Replies: ____ · introductions: ____'],
