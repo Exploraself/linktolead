@@ -4,13 +4,14 @@
 // not: every question, option, sentence, "Done when", template and reading
 // comes from the same data. Leading reads Scaling.
 //
-//   node scripts/make-manuals.mjs            preview PDFs + the sync report
-//   node scripts/make-manuals.mjs --library  also replace public/library/blueprint-*.pdf
-//                                            (only after Alexandru approves the previews)
+//   node scripts/make-manuals.mjs            the PDFs in manuals/ (not committed) + the sync report
+//   node scripts/make-manuals.mjs --library  also replace public/library/blueprint-*.pdf,
+//                                            the files founders download
 //
 // Output:
-//   public/preview/blueprint/manuals/The-Founders-Blueprint-<Stage>.pdf  (preview)
-//   docs/manuals-sync.md                                                  (sync report)
+//   manuals/The-Founders-Blueprint-<Stage>.pdf   (gitignored, to look at)
+//   public/library/blueprint-<stage>.pdf         (with --library)
+//   docs/manuals-sync.md                         (sync report)
 
 import { mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
@@ -122,7 +123,7 @@ function manual(stage, F) {
         ${weekHTML(L)}
       </section>
       ${ci != null ? readingHTML(ci) + buildHTML(L.n) : ''}
-      ${SESSIONS4.filter((x) => x.after === L.n && x.n === 2).map(sessionHTML).join('')}`;
+      ${SESSIONS4.filter((x) => x.after === L.n && x.n > 1).map(sessionHTML).join('')}`;
   }).join('');
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>The Founder’s Blueprint · ${esc(S.n)}</title><style>${F}
 @page{size:A4;margin:16mm 15mm 15mm}
@@ -193,7 +194,7 @@ cite{display:block;margin-top:1.5mm;font:normal 7.6pt Inter;color:#6B6153}
     <p class="sub">Twelve weeks. Four domains. One action plan a week.</p>
     <p class="lede">${esc(S.lede)}</p>
     <p class="lede">Each week has a word, and each letter of the word is one domain: you, your people, your business, your market. In every domain you tap the line that sounds like you, slide to the honest number, write one sentence, and leave with one action, its day, and how you will know on Sunday that it is done.</p>
-    <div class="facts"><span>12 levels</span><span>48 actions, each with a day</span><span>3 chapters, 3 readings</span><span>3 pages to build</span><span>2 sessions with Alexandru and the team</span></div></div>
+    <div class="facts"><span>12 levels</span><span>48 actions, each with a day</span><span>3 chapters, 3 readings</span><span>3 pages to build</span><span>${SESSIONS4.length} sessions with Alexandru and the team</span></div></div>
   <p class="foot">ExploraSelf · A Good People Company · Lead yourself. Grow your business.<br>linktolead.exploraself.com · A self-reflection and planning tool, not a diagnosis. The same programme as the app: what you write here, you can write there.</p>
 </section>
 <section class="howto page"><p class="lbl">Before the first level</p><h2>How to use this</h2>
@@ -228,22 +229,24 @@ function sync() {
   lines.push(row(['Stage notes', ...count((st) => String(notes(st)))]));
   lines.push(row(['Chapter readings, build pages, sessions', ...count(() => `${Object.keys(CLOSES).length}, ${Object.keys(BUILD4).length}, ${SESSIONS4.length}`)]));
   lines.push(row(['Blueprint parts', ...count(() => String(BLUEPRINT4.length))]));
-  lines.push('', '## Against the manuals in the Library today', '',
-    '| | Library PDFs (27 Oct) | These previews |', '| --- | --- | --- |',
+  lines.push('', '## Against the manuals they replace', '',
+    '| | The old Library PDFs (27 Oct) | These manuals |', '| --- | --- | --- |',
     '| Method | The earlier seven clarity points, 28 answers a level | Version 4: tap, slide, write once, four lines back |',
     '| Level promises matching the app | 0 of 36 | 36 of 36 |',
     '| Actions with a day and a “Done when” | none | 48 of 48 |',
-    '| Built from | `levels-build/grow/scale.js` (old) | `levels-v4.js` (the app) |', '',
-    'The Library PDFs (`public/library/blueprint-*.pdf`) are replaced only when Alexandru approves the previews: `node scripts/make-manuals.mjs --library`.', '');
+    '| Built from | `levels-build/grow/scale.js` (old) | `levels-v4.js` (the app) |',
+    `| Pages (Building · Growing · Scaling) | 79 · 77 · 80 | ${['build', 'grow', 'scale'].map((st) => PAGES[st]).join(' · ')} |`, '',
+    '`node scripts/make-manuals.mjs --library` writes these to `public/library/blueprint-*.pdf`, the files founders download. Run it again whenever `public/levels-v4.js` changes, so the manuals never drift from the app.', '');
   return lines.join('\n');
 }
 
 const toLibrary = process.argv.includes('--library');
 const F = await fonts();
-const out = new URL('public/preview/blueprint/manuals/', root);
+const out = new URL('manuals/', root);
 await mkdir(out, { recursive: true });
 const browser = await chromium.launch();
 const LIB = { build: 'blueprint-building.pdf', grow: 'blueprint-growing.pdf', scale: 'blueprint-scaling.pdf' };
+const PAGES = {};
 for (const stage of ['build', 'grow', 'scale']) {
   const page = await browser.newPage();
   await page.setContent(manual(stage, F), { waitUntil: 'load' });
@@ -255,8 +258,21 @@ for (const stage of ['build', 'grow', 'scale']) {
     margin: { top: '16mm', bottom: '16mm', left: '15mm', right: '15mm' } });
   await page.close();
   console.log('wrote', file.pathname.replace(root.pathname, ''));
+  PAGES[stage] = ((await readFile(file)).toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
   if (toLibrary) { await copyFile(file, new URL(`public/library/${LIB[stage]}`, root)); console.log('  replaced public/library/' + LIB[stage]); }
 }
 await browser.close();
+// The library shelf states each manual's page count: keep it true to the files just written.
+if (toLibrary) {
+  const VOL = { build: 'I', grow: 'II', scale: 'III' };
+  const contentJs = new URL('public/content.js', root), cabinetJs = new URL('public/cabinet.js', root);
+  let c = await readFile(contentJs, 'utf8'), k = await readFile(cabinetJs, 'utf8');
+  for (const st of Object.keys(LIB)) {
+    c = c.replace(new RegExp(`pages: \\d+, file: '/library/${LIB[st]}'`), `pages: ${PAGES[st]}, file: '/library/${LIB[st]}'`);
+    k = k.replace(new RegExp(`'Volume ${VOL[st]} · \\d+ pages'`), `'Volume ${VOL[st]} · ${PAGES[st]} pages'`);
+  }
+  await writeFile(contentJs, c); await writeFile(cabinetJs, k);
+  console.log('page counts set:', Object.entries(PAGES).map(([s, n]) => `${s} ${n}`).join(', '));
+}
 await writeFile(new URL('docs/manuals-sync.md', root), sync());
 console.log('wrote docs/manuals-sync.md');
