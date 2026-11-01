@@ -222,4 +222,13 @@ export const ART = {
     ${fig(f)}`,
 };
 
+ART.officechair = (f = 'FIG. 34 — MONDAY, 9:00') => `
+    <path d="M300 120 Q300 80 340 80 H460 Q500 80 500 120 V330 Q500 350 480 350 H320 Q300 350 300 330 Z"/>
+    <path d="M250 380 Q250 360 270 360 H530 Q550 360 550 380 V400 Q550 420 530 420 H270 Q250 420 250 400 Z" fill="currentColor" fill-opacity=".18"/>
+    <path d="M250 330 H220 V400 M550 330 H580 V400"/><path d="M400 350 V360 M400 420 V500"/><rect x="385" y="440" width="30" height="40" rx="4"/>
+    <path d="M400 500 L250 540 M400 500 L550 540 M400 500 L320 575 M400 500 L480 575 M400 500 L400 560"/>
+    <circle cx="250" cy="552" r="12"/><circle cx="550" cy="552" r="12"/><circle cx="320" cy="587" r="12"/><circle cx="480" cy="587" r="12"/><circle cx="400" cy="572" r="12"/>
+    <path d="M610 160 V120 M640 175 L668 147 M655 210 H695" stroke-width="2.4" opacity=".7"/>
+    ${dimH(250, 550, 470, 'empty')}${fig(f)}`;
+
 export const artNames = Object.keys(ART);

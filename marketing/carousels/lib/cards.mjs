@@ -15,7 +15,7 @@ export const CARD_CSS = `
 .cal .hr{position:absolute;left:-50px;right:0;border-top:1px solid var(--pline);font:500 16px/1 Inter;color:var(--pmute)}
 .cal .hr span{position:absolute;left:0;top:4px}
 .cal .ev{position:absolute;border-radius:10px;padding:8px 10px;font:600 18px/1.2 Inter;background:#E6DCC9;color:var(--pink);overflow:hidden}
-.cal .ev.hl{background:#D9A441;color:#1A130A}.cal .ev.dk{background:var(--pink);color:var(--paper)}
+.cal .ev.hl{background:#D9A441;color:#1A130A}.cal.one .ev{font:600 22px/1.15 Inter;padding:4px 16px;display:flex;align-items:center}.cal.one .hr{font-size:18px}.cal .ev.dk{background:var(--pink);color:var(--paper)}
 /* chat */
 .msg{padding:24px 26px 30px;display:flex;flex-direction:column;gap:16px}
 .msg .m{max-width:86%;padding:20px 24px;border-radius:24px;font:400 31px/1.36 Inter}
@@ -61,7 +61,7 @@ const C = {
     const [h0, h1] = c.hours || [8, 18], n = (c.days || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']).length, per = c.rowH || 44, h = (h1 - h0) * per;
     const hrs = Array.from({ length: h1 - h0 + 1 }, (_, i) => `<div class="hr" style="top:${i * per}px"><span>${String(h0 + i).padStart(2, '0')}</span></div>`).join('');
     const ev = (c.blocks || []).map((b) => `<div class="ev ${b.hl ? 'hl' : ''} ${b.dark ? 'dk' : ''}" style="left:calc(${(100 * b.d) / n}% + 3px);width:calc(${(100 * (b.span || 1)) / n}% - 6px);top:${(b.from - h0) * per + 2}px;height:${(b.to - b.from) * per - 4}px">${esc(b.label)}</div>`).join('');
-    return `<div class="paper cd cal" style="--n:${n};--h:${h}px"><div class="hd"><b>${esc(c.head || 'Last week')}</b><span>${esc(c.meta || '')}</span></div>
+    return `<div class="paper cd cal ${n === 1 ? 'one' : ''}" style="--n:${n};--h:${h}px"><div class="hd"><b>${esc(c.head || 'Last week')}</b><span>${esc(c.meta || '')}</span></div>
       <div class="days"><span></span>${(c.days || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']).map((d) => `<span>${esc(d)}</span>`).join('')}</div><div class="gridc">${hrs}${ev}</div></div>`;
   },
   chat: (c) => `<div class="paper cd"><div class="hd"><b>${esc(c.head || 'Messages')}</b><span>${esc(c.meta || '')}</span></div><div class="msg">${c.msgs.map((m) => m.typing ? `<div class="typing">${esc(m.text || 'typing…')}</div>` : `<div class="m ${m.me ? 'me' : 'them'}">${md(m.text)}${m.at ? `<small>${esc(m.at)}</small>` : ''}</div>`).join('')}</div></div>`,

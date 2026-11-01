@@ -66,12 +66,12 @@ export const DIAGRAM_CSS = `
 .flow .loop{margin-top:18px;text-align:center;font:600 22px/1 Inter;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
 /* tiles */
 .tiles{display:flex;flex-direction:column;gap:22px}
-.tiles .lbl{font:500 26px/1.2 Inter;color:var(--soft);text-align:center}
+.tiles .lbl{font:500 32px/1.25 Inter;color:var(--soft);text-align:center}
 .tiles .tg{display:grid;gap:22px}
 .tiles .tl{display:flex;flex-direction:column;align-items:center;gap:12px}
-.tiles .tb{width:100%;aspect-ratio:1/1.1;border-radius:16px;background:var(--gold);display:grid;place-items:center;font:800 76px/1 Newsreader,serif;color:#1A130A;padding:6px;text-align:center}
+.tiles .tb{width:100%;aspect-ratio:1/.9;border-radius:18px;background:var(--gold);display:grid;place-items:center;font:800 96px/1 Newsreader,serif;color:#1A130A;padding:6px;text-align:center}
 .tiles .tl.dim .tb{background:#2A2118;color:var(--soft)}
-.tiles .tl span{font:500 23px/1.25 Inter;color:var(--soft);text-align:center}
+.tiles .tl span{font:400 30px/1.3 Inter;color:var(--soft);text-align:center}.tiles .tl span b{color:var(--ink);font-weight:600}
 /* split */
 .split{display:grid;grid-template-columns:1fr 1fr;gap:22px}
 .split .sc{border:2px solid var(--line);border-radius:22px;background:var(--card);padding:38px 30px;display:flex;flex-direction:column;gap:28px}
@@ -90,8 +90,8 @@ export const DIAGRAM_CSS = `
 .tline .tx{font:400 34px/1.38 Inter;color:var(--soft);margin-top:10px}.tline .tx b{color:var(--ink);font-weight:600}
 /* stack */
 .stack{display:flex;flex-direction:column-reverse;gap:14px}
-.stack .sb{padding:24px 30px;border-radius:14px;border:2px solid var(--line);background:var(--card);display:flex;justify-content:space-between;align-items:center;gap:20px}
-.stack .sb h4{font:600 42px/1.1 Newsreader,serif;color:var(--ink)}.stack .sb span{font:500 24px/1.3 Inter;color:var(--mute);text-align:right}
+.stack .sb{padding:30px 34px;border-radius:14px;border:2px solid var(--line);background:var(--card);display:flex;justify-content:space-between;align-items:center;gap:20px}
+.stack .sb h4{font:600 50px/1.1 Newsreader,serif;color:var(--ink)}.stack .sb span{font:500 29px/1.3 Inter;max-width:420px;color:var(--mute);text-align:right}
 .stack .sb.hl{background:var(--gold);border-color:var(--gold)}.stack .sb.hl h4,.stack .sb.hl span{color:#1A130A}
 /* big number */
 .bigv{display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center}

@@ -6,6 +6,7 @@ import { md, esc, drawable } from './markup.mjs';
 import { ART } from './art.mjs';
 import { diagram } from './diagrams.mjs';
 import { card } from './cards.mjs';
+import { PT } from './premium.mjs';
 
 export const BRAND = { name: 'Alexandru Cojocari', role: 'Leadership mentor · ExploraSelf' };
 
@@ -211,9 +212,10 @@ const T = {
 };
 
 export function slideHTML(c, s, i, total, photo) {
-  const fn = T[s.type];
+  const fn = T[s.type] || PT[s.type];
   if (!fn) throw new Error(`${c.id} slide ${i + 1}: unknown type "${s.type}"`);
-  return `<section class="slide ${s.type}" data-n="${i + 1}">${fn(s, c, photo)}${chrome(c, i, total)}</section>`;
+  const grain = ['photo', 'poster'].includes(s.type) ? ' grain' : '';
+  return `<section class="slide ${s.type}${s.center ? ' center' : ''}${grain}" data-n="${i + 1}">${fn(s, c, photo)}${chrome(c, i, total)}</section>`;
 }
 
 // Shrinks each .fit line until it fits its width, and each .fit-h block
@@ -226,8 +228,11 @@ window.__fit = () => {
     while (el.scrollWidth > box && s > min) { s -= 2; el.style.fontSize = s + 'px'; }
     if (s < start * 0.7) el.dataset.shrunk = Math.round(100 * s / start) + '%';
   }
-  for (const body of document.querySelectorAll('.body')) {
-    const over = () => body.scrollHeight > body.clientHeight + 1;
+  for (const body of document.querySelectorAll('.body,.pbox,.phtxt')) {
+    const sl = body.closest('.slide').getBoundingClientRect();
+    const over = body.classList.contains('phtxt')
+      ? () => body.getBoundingClientRect().top < sl.top + 128
+      : () => body.scrollHeight > body.clientHeight + 1;
     const els = [...body.querySelectorAll('.fit-h')];
     let guard = 0;
     while (over() && guard++ < 60) {
@@ -244,8 +249,8 @@ window.__check = () => {
   const out = [];
   for (const sl of document.querySelectorAll('.slide')) {
     const n = sl.dataset.n, r = sl.getBoundingClientRect();
-    const body = sl.querySelector('.body');
-    if (body && body.scrollHeight > body.clientHeight + 2) out.push(n + ': content taller than the slide by ' + (body.scrollHeight - body.clientHeight) + 'px');
+    for (const body of sl.querySelectorAll('.body,.pbox')) if (body.scrollHeight > body.clientHeight + 2) out.push(n + ': content taller than the slide by ' + (body.scrollHeight - body.clientHeight) + 'px');
+    for (const t of sl.querySelectorAll('.phtxt')) if (t.getBoundingClientRect().top < r.top + 120) out.push(n + ': photo text runs into the top bar');
     for (const el of sl.querySelectorAll('.fit[data-shrunk]')) out.push(n + ': a line shrank to ' + el.dataset.shrunk + ' (' + el.textContent.slice(0, 40) + ')');
     for (const el of sl.querySelectorAll('.fit-h[data-shrunk]')) out.push(n + ': text shrank to fit (' + el.textContent.slice(0, 40) + '…)');
     for (const el of sl.querySelectorAll('.p,.foot,.step,.chk,.bub,.paper,.dg')) {

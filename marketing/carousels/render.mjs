@@ -14,6 +14,7 @@ import { CSS, FIT_JS, CTAS, W, H, slideHTML } from './lib/template.mjs';
 import { DIAGRAM_CSS, diagramKinds } from './lib/diagrams.mjs';
 import { CARD_CSS, cardKinds } from './lib/cards.mjs';
 import { artNames } from './lib/art.mjs';
+import { PREMIUM_CSS, PREMIUM_FONTS } from './lib/premium.mjs';
 
 const here = new URL('./', import.meta.url);
 // Playwright resolves through CommonJS in this environment.
@@ -27,14 +28,14 @@ const FONTS = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;7
 const photo = `data:image/jpeg;base64,${(await readFile(new URL('../../public/cabinet/alexandru.jpg', here))).toString('base64')}`;
 
 const page = (inner) => `<!doctype html><html lang="en-GB"><head><meta charset="utf-8">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="${FONTS}">
-<style>${CSS}${DIAGRAM_CSS}${CARD_CSS}</style></head><body>${inner}<script>${FIT_JS}</script></body></html>`;
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="${FONTS}${PREMIUM_FONTS}">
+<style>${CSS}${DIAGRAM_CSS}${CARD_CSS}${PREMIUM_CSS}</style></head><body>${inner}<script>${FIT_JS}</script></body></html>`;
 
 // What every carousel must hold before it is drawn.
 function lint(c) {
   const e = [];
   if (c.slides?.length !== 10) e.push(`has ${c.slides?.length} slides, not 10`);
-  if (c.slides?.[0]?.type !== 'hook') e.push('slide 1 is not the hook');
+  if (!['hook', 'photo', 'poster', 'crayon', 'prompts'].includes(c.slides?.[0]?.type)) e.push('slide 1 is not a hook');
   if (c.slides?.[9]?.type !== 'cta') e.push('slide 10 is not the call to action');
   if (!CTAS[c.cta]) e.push(`unknown cta "${c.cta}"`);
   for (const [i, s] of (c.slides || []).entries()) {
@@ -50,7 +51,7 @@ function lint(c) {
   return e;
 }
 
-const files = (await readdir(new URL('data/', here))).filter((f) => /^c\d+.*\.mjs$/.test(f)).sort();
+const files = (await readdir(new URL('data/', here))).filter((f) => /^[cp]\d+.*\.mjs$/.test(f)).sort();
 const all = [];
 for (const f of files) all.push((await import(new URL(`data/${f}`, here))).default);
 const todo = only.length ? all.filter((c) => only.includes(c.id)) : all;
@@ -70,7 +71,7 @@ for (const c of todo) {
   const p = await ctx.newPage();
   await p.setContent(page(c.slides.map((s, i) => slideHTML(c, s, i, 10, photo)).join('')), { waitUntil: 'networkidle' });
   await p.evaluate(async () => { await document.fonts.ready; window.__fit(); });
-  await p.evaluate(() => document.getAnimations().forEach((a) => a.finish()));
+  await p.evaluate(() => document.getAnimations().forEach((a) => { if (a.effect.getComputedTiming().endTime === Infinity) { a.pause(); a.currentTime = 0; } else a.finish(); }));
   const warn = await p.evaluate(() => window.__check());
   const els = await p.$$('section.slide');
   for (const [i, el] of els.entries()) await el.screenshot({ path: new URL(`${c.id}-${String(i + 1).padStart(2, '0')}.png`, dir).pathname });
