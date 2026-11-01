@@ -88,7 +88,7 @@ export const READINGS = [
   { ch: 1, after: 9,
     extra: 'Actions counted: Levels 05 to 08 (16). Then Session 2.' },
   { ch: 2, after: 12,
-    extra: 'Actions counted: Levels 09 to 11 (12), and the whole programme. Level 12’s four are checked in week 13, which then opens the North Star again, to compare with where you began.' },
+    extra: 'Actions counted: Levels 09 to 11 (12), and the whole programme. Level 12’s four are checked in week 13 (on My Blueprint), which then opens the North Star again, to compare with where you began. Then Session 3.' },
 ];
 
 /** Launchpad plan: actions that repeat a level become counts (the plan is
@@ -105,13 +105,13 @@ export const LAUNCHPAD_CHANGES = [
 
 /** Decisions only Alexandru can make. */
 export const DECISIONS = [
-  ['D1', 'How many 1:1 sessions, and where', 'The brief says two in Levels 04–12. The ladder on the site (public/content.js) says one in The Boardroom (04–05), two in the LAB, three in total with the HUB.', 'Two: Session 1 opens Level 04, Session 2 follows the Chapter II reading. Then the ladder copy changes to match (Phase 3).'],
+  ['D1', 'How many 1:1 sessions, and where', 'The brief said two in Levels 04–12. The ladder on the site (public/content.js) sells one in The Boardroom (04–05), two in the LAB, three in total with the HUB.', 'Applied 1 Nov: three, as the site sells them, so no promise changes. Session 1 opens Level 04, Session 2 follows the Chapter II reading, Session 3 the Chapter III reading. To keep two, remove Session 3 (one entry in SESSIONS4).'],
   ['D2', 'Start with the weakest domain?', 'The level’s word is spelled one letter per domain, in order.', 'Keep the word order on screen. The weakest domain from the North Star gets the “Start here” mark, and its action becomes the week’s one move on the Planner’s Monday page. Applied 1 Nov.'],
   ['D3', 'How long is the weekly review?', 'Launchpad plan: 5 minutes. Growth Plan step 21: ten minutes. Level 09: 30 minutes.', 'Ten minutes, everywhere. A short review that happens beats a long one that does not. Applied 1 Nov.'],
-  ['D4', 'Two things called “boardroom”', '“The Boardroom” is the paid session for Levels 04–05. “Your inner boardroom” is the Sunday page of the Planner and Growth Plan step 21.', 'Keep both, always with their full names: “The Boardroom with Alexandru” and “your Sunday boardroom”.'],
+  ['D4', 'Two things called “boardroom”', '“The Boardroom” is the paid session for Levels 04–05. “Your inner boardroom” is the Sunday page of the Planner and Growth Plan step 21.', 'Keep both, always with their full names: “The Boardroom with Alexandru” and “your Sunday boardroom”. Applied 1 Nov: nothing to change; both names are already used in full.'],
   ['D5', 'Ninety days or twelve weeks?', 'Level 12 says 90 days. The Planner contract and Growth Plan step 5 say twelve weeks. The Planner’s reviews come every 13 weeks.', 'Say “twelve weeks” everywhere, Level 12 included. One horizon. Applied 1 Nov.'],
-  ['D6', 'Level words that are also tool names', 'The book in public/library/built-to-lead.pdf lists 100 tools; three of its names are SEED, VIEW and FACT, with other meanings.', 'Keep the level words. The tool names never show on screen (rule 4). Rename the three tools in the book when it is next printed.'],
-  ['D7', 'The Leading stage', 'The North Star has four stages; there are three manuals. Leading uses the Scaling manual today.', 'Keep it: Leading reads Scaling, with its own stage notes added only when you write them.'],
+  ['D6', 'Level words that are also tool names', 'The book in public/library/built-to-lead.pdf lists 100 tools; three of its names are SEED, VIEW and FACT, with other meanings.', 'Keep the level words. The tool names never show on screen (rule 4). Rename the three tools in the book when it is next printed. Applied 1 Nov: nothing shows on screen; the book is unchanged until its next print.'],
+  ['D7', 'The Leading stage', 'The North Star has four stages; there are three manuals. Leading uses the Scaling manual today.', 'Keep it: Leading reads Scaling, with its own stage notes added only when you write them. Applied 1 Nov: Leading reads the Scaling manual.'],
   ['D8', 'Book file names', 'public/library/built-to-lead.pdf is titled “100 Frameworks” (no byline); worth-building.pdf is “The Founder’s Manual · 32 frameworks”.', 'Tell me the right titles; quotes only come from books you confirm are yours.'],
 ];
 
@@ -132,12 +132,12 @@ export const GAPS = [
   'In 28 of 48 domains the sentence has no day for its action, and one more (Own it) has a date weeks away; none has a “Done when”.',
   'Nothing in the app records what really happened, or how sure the founder was. Only the Planner does, on paper.',
   'The three readings never look back at the actions, or at the North Star.',
-  'The two sessions have no stated purpose or result.',
+  'The sessions have no stated place, purpose or result.',
   'The manuals do not teach Version 4: 0 of 36 manual promises match (scripts/make-manuals.mjs reads the old levels, never levels-v4.js).',
   'The market domain is the thinnest in the books; money is only in Worth Building.',
 ];
 export const CONTRADICTIONS = [
-  'Sessions: two (brief) against one, two and three (site ladder). D1.',
+  'Sessions: two (brief) against one, two and three (site ladder). D1: three, as sold.',
   'Weekly review: 5, 10 and 30 minutes. D3.',
   '“Boardroom” means a paid session and a Sunday page. D4.',
   '90 days (Level 12) against twelve weeks (Planner, Growth Plan) against 13 weeks (Planner reviews). D5.',

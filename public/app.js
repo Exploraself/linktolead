@@ -23,7 +23,7 @@ import { videoBlock } from './video-talk.js';
 import * as M from './music.js';
 import { LEVELS4, CHAPTERS4, DOMS, UNITS, CLOSES, wkey, tapOf, slideOf, wordOf, shown, domainUnits, levelUnits,
   lines4, sentence, reading, fieldsOf, fill, stepsOf, stepDone, firstOf, planOf, plainOf, doneOf, takeOf, notyetOf,
-  sureOf, gotOf, GOT, tally, countedFor, READ_QUOTES, carriedFrom, blueprint, BUILD4, fillB, buildPage, stepsWritten } from './levels-v4.js';
+  sureOf, gotOf, GOT, tally, countedFor, READ_QUOTES, carriedFrom, blueprint, BUILD4, fillB, buildPage, stepsWritten, SESSIONS4 } from './levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -658,6 +658,16 @@ function weekList(lv, sh) {
       <p class="cw-dw"><b>Done when</b> ${doneOf(w, lv, k)}${u != null ? ` <span class="cw-u">· ${u}% sure</span>` : ''}</p></li>`;
   }).join('')}</ol>`;
 }
+/** The next 1:1, where it comes up in the programme (SESSIONS4): what it is
+ *  for, what to bring, and the booking form. Nothing is asserted about a
+ *  payment: the gate of the next level says plainly what opens it. */
+function sessionCard(lv) {
+  const S = SESSIONS4.find((x) => x.after === lv);
+  if (!S) return '';
+  return `<div class="cw-sess"><p class="eyebrow">${compass} Next · 1:1 with Alexandru and the team</p>
+    <p class="gaint">Session ${S.n} · ${esc(S.name)}</p><p class="gainp"><b>Bring:</b> ${esc(S.bring)}</p>
+    <a class="cta" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book Session ${S.n} ↗</a></div>`;
+}
 /** Build it: one page after each chapter reading, mostly from answers
  *  already given (BUILD4). One field on screen, then the page. */
 function buildHTML(st, kind, key, ci) {
@@ -686,6 +696,7 @@ function buildHTML(st, kind, key, ci) {
     <section class="cw-page" aria-label="${esc(B.title)}">${buildPage(w, level).map(([label, html]) => `<div><h4>${esc(label)}</h4><p>${html}</p></div>`).join('')}</section>
     <p class="cw-dw"><b>Done when</b> ${fillB(B.done, w, level)}</p>
     <p class="cw-more"><button type="button" class="cw-copy cw-copyweek" data-copypage>Copy the page</button><button type="button" class="cw-all" data-go="blueprint">See it in your Blueprint</button></p>
+    ${sessionCard(level)}
     ${next && LEVELS4[level] ? `<div class="gain"><p class="gaint">${esc(next.n)} · ${esc(next.name)}</p><p class="gainp">${esc(next.about)}</p>
       <button class="cta" type="button" data-level="${level + 1}">${holds(state.tier, gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button></div>`
       : `<p class="cw-planner">Twelve weeks, written. <button type="button" class="cw-all" data-go="blueprint">Open your Blueprint</button></p>`}`;
@@ -776,6 +787,7 @@ function pageHTML(st, x) {
       ${pc ? `<p class="cw-carry"><b>Carried forward from your reading</b> ${fill(LEVELS4[pc[0] - 1].d[pc[1]].fb[3], w, pc[0], pc[1])}${w[wkey(level - 1, 'r', 'on')] ? ` · by ${esc(w[wkey(level - 1, 'r', 'on')])}` : ''}</p>` : ''}
       <p class="cw-planner">Write them on your Planner’s Monday page: ${sh >= 0 ? 'the first as <b>My one move</b>, the other three as <b>Three goals</b>' : 'the one you most want to avoid as <b>My one move</b>, the other three as <b>Three goals</b>'}. On Sunday, the next level asks what happened.</p>
       <p class="cw-more"><button type="button" class="cw-copy cw-copyweek" data-copyweek>Copy my week</button><button type="button" class="cw-all" data-go="blueprint">See it in your Blueprint</button></p>
+      ${ci == null ? sessionCard(level) : ''}
       ${ci != null ? `<p class="cw-note">This closes ${esc(CHAPTERS4[ci].name)}. Your chapter reading is next.</p>`
         : next ? `<div class="gain"><p class="eyebrow">${compass} What level ${pad(level + 1)} gives you</p><p class="gaint">${esc(next.word)} · ${esc(next.title)}</p><p class="gainp">${esc(next.promise)}</p>
           ${levelDone(st, level) === UNITS ? `<button class="cta" type="button" data-level="${level + 1}">${holds(state.tier, gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button>` : `<p class="cw-note">It opens when all ${UNITS} moves here are done: ${UNITS - levelDone(st, level)} to go.</p>`}</div>` : ''}`;

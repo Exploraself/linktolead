@@ -11,19 +11,19 @@
 - **One question per screen.** Each blank of the sentence gets its own screen. Days are taps. Enter moves on.
 - **Every Sunday counts.** From Level 02, a level opens by asking about last week’s four actions: Done, Partly, Not yet. The readings show what was done and how good the estimates were.
 - **Nothing is asked twice.** Where the Launchpad plan or the Growth Plan already covers a step, the level shows that answer back or links to it. Seven Launchpad actions that repeat a level become counts (proposal).
-- **Eight decisions are yours** (D1–D8, next). Saved answers keep their meaning: only new keys are added, so no migration.
+- **Decisions:** D1 to D7 are applied (1 Nov); D8, the book titles, is still yours. Saved answers keep their meaning: only new keys are added, so no migration.
 
-## Decisions only you can make
+## Decisions
 
-|  | Question | What I found | My recommendation |
+|  | Question | What I found | Recommendation and status |
 | --- | --- | --- | --- |
-| D1 | How many 1:1 sessions, and where | The brief says two in Levels 04–12. The ladder on the site (public/content.js) says one in The Boardroom (04–05), two in the LAB, three in total with the HUB. | Two: Session 1 opens Level 04, Session 2 follows the Chapter II reading. Then the ladder copy changes to match (Phase 3). |
+| D1 | How many 1:1 sessions, and where | The brief said two in Levels 04–12. The ladder on the site (public/content.js) sells one in The Boardroom (04–05), two in the LAB, three in total with the HUB. | Applied 1 Nov: three, as the site sells them, so no promise changes. Session 1 opens Level 04, Session 2 follows the Chapter II reading, Session 3 the Chapter III reading. To keep two, remove Session 3 (one entry in SESSIONS4). |
 | D2 | Start with the weakest domain? | The level’s word is spelled one letter per domain, in order. | Keep the word order on screen. The weakest domain from the North Star gets the “Start here” mark, and its action becomes the week’s one move on the Planner’s Monday page. Applied 1 Nov. |
 | D3 | How long is the weekly review? | Launchpad plan: 5 minutes. Growth Plan step 21: ten minutes. Level 09: 30 minutes. | Ten minutes, everywhere. A short review that happens beats a long one that does not. Applied 1 Nov. |
-| D4 | Two things called “boardroom” | “The Boardroom” is the paid session for Levels 04–05. “Your inner boardroom” is the Sunday page of the Planner and Growth Plan step 21. | Keep both, always with their full names: “The Boardroom with Alexandru” and “your Sunday boardroom”. |
+| D4 | Two things called “boardroom” | “The Boardroom” is the paid session for Levels 04–05. “Your inner boardroom” is the Sunday page of the Planner and Growth Plan step 21. | Keep both, always with their full names: “The Boardroom with Alexandru” and “your Sunday boardroom”. Applied 1 Nov: nothing to change; both names are already used in full. |
 | D5 | Ninety days or twelve weeks? | Level 12 says 90 days. The Planner contract and Growth Plan step 5 say twelve weeks. The Planner’s reviews come every 13 weeks. | Say “twelve weeks” everywhere, Level 12 included. One horizon. Applied 1 Nov. |
-| D6 | Level words that are also tool names | The book in public/library/built-to-lead.pdf lists 100 tools; three of its names are SEED, VIEW and FACT, with other meanings. | Keep the level words. The tool names never show on screen (rule 4). Rename the three tools in the book when it is next printed. |
-| D7 | The Leading stage | The North Star has four stages; there are three manuals. Leading uses the Scaling manual today. | Keep it: Leading reads Scaling, with its own stage notes added only when you write them. |
+| D6 | Level words that are also tool names | The book in public/library/built-to-lead.pdf lists 100 tools; three of its names are SEED, VIEW and FACT, with other meanings. | Keep the level words. The tool names never show on screen (rule 4). Rename the three tools in the book when it is next printed. Applied 1 Nov: nothing shows on screen; the book is unchanged until its next print. |
+| D7 | The Leading stage | The North Star has four stages; there are three manuals. Leading uses the Scaling manual today. | Keep it: Leading reads Scaling, with its own stage notes added only when you write them. Applied 1 Nov: Leading reads the Scaling manual. |
 | D8 | Book file names | public/library/built-to-lead.pdf is titled “100 Frameworks” (no byline); worth-building.pdf is “The Founder’s Manual · 32 frameworks”. | Tell me the right titles; quotes only come from books you confirm are yours. |
 
 ## The twelve weeks at a glance
@@ -41,7 +41,7 @@
 | 9 | The Engine Room | 09 · FLOW · Your systems | A weekly review held, one area with an owner, one page of cash, your warm list written down. | Personal Leadership LAB | Chapter II reading; then Session 2 |
 | 10 | The Open Market | 10 · NAME · Your first hundred names | Ten people contacted, one partner asked, your best client described, three customer conversations booked. | Business HUB | — |
 | 11 | The Open Market | 11 · EDGE · Your advantage | Three people asked for honest feedback, one open question in a meeting, your advantage written with proof, three testimonials asked for. | Business HUB | — |
-| 12 | The Open Market | 12 · RISE · Your twelve weeks | Your leader sentence written, one person given something to own, a twelve-week number with checkpoints, one market test set. | Business HUB | Chapter III reading |
+| 12 | The Open Market | 12 · RISE · Your twelve weeks | Your leader sentence written, one person given something to own, a twelve-week number with checkpoints, one market test set. | Business HUB | Chapter III reading; then Session 3 |
 | 13 | — | The last Sunday | Level 12’s four actions checked, then the North Star again, to compare with where you began. | — | — |
 
 ## How one level runs, one question at a time
@@ -188,7 +188,7 @@ Where each one lives. None is pasted on screen as a slogan.
 
 **Links.** Growth Plan step 10: deepens. Launchpad plan, “Give one thing away”: proposed change, the same hand-over, a week later. The plan counts the hours it gave back instead. Planner: Monday page, as the one move (Start here) or one of three goals, with its day. Manual for your stage · Level 01 · Lead your people · Entrust (anchor #l01-people, built in Phase 4).
 
-**Stage notes.** *Building:* No team yet? Hand it to a tool, a template, or a freelancer for two hours.
+**Stage notes.** *Growing:* You already have help, but the work comes back to you. Hand over the task that comes back most often. *Building:* No team yet? Hand it to a tool, a template, or a freelancer for two hours.
 
 #### E · Lead your business · Enough
 
@@ -654,7 +654,7 @@ Where each one lives. None is pasted on screen as a slogan.
 
 **Links.** Launchpad plan, “Find your cheapest hour”: uses, the cheapest hour found in week 2 is the first one to hand back. Planner: Monday page, as the one move (Start here) or one of three goals, with its day. Manual for your stage · Level 04 · Lead your business · Essential first (anchor #l04-work, built in Phase 4).
 
-**Stage notes.** *Scaling:* Price your team’s hour too: what one hour of their work costs you.
+**Stage notes.** *Growing:* Price the hours you spend fixing other people’s work too: they are the first ones to hand back. *Scaling:* Price your team’s hour too: what one hour of their work costs you.
 
 #### P · Lead the market · Pace
 
@@ -1360,7 +1360,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 
 **Links.** Growth Plan step 9: feeds (one decision made without you). Planner: Monday page, as the one move (Start here) or one of three goals, with its day. Manual for your stage · Level 09 · Lead your people · Lean on roles (anchor #l09-people, built in Phase 4).
 
-**Stage notes.** *Building:* No team? Name the tool, template or freelancer that owns the area, and what you still check.
+**Stage notes.** *Growing:* Start with the area that interrupts you most in a week, and give that one an owner first. *Building:* No team? Name the tool, template or freelancer that owns the area, and what you still check.
 
 #### O · Lead your business · One page of cash
 
@@ -1431,7 +1431,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 
 **Links.** Planner: Monday page, as the one move (Start here) or one of three goals, with its day. Manual for your stage · Level 09 · Lead the market · Warm list (anchor #l09-market, built in Phase 4).
 
-**Stage notes.** *Scaling:* Each person who sells keeps their own list; you read the total every week.
+**Stage notes.** *Growing:* Your repeat clients are the warmest names on the list: put them first, and ask each one who else they know. *Scaling:* Each person who sells keeps their own list; you read the total every week.
 
 ### Chapter II reading · The Engine Room (after Level 09)
 
@@ -1894,7 +1894,7 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
 
 ### Chapter III reading · The Open Market (after Level 12)
 
-One screen each, in this order. Actions counted: Levels 09 to 11 (12), and the whole programme. Level 12’s four are checked in week 13, which then opens the North Star again, to compare with where you began.
+One screen each, in this order. Actions counted: Levels 09 to 11 (12), and the whole programme. Level 12’s four are checked in week 13 (on My Blueprint), which then opens the North Star again, to compare with where you began. Then Session 3.
 
 1. **Where you were.** The Version 4 reading, unchanged: the four corners from your own slides, the lowest and the highest, four lines, and your own sentence to carry into the next chapter.
 2. **What you did.** New. The chapter’s actions: how many Done, Partly, Not yet, from your Sunday answers.
@@ -1905,6 +1905,18 @@ One screen each, in this order. Actions counted: Levels 09 to 11 (12), and the w
 7. **Your next move.** New. Tap the one undone action that matters most, pick its day, and read its “Done when”. It is carried into next week next to the new level’s four, and asked about on Sunday like them.
 
 **In his words:** “I believe each of us has been given talents, and that we are meant to multiply them, not bury them.” (Worth Building · A word from Alexandru).
+
+### Session 3 with Alexandru · The next twelve weeks
+
+**When:** After the Chapter III reading (end of Level 12).  
+**Before the call:** The Chapter III reading, your twelve-week page, your market test and your Blueprint.
+
+1. Read the twelve weeks together: what you did, how good your estimates became, where you began and where you stand now.
+2. Read your Blueprint part by part, and mark the one part to strengthen next.
+3. Set the next twelve-week number and its first checkpoint, from your twelve-week page.
+4. Choose how you keep going: on your own with the Planner, or with Alexandru and the team.
+
+**Done when:** the next twelve-week number and its first checkpoint are in your Planner, and you know how you keep going.
 
 ## Every change from Version 4
 
@@ -1926,7 +1938,7 @@ One screen each, in this order. Actions counted: Levels 09 to 11 (12), and the w
 | Level 12 | “90 days” becomes “twelve weeks”; checkpoints “week 4” and “week 8” (D5, applied 1 Nov). | One horizon. |
 | Levels 05, 09, 12 | After each reading, one page to build: a process in ten lines, the operations page, the twelve-week page (option C). | The thinnest parts of the Blueprint, filled from answers already given. |
 | My Blueprint | A ninth part, the inner side, from the Growth Plan (option D); week 13 asks about Level 12 and offers the North Star again. | The whole of the founder, and the loop closed. |
-| Levels 04 and 10 | Session 1 opens Level 04; Session 2 follows the Chapter II reading. | D1. The sessions had no stated place or purpose. |
+| Levels 04, 10 and week 13 | Session 1 opens Level 04; Session 2 follows the Chapter II reading; Session 3 follows the Chapter III reading. A “Book it” card shows where each comes up. | D1: three sessions in total, as the site’s ladder sells them. The sessions had no stated place or purpose. |
 
 **Unchanged:** every tap, option, slide, scale, sentence and four-lines text (except Level 05 · Testimony’s “by Friday”), the twelve words, the three chapters, the promises, the readings after 05, 09 and 12, and the meaning of every saved answer.
 
@@ -2019,13 +2031,13 @@ The Launchpad plan is the numbers. Where one of its actions repeats a level, it 
 - In 28 of 48 domains the sentence has no day for its action, and one more (Own it) has a date weeks away; none has a “Done when”.
 - Nothing in the app records what really happened, or how sure the founder was. Only the Planner does, on paper.
 - The three readings never look back at the actions, or at the North Star.
-- The two sessions have no stated purpose or result.
+- The sessions have no stated place, purpose or result.
 - The manuals do not teach Version 4: 0 of 36 manual promises match (scripts/make-manuals.mjs reads the old levels, never levels-v4.js).
 - The market domain is the thinnest in the books; money is only in Worth Building.
 
 ### Contradictions
 
-- Sessions: two (brief) against one, two and three (site ladder). D1.
+- Sessions: two (brief) against one, two and three (site ladder). D1: three, as sold.
 - Weekly review: 5, 10 and 30 minutes. D3.
 - “Boardroom” means a paid session and a Sunday page. D4.
 - 90 days (Level 12) against twelve weeks (Planner, Growth Plan) against 13 weeks (Planner reviews). D5.

@@ -2,8 +2,6 @@
 //   docs/blueprint-skeleton.md            the skeleton, week by week
 //   docs/blueprint-skeleton.html          the same, readable on a phone
 //   docs/level-01-one-at-a-time.html      a clickable mock of Level 01
-// and copies the two pages to public/preview/blueprint/ so the Pages preview
-// of the pull request can show them (noindex; preview only, not linked).
 //
 // Every question, option, scale, sentence and four-lines text comes from
 // public/levels-v4.js. Only what the skeleton adds lives in
@@ -11,7 +9,7 @@
 //
 //   node scripts/blueprint-skeleton.mjs
 
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { LEVELS4, CHAPTERS4, DOM_NAMES, DOMS, wkey, lines4, wordOf, fieldsOf, PLAN4, BLUEPRINT4, takeOf, notyetOf, READ_QUOTES } from '../public/levels-v4.js';
 import { DOMAINS, SESSIONS, READINGS, READING_SCREENS, LAUNCHPAD_CHANGES, DECISIONS, COVERAGE, GAPS, CONTRADICTIONS, PRINCIPLES, OPTIONS } from '../docs/blueprint-skeleton.data.mjs';
 import { SECTIONS } from '../public/content.js';
@@ -81,7 +79,7 @@ const MODEL = LEVELS4.map((L) => ({
   n: L.n, word: L.word, title: L.title, floor: L.floor, promise: L.promise, old: L.old, neu: L.neu,
   ch: L.ch, chapter: CHAPTERS4[L.ch], gate: gateOf(L.n),
   session: SESSIONS.find((s) => s.after === L.n - 1 && s.n === 1) || null,
-  sessionAfter: SESSIONS.find((s) => s.after === L.n && s.n === 2) || null,
+  sessionAfter: SESSIONS.find((s) => s.after === L.n && s.n > 1) || null,
   reading: READINGS.find((r) => r.after === L.n) || null,
   d: L.d.map((_, d) => domainModel(L, d)),
 }));
@@ -149,8 +147,8 @@ function md() {
     '- **One question per screen.** Each blank of the sentence gets its own screen. Days are taps. Enter moves on.',
     '- **Every Sunday counts.** From Level 02, a level opens by asking about last week’s four actions: Done, Partly, Not yet. The readings show what was done and how good the estimates were.',
     '- **Nothing is asked twice.** Where the Launchpad plan or the Growth Plan already covers a step, the level shows that answer back or links to it. Seven Launchpad actions that repeat a level become counts (proposal).',
-    `- **Eight decisions are yours** (D1–D8, next). Saved answers keep their meaning: only new keys are added, so no migration.`, '');
-  out.push('## Decisions only you can make', '', mdTable(['', 'Question', 'What I found', 'My recommendation'], DECISIONS), '');
+    `- **Decisions:** D1 to D7 are applied (1 Nov); D8, the book titles, is still yours. Saved answers keep their meaning: only new keys are added, so no migration.`, '');
+  out.push('## Decisions', '', mdTable(['', 'Question', 'What I found', 'Recommendation and status'], DECISIONS), '');
   out.push('## The twelve weeks at a glance', '',
     mdTable(['Week', 'Chapter', 'Level', 'Promise: by Sunday you will have', 'Part of', 'Also this week'],
       MODEL.map((L) => [L.n, L.chapter.name, `${two(L.n)} · ${L.word} · ${L.title}`, L.promise, L.gate,
@@ -225,7 +223,7 @@ const CHANGES = [
   ['Level 12', '“90 days” becomes “twelve weeks”; checkpoints “week 4” and “week 8” (D5, applied 1 Nov).', 'One horizon.'],
   ['Levels 05, 09, 12', 'After each reading, one page to build: a process in ten lines, the operations page, the twelve-week page (option C).', 'The thinnest parts of the Blueprint, filled from answers already given.'],
   ['My Blueprint', 'A ninth part, the inner side, from the Growth Plan (option D); week 13 asks about Level 12 and offers the North Star again.', 'The whole of the founder, and the loop closed.'],
-  ['Levels 04 and 10', 'Session 1 opens Level 04; Session 2 follows the Chapter II reading.', 'D1. The sessions had no stated place or purpose.'],
+  ['Levels 04, 10 and week 13', 'Session 1 opens Level 04; Session 2 follows the Chapter II reading; Session 3 follows the Chapter III reading. A “Book it” card shows where each comes up.', 'D1: three sessions in total, as the site’s ladder sells them. The sessions had no stated place or purpose.'],
 ];
 const KEYS = [
   ['`w.v4.<level>.<d>.t`, `.s`, every sentence field', 'The tap, the slide, the words written', 'Unchanged'],
@@ -284,7 +282,7 @@ function html() {
 <header class="top"><p class="kick">Draft for Alexandru’s approval · 31 Oct 2026 · Phase 2 of 4</p>
 <h1>The Founder’s Blueprint<br><em>Skeleton</em></h1>
 <p class="lede">Twelve weeks, week by week. Every question, option, scale and four-lines text is read from Version 4; what is new is marked <span class="chip">new</span>. Nothing here is live.</p>
-<nav class="toc"><a href="#first">Read this first</a><a href="#decide">Your decisions</a><a href="#glance">At a glance</a><a href="#flow">One question at a time</a><a href="#fit">How the pieces fit</a><a href="#bp12">Blueprint at week 12</a><a href="#principles">Principles</a><a href="#ch-1">Chapter I</a><a href="#ch-2">Chapter II</a><a href="#ch-3">Chapter III</a><a href="#changes">Changes</a><a href="#keys">Saved answers</a><a href="#audit">Audit</a><a href="level-01-one-at-a-time.html">Try Level 01 →</a><a href="screens.html">The real screens on a phone →</a></nav>
+<nav class="toc"><a href="#first">Read this first</a><a href="#decide">Your decisions</a><a href="#glance">At a glance</a><a href="#flow">One question at a time</a><a href="#fit">How the pieces fit</a><a href="#bp12">Blueprint at week 12</a><a href="#principles">Principles</a><a href="#ch-1">Chapter I</a><a href="#ch-2">Chapter II</a><a href="#ch-3">Chapter III</a><a href="#changes">Changes</a><a href="#keys">Saved answers</a><a href="#audit">Audit</a><a href="level-01-one-at-a-time.html">Try Level 01 →</a></nav>
 </header>
 <main>
 <h2 id="first">Read this first</h2>
@@ -296,10 +294,10 @@ function html() {
 <li><b>One question per screen.</b> Each blank of the sentence gets its own screen. Days are taps. Enter moves on.</li>
 <li><b>Every Sunday counts.</b> From Level 02, a level opens with last week’s four actions: Done, Partly, Not yet. The readings show what was done and how good the estimates were.</li>
 <li><b>Nothing is asked twice.</b> Where the Launchpad plan or the Growth Plan already covers a step, the level shows that answer back or links to it.</li>
-<li><b>Eight decisions are yours</b> (below). Saved answers keep their meaning: only new keys are added, so no migration.</li>
+<li><b>Decisions:</b> D1 to D7 are applied (1 Nov); D8, the book titles, is still yours. Saved answers keep their meaning: only new keys are added, so no migration.</li>
 </ul>
-<h2 id="decide">Decisions only you can make</h2>
-${hTable(['', 'Question', 'What I found', 'My recommendation'], DECISIONS, 'dec')}
+<h2 id="decide">Decisions</h2>
+${hTable(['', 'Question', 'What I found', 'Recommendation and status'], DECISIONS, 'dec')}
 <h2 id="glance">The twelve weeks at a glance</h2>
 ${hTable(['Week', 'Level', 'By Sunday you will have', 'Part of', 'Also'], MODEL.map((L) => [L.n, `${two(L.n)} · ${L.word} · ${L.title}`, L.promise, L.gate,
     [L.n <= 3 ? `Launchpad plan, week ${L.n}` : '', L.session ? `Session ${L.session.n} opens it` : '', L.reading ? `${L.chapter.n} reading` : '', L.sessionAfter ? `then Session ${L.sessionAfter.n}` : ''].filter(Boolean).join('; ') || '—'])
@@ -665,8 +663,5 @@ function mock() {
 
 // ── Write ──────────────────────────────────────────────────────────────────
 const outs = [['docs/blueprint-skeleton.md', md()], ['docs/blueprint-skeleton.html', html()], ['docs/level-01-one-at-a-time.html', mock()]];
-mkdirSync(new URL('public/preview/blueprint/', root), { recursive: true });
 for (const [p, s] of outs) writeFileSync(new URL(p, root), s);
-writeFileSync(new URL('public/preview/blueprint/index.html', root), outs[1][1]);
-writeFileSync(new URL('public/preview/blueprint/level-01-one-at-a-time.html', root), outs[2][1]);
 console.log(outs.map(([p, s]) => `${p}  ${s.split('\n').length} lines`).join('\n'));
