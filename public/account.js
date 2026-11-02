@@ -26,10 +26,23 @@ async function post(path, body, keepalive = false) {
   if (!r.ok) {
     // A preview copy (*.pages.dev) has no account database: say so plainly.
     if (r.status === 503 && typeof location !== 'undefined' && /pages\.dev$/.test(location.hostname)) throw new Error('This is a preview copy of the site, so accounts are switched off here. On linktolead.exploraself.com it works.');
-    throw new Error(data.error || 'That did not go through.');
+    const e = new Error(data.error || 'That did not go through.');
+    e.data = data; // e.g. { noAccount: true } from /api/login
+    throw e;
   }
   return data;
 }
+
+/** A place on this site to come back to (same rule as functions/_shared.js
+ *  safeNext): "/pay/?step=session", never another site. */
+export const safeNext = (n) => { const s = String(n || '').trim(); return s.length <= 200 && /^\/(?![/\\])[^\s\\]*$/.test(s) ? s : ''; };
+/** Where a founder came from, to come back to after making the account:
+ *  the pay page keeps its step; every other page its path. */
+export const here = () => { try { return safeNext(location.pathname + (location.pathname.startsWith('/pay/') ? location.search : '')); } catch { return ''; } };
+/** "Make my free account": the full form on /road1/, the email already in it
+ *  (Alexandru, 2 Nov 2026). */
+export const joinHref = (email, next = here()) =>
+  `/road1/?email=${encodeURIComponent(String(email || ''))}${safeNext(next) ? `&next=${encodeURIComponent(safeNext(next))}` : ''}#join`;
 
 /** Pull the record on arrival, so work follows between devices. { gone: true }
  *  when the account this device remembers no longer exists. */
@@ -97,9 +110,10 @@ export async function signup({ first, last, email, industry, consent, source, st
   return out;
 }
 
-/** Ask for a one-time sign-in link. The reply is the same whether or not the
- *  address has an account. */
-export const signinLink = (email, to = 'start', reset = false) => post('/api/signin', { email, to, reset });
+/** Ask for a one-time sign-in link. With no account for the address, the
+ *  reply has noAccount: true, and the address is emailed a way to make one,
+ *  coming back to `next` (this page). */
+export const signinLink = (email, to = 'start', reset = false, next = here()) => post('/api/signin', { email, to, reset, next });
 
 /** Sign in with email and password (for founders who set one); keeps the token. */
 export async function login(email, password) {

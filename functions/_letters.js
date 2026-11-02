@@ -334,6 +334,20 @@ export function signinLetter(base, url, { first, to = '', offer, reset = false, 
   ], offerFor('signin', to, 'free', offer), close('signin', { ...o, to }, 'security')) };
 }
 
+/** Someone asked for a sign-in or reset link for an address with no account
+ *  (Alexandru, 2 Nov 2026: they should still get an email). A security
+ *  letter: no paid offer, one thing to do. `url` opens the free account form
+ *  with their email already in it. */
+export function noAccountLetter(base, url, { reset = false, to = '', ...o } = {}) {
+  return { subject: 'There’s no ExploraSelf account here yet', ...letter(base, [
+    'Hi,',
+    `Thank you for coming back. Someone, we hope you, asked for ${reset ? 'a password reset link' : 'a sign-in link'} for this address, but there’s no ExploraSelf account for it yet.`,
+    'Making one is free and takes a minute. Your first three levels open straight away.',
+    button(url, 'Make my free account →'),
+    'If you used another email before, try that one. The team and I are here for you.',
+  ], null, close('no-account', { ...o, to }, 'security')) };
+}
+
 /** After a password is set, changed or reset. A security letter. */
 export function passwordChangedLetter(base, { first, to = '', offer, ...o } = {}) {
   return { subject: 'Your password was changed', ...letter(base, [

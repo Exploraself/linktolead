@@ -39,6 +39,24 @@ function card(S, step, test) {
     <p class="err" id="err" role="alert" hidden></p>`;
 }
 
+/** Not signed in (Alexandru, 2 Nov 2026): the free account is made right
+ *  here, with the same form as /road1/ (landing "road1"), and the founder
+ *  comes straight back to this page, signed in, to pay. Never sent away. */
+function makeAccount(S) {
+  const back = location.pathname + location.search;
+  draw(`<p class="eb">${ICON.open}Unlock your next step</p><h1>${esc(S.name)} · ${esc(S.price)}</h1>
+    <p>First, your free account. It takes a minute, and then you come straight back here to pay.</p>
+    <button class="go" type="button" id="make">Make my free account</button>
+    <a class="ghost" href="/ground-plan/?next=${encodeURIComponent(back)}#signin">Already have an account? Sign in</a>`);
+  let gate = document.getElementById('gate');
+  if (!gate) { gate = document.createElement('div'); gate.id = 'gate'; gate.hidden = true; document.body.appendChild(gate); }
+  const open = () => import('/account-box.js').then((m) => m.open({ gate, opener: $('#make'), stage: null, variant: 'full', landing: 'road1', next: back,
+    head: ['ONE STEP BEFORE YOU PAY', 'Your free account', `Then you come straight back here to unlock ${S.name}. You sign in with your email and a password.`],
+    label: 'CONTINUE TO PAYMENT →', notNow: 'Not now' })).catch(() => { location.href = `/road1/?next=${encodeURIComponent(back)}#join`; });
+  $('#make').onclick = open;
+  open();
+}
+
 async function start() {
   let info;
   try { info = await (await fetch('/api/checkout', { headers: H() })).json(); } catch { info = null; }
@@ -55,12 +73,7 @@ async function start() {
       <p class="muted">Payments open here very soon. Until then, reply to any of our emails and Alexandru and the team will open it for you.</p>
       <a class="ghost" href="/ground-plan/#home">Back to my Base Camp</a>`);
   }
-  if (!info.signedIn) {
-    return draw(`<p class="eb">${ICON.open}Unlock your next step</p><h1>${esc(S.name)} · ${esc(S.price)}</h1>
-      <p>First, sign in to your free account, so we open the step in the right place. Then tap Unlock again.</p>
-      <a class="go" href="/ground-plan/#signin">Sign in</a>
-      <a class="ghost" href="/road1/">No account yet? Make your free account</a>`);
-  }
+  if (!info.signedIn) return makeAccount(S);
   if (ORDER.indexOf(step) <= ORDER.indexOf(info.tier || 'free')) {
     return draw(`<p class="eb">${ICON.check}Already yours</p><h1>${esc(S.name)} is open for you</h1>
       <p class="muted">Nothing to pay. It is waiting in your Base Camp.</p>

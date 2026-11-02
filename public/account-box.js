@@ -86,8 +86,8 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
       <label class="ab-fine" style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: #3D4966"><input type="checkbox" id="j-consent" style="width: 18px; height: 18px; margin-top: 1px; accent-color: #B4975F; flex: none">${CONSENT}</label>
       <span id="gate-err" class="ab-err" role="alert" style="font-size: 13px; color: #B5512E; font-weight: 600"></span>
       <button type="submit" class="ab-go">${stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →'}</button>
-      ${stay ? '' : '<button type="button" class="ab-no" data-close style="min-height: 44px; border-radius: 5px; border: 1px solid #D8CDBB; background: transparent; color: #121C2D; font-weight: 600; cursor: pointer">Not now · keep reading</button>'}
-      <span style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap"><a class="ab-link" href="/ground-plan/#signin" style="font-size: 13px; font-weight: 600; color: #7A5E26">Already have an account? Sign in</a><button type="button" class="ab-link" data-reset style="border: 0; background: none; padding: 0; font: 600 13px Inter, Arial, sans-serif; color: #7A5E26; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">Forgot your password?</button></span>
+      ${stay ? '' : '<button type="button" class="ab-no" data-close style="min-height: 44px; border-radius: 5px; border: 1px solid #D8CDBB; background: transparent; color: #121C2D; font-weight: 600; cursor: pointer">' + (ctx.notNow || 'Not now · keep reading') + '</button>'}
+      <span style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap"><a class="ab-link" href="${signinHref()}" style="font-size: 13px; font-weight: 600; color: #7A5E26">Already have an account? Sign in</a><button type="button" class="ab-link" data-reset style="border: 0; background: none; padding: 0; font: 600 13px Inter, Arial, sans-serif; color: #7A5E26; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">Forgot your password?</button></span>
     </form>
   </div>`;
 
@@ -98,12 +98,14 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
 const NS_HOME = ['north2'];
 /** The North Star sales pages: their box speaks of the North Star. */
 const NS_PAGES = ['north2', 'north3'];
+/** Sign in instead, then back to `next` (the pay page) when there is one. */
+const signinHref = () => `/ground-plan/${ctx.next ? `?next=${encodeURIComponent(ctx.next)}` : ''}#signin`;
 const after = () => ctx.next || (NS_HOME.includes(ctx.landing) ? '/northstar/' : '/ground-plan/#home');
-let ctx = { opener: null, stage: null, variant: 'full', landing: 'road1', stay: false, onExisting: null };
+let ctx = { opener: null, stage: null, variant: 'full', landing: 'road1', stay: false, onExisting: null, head: null, label: '', notNow: '' };
 function close() { if (ctx.gate) ctx.gate.hidden = true; if (ctx.opener && ctx.opener.focus) ctx.opener.focus(); }
 
 function wire(gate, variant, landing) {
-  gate.innerHTML = markup(variant, HEAD[ctx.stay ? 'stay' : landing === 'summit' ? 'summit' : variant === 'full' && NS_PAGES.includes(landing) ? 'compass' : variant], ctx.stay);
+  gate.innerHTML = markup(variant, ctx.head || HEAD[ctx.stay ? 'stay' : landing === 'summit' ? 'summit' : variant === 'full' && NS_PAGES.includes(landing) ? 'compass' : variant], ctx.stay);
   gate.dataset.variant = variant + ' ' + landing;
   gate.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
   gate.querySelectorAll('[data-eye]').forEach((b) => b.addEventListener('click', (e) => {
@@ -173,18 +175,21 @@ function wire(gate, variant, landing) {
       if (out.token) { if (ctx.stay) location.reload(); else location.href = after(); return; }
       if (ctx.onExisting) { close(); ctx.onExisting(email); return; }
       // An address that already has an account is never handed its key here.
-      $('#gate-err').innerHTML = 'This email already has an account. Sign in to open your plans. <a href="/ground-plan/#signin">Sign in →</a> or <button type="button" data-reset style="border: 0; background: none; padding: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer">reset your password</button>.';
+      $('#gate-err').innerHTML = 'This email already has an account. Sign in to open your plans. <a href="' + signinHref() + '">Sign in →</a> or <button type="button" data-reset style="border: 0; background: none; padding: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer">reset your password</button>.';
     } catch (ex) {
       err(ex && ex.message && !/fetch|network|load failed|import/i.test(ex.message) ? ex.message : 'We could not reach the account service just now. Try again in a minute.');
     }
-    go.disabled = false; go.textContent = ctx.stay || NS_HOME.includes(ctx.landing) || ctx.next === '/northstar/' ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →';
+    go.disabled = false; go.textContent = ctx.label || (ctx.stay || NS_HOME.includes(ctx.landing) || ctx.next === '/northstar/' ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →');
   });
 }
 
 /** Open the box. A founder already signed in on this device goes straight to
- *  their Base Camp. */
-export function open({ gate, opener, stage, variant = 'full', landing = variant === 'full' ? 'road1' : 'road3', stay = false, onExisting = null, next = '' }) {
-  ctx = { gate, opener, stage, variant, landing, stay, onExisting, next };
+ *  their Base Camp (or `next`). From a "Make my free account" button (the
+ *  sign-in screens, the no-account email, the pay page): `email` is already
+ *  filled in, `next` is where they go back to. `head` ([small, title, line]),
+ *  `label` (the button) and `notNow` change the words, as on /pay/. */
+export function open({ gate, opener, stage, variant = 'full', landing = variant === 'full' ? 'road1' : 'road3', stay = false, onExisting = null, next = '', email = '', head = null, label = '', notNow = '' }) {
+  ctx = { gate, opener, stage, variant, landing, stay, onExisting, next, head, label, notNow };
   if (hasAccount() && stay) return;
   if (hasAccount()) {
     if (stage) { const p = known() || {}; p.stage = stage.id; try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* private mode */ } }
@@ -193,9 +198,10 @@ export function open({ gate, opener, stage, variant = 'full', landing = variant 
   }
   if (gate.dataset.variant !== variant + ' ' + landing) wire(gate, variant, landing);
   // The button says where it goes.
-  { const g = gate.querySelector('.ab-go'); if (g && !ctx.stay) g.textContent = NS_HOME.includes(landing) || ctx.next === '/northstar/' ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →'; }
+  { const g = gate.querySelector('.ab-go'); if (g && (ctx.label || !ctx.stay)) g.textContent = ctx.label || (NS_HOME.includes(landing) || ctx.next === '/northstar/' ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →'); }
   const p = known();
   if (p) { $('#j-first').value = p.first || ''; $('#j-last').value = p.last || ''; $('#j-email').value = p.email || ''; }
+  if (email) $('#j-email').value = email;
   gate.hidden = false;
   $('#j-first').focus();
 }

@@ -1,8 +1,10 @@
 // Sign in on another device, by a one-time link sent to the account's email.
 //
-// POST { email } answers the same way whether or not there is an account, so
-// the form cannot be used to find out who has one. When there is, it emails
-// /northstar?signin=<code>. The code is 32 random bytes; only its SHA-256 is
+// POST { email } emails /ground-plan/?signin=<code> when there is an account.
+// When there is none, it says so, and still emails the address a way to make
+// one: the free account form with the email in it, and `next`, the page they
+// were on (Alexandru, 2 Nov 2026: someone who asks for a link should get an
+// email). The code is 32 random bytes; only its SHA-256 is
 // stored, it lasts 30 minutes (any number of opens; a new password ends it). Requests share the mail limits
 // with every other email (3 per address, 10 per connection, per hour), and
 // they count whether or not the address has an account.
@@ -12,15 +14,16 @@
 // A sign-in link is something the founder asked for in the moment, so it is
 // sent even to an address that unsubscribed.
 
-import { json, bad, db, now, clean, looksLikeEmail, accountTables, newToken, sha256 } from '../_shared.js';
+import { json, bad, db, now, clean, looksLikeEmail, accountTables, newToken, sha256, safeNext, joinUrl } from '../_shared.js';
 import { profile, unsubLink } from '../_account.js';
 import { allowed, logged, mailState, origin, send, LIMIT_MSG } from '../_mail.js';
-import { signinLetter } from '../_letters.js';
+import { signinLetter, noAccountLetter } from '../_letters.js';
 import { PAUSED } from '../_auth.js';
 import { letterContext } from '../_mentor.js';
 
 export const TTL = 30 * 60_000;
-const SAME = { ok: true, message: 'If there is an account for that address, a sign-in link is on its way. It works for the next 30 minutes.' };
+const SENT = { ok: true, message: 'A sign-in link is on its way. It works for the next 30 minutes.' };
+const NONE = (email) => ({ ok: true, noAccount: true, email, message: `There’s no account for ${email} yet. We’ve emailed you a link to make one.` });
 
 /** Make a one-time code for this founder and email the link. The link always
  *  opens their Base Camp (/ground-plan/), the dashboard. `reset` (a forgotten
@@ -60,12 +63,17 @@ export async function onRequestPost({ request, env }) {
   await logged(D, email, ip);
 
   const me = await D.prepare('SELECT id, email FROM student WHERE email = ?').bind(email).first();
-  if (!me) return json(SAME);
+  if (!me) {
+    const base = origin(request);
+    await send(env, { to: email, ...noAccountLetter(base, joinUrl(base, email, safeNext(body.next)), { to: email, reset: body.reset === true, tz: body.tz }),
+      why: 'Someone asked for a sign-in link for this address on ExploraSelf. If it was not you, ignore this email; nothing changes.' });
+    return json(NONE(email));
+  }
 
   const r = await sendLink(env, D, origin(request), me, 'start', { reset: body.reset === true, tz: body.tz });
   await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)')
     .bind(me.id, r.ok ? 'signin-link' : 'signin-link-failed', now(), r.why || null).run();
-  return json(SAME);
+  return json(SENT);
 }
 
 export async function onRequestGet({ request, env }) {

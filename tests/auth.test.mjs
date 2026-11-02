@@ -51,7 +51,8 @@ ok(st === 200 && j.token === ana && j.me.first === 'Ana', 'the right password si
 const [s1, wrong] = await J(await L('ana@example.com', 'wrong password!', '2.2.2.1'));
 const [s2, nobody] = await J(await L('nobody@example.com', 'wrong password!', '2.2.2.2'));
 const [s3, nopass] = await J(await L('bo@example.com', 'any password!!', '2.2.2.3'));
-ok(s1 === 401 && s2 === 401 && s3 === 401 && wrong.error === nobody.error && nobody.error === nopass.error, 'the same reply for a wrong password, an unknown email and an account without a password');
+ok(s1 === 401 && s3 === 401 && wrong.error === nopass.error, 'the same reply for a wrong password and an account without a password');
+ok(s2 === 404 && nobody.noAccount === true && nobody.error === 'There’s no account for nobody@example.com yet.', 'an email with no account is told so (Alexandru, 2 Nov 2026)');
 ok(!wrong.token && !nobody.token, 'no token on failure');
 
 // Rate limit on failed tries, counted alike for known and unknown addresses.

@@ -335,9 +335,11 @@
     const say = (m) => { if (where === 'note') UI.note = m; else UI.signin = m; render(); };
     if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email || '')) return say('Type your email first, then tap this again.');
     if (!A) return say('Sign-in is not available here. Open linktolead.exploraself.com/northstar.');
-    UI.signinBusy = true; render();
+    UI.signinBusy = true; UI.signinNew = null; render();
     try {
       const r = await A.signinLink(email, 'start', where !== 'note');
+      // No account (Alexandru, 2 Nov 2026): the reply says so, with the button.
+      if (r && r.noAccount) UI.signinNew = email;
       say(where === 'note' ? 'This email already has an account. We have sent a sign-in link to it. Open it on this device and your answers here join your account. Until then they are saved on this browser.' : r.message);
     } catch (e) {
       say(e && e.message && !/fetch|network|load failed/i.test(e.message) ? e.message : 'We could not send a link just now. Try again in a minute.');
@@ -377,9 +379,9 @@
     const email = (($(where === 'gate' ? '#g-email' : '#ws-signin') || {}).value || '').trim(), pw = ($('#si-pw-' + where) || {}).value || '';
     if (!A) return;
     if (!pw) { UI.signin = 'Type your password, or use “Email me a sign-in link”.'; render(); return; }
-    UI.signinBusy = true; render();
+    UI.signinBusy = true; UI.signinNew = null; render();
     try { const out = await A.login(email, pw); UI.gate = false; UI.signin = ''; UI.signinFor = null; await afterSignIn(out.me || {}); }
-    catch (e) { UI.signin = e && e.message && !/fetch|network|load failed/i.test(e.message) ? e.message : 'We could not reach the account service just now.'; }
+    catch (e) { if (e && e.data && e.data.noAccount) UI.signinNew = email; UI.signin = e && e.message && !/fetch|network|load failed/i.test(e.message) ? e.message : 'We could not reach the account service just now.'; }
     UI.signinBusy = false; render();
   }
   async function savePassword() {
@@ -2144,7 +2146,7 @@
   const pSignin = (where) => `${pwInput('si-pw-' + where, 'Password', 'current-password')}
     <button type="button" data-act="pw-in" data-v="${where}" data-f="pw-in-${where}" ${UI.signinBusy ? 'disabled' : ''} style="min-height: 46px; border-radius: 5px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 520; cursor: pointer">Sign in</button>
     <span style="display: flex; gap: 14px; flex-wrap: wrap"><button type="button" data-act="reset-open" data-v="${where}" data-f="reset-${where}" style="border: 0; background: none; padding: 6px 0; color: var(--goldink); font-size: 13px; font-weight: 520; text-decoration: underline; text-underline-offset: 4px; cursor: pointer">Forgot your password?</button></span>
-    ${UI.signin ? `<span role="status" style="font-size: 13px; color: var(--ink)">${esc(UI.signin)}</span>` : ''}`;
+    ${UI.signin ? `<span role="status" style="font-size: 13px; color: var(--ink)">${esc(UI.signin)}${UI.signinNew && A && A.joinHref ? ` <a href="${esc(A.joinHref(UI.signinNew, '/northstar/'))}" style="color: var(--goldink); font-weight: 600">Make my free account →</a>` : ''}</span>` : ''}`;
   const pPassword = () => `<details${UI.pwmsg ? ' open' : ''}><summary style="cursor: pointer; font-weight: 520; color: var(--goldink); min-height: 32px">${UI.hasPw ? 'Change your password' : 'Set a password (optional)'}</summary>
     <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 8px; max-width: 420px">${pwInput('pw-1', 'Password', 'new-password')}${pwInput('pw-2', 'Confirm password', 'new-password')}
     <button type="button" data-act="pw-save" data-f="pw-save" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; cursor: pointer">Save my password</button>

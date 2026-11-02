@@ -68,8 +68,9 @@ sent = fakeResend();
 const ask = (email, ip) => askLink({ request: post('/api/signin', { email }, ip), env });
 const [s1, known] = await jsonOf(await ask('ana@example.com', '9.9.9.1'));
 const [s2, unknown] = await jsonOf(await ask('nobody@example.com', '9.9.9.2'));
-ok(s1 === 200 && s2 === 200 && JSON.stringify(known) === JSON.stringify(unknown), 'same reply for a known and an unknown email');
-ok(sent.length === 1 && sent[0].body.to[0] === 'ana@example.com', 'only the real account gets an email');
+// Alexandru, 2 Nov 2026: an address with no account is told so, and still gets an email to make one.
+ok(s1 === 200 && s2 === 200 && !known.noAccount && unknown.noAccount === true && /no account for nobody@example\.com/.test(unknown.message), 'a known email: link sent; an unknown one: told plainly');
+ok(sent.length === 2 && sent[0].body.to[0] === 'ana@example.com' && sent[1].body.to[0] === 'nobody@example.com' && /no ExploraSelf account here yet/.test(sent[1].body.subject), 'the real account gets its link, the unknown address an invitation to make one');
 const link = /https:\/\/linktolead\.exploraself\.com\/ground-plan\/\?signin=([0-9a-f]+)/.exec(sent[0].body.text);
 ok(link, 'the email carries /start?signin=<code>: every sign-in link opens the Base Camp');
 const code = link[1];

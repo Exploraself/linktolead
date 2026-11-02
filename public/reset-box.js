@@ -37,6 +37,7 @@ const STYLE = `.rbx-veil{position:fixed;inset:0;z-index:120;background:rgba(14,2
 .rbx-ic{flex:none;width:46px;min-height:48px;border:1px solid #D8CDBB;border-radius:6px;background:#fff;color:#121C2D;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;font-size:11px;font-weight:600}
 .rbx-ic[aria-pressed="true"]{background:#F3EBDA}
 .rbx-go{min-height:52px;border:0;border-radius:6px;background:#B4975F;color:#14100B;font:600 15px Inter,Arial,sans-serif;letter-spacing:.03em;cursor:pointer;width:100%}
+a.rbx-go{display:flex;align-items:center;justify-content:center;text-decoration:none;box-sizing:border-box}
 .rbx-go:hover{background:#D6BF8F}.rbx-go:disabled{opacity:.55;cursor:not-allowed}
 .rbx-ghost{min-height:46px;border:1px solid #D8CDBB;border-radius:6px;background:transparent;color:#121C2D;font:600 14px Inter,Arial,sans-serif;cursor:pointer;width:100%}
 .rbx-link{border:0;background:none;padding:6px 0;color:#7A5E26;font:600 13.5px Inter,Arial,sans-serif;text-decoration:underline;text-underline-offset:4px;cursor:pointer;align-self:center}
@@ -134,7 +135,7 @@ export function openReset({ email = '', mode = 'reset' } = {}) {
       const to = inner.querySelector('#rbx-email').value.trim();
       if (!OK_EMAIL.test(to)) return say(inner, 'That email does not look complete. Check it and try again.');
       const go = inner.querySelector('.rbx-go'); go.disabled = true; go.textContent = 'Sending…'; say(inner, '');
-      try { const A = await import('/account.js'); await A.signinLink(to, 'start', reset); sent(to); }
+      try { const A = await import('/account.js'); const r = await A.signinLink(to, 'start', reset); if (r && r.noAccount) none(to, A.joinHref(to)); else sent(to); }
       catch (ex) { say(inner, plain(ex, 'We could not send it just now. Try again in a minute.')); go.disabled = false; go.textContent = reset ? 'Email me a reset link' : 'Email me a sign-in link'; }
     });
   };
@@ -142,7 +143,7 @@ export function openReset({ email = '', mode = 'reset' } = {}) {
     put(inner, `<div class="rbx-done" style="display:flex;flex-direction:column;gap:12px">
         <span class="rbx-icon">${MAIL}</span>
         <h2 id="rbx-h">Check your email</h2>
-        <p>If there is an account for<br><span class="rbx-addr">${esc(to)}</span><br>a ${reset ? 'reset' : 'sign-in'} link is on its way. It works for the next 30 minutes.</p>
+        <p>A ${reset ? 'reset' : 'sign-in'} link is on its way to<br><span class="rbx-addr">${esc(to)}</span><br>It works for the next 30 minutes.</p>
         ${inboxes(to)}
         <p class="rbx-tip">Not there in two minutes? Look in Spam or Promotions.</p>
         <div class="rbx-err" role="alert"></div>
@@ -153,9 +154,22 @@ export function openReset({ email = '', mode = 'reset' } = {}) {
     let n = 30; const tick = setInterval(() => { n--; if (!veil || !again.isConnected) return clearInterval(tick); if (n <= 0) { clearInterval(tick); again.disabled = false; again.textContent = 'Send it again'; } else again.textContent = `Send it again in ${n} s`; }, 1000);
     again.addEventListener('click', async () => {
       again.disabled = true; again.textContent = 'Sending…';
-      try { const A = await import('/account.js'); await A.signinLink(to, 'start', reset); sent(to); }
+      try { const A = await import('/account.js'); const r = await A.signinLink(to, 'start', reset); if (r && r.noAccount) none(to, A.joinHref(to)); else sent(to); }
       catch (ex) { say(inner, plain(ex, 'We could not send it just now. Try again in a minute.')); again.disabled = false; again.textContent = 'Send it again'; }
     });
+    inner.querySelector('#rbx-other').addEventListener('click', () => ask(''));
+  };
+  // No account for this address (Alexandru, 2 Nov 2026): say so, and open the
+  // free account form with the email in it. The email with the same button
+  // is on its way too, for later.
+  const none = (to, href) => {
+    put(inner, `<div class="rbx-done" style="display:flex;flex-direction:column;gap:12px">
+        <span class="rbx-k">No account yet</span>
+        <h2 id="rbx-h">Let’s make your free account.</h2>
+        <p>There’s no account for<br><span class="rbx-addr">${esc(to)}</span><br>yet. Making one is free and takes a minute. Your first three levels open straight away.</p>
+        <a class="rbx-go" href="${esc(href)}">Make my free account →</a>
+        <p class="rbx-tip">We’ve also emailed you this button, for later.</p>
+        <button type="button" class="rbx-link" id="rbx-other">Used another email before? Try that one</button></div>`);
     inner.querySelector('#rbx-other').addEventListener('click', () => ask(''));
   };
   ask(email);
