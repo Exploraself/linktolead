@@ -19,7 +19,23 @@ main{max-width:640px;margin:0 auto;padding:36px 18px 72px;display:grid;gap:18px}
 h1{font-size:clamp(30px,7vw,40px);line-height:1.15;font-weight:700}
 .price{font-size:34px;font-weight:700;line-height:1.2}
 .price small{font-size:15px;font-weight:400;color:var(--muted);margin-left:8px}
-.card{border:1px solid var(--line);border-radius:16px;padding:18px 20px;display:grid;gap:14px}
+.pitch{font-size:19px;line-height:1.5;color:var(--muted);margin-top:-6px}
+.card{border:1px solid var(--line);border-radius:16px;padding:18px 20px;display:grid;gap:12px}
+.card h2{display:flex;align-items:center;gap:10px;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--gold-ink)}
+.card h2 svg{width:20px;height:20px;flex:none}
+.with b{display:block;font-size:18px;margin-bottom:4px;color:var(--ink)}
+.with{color:var(--muted)}
+.lv{list-style:none;margin:0;padding:0;display:grid}
+.lv li{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start;padding:12px 0;border-top:1px solid var(--line)}
+.lv li:first-child{border-top:0;padding-top:2px}
+.lv .n{font-weight:700;font-size:15px;color:var(--gold-ink);background:var(--soft);border-radius:10px;text-align:center;padding:5px 0;font-variant-numeric:tabular-nums}
+.lv b{display:block;font-size:18px;line-height:1.35}
+.lv small{display:block;font-size:15.5px;line-height:1.5;color:var(--muted);margin-top:3px}
+.also{font-size:15.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+.lv.short li{padding:8px 0;align-items:center}
+.trust{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.trust li{display:flex;align-items:center;gap:10px;font-size:15px;color:var(--muted)}
+.trust svg{width:18px;height:18px;color:var(--gold-ink);flex:none}
 .row{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
 .row svg{width:22px;height:22px;color:var(--gold-ink);margin-top:2px}
 .row b{display:block}
