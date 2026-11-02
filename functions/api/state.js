@@ -6,6 +6,7 @@ import { json, bad, db, now, clean, accountTables } from '../_shared.js';
 import { mentorFor, keepTz } from '../_mentor.js';
 import { originOf } from '../_mailchimp.js';
 import { missingOf } from '../_profile.js';
+import { isTeam } from '../_team.js';
 
 async function student(D, token) {
   if (!token || token.length < 20) return null;
@@ -49,7 +50,9 @@ export async function onRequestGet({ request, env }) {
   // stageChosen: the founder picked this stage on /start ("Change where I
   // stand"), so it wins over the North Star's on every device. signupType:
   // 'simple' founders never have a password, so /start offers none.
-  return json({ ok: true, me: { name: me.name, email: me.email, stage: me.stage, stageChosen: !!chose, tier: me.tier, thin: me.thin_domain, hasPassword: !!(auth && auth.pass_hash),
+  return json({ ok: true, me: { name: me.name, email: me.email, stage: me.stage, stageChosen: !!chose, tier: me.tier, thin: me.thin_domain,
+    // Team accounts see every Blueprint level open (functions/_team.js).
+    openAll: isTeam(me.email, env), hasPassword: !!(auth && auth.pass_hash),
     signupType: (prof && prof.signup_type) || null,
     avatar: (prof && prof.avatar) || '',
     // The industry from sign-up, so the North Star workspace does not ask again.
