@@ -396,7 +396,7 @@ export function answerLetter(base, { first, question, answer, to = '', tier, off
  *  just bought. The words of each step come from STEPS in _stripe.js. */
 export const UNLOCKED = {
   session: { name: 'The Boardroom', last: 5, extra: 'and so is your full North Star', sessions: 'One 1:1 session with me. Before we speak, the team and I read your first three levels, so the time is spent on you, not on catching up.' },
-  lab: { name: 'The LAB', last: 9, extra: 'and the library comes with them: the frameworks, the tools, the books and the workbook for your stage', sessions: 'Two 1:1 sessions with me.' },
+  lab: { name: 'The LAB', last: 9, extra: 'each one with its questions and its twenty actions', sessions: 'Two 1:1 sessions with me.' },
   hub: { name: 'The HUB', last: 12, extra: 'with the LAB included and every resource. Nothing is held back', sessions: 'Three 1:1 sessions with me in total, including the one from the LAB.' },
   premium: { name: 'The Summit', last: 12, extra: 'with the LAB, the HUB and every resource. Everything is yours', sessions: 'Me, every week. We will set the day together.' },
 };
@@ -418,6 +418,28 @@ export function unlockedLetter(base, { first, step, from = 'free', to = '', ...o
     button(`${base}/ground-plan/#programme-${a}`, `Open Level ${pad2(a)}`),
     'You chose to invest in yourself and your business. That decision is already a step. The team and I are here for you.',
   ], null, asReceipt(close('unlocked', { ...o, to }, ['How do I book my session?', 'Where should I start?', 'Can I have an invoice?']))) };
+}
+
+/** "gift": Alexandru invites a founder from /mentor (Alexandru, 2 Nov 2026:
+ *  "add somebody by email … decide ahead to what degree … at no cost"). The
+ *  step he chose is open the moment the letter leaves; nothing to pay. A new
+ *  account gets a button that signs them in and asks for a password (7 days);
+ *  an existing one, a button that signs them in. No offer: it is a gift. */
+export function giftLetter(base, { first, step = 'free', url = '', fresh = true, to = '', ...o } = {}) {
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const U = UNLOCKED[step];
+  const what = U ? `${U.name}` : 'The Founder’s Blueprint';
+  return { subject: U ? `A gift from Alexandru: ${U.name}` : 'Your free place in The Founder’s Blueprint', ...letter(base, [
+    hi(first),
+    U ? `I have opened ${U.name} for you, as my gift. There is nothing to pay.`
+      : 'I have opened a free account for you in The Founder’s Blueprint, so your place is ready.',
+    U ? `Levels 01 to ${pad2(U.last)} are open for you now, ${U.extra}.` : 'Levels 01 to 03 are open for you now, with the manuals and the books in your library.',
+    ...(U ? [`What you have with it: ${U.sessions.charAt(0).toLowerCase() + U.sessions.slice(1)}`, ['Book your session here, at a time that suits you: ', link(BOOKING)]] : []),
+    fresh ? 'One step first: tap the button and choose your password. It signs you in on this device, and it works for the next 7 days.'
+      : 'Tap the button and you arrive signed in. It works for the next 7 days.',
+    button(url || `${base}/ground-plan/#signin`, fresh ? 'Set my password →' : `Open ${what} →`),
+    'Start with Level 01: one question at a time, and ten minutes is enough for today. I am glad you are here. The team and I are here for you.',
+  ], null, close('gift', { ...o, to }, U ? ['Where should I start?', 'How do I book my session?', 'The button doesn’t work'] : ['Where should I start?', 'What is in my library?', 'The button doesn’t work'])) };
 }
 
 /** "team-invite": to a new team member, once, when Alexandru adds their

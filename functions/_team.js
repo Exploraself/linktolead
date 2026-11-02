@@ -58,7 +58,8 @@ export const DID_WORDS = { message: ['letter', 'letters'], reply: ['answer', 'an
   'series-hold': ['pause or resume', 'pauses or resumes'], 'signin-link': ['sign-in link', 'sign-in links'], 'reset-link': ['reset link', 'reset links'],
   pause: ['account pause', 'account pauses'], delete: ['founder deleted', 'founders deleted'], 'mentor-save': ['mentor profile saved', 'mentor profiles saved'],
   'mentor-assign': ['mentor chosen', 'mentors chosen'], 'mc-test': ['Mailchimp test', 'Mailchimp tests'], 'mc-backfill': ['Mailchimp send', 'Mailchimp sends'],
-  'team-add': ['member added', 'members added'], 'team-remove': ['member removed', 'members removed'], 'team-can': ['rights change', 'rights changes'] };
+  'team-add': ['member added', 'members added'], 'team-remove': ['member removed', 'members removed'], 'team-can': ['rights change', 'rights changes'],
+  invite: ['founder invited', 'founders invited'] };
 
 // ── What each team member may do (Alexandru, 2 Nov 2026: "choose per team
 // member what they can do … access like me on everything") ─────────────────
@@ -80,13 +81,14 @@ export const TEAM_RIGHTS = [
   ['mailchimp', 'Mailchimp tools and the tag list'],
   ['payments', 'See the payments (Stripe)'],
   ['team', 'Change the team and what each member can do'],
+  ['invite', 'Invite a founder at any step, free'],
 ];
 export const ALL_RIGHTS = TEAM_RIGHTS.map(([k]) => k);
 export const DEFAULT_RIGHTS = ['reply', 'message', 'signin-link', 'reset-link', 'series-hold', 'tier'];
 /** Which right each /mentor action needs. An action not here is the key's only. */
 export const ACTION_RIGHT = { reply: 'reply', message: 'message', 'signin-link': 'signin-link', 'reset-link': 'reset-link',
   'series-hold': 'series-hold', tier: 'tier', pause: 'pause', delete: 'delete', 'mentor-save': 'mentors', 'mentor-assign': 'mentors',
-  'mc-test': 'mailchimp', 'mc-backfill': 'mailchimp', 'team-add': 'team', 'team-remove': 'team', 'team-can': 'team' };
+  'mc-test': 'mailchimp', 'mc-backfill': 'mailchimp', 'team-add': 'team', 'team-remove': 'team', 'team-can': 'team', invite: 'invite' };
 
 async function rightsTable(D) {
   await D.prepare('CREATE TABLE IF NOT EXISTS team_right (email TEXT PRIMARY KEY, can TEXT NOT NULL, at TEXT)').run();

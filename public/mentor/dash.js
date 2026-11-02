@@ -98,9 +98,12 @@ export function summary(students, waiting, now = Date.now()) {
 /** The table's rows. The old tiles (tile) and the cockpit's chips: group
  *  (ns, bp, both), step, act (new, active, quiet), need (q, ready, nopw),
  *  more (full, simple, library) and the search (name, email, business). */
-export function filter(students, { tile = 'all', q = '', group = 'all', step = 'all', act = 'all', need = 'all', more = 'all' } = {}, now = Date.now()) {
+export function filter(students, { tile = 'all', q = '', group = 'all', step = 'all', act = 'all', need = 'all', more = 'all', pay = 'all', joined = 'all', live = null } = {}, now = Date.now()) {
   const needle = String(q).trim().toLowerCase();
+  const since = sinceOf(joined, now);
   return (students || []).filter((s) => {
+    if (pay !== 'all' && payOf(s, live) !== pay && !(pay === 'notpaid' && payOf(s, live) !== 'paid')) return false;
+    if (joined !== 'all' && !((new Date(s.joined_at).getTime() || 0) >= since)) return false;
     if (tile === 'new' && !isNew(s, now)) return false;
     if (tile === 'compass' && !s.compass_at) return false;
     if (tile === 'notes' && !(s.open_notes > 0)) return false;
@@ -435,4 +438,37 @@ export function draftLetter(s, kind = 'note', { word = '', origin = '' } = {}) {
 export function topThree(students, waiting, now = Date.now()) {
   const all = today(students, waiting, now);
   return { three: all.slice(0, 3), more: all.slice(3) };
+}
+
+// ── Paid or not (Alexandru, 2 Nov 2026: "those who haven't paid, those who
+// paid, the percentage of them, and those who just paid … on the top") ──────
+/** paid: a real (live) Stripe payment. given: on a paid step without one
+ *  (moved up in /mentor, or invited at a step). free: the free levels, no
+ *  payment. Test payments never count as paid. */
+export function payOf(s, liveIds) {
+  if (liveIds && liveIds.has(s.id)) return 'paid';
+  return tierOf(s) !== 'free' ? 'given' : 'free';
+}
+export const liveIdsOf = (paid) => new Set((paid || []).filter((p) => p.mode === 'live').map((p) => p.student_id));
+/** The time windows of Grow and of the Founders filter. */
+export const WINDOWS = [['today', 'Today'], ['7', '7 days'], ['30', '30 days'], ['all', 'All']];
+export function sinceOf(w, now = Date.now()) {
+  if (w === 'today') { const d = new Date(now); d.setHours(0, 0, 0, 0); return d.getTime(); }
+  if (w === '7' || w === '30') return now - Number(w) * 864e5;
+  return 0;
+}
+/** The numbers at the top of Grow, for one window: who joined (newest first),
+ *  how many of them paid, were given a step, or are on the free levels, the
+ *  share that paid, and the payments in the window (money: live only). */
+export function pulse(students, paid, w = '7', now = Date.now()) {
+  const since = sinceOf(w, now), t = (x) => new Date(x).getTime() || 0, live = liveIdsOf(paid);
+  const joined = (students || []).filter((s) => t(s.joined_at) >= since).sort((a, b) => t(b.joined_at) - t(a.joined_at));
+  const n = { paid: 0, given: 0, free: 0 };
+  for (const s of joined) n[payOf(s, live)]++;
+  const pays = (paid || []).filter((p) => t(p.at) >= since).sort((a, b) => t(b.at) - t(a.at));
+  const livePays = pays.filter((p) => p.mode === 'live');
+  return { since, joined, total: joined.length, ...n, notPaid: joined.length - n.paid,
+    pct: joined.length ? Math.round((n.paid * 100) / joined.length) : 0,
+    pays, livePays, test: pays.length - livePays.length, money: livePays.reduce((a, p) => a + (Number(p.amount) || 0), 0),
+    seesMoney: (paid || []).some((p) => 'amount' in p) };
 }

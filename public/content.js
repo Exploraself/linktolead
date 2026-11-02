@@ -59,7 +59,7 @@ export const LADDER = [
   { from: 4, to: 5, key: 'session', n: 'The Boardroom — one session with Alexandru', price: '$27',
     what: 'Alexandru and the team read your first three levels before you speak. You leave knowing which of the four domains is costing you most, why it is that one, and with levels four and five opened and walked through. These two are not handed over cold.' },
   { from: 6, to: 9, key: 'lab', n: 'Personal Leadership LAB', price: '$97',
-    what: 'Nine levels, self-paced, in your own time, and two sessions with Alexandru. The library comes with it: the 32 frameworks, the 99 tools, the books and the workbook for your stage.',
+    what: 'Nine levels, self-paced, in your own time, and two sessions with Alexandru.',
     url: 'https://exploraself.com/lab' },
   { from: 10, to: 12, key: 'hub', n: 'Business Growth HUB', price: '$750',
     what: 'The full Blueprint, unlocked immediately. Three sessions with Alexandru in total, including one from the LAB, the LAB included, and every resource.',

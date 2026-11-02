@@ -122,6 +122,16 @@ export const ENTRIES = [
     build: () => L.unlockedLetter(BASE, { ...S, step: 'session' }),
   },
   {
+    id: 'gift', stage: 'pay', icon: 'key', fn: 'giftLetter',
+    name: 'A gift from Alexandru',
+    when: 'Alexandru and the team (a member needs the right “Invite a founder at any step, free”) invite someone by email in /mentor → Founders → Invite a founder, choosing the step: free, The Boardroom, the LAB, the HUB or The Summit. Since 2 Nov 2026. The step opens at once, with nothing to pay; the letter leaves at the same moment.',
+    who: 'The person invited. A new address gets a free account first (no letters until they say yes); someone with an account moves up, never down.',
+    from: '/mentor (Founders → Invite a founder)',
+    sentBy: 'functions/api/mentor.js (invite)',
+    also: 'What opened and the sessions that come with it (with the booking link), then one button that signs them in for 7 days: “Set my password” for a new account, “Open …” for one that has a password. No offer: it is a gift. The step tags go to Mailchimp only for someone who already said yes to letters.',
+    build: () => L.giftLetter(BASE, { ...S, step: 'lab', url: `${BASE}/ground-plan/?signin=…&reset=1`, fresh: true }),
+  },
+  {
     id: 'mentor', stage: 'close', icon: 'pen', fn: 'mentorLetter',
     name: 'A letter from the mentor',
     when: 'Alexandru and the team write to one founder from /mentor. Since 2 Nov 2026 each button opens a letter already written from the founder\'s own answers (a welcome, a check-in, the Boardroom offer, an invite to the Blueprint, the North Star link, or a plain note), which the mentor reads, changes and sends.',
