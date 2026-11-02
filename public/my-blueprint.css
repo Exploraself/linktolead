@@ -89,6 +89,24 @@ body.mbview #main{background:#F6F6F4}
 .mb-box[aria-checked="true"]::after{content:"";width:12px;height:7px;border:solid #fff;border-width:0 0 3px 3px;transform:translateY(-2px) rotate(-45deg)}
 .mb-box:focus-visible{outline:2px solid var(--mb-ink);outline-offset:2px}
 
+/* Twenty actions: the size switch, the four areas, Do on top, the day it was done. */
+.mb-sizes{display:flex;flex-wrap:wrap;gap:8px}
+.mb-sizes button{min-height:42px;padding:0 14px;border-radius:999px;border:1px solid var(--mb-line);background:#fff;color:var(--mb-ink);font-size:15px;cursor:pointer}
+.mb-sizes button[aria-pressed="true"]{background:var(--mb-ink);border-color:var(--mb-ink);color:#fff;font-weight:700}
+.mb-count{font-size:15px;color:var(--mb-muted)}
+.mb-count b{color:var(--mb-ink)}
+.mb-area{display:flex;flex-direction:column;gap:10px;padding-top:12px;border-top:1px solid var(--mb-line)}
+.mb-area h3{font-size:17px}
+.mb-area h3 small{display:block;font-weight:400;font-size:14.5px;color:var(--mb-muted)}
+.mb-acts li.mb-dostep{border-color:var(--mb-ink)}
+.mb-acts li.mb-dostep.mb-on{border-color:var(--mb-ok)}
+.mb-meta b{color:var(--mb-gold-ink)}
+.mb-when{font-size:13.5px;color:var(--mb-ok);font-weight:700}
+.mb-five{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:15.5px}
+.mb-five b{color:var(--mb-gold-ink);margin-right:4px}
+.mb-five li.mb-on{color:var(--mb-ink)}
+@media (hover:hover){.mb-sizes button:hover{border-color:var(--mb-ink)}}
+
 /* My playbook: the chapters, then each level folded. */
 .mb-ch{font-size:15px;color:var(--mb-muted);font-weight:700;margin-top:8px!important;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
 .mb-ch small{font-weight:400;font-size:14px}
