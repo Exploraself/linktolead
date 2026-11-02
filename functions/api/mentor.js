@@ -32,6 +32,7 @@ import { thread } from './thread.js';
 import { profile, unsubLink, deleteFounder } from '../_account.js';
 import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER, readTags, FORGOTTEN } from '../_mailchimp.js';
 import { sortTags } from '../_tag-list.js';
+import { webhookState, payments } from '../_stripe.js';
 import { holdLetters } from '../_series.js';
 
 /** What only the mentor key may do (Alexandru, 2 Nov 2026). A team account
@@ -191,6 +192,13 @@ export async function onRequestGet({ request, env }) {
     const mc = mailchimpState(env);
     const waiting = canTag(env) ? (await stepsBackfillList(D, 5000, mc.mode)).length : 0;
     return json({ ok: true, read: true, total: live.total, waiting, ...sortTags(live.tags, { kept: (kept.results || []).map((r) => r.t) }) });
+  }
+  // Payments (functions/_stripe.js): the mode, the webhook, the latest
+  // payments. The key only.
+  if (url.searchParams.get('stripe')) {
+    if (access.by !== 'key') return bad('Only the mentor key can see the payments.', 403);
+    const hook = await webhookState(D, env);
+    return json({ ok: true, ...hook, payments: await payments(D, 30) });
   }
   const one = url.searchParams.get('student');
 
