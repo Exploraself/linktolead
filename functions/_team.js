@@ -7,7 +7,9 @@
 // TEAM_EMAILS in the Cloudflare Pages project settings, comma separated (the
 // live site ignores wrangler.toml [vars]).
 
-export const TEAM = ['alex@exploraself.com'];
+// Alexandru's two addresses (2 Nov 2026): the mentor inbox, and the one his
+// founder account was made with (reset letters reached sales@ on 31 Oct).
+export const TEAM = ['alex@exploraself.com', 'sales@exploraself.com'];
 
 const norm = (e) => String(e || '').trim().toLowerCase();
 

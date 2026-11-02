@@ -40,7 +40,7 @@ for (const x of L) for (let d = 0; d < 4; d++) {
   if (/[{}]|class="blank"/.test(h)) { clean = false; console.error('gap in', x.n, d, h.slice(0, 160)); }
 }
 ok(clean, 'every "Done when", template and day question fills from the founder’s own answers');
-ok(V.takeOf(w, 6, 2).lines[0].includes('Studio Rossi') && V.takeOf(w, 6, 2).lines.join('').includes('class="ln"'), 'what the founder keeps carries their words, and lines to fill in on paper');
+ok(V.takeOf(w, 6, 2).lines[0].includes('Parker Studio') && V.takeOf(w, 6, 2).lines.join('').includes('class="ln"'), 'what the founder keeps carries their words, and lines to fill in on paper');
 ok(!V.doneOf({ [V.wkey(1, 0, 'act')]: '<b>x</b>' }, 1, 0).includes('<b>'), 'founder text is escaped');
 
 // Rule 4: no tool names on the surface, not even as a topic or a title.
@@ -60,7 +60,7 @@ ok(empty.every((s) => s.items.every((i) => !i.started)) && bp.every((s) => s.ite
 
 // ── The flow: one field on screen ─────────────────────────────────────────
 const s1 = V.stepsOf(1), s2 = V.stepsOf(2), s5 = V.stepsOf(5);
-ok(s1[0].join() === '0,tap' && s2.slice(0, 4).every((s, i) => s[0] === i && s[1] === 'got') && s2[4].join() === '0,tap', 'Level 01 opens on its first tap; every later level on last week’s four actions');
+ok(s1[0].join() === '0,idea' && s1[1].join() === '0,tap' && s2.slice(0, 4).every((s, i) => s[0] === i && s[1] === 'got') && s2[4].join() === '0,tap', 'Level 01 opens on its first concept, then its tap; every later level on last week’s four actions');
 { const k5 = s5.map((s) => s[1]), at = k5.indexOf('week');
   ok(k5.slice(at, at + 4).join() === 'week,reading,carry,carryday' && k5[k5.length - 1] === 'bpage' && V.stepsOf(4).slice(-1)[0][1] === 'week',
     'the week ends a level; after 05, 09 and 12, the reading, one action carried forward, and one page to build'); }
@@ -70,9 +70,10 @@ for (const x of L) x.d.forEach((D, d) => {
   const fields = V.fieldsOf(D).map((f) => f[0]);
   if (S.filter((s) => s[1] === 'done').length !== 1 || S.filter((s) => s[1] === 'lines').length !== 1) once = false;
   for (const f of fields) if (S.filter((s) => s[2] === f).length !== 1) once = false;
-  if (S[0][1] !== 'tap' || S[1][1] !== 'slide' || S[S.length - 1][1] !== 'lines') once = false;
+  const T = S[0][1] === 'idea' ? S.slice(1) : S; // the concept screen comes first where a domain has one
+  if (T[0][1] !== 'tap' || T[1][1] !== 'slide' || T[T.length - 1][1] !== 'lines') once = false;
 });
-ok(once, 'per domain: tap, slide, each blank once, the day, "Done when", four lines');
+ok(once, 'per domain: (the concept,) tap, slide, each blank once, the day, "Done when", four lines');
 ok(V.stepsOf(1).filter((s) => s[1] === 'day').every((s) => ['day', 'when', 'on'].includes(s[2])), 'a day is a tap, never typed unless it is a date');
 
 ok(V.firstOf({}, 1) === 0 && V.firstOf({}, 2) === 0, 'a new level opens on its first question');
