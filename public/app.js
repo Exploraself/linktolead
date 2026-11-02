@@ -417,13 +417,20 @@ function boardroomCta(cls) {
   return `<a class="${cls}" href="${esc(payHref('session'))}">Unlock The Boardroom · ${esc(r ? r.price : '')} →</a>`;
 }
 
-/** The Leader’s North Star, always in the rail, just above The Boardroom. */
+/** The Leader’s North Star, always in the rail, at the top under the
+ *  Blueprint button (Alexandru, 2 Nov 2026: "move it up"). */
 const railStar = `<a class="rstar" href="/northstar/" aria-label="Open your Leader’s North Star: where you stand in all four domains">
   <svg class="rstar-i" width="40" height="40" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="#B4975F" stroke-width="1.6"/><circle cx="32" cy="32" r="23" fill="none" stroke="#3B4C70"/>
     <g stroke="#B4975F" stroke-width="1.4"><line x1="32" y1="3" x2="32" y2="9"/><line x1="32" y1="55" x2="32" y2="61"/><line x1="3" y1="32" x2="9" y2="32"/><line x1="55" y1="32" x2="61" y2="32"/></g>
     <circle cx="32" cy="11" r="2.6" fill="#A8623A"/><circle cx="53" cy="32" r="2.6" fill="#4C7355"/><circle cx="32" cy="53" r="2.6" fill="#36607F"/><circle cx="11" cy="32" r="2.6" fill="#9A7418"/>
     <g class="cban-needle"><path d="M32 14 L36 32 L32 35 L28 32Z" fill="#D6BF8F"/><path d="M32 50 L36 32 L32 29 L28 32Z" fill="#3B4C70"/></g><circle cx="32" cy="32" r="3" fill="#B4975F"/></svg>
   <span><small>The Leader’s North Star</small><b>Where you stand, in all four domains</b><em>Open my North Star →</em></span></a>`;
+/** The Boardroom's own page, just above Levels 04–05 while they are shut,
+ *  with a small gift: Alexandru gives it in the 1:1 (2 Nov 2026). */
+const GIFT_ICON = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4.5" rx="1"/><path d="M5 13v7.5h14V13M12 8.5v12"/><path d="M12 8.5C10.4 4.8 6.4 4.3 6.4 6.8c0 1.7 3.2 1.7 5.6 1.7Zm0 0c1.6-3.7 5.6-4.2 5.6-1.7 0 1.7-3.2 1.7-5.6 1.7Z"/></svg>';
+const railGift = `<a class="rgift" href="/boardroom/" aria-label="The Boardroom: see what it holds. A gift inside, from Alexandru">
+  <span class="rgift-i">${GIFT_ICON}</span>
+  <span><small>The Boardroom · Levels 04–05</small><b>See what it holds</b><em>A gift inside, from Alexandru →</em></span></a>`;
 function railHTML(st) {
   const marks = { done: '✓', open: '', waiting: '·', locked: '🔒' };
   return `<nav class="rail" id="rail" aria-label="The twelve levels">
@@ -433,12 +440,13 @@ function railHTML(st) {
       <p class="railsub">${esc(STAGES[st].blurb)}</p>
       <button type="button" class="rbp" data-go="blueprint">Open my Blueprint: everything you have written →</button>
     </div>
+    ${railStar}
     ${libIcons()}
     ${SECTIONS.map((sec) => {
       const owned = holds(tierNow(), sec.k);
       const rung = LADDER.find((r) => r.key === sec.k);
       const tag = sec.k === 'session' ? '1:1' : rung ? rung.price : '';
-      return `${sec.k === 'session' ? railStar : ''}<section class="rsec${owned ? '' : ' shut'}">
+      return `${sec.k === 'session' && !owned ? railGift : ''}<section class="rsec${owned ? '' : ' shut'}">
         <header class="rsh">
           <div><p class="rsn">${esc(sec.n)}</p><p class="rss">${esc(sec.sub)}</p></div>
           ${owned ? '<span class="rtag open">Open</span>' : `<span class="rtag">${esc(tag)}</span>`}
