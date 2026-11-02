@@ -28,7 +28,7 @@ import { letterContext } from './_mentor.js';
  *  public/content.js (a test holds them equal). */
 export const STEPS = {
   session: { amount: 2700, name: 'The Boardroom', product: 'The Boardroom · one session with Alexandru', opens: 'Levels 04 and 05', first: 4,
-    sessions: 'one 1:1 session with Alexandru, who reads your first three levels before you speak' },
+    sessions: 'one 1:1 session with Alexandru; Alexandru and the team read your first three levels before you speak' },
   lab: { amount: 9700, name: 'The LAB', product: 'Personal Leadership LAB', opens: 'Levels 06 to 09, and the library', first: 6,
     sessions: 'two 1:1 sessions with Alexandru' },
   hub: { amount: 75000, name: 'The HUB', product: 'Business Growth HUB · the full Blueprint', opens: 'every level up to 12, with the LAB included', first: 10,
