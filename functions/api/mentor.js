@@ -10,15 +10,15 @@
 // GET ?growth=id   one founder's Massive Growth Plan: ticks and what they
 //                  wrote in its blanks, with the date of each change
 // GET ?tags=1      every Mailchimp tag of the audience, sorted Keep / Old /
-//                  Ask (functions/_tag-list.js). The mentor key only
-// POST { action }  (a team account: only TEAM_CAN; the key: everything)
+//                  Ask (functions/_tag-list.js). The key, or the 'mailchimp' right
+// POST { action }  (a team account: only the rights ticked for it, functions/_team.js; the key: everything)
 //                  reply (an answer in the thread, emailed as a letter) · tier (change step, and its step tags in Mailchimp) ·
 //                  pause · series-hold (pause or resume the letters that
 //                  follow each pain) · delete · signin-link · message · mc-test ·
 //                  mc-backfill. Every action is logged as an event; every
 //                  Mailchimp call also in mailchimp_log.
 
-import { teamList, teamAdd, teamRemove, teamDetails } from '../_team.js';
+import { teamList, teamAdd, teamRemove, teamDetails, isTeamMember, rightsOf, setRights, isOwner, TEAM_RIGHTS, ALL_RIGHTS, DEFAULT_RIGHTS, ACTION_RIGHT } from '../_team.js';
 import { json, bad, db, now, mentorAccess, clean, looksLikeEmail, accountTables, newToken } from '../_shared.js';
 import { DOMAIN_STEPS, WHATIF_STEPS, ALL_STEP_IDS } from '../_plans.js';
 import { GROWTH_IDS, GROWTH_SQL, GROWTH_BLANK_IDS } from '../_growth.js';
@@ -35,15 +35,19 @@ import { sortTags } from '../_tag-list.js';
 import { webhookState, payments } from '../_stripe.js';
 import { holdLetters } from '../_series.js';
 
-/** What only the mentor key may do (Alexandru, 2 Nov 2026). A team account
- *  reads everything, answers questions, writes letters and notes, sends a
- *  sign-in or reset link, pauses or resumes a founder's letters, and changes
- *  a founder's step. It never changes the team or the mentor profiles, never
- *  uses the Mailchimp tools, and never pauses or deletes a founder. Checked
- *  here, on the server; the page only hides the buttons. */
-export const KEY_ONLY = ['team-add', 'team-remove', 'mentor-save', 'mentor-assign', 'mc-test', 'mc-backfill', 'pause', 'delete'];
-/** What a team account may do, for the page and the tests. */
-export const TEAM_CAN = ['reply', 'message', 'signin-link', 'reset-link', 'series-hold', 'tier'];
+/** The actions a new team member cannot do until a right is ticked for them
+ *  (Alexandru, 2 Nov 2026: first "only Alexandru", then "choose per team
+ *  member what they can do … access like me on everything"). Checked here,
+ *  on the server, against the member's own rights; the page only hides the
+ *  buttons. The mentor key can always do everything. */
+export const KEY_ONLY = ['team-add', 'team-remove', 'team-can', 'mentor-save', 'mentor-assign', 'mc-test', 'mc-backfill', 'pause', 'delete'];
+/** What a new team member may do (Alexandru, 2 Nov 2026): since then each
+ *  member's own rights decide (functions/_team.js TEAM_RIGHTS, ticked in
+ *  /mentor → Settings → Team, up to Everything). These are the defaults. */
+export const TEAM_CAN = DEFAULT_RIGHTS;
+/** What this caller may do: every right with the key, else the member's own. */
+const rightsFor = async (D, access) => (access.by === 'key' ? [...ALL_RIGHTS] : access.me ? await rightsOf(D, access.me.email) : []);
+const NO_RIGHT = 'You don’t have this right yet. Alexandru can tick it for you in Settings → Team.';
 
 /** Each plan step's domain and title, so ticks can be read by domain. */
 const STEP = Object.fromEntries([...DOMAIN_STEPS, ...WHATIF_STEPS].map((s) => [s.id, s]));
@@ -180,12 +184,13 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   // The team (functions/_team.js): who has every level, the toolkit without a
   // code, and /mentor with their own account. Only the key may change it.
-  if (url.searchParams.get('team')) return json({ ok: true, team: await teamDetails(D, await teamList(D, env)), canEdit: access.by === 'key' });
+  const rights = await rightsFor(D, access);
+  if (url.searchParams.get('team')) return json({ ok: true, team: await teamDetails(D, await teamList(D, env)), canEdit: rights.includes('team'), rights: TEAM_RIGHTS, me: access.me ? access.me.email : null });
   // Every tag of the audience, sorted Keep / Old / Ask against the code's own
   // list (functions/_tag-list.js), so Alexandru deletes from a clear list.
   // A Mailchimp tool: the key only.
   if (url.searchParams.get('tags')) {
-    if (access.by !== 'key') return bad('Only the mentor key can read the Mailchimp tags.', 403);
+    if (!rights.includes('mailchimp')) return bad(NO_RIGHT, 403);
     const live = await readTags(env);
     if (!live.ok) return json({ ok: true, read: false, why: live.why });
     const kept = await D.prepare("SELECT DISTINCT landing_tag AS t FROM student_profile WHERE landing_tag IS NOT NULL AND landing_tag <> ''").all();
@@ -196,7 +201,7 @@ export async function onRequestGet({ request, env }) {
   // Payments (functions/_stripe.js): the mode, the webhook, the latest
   // payments. The key only.
   if (url.searchParams.get('stripe')) {
-    if (access.by !== 'key') return bad('Only the mentor key can see the payments.', 403);
+    if (!rights.includes('payments')) return bad(NO_RIGHT, 403);
     const hook = await webhookState(D, env);
     return json({ ok: true, ...hook, payments: await payments(D, 30) });
   }
@@ -257,7 +262,7 @@ export async function onRequestGet({ request, env }) {
   const words = await D.prepare(`SELECT w.student_id, w.key, w.value, w.updated_at, s.name, s.email FROM sheet w JOIN student s ON s.id = w.student_id
       WHERE w.key LIKE 'w.v4.%' AND w.value <> '' ORDER BY w.updated_at DESC LIMIT 600`).all();
   // Who is looking, for the greeting on Today: a team member by name; the key is the default mentor.
-  const you = access.by === 'team' && access.me ? { name: access.me.name || '', team: true, can: TEAM_CAN } : { key: true };
+  const you = access.by === 'team' && access.me ? { name: access.me.name || '', team: true, can: rights } : { key: true, can: rights };
   return json({ ok: true, you, students, words: words.results || [], waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, totalGrowth: GROWTH_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
     mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags,
       forgotten: (gone.results || []).map((r) => r.email).filter(Boolean), forgottenWhy: FORGOTTEN } });
@@ -273,7 +278,7 @@ export async function onRequestPost(ctx) {
     const D = db(ctx.env), access = await mentorAccess(copy, ctx.env, D);
     if (access.ok && access.by === 'team' && access.me) {
       const b = await copy.json().catch(() => ({}));
-      if (TEAM_CAN.includes(b.action)) {
+      if (ACTION_RIGHT[b.action]) {
         await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(access.me.id, 'team-did', now(), JSON.stringify({ action: b.action, student: clean(b.student, 80) || null })).run();
       }
     }
@@ -290,15 +295,30 @@ async function post({ request, env }) {
   try { body = await request.json(); } catch { return bad('Could not read that.'); }
   await accountTables(D);
   const log = (student, kind, detail = null) => D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(student, kind, now(), detail).run();
-  if (access.by !== 'key' && !TEAM_CAN.includes(body.action)) {
-    return bad(KEY_ONLY.includes(body.action) ? 'Only Alexandru can do this (with the mentor key).' : 'Unknown action.', 403);
+  const rights = await rightsFor(D, access);
+  if (access.by !== 'key' && !(ACTION_RIGHT[body.action] && rights.includes(ACTION_RIGHT[body.action]))) {
+    return bad(ACTION_RIGHT[body.action] ? NO_RIGHT : 'Unknown action.', 403);
+  }
+
+  // What a team member may do (Alexandru, 2 Nov 2026): the key, or a member
+  // with the 'team' right, ticks each member's rights. Alexandru's own
+  // addresses always have every right; nobody changes their own.
+  if (body.action === 'team-can') {
+    const email = clean(body.email, 200).toLowerCase();
+    if (!looksLikeEmail(email) || !(await isTeamMember(D, email, env))) return bad('That address is not on the team.');
+    if (isOwner(email)) return bad('Alexandru’s own address always has every right.');
+    if (access.by !== 'key' && access.me && String(access.me.email || '').toLowerCase() === email) return bad('Nobody changes their own rights. Ask Alexandru.', 403);
+    if (!Array.isArray(body.can)) return bad('Choose the rights first.');
+    return json({ ok: true, email, can: await setRights(D, email, body.can, now()) });
   }
 
   if (body.action === 'team-add' || body.action === 'team-remove') {
-    if (access.by !== 'key') return bad('Only the mentor key can change the team.', 403);
     const email = clean(body.email, 200).toLowerCase();
     if (!looksLikeEmail(email)) return bad('That email does not look complete.');
-    if (body.action === 'team-remove') { await teamRemove(D, email); return json({ ok: true, team: await teamList(D, env) }); }
+    if (body.action === 'team-remove') {
+      if (access.by !== 'key' && access.me && String(access.me.email || '').toLowerCase() === email) return bad('You can’t remove yourself. Ask Alexandru.', 403);
+      await teamRemove(D, email); return json({ ok: true, team: await teamList(D, env) });
+    }
     await teamAdd(D, email, now());
     // The invitation (Alexandru, 2 Nov 2026): signed in at one tap when the
     // address has an account, else "make your free account" first.

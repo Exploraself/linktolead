@@ -246,15 +246,26 @@ know.
 
 ## 18. What the team can do in /mentor (Alexandru, 2 Nov 2026)
 
-A team account (added in /mentor → Settings → Team) reads everything,
-answers questions, writes letters and notes (signed by Alexandru, replies to
-Alexandru), sends a sign-in or reset link, pauses or resumes a founder's
-letters, and changes a founder's step. Only Alexandru, with the mentor key,
-pauses or deletes a founder, changes the team or the mentor profiles, and
-uses the Mailchimp tools.
+Each team member has their own rights, ticked in /mentor → Settings → Team
+("choose per team member what they can do … access like me on everything").
+There are twelve, in his words: answer questions, write letters and notes,
+send sign-in links, send reset links, pause or resume a founder's letters,
+change a founder's step (unlock), pause or unpause an account, delete a
+founder, mentor profiles and a founder's mentor, the Mailchimp tools and tag
+list, the payments (Stripe), and the team itself. "Everything (like
+Alexandru)" ticks all twelve.
 
-This is enforced on the server, as an allow-list: TEAM_CAN in
-functions/api/mentor.js. A new /mentor action is the key's only until
-Alexandru says the team may use it; then add it to TEAM_CAN, and hide or show
-its button with isTeam() in public/mentor/mentor.js.
-tests/team-permissions.test.mjs holds both lists.
+A new member starts with the first six (TEAM_CAN in functions/api/mentor.js,
+DEFAULT_RIGHTS in functions/_team.js); reading every founder and the CSV is
+always allowed. The mentor key always has every right, and so do Alexandru's
+own addresses (TEAM in functions/_team.js); nobody changes their own rights or
+removes themselves. A member with the "team" right can add and remove members
+and tick other members' rights.
+
+This is enforced on the server: every /mentor action needs its right
+(ACTION_RIGHT in functions/_team.js); an action that is not listed there is
+the key's only. A new /mentor action: add it to ACTION_RIGHT under an existing
+right, or add a right to TEAM_RIGHTS with its words (and RIGHT_WORDS in
+public/mentor/mentor.js, which a test holds equal), and show or hide its button
+with can('<right>') in public/mentor/mentor.js.
+tests/team-permissions.test.mjs holds the rules.

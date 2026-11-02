@@ -117,7 +117,7 @@ ok(!(await backfillList(DB, 50, 'api')).includes('g1'), 'logged before 2 Nov as 
 ok(j.mailchimp.forgotten.includes('old@example.com') && j.mailchimp.forgottenWhy === FORGOTTEN, 'the roster names it, so /mentor says it plainly');
 const src = readFileSync(new URL('../public/mentor/mentor.js', import.meta.url), 'utf8');
 ok(/!gone\(last\.email\)/.test(src), 'no red "Last call failed" for an address Mailchimp deleted for good');
-ok(/data\.you && data\.you\.key \? '[^']*<section class="panel" id="mctags">/.test(src), 'the tags box shows only with the mentor key');
+ok(/can\('mailchimp'\) \? '<section class="panel" id="mctags">/.test(src), 'the tags box shows only with the mentor key, or a member with the Mailchimp right');
 ok(sent !== null, 'mail faked');
 
 done();
