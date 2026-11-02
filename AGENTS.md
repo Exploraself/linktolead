@@ -183,3 +183,32 @@ founder: their mindset, and the basics of a business seen from there (what a
 business is, the customer, serving, what stops them, their attitude to
 serving, their relationship with money and with goals). From Level 06 the
 questions go deeper into the business itself.
+
+## 16. A welcome before each part, "Where are you now?", and focus mode (Alexandru, 2 Nov 2026)
+
+**A welcome page** opens Levels 01, 04 (the Boardroom), 06 (the LAB) and 10
+(the HUB), with its own version for The Summit at Level 01. It is short and
+follows four steps, in this order: we understand you (the pain, the problem,
+the struggles, the dreams); it is possible (you are the hero, we are here to
+help you grow); the puzzle (so much to do, a mindset that holds us back,
+advice that does not fit); here you are (answer every question, fully). Then
+what the founder will have at the end: each level's own promise, word for
+word. It is personal: the founder's first name, and from Level 04 on, their
+own answers. Shown once, then one tap back from the level.
+
+**"Where are you now?"** opens Level 01, before any question about mindset:
+five taps on where the business really is (an idea or running, sales or
+none, alone or a team, who they serve, what weighs most, what would tell them
+it worked). Practical, never a psychological test. Asked again at 04, 06 and
+10. The answers set the size of the examples and actions in the levels that
+follow (rule 12): before the first sale, selling alone, a team with payroll,
+sixteen people or more.
+
+**Focus mode** is the only way to answer: one full-screen layer, the same on
+a computer and a phone. One question in one centred column, the answer right
+under it, Next right under the answer. The top line shows a thin progress
+bar, where the founder is ("Lead yourself · 3 of 5") and Back. Keys 1–9
+choose, the arrows move a slider, Enter is Next, Esc closes. A tap moves on
+by itself after a short pause, unless it shows a reply to read. Done ✓ at
+the end of a domain or a level closes the layer, back at the levels with the
+new tick. Opening it is a step in the browser's history, so Back closes it.

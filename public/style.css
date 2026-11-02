@@ -758,9 +758,9 @@ body.inwork .foot{display:none}
   .bmark svg{width:24px;height:24px}
   /* Seven items since "My Blueprint" joined (2 Nov 2026): less padding, so
      the profile button stays on screen. */
-  .tnav{gap:4px}
+  .tnav{gap:3px}
   .tnav button,.tnav a.tbook,.tnav a.ttools{padding:7px 7px;font-size:11px}
-  .topin{gap:10px}
+  .topin{gap:8px}
 }
 @media(min-width:1500px) and (max-width:1699px){
   .tnav button,.tnav a.tbook,.tnav a.ttools{padding:8px 10px}

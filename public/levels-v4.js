@@ -693,6 +693,80 @@ export const CHAPTERS4 = [
   { n: 'Chapter II', name: 'Run the business', about: 'Inside the business: the conversations, your time, your offer and its price, and systems that run without you.', lv: [5, 6, 7, 8] },
   { n: 'Chapter III', name: 'Grow the market', about: 'Outside the business: reach, advantage and leadership, so customers come to you.', lv: [9, 10, 11] }];
 
+/* ── A welcome before each part, and "Where are you now?" ───────────────
+ * Alexandru, 2 Nov 2026. Before Levels 01, 04 (the Boardroom), 06 (the LAB)
+ * and 10 (the HUB), one page in four steps: we understand you, it is
+ * possible, the puzzle, here you are. A Summit founder gets its own page at
+ * Level 01. Personal: the founder's first name, and from Level 04 on, their
+ * own answers. Level 01 then asks where the business really is (five taps);
+ * 04, 06 and 10 ask once more. The answers set the size of the examples. */
+export const WELCOME_AT = { 1: 0, 4: 1, 6: 2, 10: 3 };
+export const WELCOME4 = [
+  { lv: [1, 3], where: 'Levels 01 to 03 of 12', h: 'Welcome{, first}. This is where you start.', sub: 'Free, and free to stay. About you, and the basics of your business.',
+    summit: { h: 'Welcome to The Summit{, first}.', sub: 'All twelve levels, with Alexandru every week. You start here, with you.' },
+    beats: [
+      ['We understand you', 'You carry a lot: the rent or the payroll, the customers who went quiet, the decisions nobody else can make for you. And you carry a dream: the business you know it can become. We understand both.'],
+      ['It is possible', 'Founders have stood where you stand: with only an idea, with ten people to pay, with fifty. It can be done, and you are the one who does it. We are here to walk it with you.'],
+      ['The puzzle', 'There is always more to do than hours, and something new every week. Your own way of thinking sometimes holds you back without a sound. And most advice you have heard was for someone else’s business.'],
+      ['Here you are', 'We start with you. First, five taps on where your business is today. Then each level is a few taps and one sentence of your own, and four actions for your week. Answer every question fully: your answers become your plan.']] },
+  { lv: [4, 5], where: 'Levels 04 and 05 of 12', h: 'Welcome to the Boardroom levels{, first}.', sub: 'Opened after Alexandru and the team read your first three levels.',
+    summit: { sub: 'With The Summit, Alexandru reads them with you every week.' },
+    beats: [
+      ['We understand you', 'Three levels in, you have seen things you may not have liked: a rule that runs your week, a number you were avoiding. That took courage. It can feel like more questions than answers.'],
+      ['It is possible', 'Seeing it was the hardest part, and you have done it. From here, what you saw turns into what you do.'],
+      ['The puzzle', 'Knowing is not yet doing. Under pressure the old habit comes back first, and a plan that lives only in your head is gone by Tuesday afternoon.'],
+      ['Here you are', 'Two levels: what you do, and what it makes of you. The same rhythm: taps, one sentence, four actions. Level 05 closes Start with you with a reading of your first five weeks. Answer every question fully.']] },
+  { lv: [6, 9], where: 'Levels 06 to 09 of 12', h: 'Welcome to Run the business{, first}.', sub: 'The LAB: four levels about the inside of your business, two sessions with Alexandru, and the library.',
+    summit: { sub: 'Four levels about the inside of your business, with Alexandru every week.' },
+    beats: [
+      ['We understand you', 'Too much of your business still waits for you: the conversation you keep postponing, a week that belongs to everyone else, a price you are not sure of, work that stops when you stop.'],
+      ['It is possible', 'A business that runs without you on every task is built one conversation, one hour and one system at a time. You can build it, at any size.'],
+      ['The puzzle', 'The day-to-day always wins. There is no time to fix the system, because the system takes all your time. And the hard conversations are hard at every size.'],
+      ['Here you are', 'Four levels: the conversations you avoid, your week, your offer and its price, your systems. Answer every question fully. Level 09 ends with a reading of these four weeks.']] },
+  { lv: [10, 12], where: 'Levels 10 to 12 of 12', h: 'Welcome to Grow the market{, first}.', sub: 'The HUB: three levels about the outside of your business, with three sessions with Alexandru in total.',
+    summit: { sub: 'Three levels about the outside of your business, with Alexandru every week.' },
+    beats: [
+      ['We understand you', 'You want more of the right customers, without living on luck and referrals. And you want people around you who can carry the business further than you can alone.'],
+      ['It is possible', 'You have done the inside work: you know yourself better, and the business runs better. Now it can grow.'],
+      ['The puzzle', 'Growth brings its own problems: more people to reach, competitors who look the same, a team that needs you to lead instead of do. What got you here will not take you further on its own.'],
+      ['Here you are', 'Three levels: your first hundred names, your advantage, your next twelve weeks. Level 12 ends with a twelve-week number and the checkpoints to hold it. Answer every question fully.']] }];
+/** The welcome for level lv (01, 04, 06 or 10), or null. */
+export const welcomeOf = (lv) => (WELCOME_AT[lv] != null ? WELCOME4[WELCOME_AT[lv]] : null);
+/** Where the business is (Level 01, five taps; asked again at 04, 06, 10). */
+export const WHERE4 = [
+  { k: 'stage', q: 'Where is your business today?', hint: 'Pick the closest. You can change it later.',
+    o: ['Just an idea for now', 'Started, no sales yet', 'Selling, and it is only me', 'A small team with payroll: 2 to 15 people', 'A company: 16 to 50 people', 'More than 50 people'] },
+  { k: 'money', q: (a) => (a.stage != null && a.stage < 2 ? 'What pays your bills right now?' : 'Last month’s sales, against the month before?'),
+    hint: (a) => (a.stage != null && a.stage < 2 ? 'So the money questions start from where you really are.' : 'Roughly is fine. If you do not know, that is an answer too.'),
+    o: (a) => (a.stage != null && a.stage < 2 ? ['A job', 'Savings', 'My partner or family', 'Investors or a loan'] : ['Lower', 'About the same', 'Higher', 'I don’t know']) },
+  { k: 'who', q: 'Who do you serve, or want to serve?', hint: 'The people who pay you, or who would.',
+    o: ['People, for themselves or their home', 'Small businesses', 'Larger companies', 'Not sure yet'] },
+  { k: 'weight', q: 'What weighs on you most this month?', hint: 'The one that comes to mind first.',
+    o: ['Finding customers', 'Money and cash', 'My people', 'My time', 'Myself: doubt, stress, energy'] },
+  { k: 'win', q: 'In twelve weeks, what would tell you it worked?', hint: 'It becomes the first draft of your business goal, in My Blueprint.',
+    o: ['My first paying customers', 'Steady sales every month', 'A team that runs without me on every task', 'Room to grow: more customers, more people'] }];
+const whereRaw = (work, k) => { const v = work && work[`w.v4.where.${k}`]; return v == null ? '' : String(v); };
+/** The founder's answers, as indexes ({ stage: 2, … }); money is kept as its words. */
+export function whereOf(work) {
+  const out = {};
+  for (const Q of WHERE4) { const v = whereRaw(work, Q.k); if (v !== '') out[Q.k] = Q.k === 'money' ? v : Number(v); }
+  return out;
+}
+/** The words of one answer, or ''. */
+export function whereWords(work, k) {
+  const a = whereOf(work), Q = WHERE4.find((x) => x.k === k);
+  if (!Q || a[k] == null) return '';
+  if (k === 'money') return String(a.money);
+  const o = typeof Q.o === 'function' ? Q.o(a) : Q.o;
+  return o[a[k]] || '';
+}
+/** The size the examples speak to: start (an idea, or before the first
+ *  sale), solo, team (payroll, up to 15), company (16 or more); '' unknown. */
+export function sizeOf(work) {
+  const s = whereOf(work).stage;
+  return s == null ? '' : s < 2 ? 'start' : s === 2 ? 'solo' : s === 3 ? 'team' : 'company';
+}
+
 /** My direction (Alexandru, 2 Nov 2026): written once, one field on screen,
  *  the way a sign-in asks one thing at a time. Each line is about the founder
  *  in relation to the business, and turned to the customer: who they serve,
@@ -887,6 +961,11 @@ export function stepsOf(lv) {
   const L = LEVELS4[lv - 1];
   if (!L) return [];
   const out = [];
+  if (WELCOME_AT[lv] != null) {
+    out.push([-1, 'welcome']);
+    if (lv === 1) for (const Q of WHERE4) out.push([-1, 'where', Q.k]);
+    else out.push([-1, 'still']);
+  }
   if (lv > 1) for (let d = 0; d < 4; d++) out.push([d, 'got']);
   L.d.forEach((D, d) => {
     const dk = dayKeyOf(lv, d), p = planOf(lv, d);
@@ -904,6 +983,12 @@ const filled = (work, lv, d, k) => raw(work, lv, d, k).trim() !== '';
 /** Has the founder answered this screen? Screens that only show are always done. */
 export function stepDone(work, lv, s) {
   const [d, kind, k] = s;
+  // The welcome and "Where are you now?": answered, or already behind the
+  // founder (they had started this level before these screens existed).
+  const begunHere = tapOf(work, lv, 0) != null;
+  if (kind === 'welcome') return filled(work, lv, 'w', 'seen') || begunHere;
+  if (kind === 'where') return whereRaw(work, k) !== '' || begunHere;
+  if (kind === 'still') return filled(work, lv, 'w', 'stage') || begunHere;
   if (kind === 'got') return raw(work, lv - 1, d, 'got') !== '';
   // The concept counts as seen once its domain's tap is answered, so a new
   // level opens on it and a returning founder picks up where they left off.
