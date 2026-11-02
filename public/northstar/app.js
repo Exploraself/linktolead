@@ -1515,7 +1515,7 @@
    * their shape as a constellation, what they lead for, the next summit, and
    * at the bottom the link and their mentor. Downloads as an image, or opens
    * the phone's share sheet. ── */
-  const ARCH = [['The Steady Hand', 'Knows why, and keeps going when it gets hard.'],
+  const ARCH = [['The Steady Compass', 'Knows why, and keeps going when it gets hard.'],
     ['The Trusted Captain', 'People follow, because they are trusted to lead.'],
     ['The Quiet Builder', 'Builds what lasts, one honest number at a time.'],
     ['The Voice People Find', 'Speaks so clearly the right people come looking.']];
