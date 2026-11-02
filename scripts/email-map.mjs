@@ -110,7 +110,7 @@ export const ENTRIES = [
   {
     id: 'mentor', stage: 'close', icon: 'pen', fn: 'mentorLetter',
     name: 'A letter from the mentor',
-    when: 'Alexandru and the team write to one founder from /mentor.',
+    when: 'Alexandru and the team write to one founder from /mentor. Since 2 Nov 2026 each button opens a letter already written from the founder\'s own answers (a welcome, a check-in, the Boardroom offer, an invite to the Blueprint, the North Star link, or a plain note), which the mentor reads, changes and sends.',
     who: 'One founder at a time, chosen in /mentor.',
     from: '/mentor',
     sentBy: 'functions/api/mentor.js',

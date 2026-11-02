@@ -4,12 +4,14 @@
 // count shows 0. The arithmetic (groups, next action, funnel, filters) lives
 // in ./dash.js, where the tests hold it.
 //
-// Tabs: Today · Founders · Questions · Mailchimp · Mentors & comments. A row
-// in Founders opens a drawer with every action; "Open their work" is the
-// one-founder view, one(id).
+// Tabs (Alexandru, 2 Nov 2026): Today · Founders · Inbox · Grow · Settings,
+// each with a small icon; on a phone they sit at the bottom. Today opens with
+// "Your 3 for today". Every letter button opens a letter already written
+// (dash.js draftLetter). A row in Founders opens a drawer with every action;
+// "Open their work" is the one-founder view, one(id).
 
 import { STEP_KEYS, STEP_NAMES, STEP_SHORT, GROUPS, LANDING_SHORT, summary, filter, byLanding, groupOf, nextAction, funnel, today, levelSet, levelCount, launchpadDone, crossedOf,
-  told, toldTally, theirWords, SIDES, PAIN_NAMES, WANT_NAMES, VALUE_NAMES, TEAM_NAMES, growthDone, growthGroups, growthWritten, stuckOnSunday } from './dash.js';
+  told, toldTally, theirWords, SIDES, PAIN_NAMES, WANT_NAMES, VALUE_NAMES, TEAM_NAMES, growthDone, growthGroups, growthWritten, stuckOnSunday, DRAFT_KINDS, KIND_OF, draftLetter, newestWord, topThree } from './dash.js';
 import { LEVELS4, wordOf, briefOf, GOT } from '/levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
@@ -20,10 +22,22 @@ let key = ''; try { key = localStorage.getItem(KEY) || ''; } catch { /* private 
  *  without the key (functions/_team.js); the key still works for Alexandru. */
 const acct = () => { try { return localStorage.getItem('ftb-token') || ''; } catch { return ''; } };
 const H = (extra) => Object.assign({ 'x-mentor-key': key, 'x-account-token': acct() }, extra || {});
-const TABS = [['today', 'Today'], ['founders', 'Founders'], ['questions', 'Questions'], ['mailchimp', 'Mailchimp'], ['settings', 'Mentors & team']];
+const TABS = [['today', 'Today'], ['founders', 'Founders'], ['inbox', 'Inbox'], ['grow', 'Grow'], ['settings', 'Settings']];
+/** Old addresses still land in the right place (#questions, #mailchimp before 2 Nov 2026). */
+const OLD_TABS = { questions: 'inbox', mailchimp: 'settings' };
+/** One small line icon per tab, in the text colour (rule 13); the label carries the meaning. */
+const TAB_ICONS = {
+  today: '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+  founders: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5M16 4.5a3.5 3.5 0 010 7M18 15c2 .7 3 2.3 3.5 5"/>',
+  inbox: '<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 2h6l1-2h5"/>',
+  grow: '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+};
+const icon = (k) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${TAB_ICONS[k] || ''}</svg>`;
+const tabOf = (h) => { const k = String(h || '').replace(/^#/, ''); const t = OLD_TABS[k] || k; return TABS.some(([x]) => x === t) ? t : 'today'; };
 const NO_FILTER = { group: 'all', step: 'all', act: 'all', need: 'all', more: 'all' };
 let data = null, q = '', flash = '', openId = null;
-let tab = TABS.some(([k]) => '#' + k === location.hash) ? location.hash.slice(1) : 'today';
+let tab = tabOf(location.hash);
 let F = { ...NO_FILTER };
 
 const api = async (path, opts) => {
@@ -106,7 +120,7 @@ async function load() {
 
 function tabsHTML() {
   const n = (data.waiting || []).length;
-  return TABS.map(([k, label]) => `<button type="button" role="tab" aria-selected="${tab === k}" data-tab="${k}">${esc(label)}${k === 'questions' && n ? `<b>${n}<span class="vh"> waiting</span></b>` : ''}</button>`).join('');
+  return TABS.map(([k, label]) => `<button type="button" role="tab" aria-selected="${tab === k}" data-tab="${k}">${icon(k)}<span>${esc(label)}</span>${k === 'inbox' && n ? `<b>${n}<span class="vh"> waiting</span></b>` : ''}</button>`).join('');
 }
 
 // ── Today ────────────────────────────────────────────────────────────────────
@@ -118,20 +132,20 @@ function groupsHTML(S) {
 }
 
 const SEV = { question: 'var(--warn)', quiet: 'var(--warn)', ready: 'var(--both)', new: 'var(--gold)' };
-function needsHTML() {
-  const N = today(data.students, data.waiting);
+function needsHTML(skip = 0) {
+  const N = today(data.students, data.waiting).slice(skip);
   const g = (s) => { const k = groupOf(s); return k ? GROUPS[k].name : 'Nothing started yet'; };
   const why = (x) => x.kind === 'question' ? `${x.count > 1 ? `Asked ${x.count} questions` : 'Asked a question'} · waiting for your answer since ${when(x.waitingSince)}<br>“${esc(String(x.text || '').slice(0, 140))}${String(x.text || '').length > 140 ? '…' : ''}”`
     : x.kind === 'quiet' ? `Quiet for ${x.days} days · ${g(x.s)}`
     : x.kind === 'ready' ? 'Finished the free Launchpad · ready for the Boardroom'
     : `New, ${x.days === 0 ? 'today' : x.days === 1 ? 'yesterday' : x.days + ' days ago'} · ${g(x.s)}`;
   const btn = (x) => x.does === 'open' ? `<button class="btn gold" data-open="${esc(x.id)}">${x.button}</button>`
-    : `<button class="btn" data-msg="${esc(x.id)}" data-hint="${esc(x.kind === 'ready' ? 'Offer the Boardroom' : x.kind === 'new' ? 'A welcome' : 'A check-in')}">${x.button}</button>`;
+    : `<button class="btn" data-msg="${esc(x.id)}" data-kind="${KIND_OF[x.kind] || 'note'}">${x.button}</button>`;
   const body = N.length ? `<ul class="needs">${N.slice(0, 30).map((x) => `<li><span class="sev" style="--c:${SEV[x.kind]}"></span>
       <div><button type="button" class="linkish" data-drawer="${esc(x.id)}">${esc(x.s.name || x.s.email || '—')}</button><span class="why">${why(x)}</span></div>${btn(x)}</li>`).join('')}</ul>
       ${N.length > 30 ? `<p class="tiny">And ${N.length - 30} more. The Founders tab has everyone.</p>` : ''}`
     : '<p class="hint">Nothing needs you today. No questions waiting, nobody quiet for 14 days or more, nobody new in the last 3 days.</p>';
-  return `<div class="panel"><div><h2>Needs you today</h2><p class="sub">Most urgent first. One button each.</p></div>${body}</div>`;
+  return skip ? body : `<div class="panel"><div><h2>Needs you today</h2><p class="sub">Most urgent first. One button each.</p></div>${body}</div>`;
 }
 
 function funnelHTML() {
@@ -176,17 +190,59 @@ function stuckHTML() {
   return `<div class="panel"><div><h2>Stuck on Sunday</h2><p class="sub">Two or more of last week’s four actions “Not yet”, from their own Sunday answers. A short, kind check-in this week.</p></div>
     ${L.length ? `<ul class="needs">${L.map((x) => `<li><span class="sev" style="--c:var(--warn)"></span>
       <div><button type="button" class="linkish" data-drawer="${esc(x.id)}">${esc(x.name || x.email || '—')}</button><span class="why">Level ${String(x.lv).padStart(2, '0')}: ${x.not} not yet${x.part ? `, ${x.part} partly` : ''}${x.done ? `, ${x.done} done` : ''} · ${esc(x.notDomains.map((d) => SIDES[d]).join(' · '))}</span></div>
-      <button class="btn" data-msg="${esc(x.id)}" data-hint="A check-in">Send a check-in</button></li>`).join('')}</ul>`
+      <button class="btn" data-msg="${esc(x.id)}" data-kind="checkin">Send a check-in</button></li>`).join('')}</ul>`
       : '<p class="hint">Nobody is stuck. When a founder answers “Not yet” to two or more of last week’s actions, they appear here.</p>'}</div>`;
 }
 
+/** Who is looking: the team member's first name, or the default mentor's for the key. */
+function whoFirst() {
+  const y = (data && data.you) || {};
+  const n = y.name || ((data.mentors || []).find((m) => m.isDefault) || {}).name || '';
+  return String(n).trim().split(/\s+/)[0] || '';
+}
+const partOfDay = (h = new Date().getHours()) => (h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening');
+
+/** Your 3 for today (Alexandru, 2 Nov 2026): at most three jobs, most urgent
+ *  first, one button each. The rest folds under "And N more". */
+function threeHTML() {
+  const { three, more } = topThree(data.students, data.waiting);
+  const who = whoFirst();
+  const job = (x) => {
+    const nm = esc(x.s.name || x.s.email || '—');
+    const [what, why] = x.kind === 'question' ? [`${nm} asked ${x.count > 1 ? `${x.count} questions` : 'a question'}`, `Asked ${when(x.waitingSince)}: “${esc(String(x.text || '').slice(0, 120))}${String(x.text || '').length > 120 ? '…' : ''}”`]
+      : x.kind === 'quiet' ? [`${nm} has been quiet for ${x.days} days`, esc(toldBrief(x.s))]
+      : x.kind === 'ready' ? [`${nm} finished Levels 01, 02 and 03`, 'Ready for the Boardroom']
+      : [`${nm} is new`, `Joined ${x.days === 0 ? 'today' : x.days === 1 ? 'yesterday' : x.days + ' days ago'}${toldBrief(x.s) ? ' · ' + esc(toldBrief(x.s)) : ''}`];
+    const btn = x.does === 'open' ? `<button class="btn gold" data-open="${esc(x.id)}">Answer</button>`
+      : `<button class="btn gold" data-msg="${esc(x.id)}" data-kind="${KIND_OF[x.kind] || 'note'}">${x.kind === 'quiet' ? 'Check in' : x.kind === 'ready' ? 'Offer the Boardroom' : 'Welcome'}</button>`;
+    return `<li><span class="sev" style="--c:${SEV[x.kind]}"></span><div><button type="button" class="linkish" data-drawer="${esc(x.id)}">${what}</button><span class="why">${why}</span></div>${btn}</li>`;
+  };
+  return `<div class="panel three"><div><h2>${partOfDay()}${who ? ', ' + esc(who) : ''}</h2>
+      <p class="sub">${three.length ? `${three.length === 1 ? 'One thing' : three.length === 2 ? 'Two things' : 'Three things'} for today. Each letter is already written: read it, change a word, send.` : 'All done. Nothing needs you today.'}</p></div>
+    ${three.length ? `<ul class="needs">${three.map(job).join('')}</ul>` : ''}
+    ${more.length ? `<details class="more"><summary>And ${more.length} more</summary>${needsHTML(3)}</details>` : ''}</div>`;
+}
+/** One line about a founder: where they stopped and what hurts. */
+function toldBrief(s) {
+  const L = [...levelSet(s)], t = told(s), bits = [];
+  if (L.length) bits.push(`Stopped at Level ${String(Math.max(...L)).padStart(2, '0')}`);
+  if (t.pains.length) bits.push(`said “${PAIN_NAMES[t.pains[0]]}”`);
+  return bits.join(' · ');
+}
+
 function todayHTML(S) {
-  return `<div><h2>Where your founders are</h2><p class="sub">Tap a group to see who is in it. Each group has the one thing that moves them on.</p></div>
-    ${groupsHTML(S)}
-    <div class="row2">${needsHTML()}${funnelHTML()}</div>
+  return `${threeHTML()}
     ${stuckHTML()}
-    <div class="row2">${toldHTML()}${wordsHTML()}</div>
-    ${landingHTML()}`;
+    <div><h2>Where your founders are</h2><p class="sub">Tap a group to see who is in it. Each group has the one thing that moves them on.</p></div>
+    ${groupsHTML(S)}`;
+}
+
+/** Grow: the numbers, where founders came from, and their own words. */
+function growHTML(S) {
+  return `<div class="row2">${funnelHTML()}${toldHTML()}</div>
+    ${wordsHTML()}
+    ${landingHTML()}
+    ${crossedHTML(S)}`;
 }
 
 /** One short line under a founder's name: what they want, what hurts. */
@@ -362,7 +418,7 @@ function drawerHTML(s) {
   const n = nextAction(s), g = groupOf(s), cr = crossedOf(s), lv = levelCount(s), lp = launchpadDone(s), id = esc(s.id);
   const main = n.does === 'open' ? `<button class="btn gold" data-open="${id}">${esc(n.button)}</button>`
     : n.does === 'unpause' ? `<button class="btn gold" data-pause="${id}" data-v="0">${esc(n.button)}</button>`
-    : `<button class="btn gold" data-msg="${id}" data-hint="${esc(n.label)}">${esc(n.button)}</button>`;
+    : `<button class="btn gold" data-msg="${id}" data-kind="${KIND_OF[n.key] || 'note'}">${esc(n.button)}</button>`;
   const land = landingName(s);
   const books = String(s.library || '').split(',').filter(Boolean).length;
   const said = flash;
@@ -439,20 +495,25 @@ function draw() {
   $('#tabs').innerHTML = tabsHTML();
   const S = summary(data.students, data.waiting);
   const said = flash ? `<p class="flash" role="status">${esc(flash)}</p>` : '';
-  const pane = tab === 'founders' ? foundersHTML() : tab === 'questions' ? questionsHTML()
-    : tab === 'mailchimp' ? crossedHTML(S) + mailchimpHTML()
-    : tab === 'settings' ? `${mentorsHTML()}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section><section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
+  const pane = tab === 'founders' ? foundersHTML()
+    : tab === 'inbox' ? `${questionsHTML()}<section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
+    : tab === 'grow' ? growHTML(S)
+    : tab === 'settings' ? `${mailchimpHTML()}${mentorsHTML()}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>`
     : todayHTML(S);
   $('#main').innerHTML = `<div class="stack" role="tabpanel">${said}${pane}</div>`;
-  if (tab === 'settings') { loadComments(); loadTeam(); }
+  if (tab === 'inbox') loadComments();
+  if (tab === 'settings') loadTeam();
   if (openId) openDrawer(openId); else closeDrawer();
 }
 
 function goTab(k) {
-  tab = k; flash = '';
-  try { history.replaceState(null, '', '#' + k); } catch { /* file: or sandboxed */ }
+  const was = tab;
+  tab = tabOf(k); flash = '';
+  // A history step per tab, so Back and Forward walk the cockpit (rule 13).
+  try { if (was !== tab || location.hash !== '#' + tab) history.pushState(null, '', '#' + tab); } catch { /* file: or sandboxed */ }
   closeDrawer(); draw(); window.scrollTo(0, 0);
 }
+window.addEventListener('popstate', () => { if (!data) return; tab = tabOf(location.hash); flash = ''; closeDrawer(); draw(); });
 
 /** What Mailchimp did with the step tags after a step change. */
 const tagNote = (d) => (d && d.mailchimp === 'ok' ? ' Step tags sent to Mailchimp.' : d && d.mailchimp === 'failed' ? ` Mailchimp: ${d.mailchimpDetail}` : d && d.mailchimp === 'test' ? ' Mailchimp: step tags logged only (test mode).' : '');
@@ -462,15 +523,20 @@ const mcNote = (d) => (d && d.mailchimp === 'ok' ? ' Unsubscribed in Mailchimp.'
 
 const person = (id) => (data && data.students.find((s) => s.id === id)) || { id };
 
-function messageBox(id, hint) {
+function messageBox(id, hint, kind) {
   const s = person(id);
+  const k = DRAFT_KINDS[kind] ? kind : 'note';
+  const word = newestWord(theirWords(data.words, LEVELS4, 2000), id);
+  const D = draftLetter(s, k, { word, origin: location.origin });
+  hint = hint || (k === 'note' ? '' : DRAFT_KINDS[k]);
   const note = s.unsubscribed ? '<p class="tiny warn">Unsubscribed: this goes to their Base Camp only, never by email.</p>'
     : !data.mailReady ? '<p class="tiny warn">Email is not switched on yet: this goes to their Base Camp only.</p>' : '';
   $('#dlg').innerHTML = `<div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlg-h"><form class="dlgbox" id="msgform">
-    <h2 id="dlg-h">A note to ${esc(s.name || s.email)}</h2>
+    <h2 id="dlg-h">${k === 'note' ? 'A note' : 'A letter'} to ${esc(s.name || s.email)}</h2>
     ${hint ? `<p class="tiny">For: ${esc(hint)}</p>` : ''}
-    <label>Subject<input id="m-subj" maxlength="160" required></label>
-    <label>Message<textarea id="m-body" rows="6" maxlength="4000" required></textarea></label>
+    <label>Subject<input id="m-subj" maxlength="160" required value="${esc(D.subject)}"></label>
+    <label>Message<textarea id="m-body" rows="${k === 'note' ? 6 : 12}" maxlength="4000" required>${esc(D.body)}</textarea></label>
+    ${D.used.word || D.used.pain ? `<p class="tiny">From their own answers: ${[D.used.word ? `their newest sentence in the Blueprint` : '', D.used.pain ? `what hurts most in the North Star (“${esc(D.used.pain)}”)` : ''].filter(Boolean).join(' and ')}. Read it, change a word, send.</p>` : ''}
     <fieldset><legend>Where it goes</legend>
       <label class="rad"><input type="radio" name="ch" value="both" checked> Email and their Base Camp</label>
       <label class="rad"><input type="radio" name="ch" value="email"> Email only</label>
@@ -479,7 +545,13 @@ function messageBox(id, hint) {
     <p class="err" id="m-err" role="status"></p>
     <div class="acts"><button type="submit">Send</button><button type="button" class="ghost" data-close>Cancel</button></div>
   </form></div>`;
-  $('#m-subj').focus();
+  if (k === 'note') {
+    $('#m-subj').focus();
+  } else {
+    const t = $('#m-body'); t.focus(); try { t.setSelectionRange(0, 0); t.scrollTop = 0; } catch { /* old browser */ }
+  }
+  // A plain note: the first click in the message lands between the greeting and the close.
+  if (k === 'note' && D.body) { const t = $('#m-body'), at = D.body.indexOf('\n\n') + 2; t.addEventListener('focus', () => { try { t.setSelectionRange(at, at); } catch { /* old browser */ } }, { once: true }); }
   $('#msgform').onsubmit = async (e) => {
     e.preventDefault();
     const r = await act({ action: 'message', student: id, subject: $('#m-subj').value, body: $('#m-body').value, channel: document.querySelector('input[name=ch]:checked').value });
@@ -672,7 +744,7 @@ document.addEventListener('click', async (e) => {
   if (d.drawer) return openDrawer(d.drawer, true);
   if ('xdrawer' in d) return closeDrawer();
   if (d.open) { closeDrawer(); return one(d.open); }
-  if (d.msg) return messageBox(d.msg, d.hint);
+  if (d.msg) return messageBox(d.msg, d.hint, d.kind);
   if (d.medit) {
     const m = (data.mentors || []).find((x) => x.id === d.medit); if (!m) return;
     $('#m-id').value = m.id; $('#m-name').value = m.name; $('#m-title').value = m.title; $('#m-photo').value = m.photo; $('#m-sig').value = m.signature; $('#m-email').value = m.email; $('#m-def').checked = !!m.isDefault;
