@@ -19,7 +19,7 @@
 
 import { now } from './_shared.js';
 import { send, mailState } from './_mail.js';
-import { unlockedLetter } from './_letters.js';
+import { unlockedLetter, FIRST_NEW } from './_letters.js';
 import { syncFounder } from './_mailchimp.js';
 import { unsubLink } from './_account.js';
 import { letterContext } from './_mentor.js';
@@ -157,7 +157,10 @@ export async function applyPaid(env, D, base, s) {
   if (!me) return { ok: false, why: 'No such founder.' };
   const put = await D.prepare('INSERT OR IGNORE INTO payment (session, student_id, step, amount, currency, mode, from_tier, at) VALUES (?,?,?,?,?,?,?,?)')
     .bind(s.id, me.id, step, S.amount, 'usd', s.livemode ? 'live' : 'test', me.tier || 'free', now()).run();
-  if (!put.meta || !put.meta.changes) return { ok: true, already: true, step };
+  if (!put.meta || !put.meta.changes) {
+    const was = await D.prepare('SELECT from_tier FROM payment WHERE session = ?').bind(s.id).first();
+    return { ok: true, already: true, step, first: FIRST_NEW[(was && was.from_tier) || 'free'] || 4 };
+  }
   const opened = above(step, me.tier);
   if (opened) {
     await D.prepare('UPDATE student SET tier = ? WHERE id = ?').bind(step, me.id).run();
@@ -172,11 +175,11 @@ export async function applyPaid(env, D, base, s) {
     const first = String(me.name || '').trim().split(/\s+/)[0] || '';
     // A receipt of what they bought: sent even to a founder who turned
     // letters off, because it is about their own payment.
-    const r = await send(env, { to: me.email, ...unlockedLetter(base, { first, to: me.email, step, ...ctx }),
+    const r = await send(env, { to: me.email, ...unlockedLetter(base, { first, to: me.email, step, from: me.tier || 'free', ...ctx }),
       why: `You paid for ${S.name} at linktolead.exploraself.com.`, unsubUrl: unsubLink(base, p) });
     await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(me.id, r.ok ? 'unlocked-letter' : 'unlocked-letter-failed', now(), r.ok ? step : (r.why || step)).run();
   }
-  return { ok: true, opened, step };
+  return { ok: true, opened, step, first: FIRST_NEW[me.tier || 'free'] || 4 };
 }
 
 /** The signing secret of this mode's webhook (STRIPE_WEBHOOK_SECRET in

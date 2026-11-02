@@ -36,6 +36,14 @@ ok(!(await verifySignature('{"a":1}', sign('{"a":1}', 'whsec_1', Math.floor(Date
 const U = unlockedLetter(B, { first: 'maya', step: 'session', to: 'm@x.com' });
 ok(U.subject === 'It’s unlocked: The Boardroom' && /^Hi Maya,/.test(U.text) && /Thank you/.test(U.text) && /Levels 04 and 05 are open/.test(U.text) && /forms\.gle/.test(U.text) && U.html.includes('/ground-plan/#programme-4') && /The team and I are here for you/.test(U.text), 'It’s unlocked: thanks, what opened, the session, the booking link, the first level, the team');
 ok(!/P\.S\./.test(U.text), 'no offer in the letter: they just bought');
+// A higher step includes every step below it (Alexandru, 2 Nov 2026).
+const opened = (step, from) => unlockedLetter(B, { first: 'Maya', step, from }).text;
+ok(/Levels 04 to 09 are open/.test(opened('lab', 'free')) && /#programme-4|Open Level 04/.test(opened('lab', 'free')), 'the LAB bought straight away: The Boardroom’s levels are included (04 to 09)');
+ok(/Levels 06 to 09 are open/.test(opened('lab', 'session')), 'the LAB after The Boardroom: 06 to 09');
+ok(/Levels 04 to 12 are open[^]*Nothing is held back/.test(opened('hub', 'free')), 'the HUB: everything, 04 to 12');
+ok(/Levels 04 to 12 are open[^]*Everything is yours/.test(opened('premium', 'free')), 'The Summit: everything, at once');
+const { holds } = await import('../public/content.js');
+ok(['session', 'lab', 'hub'].every((g) => holds('hub', g)) && ['session', 'lab', 'hub', 'premium'].every((g) => holds('premium', g)) && holds('lab', 'session'), 'the levels follow: the HUB and The Summit open every level, the LAB includes The Boardroom');
 
 // A fake Stripe and a fake Resend.
 const calls = [], sent = [];
@@ -114,7 +122,7 @@ sessions.cs_test_5 = paid('cs_test_5', tom, 'lab');
 [st, j] = await jsonOf(await payGet({ request: req('/api/checkout?cs=cs_test_5', { token: maya }), env }));
 ok(st === 403 && tierOf(tom) === 'free', 'someone else’s payment: refused');
 [st, j] = await jsonOf(await payGet({ request: req('/api/checkout?cs=cs_test_5', { token: tom }), env }));
-ok(st === 200 && j.paid && j.step === 'lab' && tierOf(tom) === 'lab', 'back from Stripe: Stripe confirms, the LAB opens');
+ok(st === 200 && j.paid && j.step === 'lab' && tierOf(tom) === 'lab' && j.first === 4, 'back from Stripe: Stripe confirms, the LAB opens, from Level 04 (bought straight from free)');
 sessions.cs_test_6 = { ...paid('cs_test_6', tom, 'hub'), payment_status: 'unpaid' };
 [st, j] = await jsonOf(await payGet({ request: req('/api/checkout?cs=cs_test_6', { token: tom }), env }));
 ok(j.paid === false && tierOf(tom) === 'lab', 'back from Stripe before it is paid: waits, nothing opens');
