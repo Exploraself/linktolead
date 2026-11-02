@@ -1,6 +1,6 @@
 // The ladder and the public pages say the same thing everywhere.
 //
-// Names (The Founder Launchpad, The Boardroom, The Summit), prices ($97, $397,
+// Names (The Founder Launchpad, The Boardroom, The Summit), prices ($97, $750,
 // $1,989), the Summit tier key, and Road 2, the North Star sales page.
 
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -19,7 +19,7 @@ for (const t of ['free', 'session', 'lab', 'hub', 'premium']) ok(holds('premium'
 ok(!holds('hub', 'premium') && holds('hub', 'lab') && !holds('free', 'session'), 'the ladder still reaches from the left');
 
 ok(SECTIONS.map((s) => s.n).join() === 'The Founder Launchpad,The Boardroom,Personal Leadership LAB,Business HUB', 'rail names');
-ok(LADDER.find((r) => r.key === 'hub').price === '$397', 'HUB is $397');
+ok(LADDER.find((r) => r.key === 'hub').price === '$750', 'HUB is $750, one payment (Alexandru, 2 Nov 2026)');
 ok(LADDER.find((r) => r.key === 'premium').n.startsWith('The Summit'), 'premium shows as The Summit');
 
 // No old prices or names on any public page (the hidden /v2 draft aside).
