@@ -727,7 +727,7 @@ function welcomeHTML() {
   const summit = (state.tier || 'free') === 'premium' && !team(), first = firstName(), w = state.work;
   const h = ((summit && W.summit && W.summit.h) || W.h).replace('{, first}', first ? `, ${first}` : '');
   const sub = (summit && W.summit && W.summit.sub) || W.sub;
-  const told = level > 1 && whereWords(w, 'stage') ? `You told us: “${esc(whereWords(w, 'stage'))}”.${whereWords(w, 'weight') ? ` What weighs most: “${esc(whereWords(w, 'weight'))}”.` : ''}${whereWords(w, 'win') ? ` In twelve weeks: “${esc(whereWords(w, 'win'))}”.` : ''} We kept it in mind for what comes next.` : '';
+  const told = level > 1 && whereWords(w, 'stage') ? `You told us: “${esc(whereWords(w, 'stage'))}”.${whereWords(w, 'weight') ? ` What weighs most: “${esc(whereWords(w, 'weight'))}”.` : ''}${whereWords(w, 'win') ? ` In twelve weeks: “${esc(whereWords(w, 'win'))}”.` : ''} If that has changed, the next screen asks.` : '';
   const lvs = []; for (let n = W.lv[0]; n <= W.lv[1]; n++) lvs.push(n);
   return `<div class="wl">
     <p class="cw-topic">Welcome · ${esc(W.where)}</p>

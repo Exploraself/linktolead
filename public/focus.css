@@ -21,6 +21,9 @@ body.fmopen .leaf-r{
 body.fmopen .leaf-r > *{box-sizing:border-box;width:100%;max-width:640px;margin-left:auto;margin-right:auto;
   padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
 body.fmopen .leaf-r > .fm-top{max-width:none;padding:env(safe-area-inset-top,0px) 0 0}
+/* Every piece of the page sits in the one column, one after the other (some keep their own margins in the book). */
+body.fmopen .leaf-r > :not(.fm-top){margin-left:auto!important;margin-right:auto!important}
+body.fmopen .leaf-r > .cw-take{margin-top:4px}
 body.fmopen .leaf-r > .vh{padding:0}
 /* Behind the layer: nothing floats over it. */
 body.fmopen .crown-wrap,body.fmopen .mp,body.fmopen .cw-pb,body.fmopen .cw-pk,body.fmopen .cw-hush{display:none!important}
@@ -83,3 +86,4 @@ body.fmopen .leaf-r button:focus-visible,body.fmopen .leaf-r input:focus-visible
   .fm-where{font-size:13.5px}
 }
 @media(prefers-reduced-motion:reduce){.fm-bar i{transition:none}}
+body.fmopen .leaf-r .cw-tk{padding-right:64px}
