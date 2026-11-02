@@ -5,7 +5,7 @@
 import { now, newToken, clean, STUDENT_TABLES } from './_shared.js';
 import { syncFounder } from './_mailchimp.js';
 import { send } from './_mail.js';
-import { launchpadWelcome, northStarWelcome, NORTH_STAR_LANDINGS } from './_letters.js';
+import { launchpadWelcome, northStarWelcome, toolsWelcome, NORTH_STAR_LANDINGS } from './_letters.js';
 import { letterContext } from './_mentor.js';
 
 export const SOURCES = ['compass', 'sales-page', 'home'];
@@ -28,12 +28,14 @@ export async function profile(D, studentId, { industry, consent, source } = {}) 
 
 export const unsubLink = (base, p) => (p && p.unsub_id ? `${base}/api/unsubscribe?u=${p.unsub_id}` : '');
 
-/** The welcome: sent once, when the account is made. A North Star page gets
- *  the North Star welcome; every other door gets the Launchpad welcome. */
-export async function sendWelcome(env, base, { email, first, p, D, tz, landing = '' }) {
+/** The welcome: sent once, when the account is made. A free tool (door
+ *  'tools', `path` the tool's page) gets the toolkit welcome; a North Star page
+ *  the North Star welcome; every other door the Launchpad welcome. */
+export async function sendWelcome(env, base, { email, first, p, D, tz, landing = '', door = '', path = '' }) {
   const ctx = D && p ? await letterContext(D, p.student_id, tz) : {};
-  const welcome = NORTH_STAR_LANDINGS.includes(landing) ? northStarWelcome : launchpadWelcome;
-  return send(env, { to: email, ...welcome(base, { first, to: email, ...ctx }),
+  const tools = door === 'tools';
+  const welcome = tools ? toolsWelcome : NORTH_STAR_LANDINGS.includes(landing) ? northStarWelcome : launchpadWelcome;
+  return send(env, { to: email, ...welcome(base, { first, to: email, ...ctx, ...(tools ? { path } : {}) }),
     why: 'You created a free ExploraSelf account at linktolead.exploraself.com.', unsubUrl: unsubLink(base, p) });
 }
 

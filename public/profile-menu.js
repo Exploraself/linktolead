@@ -5,7 +5,8 @@
  *
  * Menu: name, the email the account was made with (2 Nov 2026, Alexandru:
  * every user sees which address they are signed in with), and step; the
- * Leader’s North Star in its own highlighted row, Your Base Camp, Library, Ask
+ * Leader’s North Star in its own highlighted row, Your Base Camp, Library, Your
+ * toolkit (/tools/), Ask
  * Alexandru, Password (full accounts only; simple accounts sign in by email
  * link), "Letters from your mentor: On/Off" (consent, synced to Mailchimp),
  * Sign out, and "Delete my account" (two steps: a plain warning, then the
@@ -30,6 +31,8 @@ export function items(me) {
   const list = [
     ['/ground-plan/#home', 'See your progress', 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'],
     ['/ground-plan/#library', 'Library', 'M4 19V5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2zm0 0a2 2 0 0 1 2-2h12'],
+    // The free tools (2 Nov 2026): the same entry on the North Star and in Base Camp.
+    ['/tools/', 'Your toolkit', 'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z'],
     ['/ground-plan/#ask', 'Ask Alexandru', 'M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z'],
   ];
   if (!(me && me.signupType === 'simple' && !me.hasPassword)) list.push(['/ground-plan/#account', me && me.hasPassword ? 'Change my password' : 'Set my password', 'M6 11h12v10H6zM8 11V8a4 4 0 0 1 8 0v3']);

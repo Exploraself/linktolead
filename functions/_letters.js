@@ -150,9 +150,12 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
   // say we are here, and give something to do. Security letters (sign-in
   // link, reset, password changed) never sell: their P.S. is a free gift.
   const free = Object.keys(OFFERS).filter((k) => !OFFERS[k].paid);
-  const use = security && offer && OFFERS[offer] && OFFERS[offer].paid ? free[seed % free.length] : offer;
+  // A letter may bring its own P.S. ({ line: (base) => [...] }): the 12-day
+  // letters (functions/_course.js) each have one, written and checked with them.
+  const own = offer && typeof offer === 'object' && typeof offer.line === 'function' ? offer : null;
+  const use = own ? null : security && offer && OFFERS[offer] && OFFERS[offer].paid ? free[seed % free.length] : offer;
   const tests = sign ? threeAssessments(seed) : [];
-  const ps = use && OFFERS[use] ? parts(['P.S. ', ...OFFERS[use].line(base)]) : null;
+  const ps = own ? parts(['P.S. ', ...own.line(base)]) : use && OFFERS[use] ? parts(['P.S. ', ...OFFERS[use].line(base)]) : null;
   const good = sign ? GOOD_WORDS[seed % GOOD_WORDS.length] : '';
   const qs = !sign || ask === null ? [] : Array.isArray(ask) ? ask : (SHORTCUTS[ask] || SHORTCUTS.start);
   const bye = sign ? farewell(tz, at) : '';
@@ -201,6 +204,21 @@ export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {
     'You’re in. Welcome to The Founder Launchpad. I’m really glad you’re here.',
     'Start with Level 01 today. In about an hour you’ll have your business on paper, not only in your head.',
     `${asMentor(o.mentor).first} and the team read every word you write in there, and we’re cheering you on.`,
+  ], offerFor('launchpad-welcome', to, tier, offer), close('launchpad-welcome', { ...o, to })) };
+}
+
+/** "tools-welcome": sent once, when the account is made from a free tool
+ *  (/runway/, /bottleneck/, /off-switch/, /12-days/, /toolkit/, /tools/).
+ *  They came for a tool, so the letter opens the toolkit, not the Launchpad.
+ *  `path` is the tool they came from, or the Tools page. */
+export function toolsWelcome(base, { first, to = '', tier, offer, path = '/tools/', ...o } = {}) {
+  const home = /^\/[a-z0-9-]+\/$/.test(path) ? path : '/tools/';
+  return { subject: 'Your toolkit is open', ...letter(base, [
+    hi(first),
+    'You’re in. Your free toolkit is open, and I’m really glad you’re here.',
+    'Each tool reads your own numbers and gives you one move for this week. Start with the one that brought you here.',
+    button(`${base}${home}`, home === '/tools/' ? 'Open my toolkit →' : 'Open my tool →'),
+    ['Every tool is on one page, by the four domains: ', link(`${base}/tools/`), '. When you want the whole picture, The Leader’s North Star is free with the same account.'],
   ], offerFor('launchpad-welcome', to, tier, offer), close('launchpad-welcome', { ...o, to })) };
 }
 

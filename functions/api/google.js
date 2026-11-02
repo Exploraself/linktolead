@@ -14,7 +14,7 @@
 // lacks (company, interest, industry), and the Blueprint asks for it once, at
 // the first answer (api/complete.js), as for every other account.
 
-import { json, bad, db, now, newToken, accountTables } from '../_shared.js';
+import { json, bad, db, now, newToken, clean, accountTables } from '../_shared.js';
 import { profile, sendWelcome, SOURCES } from '../_account.js';
 import { keepTz } from '../_mentor.js';
 import { allowed, logged, mailState, origin } from '../_mail.js';
@@ -74,7 +74,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
     const go = (async () => {
       if (!(await allowed(D, who.email, ip))) return;
-      const r = await sendWelcome(env, origin(request), { email: who.email, first: who.first, p, D, tz: body.tz, landing });
+      const r = await sendWelcome(env, origin(request), { email: who.email, first: who.first, p, D, tz: body.tz, landing, door: body.door === 'tools' ? 'tools' : '', path: clean(body.path, 40) });
       if (r.ok) await logged(D, who.email, ip);
       await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)')
         .bind(id, r.ok ? 'launchpad-welcome' : 'launchpad-welcome-failed', now(), r.why || null).run();

@@ -199,3 +199,23 @@ Growth Plan ticks share `plan_tick` with the Account Plans but are never
 counted with them: `/api/plans` ("x of 32"), the count `/api/plans/tick`
 returns and /mentor's "Plan steps done" stay the plans' own. No Mailchimp
 tags.
+
+## The founder's toolkit (2 Nov 2026)
+
+Free tools for a full free account, listed by the four domains at
+`/tools/`. One entry per tool in `public/tools/catalog.js`; a new tool is one
+entry there, a page of its own, and its key in `functions/_tools.js`.
+
+| Address | What |
+| --- | --- |
+| `/tools/` | Every tool, by domain; signed in, the last result of each |
+| `/runway/`, `/bottleneck/`, `/off-switch/` | Cover → the way in → one question per screen → the reading → The Leader's North Star |
+| `/12-days/` | 12 Days to Start Winning: letters sent by the site (`functions/_course.js`), the welcome at once, then one a morning from 8:00 the founder's time, Day 1 to 12 and a last "what next" |
+| `/toolkit/` | The page for ads and links: one offer, one button |
+
+The way in (`public/tools/gate.js`): signed out, the full account form one
+field at a time; details missing, only those, once; a full account, one tap.
+Mailchimp tag `TOOLS` the first time each tool is opened. `/mentor` shows which
+tools each founder opened and their day in the 12 days. The 12-day letters need
+the hourly cron in `wrangler.toml` (`[triggers]`), which runs `JOBS` in
+`worker.js`.

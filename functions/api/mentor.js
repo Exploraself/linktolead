@@ -22,6 +22,7 @@ import { send, origin, mailState } from '../_mail.js';
 import { mentorLetter, answerLetter } from '../_letters.js';
 import { letterContext, mentors, saveMentor } from '../_mentor.js';
 import { LIBRARY_ITEMS } from './library.js';
+import { toolNames } from '../_tools.js';
 import { thread } from './thread.js';
 import { profile, unsubLink, deleteFounder } from '../_account.js';
 import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER } from '../_mailchimp.js';
@@ -76,6 +77,8 @@ async function roster(D) {
       (SELECT COUNT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS levels,
       (SELECT GROUP_CONCAT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS level_list,
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'crossed') AS crossed,
+      (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'tool-open') AS tools,
+      (SELECT cs.day_sent || '|' || CASE WHEN cs.stopped_at IS NULL THEN '' ELSE 'stopped' END FROM course_sub cs WHERE cs.student_id = s.id AND cs.course = 'win12') AS course,
       p.avatar,
       p.industry, p.source, p.consent, p.unsubscribed, p.mailchimp_status, p.mailchimp_at, p.signup_type, p.company, p.interest, p.landing, p.utm_source, p.utm_medium, p.utm_campaign, p.utm_content,
       CASE WHEN au.pass_hash IS NULL THEN 0 ELSE 1 END AS has_password, COALESCE(au.paused, 0) AS paused
@@ -89,7 +92,7 @@ async function roster(D) {
 const LANDING_NAMES = { road1: 'Road 1', road2: 'Road 2', road3: 'Road 3', road4: 'Road 4', north1: 'North 1', north2: 'North 2', north3: 'North 3', compass: 'North Star box', summit: 'The Summit' };
 const CSV_COLS = [['name', 'Name'], ['email', 'Email'], ['joined_at', 'Joined'], ['last_seen_at', 'Last seen'], ['stage', 'Stage'], ['step', 'Step'],
   ['signup', 'Sign-up form'], ['landing_name', 'Landing'], ['utm_source', 'utm_source'], ['utm_medium', 'utm_medium'], ['utm_campaign', 'utm_campaign'], ['utm_content', 'utm_content'], ['company_name', 'Company'], ['interest', 'Interest'], ['industry', 'Industry'],
-  ['compass', 'North Star done'], ['plan_ticks', 'Plan steps done'], ['library_names', 'Library'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp'],
+  ['compass', 'North Star done'], ['plan_ticks', 'Plan steps done'], ['library_names', 'Library'], ['tool_names', 'Tools'], ['course_line', '12 Days to Start Winning'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp'],
   ['ns_wants', 'Wants (North Star)'], ['ns_pains', 'Hurts (North Star)'], ['ns_values', 'Cares about (North Star)'], ['ns_first', 'Needs them first'], ['ns_team', 'Works with'],
   ['growth_plan', 'Growth plan'],
   ['group', 'Group'], ['levels', 'Blueprint levels'], ['crossed_names', 'Crossed']];
@@ -120,6 +123,12 @@ export function groupName(s) {
   return n && b ? 'Both' : n ? 'North Star only' : b ? 'Blueprint only' : '';
 }
 const CROSSED = { blueprint: 'North Star → Blueprint', northstar: 'Blueprint → North Star' };
+/** The 12 days as words: "day 5 of 13", "day 5 of 13 · stopped", "welcome pending". */
+export function courseLine(v) {
+  if (!v) return '';
+  const [d, st] = String(v).split('|'), n = Number(d);
+  return (n < 0 ? 'welcome pending' : n === 0 ? 'welcome sent' : `day ${n} of 13`) + (st ? ' · stopped' : '');
+}
 export function toCSV(list) {
   // Quoted, and a leading = + - @ is defused so a spreadsheet never runs it.
   const cell = (v) => { let s = String(v ?? ''); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
@@ -127,7 +136,8 @@ export function toCSV(list) {
   const books = (v) => String(v || '').split(',').filter((k) => LIBRARY_ITEMS[k]).map((k) => LIBRARY_ITEMS[k].name).join('; ');
   const row = (s) => ({ ...s, step: STEPS[s.tier || 'free'] || s.tier, library_names: books(s.library), signup: s.signup_type || '',
     company_name: s.company === '' ? 'No company yet' : s.company || '', landing_name: LANDING_NAMES[s.landing] || '', compass: yes(s.compass_at), has_password: yes(s.has_password), consent: yes(s.consent), unsubscribed: yes(s.unsubscribed), paused: yes(s.paused),
-    ...nsWords(s), growth_plan: Number(s.growth_ticks) || 0, group: groupName(s), levels: s.levels || 0, crossed_names: String(s.crossed || '').split(',').filter((k) => CROSSED[k]).map((k) => CROSSED[k]).join('; ') });
+    ...nsWords(s), growth_plan: Number(s.growth_ticks) || 0, group: groupName(s), levels: s.levels || 0, crossed_names: String(s.crossed || '').split(',').filter((k) => CROSSED[k]).map((k) => CROSSED[k]).join('; '),
+    tool_names: toolNames(s.tools).join('; '), course_line: courseLine(s.course) });
   return [CSV_COLS.map(([, h]) => cell(h)).join(','), ...list.map((s) => { const r = row(s); return CSV_COLS.map(([k]) => cell(r[k])).join(','); })].join('\r\n') + '\r\n';
 }
 
