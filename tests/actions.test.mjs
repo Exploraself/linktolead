@@ -13,8 +13,8 @@ const SZ = ['start', 'solo', 'team', 'company'];
 
 ok(A.STEPS5.join() === 'Look,Decide,Do,Involve,Keep', 'five actions in one order: Look, Decide, Do, Involve, Keep');
 ok(A.SIZES4.map((s) => s[0]).join() === SZ.join() && A.SIZES4.map((s) => s[1]).join(' / ') === 'Before the first sale / Selling alone / A team with payroll / 16 people or more', 'the four sizes, in plain words');
-const WRITTEN = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-ok(A.ACTION_LEVELS.join() === WRITTEN.join(), 'Levels 01–09 have their twenty');
+const WRITTEN = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+ok(A.ACTION_LEVELS.join() === WRITTEN.join(), 'all twelve levels have their twenty');
 let all = 0, empty = [];
 for (const lv of WRITTEN) for (let d = 0; d < 4; d++) for (const s of SZ) {
   const X = A.actionsAt(lv, d, s);
@@ -38,6 +38,10 @@ ok(A.actionsAt(1, 2, 'team')[0].t.includes('payroll') && A.actionsAt(1, 2, 'comp
 ok([1, 2].every((lv) => A.actionsAt(lv, 2, 'solo')[4].t.includes('machine')), 'the numbers serve the decision: a machine adds up, the founder decides (rule 9)');
 ok(['7.2', '8.2', '9.2'].every((k) => /calculator|spreadsheet|count is quick|Software/.test(A.ACTIONS4[k][4].t.solo || A.ACTIONS4[k][4].t)), 'Run the business: every money action says what a machine can do, and what is the founder’s (rule 9)');
 ok(A.actionsAt(6, 2, 'team')[0].t.includes('payroll') && A.actionsAt(9, 2, 'company')[3].t.includes('chair') && A.actionsAt(9, 1, 'start')[1].ex.includes('freelance'), 'the pressure changes with the size in Run the business too: payroll, the board, a freelancer before a team');
+// Level 12 leaves the founder ready: who they are now, a leader grown, one
+// number for twelve weeks in My direction, and a market test with plan B.
+ok(A.actionsAt(12, 2, 'solo')[1].t.includes('business goal in My direction') && A.actionsAt(12, 1, 'team')[1].t.includes('own') && /plan B/.test(A.actionsAt(12, 3, 'company')[1].t), 'Level 12 closes the climb: the twelve-week number becomes the business goal, a leader owns something real, the next move is tested');
+ok(A.actionsAt(12, 0, 'start')[0].t.includes('Levels 01 and 05') && A.actionsAt(12, 3, 'solo')[0].t.includes('Level 10'), 'and it reads what the levels before it wrote');
 ok(A.sizeFor('') === 'solo' && A.sizeFor('team') === 'team' && A.SIZE_STAGE.company === 4, 'until the founder says, the actions speak to a founder selling alone');
 ok(V.sizeOf({ 'w.v4.where.stage': String(A.SIZE_STAGE.start) }) === 'start' && V.sizeOf({ 'w.v4.where.stage': String(A.SIZE_STAGE.team) }) === 'team', 'switching size sets the answer “Where are you now?” keeps');
 

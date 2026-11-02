@@ -1,4 +1,5 @@
-// Twenty actions a level (Alexandru, 2 Nov 2026). In each of the four areas,
+// Twenty actions a level, for all twelve levels (Alexandru, 2 Nov 2026:
+// Levels 01–05 first, then 06–12). In each of the four areas,
 // five actions in one order: Look (open and count), Decide (write the line),
 // Do (the level's own action, from the founder's sentence), Involve (one
 // person or customer), Keep (make it weekly). Each is written for the four
@@ -8,7 +9,8 @@
 // How the material is organised (for whoever writes it, never shown):
 // Inform → Reform → Transform. Look and Decide inform and reform; Do, Involve
 // and Keep transform. Every action can be done and checked this week
-// (AGENTS.md 1 and 10). Every example is marked as one.
+// (AGENTS.md 1 and 10). Every example is marked as one. The levels climb: no
+// action repeats another level's, and Level 12 reads what 01–11 wrote.
 //
 // One action is { t, ex?, exLabel? }: t is a sentence for every size, or
 // { start, solo, team, company }; ex is an example in the same shape. The
@@ -203,7 +205,7 @@ export const ACTIONS4 = {
     { t: 'Choose your selling hour: the day, the time, and how many buyers you will talk to.' },
     { t: 'Hold the hour on the day, talk to the buyers you chose, and follow up once with everyone who stays silent.' },
     { t: 'When someone says “let me think”, ask: “What would you need to know to decide?” Then agree a day.' },
-    { t: S('Book the hour every week for the next four weeks.', 'Book it as a recurring event, and never move it twice in a row.',
+    { t: S('Keep the hour every week for the next four weeks, and write next week’s names before you close it.', 'Keep it as a recurring event, never move it twice in a row, and follow up everyone once before the next one.',
       'Book it for you and one person on your team, at the same hour.', 'Keep one customer hour a week for yourself, and ask each lead to keep one.') }],
 
   // ── Level 05 · What you became ───────────────────────────────────────────
@@ -434,6 +436,150 @@ export const ACTIONS4 = {
       'Ask one person on the team to own the list, and to bring it to Monday’s meeting.', 'Ask each salesperson to keep their list in the same shape, so you can read the total each week.') },
     { t: S('Every week, on the same day, move names one step and add the new ones.', 'Every week, on the same day, move names one step, and add each new name the day it arrives.',
       'Read the list with the team every Monday: how many moved, how many are new, how many went cold.', 'Read the total every Monday: moved, new, gone cold. When it runs thin, you see it before the work does.') }],
+
+  // ── Level 10 · Your first hundred names ──────────────────────────────────
+  '10.0': [
+    { t: S('Go through your phone and the last year of messages. Write everyone who has the problem you solve, or knows someone who does. Count them.',
+      'Go through your phone, email and LinkedIn. Write everyone who fits your best client, or knows one. Count them.',
+      'Ask each person on the team to list ten people they know who fit your client, or know one. Count the names, and remove the doubles.',
+      'Ask each lead for the twenty strongest relationships they hold with buyers, or people who know buyers. Count them, and mark the ones nobody called this quarter.') },
+    { t: 'Write your opening line: who you help, then “Who do you know who…?”',
+      ex: S('“I’m starting a service that gives new parents their evenings back. Who do you know with a baby under one?”', '“I help cafés fill quiet afternoons. Who do you know who runs a café?”',
+        '“We help clinics keep patients coming back. Who do you know who runs a clinic?”', '“We keep regional retailers’ shelves full. Who do you know who buys for a chain of stores?”') },
+    { t: 'By the day you chose, send the line to the number of people you set, starting with the first name, and count the replies.' },
+    { t: 'When someone gives you a name, ask: “May I say you suggested it?” Then write to that person within two days.' },
+    { t: S('Every week, add ten names to the list, and send the line to five of them.', 'Every week, add ten names to the list, and send the line to five of them.',
+      'Every week, each person on the team sends the line to three people they know. Count the introductions on Monday.', 'Every month, each lead reports the introductions their relationships brought. Read the count with them.') }],
+  '10.1': [
+    { t: S('List who already meets the people you want to serve: a shop, a group, a professional. Count them.',
+      'Look at your last five clients. Write who else they pay for something close to what you do: an accountant, a supplier, a professional.',
+      'Ask the team who your clients mention most: their accountant, supplier or advisor. Write the names, and how often each comes up.',
+      'Ask sales and service for the partners, suppliers and advisors your largest customers trust most. List the top ten.') },
+    { t: 'Pick one partner, and write the fair trade: the two introductions you ask for, and what you give first.',
+      ex: S('The leader of the parents’ group: two introductions; I run a free evening for the group.', 'Dan at Main Street Coffee: two introductions; I recommend the coffee to every café I work with.',
+        'The accountant three of our clinics use: two introductions; we send our clients who need an accountant.', 'The industry association: an introduction to five members; we speak at their spring event.') },
+    { t: 'By the day you chose, send the partner your ask, with your part offered first.' },
+    { t: 'When an introduction comes, thank the partner the same day, and tell them what happened next.' },
+    { t: S('Each month, send the partner one useful thing for the people they serve.', 'Each month, send the partner something useful, and a client their way when you can.',
+      'Give one person on the team the job of looking after the partner, and read what came of it each month.', 'Each quarter, review partners with your leads: what each sent, what you sent back, and who to add.') }],
+  '10.2': [
+    { t: S('Write the three people closest to buying, and what they have in common.', 'Open last year’s sales by client and sort them by money in (a spreadsheet does it in a minute). Mark your three best.',
+      'Open last year’s sales by client. Sort them by money in, and by how easy they were to serve. Mark the top five on both.', 'Ask finance for last year’s sales and margin by customer. Mark the top ten, and the share of sales from the top three.') },
+    { t: 'Write the three things your best clients share, and how many more you want, by when.',
+      ex: S('Parents of a first baby, both working, already paying for help at home: five more by March.', 'Own their café, pay on time, refer others: five more by March.',
+        'Two or more locations, pay within 30 days, refer other owners: five more by March.', 'Twenty stores or more, one central buyer, a three-year contract: four more by the end of the year.') },
+    { t: 'By the day you chose, list by name every current client who shares all three, and every name on your warm list who does.' },
+    { t: S('Ask one of the three where people like them look for help, and go there next week.', 'Ask one best client where they look when they need what you do, and go there next week.',
+      'Ask one best client where they look when they need what you do, and send the team there next week.', 'Ask three of the best customers where they look for suppliers, and give the answers to sales and marketing.') },
+    { t: S('Each week, check every new name against the three things before you spend time on them.', 'Each week, check every new lead against the three things before you spend time on them.',
+      'Give the three things to the team, and ask them to mark every new lead against them.', 'Put the three things into how sales qualifies a lead, and read the count each month.') }],
+  '10.3': [
+    { t: S('Count the conversations you have had with people who have the problem, and how many were about their past, not your idea.',
+      'Count last month’s conversations with buyers, and how many asked what they had already tried.',
+      'Ask the team for last month’s customer conversations, and count how many were written down.',
+      'Ask for last quarter’s customer calls and interviews, and count how many were read by someone who decides what to build.') },
+    { t: 'Write the three questions about the last time it happened: “When did you last ___? What did you try? What did it cost you?”' },
+    { t: 'By the day you chose, invite the number of people you set, and write each conversation down the same day, word for word.' },
+    { t: S('At the end of each one, ask: “Who else has this problem that I should talk to?”', 'At the end of each one, ask: “Who else has this problem that I should talk to?”',
+      'Bring one person from the team to each conversation, to listen and take the notes.', 'Ask the person who builds or delivers to join two of the conversations, and only listen.') },
+    { t: S('Each Friday, read the week’s notes, and write the words you heard twice. They are the start of what you build.', 'Each Friday, read the week’s notes, and use the words you heard twice in your offer.',
+      'Each Friday, read the notes with the team, and pick one thing to change because of them.', 'Each month, read the conversations with your leads, and pick one thing to build or stop because of them.') }],
+
+  // ── Level 11 · Your advantage ────────────────────────────────────────────
+  '11.0': [
+    { t: S('Write the last three times someone told you something hard about the idea, and what you did with each.',
+      'Open the last three months of messages. Find every complaint or hard comment from a client. Count them, and mark the ones you answered with a defence.',
+      'Read the last three months of client complaints and your team’s review notes. Count the things said more than once.',
+      'Read the last year’s staff review notes and customer complaints. Count the ones about how you lead.') },
+    { t: 'Write the three people you will ask, and the one question: “What’s one thing I do that makes working with me harder?”' },
+    { t: 'Ask all three by the day you chose. Write each answer down, and only say thank you.' },
+    { t: 'Pick one thing you heard and change it this month. Tell the person who said it when it is done.' },
+    { t: S('Ask one person who tried the idea the same question every month.', 'Ask one client the same question at the end of every job.',
+      'Ask one person on the team the same question every month, and thank them in front of the others.', 'Ask your leads the question in writing once a quarter, and tell them what you changed.') }],
+  '11.1': [
+    { t: S('Read the last month of messages with your partner or helpers. Count the times someone told you something was not working before you found it.',
+      'Read the last month of messages with clients and suppliers. Count the problems they raised before you found them.',
+      'Open the notes of your last four team meetings. Count the problems raised by the team, not by you.',
+      'Open the notes of your last four leadership meetings. Count the problems raised by someone other than you.') },
+    { t: 'Write the question for every meeting, “What isn’t working that I don’t know?”, and what you do before you answer.',
+      ex: S('Before I answer, I write it down.', 'Before I answer, I say “Tell me more.”', 'Before I answer, I write it on the board.', 'Before I answer, I ask who else sees it.') },
+    { t: 'Ask the question at your next meeting, and do what you wrote before you answer.' },
+    { t: 'Pick one thing raised in the meeting, fix it by the next one, and say so at the start of it.' },
+    { t: S('For a month, ask the question at the end of every conversation with the people who help you.', 'For a month, ask the question at the end of every call with a supplier or partner.',
+      'Keep the question as the first item of every team meeting, and count what comes up each month.', 'Ask each lead to put the question first in their own team meetings, and to bring you one answer a month.') }],
+  '11.2': [
+    { t: S('Find three ways people with this problem solve it today. Write what each offers, and what it costs.',
+      'Find three offers buyers compare you with. Write what each offers, its price, and what it leaves out.',
+      'Ask the team which competitors clients mention, and why clients chose you or them. Write the three named most.',
+      'Ask sales for the last ten deals won and lost, and why. Write what decided each one.') },
+    { t: 'Write your advantage: “Others offer ___. I offer ___, because ___. Proof: ___.”',
+      ex: S('Others offer apps; I offer a person who plans bedtime with you, because I have done it for years. Proof: the first two families, in their words.',
+        'Others offer discount cards; I offer events that bring regulars, because I know the neighbourhood. Proof: one café’s Tuesdays, before and after.',
+        'Others offer reminders; we offer a person who calls, because our team are former nurses. Proof: three clinics, in their own words.',
+        'Others deliver next week; we deliver every week on the same day, because we run our own trucks. Proof: 40 stores, no missed delivery this year.') },
+    { t: 'By the day you chose, put the sentence and its proof on your offer page, or in the next proposal you send.' },
+    { t: 'Read the sentence to one client, and ask: “Is that why you chose us?” Where their words are better, use them.' },
+    { t: S('Each month, add one new proof next to the sentence.', 'Each month, add one new proof next to the sentence, with the client’s permission.',
+      'Each month, ask the team for one new proof, and put it in the next proposal.', 'Each quarter, read the deals won and lost against the sentence with your leads, and update the proof.') }],
+  '11.3': [
+    { t: S('Collect every kind thing people who tried the idea have written to you: messages, emails, comments. Count them.',
+      'Collect every kind thing clients have written to you: emails, messages, reviews. Count the ones you could show with a name.',
+      'Ask the team for every kind thing clients wrote to them this year. Count the ones you could show with a name.',
+      'Ask service and sales for every written customer compliment this year. Count the ones you could show with a name and a company.') },
+    { t: 'Write the ask, with two questions and a permission: “What changed for you? Who would you recommend me to? May I share it with your name?”' },
+    { t: 'By the day you chose, send the ask to the number of clients you set.' },
+    { t: 'When an answer comes, thank them, and ask once for a public review where your buyers look.' },
+    { t: S('Put every answer you may share next to your offer, and ask the next person who tries it.', 'Put every answer next to your price, and ask each client at the end of every job.',
+      'Make the ask the last step of every client job, sent by the person who delivered it.', 'Make the ask part of every account review, and put the answers where buyers decide.') }],
+
+  // ── Level 12 · Your twelve weeks ─────────────────────────────────────────
+  '12.0': [
+    { t: 'Read your proof list from Level 05 and your sentences from Levels 01 and 05. Mark three things you do now that you did not do twelve weeks ago.' },
+    { t: 'Write who you are now in one sentence, and what you will be known for in twelve weeks.',
+      ex: S('A founder who asks, listens and ships a little every week; known for calm evenings for new parents.', 'A leader who decides calmly and serves first; known for the busiest Tuesdays on Main Street.',
+        'A leader who decides from the numbers and lets the team own the work; known for kitchens that open on time.', 'A leader who grows leaders and keeps the promise to customers; known for no missed delivery.') },
+    { t: 'By the day you chose, read the sentence aloud to one person, and put it on the first page of your Planner.' },
+    { t: S('Ask the person you read it to: “What have you seen me do that fits it?” Write their answer.', 'Ask the person you read it to: “What have you seen me do that fits it?” Write their answer.',
+      'Read it to your team, and ask: “Where do you see this already, and where not yet?”', 'Read it to your leadership team, and ask each lead for one place they see it, and one where they don’t.') },
+    { t: S('Read the sentence and your proof list every Monday, before the week starts.', 'Read the sentence and your proof list every Monday, before the week starts.',
+      'Read the sentence and your proof list every Monday, before the team’s first meeting.', 'Read it every Monday, and open each quarter’s first leadership meeting with it.') }],
+  '12.1': [
+    { t: S('List the people who already help the idea: a partner, a freelancer, a first customer. Mark the one who could own something.',
+      'List the people you work with most: a freelancer, a partner, a client. Mark the one who could own something.',
+      'List your team. Mark the person who already decides well when you are not there.',
+      'List your leads. Mark the one who could lead a bigger part, and the one who needs more from you.') },
+    { t: 'Write what they will own, their limit, and the question you will ask each week.',
+      ex: S('Sam owns the sign-up page and its changes; every Thursday: “What did you change, and why?”', 'My freelancer owns all social posts, up to $200 a month; every Thursday: “What did you decide, and why?”',
+        'Jordan owns every supplier decision up to $2,000; every Thursday: “What did you decide, and why?”', 'Priya owns the southern region, up to $50,000 a decision; every Thursday: “What would you do if I weren’t here?”') },
+    { t: 'By the day you chose, give them the ownership in writing, and ask your question once.' },
+    { t: 'Ask them: “What do you need from me to own this well?” Give it to them by Friday.' },
+    { t: S('Every week, on the same day, ask your question and only listen.', 'Every week, on the same day, ask your question; each month, write one thing they decided well.',
+      'Every week, on the same day, ask your question; each month, tell them one thing they decided well.', 'Every week, ask your question; each quarter, agree with them what they own next.') }],
+  '12.2': [
+    { t: S('Read your numbers from the last twelve weeks: people asked, people who said yes, money spent. Write where you start.',
+      'Read your one number from Level 05, week by week, for the last twelve weeks. Write where you start.',
+      'Read the last twelve weeks of the number with your bookkeeper: sales, profit or cash. Write where you start.',
+      'Ask finance for the last twelve weeks of the number, by month and by region. Write where you start.') },
+    { t: 'Write one number for the next twelve weeks: from where, to where, and the week-4 and week-8 checkpoints. Make it your business goal in My direction.',
+      ex: S('Paying customers: 0 to 10; week 4: 3; week 8: 6.', 'Profit: $1,300 to $2,000 a month; week 4: $1,500; week 8: $1,750.',
+        'Profit per job: $180 to $250; week 4: $200; week 8: $230.', 'Cash from sales: $1.2M to $1.5M a month; week 4: $1.3M; week 8: $1.4M.') },
+    { t: 'By the day you chose, put the number and both checkpoints in your Planner, and on your weekly review page.' },
+    { t: S('Tell one person the number, and ask them to ask you about it at week 4.', 'Tell one person the number, and ask them to ask you about it at week 4.',
+      'Tell the team the number, and what each person’s part in it is.', 'Give each owner from Level 09 their own part of the number, with their checkpoints.') },
+    { t: 'Read the number every week in your review. If week 4 misses, write the first thing you change. A spreadsheet draws the line; the change is yours.' }],
+  '12.3': [
+    { t: S('Read your notes from the customer conversations of Level 10. Write the three things people asked for most.',
+      'Read your notes from Level 10 and your warm list. Write three next moves your clients have asked for.',
+      'Read the customer notes and the sales of each offer with the team. Write three next moves, and what each would cost to test.',
+      'Ask your leads for one next market move each, with what it would cost to test. Write them side by side.') },
+    { t: 'Pick one move, and write the test: with how many people, by when, what counts as success, and plan B.',
+      ex: S('A paid evening for 10 parents by 31 Jan; success: 4 bookings; plan B: a weekend morning.', 'A supper club for 10 local offices by 31 Jan; success: 4 bookings; plan B: lunch instead.',
+        'A new service for 10 clients by 31 Jan; success: 3 sign up; plan B: add it to the top level.', 'A new region with 10 stores by the end of the quarter; success: 4 contracts; plan B: serve them from the nearest depot.') },
+    { t: 'By the day you chose, send the first invitations, and write the success number in your Planner.' },
+    { t: S('Ask one person who says no: “What would have made it a yes?” Write their words.', 'Ask one person who says no: “What would have made it a yes?” Write their words.',
+      'Ask one person who says no what would have made it a yes, and read the answers with the team.', 'Ask the lead who runs the test to report each week: invited, yes, no, and why.') },
+    { t: S('Every Friday until the test ends, count invited, yes and no. On the day you set, decide: go on, change, or stop.', 'Every Friday until the test ends, count invited, yes and no. On the day you set, decide: go on, change, or stop.',
+      'Read the count with the team every Friday, and decide together on the day you set.', 'Read the count with the lead every Friday, and decide on the day you set: grow it, change it, or stop.') }],
 };
 
 /** The levels whose twenty actions are written. */
