@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>The Boardroom · one hour with Alexandru Cojocari · ExploraSelf</title>
-<meta name="description" content="One hour, one to one, online, with Alexandru Cojocari. What you write is read before you meet. $27, with 14 days to change your mind.">
+<meta name="description" content="One hour, one to one, online, with Alexandru Cojocari. What you write is read before you meet. $27.">
 <link rel="icon" href="/northstar/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
@@ -119,11 +119,6 @@ blockquote i{color:var(--gl)}
 .fit li::before{position:absolute;left:2px;top:15px;font:400 18px/1 var(--serif);color:var(--gi)}
 .fit .yes li::before{content:"—"}
 .fit .no li::before{content:"×"}
-/* why now */
-.why{display:flex;flex-wrap:wrap;border-top:1px solid var(--line)}
-.why div{flex:1 1 280px;min-width:0;padding:28px 28px 0 0;display:flex;flex-direction:column;gap:10px}
-.why b{font:400 23px/1.25 var(--serif)}
-.why p{font-size:15.5px;color:var(--mut)}
 /* faq */
 .faq{border-top:1px solid var(--line);max-width:880px}
 .faq details{border-bottom:1px solid var(--line)}
@@ -144,18 +139,32 @@ blockquote i{color:var(--gl)}
 .stick.on{transform:none}
 .stick .go{width:100%;min-height:52px}
 @media(min-width:900px){.stick{display:none}}
+/* Fine-line drawings, like an architect's plan (Alexandru, 23:17: "a few
+   illustrations"): one gold line, drawn in as it comes into view. */
+.ill{display:block;width:100%;height:auto;overflow:visible}
+.ill .lbl{font:500 13px var(--sans);letter-spacing:.24em;fill:var(--gl)}
+.steps .ic{width:52px;height:52px;margin-bottom:6px}
+.js .rv .draw{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.9s cubic-bezier(.3,.6,.2,1)}
+.js .rv.in .draw{stroke-dashoffset:0}
+.js .rv .lbl,.js .rv .fill{opacity:0;transition:opacity .9s ease 1.3s}
+.js .rv.in .lbl,.js .rv.in .fill{opacity:1}
+.hz{margin:-8px 0 44px}
+.hz .lbl{font-size:15px}
+.plan{max-width:560px;margin:8px auto 4px}
+.plan .lbl{font-size:15px}
+@media(max-width:600px){.hz .lbl{display:none}.plan .lbl{font-size:20px}}
 /* quiet motion */
 .js .rv{opacity:0;transform:translateY(18px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
 .js .rv.in{opacity:1;transform:none}
 .hero .ph img{animation:settle 1.6s ease both}
 @keyframes settle{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.js .rv{opacity:1;transform:none;transition:none}.hero .ph img{animation:none}.stick,.go,.go span{transition:none}}
+@media(prefers-reduced-motion:reduce){.js .rv .draw{stroke-dashoffset:0;transition:none}.js .rv .lbl,.js .rv .fill{opacity:1;transition:none}html{scroll-behavior:auto}.js .rv{opacity:1;transform:none;transition:none}.hero .ph img{animation:none}.stick,.go,.go span{transition:none}}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#D6BF8F" stroke-width="1.3" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12Z"/><path d="m12 6.5 1.6 3.9 3.9 1.6-3.9 1.6L12 17.5l-1.6-3.9L6.5 12l3.9-1.6Z" fill="#D6BF8F" stroke="none"/></svg>EXPLORASELF</span>
-  <small>14 days money back</small>
+  <small>One hour · online</small>
 </div></header>
 <main>
 
@@ -165,7 +174,7 @@ blockquote i{color:var(--gl)}
     <h1 id="h-top">The decisions that shape your business deserve <i>a second mind at the table.</i></h1>
     <p class="lede">One hour, one to one, online. Before you meet, Alexandru and the team read what you wrote, so the hour starts on your business, not on introductions.</p>
     <div><a class="go" href="/pay/?step=session&amp;from=road5" data-pay>Take your seat · $27 <span aria-hidden="true">→</span></a></div>
-    <p class="meta">Online · Tuesday to Thursday afternoons, Rome time · 14 days to change your mind</p>
+    <p class="meta">Online · Tuesday, Wednesday or Thursday afternoon, Rome time</p>
     <p class="gift"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4.5" rx="1"/><path d="M5 13v7.5h14V13M12 8.5v12"/><path d="M12 8.5C10.4 4.8 6.4 4.3 6.4 6.8c0 1.7 3.2 1.7 5.6 1.7Zm0 0c1.6-3.7 5.6-4.2 5.6-1.7 0 1.7-3.2 1.7-5.6 1.7Z"/></svg>And a gift from Alexandru, given to you in the call.</p>
   </div>
   <figure>
@@ -220,10 +229,10 @@ blockquote i{color:var(--gl)}
     <h2 id="h-how">Four steps. <i>Nothing to wait for.</i></h2>
   </div>
   <ol class="steps rv">
-    <li><em>i</em><b>You take your seat.</b><span>$27. Your account opens with Levels 01 to 05.</span></li>
-    <li><em>ii</em><b>You write first.</b><span>Three short levels at your own pace: what you believe, how you read it, what you feel.</span></li>
-    <li><em>iii</em><b>Alexandru and the team read it.</b><span>Before you meet, so the hour is spent on you.</span></li>
-    <li><em>iv</em><b>Your hour at the table.</b><span>Online, on a Tuesday, Wednesday or Thursday afternoon. You leave with one road, chosen together.</span></li>
+    <li><svg class="ic" viewBox="0 0 52 52" fill="none" stroke="#7A5C16" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="draw" pathLength="1" d="M16 8v36M16 28h20v16M16 28V8c4-2 8-2 12 0"/><path class="draw" pathLength="1" d="M12 44h28"/></svg><em>i</em><b>You take your seat.</b><span>$27. Your account opens with Levels 01 to 05.</span></li>
+    <li><svg class="ic" viewBox="0 0 52 52" fill="none" stroke="#7A5C16" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="draw" pathLength="1" d="M14 38l20-20 5 5-20 20-7 2z"/><path class="draw" pathLength="1" d="M30 22l5 5M8 46h36"/></svg><em>ii</em><b>You write first.</b><span>Three short levels at your own pace: what you believe, how you read it, what you feel.</span></li>
+    <li><svg class="ic" viewBox="0 0 52 52" fill="none" stroke="#7A5C16" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="draw" pathLength="1" d="M26 15c-5-4-12-5-18-4v27c6-1 13 0 18 4 5-4 12-5 18-4V11c-6-1-13 0-18 4zM26 15v27"/><path class="draw" pathLength="1" d="M13 19h8M13 24h8M31 19h8M31 24h8"/></svg><em>iii</em><b>Alexandru and the team read it.</b><span>Before you meet, so the hour is spent on you.</span></li>
+    <li><svg class="ic" viewBox="0 0 52 52" fill="none" stroke="#7A5C16" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect class="draw" pathLength="1" x="15" y="18" width="22" height="16" rx="1"/><circle class="draw" pathLength="1" cx="8" cy="26" r="3.5"/><circle class="draw" pathLength="1" cx="44" cy="26" r="3.5"/><path class="draw" pathLength="1" d="M26 8v4M26 40v4"/></svg><em>iv</em><b>Your hour at the table.</b><span>Online, on a Tuesday, Wednesday or Thursday afternoon. You leave with one road, chosen together.</span></li>
   </ol>
 </div></section>
 
@@ -233,6 +242,14 @@ blockquote i{color:var(--gl)}
     <h2 id="h-future">Five weeks from now, <i>things have happened.</i></h2>
     <p class="lede">Each level ends with a promise you can check on Sunday. These are the first five, word for word.</p>
   </div>
+  <svg class="ill hz rv" viewBox="0 0 1000 170" aria-hidden="true">
+    <path class="draw" pathLength="1" d="M0 132H1000" stroke="rgba(214,191,143,.45)" stroke-width="1" fill="none"/>
+    <path class="draw" pathLength="1" d="M60 132C300 128 520 110 700 82S880 52 900 50" stroke="#D6BF8F" stroke-width="1.2" stroke-dasharray="1" fill="none"/>
+    <path class="draw" pathLength="1" d="M852 132a48 48 0 0 1 96 0" stroke="#D6BF8F" stroke-width="1.4" fill="none"/>
+    <path class="draw" pathLength="1" d="M900 70V56M858 90l-10-10M942 90l10-10M836 112h-14M964 112h14" stroke="#D6BF8F" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+    <g class="fill" fill="#D6BF8F"><circle cx="60" cy="132" r="4"/><circle cx="250" cy="129" r="3"/><circle cx="430" cy="118" r="3"/><circle cx="600" cy="98" r="3"/><circle cx="760" cy="72" r="3"/></g>
+    <text class="lbl" x="60" y="164">NOW</text><text class="lbl" x="250" y="164" text-anchor="middle">WEEK 1</text><text class="lbl" x="430" y="164" text-anchor="middle">WEEK 3</text><text class="lbl" x="600" y="164" text-anchor="middle">WEEK 4</text><text class="lbl" x="760" y="164" text-anchor="middle">WEEK 5</text>
+  </svg>
   <div class="time rv">
     <div class="tp"><small>Weeks 1 to 3 · free</small><p>One old rule tested, one task handed over, your enough as a number, three people asked to buy.</p></div>
     <div class="tp"><small>Week 4</small><p>One if–then plan kept, one clear ask with a date, your hour priced, a weekly selling hour booked.</p></div>
@@ -252,7 +269,6 @@ blockquote i{color:var(--gl)}
     <div class="lr"><span>What you write, read by Alexandru and the team before you meet</span><i></i><b>Included</b></div>
     <div class="lr"><span>One hour, one to one, with Alexandru, online</span><i></i><b>Included</b></div>
     <div class="lr"><span>A gift from Alexandru, given in the call</span><i></i><b>Included</b></div>
-    <div class="lr"><span>14 days to change your mind</span><i></i><b>Money back</b></div>
     <div class="lr tot"><span>Your seat at the table</span><i></i><b>$27</b></div>
   </div>
   <p class="note rv">The weekly hour with Alexandru is the heart of The Summit, at $1,989. Here you take the first one.</p>
@@ -290,20 +306,8 @@ blockquote i{color:var(--gl)}
   </div>
 </div></section>
 
-<section class="band" aria-labelledby="h-now"><div class="wrap">
-  <div class="head rv">
-    <p class="lab">Why this week</p>
-    <h2 id="h-now">Three honest reasons <i>not to wait.</i></h2>
-  </div>
-  <div class="why rv">
-    <div><b>The question is fresh now.</b><p>The longer it waits, the more it becomes the way things are.</p></div>
-    <div><b>The hours are few.</b><p>Alexandru takes Boardroom calls on three afternoons a week: Tuesday, Wednesday and Thursday.</p></div>
-    <div><b>Waiting has a price.</b><p data-cost>Every week the same question stays open is a week your business pays for it.</p></div>
-  </div>
-  <div class="rv" style="margin-top:44px"><a class="go ink" href="/pay/?step=session&amp;from=road5" data-pay>Take your seat · $27 <span aria-hidden="true">→</span></a></div>
-</div></section>
 
-<section class="band bone" aria-labelledby="h-faq"><div class="wrap">
+<section class="band" aria-labelledby="h-faq"><div class="wrap">
   <div class="head rv">
     <p class="lab">Before you decide</p>
     <h2 id="h-faq">Plain answers.</h2>
@@ -314,16 +318,27 @@ blockquote i{color:var(--gl)}
     <details><summary>Do I have to finish the first three levels first?</summary><p>That is the best way: the hour is built on what you wrote. Take your time; the seat is yours.</p></details>
     <details><summary>What is the gift?</summary><p>Alexandru gives it to you in the call.</p></details>
     <details><summary>Can I go further later?</summary><p>Yes, any time, from your Base Camp. Each step includes the ones below.</p></details>
-    <details><summary>What if it isn’t for me?</summary><p>Write to us within 14 days and you get your $27 back.</p></details>
   </div>
 </div></section>
 
 <section class="dark band end" aria-labelledby="h-end"><div class="wrap">
-  <span class="rule" aria-hidden="true"></span>
+  <svg class="ill plan rv" viewBox="0 0 640 300" role="img" aria-label="A plan of the Boardroom: one table, your seat at one end, Alexandru at the other.">
+    <path class="draw" pathLength="1" d="M40 30H250M390 30H600V270H140M80 270H40V30" stroke="rgba(214,191,143,.5)" stroke-width="1.2" fill="none"/>
+    <path class="draw" pathLength="1" d="M250 30a70 70 0 0 0 140 0" stroke="rgba(214,191,143,.35)" stroke-width="1" fill="none"/>
+    <path class="draw" pathLength="1" d="M80 270a60 60 0 0 1 60-60" stroke="rgba(214,191,143,.35)" stroke-width="1" fill="none"/>
+    <rect class="draw" pathLength="1" x="190" y="118" width="260" height="74" rx="2" stroke="#D6BF8F" stroke-width="1.4" fill="none"/>
+    <rect class="draw" pathLength="1" x="198" y="126" width="244" height="58" rx="1" stroke="rgba(214,191,143,.4)" stroke-width="1" fill="none"/>
+    <rect class="fill" x="128" y="133" width="40" height="44" rx="6" fill="#D6BF8F"/>
+    <rect class="draw" pathLength="1" x="472" y="133" width="40" height="44" rx="6" stroke="#D6BF8F" stroke-width="1.4" fill="none"/>
+    <path class="draw" pathLength="1" d="M190 222H450M190 216v12M450 216v12" stroke="rgba(214,191,143,.6)" stroke-width="1" fill="none"/>
+    <text class="lbl" x="148" y="112" text-anchor="middle">YOUR SEAT</text>
+    <text class="lbl" x="492" y="112" text-anchor="middle">ALEXANDRU</text>
+    <text class="lbl" x="320" y="250" text-anchor="middle">ONE HOUR</text>
+  </svg>
   <h2 id="h-end">Take your seat.</h2>
   <p class="lede">One hour. One decision named. One road chosen together.</p>
   <a class="go" href="/pay/?step=session&amp;from=road5" data-pay>Take your seat · $27 <span aria-hidden="true">→</span></a>
-  <p class="meta">14 days to change your mind · a gift inside</p>
+  <p class="meta">And a gift from Alexandru, given in the call</p>
 </div></section>
 
 </main>
@@ -357,7 +372,6 @@ blockquote i{color:var(--gl)}
   const read = () => {
     out.textContent = w() >= 52 ? '52+ weeks' : `${w()} ${w() === 1 ? 'week' : 'weeks'}`;
     const total = w() + 13;
-    $('[data-cost]').textContent = `Every week the same question stays open is a week your business pays for it. By your own answer, it has been ${w() >= 52 ? 'a year or more' : `${w()} ${w() === 1 ? 'week' : 'weeks'}`} already.`;
     if (!pain || n < 0) { $('[data-reading]').hidden = true; return; }
     $('[data-read1]').textContent = `${PAIN[pain]}, for ${w() >= 52 ? 'a year or more' : `${w()} ${w() === 1 ? 'week' : 'weeks'}`}. If nothing changes, in ninety days that is ${w() >= 52 ? 'well over a year' : `${total} weeks`} on one question, and by your own answer you will be ${NINETY[n]}.`;
     $('[data-read2]').textContent = 'One hour is enough to name the decision behind it and choose one road. That is what The Boardroom is for.';
