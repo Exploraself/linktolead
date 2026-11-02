@@ -12,7 +12,7 @@
  * node_modules/.bin or through npx; nothing is installed here).
  *
  * AGENTS.md rule 14: a letter added or changed is added here in the same
- * work, and the page is published again in /internal (Promotion).
+ * work, and the page is published again in /internal (Internal → Emails).
  * tests/email-map.test.mjs fails when a letter builder is missing from ENTRIES.
  *
  * Nothing here is invented: the words the mentor writes each time are shown
@@ -503,7 +503,7 @@ code{font:12.5px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--soft
 </head>
 <body>
 <div class="wrap">
-  <p class="eb">ExploraSelf · Internal · Promotion · ${esc(date)}</p>
+  <p class="eb">ExploraSelf · Internal · Emails · ${esc(date)}</p>
   <h1>Every email, <i>in the order they arrive.</i></h1>
   <p class="lede">What a founder receives from ExploraSelf, from the first free assessment to the last of the 12 days: what sends each letter, who gets it, what it says and what its P.S. offers. Drawn from the code that sends them, so it shows exactly what lands. Tap any letter to read it as it arrives.</p>
   <div class="facts">
