@@ -514,7 +514,7 @@
     return { qs, sc, rd, pc, answered, n: E.numbers(S), here: E.STAGES.findIndex((x) => x.id === S.stage), goal: E.STAGES.findIndex((x) => x.id === S.goal) };
   }
 
-  /* ── Your constellation (31 Oct, round 4): sixteen stars, four per domain,
+  /* ── Your North Star progress (31 Oct, round 4; words 2 Nov): sixteen pieces, four per domain,
    * each lit by a piece in place, with the North Star in the middle growing as
    * they light. One picture for the whole North Star: the night sky. ── */
   const starPath = (x, y, r) => { const q = r * 0.32, f = (v) => v.toFixed(1); return `M${f(x)} ${f(y - r)}L${f(x + q)} ${f(y - q)}L${f(x + r)} ${f(y)}L${f(x + q)} ${f(y + q)}L${f(x)} ${f(y + r)}L${f(x - q)} ${f(y + q)}L${f(x - r)} ${f(y)}L${f(x - q)} ${f(y - q)}Z`; };
@@ -532,7 +532,7 @@
       }
     });
     const cr = (sm ? 7 : 5) + total / 16 * 6;
-    return `<svg class="${opts.cls || ''}" width="${size}" height="${size}" viewBox="0 0 120 120" role="img" aria-label="Your constellation: ${total} of 16 stars lit" style="flex: none">
+    return `<svg class="${opts.cls || ''}" width="${size}" height="${size}" viewBox="0 0 120 120" role="img" aria-label="Your North Star: ${total} of 16 in place" style="flex: none">
       ${sm ? '' : '<circle cx="60" cy="60" r="58" fill="#0B1522"/><g class="spin"><circle cx="60" cy="60" r="58" fill="none" stroke="#6F93B8" stroke-width=".7" stroke-dasharray="1.2 5" opacity=".6"/></g>'}
       ${lines}${stars}
       <circle cx="60" cy="60" r="${(cr + 4).toFixed(1)}" fill="#A9C0D9" opacity="${(0.08 + total / 16 * 0.22).toFixed(2)}"/>
@@ -555,14 +555,15 @@
       <span class="sf" style="font-size: 21px; display: flex; align-items: center; gap: 8px">${t} <span class="sarr" aria-hidden="true">→</span></span>
       <span style="font-size: 13px; color: var(--muted)">${k}</span></button>`).join('');
 
-  const LINES = ['Every answer lights a star. Watch your constellation appear.', 'It is taking shape. Keep going: each domain has four stars.',
-    'More than half lit. The darkest corner shows you where to look.', 'Almost complete. Tick “Got it” on your feedback to light the last stars.', 'Your constellation is complete. The next step is inside.'];
+  // Plain words, no star-sign talk (Alexandru, 2 Nov 2026): pieces in place, not stars lit.
+  const LINES = ['Each answer puts one piece in place: four in each domain, sixteen in all.', 'Taking shape. Keep going: each domain has four pieces.',
+    'More than half in place. The emptiest domain shows you where to look.', 'Almost there. Tick “Got it” on your feedback to place the last pieces.', 'Your North Star is complete. The next step is inside.'];
   function pBanner(c) {
     const t = c.pc.total, ready = t >= 12;
     const line = t === 16 ? LINES[4] : t === 0 ? LINES[0] : t < 8 ? LINES[1] : t < 12 ? LINES[2] : LINES[3];
     return `${emblem(c.pc.per, 124, { cls: 'lp-emb' })}
       <div style="flex: 1 1 260px; display: flex; flex-direction: column; gap: 4px; min-width: 0">
-        <span class="eb" style="color: #A9C0D9">Your constellation · ${t} of 16 stars lit</span>
+        <span class="eb" style="color: #A9C0D9">Your North Star · ${t} of 16 in place</span>
         <span class="sf" style="font-size: 18px; line-height: 1.25">${line}</span>
         <div style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; font-weight: 520">${D.map((d, i) => `<span style="display: inline-flex; align-items: center; gap: 6px; color: ${LIGHT[i]}"><span style="width: 9px; height: 9px; border-radius: 50%; background: ${LIGHT[i]}"></span>${d.name} ${c.pc.per[i]}/4</span>`).join('')}</div>
       </div>
@@ -1775,7 +1776,7 @@
         <h2 class="sf" style="font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; color: #EEF2F7">Your climb. <span class="sfi" style="color: #A9C0D9">One step at a time.</span></h2>
         <p style="color: #B8C6D6; font-size: 15px; line-height: 1.7">Five stops, one at a time. The first one is free. Tap a stop to see what opens there.</p></div>
       <div style="display: flex; flex-wrap: wrap; gap: 26px; align-items: center">
-        <svg viewBox="0 0 460 420" style="flex: 1 1 340px; max-width: 520px; height: auto" role="img" aria-label="A constellation from The Founder Launchpad at the bottom to The Summit, the North Star, at the top">
+        <svg viewBox="0 0 460 420" style="flex: 1 1 340px; max-width: 520px; height: auto" role="img" aria-label="A climb from The Founder Launchpad at the bottom to The Summit, the North Star, at the top">
           ${[[40, 40], [120, 110], [400, 70], [350, 30], [70, 200], [420, 220], [30, 330], [410, 360], [210, 140], [330, 260], [100, 280], [260, 380]].map(([x, y], k) => `<circle class="twinkle${k % 3 ? ' t' + (k % 3 + 1) : ''}" cx="${x}" cy="${y}" r="${(0.8 + (k % 3) * 0.4).toFixed(1)}" fill="${k % 4 ? '#A9C0D9' : '#D6BF8F'}" opacity=".7"/>`).join('')}
           <polyline class="trail" points="${STOPS.map((t) => t.x + ',' + t.y).join(' ')}" fill="none" stroke="#A9C0D9" stroke-width="1.2" opacity=".55"/>
           <polyline points="${STOPS.slice(0, si + 1).map((t) => t.x + ',' + t.y).join(' ')}" fill="none" stroke="#D6BF8F" stroke-width="1.8" style="filter: drop-shadow(0 0 4px rgba(214,191,143,.8))"/>
@@ -2094,7 +2095,7 @@
   }
 
   const pMbar = (c) => `${emblem(c.pc.per, 40, { small: true })}
-    <span style="flex: 1; font-size: 12px; color: #B8C6D6; line-height: 1.3"><b style="color: #EEF2F7">${c.pc.total}/16</b> stars lit</span>
+    <span style="flex: 1; font-size: 12px; color: #B8C6D6; line-height: 1.3"><b style="color: #EEF2F7">${c.pc.total}/16</b> in place</span>
     <button type="button" data-act="print" data-f="m-print" aria-label="Print or save as PDF" style="width: 44px; height: 44px; border-radius: 50%; border: 1px solid #2A3A50; background: transparent; color: #EEF2F7; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M6 14h12v7H6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
     <button type="button" data-act="email" data-f="m-email" style="min-height: 44px; padding: 0 14px; border-radius: 22px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; cursor: pointer">Email me</button>`;
 
