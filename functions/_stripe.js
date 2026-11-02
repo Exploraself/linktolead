@@ -41,10 +41,25 @@ export const ORDER = ['free', 'session', 'lab', 'hub', 'premium'];
 export const above = (step, tier) => ORDER.indexOf(step) > ORDER.indexOf(tier || 'free');
 export const dollars = (cents) => `$${(cents / 100).toLocaleString('en-US', { minimumFractionDigits: cents % 100 ? 2 : 0 })}`;
 
-const key = (env) => String((env && env.STRIPE_SECRET_KEY) || '').trim();
+/** The key as pasted, forgiving quote marks and a "Bearer " in front. */
+const key = (env) => String((env && env.STRIPE_SECRET_KEY) || '').trim()
+  .replace(/^bearer\s+/i, '').replace(/^(["'`])(.*)\1$/s, '$2').trim();
+/** Why the key in Cloudflare cannot be used, in plain words ('' when it can).
+ *  It names the kind of value only, never the value itself. */
+export function keyProblem(env) {
+  const k = key(env);
+  if (!k) return 'STRIPE_SECRET_KEY is not set in Cloudflare.';
+  if (/^(rk|sk)_(test|live)_\S+$/.test(k)) return '';
+  const fix = ' In Cloudflare, edit STRIPE_SECRET_KEY and paste the restricted key from Stripe: it starts with rk_test_.';
+  if (/^pk_/.test(k)) return 'STRIPE_SECRET_KEY holds the publishable key (it starts with pk_). That one cannot take payments.' + fix;
+  if (/^whsec_/.test(k)) return 'STRIPE_SECRET_KEY holds a webhook signing secret (it starts with whsec_). The code makes its own.' + fix;
+  if (/\s/.test(k)) return 'STRIPE_SECRET_KEY has spaces or extra words in it.' + fix;
+  return `STRIPE_SECRET_KEY is set, but it is not a Stripe key (${k.length} characters, and it does not start with rk_test_).` + fix;
+}
 /** 'test', 'live' or '' (no key, or not a Stripe key). */
 export function stripeMode(env) {
   const k = key(env);
+  if (keyProblem(env)) return '';
   if (/^(rk|sk)_test_/.test(k)) return 'test';
   if (/^(rk|sk)_live_/.test(k)) return 'live';
   return '';
@@ -64,7 +79,7 @@ export function form(obj, prefix = '', out = new URLSearchParams()) {
 /** One call to Stripe. Never throws: { ok, status, data, why }. */
 export async function stripe(env, method, path, params) {
   const k = key(env);
-  if (!stripeMode(env)) return { ok: false, status: 0, why: 'Stripe is not connected yet: STRIPE_SECRET_KEY is not set in Cloudflare.' };
+  if (!stripeMode(env)) return { ok: false, status: 0, why: 'Stripe is not connected yet: ' + keyProblem(env) };
   try {
     const body = method === 'GET' ? null : form(params).toString();
     const q = method === 'GET' && params ? `?${form(params)}` : '';
@@ -204,7 +219,7 @@ export async function payments(D, limit = 30) {
 }
 export async function webhookState(D, env) {
   const mode = stripeMode(env);
-  if (!mode) return { mode: '', connected: false };
+  if (!mode) return { mode: '', connected: false, problem: keyProblem(env) };
   await tables(D);
   const row = await D.prepare('SELECT v, at FROM stripe_setting WHERE k = ?').bind(`webhook.${mode}`).first();
   return { mode, connected: !!row, at: row ? row.at : null };

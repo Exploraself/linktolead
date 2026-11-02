@@ -6,7 +6,7 @@
 
 import { createHmac } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { STEPS, form, stripeMode, verifySignature, applyPaid, dollars } from '../functions/_stripe.js';
+import { STEPS, form, stripeMode, keyProblem, verifySignature, applyPaid, dollars } from '../functions/_stripe.js';
 import { onRequestGet as payGet, onRequestPost as payPost } from '../functions/api/checkout.js';
 import { onRequestPost as hook } from '../functions/api/stripe-webhook.js';
 import { onRequestGet as mentorGet, onRequestPost as mentorPost } from '../functions/api/mentor.js';
@@ -141,5 +141,13 @@ ok(/function boardroomCta\(cls\)/.test(app) && !/href="\$\{esc\(BOOKING\)\}" tar
 const pay = readFileSync(new URL('../public/pay/pay.js', import.meta.url), 'utf8');
 ok(/test \? '<p class="test"><b>Test mode\.<\/b>[^']*4242 4242 4242 4242/.test(pay), 'test mode shows the test card, and only in test mode');
 ok(/if \(d && d\.paid\)/.test(pay) && !/It is open[^]*before/.test(pay), '/pay/ says “open” only when the site says Stripe confirmed it');
+
+// What /mentor says when the key in Cloudflare is the wrong kind (never the key itself).
+const K = (v) => ({ STRIPE_SECRET_KEY: v });
+ok(stripeMode(K('"rk_test_abc123"')) === 'test' && stripeMode(K('Bearer rk_test_abc123')) === 'test', 'quote marks or “Bearer” around the key are forgiven');
+ok(stripeMode(K('pk_test_abc123')) === '' && /publishable key/.test(keyProblem(K('pk_test_abc123'))), 'the publishable key is named as the problem');
+ok(/webhook signing secret/.test(keyProblem(K('whsec_abc'))), 'a webhook secret is named as the problem');
+ok(/not set/.test(keyProblem({})) && keyProblem(K('rk_test_abc')) === '', 'missing key: “not set”; a good key: no problem');
+ok(!keyProblem(K('xx_secret_value_9')).includes('secret_value'), 'the message never repeats the value');
 
 done();
