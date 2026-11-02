@@ -162,3 +162,24 @@ functions/_course-letters.js, or a new send() call), in the same work:
 3. tell Alexandru what changed.
 
 tests/email-map.test.mjs fails when a letter builder is missing from the map.
+
+## 15. My direction, and what the first five levels are for (Alexandru, 2 Nov 2026)
+
+My Blueprint opens on **My direction**, written once, one field per screen:
+the mission, the vision, the values (locked in: changed only on purpose), two
+goals for the twelve weeks (one for the business, one for the founder as a
+leader) and two mini-goals for the week (one for the work, one personal).
+Each one is purposeful and about the founder in relation to the business,
+turned to the customer: who they serve, how they will serve them better, and
+what customers say about their experience. Where a founder is unsure, the
+screen sends them to ask their customers, not to think harder. Every action
+in This week names the goal it serves. This week holds four actions, one per
+area of the business, until all twelve levels are written; then the count is
+looked at again.
+
+The three chapters are **Start with you** (Levels 01–05), **Run the
+business** (06–09) and **Grow the market** (10–12). Levels 01–05 are about the
+founder: their mindset, and the basics of a business seen from there (what a
+business is, the customer, serving, what stops them, their attitude to
+serving, their relationship with money and with goals). From Level 06 the
+questions go deeper into the business itself.

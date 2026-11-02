@@ -21,10 +21,11 @@ import { launchpadCardHTML, downloadLaunchpadPlan, launchpadOnlineHTML, launchpa
 import { slot as googleSlot } from './google.js';
 import { videoBlock } from './video-talk.js';
 import * as M from './music.js';
+import { ICONS } from './tools/icons.js';
 import { LEVELS4, CHAPTERS4, DOMS, UNITS, CLOSES, wkey, tapOf, slideOf, wordOf, shown, domainUnits, levelUnits,
   lines4, sentence, reading, fieldsOf, fill, stepsOf, stepDone, firstOf, planOf, plainOf, doneOf, takeOf, notyetOf,
   sureOf, gotOf, GOT, tally, countedFor, READ_QUOTES, carriedFrom, blueprint, BUILD4, fillB, buildPage, stepsWritten, SESSIONS4,
-  tapReply, slideReply, blankCheck, blankNote, smallOf, SMALL_UNDER } from './levels-v4.js';
+  tapReply, slideReply, blankCheck, blankNote, smallOf, SMALL_UNDER, DIRECTION4, directionOf, goalFor, dayKeyOf, buildStarted, strong } from './levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -52,6 +53,8 @@ const signedOut = (() => { try { return new URLSearchParams(location.search).get
 let resetAsk = (() => { try { return new URLSearchParams(location.search).get('reset') === '1'; } catch { return false; } })();
 let view = linkCode ? 'loading' : entry({ joined: account.joined(), old: oldEntrance, hash: hashNow });
 let level = 1, dom = 'self';
+// A level in the address (#programme-6, from Back and Forward or a link) opens that level.
+{ const m = /^#programme-(\d{1,2})$/.exec(hashNow); if (m) level = Math.min(12, Math.max(1, +m[1])); }
 /** The North Star record from the account, the notes, and whether a password is set. */
 let compassRec = null, inbox = null, hasPassword = false, replyTo = null;
 /** The "Ask Alexandru" thread (null until loaded), and the stage picker. */
@@ -1024,7 +1027,8 @@ function lastSunday() {
       : `<ol class="bp-lg">${L.d.map((D, d) => { const g = gotOf(w, 12, d); return `<li><p>${fill(D.fb[3], w, 12, d)}</p><div class="bp-lgb no-print" role="group" aria-label="Did it happen?">${GOT.map((o, k) => `<button type="button" data-lastgot="${d}:${k}" aria-pressed="${g === k}">${o}</button>`).join('')}</div></li>`; }).join('')}</ol>`}
   </section>`;
 }
-function blueprintView() {
+/** Every answer, in the eight parts: the full document, opened from My playbook. */
+function blueprintDoc() {
   growthWords();
   if (gpWords && !window.GrowthPlan) growthText().then(() => { if (view === 'blueprint') render(); });
   const w = state.work, B = blueprint(w), t = tally(w, LEVELS4.map((L) => L.n));
@@ -1036,7 +1040,7 @@ function blueprintView() {
       <h1>${name ? `${esc(name)}’s Blueprint` : 'Your Blueprint'}</h1>
       <p class="bp-lede">Everything the twelve weeks write, in your own words: how you lead, your people, what you sell, your marketing, your sales, your money, your systems and your next twelve weeks. It fills in as you go.</p>
       <p class="bp-stat"><b>${written}</b> of ${all} parts written${t.n ? ` · <b>${t.done}</b> of the ${t.n} actions you checked were done${t.est ? ` · your estimates were ${t.est}` : ''}` : ''}</p>
-      <p class="bp-act no-print"><button type="button" class="cta" data-print>Print it, or save it as a PDF</button><button type="button" class="cw-all" data-go="work">Back to the programme</button></p>
+      <p class="bp-act no-print"><button type="button" class="cta" data-print>Print it, or save it as a PDF</button><button type="button" class="cw-all" data-bpdoc="0">← My Blueprint</button><button type="button" class="cw-all" data-go="work">Back to the programme</button></p>
     </header>
     ${lastSunday()}
     <nav class="bp-toc no-print" aria-label="The parts of your Blueprint">${B.map((S) => `<a href="#bp-${S.k}">${esc(S.n)}</a>`).join('')}${innerSide() ? '<a href="#bp-inner">The inner side</a>' : ''}</nav>
@@ -1056,6 +1060,185 @@ function blueprintView() {
     </section>`).join('')}
     ${innerSide()}
   </div></section>`;
+}
+
+// ── My Blueprint (Alexandru, 2 Nov 2026) ─────────────────────────────────────
+// The founder's playbook, brought back up to the practical (AGENTS.md 10, 11):
+// light and white, one thing at a time. Five tabs: My direction (written once,
+// one field per screen), This week (four actions), My playbook (every level),
+// Strengths and My journey. Built only from the founder's own answers.
+let bpTab = 'dir', dirAt = null, dirBack = false, bpDoc = false;
+const mbI = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${d}</svg>`;
+const MB_TABS = [
+  ['dir', 'My direction', mbI('<circle cx="12" cy="12" r="9"/><path d="m15.6 8.4-2.2 5-5 2.2 2.2-5z"/>')],
+  ['week', 'This week', mbI('<rect x="3.5" y="5" width="17" height="15" rx="2.2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M9 14.6l2 2 4-4"/>')],
+  ['book', 'My playbook', mbI('<path d="M12 6.6C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.6 2-1.6 5-2.1 8-1.6V5c-3-.5-6 0-8 1.6z"/><path d="M12 6.6v13"/>')],
+  ['strong', 'Strengths', mbI('<path d="m12 3.6 2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/>')],
+  ['path', 'My journey', mbI('<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h5a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h5"/>')]];
+const MB_LOCK = mbI('<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>');
+const MB_ASK = mbI('<path d="M4 5.5h16v10H9l-5 4z"/><path d="M9.5 9.2a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.7-.9 1.3M12 14.6v.1"/>');
+const DOM_LEAD = DOMS.map((k) => LEAD[k]);
+const mbv = (lv, d, k) => String(state.work[wkey(lv, d, k)] ?? '').trim();
+/** A domain of a level is written once its sentence has a word in it. */
+const begun = (lv, d) => { const L = LEVELS4[lv - 1]; return !!L && fieldsOf(L.d[d]).some(([k]) => mbv(lv, d, k)); };
+const levelBegun = (lv) => [0, 1, 2, 3].some((d) => begun(lv, d));
+/** This week's level: the latest one the founder has started writing. */
+function weekLevel() {
+  for (let n = 12; n >= 1; n--) if (levelBegun(n)) return n;
+  return 0;
+}
+/** Twelve weeks from today, as the goal screens say it. */
+const twelveOn = () => { try { return new Date(Date.now() + 84 * 864e5).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { return 'twelve weeks from today'; } };
+const doneThisWeek = (lv) => (lv ? [0, 1, 2, 3].filter((d) => gotOf(state.work, lv, d) === 0).length : 0);
+
+function dirPane() {
+  const D = directionOf(state.work), n = DIRECTION4.length;
+  if (dirAt == null && !DIRECTION4.some((F) => D[F.k])) dirAt = 0;
+  if (dirAt != null && dirAt >= 0 && dirAt < n) {
+    const i = dirAt, F = DIRECTION4[i], last = DIRECTION4.findIndex((x, j) => j > i && !D[x.k]) < 0 || dirBack;
+    return `<form class="mb-one" data-dirform="${i}" novalidate>
+      <p class="mb-step">${i + 1} of ${n} · ${esc(F.label)}</p>
+      <h2 class="mb-q"><label for="mb-in">${esc(F.q)}</label></h2>
+      <p class="mb-hint" id="mb-hint">${esc(F.hint.replace('{by}', twelveOn()))}</p>
+      <input id="mb-in" class="mb-input" type="text" maxlength="300" autocomplete="off" value="${esc(D[F.k])}" placeholder="${esc(F.ph)}" aria-describedby="mb-hint mb-err">
+      <p class="mb-err" id="mb-err" role="status"></p>
+      ${D[F.k] ? '' : `<p><button type="button" class="mb-text mb-skip" data-dirskip="${i}">Skip for now</button></p>`}
+      <div class="mb-btns">
+        <button type="button" class="mb-text" data-dirat="${i > 0 && !dirBack ? i - 1 : 'list'}">Back</button>
+        <button type="submit" class="mb-btn">${F.lock ? `${MB_LOCK}Lock them in` : last ? 'Save' : 'Next'}</button>
+      </div>
+      ${F.ask ? `<p class="mb-ask">${MB_ASK}<span>${esc(F.ask)}</span></p>` : ''}
+      <p class="mb-ex"><span>Example · ${esc(F.ex[0])}</span>${esc(F.ex[1])}</p>
+    </form>`;
+  }
+  const left = DIRECTION4.findIndex((F) => !D[F.k]);
+  return `<h2 class="mb-h2" tabindex="-1">My direction</h2>
+    <p class="mb-lead">Written once, in your words, about you and your customers. Every action in This week serves one of your two goals.</p>
+    ${left >= 0 ? `<p class="mb-next"><button type="button" class="mb-btn" data-dirat="${left}">${DIRECTION4.some((F) => D[F.k]) ? 'Continue' : 'Start'}: ${esc(DIRECTION4[left].label.toLowerCase())}</button></p>` : ''}
+    <dl class="mb-dir">${DIRECTION4.map((F, i) => `<div><dt>${esc(F.label)}${F.lock && D[F.k] ? ` <span class="mb-locked">${MB_LOCK}locked in</span>` : ''}</dt>
+      <dd>${D[F.k] ? esc(D[F.k]) : '<span class="mb-not">Not written yet</span>'}</dd>
+      <dd class="no-print"><button type="button" class="mb-text" data-dirat="${i}" data-dirone="1" aria-label="${D[F.k] ? 'Change' : 'Write'} ${esc(F.label.toLowerCase())}">${D[F.k] ? 'Change' : 'Write it'}</button></dd></div>`).join('')}</dl>`;
+}
+
+function weekPane() {
+  const w = state.work, lv = weekLevel(), G = directionOf(w);
+  if (!lv) return `<h2 class="mb-h2" tabindex="-1">This week</h2>
+    <p class="mb-lead">Your first four actions come from Level 01, ${esc(LEVELS4[0].title)}: one in each area of your business.</p>
+    <p class="mb-next"><button type="button" class="mb-btn" data-level="1">Start Level 01 →</button></p>`;
+  const L = LEVELS4[lv - 1], last = lv === 12 ? lastSunday() : '';
+  if (last) return `<h2 class="mb-h2" tabindex="-1">This week</h2>${last}`;
+  const goalLine = (d) => {
+    const k = goalFor(d), F = DIRECTION4.find((x) => x.k === k);
+    return G[k] ? `<b>${esc(G[k])}</b>` : `<button type="button" class="mb-text" data-dirat="${DIRECTION4.indexOf(F)}" data-dirone="1" data-bptab="dir">Write ${esc(F.label.replace('My ', 'your ').replace(' for 12 weeks', ''))}</button>`;
+  };
+  return `<h2 class="mb-h2" tabindex="-1">This week: 4 things to do</h2>
+    <p class="mb-lead">From Level ${pad(lv)}, ${esc(L.title)}. One in each area of your business. Tick each one when it is done.</p>
+    <ul class="mb-acts">${L.d.map((D, d) => {
+      if (!begun(lv, d)) return `<li class="mb-off"><span class="mb-box" aria-hidden="true"></span><div><p class="mb-meta">${esc(DOM_LEAD[d])}</p><p class="mb-do">Not written yet.</p>
+        <p class="no-print"><button type="button" class="mb-text" data-level="${lv}">Write it in Level ${pad(lv)}</button></p></div></li>`;
+      const g = gotOf(w, lv, d), day = mbv(lv, d, dayKeyOf(lv, d));
+      return `<li${g === 0 ? ' class="mb-on"' : ''}><button type="button" class="mb-box" role="checkbox" aria-checked="${g === 0}" data-mbgot="${lv}:${d}" aria-label="Done: ${plainOf(D.fb[3], w, lv, d).replace(/"/g, '&quot;')}"></button>
+        <div><p class="mb-meta">${day ? `${esc(day)} · ` : ''}${esc(DOM_LEAD[d])}</p><p class="mb-do">${fill(D.fb[3], w, lv, d)}</p>
+        <p class="mb-sub">Serves: ${goalLine(d)}</p><p class="mb-sub">Done when: <span class="mb-ink">${doneOf(w, lv, d)}</span></p>
+        ${g === 1 || g === 2 ? `<p class="mb-sub">${GOT[g]} on Sunday. The smaller step: ${notyetOf(w, lv, d)}</p>` : ''}</div></li>`;
+    }).join('')}</ul>
+    <p class="mb-row no-print"><button type="button" class="mb-btn" data-print>Print my week</button></p>`;
+}
+
+function bookPane() {
+  const w = state.work, st = state.stage || 'build', now = weekLevel();
+  const levelBox = (L) => {
+    const n = L.n, rung = LADDER.find((r) => r.key === gateFor(n)), open = holds(tierNow(), gateFor(n)), ls = levelState(st, n), on = levelBegun(n);
+    const t = tally(w, [n]);
+    const tag = !open ? `<span class="mb-tag">${MB_LOCK}${esc(rung.price)}</span>`
+      : n === now && ls !== 'done' ? '<span class="mb-tag mb-now">This week</span>'
+      : ls === 'done' ? '<span class="mb-tag mb-done">Written</span>'
+      : on ? '<span class="mb-tag">Started</span>' : '<span class="mb-tag">Open</span>';
+    const small = t.n ? `${t.done} of 4 actions done${t.part ? `, ${t.part} partly` : ''}` : on ? `${[0, 1, 2, 3].filter((d) => begun(n, d)).length} of 4 actions written` : '4 actions, one in each area';
+    let body;
+    if (!open) body = `<p class="mb-have"><b>After this level you will have:</b> ${esc(L.promise)}</p>
+      <p class="mb-sub">Opens with ${esc(rung.n)} · ${esc(rung.price)}</p>
+      ${rung.url ? `<p class="no-print"><a class="mb-btn mb-gold" href="${esc(rung.url)}" target="_blank" rel="noopener">See what opens it ↗</a></p>` : ''}`;
+    else if (!on) body = `<p class="mb-have"><b>After this level you will have:</b> ${esc(L.promise)}</p>
+      ${ls === 'waiting' ? `<p class="mb-sub">Opens when Level ${pad(n - 1)} is written.</p>` : `<p class="no-print"><button type="button" class="mb-btn" data-level="${n}">Open Level ${pad(n)} →</button></p>`}`;
+    else body = L.d.map((D, d) => {
+      const p = planOf(n, d), g = gotOf(w, n, d), tk = begun(n, d) ? takeOf(w, n, d) : null;
+      return `<div class="mb-dom"><h4>${esc(DOM_LEAD[d])}${p ? `: ${esc(p.topic)}` : ''}</h4>
+        ${begun(n, d) ? `<p><b>Do:</b> ${fill(D.fb[3], w, n, d)}</p><p><b>Done when:</b> ${doneOf(w, n, d)}</p>${g != null ? `<p class="mb-sub">Sunday: ${GOT[g]}</p>` : ''}
+          ${tk ? `<details class="mb-take"><summary>${esc(tk.title)}</summary><ol>${tk.lines.map((l) => `<li>${l}</li>`).join('')}</ol></details>` : ''}`
+        : `<p class="mb-sub">Not written yet. <button type="button" class="mb-text no-print" data-level="${n}">Write it</button></p>`}</div>`;
+    }).join('') + (BUILD4[n] && buildStarted(w, n) ? `<details class="mb-take"><summary>The page you built: ${esc(BUILD4[n].title)}</summary><dl>${buildPage(w, n).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl></details>` : '');
+    return `<details class="mb-lv"${n === now ? ' open' : ''}><summary><span class="mb-lvt"><b>Level ${pad(n)} · ${esc(L.title)}</b><small>${small}</small></span>${tag}</summary><div class="mb-lvb">${body}</div></details>`;
+  };
+  return `<h2 class="mb-h2" tabindex="-1">My playbook</h2>
+    <p class="mb-lead">Everything you work out inside the programme, as things to do: four actions a level, one in each area of your business.</p>
+    ${CHAPTERS4.map((C) => `<h3 class="mb-ch">${esc(C.name)} <small>Levels ${pad(C.lv[0] + 1)}–${pad(C.lv[C.lv.length - 1] + 1)}</small></h3>
+      ${C.lv.map((i) => levelBox(LEVELS4[i])).join('')}`).join('')}
+    <p class="mb-row no-print"><button type="button" class="mb-btn" data-print>Print my playbook</button><button type="button" class="mb-text" data-bpdoc="1">Every answer, in eight parts</button></p>`;
+}
+
+function strongPane() {
+  const w = state.work, hi = [], lo = [];
+  [0, 1, 2, 3].forEach((d) => {
+    let lv = 0;
+    for (let n = 12; n >= 1 && !lv; n--) if (begun(n, d) && slideOf(w, n, d) != null) lv = n;
+    if (!lv) return;
+    const l4 = lines4(w, lv, d), from = `<span>${esc(DOM_LEAD[d])} · Level ${pad(lv)}</span>`;
+    if (strong(w, lv, d)) hi.push(`<p>${from}${l4[2][2]}</p>`);
+    else lo.push(`<p>${from}${l4[1][2]} <em>Start here: ${l4[3][2]}</em></p>`);
+  });
+  if (!hi.length && !lo.length) return `<h2 class="mb-h2" tabindex="-1">Strengths</h2>
+    <p class="mb-lead">Your strengths show here after your first level. They come only from your own answers.</p>
+    <p class="mb-next"><button type="button" class="mb-btn" data-level="1">Start Level 01 →</button></p>`;
+  return `<h2 class="mb-h2" tabindex="-1">Strengths</h2>
+    <p class="mb-lead">From your own answers, in the latest level of each area.</p>
+    <div class="mb-two">
+      ${hi.length ? `<div class="mb-list"><h3>You are strong at</h3>${hi.join('')}</div>` : ''}
+      ${lo.length ? `<div class="mb-list"><h3>Needs you first</h3>${lo.join('')}</div>` : ''}
+    </div>`;
+}
+
+function pathPane() {
+  const w = state.work, rows = [];
+  const taken = (compassRec && compassRec.taken) || [];
+  if (taken.length) {
+    let at = ''; try { at = new Date(taken[taken.length - 1]).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); } catch { /* old browser */ }
+    rows.push(['North Star', `The Leader’s North Star, taken${taken.length > 1 ? ` ${taken.length} times` : ''}${at ? `, last on ${esc(at)}` : ''}.`]);
+  }
+  for (let n = 1; n <= 12; n++) {
+    if (!levelBegun(n)) continue;
+    const L = LEVELS4[n - 1], t = tally(w, [n]), wr = [0, 1, 2, 3].filter((d) => begun(n, d)).length;
+    rows.push([`Level ${pad(n)}`, `${esc(L.title)}: ${wr === 4 ? 'all four areas written' : `${wr} of 4 areas written`}. ${t.n ? `${t.done} of ${t.n} actions done${t.part ? `, ${t.part} partly` : ''}${t.not ? `, ${t.not} not yet` : ''}.` : 'Sunday’s check comes when the next level opens.'}`]);
+    const ci = CLOSES[n];
+    if (ci != null && mbv(n, 'r', 'carry')) rows.push(['Reading', `${esc(CHAPTERS4[ci].name)}: chapter reading done, one action carried forward.`]);
+  }
+  if (!rows.length) return `<h2 class="mb-h2" tabindex="-1">My journey</h2>
+    <p class="mb-lead">Your journey starts with Level 01, ${esc(LEVELS4[0].title)}.</p>
+    <p class="mb-next"><button type="button" class="mb-btn" data-level="1">Start Level 01 →</button></p>`;
+  return `<h2 class="mb-h2" tabindex="-1">My journey</h2>
+    <p class="mb-lead">What you have done so far, in order.</p>
+    <ol class="mb-tl">${rows.map(([k, v]) => `<li><span class="mb-tlk">${k}</span><span>${v}</span></li>`).join('')}</ol>`;
+}
+
+function blueprintView() {
+  if (bpDoc) return blueprintDoc();
+  const name = (state.me && state.me.name) || '', lv = weekLevel();
+  const pane = bpTab === 'week' ? weekPane() : bpTab === 'book' ? bookPane() : bpTab === 'strong' ? strongPane() : bpTab === 'path' ? pathPane() : dirPane();
+  return `<section class="mb" aria-labelledby="mb-h"><div class="mb-in">
+    <header class="mb-who"><p class="mb-k">My Blueprint</p><h1 id="mb-h">${name ? esc(name) : 'My Blueprint'}</h1>
+      <p>${lv ? `Level ${pad(lv)} of 12 · ${esc(LEVELS4[lv - 1].title)} · ${doneThisWeek(lv)} of 4 done this week` : 'Twelve levels · it fills in as you go'}</p></header>
+    <div class="mb-tabs no-print" role="tablist" aria-label="My Blueprint">${MB_TABS.map(([k, n, ic]) => `<button type="button" role="tab" id="mb-t-${k}" aria-controls="mb-p" aria-selected="${bpTab === k}" tabindex="${bpTab === k ? 0 : -1}" data-bptab="${k}">${ic}<span>${n}</span></button>`).join('')}</div>
+    <section class="mb-pane" id="mb-p" role="tabpanel" aria-labelledby="mb-t-${bpTab}">${pane}</section>
+    <nav class="mb-links no-print" aria-label="More">
+      <a href="/northstar/">The Leader’s North Star <span>Your direction in all four areas</span></a>
+      <button type="button" data-go="work">The programme <span>Level ${pad(lv || 1)}</span></button>
+    </nav>
+  </div></section>`;
+}
+/** After a redraw of My Blueprint: the field, the box or the heading gets the focus. */
+function mbFocus(sel) {
+  const x = (sel && document.querySelector(sel)) || document.getElementById('mb-in') || document.querySelector('.mb-h2');
+  if (x) x.focus({ preventScroll: true });
 }
 
 function libraryView() {
@@ -1194,9 +1377,29 @@ function emphasisName(st, lv) {
 function drawNav() {
   const unread = inbox ? inbox.unread : 0, answers = askUnread();
   $('#tnav').innerHTML = account.joined() && !['signin', 'redirect', 'loading'].includes(view)
-    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Base Camp${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button><a class="tbook ttools" href="/tools/">Growth Toolkit</a><button type="button" data-go="ask" ${view === 'ask' ? 'aria-current="page"' : ''}>Ask Alexandru${answers ? `<span class="tdot" aria-label="${answers} new ${answers === 1 ? 'answer' : 'answers'}"></span>` : ''}</button>${holds(tierNow(), 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
+    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Base Camp${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="blueprint" ${view === 'blueprint' ? 'aria-current="page"' : ''}>My Blueprint</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button><a class="ttools" href="/tools/">${ICONS.toolkit}Growth Toolkit</a><button type="button" data-go="ask" ${view === 'ask' ? 'aria-current="page"' : ''}>Ask Alexandru${answers ? `<span class="tdot" aria-label="${answers} new ${answers === 1 ? 'answer' : 'answers'}"></span>` : ''}</button>${holds(tierNow(), 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
     : '';
 }
+
+/** Back and Forward walk Base Camp (Alexandru, 2 Nov 2026; rule 13): every
+ *  change of view, or of level, is a step in the browser's history, so Back
+ *  goes to the last place inside Base Camp instead of leaving it. */
+const HASHES = { home: '#home', blueprint: '#blueprint', library: '#library', ask: '#ask', launchpad: '#launchpad' };
+function remember() {
+  const h = view === 'work' ? `#programme-${level}` : HASHES[view];
+  if (!h || location.hash === h) return;
+  try { history.pushState(null, '', location.pathname + location.search + h); } catch { /* old browser */ }
+}
+addEventListener('popstate', () => {
+  if (!account.joined()) return;
+  const h = location.hash, m = /^#programme-(\d{1,2})$/.exec(h);
+  if (m) { level = Math.min(12, Math.max(1, +m[1])); dom = 'self'; qi = null; view = 'work'; }
+  else view = entry({ joined: true, old: oldEntrance, hash: h });
+  bpDoc = false; dirAt = null; dirBack = false;
+  document.body.classList.remove('railopen', 'crownopen', 'stepsopen');
+  render(); window.scrollTo({ top: 0, behavior: 'instant' });
+  if (view === 'ask') openAsk();
+});
 
 /** The top bar's height, so the always-on level bar sits right under it. */
 function topbar() {
@@ -1207,6 +1410,7 @@ addEventListener('resize', topbar, { passive: true });
 function render() {
   const st = state.stage || 'build';
   document.body.classList.toggle('inwork', view === 'work');
+  document.body.classList.toggle('mbview', view === 'blueprint' && !bpDoc);
   document.body.classList.remove('crownopen', 'stepsopen');
   drawNav();
   topbar();
@@ -1273,7 +1477,7 @@ document.addEventListener('click', (e) => {
     return;
   }
   if (b.dataset.qmove) { moveQ(+b.dataset.qmove); return; }
-  if (b.hasAttribute('data-print')) { window.print(); return; }
+  if (b.hasAttribute('data-print')) { document.querySelectorAll('.mb details').forEach((x) => { x.open = true; }); window.print(); return; }
   if (b.dataset.lpdone) {
     if (needsAccount()) { const k = b.dataset.lpdone; askAccount(() => { const x = document.querySelector(`[data-lpdone="${k}"]`); if (x) x.click(); }); return; }
     const on = !state.work[b.dataset.lpdone], v = on ? new Date().toISOString().slice(0, 10) : '';
@@ -1375,9 +1579,30 @@ document.addEventListener('click', (e) => {
   }
   if (b.dataset.cban === 'close') { cbSet(CB_TIMES); const h = $('#cban'); if (h) h.innerHTML = ''; return; }
   if (b.dataset.banner === 'close') { bannerDone(); const h = $('#libban'); if (h) h.innerHTML = ''; return; }
+  // My Blueprint: the tabs, My direction one field at a time, This week's ticks.
+  if (b.dataset.dirat != null) {
+    bpTab = 'dir'; bpDoc = false; dirBack = !!b.dataset.dirone;
+    dirAt = b.dataset.dirat === 'list' ? -1 : +b.dataset.dirat;
+    if (dirAt < 0) dirBack = false;
+    render(); mbFocus(); return;
+  }
+  if (b.dataset.dirskip != null) {
+    const i = +b.dataset.dirskip, D = directionOf(state.work), nx = DIRECTION4.findIndex((x, j) => j > i && !D[x.k]);
+    dirAt = nx < 0 ? -1 : nx; dirBack = false;
+    render(); mbFocus(); return;
+  }
+  if (b.dataset.bptab) { bpTab = b.dataset.bptab; bpDoc = false; dirAt = null; dirBack = false; render(); mbFocus(`#mb-t-${bpTab}`); return; }
+  if (b.dataset.bpdoc) { bpDoc = b.dataset.bpdoc === '1'; render(); window.scrollTo({ top: 0, behavior: 'instant' }); return; }
+  if (b.dataset.mbgot) {
+    const [lv, d] = b.dataset.mbgot.split(':').map(Number);
+    if (needsAccount()) { askAccount(() => { const x = document.querySelector(`[data-mbgot="${lv}:${d}"]`); if (x) x.click(); }); return; }
+    keep4(d, 'got', gotOf(state.work, lv, d) === 0 ? '' : 0, lv);
+    render(); mbFocus(`[data-mbgot="${lv}:${d}"]`); return;
+  }
+  if (b.dataset.go === 'blueprint') { bpDoc = false; dirAt = null; dirBack = false; }
   if (b.dataset.go === 'library') bannerDone();
   if (b.dataset.go) {
-    view = b.dataset.go; document.body.classList.remove('railopen'); render();
+    view = b.dataset.go; document.body.classList.remove('railopen'); render(); remember();
     window.scrollTo({ top: 0, behavior: 'instant' });
     if (view === 'ask') openAsk();
     return;
@@ -1411,9 +1636,19 @@ document.addEventListener('click', (e) => {
   if (b.dataset.level) {
     level = +b.dataset.level; dom = 'self'; view = 'work'; qi = null;
     document.body.classList.remove('railopen');
-    render(); window.scrollTo({ top: 0, behavior: 'instant' }); return;
+    render(); remember(); window.scrollTo({ top: 0, behavior: 'instant' }); return;
   }
   if (b.dataset.dom) { dom = b.dataset.dom; qi = null; redrawModule(); return; }
+});
+
+/* My Blueprint's tabs: the arrow keys, Home and End move between them. */
+document.addEventListener('keydown', (e) => {
+  const t = e.target && e.target.closest && e.target.closest('.mb-tabs [role="tab"]');
+  if (!t || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+  e.preventDefault();
+  const n = MB_TABS.length, i = MB_TABS.findIndex(([k]) => k === t.dataset.bptab);
+  const j = e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : (i + (e.key === 'ArrowRight' ? 1 : n - 1)) % n;
+  bpTab = MB_TABS[j][0]; dirAt = null; dirBack = false; render(); mbFocus(`#mb-t-${bpTab}`);
 });
 
 /* The Launchpad plan online: Enter goes to the next blank. */
@@ -1511,6 +1746,21 @@ async function sendSigninLink() {
 
 document.addEventListener('submit', async (e) => {
   const f = e.target;
+  // My direction: one field, saved to the device first, then to the account.
+  if (f.dataset && f.dataset.dirform != null) {
+    e.preventDefault();
+    const i = +f.dataset.dirform, inp = $('#mb-in'), v = inp ? inp.value.trim().slice(0, 300) : '';
+    if (!v) { const m = $('#mb-err'); if (m) m.textContent = 'Write one line, or skip it for now.'; if (inp) inp.focus(); return; }
+    const keepDir = () => {
+      const key = `w.v4.dir.${DIRECTION4[i].k}`;
+      state.work[key] = v; save(); account.touch('work', key, v);
+      const D = directionOf(state.work), nx = DIRECTION4.findIndex((x, j) => j > i && !D[x.k]);
+      dirAt = dirBack || nx < 0 ? -1 : nx; if (dirAt < 0) dirBack = false;
+      render(); mbFocus();
+    };
+    if (needsAccount()) { askAccount(keepDir); return; }
+    keepDir(); return;
+  }
   if (f.id === 'signinform') {
     e.preventDefault();
     const msg = $('#si-msg'), email = $('#si-email').value.trim(), pw = $('#si-pw').value;

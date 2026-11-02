@@ -686,9 +686,58 @@ export const BLUEPRINT4 = [
 ];
 
 export const CHAPTERS4 = [
-  { n: 'Chapter I', name: 'The Inner Pyramid', about: 'The founder, from the base up: what you believe, how you read it, what you feel, what you do, what it makes of you.', lv: [0, 1, 2, 3, 4] },
-  { n: 'Chapter II', name: 'The Engine Room', about: 'The business inside: conversations, time, your offer and its price, and systems that run without you.', lv: [5, 6, 7, 8] },
-  { n: 'Chapter III', name: 'The Open Market', about: 'The business outside: reach, advantage and leadership, so the market comes to you.', lv: [9, 10, 11] }];
+  // Plain names (Alexandru, 2 Nov 2026). Levels 01–05 are about the founder:
+  // their mindset, and the basics of a business seen from there. From Level
+  // 06 the questions go deeper into the business itself.
+  { n: 'Chapter I', name: 'Start with you', about: 'You, and the basics of a business: what you believe, how you read what happens, what you feel, what you do and what it makes of you, with the customer, serving, money and goals.', lv: [0, 1, 2, 3, 4] },
+  { n: 'Chapter II', name: 'Run the business', about: 'Inside the business: the conversations, your time, your offer and its price, and systems that run without you.', lv: [5, 6, 7, 8] },
+  { n: 'Chapter III', name: 'Grow the market', about: 'Outside the business: reach, advantage and leadership, so customers come to you.', lv: [9, 10, 11] }];
+
+/** My direction (Alexandru, 2 Nov 2026): written once, one field on screen,
+ *  the way a sign-in asks one thing at a time. Each line is about the founder
+ *  in relation to the business, and turned to the customer: who they serve,
+ *  how they serve them better, what customers say about it. Two goals for the
+ *  twelve weeks (one for the business, one for the leader) and two mini-goals
+ *  for the week (work, personal). Saved as w.v4.dir.<k>. Every example is
+ *  marked as one, and the sizes alternate (AGENTS.md 12). */
+export const DIRECTION4 = [
+  { k: 'mission', label: 'My mission', q: 'Who do you serve, and what do you make better for them?', ph: 'Who I serve, and what changes for them',
+    hint: 'Start with the customer, not the product: who they are, and what is better for them because of you.',
+    ask: 'Not sure? Ask three customers this week: “What is better for you since you started with us?” Use their words.',
+    ex: ['a founder with an idea and no money yet', 'New parents get two hours of their evening back, without the guilt.'] },
+  { k: 'vision', label: 'My vision', q: 'Three years from now, what do your customers say about you?', ph: 'What my customers say, and what the business looks like',
+    hint: 'Then one line on what the business looks like, so it can keep serving them that way.',
+    ask: 'Ask your best customer: “What would make you tell a friend about us?” The answer is a piece of your vision.',
+    ex: ['a company with 50 people', '“They answer the same day, and they fix it the first time.” Three offices, each run by its own leader.'] },
+  { k: 'values', label: 'My values', q: 'Which three values will you hold with every customer, even on a bad week?', ph: 'Three values, each one a customer could see',
+    hint: 'Short, and each one something a customer could notice. Once written, they are locked in: change them only on purpose.',
+    ask: 'Test each one: would a customer see it this week? If not, make it plainer.',
+    ex: ['an owner with 12 people and payroll every month', 'On time · The plain truth, even when it costs us · We call back the same day'], lock: true },
+  { k: 'goalBiz', label: 'My business goal for 12 weeks', q: 'By the end of these twelve weeks, what number will your business reach?', ph: 'One number, and the date',
+    hint: 'One number that only customers can move: paying customers, monthly sales, or customers who came back. Twelve weeks from today is {by}.',
+    ask: 'Pick the number you can count every Monday.',
+    ex: ['a founder with an idea and no money yet', '10 paying customers by 31 January, each asked how it went.'] },
+  { k: 'goalLead', label: 'My leadership goal for 12 weeks', q: 'As a leader, what will people see you do differently by then?', ph: 'One thing someone else could check',
+    hint: 'Something your people, a partner or a customer could see, not a feeling. Twelve weeks from today is {by}.',
+    ask: 'Ask one person who works with you: “What is one thing I could do that would help you serve customers better?”',
+    ex: ['a company with 50 people or $50 million', 'Every Friday, 20 minutes with each of my six leads, and one customer call a week we listen to together.'] },
+  { k: 'miniWork', label: 'My work mini-goal this week', q: 'This week, which one step moves your business goal?', ph: 'One step, with its day',
+    hint: 'Small enough to finish by Sunday, and about a customer: one you call, ask, serve or win back.',
+    ask: '',
+    ex: ['an owner with 12 people and payroll every month', 'Call the three clients who did not reorder, by Wednesday, and ask what we missed.'] },
+  { k: 'miniLife', label: 'My personal mini-goal this week', q: 'This week, which one personal step keeps you able to lead and serve?', ph: 'One personal step, with its day',
+    hint: 'Tied to the business: the time, the rest or the people that keep you serving well next week.',
+    ask: '',
+    ex: ['a founder with an idea and no money yet', 'Phone off at 8 pm on weeknights, so the first hour of each morning goes to customers.'] }];
+/** The founder's own direction, as saved: { mission, vision, … }, '' when not written. */
+export function directionOf(work) {
+  const out = {};
+  for (const F of DIRECTION4) { const v = work && work[`w.v4.dir.${F.k}`]; out[F.k] = v == null ? '' : String(v).trim(); }
+  return out;
+}
+/** The goal an action serves: yourself and your people serve the leadership
+ *  goal; your business and the market serve the business goal. */
+export const goalFor = (d) => (d < 2 ? 'goalLead' : 'goalBiz');
 
 export const DOMS = ['self', 'people', 'work', 'market'];
 export const DOM_NAMES = DOM.map((x) => x.n);
