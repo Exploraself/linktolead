@@ -21,6 +21,11 @@ const ORDER = ['free', 'session', 'lab', 'hub', 'premium'];
 const pad = (n) => String(n).padStart(2, '0');
 const q = new URLSearchParams(location.search);
 const want = q.get('step');
+/** Where the founder came from, for the free account's landing (and so its
+ *  Mailchimp tag): a sales page that sends to /pay/ names itself with
+ *  ?from=…; anything else is /road1/'s, as before. */
+const FROM = { summit: 'summit' };
+const landing = FROM[q.get('from')] || 'road1';
 const H = () => ({ 'x-account-token': token(), 'content-type': 'application/json' });
 
 function draw(html) { $('#pay').innerHTML = html; }
@@ -50,7 +55,7 @@ function makeAccount(S) {
     <a class="ghost" href="/ground-plan/?next=${encodeURIComponent(back)}#signin">Already have an account? Sign in</a>`);
   let gate = document.getElementById('gate');
   if (!gate) { gate = document.createElement('div'); gate.id = 'gate'; gate.hidden = true; document.body.appendChild(gate); }
-  const open = () => import('/account-box.js').then((m) => m.open({ gate, opener: $('#make'), stage: null, variant: 'full', landing: 'road1', next: back,
+  const open = () => import('/account-box.js').then((m) => m.open({ gate, opener: $('#make'), stage: null, variant: 'full', landing, next: back,
     head: ['ONE STEP BEFORE YOU PAY', 'Your free account', `Then you come straight back here to unlock ${S.name}. You sign in with your email and a password.`],
     label: 'CONTINUE TO PAYMENT →', notNow: 'Not now' })).catch(() => { location.href = `/road1/?next=${encodeURIComponent(back)}#join`; });
   $('#make').onclick = open;

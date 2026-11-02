@@ -60,7 +60,8 @@ ok(client.joinHref('a@x.com', '/pay/?step=lab') === '/road1/?email=a%40x.com&nex
 // ── The pages ───────────────────────────────────────────────────────────────
 const src = (f) => fs.readFileSync(f, 'utf8');
 const pay = src('public/pay/pay.js');
-ok(/function makeAccount\(S\)/.test(pay) && /import\('\/account-box\.js'\)\.then\(\(m\) => m\.open\(\{[^}]*landing: 'road1', next: back/.test(pay), '/pay/: not signed in, the free account is made on the page (the /road1/ form), then back to pay');
+ok(/function makeAccount\(S\)/.test(pay) && /import\('\/account-box\.js'\)\.then\(\(m\) => m\.open\(\{[^}]*landing, next: back/.test(pay), '/pay/: not signed in, the free account is made on the page (the /road1/ form), then back to pay');
+ok(/const FROM = \{ summit: 'summit' \};\nconst landing = FROM\[q\.get\('from'\)\] \|\| 'road1';/.test(pay), '/pay/: landing road1, or summit when The Summit page sent them (its Mailchimp tag as before)');
 ok(pay.includes("label: 'CONTINUE TO PAYMENT →'") && pay.includes('Already have an account? Sign in') && pay.includes('/ground-plan/?next=${encodeURIComponent(back)}#signin'), '/pay/: “Continue to payment”, and sign-in comes back here too');
 ok(!pay.includes('href="/road1/">No account yet'), '/pay/ no longer sends founders away to /road1/');
 const road = src('public/road1/page.js');
