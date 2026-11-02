@@ -43,6 +43,10 @@ let data = null, q = '', flash = '', openId = null;
  *  (the mentor key); the server refuses them anyway (KEY_ONLY in
  *  functions/api/mentor.js). */
 const isTeam = () => !!(data && data.you && data.you.team);
+/** What this person may do here (functions/_team.js TEAM_RIGHTS): everything
+ *  with the mentor key, else the rights ticked for this team member. The server
+ *  checks every action; this only hides what they cannot use. */
+const can = (right) => !isTeam() || !!(data && data.you && Array.isArray(data.you.can) && data.you.can.includes(right));
 let tab = tabOf(location.hash);
 let F = { ...NO_FILTER };
 
@@ -321,7 +325,7 @@ function crossedHTML(S) {
  *  last 20 calls. Nothing here is a secret; the API key never leaves Cloudflare. */
 function mailchimpHTML() {
   const M = data.mailchimp;
-  if (!M || isTeam()) return '';
+  if (!M || !can('mailchimp')) return '';
   const last = (M.log || [])[0];
   const lastFail = last && last.status === 'failed' && !gone(last.email) ? `<p class="flash warn" role="status"><b>Last call failed:</b> ${esc(last.detail)}</p>` : '';
   const G = M.forgotten || [];
@@ -399,14 +403,32 @@ async function loadTags(read) {
   if (c) c.onclick = async () => { try { await navigator.clipboard.writeText(tagsRead.old.map((t) => t.name).join('\n')); c.textContent = 'Copied'; } catch { c.textContent = 'Could not copy'; } };
 }
 
+/** Every right a team member can be given, in the tick-box order and words
+ *  (functions/_team.js TEAM_RIGHTS; a test holds them equal). */
+export const RIGHT_WORDS = [
+  ['reply', 'Answer founders’ questions'],
+  ['message', 'Write letters and notes to founders'],
+  ['signin-link', 'Send sign-in links'],
+  ['reset-link', 'Send password reset links'],
+  ['series-hold', 'Pause or resume a founder’s letters'],
+  ['tier', 'Change a founder’s step (unlock)'],
+  ['pause', 'Pause or unpause a founder’s account'],
+  ['delete', 'Delete a founder'],
+  ['mentors', 'Mentor profiles, and a founder’s mentor'],
+  ['mailchimp', 'Mailchimp tools and the tag list'],
+  ['payments', 'See the payments (Stripe)'],
+  ['team', 'Change the team and what each member can do'],
+];
 /** For a team account: what they can and cannot do here, in plain words. */
 function teamCanHTML() {
-  const yes = ['Read every founder, their answers and their path', 'Answer questions in Ask Alexandru', 'Write letters and notes (signed by Alexandru; replies go to Alexandru)', 'Send a sign-in or password reset link', 'Pause or resume a founder’s letters', 'Change a founder’s step, when they have paid', 'Hide or show a video comment', 'Export the founders as CSV'];
-  const no = ['Pause or delete a founder', 'Change the team', 'Change the mentor profiles', 'Use the Mailchimp tools'];
+  const mine = (data.you && data.you.can) || [];
+  const yes = ['Read every founder, their answers and their path', 'Export the founders as CSV', ...RIGHT_WORDS.filter(([k]) => mine.includes(k)).map(([, w]) => w)];
+  const no = RIGHT_WORDS.filter(([k]) => !mine.includes(k)).map(([, w]) => w);
   return `<section class="panel"><h2>What you can do here</h2>
     <div class="tgrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
       <div><p class="lbl">You can</p><ul class="list" style="margin-top:6px">${yes.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
-      <div><p class="lbl">Only Alexandru</p><ul class="list" style="margin-top:6px">${no.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div></div></section>`;
+      ${no.length ? `<div><p class="lbl">Only Alexandru, for now</p><ul class="list" style="margin-top:6px">${no.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+      <p class="tiny" style="margin-top:6px">Alexandru can tick any of these for you in Settings → Team.</p></div>` : ''}</div></section>`;
 }
 
 // ── Mentors & comments ───────────────────────────────────────────────────────
@@ -414,7 +436,7 @@ function teamCanHTML() {
 /** Mentors: who the letters come from. Everyone's mentor (the default), and
  *  others a founder can be given on their own page. */
 function mentorsHTML() {
-  if (isTeam()) return '';
+  if (!can('mentors')) return '';
   const L = data.mentors || [];
   const row = (m) => `<li><img src="${esc(m.photo)}" alt="" width="40" height="40" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid var(--gold)">
     <div style="min-width:0;flex:1 1 200px"><b>${esc(m.name)}</b>${m.isDefault ? ' <span class="pill both">Everyone’s mentor</span>' : ''}<span class="em">${esc(m.title)} · replies to ${esc(m.email)}</span></div>
@@ -438,25 +460,39 @@ function mentorsHTML() {
 /** Comments founders left under the level videos, newest first; hide or show. */
 /* ── The team (Alexandru, 2 Nov 2026) ─────────────────────────────────────
    Addresses with every Blueprint level open, the Growth Toolkit without a
-   code, and /mentor with their own account. Added by exact address, once;
-   only the mentor key can add or remove. */
+   code, and /mentor with their own account. Added by exact address, once,
+   with the mentor key or by a member with the 'team' right; each member's
+   own rights are ticked here (functions/_team.js TEAM_RIGHTS). */
 /** What a team member did in /mentor, in words (functions/_team.js DID_WORDS; a test holds them equal). */
 export const TEAM_DID = { message: ['letter', 'letters'], reply: ['answer', 'answers'], tier: ['step change', 'step changes'],
-  'series-hold': ['pause or resume', 'pauses or resumes'], 'signin-link': ['sign-in link', 'sign-in links'], 'reset-link': ['reset link', 'reset links'] };
+  'series-hold': ['pause or resume', 'pauses or resumes'], 'signin-link': ['sign-in link', 'sign-in links'], 'reset-link': ['reset link', 'reset links'],
+  pause: ['account pause', 'account pauses'], delete: ['founder deleted', 'founders deleted'], 'mentor-save': ['mentor profile saved', 'mentor profiles saved'],
+  'mentor-assign': ['mentor chosen', 'mentors chosen'], 'mc-test': ['Mailchimp test', 'Mailchimp tests'], 'mc-backfill': ['Mailchimp send', 'Mailchimp sends'],
+  'team-add': ['member added', 'members added'], 'team-remove': ['member removed', 'members removed'], 'team-can': ['rights change', 'rights changes'] };
 const didLine = (did) => Object.entries(did || {}).filter(([a, n]) => TEAM_DID[a] && n).map(([a, n]) => `${n} ${n === 1 ? TEAM_DID[a][0] : TEAM_DID[a][1]}`).join(' · ');
 async function loadTeam(msg = '') {
   const box = $('#team');
   if (!box) return;
   const r = await api('?team=1');
   if (!r.ok) { box.innerHTML = '<p class="tiny">Could not load the team.</p>'; return; }
-  const T = r.data.team || [], edit = !!r.data.canEdit;
+  const T = r.data.team || [], edit = !!r.data.canEdit, me = String(r.data.me || '').toLowerCase();
+  const all = (m) => RIGHT_WORDS.every(([k]) => (m.can || []).includes(k));
+  const canLine = (m) => (all(m) ? 'Everything, like Alexandru' : RIGHT_WORDS.filter(([k]) => (m.can || []).includes(k)).map(([, w]) => w).join(' · ') || 'Read only');
+  // Per member, what they may do (Alexandru, 2 Nov 2026): tick boxes, saved on
+  // each tick. Alexandru's own addresses always have every right; nobody edits their own.
+  const rightsBox = (m) => m.owner ? '<span class="em">Alexandru’s own address: every right, always.</span>'
+    : !edit || m.email.toLowerCase() === me ? `<span class="em">Can: ${esc(canLine(m))}</span>`
+    : `<div data-rights="${esc(m.email)}" style="flex-basis:100%;margin:10px 0 2px;padding:10px 12px;border:1px solid #E7DCC6;border-radius:10px;background:#FFFCF5">
+      <label style="display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:6px"><input type="checkbox" data-all style="width:auto"${all(m) ? ' checked' : ''}> Everything (like Alexandru)</label>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:4px 16px">${RIGHT_WORDS.map(([k, w]) => `<label style="display:flex;align-items:center;gap:8px;font-size:14px"><input type="checkbox" data-right="${k}" style="width:auto"${(m.can || []).includes(k) ? ' checked' : ''}> ${esc(w)}</label>`).join('')}</div>
+      <p class="tiny" data-saved style="margin:6px 0 0" role="status" aria-live="polite"></p></div>`;
   box.innerHTML = `<h2>Team · ${T.length}</h2>
     <p class="tiny">Add their exact email: they get an invitation with a button to start. They see every Blueprint level, the Growth Toolkit without a code, and this page. Everything they send goes out signed by ${isTeam() ? 'Alexandru' : 'you'}, and replies come back to ${isTeam() ? 'Alexandru' : 'you'}.</p>
-    <ul class="list" style="margin-top:10px">${T.map((m) => `<li><div style="flex:1;min-width:0"><b>${esc(m.name || m.email)}</b>
+    <ul class="list" style="margin-top:10px">${T.map((m) => `<li style="flex-wrap:wrap"><div style="flex:1;min-width:0"><b>${esc(m.name || m.email)}</b>
       <span class="em">${m.name ? esc(m.email) + ' · ' : ''}${m.account ? `account ready · last active ${esc(when(m.lastSeen))}` : `<span class="warn">${m.removable ? 'invited, no account yet' : 'no account yet'}</span>`} · ${esc(m.from)}${m.at ? ' ' + esc(when(m.at)) : ''}</span>
-      ${didLine(m.did) ? `<span class="em">In /mentor: ${esc(didLine(m.did))}</span>` : ''}</div>${edit && m.removable ? `<button class="ghost" data-team-rm="${esc(m.email)}">Remove</button>` : ''}</li>`).join('')}</ul>
+      ${didLine(m.did) ? `<span class="em">In /mentor: ${esc(didLine(m.did))}</span>` : ''}${m.owner || !edit || m.email.toLowerCase() === me ? rightsBox(m) : ''}</div>${edit && m.removable && m.email.toLowerCase() !== me ? `<button class="ghost" data-team-rm="${esc(m.email)}">Remove</button>` : ''}${!m.owner && edit && m.email.toLowerCase() !== me ? rightsBox(m) : ''}</li>`).join('')}</ul>
     ${edit ? `<p style="margin-top:12px;display:flex;gap:6px;max-width:460px;flex-wrap:wrap"><input id="team-new" type="email" placeholder="Their email, exactly" autocomplete="off" style="flex:1 1 220px;min-width:0"><button id="team-add">Add to the team</button></p>`
-      : '<p class="tiny" style="margin-top:10px">Only Alexandru can change the team.</p>'}
+      : '<p class="tiny" style="margin-top:10px">Only Alexandru, or a team member with that right, can change the team.</p>'}
     ${msg ? `<p class="flash" role="status">${esc(msg)}</p>` : ''}`;
   const add = $('#team-add');
   if (add) {
@@ -468,6 +504,17 @@ async function loadTeam(msg = '') {
     };
     $('#team-new').onkeydown = (e) => { if (e.key === 'Enter') add.click(); };
   }
+  box.querySelectorAll('[data-rights]').forEach((wrap) => {
+    const boxes = [...wrap.querySelectorAll('[data-right]')], allBox = wrap.querySelector('[data-all]'), note = wrap.querySelector('[data-saved]');
+    const save = async () => {
+      allBox.checked = boxes.every((x) => x.checked);
+      note.textContent = 'Saving…';
+      const x = await act({ action: 'team-can', email: wrap.dataset.rights, can: boxes.filter((c) => c.checked).map((c) => c.dataset.right) });
+      note.textContent = x.ok ? 'Saved.' : (x.data.error || 'Could not save. Try again.');
+    };
+    allBox.onchange = () => { boxes.forEach((c) => { c.checked = allBox.checked; }); save(); };
+    boxes.forEach((c) => { c.onchange = save; });
+  });
   box.querySelectorAll('[data-team-rm]').forEach((b) => { b.onclick = async () => {
     if (!confirm(`Remove ${b.dataset.teamRm} from the team?`)) return;
     const x = await act({ action: 'team-remove', email: b.dataset.teamRm });
@@ -505,7 +552,7 @@ function toolsOf(s) {
 function drawerHTML(s) {
   const n = nextAction(s), g = groupOf(s), cr = crossedOf(s), lv = levelCount(s), lp = launchpadDone(s), id = esc(s.id);
   const main = n.does === 'open' ? `<button class="btn gold" data-open="${id}">${esc(n.button)}</button>`
-    : n.does === 'unpause' ? (isTeam() ? '<span class="pill warn">Paused by Alexandru. Only Alexandru can unpause.</span>' : `<button class="btn gold" data-pause="${id}" data-v="0">${esc(n.button)}</button>`)
+    : n.does === 'unpause' ? (!can('pause') ? '<span class="pill warn">Paused. Only Alexandru, or a team member with that right, can unpause.</span>' : `<button class="btn gold" data-pause="${id}" data-v="0">${esc(n.button)}</button>`)
     : `<button class="btn gold" data-msg="${id}" data-kind="${KIND_OF[n.key] || 'note'}">${esc(n.button)}</button>`;
   const land = landingName(s);
   const books = String(s.library || '').split(',').filter(Boolean).length;
@@ -532,7 +579,7 @@ function drawerHTML(s) {
       <dt>Mailchimp</dt><dd>${mcState(s)}</dd>
       <dt>Library</dt><dd>${books ? plural(books, 'book', 'books') + ' taken' : '—'}</dd>
       <dt>Tools</dt><dd>${esc(toolsOf(s)) || '—'}</dd>
-      ${(() => { const L = seriesInfo(s); return L ? `<dt>Pain letters</dt><dd>${esc(L.line)}${L.active || L.held ? ` <button class="ghost" data-hold="${id}" data-v="${L.held ? 0 : 1}">${L.held ? 'Resume letters' : 'Pause letters'}</button>` : ''}</dd>` : ''; })()}
+      ${(() => { const L = seriesInfo(s); return L ? `<dt>Pain letters</dt><dd>${esc(L.line)}${(L.active || L.held) && can('series-hold') ? ` <button class="ghost" data-hold="${id}" data-v="${L.held ? 0 : 1}">${L.held ? 'Resume letters' : 'Pause letters'}</button>` : ''}</dd>` : ''; })()}
     </dl>
     <div><p class="lbl">Their path</p><ul class="tl" style="margin-top:8px">
       <li>Signed up${land ? ' on ' + esc(land) : ''} <span>· ${esc(day(s.joined_at))}</span></li>
@@ -545,14 +592,14 @@ function drawerHTML(s) {
     ${Number(s.growth_ticks) || Number(s.growth_words) ? `<div><p class="lbl">Growth plan · ${esc(gpCount(s))}${Number(s.growth_words) ? ` · ${esc(plural(Number(s.growth_words), 'blank', 'blanks'))} written` : ''}</p><div id="gpw-${id}">${gpList(s)}</div></div>` : ''}
     <div><p class="lbl">All actions</p><div class="acts" style="margin-top:8px">
       <button class="btn" data-open="${id}">Open their work</button>
-      <button class="btn" data-msg="${id}">Send a message</button>
-      <button class="btn" data-link="${id}">Send sign-in link</button>
-      <button class="btn" data-reset="${id}">Send a password reset link</button>
-      ${isTeam() ? '' : `<button class="btn" data-pause="${id}" data-v="${s.paused ? 0 : 1}">${s.paused ? 'Unpause' : 'Pause'}</button>
-      <button class="btn danger" data-del="${id}">Delete</button>`}</div>
-      <label class="tiny" style="display:flex;align-items:center;gap:8px;margin-top:12px">Step
+      ${can('message') ? `<button class="btn" data-msg="${id}">Send a message</button>` : ''}
+      ${can('signin-link') ? `<button class="btn" data-link="${id}">Send sign-in link</button>` : ''}
+      ${can('reset-link') ? `<button class="btn" data-reset="${id}">Send a password reset link</button>` : ''}
+      ${can('pause') ? `<button class="btn" data-pause="${id}" data-v="${s.paused ? 0 : 1}">${s.paused ? 'Unpause' : 'Pause'}</button>` : ''}
+      ${can('delete') ? `<button class="btn danger" data-del="${id}">Delete</button>` : ''}</div>
+      ${can('tier') ? `<label class="tiny" style="display:flex;align-items:center;gap:8px;margin-top:12px">Step
         <select data-step="${id}" aria-label="Step for ${esc(s.name || s.email)}">${STEP_KEYS.map((k) => `<option value="${k}"${(s.tier || 'free') === k ? ' selected' : ''}>${STEP_NAMES[k]}</option>`).join('')}</select></label>
-      <p class="tiny" style="margin-top:6px">A new step sends its step tags to Mailchimp.</p></div>`;
+      <p class="tiny" style="margin-top:6px">A new step sends its step tags to Mailchimp.</p>` : `<p class="tiny" style="margin-top:12px">Step: ${esc(STEP_NAMES[s.tier || 'free'] || s.tier || 'free')}</p>`}</div>`;
 }
 
 let lastFocus = null;
@@ -587,7 +634,7 @@ function draw() {
   const pane = tab === 'founders' ? foundersHTML()
     : tab === 'inbox' ? `${questionsHTML()}<section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
     : tab === 'grow' ? growHTML(S)
-    : tab === 'settings' ? `${isTeam() ? teamCanHTML() : ''}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>${mailchimpHTML()}${data.you && data.you.key ? '<section class="panel" id="stripebox"><p class="tiny">Loading the payments…</p></section><section class="panel" id="mctags"></section>' : ''}${mentorsHTML()}`
+    : tab === 'settings' ? `${isTeam() ? teamCanHTML() : ''}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>${mailchimpHTML()}${can('payments') ? '<section class="panel" id="stripebox"><p class="tiny">Loading the payments…</p></section>' : ''}${can('mailchimp') ? '<section class="panel" id="mctags"></section>' : ''}${mentorsHTML()}`
     : todayHTML(S);
   $('#main').innerHTML = `<div class="stack" role="tabpanel">${said}${pane}</div>`;
   if (tab === 'inbox') loadComments();
@@ -769,7 +816,7 @@ async function one(id) {
         <div class="k"><b>Came from</b><span>${esc(P.source || 'programme')}</span></div>
         <div class="k"><b>Consent</b><span>${P.consent ? 'yes' + (P.consent_at ? ' · ' + when(P.consent_at) : '') : 'no'}</span></div>
         <div class="k"><b>Letters from mentor</b><span>${P.consent && !P.unsubscribed ? 'on' : 'off'}</span></div>
-        <div class="k"><b>Mentor</b><span>${isTeam() ? esc(((d.mentors || []).find((m) => m.id === P.mentor_id) || {}).name || 'Everyone’s mentor') : `<select data-mentorof="${esc(id)}" aria-label="This founder’s mentor"><option value="">Everyone’s mentor</option>${(d.mentors || []).map((m) => `<option value="${esc(m.id)}"${P.mentor_id === m.id ? ' selected' : ''}>${esc(m.name)}</option>`).join('')}</select>`}</span></div>
+        <div class="k"><b>Mentor</b><span>${!can('mentors') ? esc(((d.mentors || []).find((m) => m.id === P.mentor_id) || {}).name || 'Everyone’s mentor') : `<select data-mentorof="${esc(id)}" aria-label="This founder’s mentor"><option value="">Everyone’s mentor</option>${(d.mentors || []).map((m) => `<option value="${esc(m.id)}"${P.mentor_id === m.id ? ' selected' : ''}>${esc(m.name)}</option>`).join('')}</select>`}</span></div>
         <div class="k"><b>Time zone</b><span>${esc(P.tz || '—')}</span></div>
         <div class="k"><b>Password</b><span>${d.auth && d.auth.has_password ? 'yes' : P.signup_type === 'simple' ? 'none (signs in by email link)' : 'no'}${d.auth && d.auth.paused ? ' · paused' : ''}</span></div>
       </div></div>
