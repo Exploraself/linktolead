@@ -111,6 +111,85 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
 .end h2{margin-top:0}
 .end .cta{margin-top:18px}
 @media (prefers-reduced-motion:no-preference){.go{transition:background .2s ease}}
+
+/* ── Illustrations and motion (Alexandru, 2 Nov 2026: "make it nicer, with
+   illustrations and animations"). Pure SVG and CSS, no images to load. All
+   motion stops for people who ask their device for less motion. */
+.art{display:block;width:100%;height:auto;margin:0 0 22px}
+.art text{font-family:var(--f)}
+.hero-art{border-radius:22px;overflow:hidden;box-shadow:0 18px 40px -26px rgba(42,33,23,.55)}
+.hero-art .sun{animation:sunRise 2.6s cubic-bezier(.2,.7,.2,1) both}
+@keyframes sunRise{from{transform:translateY(46px);opacity:.2}to{transform:none;opacity:1}}
+.hero-art .rays{transform-origin:320px 112px;animation:spin 60s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-art .beam{animation:beam 5s ease-in-out infinite}
+@keyframes beam{0%,100%{opacity:.55}50%{opacity:.85}}
+.hero-art .mote{animation:mote 7s linear infinite;opacity:0}
+.hero-art .mote:nth-of-type(2){animation-delay:1.6s}.hero-art .mote:nth-of-type(3){animation-delay:3.1s}.hero-art .mote:nth-of-type(4){animation-delay:4.4s}.hero-art .mote:nth-of-type(5){animation-delay:5.6s}
+@keyframes mote{0%{transform:translateY(0);opacity:0}15%{opacity:.9}100%{transform:translateY(-90px);opacity:0}}
+.hero-art .lid{transform-box:fill-box;transform-origin:50% 100%;animation:lid 3.4s ease-in-out infinite}
+@keyframes lid{0%,70%,100%{transform:none}78%{transform:translateY(-5px) rotate(-6deg)}86%{transform:translateY(-2px) rotate(3deg)}}
+.tw{transform-box:fill-box;transform-origin:center;animation:tw 2.4s ease-in-out infinite}
+.tw.b{animation-delay:.8s}.tw.c{animation-delay:1.6s}
+@keyframes tw{0%,100%{transform:scale(.3);opacity:0}50%{transform:scale(1);opacity:1}}
+.hero-art .pin{animation:pinIn .9s .6s both}.hero-art .pin.r{animation-delay:.9s}
+@keyframes pinIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.side{float:right;width:96px;margin:-6px 0 6px 14px}
+.side.hg{width:52px}
+.ask,.pains{clear:both}
+.ele .ear{transform-box:fill-box;transform-origin:85% 30%;animation:ear 4s ease-in-out infinite}
+@keyframes ear{0%,100%{transform:rotate(0)}50%{transform:rotate(-12deg)}}
+.ele .trunk{transform-box:fill-box;transform-origin:10% 0;animation:trunk 4s ease-in-out infinite}
+@keyframes trunk{0%,100%{transform:rotate(0)}50%{transform:rotate(8deg)}}
+.hg .sand-top{transform-box:fill-box;transform-origin:50% 100%;animation:sandTop 6s linear infinite}
+.hg .sand-bot{transform-box:fill-box;transform-origin:50% 100%;animation:sandBot 6s linear infinite}
+.hg .stream{stroke-dasharray:3 4;animation:stream .6s linear infinite}
+@keyframes sandTop{from{transform:scaleY(1)}to{transform:scaleY(.15)}}
+@keyframes sandBot{from{transform:scaleY(.15)}to{transform:scaleY(1)}}
+@keyframes stream{to{stroke-dashoffset:-7}}
+.js .road .line{stroke-dasharray:900;stroke-dashoffset:900;transition:stroke-dashoffset 2.2s cubic-bezier(.3,.6,.2,1)}
+.in .road .line,.road.in .line{stroke-dashoffset:0}
+.js .road .node{opacity:0;transform-box:fill-box;transform-origin:center;transition:opacity .5s,transform .5s}
+.in .road .node{opacity:1}
+.in .road .node.n1{transition-delay:.3s}.in .road .node.n2{transition-delay:1.1s}.in .road .node.n3{transition-delay:2s}
+.road .sunend{transform-box:fill-box;transform-origin:center;animation:glow 3s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.06)}}
+.stairs .me{animation:pulse 2s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{0%{transform:scale(.6);opacity:.9}100%{transform:scale(2.2);opacity:0}}
+.stairs .flag{transform-box:fill-box;transform-origin:0 50%;animation:flag 2.6s ease-in-out infinite}
+@keyframes flag{0%,100%{transform:skewY(0)}50%{transform:skewY(-8deg) scaleX(.92)}}
+.js .stairs .step{opacity:0;transform:translateY(10px);transition:opacity .5s,transform .5s}
+.in .stairs .step{opacity:1;transform:none}
+.in .stairs .s2{transition-delay:.15s}.in .stairs .s3{transition-delay:.3s}.in .stairs .s4{transition-delay:.45s}
+.ico{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#F1E6CC;color:var(--gold-ink);float:right;margin:-2px 0 4px 10px}
+.ico svg{width:20px;height:20px}
+.ico .hand{transform-origin:12px 12px;animation:spin 8s linear infinite}
+.ico .leaf{transform-box:fill-box;transform-origin:10% 90%;animation:leaf 3.6s ease-in-out infinite}
+@keyframes leaf{0%,100%{transform:rotate(0)}50%{transform:rotate(-8deg)}}
+.chairs .lamp{animation:beam 4s ease-in-out infinite}
+/* Reveal as you scroll: added by the script, so without it all is visible. */
+.js .rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.js .rv.in{opacity:1;transform:none}
+.js .rv .st,.js .rv .stack>div,.js .rv .lvl,.js .rv .rung,.js .rv .pain{opacity:0;transform:translateY(12px);transition:opacity .55s ease,transform .55s ease;transition-delay:calc(var(--i,0) * 110ms + 150ms)}
+.js .rv.in .st,.js .rv.in .stack>div,.js .rv.in .lvl,.js .rv.in .rung,.js .rv.in .pain{opacity:1;transform:none}
+.steps{position:relative}
+.js .steps::after{content:"";position:absolute;left:-2px;top:0;width:2px;height:100%;background:var(--gold);transform:scaleY(0);transform-origin:top;transition:transform 1.6s ease .2s}
+.js .in .steps::after{transform:scaleY(1)}
+.stack .tot b{display:inline-block}
+.js .rv.in .stack .tot b{animation:pop .7s cubic-bezier(.3,1.6,.5,1) 1s both}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+.go{position:relative;overflow:hidden}
+.go::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-18deg);animation:shine 4.5s ease-in-out 1.5s infinite}
+@keyframes shine{0%{left:-60%}35%,100%{left:130%}}
+.stick{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);transform:translateY(110%);transition:transform .35s ease}
+.stick.on{transform:none}
+.stick .go{margin:0 auto;min-height:50px;font-size:17px}
+@media(min-width:900px){.stick{display:none}}
+@media(prefers-reduced-motion:reduce){
+  .hero-art *,.ele *,.hg *,.road *,.stairs *,.ico *,.tw,.chairs *,.go::after{animation:none!important;transition:none!important}
+  .js .rv,.js .rv *{opacity:1!important;transform:none!important;transition:none!important}
+  .road .line{stroke-dashoffset:0}.road .node,.stairs .step{opacity:1}.js .steps::after{transform:none}.stick{transition:none}
+}
 </style>
 </head>
 <body>
@@ -121,6 +200,51 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
 <main>
 
 <section aria-labelledby="h-top">
+  <svg class="art hero-art" viewBox="0 0 640 270" role="img" aria-label="A quiet boardroom at sunrise: two chairs at one table, a notebook, and a small gift.">
+  <defs>
+    <linearGradient id="bgW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBF5E8"/><stop offset="1" stop-color="#F3EADB"/></linearGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7E3B8"/><stop offset=".7" stop-color="#FCF2DE"/><stop offset="1" stop-color="#FFFBF2"/></linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A2D1E"/><stop offset="1" stop-color="#241B11"/></linearGradient>
+    <linearGradient id="beamG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6DD" stop-opacity=".9"/><stop offset="1" stop-color="#FFF6DD" stop-opacity="0"/></linearGradient>
+    <radialGradient id="sunG"><stop offset="0" stop-color="#FFF1C9"/><stop offset=".55" stop-color="#EDC977"/><stop offset="1" stop-color="#D9AE57"/></radialGradient>
+    <clipPath id="win"><path d="M236 186V96a84 84 0 0 1 168 0v90Z"/></clipPath>
+  </defs>
+  <rect width="640" height="270" fill="url(#bgW)"/>
+  <g opacity=".35" stroke="#E2D2B2"><path d="M0 214H640"/><path d="M60 214 20 270M180 214 160 270M320 214V270M460 214 480 270M580 214 620 270"/></g>
+  <path d="M236 186V96a84 84 0 0 1 168 0v90Z" fill="url(#sky)"/>
+  <g clip-path="url(#win)">
+    <g class="rays" stroke="#EBCB82" stroke-width="2" stroke-linecap="round" opacity=".55">
+      <path d="M320 50V30M320 194v20M254 112h-20M386 112h20M273 65l-14-14M367 65l14-14M273 159l-14 14M367 159l14 14"/></g>
+    <circle class="sun" cx="320" cy="132" r="30" fill="url(#sunG)"/>
+    <path d="M236 168c30-10 60-12 84-6s54 2 84-8v32H236Z" fill="#E9D6AE" opacity=".8"/>
+    <path d="M236 178c40-8 70-4 100 0s50 0 68-6v14H236Z" fill="#D9C092" opacity=".8"/>
+  </g>
+  <path d="M236 186V96a84 84 0 0 1 168 0v90Z" fill="none" stroke="#CDB48A" stroke-width="5"/>
+  <path d="M320 12V186M236 120H404" stroke="#CDB48A" stroke-width="3"/>
+  <rect x="226" y="184" width="188" height="8" rx="3" fill="#CDB48A"/>
+  <path class="beam" d="M250 192 404 192 470 236 170 236Z" fill="url(#beamG)"/>
+  <circle class="mote" cx="290" cy="206" r="1.8" fill="#E2BF6E"/><circle class="mote" cx="338" cy="212" r="1.4" fill="#E2BF6E"/><circle class="mote" cx="312" cy="200" r="1.6" fill="#E2BF6E"/><circle class="mote" cx="360" cy="208" r="1.3" fill="#E2BF6E"/><circle class="mote" cx="276" cy="214" r="1.2" fill="#E2BF6E"/>
+  <g>
+    <path d="M118 150h40a8 8 0 0 1 8 8v58h-56v-58a8 8 0 0 1 8-8Z" fill="#6E5213"/>
+    <path d="M482 150h40a8 8 0 0 1 8 8v58h-56v-58a8 8 0 0 1 8-8Z" fill="#6E5213"/>
+    <path d="M124 156h28v26h-28Z" fill="#8A6A2A" opacity=".55"/><path d="M488 156h28v26h-28Z" fill="#8A6A2A" opacity=".55"/>
+  </g>
+  <path d="M170 206h300l34 26H136Z" fill="url(#wood)"/>
+  <path d="M170 206h300" stroke="#8C6F3E" stroke-width="2"/>
+  <path d="M150 232v30M490 232v30" stroke="#241B11" stroke-width="7" stroke-linecap="round"/>
+  <g transform="translate(232 211) skewX(-24)"><rect width="56" height="15" rx="2" fill="#FFFDF8"/><path d="M8 5h38M8 10h28" stroke="#C9B48C" stroke-width="1.5"/></g>
+  <g transform="translate(330 208)"><path d="M0 6h16l-2 12H2Z" fill="#F4EFE6" stroke="#CDB48A"/><path d="M16 9h3a3 3 0 0 1 0 6h-3" fill="none" stroke="#CDB48A"/><path d="M5 2c0-2 3-2 3-4M10 3c0-2 3-2 3-4" stroke="#CDB48A" fill="none" stroke-linecap="round" opacity=".7"/></g>
+  <g transform="translate(392 192)">
+    <rect x="0" y="10" width="34" height="18" rx="2" fill="#C9A35A"/><rect x="15" y="10" width="4" height="18" fill="#F5E5BE"/>
+    <g class="lid"><rect x="-2" y="4" width="38" height="7" rx="2" fill="#B48C44"/><rect x="15" y="4" width="4" height="7" fill="#F5E5BE"/>
+      <path d="M17 4c-4-7-11-7-10-2 1 3 6 2 10 2Zm0 0c4-7 11-7 10-2-1 3-6 2-10 2Z" fill="none" stroke="#F5E5BE" stroke-width="2"/></g>
+  </g>
+  <path class="tw" d="M0 -7 L1.6 -1.6 L7 0 L1.6 1.6 L0 7 L-1.6 1.6 L-7 0 L-1.6 -1.6Z" transform="translate(440 182)" fill="#E2BF6E"/>
+  <path class="tw b" d="M0 -7 L1.6 -1.6 L7 0 L1.6 1.6 L0 7 L-1.6 1.6 L-7 0 L-1.6 -1.6Z" transform="translate(386 176) scale(.7)" fill="#E2BF6E"/>
+  <path class="tw c" d="M0 -7 L1.6 -1.6 L7 0 L1.6 1.6 L0 7 L-1.6 1.6 L-7 0 L-1.6 -1.6Z" transform="translate(452 204) scale(.55)" fill="#E2BF6E"/>
+  <g class="pin"><rect x="92" y="108" width="92" height="32" rx="16" fill="#FFFDF8" stroke="#E2D2B2"/><text x="138" y="130" text-anchor="middle" font-size="18" font-weight="700" fill="#6E5213">You</text></g>
+  <g class="pin r"><rect x="438" y="108" width="136" height="32" rx="16" fill="#FFFDF8" stroke="#E2D2B2"/><text x="506" y="130" text-anchor="middle" font-size="18" font-weight="700" fill="#6E5213">Alexandru</text></g>
+</svg>
   <p class="eb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="11" rx="2"/><path d="M7 9V6a5 5 0 0 1 10 0v3"/></svg>The Boardroom · Levels 04 and 05</p>
   <h1 id="h-top" data-h>The future you is already in this room.</h1>
   <p class="lede">You have done the free part, and you have seen things. Now comes the part a page cannot do alone: Alexandru and the team read what you wrote, and you sit down with Alexandru. One hour that turns what you saw into what you do.</p>
@@ -139,6 +263,13 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
 </section>
 
 <section aria-labelledby="h-look">
+  <svg class="side hg" viewBox="0 0 60 84" aria-hidden="true">
+    <path d="M8 4h44M8 80h44" stroke="#6E5213" stroke-width="3" stroke-linecap="round"/>
+    <path d="M13 6c0 18 14 22 14 36S13 60 13 78M47 6c0 18-14 22-14 36s14 18 14 36" fill="none" stroke="#B4975F" stroke-width="2.2"/>
+    <path class="sand-top" d="M17 16h26c-2 10-9 15-13 21-4-6-11-11-13-21Z" fill="#E2BF6E"/>
+    <path class="stream" d="M30 40v30" stroke="#D9AE57" stroke-width="2"/>
+    <path class="sand-bot" d="M16 77c2-9 8-13 14-15 6 2 12 6 14 15Z" fill="#E2BF6E"/>
+  </svg>
   <p class="eb">Twenty honest seconds</p>
   <h2 id="h-look">Look at it straight.</h2>
   <div class="ask">
@@ -155,6 +286,17 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
 </section>
 
 <section aria-labelledby="h-why">
+  <svg class="side ele" viewBox="0 0 120 92" aria-hidden="true">
+    <ellipse cx="60" cy="86" rx="46" ry="5" fill="#EFE6D4"/>
+    <path d="M30 46c0-16 14-26 34-26s32 8 34 22c1 8-2 14-6 18v20h-12v-14H52v14H40V62c-6-4-10-9-10-16Z" fill="#E7DCC6" stroke="#6E5213" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M98 44c2 4 5 6 9 5" fill="none" stroke="#6E5213" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="30" cy="44" r="17" fill="#E7DCC6" stroke="#6E5213" stroke-width="2"/>
+    <path class="ear" d="M36 32c10-4 18 2 17 13-1 9-8 14-16 11" fill="#DCCDB0" stroke="#6E5213" stroke-width="2" stroke-linejoin="round"/>
+    <path class="trunk" d="M16 50c-4 6-6 14-2 20 2 3 6 3 7 0" fill="none" stroke="#6E5213" stroke-width="5" stroke-linecap="round"/>
+    <path class="trunk" d="M16 50c-4 6-6 14-2 20 2 3 6 3 7 0" fill="none" stroke="#E7DCC6" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="25" cy="40" r="2.2" fill="#2A2117"/>
+    <path d="M30 56c-2 2-4 3-7 3" fill="none" stroke="#FFFDF8" stroke-width="2.4" stroke-linecap="round"/>
+  </svg>
   <p class="eb">The elephant in the room</p>
   <h2 id="h-why">Knowing is not yet doing.</h2>
   <div class="pains">
@@ -168,6 +310,13 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
 <section aria-labelledby="h-future">
   <p class="eb">Picture it</p>
   <h2 id="h-future">It is <span data-sun1>Sunday, two weeks from now</span>.</h2>
+  <svg class="art road" viewBox="0 0 640 160" aria-hidden="true">
+    <path d="M30 120 C140 120 170 92 250 86 S420 70 470 46 S580 24 610 22" fill="none" stroke="#EDE3D0" stroke-width="10" stroke-linecap="round"/>
+    <path class="line" d="M30 120 C140 120 170 92 250 86 S420 70 470 46 S580 24 610 22" fill="none" stroke="#B4975F" stroke-width="3" stroke-linecap="round"/>
+    <g class="node n1"><circle cx="30" cy="120" r="9" fill="#2A2117"/><text x="22" y="152" text-anchor="start" font-size="20" font-weight="700" fill="#5E574C">Now</text></g>
+    <g class="node n2"><circle cx="250" cy="86" r="9" fill="#B4975F"/><circle cx="250" cy="86" r="4" fill="#FFFDF8"/><text x="250" y="120" text-anchor="middle" font-size="20" font-weight="700" fill="#5E574C">In two weeks</text></g>
+    <g class="node n3"><circle class="sunend" cx="610" cy="22" r="16" fill="#F1D48E" opacity=".7"/><circle cx="610" cy="22" r="9" fill="#D9AE57"/><text x="618" y="66" text-anchor="end" font-size="20" font-weight="700" fill="#5E574C">In twelve weeks</text></g>
+  </svg>
   <div class="future">
     <p>You kept one if–then plan all week, even on the bad day. You asked one person for something clearly, with a date. You know what your hour is worth, and a selling hour sits in your calendar every week.</p>
     <p>A week later, you hold a dated proof of who you are becoming, one number you read without flinching, and three clients telling you, in their own words, why they buy.</p>
@@ -205,9 +354,9 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
   <p class="eb">Why this week</p>
   <h2 id="h-now">Three honest reasons not to wait.</h2>
   <div class="have">
-    <div class="lvl"><small>Your answers are fresh</small><p>What you wrote in the first three levels is still alive in you. The longer the gap, the more the old habit takes the week back.</p></div>
-    <div class="lvl"><small>The hours are few</small><p>Alexandru takes Boardroom calls on three afternoons a week: Tuesday, Wednesday and Thursday. Join this week, speak next week.</p></div>
-    <div class="lvl"><small>The cost of waiting is yours</small><p data-cost>Every week the same thing stays unsolved is a week your business pays for it. The Boardroom is one hour and $27.</p></div>
+    <div class="lvl"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="leaf" d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15M5 19l7-7"/></svg></span><small>Your answers are fresh</small><p>What you wrote in the first three levels is still alive in you. The longer the gap, the more the old habit takes the week back.</p></div>
+    <div class="lvl"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path class="hand" d="M12 12V7"/><path d="M12 12h3.5"/></svg></span><small>The hours are few</small><p>Alexandru takes Boardroom calls on three afternoons a week: Tuesday, Wednesday and Thursday. Join this week, speak next week.</p></div>
+    <div class="lvl"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6.5" rx="7" ry="2.5"/><path d="M5 6.5v4c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-4M5 10.5v4c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-4M5 14.5v3c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-3"/></svg></span><small>The cost of waiting is yours</small><p data-cost>Every week the same thing stays unsolved is a week your business pays for it. The Boardroom is one hour and $27.</p></div>
   </div>
   <div class="cta"><a class="go" href="/pay/?step=session">Unlock The Boardroom · $27 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     <p class="under">If The Boardroom isn’t for you, write to us within 14 days and you get your $27 back.</p></div>
@@ -216,6 +365,15 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
 <section aria-labelledby="h-climb">
   <p class="eb">The whole climb</p>
   <h2 id="h-climb">Start here, or start higher.</h2>
+  <svg class="art stairs" viewBox="0 0 640 240" aria-hidden="true">
+    <g class="step s1"><rect x="10" y="176" width="152" height="58" rx="8" fill="#FBF7EE" stroke="#B4975F" stroke-width="2.5"/><text x="86" y="201" text-anchor="middle" font-size="19" font-weight="700" fill="#6E5213">Boardroom</text><text x="86" y="224" text-anchor="middle" font-size="18" fill="#6E5213">$27</text></g>
+    <g class="step s2"><rect x="166" y="130" width="152" height="104" rx="8" fill="#F6F4EF" stroke="#E2D9C6"/><text x="242" y="156" text-anchor="middle" font-size="19" font-weight="700" fill="#5E574C">LAB</text><text x="242" y="179" text-anchor="middle" font-size="18" fill="#5E574C">$97</text></g>
+    <g class="step s3"><rect x="322" y="84" width="152" height="150" rx="8" fill="#F6F4EF" stroke="#E2D9C6"/><text x="398" y="110" text-anchor="middle" font-size="19" font-weight="700" fill="#5E574C">HUB</text><text x="398" y="133" text-anchor="middle" font-size="18" fill="#5E574C">$750</text></g>
+    <g class="step s4"><rect x="478" y="38" width="152" height="196" rx="8" fill="#2A2117"/><text x="554" y="64" text-anchor="middle" font-size="19" font-weight="700" fill="#F5EFE3">Summit</text><text x="554" y="87" text-anchor="middle" font-size="18" fill="#E2D2B2">$1,989</text>
+      <path d="M554 38V6" stroke="#F5EFE3" stroke-width="2.5"/><path class="flag" d="M555 7h28l-7 8 7 8h-28Z" fill="#D9AE57"/></g>
+    <circle class="me" cx="24" cy="156" r="8" fill="#D9AE57"/><circle cx="24" cy="156" r="8" fill="#B4975F" stroke="#FFFDF8" stroke-width="2.5"/>
+    <text x="40" y="162" font-size="18" font-weight="700" fill="#6E5213">You are here</text>
+  </svg>
   <p class="lede" style="font-size:17px">Each step includes every step below it. Pick the one that fits the size of your business today.</p>
   <div class="ladder">
     <div class="rung here"><b>The Boardroom<span class="tag">You are here</span></b><span class="p">$27</span><p>Levels 04–05, open at once · one hour 1:1 with Alexandru</p><p class="fit">Fits if you have an idea or your first clients, and want to see clearly before you spend more.</p></div>
@@ -239,12 +397,37 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
 </section>
 
 <section class="end" aria-labelledby="h-end">
+  <svg class="art chairs" viewBox="0 0 640 120" aria-hidden="true" style="margin-bottom:14px">
+    <path class="lamp" d="M250 0h140l60 96H190Z" fill="#FFF6DD" opacity=".7"/>
+    <path d="M200 82h240l24 18H176Z" fill="#2A2117"/><path d="M196 100v16M444 100v16" stroke="#2A2117" stroke-width="6" stroke-linecap="round"/>
+    <path d="M128 48h34a7 7 0 0 1 7 7v57h-48V55a7 7 0 0 1 7-7Z" fill="#6E5213"/><path d="M478 48h34a7 7 0 0 1 7 7v57h-48V55a7 7 0 0 1 7-7Z" fill="#6E5213"/>
+    <g transform="translate(302 66)"><rect x="0" y="6" width="32" height="16" rx="2" fill="#C9A35A"/><rect x="14" y="6" width="4" height="16" fill="#F5E5BE"/><rect x="-2" y="1" width="36" height="6" rx="2" fill="#B48C44"/><path d="M16 1c-4-6-10-6-9-1 1 2 5 1 9 1Zm0 0c4-6 10-6 9-1-1 2-5 1-9 1Z" fill="none" stroke="#F5E5BE" stroke-width="2"/></g>
+    <path class="tw" d="M0 -7 L1.6 -1.6 L7 0 L1.6 1.6 L0 7 L-1.6 1.6 L-7 0 L-1.6 -1.6Z" transform="translate(346 58) scale(.8)" fill="#E2BF6E"/>
+  </svg>
   <h2 id="h-end" data-end>You started this. Let’s finish the first chapter together.</h2>
   <div class="cta"><a class="go" href="/pay/?step=session">Unlock The Boardroom · $27 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     <p class="under">Alexandru and the team are here for you. Questions first? <a href="/ground-plan/#ask">Ask Alexandru</a>.</p></div>
 </section>
 
 </main>
+<div class="stick" data-stick aria-hidden="true"><a class="go" href="/pay/?step=session" tabindex="-1">Unlock The Boardroom · $27 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+<script>
+// Motion for the Boardroom page: reveal each part as it comes into view, and
+// a slim pay bar on phones between the first button and the last one.
+(() => {
+  document.documentElement.classList.add('js');
+  const secs = [...document.querySelectorAll('main > section')].slice(1);
+  secs.forEach((s) => { s.classList.add('rv'); s.querySelectorAll('.st,.stack>div,.lvl,.rung,.pain').forEach((el, i) => el.style.setProperty('--i', i)); });
+  if (!('IntersectionObserver' in window)) { secs.forEach((s) => s.classList.add('in')); return; }
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  secs.forEach((s) => io.observe(s));
+  const bar = document.querySelector('[data-stick]'), top = document.querySelector('main > section .cta'), end = document.querySelector('.end');
+  let pastTop = false, atEnd = false;
+  const show = () => { const on = pastTop && !atEnd; bar.classList.toggle('on', on); document.body.style.paddingBottom = on ? '76px' : ''; };
+  new IntersectionObserver(([e]) => { pastTop = !e.isIntersecting && e.boundingClientRect.top < 0; show(); }).observe(top);
+  new IntersectionObserver(([e]) => { atEnd = e.isIntersecting; show(); }, { threshold: 0.05 }).observe(end);
+})();
+</script>
 <script type="module">
   // Everything here is read from the founder's own account and their taps on
   // this page. Nothing is sent. Without an account the page stays general.
