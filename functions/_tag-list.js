@@ -48,6 +48,7 @@ const CONSENT = 'Only with their yes to letters, and only while Mailchimp runs o
 const LANDING_PAGES = {
   road1: ['The Founder’s Blueprint sales page, Road 1', '/road1/'], road2: ['The Founder’s Blueprint sales page, Road 2', '/road2/'],
   road3: ['The Founder’s Blueprint sales page, Road 3', '/road3/'], road4: ['The Founder’s Blueprint sales page, Road 4', '/road4/'],
+  road5: ['The Boardroom sales page for ads, Road 5', '/road5/'],
   north1: ['The Leader’s North Star sales page, North 1', '/north1/'], north2: ['The Leader’s North Star sales page, North 2', '/north2/'],
   north3: ['The Leader’s North Star sales page, North 3', '/north3/'], compass: ['The North Star box (The Leader’s North Star, with no sales page before it)', '/northstar/'],
   summit: ['The Summit sales page', '/northstar/summit/'],
@@ -57,6 +58,7 @@ const LANDING_PAGES = {
  *  landing of the page that sent them there (public/pay/pay.js FROM). */
 const VIA_PAY = {
   road1: ' Also on the pay page (/pay/), when someone not signed in taps Unlock.',
+  road5: ' Its only button goes to the pay page for The Boardroom (/pay/?step=session&from=road5), and the account is made there.',
   summit: ' Since 2 Nov 2026 “Claim my place” goes to the pay page for The Summit (/pay/?step=premium&from=summit), and the account is made there.',
 };
 const STAGE_WORDS = { build: 'Building', grow: 'Growing', scale: 'Scaling' };
@@ -114,7 +116,7 @@ export const SITE_TAGS = [
   { id: '3359654', label: 'The Leadionaire free-code form', what: 'Leadionaire: asked for the free Unshakeable code after Level I.', from: `${ES}/play`, fromName: '/play (Leadionaire)', when: 'They send the free-code card after Level I.', by: 'exploraself: public/leadionaire-game.html (mailchimpCodeTags)' },
   { id: '3359658', label: 'The Leadionaire winner form', name: 'Leadionaire winner', what: 'Leadionaire: won the whole game and asked for the mentoring.', from: `${ES}/play`, fromName: '/play (Leadionaire)', when: 'They send the winner form at the end of the game.', by: 'exploraself: public/leadionaire-game.html (mailchimpWinnerTags)' },
   { id: DEFAULT_FORM.tag, label: 'The Link to Lead form', what: 'Link to Lead: joined through the public sign-up form of linktolead.exploraself.com.', from: `${LTL}/ground-plan/`, fromName: 'linktolead, only when Mailchimp runs without the API key (form mode)', when: 'An account is made while Mailchimp is in form mode, and the test join in /mentor.', by: 'functions/_mailchimp.js DEFAULT_FORM' },
-  { id: '', name: 'Assessment 2 weektest', label: 'The Two-Week Test form', what: 'The Two-Week Test: the free assessment (can the business run without the founder?).', from: `${ES}/two-week-test`, fromName: '/two-week-test', when: 'They sign up for the Two-Week Test. Waits for its form link: until then the form adds no tag.', by: 'exploraself: src/data/lead-magnets.ts (twoweek)' },
+  { id: '3359695', name: 'Assessment 2 weektest', label: 'The Two-Week Test form', what: 'The Two-Week Test: the free assessment (can the business run without the founder?).', from: `${ES}/two-week-test`, fromName: '/two-week-test', when: 'They sign up for the Two-Week Test (first name, email, phone), before the twenty questions. Asked again every time.', by: 'exploraself: src/data/lead-magnets.ts (twoweek)' },
 ];
 
 /** Names no code adds any more (read from this repo's history, 27 Oct –

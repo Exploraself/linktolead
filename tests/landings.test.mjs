@@ -22,6 +22,7 @@ const MAP = {
   road2: ['linktolead-road2', 'blueprint', 'launchpad'],
   road3: ['linktolead-road3', 'blueprint', 'launchpad'],
   road4: ['linktolead-road4', 'blueprint', 'launchpad'],
+  road5: ['linktolead-road5', 'blueprint', 'launchpad'],
   summit: ['linktolead-summit', 'blueprint', 'launchpad'],
   north2: ['linktolead-north2', 'northstar', 'northstar'],
   north3: ['linktolead-north3', 'northstar', 'northstar'],

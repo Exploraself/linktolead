@@ -22,7 +22,7 @@ let key = ''; try { key = localStorage.getItem(KEY) || ''; } catch { /* private 
  *  without the key (functions/_team.js); the key still works for Alexandru. */
 const acct = () => { try { return localStorage.getItem('ftb-token') || ''; } catch { return ''; } };
 const H = (extra) => Object.assign({ 'x-mentor-key': key, 'x-account-token': acct() }, extra || {});
-const TABS = [['today', 'Today'], ['founders', 'Founders'], ['inbox', 'Inbox'], ['grow', 'Grow'], ['settings', 'Settings']];
+const TABS = [['today', 'Today'], ['founders', 'Founders'], ['inbox', 'Inbox'], ['refunds', 'Refunds'], ['grow', 'Grow'], ['settings', 'Settings']];
 /** Old addresses still land in the right place (#questions, #mailchimp before 2 Nov 2026). */
 const OLD_TABS = { questions: 'inbox', mailchimp: 'settings' };
 /** One small line icon per tab, in the text colour (rule 13); the label carries the meaning. */
@@ -31,6 +31,7 @@ const TAB_ICONS = {
   founders: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5M16 4.5a3.5 3.5 0 010 7M18 15c2 .7 3 2.3 3.5 5"/>',
   inbox: '<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 2h6l1-2h5"/>',
   grow: '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
+  refunds: '<path d="M9 7H5V3"/><path d="M5.4 7A8 8 0 1 1 4 12"/><path d="M14.4 9.6c-.4-.8-1.3-1.2-2.3-1.2-1.3 0-2.3.7-2.3 1.7 0 2.4 4.8 1.2 4.8 3.7 0 1-1 1.8-2.5 1.8-1 0-2-.5-2.4-1.3M12 7.2v1.2M12 15.6v1.2"/>',
   settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
 };
 const icon = (k) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${TAB_ICONS[k] || ''}</svg>`;
@@ -134,7 +135,35 @@ async function load() {
 
 function tabsHTML() {
   const n = (data.waiting || []).length + toConfirm().length;
-  return TABS.map(([k, label]) => `<button type="button" role="tab" aria-selected="${tab === k}" data-tab="${k}">${icon(k)}<span>${esc(label)}</span>${k === 'inbox' && n ? `<b>${n}<span class="vh"> waiting</span></b>` : ''}</button>`).join('');
+  const rf = (data.refunds || []).filter((x) => !x.done_at).length;
+  return TABS.map(([k, label]) => `<button type="button" role="tab" aria-selected="${tab === k}" data-tab="${k}"${k === 'refunds' ? ' class="tab-red"' : ''}>${icon(k)}<span>${esc(label)}</span>${k === 'inbox' && n ? `<b>${n}<span class="vh"> waiting</span></b>` : k === 'refunds' && rf ? `<b>${rf}<span class="vh"> open</span></b>` : ''}</button>`).join('');
+}
+
+// ── Refunds (Alexandru, 2 Nov 2026) ──────────────────────────────────────────
+// Founders who tapped "Ask for a refund" in their Base Camp: the programme they
+// name, their name and email, and what Stripe holds for them. Alexandru gets
+// in touch himself; "Mark done" only files the request (the payments right).
+const STEP_PRICE = { session: '$27', lab: '$97', hub: '$750', premium: '$1,989' };
+function refundsHTML() {
+  const money = (c) => `$${(Number(c) / 100).toLocaleString('en-US')}`;
+  const list = data.refunds || [], open = list.filter((x) => !x.done_at), done = list.filter((x) => x.done_at);
+  const payOfAsk = (x) => (data.paid || []).filter((p) => p.mode === 'live' && x.student_id && p.student_id === x.student_id);
+  const row = (x) => {
+    const pays = payOfAsk(x), s = (data.students || []).find((y) => y.id === x.student_id);
+    const paidLine = pays.length ? pays.map((p) => `Paid ${esc(STEP_NAMES[p.step] || p.step)}${p.amount != null ? ` · ${esc(money(p.amount))}` : ''} · ${esc(day(p.at))}`).join('<br>')
+      : x.student_id ? 'No live Stripe payment on this account.' : 'No account with this email.';
+    return `<li class="rf-row${x.done_at ? ' done' : ''}">
+      <div class="rf-who"><b>${esc(x.name)}</b><span class="tiny sel">${esc(x.email)}</span>${s ? `<button type="button" class="linkish tiny" data-drawer="${esc(s.id)}">Open their account</button>` : ''}</div>
+      <div class="rf-what"><span class="rf-step">${esc(STEP_NAMES[x.step] || x.step)} · ${esc(STEP_PRICE[x.step] || '')}</span><span class="tiny">Asked ${esc(when(x.asked_at))} · ${esc(day(x.asked_at))}</span><span class="tiny">${paidLine}</span></div>
+      <div class="rf-act">${x.done_at ? `<span class="tiny">Done ${esc(day(x.done_at))}${x.done_by ? ` · ${esc(x.done_by)}` : ''}</span>` : ''}
+        ${can('payments') ? `<button type="button" class="btn${x.done_at ? '' : ' red'}" data-rfdone="${esc(x.id)}" data-v="${x.done_at ? '0' : '1'}">${x.done_at ? 'Open again' : 'Mark done'}</button>` : ''}</div>
+    </li>`;
+  };
+  return `<section class="panel rf-panel" aria-labelledby="rf-h"><h2 id="rf-h">Refunds</h2>
+    <p class="sub">Founders who tapped “Ask for a refund” in their Base Camp. Get in touch with each one yourself; nothing is refunded from here. Refunds are made in Stripe.</p>
+    ${open.length ? `<ul class="rf-list">${open.map(row).join('')}</ul>` : '<p class="tiny">No open requests.</p>'}
+    ${done.length ? `<details class="more"><summary>Done (${done.length})</summary><ul class="rf-list">${done.map(row).join('')}</ul></details>` : ''}
+  </section>`;
 }
 
 // ── Today ────────────────────────────────────────────────────────────────────
@@ -734,6 +763,7 @@ function draw() {
   const S = summary(data.students, data.waiting);
   const said = flash ? `<p class="flash" role="status">${esc(flash)}</p>` : '';
   const pane = tab === 'founders' ? foundersHTML()
+    : tab === 'refunds' ? refundsHTML()
     : tab === 'inbox' ? `${questionsHTML()}${bookingsHTML()}<section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
     : tab === 'grow' ? growHTML(S)
     : tab === 'settings' ? `${isTeam() ? teamCanHTML() : ''}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>${mailchimpHTML()}${can('payments') ? '<section class="panel" id="stripebox"><p class="tiny">Loading the payments…</p></section>' : ''}${can('mailchimp') ? '<section class="panel" id="mctags"></section>' : ''}${bookLinksHTML()}${mentorsHTML()}`
@@ -975,6 +1005,13 @@ document.addEventListener('click', async (e) => {
   if (!b) return;
   const d = b.dataset;
   if (d.tab) return goTab(d.tab);
+  if (d.rfdone) {
+    b.disabled = true;
+    const r = await act({ action: 'refund-done', id: d.rfdone, done: d.v === '1' });
+    if (r.ok) { const x = (data.refunds || []).find((y) => y.id === d.rfdone); if (x) { x.done_at = d.v === '1' ? new Date().toISOString() : null; x.done_by = d.v === '1' ? ((data.you && data.you.name) || 'Alexandru') : null; } draw(); }
+    else { flash = (r.data && r.data.error) || 'That did not save. Try again.'; draw(); }
+    return;
+  }
   if (d.gcard) { F = { ...NO_FILTER, group: d.gcard }; q = ''; $('#q').value = ''; return goTab('founders'); }
   if ('newcard' in d) { F = { ...NO_FILTER, act: 'new' }; q = ''; $('#q').value = ''; return goTab('founders'); }
   if (d.f) { F[d.f] = d.v; flash = ''; return draw(); }
