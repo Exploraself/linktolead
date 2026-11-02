@@ -31,7 +31,7 @@ export async function onRequestGet({ request, env }) {
   if (s.payment_status !== 'paid') return json({ ok: true, paid: false, step: s.metadata && s.metadata.step });
   const out = await applyPaid(env, D, origin(request), s);
   const now = await D.prepare('SELECT tier FROM student WHERE id = ?').bind(me.id).first();
-  return json({ ok: true, paid: true, step: out.step || (s.metadata && s.metadata.step), tier: now ? now.tier : null });
+  return json({ ok: true, paid: true, step: out.step || (s.metadata && s.metadata.step), first: out.first || 4, tier: now ? now.tier : null });
 }
 
 export async function onRequestPost({ request, env }) {

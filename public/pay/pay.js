@@ -91,7 +91,7 @@ async function confirm(cs, steps) {
       try { history.replaceState(null, '', `/pay/?step=${encodeURIComponent(d.step || '')}&paid=1`); } catch { /* old browser */ }
       return draw(`<p class="eb">${ICON.check}Thank you</p><h1>${esc(S.name || 'Your step')} is open</h1>
         <p class="ok">Your payment went through. We have emailed you what opened and how to book your session.</p>
-        <a class="go" href="/ground-plan/#programme-${S.first || 4}">Open Level ${pad(S.first || 4)}</a>
+        <a class="go" href="/ground-plan/#programme-${d.first || S.first || 4}">Open Level ${pad(d.first || S.first || 4)}</a>
         <a class="ghost" href="/ground-plan/#home">My Base Camp</a>`);
     }
     if (d && d.error && !/reach|Stripe said/i.test(d.error)) return draw(`<h1>We could not check this payment</h1><p class="err">${esc(d.error)}</p><a class="ghost" href="/ground-plan/#home">Back to my Base Camp</a>`);

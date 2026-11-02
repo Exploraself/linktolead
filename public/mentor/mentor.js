@@ -374,7 +374,7 @@ async function loadStripe() {
   if (!$('#stripebox')) return;
   if (!r.ok) { box.innerHTML = '<h2>Payments</h2><p class="tiny">Could not load the payments.</p>'; return; }
   const d = r.data, P = d.payments || [];
-  const state = !d.mode ? '<span class="warn">Not connected: STRIPE_SECRET_KEY is not set in Cloudflare.</span>'
+  const state = !d.mode ? `<span class="warn">Not connected: ${esc(d.problem || 'STRIPE_SECRET_KEY is not set in Cloudflare.')}</span>`
     : `${d.mode === 'test' ? 'Test mode (no real money)' : 'Live'} · webhook ${d.connected ? `connected ${esc(when(d.at))}` : 'connects itself at the first payment'}`;
   const money = (c) => `$${(Number(c) / 100).toLocaleString('en-US')}`;
   box.innerHTML = `<h2>Payments · Stripe</h2><p class="tiny">${state}</p>

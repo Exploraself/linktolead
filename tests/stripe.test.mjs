@@ -6,7 +6,7 @@
 
 import { createHmac } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { STEPS, form, stripeMode, verifySignature, applyPaid, dollars } from '../functions/_stripe.js';
+import { STEPS, form, stripeMode, keyProblem, verifySignature, applyPaid, dollars } from '../functions/_stripe.js';
 import { onRequestGet as payGet, onRequestPost as payPost } from '../functions/api/checkout.js';
 import { onRequestPost as hook } from '../functions/api/stripe-webhook.js';
 import { onRequestGet as mentorGet, onRequestPost as mentorPost } from '../functions/api/mentor.js';
@@ -36,6 +36,14 @@ ok(!(await verifySignature('{"a":1}', sign('{"a":1}', 'whsec_1', Math.floor(Date
 const U = unlockedLetter(B, { first: 'maya', step: 'session', to: 'm@x.com' });
 ok(U.subject === 'It’s unlocked: The Boardroom' && /^Hi Maya,/.test(U.text) && /Thank you/.test(U.text) && /Levels 04 and 05 are open/.test(U.text) && /forms\.gle/.test(U.text) && U.html.includes('/ground-plan/#programme-4') && /The team and I are here for you/.test(U.text), 'It’s unlocked: thanks, what opened, the session, the booking link, the first level, the team');
 ok(!/P\.S\./.test(U.text), 'no offer in the letter: they just bought');
+// A higher step includes every step below it (Alexandru, 2 Nov 2026).
+const opened = (step, from) => unlockedLetter(B, { first: 'Maya', step, from }).text;
+ok(/Levels 04 to 09 are open/.test(opened('lab', 'free')) && /#programme-4|Open Level 04/.test(opened('lab', 'free')), 'the LAB bought straight away: The Boardroom’s levels are included (04 to 09)');
+ok(/Levels 06 to 09 are open/.test(opened('lab', 'session')), 'the LAB after The Boardroom: 06 to 09');
+ok(/Levels 04 to 12 are open[^]*Nothing is held back/.test(opened('hub', 'free')), 'the HUB: everything, 04 to 12');
+ok(/Levels 04 to 12 are open[^]*Everything is yours/.test(opened('premium', 'free')), 'The Summit: everything, at once');
+const { holds } = await import('../public/content.js');
+ok(['session', 'lab', 'hub'].every((g) => holds('hub', g)) && ['session', 'lab', 'hub', 'premium'].every((g) => holds('premium', g)) && holds('lab', 'session'), 'the levels follow: the HUB and The Summit open every level, the LAB includes The Boardroom');
 
 // A fake Stripe and a fake Resend.
 const calls = [], sent = [];
@@ -114,7 +122,7 @@ sessions.cs_test_5 = paid('cs_test_5', tom, 'lab');
 [st, j] = await jsonOf(await payGet({ request: req('/api/checkout?cs=cs_test_5', { token: maya }), env }));
 ok(st === 403 && tierOf(tom) === 'free', 'someone else’s payment: refused');
 [st, j] = await jsonOf(await payGet({ request: req('/api/checkout?cs=cs_test_5', { token: tom }), env }));
-ok(st === 200 && j.paid && j.step === 'lab' && tierOf(tom) === 'lab', 'back from Stripe: Stripe confirms, the LAB opens');
+ok(st === 200 && j.paid && j.step === 'lab' && tierOf(tom) === 'lab' && j.first === 4, 'back from Stripe: Stripe confirms, the LAB opens, from Level 04 (bought straight from free)');
 sessions.cs_test_6 = { ...paid('cs_test_6', tom, 'hub'), payment_status: 'unpaid' };
 [st, j] = await jsonOf(await payGet({ request: req('/api/checkout?cs=cs_test_6', { token: tom }), env }));
 ok(j.paid === false && tierOf(tom) === 'lab', 'back from Stripe before it is paid: waits, nothing opens');
@@ -133,5 +141,13 @@ ok(/function boardroomCta\(cls\)/.test(app) && !/href="\$\{esc\(BOOKING\)\}" tar
 const pay = readFileSync(new URL('../public/pay/pay.js', import.meta.url), 'utf8');
 ok(/test \? '<p class="test"><b>Test mode\.<\/b>[^']*4242 4242 4242 4242/.test(pay), 'test mode shows the test card, and only in test mode');
 ok(/if \(d && d\.paid\)/.test(pay) && !/It is open[^]*before/.test(pay), '/pay/ says “open” only when the site says Stripe confirmed it');
+
+// What /mentor says when the key in Cloudflare is the wrong kind (never the key itself).
+const K = (v) => ({ STRIPE_SECRET_KEY: v });
+ok(stripeMode(K('"rk_test_abc123"')) === 'test' && stripeMode(K('Bearer rk_test_abc123')) === 'test', 'quote marks or “Bearer” around the key are forgiven');
+ok(stripeMode(K('pk_test_abc123')) === '' && /publishable key/.test(keyProblem(K('pk_test_abc123'))), 'the publishable key is named as the problem');
+ok(/webhook signing secret/.test(keyProblem(K('whsec_abc'))), 'a webhook secret is named as the problem');
+ok(/not set/.test(keyProblem({})) && keyProblem(K('rk_test_abc')) === '', 'missing key: “not set”; a good key: no problem');
+ok(!keyProblem(K('xx_secret_value_9')).includes('secret_value'), 'the message never repeats the value');
 
 done();
