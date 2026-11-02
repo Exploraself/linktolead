@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Who is signed in</title>
+</head>
+<body>
+<script>
+/* Who is signed in on this device (Alexandru, 2 Nov 2026: "I'm logged in, so
+ * the assessments should know my name and email"). exploraself.com's sign-up
+ * forms open this page in a hidden frame and ask; it answers only
+ * exploraself.com, and only with the first name and email of the account
+ * signed in here (never the token, never any answer). Both sites are the same
+ * site (exploraself.com), so the browser lets the frame read this storage. */
+(function () {
+  var OK = ['https://exploraself.com', 'https://www.exploraself.com'];
+  function me() {
+    try {
+      if (!localStorage.getItem('ftb-token')) return null;
+      var c = JSON.parse(localStorage.getItem('ftb-me') || 'null') || {};
+      var s = JSON.parse(localStorage.getItem('ftb-v1') || 'null') || {};
+      var who = (c && c.email) ? c : (s.me || {});
+      if (!who.email) return null;
+      return { name: String(who.name || '').trim().split(/\s+/)[0] || '', email: String(who.email) };
+    } catch (e) { return null; }
+  }
+  window.addEventListener('message', function (e) {
+    if (OK.indexOf(e.origin) < 0 || !e.data || e.data.type !== 'es-who') return;
+    e.source.postMessage({ type: 'es-who', me: me() }, e.origin);
+  });
+})();
+</script>
+</body>
+</html>
