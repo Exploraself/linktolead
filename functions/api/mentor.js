@@ -24,7 +24,7 @@ import { DOMAIN_STEPS, WHATIF_STEPS, ALL_STEP_IDS } from '../_plans.js';
 import { GROWTH_IDS, GROWTH_SQL, GROWTH_BLANK_IDS } from '../_growth.js';
 import { sendLink, signinUrl } from './signin.js';
 import { send, origin, mailState } from '../_mail.js';
-import { mentorLetter, answerLetter, teamInvite } from '../_letters.js';
+import { mentorLetter, answerLetter, teamInvite, giftLetter } from '../_letters.js';
 import { letterContext, mentors, saveMentor } from '../_mentor.js';
 import { LIBRARY_ITEMS } from './library.js';
 import { toolNames } from '../_tools.js';
@@ -261,9 +261,16 @@ export async function onRequestGet({ request, env }) {
   // page builds whole sentences from them (theirWords in dash.js).
   const words = await D.prepare(`SELECT w.student_id, w.key, w.value, w.updated_at, s.name, s.email FROM sheet w JOIN student s ON s.id = w.student_id
       WHERE w.key LIKE 'w.v4.%' AND w.value <> '' ORDER BY w.updated_at DESC LIMIT 600`).all();
+  // Payments, for the numbers at the top of Grow (Alexandru, 2 Nov 2026):
+  // who paid, which step, live or test, when. The amount only for those who
+  // may see the payments.
+  await payments(D, 1);
+  const seeMoney = rights.includes('payments');
+  const paid = ((await D.prepare('SELECT student_id, step, amount, mode, at FROM payment ORDER BY at DESC LIMIT 2000').all()).results || [])
+    .map((x) => ({ student_id: x.student_id, step: x.step, mode: x.mode, at: x.at, ...(seeMoney ? { amount: x.amount } : {}) }));
   // Who is looking, for the greeting on Today: a team member by name; the key is the default mentor.
   const you = access.by === 'team' && access.me ? { name: access.me.name || '', team: true, can: rights } : { key: true, can: rights };
-  return json({ ok: true, you, students, words: words.results || [], waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, totalGrowth: GROWTH_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
+  return json({ ok: true, you, students, paid, words: words.results || [], waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, totalGrowth: GROWTH_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
     mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags,
       forgotten: (gone.results || []).map((r) => r.email).filter(Boolean), forgottenWhy: FORGOTTEN } });
 }
@@ -310,6 +317,48 @@ async function post({ request, env }) {
     if (access.by !== 'key' && access.me && String(access.me.email || '').toLowerCase() === email) return bad('Nobody changes their own rights. Ask Alexandru.', 403);
     if (!Array.isArray(body.can)) return bad('Choose the rights first.');
     return json({ ok: true, email, can: await setRights(D, email, body.can, now()) });
+  }
+
+  if (body.action === 'invite') {
+    // Invite a founder by email, at the step Alexandru chooses, free
+    // (Alexandru, 2 Nov 2026). A new address gets a free account (no password
+    // yet, no consent to letters, so nothing goes to Mailchimp until they say
+    // yes); an existing one is moved up, never down. The step opens now, and
+    // the gift letter signs them in (and asks a new account for a password).
+    const email = clean(body.email, 200).toLowerCase();
+    if (!looksLikeEmail(email)) return bad('That email does not look complete.');
+    const step = TIER_ORDER.includes(body.step) ? body.step : null;
+    if (!step) return bad('Choose the step to open for them.');
+    if (!mailState(env).ready) return bad('Email is not switched on yet, so the invitation cannot go.', 503);
+    const first = clean(body.first, 60).split(/\s+/)[0] || '';
+    let me = await D.prepare('SELECT id, email, name, tier FROM student WHERE email = ?').bind(email).first();
+    const fresh = !me;
+    if (fresh) {
+      const id = newToken(), stamp = now();
+      await D.prepare('INSERT INTO student (id,email,name,phone,company,stage,tier,joined_at,last_seen_at) VALUES (?,?,?,?,?,?,?,?,?)')
+        .bind(id, email, first, '', '', null, 'free', stamp, stamp).run();
+      await profile(D, id, { industry: null, consent: false, source: 'mentor-invite' });
+      await D.prepare("UPDATE student_profile SET signup_type = 'invited' WHERE student_id = ?").bind(id).run();
+      await log(id, 'signup', 'mentor-invite');
+      me = { id, email, name: first, tier: 'free' };
+    } else if (TIER_ORDER.indexOf(step) < TIER_ORDER.indexOf(me.tier || 'free') || (step === (me.tier || 'free') && step !== 'free')) {
+      return bad(`${me.name || email} already has ${STEPS[me.tier || 'free']}. Nothing changed, and no letter went.`, 409);
+    }
+    if (step !== (me.tier || 'free')) {
+      await D.prepare('UPDATE student SET tier=? WHERE id=?').bind(step, me.id).run();
+      await log(me.id, 'mentor-step', JSON.stringify({ from: me.tier || 'free', to: step, gift: true }));
+      await syncFounder(env, D, me.id, 'tags').catch(() => null);
+    }
+    const auth = await D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(me.id).first();
+    const needsPassword = !(auth && auth.pass_hash);
+    const base = origin(request);
+    const url = await signinUrl(D, base, me.id, { reset: needsPassword, ttl: 7 * 24 * 3600_000 });
+    const p = await profile(D, me.id);
+    const ctx = await letterContext(D, me.id);
+    const r = await send(env, { to: email, ...giftLetter(base, { first: first || String(me.name || '').split(' ')[0], step, url, fresh: needsPassword, to: email, ...ctx }),
+      why: 'Alexandru invited this address to The Founder’s Blueprint on ExploraSelf.', unsubUrl: unsubLink(base, p) });
+    await log(me.id, r.ok ? 'mentor-invite' : 'mentor-invite-failed', JSON.stringify({ step, fresh, why: r.ok ? null : r.why || null }));
+    return json({ ok: true, id: me.id, fresh, step, sent: r.ok, why: r.ok ? null : (r.why || 'The email did not send.') });
   }
 
   if (body.action === 'team-add' || body.action === 'team-remove') {

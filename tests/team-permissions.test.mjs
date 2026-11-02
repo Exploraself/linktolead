@@ -32,7 +32,7 @@ const asKey = (body) => mentorPost({ request: req('/api/mentor', { method: 'POST
 ok(TEAM_CAN.join() === DEFAULT_RIGHTS.join() && !KEY_ONLY.some((a) => DEFAULT_RIGHTS.includes(ACTION_RIGHT[a])), 'a new member has the defaults; the rest waits for a tick');
 for (const a of ['pause', 'delete', 'team-add', 'team-remove', 'team-can', 'mentor-save', 'mentor-assign', 'mc-test', 'mc-backfill']) ok(KEY_ONLY.includes(a) && ALL_RIGHTS.includes(ACTION_RIGHT[a]), `${a}: not by default, and tickable`);
 for (const a of ['reply', 'message', 'signin-link', 'reset-link', 'series-hold', 'tier']) ok(DEFAULT_RIGHTS.includes(ACTION_RIGHT[a]), `${a}: the team may, by default`);
-ok(ALL_RIGHTS.length === 12 && TEAM_RIGHTS.every(([k, w]) => k && w && !/[{}]/.test(w)) && ALL_RIGHTS.includes('payments') && ALL_RIGHTS.includes('mailchimp') && ALL_RIGHTS.includes('team'), 'twelve rights, each in plain words, payments, Mailchimp and the team among them');
+ok(ALL_RIGHTS.length === 13 && TEAM_RIGHTS.every(([k, w]) => k && w && !/[{}]/.test(w)) && ALL_RIGHTS.includes('payments') && ALL_RIGHTS.includes('mailchimp') && ALL_RIGHTS.includes('team') && ALL_RIGHTS.includes('invite') && !DEFAULT_RIGHTS.includes('invite'), 'thirteen rights, each in plain words, payments, Mailchimp, the team and inviting a founder among them; inviting is not in the default list');
 
 // Reading: everything.
 let [st, j] = await jsonOf(await mentorGet({ request: req('/api/mentor', { token: team }), env }));
@@ -89,7 +89,7 @@ ok(st === 200, 'with the payments right: the payments open');
 [st, j] = await jsonOf(await mentorGet({ request: req('/api/mentor', { token: team }), env }));
 ok(j.you.can.join() === 'reply,message,pause,payments', 'the page is told exactly what this member can do');
 [st, j] = await jsonOf(await mentorGet({ request: req('/api/mentor?team=1', { token: team }), env }));
-ok(st === 200 && j.canEdit === false && j.rights.length === 12 && j.team.find((m) => m.email === 'team.member@example.com').can.join() === 'reply,message,pause,payments', 'the team list shows each member’s rights; no editing without the team right');
+ok(st === 200 && j.canEdit === false && j.rights.length === 13 && j.team.find((m) => m.email === 'team.member@example.com').can.join() === 'reply,message,pause,payments', 'the team list shows each member’s rights; no editing without the team right');
 [st, j] = await asTeam({ action: 'team-can', email: 'team.member@example.com', can: ALL_RIGHTS });
 ok(st === 403, 'a member cannot give themselves more');
 
@@ -97,7 +97,7 @@ ok(st === 403, 'a member cannot give themselves more');
 const second = await make('Leo', 'second.member@example.com');
 await asKey({ action: 'team-add', email: 'second.member@example.com' });
 [st, j] = await asKey({ action: 'team-can', email: 'team.member@example.com', can: ALL_RIGHTS });
-ok(st === 200 && j.can.length === 12, 'Everything: all twelve rights');
+ok(st === 200 && j.can.length === 13, 'Everything: all thirteen rights');
 [st, j] = await jsonOf(await mentorGet({ request: req('/api/mentor?tags=1', { token: team }), env }));
 ok(st === 200, 'with Everything: the Mailchimp tag list opens');
 [st, j] = await jsonOf(await mentorGet({ request: req('/api/mentor?team=1', { token: team }), env }));
@@ -119,7 +119,7 @@ await asKey({ action: 'pause', student: founder, paused: false });
 // Alexandru's own address signed in with its account: every right.
 const own = await make('Alexandru', 'alex@exploraself.com');
 [st, j] = await jsonOf(await mentorGet({ request: req('/api/mentor', { token: own }), env }));
-ok(st === 200 && j.you.can.length === 12, 'Alexandru’s own account: every right');
+ok(st === 200 && j.you.can.length === 13, 'Alexandru’s own account: every right');
 
 // Removed, then added again: back to the defaults.
 await asKey({ action: 'team-remove', email: 'second.member@example.com' });

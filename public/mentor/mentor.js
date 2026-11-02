@@ -10,7 +10,7 @@
 // (dash.js draftLetter). A row in Founders opens a drawer with every action;
 // "Open their work" is the one-founder view, one(id).
 
-import { STEP_KEYS, STEP_NAMES, STEP_SHORT, GROUPS, LANDING_SHORT, summary, filter, byLanding, groupOf, nextAction, funnel, today, levelSet, levelCount, launchpadDone, crossedOf,
+import { STEP_KEYS, STEP_NAMES, STEP_SHORT, GROUPS, LANDING_SHORT, summary, filter, pulse, payOf, liveIdsOf, WINDOWS, byLanding, groupOf, nextAction, funnel, today, levelSet, levelCount, launchpadDone, crossedOf,
   told, toldTally, theirWords, SIDES, PAIN_NAMES, WANT_NAMES, VALUE_NAMES, TEAM_NAMES, growthDone, growthGroups, growthWritten, stuckOnSunday, DRAFT_KINDS, KIND_OF, draftLetter, newestWord, topThree, seriesInfo } from './dash.js';
 import { LEVELS4, wordOf, briefOf, GOT } from '/levels-v4.js';
 
@@ -35,8 +35,12 @@ const TAB_ICONS = {
 };
 const icon = (k) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${TAB_ICONS[k] || ''}</svg>`;
 const tabOf = (h) => { const k = String(h || '').replace(/^#/, ''); const t = OLD_TABS[k] || k; return TABS.some(([x]) => x === t) ? t : 'today'; };
-const NO_FILTER = { group: 'all', step: 'all', act: 'all', need: 'all', more: 'all' };
+const NO_FILTER = { group: 'all', step: 'all', act: 'all', need: 'all', more: 'all', pay: 'all', joined: 'all' };
 let data = null, q = '', flash = '', openId = null;
+/** Who paid for real (live Stripe payments), for the Paid filter and Grow. */
+let LIVE = new Set();
+/** Grow's time window: today, 7 days, 30 days or all. */
+let GW = '7';
 /** A team account (Alexandru, 2 Nov 2026): reads everything, answers, writes
  *  letters, sends sign-in links, pauses or resumes letters and changes a
  *  step. The pause, delete, team, mentor and Mailchimp buttons are Alexandru's
@@ -125,7 +129,7 @@ async function load() {
   if (r.status === 401) return gate(key ? 'That key was not accepted.' : 'This account is not on the team yet. Ask Alexandru to add your address, or enter the mentor key.');
   if (r.status === 503) return gate('The database is not attached to this site yet.');
   if (!r.ok) return gate('Could not reach the roster.');
-  data = r.data; draw();
+  data = r.data; LIVE = liveIdsOf(data.paid); draw();
 }
 
 function tabsHTML() {
@@ -248,8 +252,36 @@ function todayHTML(S) {
 }
 
 /** Grow: the numbers, where founders came from, and their own words. */
+/* ── Grow, at the top (Alexandru, 2 Nov 2026): who joined, who paid and the
+   share that paid, who did not pay yet, who just paid, and the money in, for
+   today, 7 days, 30 days or all. Paid = a real Stripe payment; test payments
+   never count. Each number opens Founders with that filter. */
+const PAY_WORDS = { paid: ['Paid', 'pill both'], given: ['Given free', 'pill bp'], free: ['Not paid', 'pill'] };
+function pulseHTML() {
+  const P = pulse(data.students, data.paid, GW), win = { today: 'today', 7: 'in the last 7 days', 30: 'in the last 30 days', all: 'so far' }[GW];
+  const byId = Object.fromEntries((data.students || []).map((s) => [s.id, s]));
+  const money = (c) => `$${(Number(c) / 100).toLocaleString('en-US')}`;
+  const tile = (n, t, d, pf, c) => `<button type="button" class="g" style="--c:var(--${c})" data-pf="${pf}"><span class="n">${n}</span><span class="t">${t}</span><span class="d">${d}</span><span class="act">See who →</span></button>`;
+  const who = (s) => `<button type="button" class="linkish" data-drawer="${esc(s.id)}">${esc(s.name || s.email || '—')}</button>`;
+  const joined = P.joined.slice(0, 10).map((s) => { const k = payOf(s, LIVE); return `<li><div>${who(s)}<span class="why">${esc(s.email || '')} · joined ${esc(when(s.joined_at))} · ${esc(STEP_SHORT[s.tier || 'free'] || s.tier)}</span></div><span class="${PAY_WORDS[k][1]}">${PAY_WORDS[k][0]}</span></li>`; }).join('');
+  const pays = P.pays.slice(0, 10).map((p) => { const s = byId[p.student_id] || { id: p.student_id }; return `<li><div>${who(s)}<span class="why">${esc(STEP_NAMES[p.step] || p.step)}${'amount' in p ? ' · ' + esc(money(p.amount)) : ''} · ${esc(when(p.at))}</span></div>${p.mode === 'live' ? '<span class="pill both">Real</span>' : '<span class="pill">Test</span>'}</li>`; }).join('');
+  return `<div class="panel"><div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><h2>Joined and paid</h2>
+      <div class="fl" role="group" aria-label="When" style="margin-left:auto">${WINDOWS.map(([v, t]) => `<button type="button" class="chip" data-gw="${v}" aria-pressed="${GW === v}">${t}</button>`).join('')}</div></div>
+    <div class="groups" style="margin-top:12px">
+      ${tile(P.total, 'Joined', `New accounts ${win}`, 'all', 'gold')}
+      ${tile(P.paid, 'Paid', P.total ? `${P.pct}% of them paid with a card` : 'Nobody joined in this window', 'paid', 'both')}
+      ${tile(P.notPaid, 'Not paid yet', `${P.free} on the free levels${P.given ? ` · ${P.given} on a step you gave free` : ''}`, 'notpaid', 'warn')}
+      ${P.seesMoney || can('payments') ? `<div class="g" style="--c:var(--bp)"><span class="n">${esc(money(P.money))}</span><span class="t">Money in</span><span class="d">${plural(P.livePays.length, 'real payment', 'real payments')} ${win}${P.test ? ` · ${plural(P.test, 'test payment', 'test payments')} not counted` : ''}</span></div>` : ''}
+    </div>
+    <div class="row2" style="margin-top:14px">
+      <div><h3>Just joined</h3>${joined ? `<ul class="needs">${joined}</ul>` : `<p class="tiny">Nobody joined ${win}.</p>`}</div>
+      <div><h3>Just paid</h3>${pays ? `<ul class="needs">${pays}</ul>` : `<p class="tiny">No payments ${win}.</p>`}</div>
+    </div>
+    <p class="tiny" style="margin-top:8px">Paid = a real payment through Stripe. Test payments show as Test and are never counted. “Given free” = on a paid step you opened for them in /mentor.</p></div>`;
+}
+
 function growHTML(S) {
-  return `<div class="row2">${funnelHTML()}${toldHTML()}</div>
+  return `${pulseHTML()}<div class="row2">${funnelHTML()}${toldHTML()}</div>
     ${wordsHTML()}
     ${landingHTML()}
     ${crossedHTML(S)}`;
@@ -271,11 +303,30 @@ function filtersHTML() {
     ${row('Activity', 'act', [['all', 'All'], ['new', 'New this week'], ['active', 'Active'], ['quiet', 'Quiet 14+ days']])}
     ${row('Needs', 'need', [['all', 'Anything'], ['q', 'A question waiting'], ['ready', 'Ready for the Boardroom'], ['nopw', 'No password']])}
     ${row('More', 'more', [['all', 'Everyone'], ['full', 'Full form'], ['simple', 'Simple form'], ['library', 'Took a library book']])}
+    ${row('Paid', 'pay', [['all', 'All'], ['paid', 'Paid'], ['notpaid', 'Not paid yet'], ['given', 'Given free'], ['free', 'Free levels only']])}
+    ${row('Joined', 'joined', WINDOWS.map(([v, t]) => [v, v === 'all' ? 'Any time' : t]))}
   </div>`;
 }
 
+/* ── Invite a founder (Alexandru, 2 Nov 2026): by email, at the step he
+   chooses, free. The step opens at once; the letter signs them in and asks
+   a new account for a password. Never moves anyone down. */
+const INVITE_STEPS = [['free', 'Free · Levels 01–03'], ['session', 'The Boardroom · Levels 01–05 + 1 session'], ['lab', 'The LAB · Levels 01–09 + 2 sessions'],
+  ['hub', 'The HUB · all 12 levels + 3 sessions'], ['premium', 'The Summit · everything + Alexandru every week']];
+function inviteHTML() {
+  if (!can('invite')) return '';
+  return `<details class="panel"${INV_OPEN ? ' open' : ''} id="invbox"><summary style="cursor:pointer;min-height:36px;display:flex;align-items:center;gap:10px"><h2 style="display:inline;margin:0">Invite a founder</h2><span class="tiny">By email, at any step, free</span></summary>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px;align-items:end">
+      <label class="tiny">First name<input id="inv-first" autocomplete="off" placeholder="Maria"></label>
+      <label class="tiny">Email<input id="inv-email" type="email" autocomplete="off" placeholder="Their email, exactly"></label>
+      <label class="tiny">Open for them<select id="inv-step">${INVITE_STEPS.map(([k, t]) => `<option value="${k}">${esc(t)}</option>`).join('')}</select></label>
+      <button type="button" class="btn gold" id="inv-go">Send the invitation</button></div>
+    <p class="tiny" style="margin-top:8px">The step opens now, with nothing to pay. They get a letter from you with a button that signs them in; a new account chooses a password first (the button works 7 days). Someone who already has an account moves up, never down.</p></details>`;
+}
+let INV_OPEN = false;
+
 function foundersHTML() {
-  const rows = filter(data.students, { ...F, q });
+  const rows = filter(data.students, { ...F, q, live: LIVE });
   const any = Object.keys(NO_FILTER).some((k) => F[k] !== 'all') || q;
   const row = (s) => { const n = nextAction(s);
     return `<tr data-drawer="${esc(s.id)}" tabindex="0"${openId === s.id ? ' class="on"' : ''} aria-label="${esc(s.name || s.email)}: open the details">
@@ -284,7 +335,7 @@ function foundersHTML() {
       <td class="c-lv">${levelsBar(s)}</td>
       <td class="c-stage">${esc(stageName(s.stage))}</td><td class="c-gp num">${esc(gpCount(s))}</td><td class="c-seen num">${esc(when(s.last_seen_at || s.joined_at))}</td>
       <td class="c-next">${n.tone ? `<span class="pill ${n.tone}">${esc(n.label)}</span>` : `<span class="sub">${esc(n.label)}</span>`}</td></tr>`; };
-  return `${filtersHTML()}
+  return `${inviteHTML()}${filtersHTML()}
     <div class="panel"><div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><h2>Founders</h2><span class="sub" id="count">${rows.length} of ${data.students.length}</span>
       ${any ? '<button type="button" class="btn" data-fclear style="margin-left:auto">Clear the filters</button>' : ''}</div>
       ${!data.students.length ? '<div class="empty">Nobody here yet. The roster fills as founders sign up.</div>'
@@ -418,6 +469,7 @@ export const RIGHT_WORDS = [
   ['mailchimp', 'Mailchimp tools and the tag list'],
   ['payments', 'See the payments (Stripe)'],
   ['team', 'Change the team and what each member can do'],
+  ['invite', 'Invite a founder at any step, free'],
 ];
 /** For a team account: what they can and cannot do here, in plain words. */
 function teamCanHTML() {
@@ -468,7 +520,8 @@ export const TEAM_DID = { message: ['letter', 'letters'], reply: ['answer', 'ans
   'series-hold': ['pause or resume', 'pauses or resumes'], 'signin-link': ['sign-in link', 'sign-in links'], 'reset-link': ['reset link', 'reset links'],
   pause: ['account pause', 'account pauses'], delete: ['founder deleted', 'founders deleted'], 'mentor-save': ['mentor profile saved', 'mentor profiles saved'],
   'mentor-assign': ['mentor chosen', 'mentors chosen'], 'mc-test': ['Mailchimp test', 'Mailchimp tests'], 'mc-backfill': ['Mailchimp send', 'Mailchimp sends'],
-  'team-add': ['member added', 'members added'], 'team-remove': ['member removed', 'members removed'], 'team-can': ['rights change', 'rights changes'] };
+  'team-add': ['member added', 'members added'], 'team-remove': ['member removed', 'members removed'], 'team-can': ['rights change', 'rights changes'],
+  invite: ['founder invited', 'founders invited'] };
 const didLine = (did) => Object.entries(did || {}).filter(([a, n]) => TEAM_DID[a] && n).map(([a, n]) => `${n} ${n === 1 ? TEAM_DID[a][0] : TEAM_DID[a][1]}`).join(' · ');
 async function loadTeam(msg = '') {
   const box = $('#team');
@@ -876,6 +929,20 @@ document.addEventListener('click', async (e) => {
   if (d.gcard) { F = { ...NO_FILTER, group: d.gcard }; q = ''; $('#q').value = ''; return goTab('founders'); }
   if ('newcard' in d) { F = { ...NO_FILTER, act: 'new' }; q = ''; $('#q').value = ''; return goTab('founders'); }
   if (d.f) { F[d.f] = d.v; flash = ''; return draw(); }
+  if (d.gw) { GW = d.gw; return draw(); }
+  if (b.id === 'inv-go') {
+    const email = ($('#inv-email').value || '').trim(), first = ($('#inv-first').value || '').trim(), step = $('#inv-step').value;
+    if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) { flash = 'Type their email first.'; INV_OPEN = true; return draw(); }
+    const name = STEP_NAMES[step] || 'the free levels';
+    if (step !== 'free' && !confirm(`Open ${name} for ${email}, free, and send the invitation?`)) return;
+    b.disabled = true; b.textContent = 'Sending…';
+    const x = await act({ action: 'invite', email, first, step });
+    INV_OPEN = !x.ok;
+    flash = !x.ok ? (x.data.error || 'Could not send the invitation.')
+      : `${x.data.fresh ? 'New account made' : 'Account found'} for ${email}: ${step === 'free' ? 'the free levels are' : name + ' is'} open.${x.data.sent ? ' The invitation is on its way.' : ` The letter did not send (${x.data.why || 'email is off'}); send them a sign-in link from their row.`}`;
+    return load();
+  }
+  if (d.pf) { F = { ...NO_FILTER, pay: d.pf, joined: GW }; q = ''; $('#q').value = ''; return goTab('founders'); }
   if ('fclear' in d) { F = { ...NO_FILTER }; q = ''; $('#q').value = ''; flash = ''; return draw(); }
   if (d.drawer) return openDrawer(d.drawer, true);
   if ('xdrawer' in d) return closeDrawer();

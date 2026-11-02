@@ -248,12 +248,14 @@ know.
 
 Each team member has their own rights, ticked in /mentor → Settings → Team
 ("choose per team member what they can do … access like me on everything").
-There are twelve, in his words: answer questions, write letters and notes,
+There are thirteen, in his words: answer questions, write letters and notes,
 send sign-in links, send reset links, pause or resume a founder's letters,
 change a founder's step (unlock), pause or unpause an account, delete a
 founder, mentor profiles and a founder's mentor, the Mailchimp tools and tag
-list, the payments (Stripe), and the team itself. "Everything (like
-Alexandru)" ticks all twelve.
+list, the payments (Stripe), the team itself, and inviting a founder at any
+step, free (Founders → Invite a founder: the step opens at once and the gift
+letter goes; nobody is ever moved down). "Everything (like Alexandru)" ticks
+all thirteen.
 
 A new member starts with the first six (TEAM_CAN in functions/api/mentor.js,
 DEFAULT_RIGHTS in functions/_team.js); reading every founder and the CSV is
@@ -269,3 +271,14 @@ right, or add a right to TEAM_RIGHTS with its words (and RIGHT_WORDS in
 public/mentor/mentor.js, which a test holds equal), and show or hide its button
 with can('<right>') in public/mentor/mentor.js.
 tests/team-permissions.test.mjs holds the rules.
+
+## 19. Paid means paid (Alexandru, 2 Nov 2026)
+
+In /mentor, "paid" is a real payment through Stripe (mode live). A test
+payment is shown as Test and never counted; a founder on a paid step without
+a payment (moved up or invited) is "given free". Grow opens with who joined,
+how many paid and the share, who did not pay yet, who just paid and the money
+in, for today, 7 days, 30 days or all (pulse in public/mentor/dash.js); the
+amounts only for those with the payments right. A promise on a pay page or in
+a letter names only what the step really opens (rule 6): the library is free
+for everyone, so it is never sold as part of a step.

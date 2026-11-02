@@ -420,6 +420,28 @@ export function unlockedLetter(base, { first, step, from = 'free', to = '', ...o
   ], null, asReceipt(close('unlocked', { ...o, to }, ['How do I book my session?', 'Where should I start?', 'Can I have an invoice?']))) };
 }
 
+/** "gift": Alexandru invites a founder from /mentor (Alexandru, 2 Nov 2026:
+ *  "add somebody by email … decide ahead to what degree … at no cost"). The
+ *  step he chose is open the moment the letter leaves; nothing to pay. A new
+ *  account gets a button that signs them in and asks for a password (7 days);
+ *  an existing one, a button that signs them in. No offer: it is a gift. */
+export function giftLetter(base, { first, step = 'free', url = '', fresh = true, to = '', ...o } = {}) {
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const U = UNLOCKED[step];
+  const what = U ? `${U.name}` : 'The Founder’s Blueprint';
+  return { subject: U ? `A gift from Alexandru: ${U.name}` : 'Your free place in The Founder’s Blueprint', ...letter(base, [
+    hi(first),
+    U ? `I have opened ${U.name} for you, as my gift. There is nothing to pay.`
+      : 'I have opened a free account for you in The Founder’s Blueprint, so your place is ready.',
+    U ? `Levels 01 to ${pad2(U.last)} are open for you now, ${U.extra}.` : 'Levels 01 to 03 are open for you now, with the manuals and the books in your library.',
+    ...(U ? [`What you have with it: ${U.sessions.charAt(0).toLowerCase() + U.sessions.slice(1)}`, ['Book your session here, at a time that suits you: ', link(BOOKING)]] : []),
+    fresh ? 'One step first: tap the button and choose your password. It signs you in on this device, and it works for the next 7 days.'
+      : 'Tap the button and you arrive signed in. It works for the next 7 days.',
+    button(url || `${base}/ground-plan/#signin`, fresh ? 'Set my password →' : `Open ${what} →`),
+    'Start with Level 01: one question at a time, and ten minutes is enough for today. I am glad you are here. The team and I are here for you.',
+  ], null, close('gift', { ...o, to }, U ? ['Where should I start?', 'How do I book my session?', 'The button doesn’t work'] : ['Where should I start?', 'What is in my library?', 'The button doesn’t work'])) };
+}
+
 /** "team-invite": to a new team member, once, when Alexandru adds their
  *  address in /mentor (Alexandru, 2 Nov 2026). Everything a team member sends
  *  goes out signed by Alexandru, and replies come back to him; they see the
