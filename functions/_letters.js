@@ -34,7 +34,7 @@ export const button = (url, label) => ({ [BUTTON]: true, url, label });
 /** The offers, each a paragraph after "P.S.". `tier` hides an offer the
  *  founder already holds (The Boardroom, once they are in it). */
 export const OFFERS = {
-  boardroom: { paid: true, line: () => ['Want to look at your answers together? Book a 1:1 with me in The Boardroom: ', link(BOOKING)] },
+  boardroom: { paid: true, line: () => ['Want to look at your answers together? The Boardroom is one 1:1 with me, $27: ', link('https://linktolead.exploraself.com/boardroom/')] },
   unshakeable: { paid: true, line: () => ['One thing I’d love you to try: the Unshakeable assessment. It shows how steady you stay when the pressure comes, and where to start building. It’s $9.99 (valued at $199). ', link('https://exploraself.com/unshakeable', 'Take the Unshakeable assessment →')] },
   play: { paid: false, line: () => ['Got ten minutes? Play Leadionaire: fifteen decisions, thirty seconds each. It shows how you choose under pressure: ', link('https://exploraself.com/play')] },
   first100: { paid: false, line: () => ['If clients are the next thing on your mind, the First 100 Clients assessment is free and takes ten minutes: ', link('https://exploraself.com/first-100-clients')] },
@@ -395,7 +395,7 @@ export function answerLetter(base, { first, question, answer, to = '', tier, off
  *  sent after Stripe itself said "paid" (AGENTS.md rule 6). No offer: they
  *  just bought. The words of each step come from STEPS in _stripe.js. */
 export const UNLOCKED = {
-  session: { name: 'The Boardroom', last: 5, extra: 'and so is your full North Star', sessions: 'One 1:1 session with me. Before we speak, the team and I read your first three levels, so the time is spent on you, not on catching up.' },
+  session: { name: 'The Boardroom', last: 5, extra: 'each one with its questions and its twenty actions', sessions: 'One 1:1 session with me. Before we speak, the team and I read your first three levels, so the time is spent on you, not on catching up.' },
   lab: { name: 'The LAB', last: 9, extra: 'each one with its questions and its twenty actions', sessions: 'Two 1:1 sessions with me in total: the Boardroom’s, and the second with the LAB.' },
   hub: { name: 'The HUB', last: 12, extra: 'with the LAB included and every resource. Nothing is held back', sessions: 'Three 1:1 sessions with me in total: the Boardroom’s, the LAB’s, and the third with the HUB.' },
   premium: { name: 'The Summit', last: 12, extra: 'with the LAB, the HUB and every resource. Everything is yours', sessions: 'Me, every week. We will set the day together.' },

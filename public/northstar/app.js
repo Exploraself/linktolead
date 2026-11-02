@@ -23,7 +23,6 @@
   const E = window.CompassEngine, M = window.Compass;
   const KEY = 'exploraself-compass-v2', OLD = 'exploraself-compass-v1', DEFAULT_PROFILE = 'exploraself-profile';
   /* The same places /content.js points to: the free 1:1 form, the LAB, the HUB. */
-  const BOOKING = 'https://forms.gle/opnxfhFTJJg69Qy77';
   const LAB_URL = 'https://exploraself.com/lab', HUB_URL = 'https://exploraself.com/hub';
   const D = E.DOMAINS, LIGHT = D.map((d) => d.light), CSSV = D.map((d) => `var(--${d.id})`), TINT = D.map((d) => `var(--t${d.id})`);
   const $ = (s) => document.querySelector(s);
@@ -1707,7 +1706,7 @@
     const head = (eb, h, em, p) => `<span class="eb" style="color: #D6BF8F">${eb}</span><h2 class="sf">${h} <span class="sfi">${em}</span></h2><p>${p}</p>`;
     const all = `<button type="button" class="nsnext-all no-print" data-act="alloptions" aria-expanded="${!!UI.opts}" aria-controls="s-options">${UI.opts ? 'Hide the options ↑' : 'See all options ↓'}</button>`;
     if (S.fromBP) return head('Your next step · you are already on the road', 'You have done the free part.', 'Now unlock the next stretch.',
-      'Your North Star shows where to push next. One session with Alexandru, The Boardroom, opens modules 04–05 and the full North Star, so the work you started keeps going.')
+      'Your North Star shows where to push next. One session with Alexandru, The Boardroom, opens Levels 04–05, so the work you started keeps going.')
       + `<a class="go nsnext-go no-print" href="/pay/?step=session">Unlock the Boardroom · 04–05 <span class="arr" aria-hidden="true">→</span></a>`
       + '<a class="nsnext-all no-print" href="/ground-plan/#home">Back to my Base Camp</a>' + all;
     if (early) return head('Your next step · what your answers ask for', 'You do not need more information.', 'You need a guided road.',
@@ -1757,7 +1756,7 @@
 
   const STOPS = [
     { n: '1', short: 'Founder Launchpad', unlock: 'You are one click from 3 of the 12 modules, free. You will know what you believe, read your business clearly and stay steady under pressure.', name: 'The Founder Launchpad', tag: 'Start here · free', line: 'Stop circling yourself. Settle who you are, then build.', modules: '01–03', sessions: '—', price: 'Free', cta: 'Start free', href: '/ground-plan/', x: 150, y: 360, lx: 136, ly: 364, anchor: 'end' },
-    { n: '2', short: 'The Boardroom', unlock: 'Book one session with Alexandru. It unlocks modules 04–05 and the full North Star.', name: 'The Boardroom', tag: 'You and Alexandru', line: 'Sit at the table with Alexandru.', modules: '04–05', sessions: '1 session', price: '$27', cta: 'Book the Boardroom · unlock 04–05', href: BOOKING, ext: true, x: 290, y: 300, lx: 306, ly: 304, anchor: 'start' },
+    { n: '2', short: 'The Boardroom', unlock: 'One session with Alexandru. It opens Levels 04–05 at once.', name: 'The Boardroom', tag: 'You and Alexandru', line: 'Sit at the table with Alexandru.', modules: '04–05', sessions: '1 session', price: '$27', cta: 'Unlock the Boardroom · 04–05', href: '/boardroom/', ext: false, x: 290, y: 300, lx: 306, ly: 304, anchor: 'start' },
     { n: '3', short: 'Leadership LAB', unlock: 'Joining unlocks modules 06–09.', name: 'The Personal Leadership LAB', tag: 'Go deeper', line: 'Lead yourself first.', modules: '06–09', sessions: '2 in total (the 2nd is the LAB’s)', price: '$97', cta: 'Join the LAB', href: LAB_URL, ext: true, x: 175, y: 235, lx: 161, ly: 239, anchor: 'end' },
     { n: '4', short: 'Business HUB', unlock: 'Joining unlocks modules 10–12.', name: 'The Business HUB', tag: 'Build the business', line: 'Build the business that carries it.', modules: '10–12', sessions: '3 in total (the 3rd is the HUB’s)', price: '$750', cta: 'Join the HUB', href: HUB_URL, ext: true, x: 285, y: 160, lx: 301, ly: 164, anchor: 'start' },
     { n: '5', short: 'The Summit', unlock: 'Every module, with Alexandru every week.', name: 'The Summit', tag: 'The top', line: 'The whole Blueprint, with Alexandru every week.', modules: 'All', sessions: 'Every week', price: '$1,989', cta: 'Talk about The Summit', href: '/northstar/summit', x: 230, y: 58, lx: 258, ly: 62, anchor: 'start' },
@@ -2236,7 +2235,7 @@
       <p class="pp-big">Twelve weeks that take your business out of your head and onto paper, built on the same four domains you just read: lead yourself, lead your people, lead your business, lead the market.</p>
       <table class="pp-t pp-ladder">
         <tr><th>Weeks 1–3</th><td><b>The Founder Launchpad · free</b><br><span>Settle what you believe about your business, learn to read it clearly, and stay steady when it pushes back.</span></td></tr>
-        <tr><th>Weeks 4–5</th><td><b>The Boardroom</b><br><span>One session with Alexandru. It opens the next two weeks and the full North Star.</span></td></tr>
+        <tr><th>Weeks 4–5</th><td><b>The Boardroom</b><br><span>One session with Alexandru. It opens Levels 04–05 at once.</span></td></tr>
         <tr><th>Weeks 6–9</th><td><b>The Personal Leadership LAB · $97</b><br><span>Lead yourself first.</span></td></tr>
         <tr><th>Weeks 10–12</th><td><b>The Business HUB · $750</b><br><span>Build the business that carries it.</span></td></tr>
         <tr><th>All twelve</th><td><b>The Summit · $1,989</b><br><span>The whole Blueprint, with Alexandru beside you every week.</span></td></tr>
