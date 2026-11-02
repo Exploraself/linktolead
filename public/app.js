@@ -11,7 +11,7 @@
 
 import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, SHEETS, SECTIONS, loadStage,
   gateFor, levelFor, isWritten, weekTitle, videoFor, levelVideo, nextGain, holds,
-  LEAD, BOOKING, LIBRARY } from './content.js';
+  LEAD, BOOKING, LIBRARY, payHref } from './content.js';
 import { entry, programmeStage, groundPlan, stageNudge } from './home.js';
 import { cabinetHTML, cabinetShown, cabinetHidden, cabinetClick, dashboardShown, levelDots, compassStripHTML } from './cabinet.js';
 import { result as fwResult } from './frameworks.js';
@@ -200,7 +200,7 @@ function howItWorks(st) {
     <ol class="gp-mlist">
       <li class="gp-move"><span class="gp-mn">01</span><b>Find where you stand</b><p>Eight plain questions, rough numbers, and feedback in all four domains. Free.</p><a class="cta" href="/northstar">Open the North Star →</a></li>
       <li class="gp-move"><span class="gp-mn">02</span><b>Walk the Founder Launchpad</b><p>Levels 01–03, free. Know yourself before you build.</p><button class="cta" type="button" data-level="1">Start level 01 →</button></li>
-      <li class="gp-move"><span class="gp-mn">03</span><b>Book The Boardroom</b><p>Sit at the table. Unlock the full North Star.</p><a class="cta" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my 1:1 with Alexandru ↗</a></li>
+      <li class="gp-move"><span class="gp-mn">03</span><b>${holds(tierNow(), 'session') ? 'Book The Boardroom' : 'Unlock The Boardroom'}</b><p>Sit at the table. Unlock the full North Star.</p>${boardroomCta('cta')}</li>
     </ol>
   </section>`;
 }
@@ -218,7 +218,7 @@ function planHTML(gp, st) {
       <ol class="gp-mlist">${gp.moves.map((m) => `<li class="gp-move"><span class="gp-mn">${String(m.n).padStart(2, '0')}</span><b>${esc(m.title)}</b><p>${esc(m.promise)}</p></li>`).join('')}
         <li class="gp-move gp-then"><span class="gp-mt">Then</span><b>The Boardroom: a session with Alexandru</b><p>Alexandru and the team read what you wrote before you speak. The session opens levels 04–05.</p></li></ol>
       <div class="gp-btns"><button class="cta" type="button" data-level="${nx}">Continue level ${String(nx).padStart(2, '0')} →</button>
-        <a class="gp-line" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my 1:1 with Alexandru</a></div>
+        ${boardroomCta('gp-line')}</div>
     </section>
     ${plansCard()}`;
 }
@@ -405,6 +405,13 @@ const LIB_ICONS = [
 const libIcons = () => `<div class="rlib"><p class="eyebrow">Your library · now open</p><div class="rlibrow">${LIB_ICONS.map(([t, label, svg]) =>
   `<button type="button" class="libi${t === 'Soon' ? ' soon' : ''}" data-go="library" aria-label="${esc(label)}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">${svg}</svg>${esc(t)}</button>`).join('')}</div></div>`;
 const bookIcon = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+/** The Boardroom's button: pay first while it is locked (/pay/, Stripe), then
+ *  book the 1:1 (Alexandru, 2 Nov 2026). */
+function boardroomCta(cls) {
+  if (holds(tierNow(), 'session')) return `<a class="${cls}" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my 1:1 with Alexandru ↗</a>`;
+  const r = LADDER.find((x) => x.key === 'session');
+  return `<a class="${cls}" href="${esc(payHref('session'))}">Unlock The Boardroom · ${esc(r ? r.price : '')} →</a>`;
+}
 
 /** The Leader’s North Star, always in the rail, just above The Boardroom. */
 const railStar = `<a class="rstar" href="/northstar/" aria-label="Open your Leader’s North Star: where you stand in all four domains">
@@ -446,7 +453,7 @@ function railHTML(st) {
           </button></li>`;
         }).join('')}</ul>
         <p class="rnote">${esc(sec.note)}</p>
-        ${sec.k === 'session' && !owned ? `<a class="rbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>` : ''}
+        ${!owned && rung ? `<a class="rbook" href="${esc(payHref(sec.k))}">${MB_LOCK}Unlock · ${esc(rung.price)}</a>` : sec.k === 'session' ? `<a class="rbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>` : ''}
       </section>`;
     }).join('')}
     <a class="rsummit" href="/northstar/summit">
@@ -594,7 +601,8 @@ function bookHTML(st) {
         <p class="eyebrow">${compass} What opens this</p>
         <h3>${esc(rung.n)}</h3><p>${esc(rung.what)}</p>
         <span class="price">${esc(rung.price)}</span>
-        ${rung.url ? `<a class="cta" href="${esc(rung.url)}" target="_blank" rel="noopener">See what it includes ↗</a>` : ''}
+        <a class="cta" href="${esc(payHref(g))}">Unlock for ${esc(rung.price)} →</a>
+        ${rung.url ? `<a class="gp-line" href="${esc(rung.url)}" target="_blank" rel="noopener">See what it includes ↗</a>` : ''}
       </div>`;
   } else if (levelState(st, level) === 'waiting') {
     const prev = levelDone(st, level - 1);
@@ -1045,7 +1053,7 @@ function crownHTML() {
     const a = Math.PI - (i * Math.PI) / 6;
     const pos = `style="--cx:${Math.cos(a).toFixed(3)};--cy:${(-Math.sin(a)).toFixed(3)}"`;
     const ico = `<span class="jw-i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${svg}</svg></span>${esc(n)}`;
-    if (k === 'book') return `<a class="jw" ${pos} href="${esc(BOOKING)}" target="_blank" rel="noopener">${ico}</a>`;
+    if (k === 'book') return holds(tierNow(), 'session') ? `<a class="jw" ${pos} href="${esc(BOOKING)}" target="_blank" rel="noopener">${ico}</a>` : `<a class="jw" ${pos} href="${esc(payHref('session'))}">${ico}</a>`;
     if (k === 'library' || k === 'ask' || k === 'rail') return `<button type="button" class="jw" ${pos} data-go="${k}">${ico}</button>`;
     return `<button type="button" class="jw" ${pos} data-crown="${k}"${k === 'focus' ? ' aria-pressed="false"' : ''}>${ico}</button>`;
   };
@@ -1337,7 +1345,7 @@ function bookPane() {
     let body;
     if (!open) body = `<p class="mb-have"><b>After this level you will have:</b> ${esc(L.promise)}</p>
       <p class="mb-sub">Opens with ${esc(rung.n)} · ${esc(rung.price)}</p>
-      ${rung.url ? `<p class="no-print"><a class="mb-btn mb-gold" href="${esc(rung.url)}" target="_blank" rel="noopener">See what opens it ↗</a></p>` : ''}`;
+      <p class="no-print"><a class="mb-btn mb-gold" href="${esc(payHref(gateFor(n)))}">${MB_LOCK}Unlock · ${esc(rung.price)}</a>${rung.url ? ` <a class="mb-btn" href="${esc(rung.url)}" target="_blank" rel="noopener">See what opens it ↗</a>` : ''}</p>`;
     else if (!on) body = `<p class="mb-have"><b>After this level you will have:</b> ${esc(L.promise)}</p>
       ${ls === 'waiting' ? `<p class="mb-sub">Opens when Level ${pad(n - 1)} is written.</p>` : `<p class="no-print"><button type="button" class="mb-btn" data-level="${n}">Open Level ${pad(n)} →</button></p>`}`;
     else body = L.d.map((D, d) => {

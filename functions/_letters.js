@@ -363,6 +363,37 @@ export function answerLetter(base, { first, question, answer, to = '', tier, off
   ], offerFor('mentor', to, tier, offer), close('answer', { ...o, to })) };
 }
 
+/** "unlocked": the moment Stripe confirms a payment (functions/_stripe.js,
+ *  Alexandru 2 Nov 2026): it's unlocked, here is what opened, which sessions
+ *  they now have and the link to book them, and now we move forward. Only
+ *  sent after Stripe itself said "paid" (AGENTS.md rule 6). No offer: they
+ *  just bought. The words of each step come from STEPS in _stripe.js. */
+export const UNLOCKED = {
+  session: { name: 'The Boardroom', last: 5, extra: 'and so is your full North Star', sessions: 'One 1:1 session with me. Before we speak, the team and I read your first three levels, so the time is spent on you, not on catching up.' },
+  lab: { name: 'The LAB', last: 9, extra: 'and the library comes with them: the frameworks, the tools, the books and the workbook for your stage', sessions: 'Two 1:1 sessions with me.' },
+  hub: { name: 'The HUB', last: 12, extra: 'with the LAB included and every resource. Nothing is held back', sessions: 'Three 1:1 sessions with me in total, including the one from the LAB.' },
+  premium: { name: 'The Summit', last: 12, extra: 'with the LAB, the HUB and every resource. Everything is yours', sessions: 'Me, every week. We will set the day together.' },
+};
+/** The first level a payment opens: the step after the one they had. A
+ *  higher step always includes every step below it (Alexandru, 2 Nov 2026). */
+export const FIRST_NEW = { free: 4, session: 6, lab: 10, hub: 12, premium: 12 };
+export function unlockedLetter(base, { first, step, from = 'free', to = '', ...o } = {}) {
+  const U = UNLOCKED[step] || UNLOCKED.session;
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const a = Math.min(FIRST_NEW[from] || 4, U.last);
+  const opens = a >= U.last ? `Level ${pad2(U.last)} is open now, ${U.extra}.` : `Levels ${pad2(a)} ${U.last - a === 1 ? 'and' : 'to'} ${pad2(U.last)} are open now, ${U.extra}.`;
+  return { subject: `It’s unlocked: ${U.name}`, ...letter(base, [
+    hi(first),
+    `Thank you. Your payment went through, and ${U.name} is yours.`,
+    opens,
+    `What you have with it: ${U.sessions.charAt(0).toLowerCase() + U.sessions.slice(1)}`,
+    ['Book your session here, at a time that suits you: ', link(BOOKING)],
+    `Now we move forward. Level ${pad2(a)} is waiting for you in your Base Camp.`,
+    button(`${base}/ground-plan/#programme-${a}`, `Open Level ${pad2(a)}`),
+    'You chose to invest in yourself and your business. That decision is already a step. The team and I are here for you.',
+  ], null, close('unlocked', { ...o, to }, ['How do I book my session?', 'Where should I start?', 'Can I have an invoice?'])) };
+}
+
 /** "team-invite": to a new team member, once, when Alexandru adds their
  *  address in /mentor (Alexandru, 2 Nov 2026). Everything a team member sends
  *  goes out signed by Alexandru, and replies come back to him; they see the

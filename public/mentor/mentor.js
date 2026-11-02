@@ -363,6 +363,25 @@ function tagsBox(r) {
     ${r.notYet.length ? `<details><summary class="tiny" style="cursor:pointer">Not in Mailchimp yet · ${r.notYet.length}</summary><p class="tiny" style="margin-top:6px">Each one is made the first time it is added: ${esc(r.notYet.join(' · '))}.</p></details>` : ''}
     <p><button class="ghost" id="mct-read">Read again</button></p>`;
 }
+/* ── Payments (Alexandru, 2 Nov 2026) ─────────────────────────────────────
+   Stripe: test or live, whether the webhook is connected (the site connects
+   it itself at the first payment), and the latest payments. The key only. */
+const STEP_WORDS = { session: 'The Boardroom', lab: 'The LAB', hub: 'The HUB', premium: 'The Summit' };
+async function loadStripe() {
+  const box = $('#stripebox');
+  if (!box) return;
+  const r = await api('?stripe=1');
+  if (!$('#stripebox')) return;
+  if (!r.ok) { box.innerHTML = '<h2>Payments</h2><p class="tiny">Could not load the payments.</p>'; return; }
+  const d = r.data, P = d.payments || [];
+  const state = !d.mode ? `<span class="warn">Not connected: ${esc(d.problem || 'STRIPE_SECRET_KEY is not set in Cloudflare.')}</span>`
+    : `${d.mode === 'test' ? 'Test mode (no real money)' : 'Live'} · webhook ${d.connected ? `connected ${esc(when(d.at))}` : 'connects itself at the first payment'}`;
+  const money = (c) => `$${(Number(c) / 100).toLocaleString('en-US')}`;
+  box.innerHTML = `<h2>Payments · Stripe</h2><p class="tiny">${state}</p>
+    ${P.length ? `<ul class="list" style="margin-top:8px">${P.map((p) => `<li><div style="flex:1;min-width:0"><b>${esc(p.name || p.email || 'A founder')}</b>
+      <span class="em">${esc(STEP_WORDS[p.step] || p.step)} · ${esc(money(p.amount))}${p.mode === 'test' ? ' · test' : ''} · ${esc(when(p.at))}${p.email ? ' · ' + esc(p.email) : ''}</span></div></li>`).join('')}</ul>`
+      : '<p class="tiny">No payments yet. Each one opens the founder’s step at once and sends the “It’s unlocked” letter.</p>'}`;
+}
 let tagsRead = null;
 async function loadTags(read) {
   const box = $('#mctags');
@@ -568,11 +587,11 @@ function draw() {
   const pane = tab === 'founders' ? foundersHTML()
     : tab === 'inbox' ? `${questionsHTML()}<section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
     : tab === 'grow' ? growHTML(S)
-    : tab === 'settings' ? `${isTeam() ? teamCanHTML() : ''}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>${mailchimpHTML()}${data.you && data.you.key ? '<section class="panel" id="mctags"></section>' : ''}${mentorsHTML()}`
+    : tab === 'settings' ? `${isTeam() ? teamCanHTML() : ''}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>${mailchimpHTML()}${data.you && data.you.key ? '<section class="panel" id="stripebox"><p class="tiny">Loading the payments…</p></section><section class="panel" id="mctags"></section>' : ''}${mentorsHTML()}`
     : todayHTML(S);
   $('#main').innerHTML = `<div class="stack" role="tabpanel">${said}${pane}</div>`;
   if (tab === 'inbox') loadComments();
-  if (tab === 'settings') { loadTeam(); loadTags(false); }
+  if (tab === 'settings') { loadTeam(); loadStripe(); loadTags(false); }
   if (openId) openDrawer(openId); else closeDrawer();
 }
 

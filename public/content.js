@@ -196,6 +196,10 @@ export const LEAD = { self: 'Lead yourself', people: 'Lead your people', work: '
 
 /** Where "Book my session" goes. The free 1:1 form linked from exploraself.com. */
 export const BOOKING = 'https://forms.gle/opnxfhFTJJg69Qy77';
+/** Where a founder pays for a step (Alexandru, 2 Nov 2026): /pay/, then
+ *  Stripe; the step opens when Stripe confirms (functions/_stripe.js). They
+ *  book their session after paying, from the letter or Base Camp. */
+export const payHref = (step) => `/pay/?step=${encodeURIComponent(step)}`;
 
 // ── The library ──────────────────────────────────────────────────────────────
 // Working materials and companion books, shown on the entrance and inside the

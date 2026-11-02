@@ -843,7 +843,7 @@
       const ang = Math.PI - (i * Math.PI) / 6;
       const pos = `style="--cx:${Math.cos(ang).toFixed(3)};--cy:${(-Math.sin(ang)).toFixed(3)}"`;
       const ico = `<span class="jw-i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${svg}</svg></span>${n}`;
-      if (k === 'book') return `<a class="jw" ${pos} href="${BOOKING}" target="_blank" rel="noopener">${ico}</a>`;
+      if (k === 'book') return `<a class="jw" ${pos} href="/pay/?step=session">${ico}</a>`;
       if (k === 'blueprint') return `<a class="jw" ${pos} href="/ground-plan/">${ico}</a>`;
       return `<button type="button" class="jw" ${pos} data-crown="${k}"${k === 'focus' ? ' aria-pressed="false"' : ''}>${ico}</button>`;
     };
@@ -1706,7 +1706,7 @@
     const all = `<button type="button" class="nsnext-all no-print" data-act="alloptions" aria-expanded="${!!UI.opts}" aria-controls="s-options">${UI.opts ? 'Hide the options ↑' : 'See all options ↓'}</button>`;
     if (S.fromBP) return head('Your next step · you are already on the road', 'You have done the free part.', 'Now unlock the next stretch.',
       'Your North Star shows where to push next. One session with Alexandru, The Boardroom, opens modules 04–05 and the full North Star, so the work you started keeps going.')
-      + `<a class="go nsnext-go no-print" href="${BOOKING}" target="_blank" rel="noopener">Book the Boardroom · unlock 04–05 <span class="arr" aria-hidden="true">↗</span></a>`
+      + `<a class="go nsnext-go no-print" href="/pay/?step=session">Unlock the Boardroom · 04–05 <span class="arr" aria-hidden="true">→</span></a>`
       + '<a class="nsnext-all no-print" href="/ground-plan/#home">Back to my Base Camp</a>' + all;
     if (early) return head('Your next step · what your answers ask for', 'You do not need more information.', 'You need a guided road.',
       'Many of your answers are still “not yet”. That is exactly what the Founder Launchpad is for. Week by week: tap what sounds like you, slide to the honest number, write one sentence with the blanks filled in, and read back exactly what to do. The manuals sit beside you. Free.')
