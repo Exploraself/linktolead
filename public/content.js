@@ -61,7 +61,7 @@ export const LADDER = [
   { from: 6, to: 9, key: 'lab', n: 'Personal Leadership LAB', price: '$97',
     what: 'Nine levels, self-paced, in your own time, and two sessions with Alexandru. The library comes with it: the 32 frameworks, the 99 tools, the books and the workbook for your stage.',
     url: 'https://exploraself.com/lab' },
-  { from: 10, to: 12, key: 'hub', n: 'Business Growth HUB', price: '$397',
+  { from: 10, to: 12, key: 'hub', n: 'Business Growth HUB', price: '$750',
     what: 'The full Blueprint, unlocked immediately. Three sessions with Alexandru in total, including one from the LAB, the LAB included, and every resource.',
     url: 'https://exploraself.com/hub' },
   // The internal key stays 'premium'; founders see The Summit.
