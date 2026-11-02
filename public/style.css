@@ -753,8 +753,14 @@ body.inwork .foot{display:none}
   .topin{gap:12px}
   .bname{font-size:20px;white-space:nowrap}
   .bmark svg{width:24px;height:24px}
-  .tnav{gap:5px}
-  .tnav button,.tnav a.tbook{padding:7px 10px;font-size:11px}
+  /* Seven items since "My Blueprint" joined (2 Nov 2026): less padding, so
+     the profile button stays on screen. */
+  .tnav{gap:4px}
+  .tnav button,.tnav a.tbook{padding:7px 7px;font-size:11px}
+  .topin{gap:10px}
+}
+@media(min-width:1500px) and (max-width:1699px){
+  .tnav button,.tnav a.tbook{padding:8px 10px}
 }
 @media(min-width:1280px){.bname{white-space:nowrap}}
 

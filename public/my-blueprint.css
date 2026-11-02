@@ -1,0 +1,156 @@
+/* My Blueprint (Alexandru, 2 Nov 2026; AGENTS.md 10 and 11). Light and
+ * white in both themes, one easy-to-read font (Atkinson Hyperlegible), few
+ * colours, one thing at a time: the way a sign-in asks one field per screen.
+ * Works at 390px with no sideways scroll. */
+body.mbview{background:#F6F6F4}
+body.mbview #main{background:#F6F6F4}
+.mb{
+  color-scheme:light;
+  --mb-bg:#F6F6F4; --mb-card:#FFFFFF; --mb-ink:#1F1F1F; --mb-muted:#5F6368; --mb-line:#DADCE0; --mb-soft:#F1F3F4;
+  --mb-gold:#B4975F; --mb-gold-ink:#6E5213; --mb-ok:#1E7B45; --mb-ok-bg:#E6F4EA;
+  --mb-font:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  background:var(--mb-bg);color:var(--mb-ink);font:400 17px/1.55 var(--mb-font);
+  padding:24px max(16px,env(safe-area-inset-left,0px)) 120px max(16px,env(safe-area-inset-right,0px))
+}
+.mb *{box-sizing:border-box}
+.mb [hidden]{display:none!important}
+.mb-in{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:18px;background:var(--mb-card);border:1px solid var(--mb-line);border-radius:16px;padding:24px 20px}
+.mb h1,.mb h2,.mb h3,.mb h4{font-family:var(--mb-font);font-weight:700;margin:0;color:var(--mb-ink);text-wrap:balance;letter-spacing:0}
+.mb p{margin:0}
+.mb mark{background:none;color:inherit;font-weight:700}
+.mb mark.blank{font-weight:400;color:var(--mb-muted)}
+.mb svg{width:18px;height:18px;flex:none}
+.mb button,.mb a{font-family:var(--mb-font)}
+.mb button:focus-visible,.mb a:focus-visible,.mb summary:focus-visible,.mb input:focus-visible,.mb .mb-h2:focus-visible{outline:2px solid var(--mb-ink);outline-offset:2px;border-radius:6px}
+.mb .mb-h2:focus{outline:none}
+.mb-who{display:flex;flex-direction:column;gap:2px}
+.mb-k{font-size:14px;color:var(--mb-muted)}
+.mb-who h1{font-size:26px;line-height:1.25}
+.mb-who p:last-child{font-size:15px;color:var(--mb-muted)}
+
+/* The five tabs: one row, scrolling sideways inside itself on a phone. */
+.mb-tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--mb-line);margin:0 -20px;padding:0 14px}
+.mb-tabs::-webkit-scrollbar{display:none}
+.mb-tabs button{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:46px;padding:0 10px;border:0;border-bottom:3px solid transparent;background:none;color:var(--mb-muted);font-size:15.5px;font-weight:400;cursor:pointer}
+.mb-tabs button[aria-selected="true"]{color:var(--mb-ink);font-weight:700;border-bottom-color:var(--mb-gold)}
+.mb-pane{display:flex;flex-direction:column;gap:14px}
+.mb-h2{font-size:21px;line-height:1.3}
+.mb-lead{font-size:16px;color:var(--mb-muted)}
+.mb-sub{font-size:15px;color:var(--mb-muted)}
+.mb-sub b{color:var(--mb-ink)}
+.mb-row,.mb-next{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+
+/* Buttons: one dark pill for the next thing, plain text for the rest. */
+.mb-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:999px;border:0;background:var(--mb-ink);color:#fff;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
+.mb-btn svg{width:17px;height:17px}
+.mb-gold{background:var(--mb-gold);color:#1C1309}
+.mb-text{min-height:44px;padding:0 4px;border:0;background:none;color:var(--mb-gold-ink);font-size:15.5px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+@media (hover:hover){.mb-btn:hover{background:#000}.mb-gold:hover{background:#A5884F}.mb-text:hover{color:var(--mb-ink)}}
+
+/* My direction: one field on screen. */
+.mb-one{display:flex;flex-direction:column;gap:12px}
+.mb-step{font-size:14px;color:var(--mb-muted)}
+.mb-q{font-size:22px;line-height:1.3}
+.mb-q label{cursor:default}
+.mb-hint{font-size:15.5px;color:var(--mb-muted)}
+.mb-input{width:100%;min-height:54px;padding:12px 14px;border:1px solid #747775;border-radius:8px;background:#fff;color:var(--mb-ink);font:400 17px/1.4 var(--mb-font)}
+.mb-input:focus{outline:2px solid var(--mb-ink);outline-offset:0;border-color:var(--mb-ink)}
+.mb-input::placeholder{color:#80868B}
+.mb-err{min-height:1em;font-size:15px;color:#B3261E}
+.mb-err:empty{min-height:0}
+.mb-ask{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;background:var(--mb-soft);border-radius:10px;padding:12px 14px}
+.mb-ask svg{margin-top:2px;color:var(--mb-gold-ink)}
+.mb-ex{font-size:15.5px;border-left:3px solid var(--mb-line);padding:2px 0 2px 12px;color:var(--mb-ink)}
+.mb-ex span{display:block;font-size:13.5px;color:var(--mb-muted)}
+.mb-btns{display:flex;justify-content:space-between;align-items:center;gap:8px 12px;margin:2px 0 6px}
+.mb-skip{min-height:40px;padding:0;font-weight:400;color:var(--mb-muted)}
+.mb-ink{color:var(--mb-ink)}
+.mb-dir{margin:0;border:1px solid var(--mb-line);border-radius:12px}
+.mb-dir div{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:12px 14px;border-bottom:1px solid var(--mb-line)}
+.mb-dir div:last-child{border-bottom:0}
+.mb-dir dt{grid-column:1/-1;font-size:14px;color:var(--mb-muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mb-dir dd{margin:0;font-size:16.5px;overflow-wrap:anywhere}
+.mb-dir dd.no-print{align-self:center}
+.mb-locked{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;padding:2px 8px;border-radius:999px;background:var(--mb-soft);color:var(--mb-ink)}
+.mb-locked svg{width:13px;height:13px}
+.mb-not{color:var(--mb-muted)}
+
+/* This week: four actions, each with a box to tick. */
+.mb-acts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.mb-acts li{border:1px solid var(--mb-line);border-radius:12px;padding:14px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.mb-acts li > div{min-width:0;display:flex;flex-direction:column;gap:4px}
+.mb-acts li.mb-on{border-color:var(--mb-ok)}
+.mb-acts li.mb-off{background:var(--mb-soft)}
+.mb-meta{font-size:14px;color:var(--mb-muted)}
+.mb-do{font-size:17px;line-height:1.5;overflow-wrap:anywhere}
+.mb-box{width:28px;height:28px;margin-top:2px;padding:0;border-radius:7px;border:2px solid var(--mb-muted);background:#fff;cursor:pointer;display:grid;place-items:center;color:#fff}
+.mb-off .mb-box{cursor:default;border-style:dashed}
+.mb-box[aria-checked="true"]{background:var(--mb-ok);border-color:var(--mb-ok)}
+.mb-box[aria-checked="true"]::after{content:"";width:12px;height:7px;border:solid #fff;border-width:0 0 3px 3px;transform:translateY(-2px) rotate(-45deg)}
+.mb-box:focus-visible{outline:2px solid var(--mb-ink);outline-offset:2px}
+
+/* My playbook: the chapters, then each level folded. */
+.mb-ch{font-size:15px;color:var(--mb-muted);font-weight:700;margin-top:8px!important;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.mb-ch small{font-weight:400;font-size:14px}
+details.mb-lv{border:1px solid var(--mb-line);border-radius:12px}
+details.mb-lv > summary{list-style:none;cursor:pointer;padding:14px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+details.mb-lv > summary::-webkit-details-marker{display:none}
+.mb-lvt b{display:block;font-size:16.5px}
+.mb-lvt small{font-size:14px;color:var(--mb-muted)}
+.mb-tag{display:inline-flex;align-items:center;gap:4px;font-size:13.5px;padding:4px 10px;border-radius:999px;background:var(--mb-soft);color:var(--mb-ink);white-space:nowrap}
+.mb-tag svg{width:13px;height:13px}
+.mb-tag.mb-now{background:var(--mb-ink);color:#fff}
+.mb-tag.mb-done{background:var(--mb-ok-bg);color:var(--mb-ok)}
+.mb-lvb{padding:0 14px 14px;display:flex;flex-direction:column;gap:12px}
+.mb-have{font-size:16px;background:var(--mb-soft);border-radius:10px;padding:12px 14px}
+.mb-dom{display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--mb-line)}
+.mb-dom h4{font-size:15.5px}
+.mb-dom p{font-size:16px;overflow-wrap:anywhere}
+details.mb-take{border-radius:10px;background:var(--mb-soft)}
+details.mb-take > summary{cursor:pointer;padding:10px 14px;font-size:15px;font-weight:700;min-height:44px;display:flex;align-items:center}
+details.mb-take ol,details.mb-take dl{margin:0;padding:0 14px 12px 34px;font-size:15.5px}
+details.mb-take dl{padding-left:14px}
+details.mb-take dt{font-size:13.5px;color:var(--mb-muted);margin-top:6px}
+details.mb-take dd{margin:0}
+.mb-take .ln{display:inline-block;min-width:6em;border-bottom:1px solid var(--mb-muted)}
+
+/* Strengths and My journey. */
+.mb-two{display:flex;flex-direction:column;gap:18px}
+.mb-list{display:flex;flex-direction:column;gap:10px}
+.mb-list h3{font-size:15px;color:var(--mb-muted)}
+.mb-list p{font-size:16px;line-height:1.5;padding:12px 14px;border:1px solid var(--mb-line);border-radius:12px}
+.mb-list p span{display:block;font-size:13.5px;color:var(--mb-muted)}
+.mb-list em{display:block;margin-top:6px;font-style:normal}
+.mb-tl{list-style:none;margin:0;padding:0}
+.mb-tl li{display:grid;grid-template-columns:86px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--mb-line);font-size:16px;line-height:1.45}
+.mb-tl li:last-child{border-bottom:0}
+.mb-tlk{font-size:14px;color:var(--mb-muted)}
+
+/* Two ways on, at the foot. */
+.mb-links{display:flex;flex-direction:column;border:1px solid var(--mb-line);border-radius:12px}
+.mb-links a,.mb-links button{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:52px;padding:12px 14px;border:0;border-bottom:1px solid var(--mb-line);background:none;color:var(--mb-ink);text-decoration:none;font-size:16px;text-align:left;cursor:pointer;width:100%}
+.mb-links > :last-child{border-bottom:0}
+.mb-links span{color:var(--mb-muted);font-size:14px;text-align:right}
+
+@media (min-width:700px){.mb-in{max-width:680px;padding:28px 28px}.mb-tabs{margin:0 -28px;padding:0 20px}}
+@media (max-width:420px){
+  .mb{padding-top:12px}
+  .mb-in{padding:20px 16px;border-radius:14px}
+  .mb-tabs{margin:0 -16px;padding:0 8px}
+  .mb-tabs button{padding:0 8px;font-size:15px}
+  .mb-tl li{grid-template-columns:72px 1fr}
+}
+/* The music stays, as its disc only, so it never covers a button here. */
+@media (max-width:600px){
+  body.mbview .mp-pt,body.mbview .mp-eq{display:none}
+  body.mbview .mp-pill{padding:5px;min-height:0}
+}
+@media (prefers-reduced-motion:reduce){.mb *{transition:none!important;animation:none!important}}
+@media print{
+  body.mbview,body.mbview #main,.mb{background:#fff!important}
+  .mb{padding:0}
+  .mb-in{border:0;padding:0;max-width:none}
+  .mb-tabs,.mb-links,.mb .no-print{display:none!important}
+  .mb details > summary{list-style:none}
+  details.mb-lv,.mb-acts li{break-inside:avoid}
+}

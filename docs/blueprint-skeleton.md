@@ -30,18 +30,18 @@
 
 | Week | Chapter | Level | Promise: by Sunday you will have | Part of | Also this week |
 | --- | --- | --- | --- | --- | --- |
-| 1 | The Inner Pyramid | 01 · SEED · What you believe | One old rule tested, one task handed over, your enough as a number, three people asked to buy. | The Founder Launchpad (free) | Launchpad plan, week 1 |
-| 2 | The Inner Pyramid | 02 · VIEW · How you read it | One event written as facts, one person asked instead of judged, your five numbers read, one customer signal tested. | The Founder Launchpad (free) | Launchpad plan, week 2 |
-| 3 | The Inner Pyramid | 03 · CALM · What you feel | One feeling named under the stress, one new first reaction, a storm rule written, one client’s fear in their own words. | The Founder Launchpad (free) | Launchpad plan, week 3 |
-| 4 | The Inner Pyramid | 04 · STEP · What you do | One if–then plan kept, one clear ask with a date, your hour priced, a weekly selling hour booked. | The Boardroom | Session 1 opens it |
-| 5 | The Inner Pyramid | 05 · FACT · What you became | One dated proof of who you are becoming, one person thanked specifically, one number read, three clients asked for their words. | The Boardroom | Chapter I reading |
-| 6 | The Engine Room | 06 · TALK · The conversations you avoid | One postponed conversation held, one talk where you listened more, one late payment asked for, one kind no said. | Personal Leadership LAB | — |
-| 7 | The Engine Room | 07 · HOUR · Your week | Protected hours in your calendar, one task one step up the ladder, your price floor, one marketing hour booked. | Personal Leadership LAB | — |
-| 8 | The Engine Room | 08 · GOLD · Your offer | Your gift named and one thing dropped, three clear client steps, three price levels, your offer in one line. | Personal Leadership LAB | — |
-| 9 | The Engine Room | 09 · FLOW · Your systems | A weekly review held, one area with an owner, one page of cash, your warm list written down. | Personal Leadership LAB | Chapter II reading; then Session 2 |
-| 10 | The Open Market | 10 · NAME · Your first hundred names | Ten people contacted, one partner asked, your best client described, three customer conversations booked. | Business HUB | — |
-| 11 | The Open Market | 11 · EDGE · Your advantage | Three people asked for honest feedback, one open question in a meeting, your advantage written with proof, three testimonials asked for. | Business HUB | — |
-| 12 | The Open Market | 12 · RISE · Your twelve weeks | Your leader sentence written, one person given something to own, a twelve-week number with checkpoints, one market test set. | Business HUB | Chapter III reading; then Session 3 |
+| 1 | Start with you | 01 · SEED · What you believe | One old rule tested, one task handed over, your enough as a number, three people asked to buy. | The Founder Launchpad (free) | Launchpad plan, week 1 |
+| 2 | Start with you | 02 · VIEW · How you read it | One event written as facts, one person asked instead of judged, your five numbers read, one customer signal tested. | The Founder Launchpad (free) | Launchpad plan, week 2 |
+| 3 | Start with you | 03 · CALM · What you feel | One feeling named under the stress, one new first reaction, a storm rule written, one client’s fear in their own words. | The Founder Launchpad (free) | Launchpad plan, week 3 |
+| 4 | Start with you | 04 · STEP · What you do | One if–then plan kept, one clear ask with a date, your hour priced, a weekly selling hour booked. | The Boardroom | Session 1 opens it |
+| 5 | Start with you | 05 · FACT · What you became | One dated proof of who you are becoming, one person thanked specifically, one number read, three clients asked for their words. | The Boardroom | Chapter I reading |
+| 6 | Run the business | 06 · TALK · The conversations you avoid | One postponed conversation held, one talk where you listened more, one late payment asked for, one kind no said. | Personal Leadership LAB | — |
+| 7 | Run the business | 07 · HOUR · Your week | Protected hours in your calendar, one task one step up the ladder, your price floor, one marketing hour booked. | Personal Leadership LAB | — |
+| 8 | Run the business | 08 · GOLD · Your offer | Your gift named and one thing dropped, three clear client steps, three price levels, your offer in one line. | Personal Leadership LAB | — |
+| 9 | Run the business | 09 · FLOW · Your systems | A weekly review held, one area with an owner, one page of cash, your warm list written down. | Personal Leadership LAB | Chapter II reading; then Session 2 |
+| 10 | Grow the market | 10 · NAME · Your first hundred names | Ten people contacted, one partner asked, your best client described, three customer conversations booked. | Business HUB | — |
+| 11 | Grow the market | 11 · EDGE · Your advantage | Three people asked for honest feedback, one open question in a meeting, your advantage written with proof, three testimonials asked for. | Business HUB | — |
+| 12 | Grow the market | 12 · RISE · Your twelve weeks | Your leader sentence written, one person given something to own, a twelve-week number with checkpoints, one market test set. | Business HUB | Chapter III reading; then Session 3 |
 | 13 | — | The last Sunday | Level 12’s four actions checked, then the North Star again, to compare with where you began. | — | — |
 
 ## How one level runs, one question at a time
@@ -111,9 +111,9 @@ Where each one lives. None is pasted on screen as a slogan.
 | Achievement is an act of kindness | Asking to buy (01), the money owed (06), the warm list moved (09): getting it done serves the people waiting on you. |
 | Win with grace | The kind no with an alternative (06), feedback answered only with thank you (11), proof asked for in clients’ own words, never written for them (05, 11). |
 
-## Chapter I · The Inner Pyramid
+## Chapter I · Start with you
 
-*The founder, from the base up: what you believe, how you read it, what you feel, what you do, what it makes of you.*
+*You, and the basics of a business: what you believe, how you read what happens, what you feel, what you do and what it makes of you, with the customer, serving, money and goals.*
 
 ### Week 1 · Level 01 · SEED · What you believe
 
@@ -168,19 +168,19 @@ Where each one lives. None is pasted on screen as a slogan.
 3. **Write once**, one blank per screen, the sentence building above it:  
    “I hand ___ to ___ on ___. Done means ___.”
    - `task`: one task (e.g. *the weekly invoices*)
-   - `who`: a name (e.g. *Marta*)
+   - `who`: a name (e.g. *Jordan*)
    - `day`: which day (e.g. *Monday*) · day chips
    - `done`: what finished looks like (e.g. *all sent by 5 pm*)
-4. **Done when** (shown, not typed): on *Monday* you handed *the weekly invoices* to *Marta*, with “*all sent by 5 pm*” in writing, and checked it only once.  
+4. **Done when** (shown, not typed): on *Monday* you handed *the weekly invoices* to *Jordan*, with “*all sent by 5 pm*” in writing, and checked it only once.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* About *60%* of last week, you held work because nobody else could do it right.
    - *Where you struggle. Don’t fight it.* You believe people usually *do it worse than I would*. Don’t fight the feeling. Test it in one small step.
    - *Where you shine. Don’t ignore it.* You named one task to let go. That is where trust starts.
-   - *What you will do. Exactly.* On *Monday* you hand *the weekly invoices* to *Marta*. Done means *all sent by 5 pm*. You check once, not every hour.
+   - *What you will do. Exactly.* On *Monday* you hand *the weekly invoices* to *Jordan*. Done means *all sent by 5 pm*. You check once, not every hour.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your people*): **The hand-over note**
-- *Marta*, from *Monday*, this is yours: *the weekly invoices*.
+- *Jordan*, from *Monday*, this is yours: *the weekly invoices*.
 - Done means: *all sent by 5 pm*.
 - I will check it once, on ____. Ask me anything before you start.
 
@@ -202,21 +202,21 @@ Where each one lives. None is pasted on screen as a slogan.
    Scale 0 to 10, step 1; ends “Guessing” and “Exactly”; starts at 4. Words: up to 3: mostly guessing · 6: roughly · 8: quite sure · 10: certain.
 3. **Write once**, one blank per screen, the sentence building above it:  
    “My enough is ___ a month. On ___ I will ___.”
-   - `enough`: an amount (e.g. *€4,200*)
+   - `enough`: an amount (e.g. *$4,200*)
    - `day`: which day (e.g. *Wednesday*) · day chips
-   - `move`: one money move (e.g. *raise my rate for new clients to €75*)
-4. **Done when** (shown, not typed): on *Wednesday* you made the money move you wrote: “*raise my rate for new clients to €75*”.  
+   - `move`: one money move (e.g. *raise my rate for new clients to $75*)
+4. **Done when** (shown, not typed): on *Wednesday* you made the money move you wrote: “*raise my rate for new clients to $75*”.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You grew up with *There is never enough*, and you are *mostly guessing* about your own numbers.
    - *Where you struggle. Don’t fight it.* A guess becomes a number the day you open the statement. Don’t fight the fear; open it.
    - *Where you shine. Don’t ignore it.* You wrote your enough as one number. Now money has a finish line.
-   - *What you will do. Exactly.* On *Wednesday* you will *raise my rate for new clients to €75*. Your enough is *€4,200* a month: a plan, not your worth.
+   - *What you will do. Exactly.* On *Wednesday* you will *raise my rate for new clients to $75*. Your enough is *$4,200* a month: a plan, not your worth.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your money*): **My money line**
-- Enough: *€4,200* a month.
+- Enough: *$4,200* a month.
 - Last month in: ____ · fixed costs: ____ · left: ____
-- The money move: *raise my rate for new clients to €75*, on *Wednesday*.
+- The money move: *raise my rate for new clients to $75*, on *Wednesday*.
 
 **If Sunday says Partly or Not yet:** Make it smaller: open last month’s statement and write the three numbers. The move can wait a week; the looking cannot.
 
@@ -237,19 +237,19 @@ Where each one lives. None is pasted on screen as a slogan.
    - `whom`: who (e.g. *café owners*)
    - `prob`: which problem (e.g. *empty tables on weekday afternoons*)
    - `day`: which day (e.g. *Friday*) · day chips
-   - `names`: three names (e.g. *Luca, Sara and the bakery on Via Roma*)
-4. **Done when** (shown, not typed): you asked *Luca, Sara and the bakery on Via Roma* by *Friday*, and wrote each answer word for word. A yes, a no and no answer all count.  
+   - `names`: three names (e.g. *Mia, Sam and the bakery on Main Street*)
+4. **Done when** (shown, not typed): you asked *Mia, Sam and the bakery on Main Street* by *Friday*, and wrote each answer word for word. A yes, a no and no answer all count.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* *2 asks* in 30 days, and asking feels like *bothering them*.
    - *Where you struggle. Don’t fight it.* That feeling decides how often you ask. Don’t fight it. Let three real answers speak louder.
    - *Where you shine. Don’t ignore it.* You can say who you help, in one line: *café owners*, with *empty tables on weekday afternoons*.
-   - *What you will do. Exactly.* By *Friday* you ask *Luca, Sara and the bakery on Via Roma*. Write what each one says, word for word.
+   - *What you will do. Exactly.* By *Friday* you ask *Mia, Sam and the bakery on Main Street*. Write what each one says, word for word.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your sales*): **The ask, ready to send**
 - Hi ____, I help *café owners* with *empty tables on weekday afternoons*.
 - I think I can help you too. Could we talk for twenty minutes this week?
-- Asked: *Luca, Sara and the bakery on Via Roma*. Their answers, word for word: ____
+- Asked: *Mia, Sam and the bakery on Main Street*. Their answers, word for word: ____
 
 **If Sunday says Partly or Not yet:** Make it smaller: ask one of the three today, by message, with the two lines above.
 
@@ -448,22 +448,22 @@ Where each one lives. None is pasted on screen as a slogan.
    “Under pressure, I will ___ instead of ___. I ask ___ to tell me when I slip.”
    - `will`: what you’ll do (e.g. *say “thank you for telling me” first*)
    - `instead`: what you do now (e.g. *sighing*)
-   - `who`: a name (e.g. *Marta*)
-4. **Day** (new screen, day chips): Which day will you ask Marta?
-5. **Done when** (shown, not typed): you asked *Marta* on *Friday* to tell you when you slip, and under pressure you did this at least once: *say “thank you for telling me” first*.  
+   - `who`: a name (e.g. *Jordan*)
+4. **Day** (new screen, day chips): Which day will you ask Jordan?
+5. **Done when** (shown, not typed): you asked *Jordan* on *Friday* to tell you when you slip, and under pressure you did this at least once: *say “thank you for telling me” first*.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* Under pressure you *snap*, and bringing you bad news feels *sometimes safe*.
    - *Where you struggle. Don’t fight it.* People read your face before your plan. Don’t fight the pressure. Change the first five seconds.
    - *Where you shine. Don’t ignore it.* You chose one new first reaction. The room will notice in a week.
-   - *What you will do. Exactly.* You will *say “thank you for telling me” first* instead of *sighing*, and *Marta* will tell you when you slip.
+   - *What you will do. Exactly.* You will *say “thank you for telling me” first* instead of *sighing*, and *Jordan* will tell you when you slip.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your people*): **My first five seconds**
 - Under pressure I will *say “thank you for telling me” first*, instead of *sighing*.
-- *Marta* tells me when I slip.
+- *Jordan* tells me when I slip.
 - Times I slipped this week: ____ · times I kept it: ____
 
-**If Sunday says Partly or Not yet:** Make it smaller: tell *Marta* today, in one sentence, what you are practising. Asking is the first step.
+**If Sunday says Partly or Not yet:** Make it smaller: tell *Jordan* today, in one sentence, what you are practising. Asking is the first step.
 
 **Links.** Planner: Monday page, as the one move (Start here) or one of three goals, with its day. Manual for your stage · Level 03 · Lead your people · Atmosphere (anchor #l03-people, built in Phase 4).
 
@@ -517,17 +517,17 @@ Where each one lives. None is pasted on screen as a slogan.
    - `fear`: their fear (e.g. *paying for nothing*)
    - `hope`: their hope (e.g. *full tables, without discounts*)
    - `day`: which day (e.g. *Thursday*) · day chips
-   - `who`: a client (e.g. *Luca*)
-4. **Done when** (shown, not typed): you asked *Luca* by *Thursday*, and wrote their fear and their hope in their own words, or that they have not answered yet.  
+   - `who`: a client (e.g. *Mia*)
+4. **Done when** (shown, not typed): you asked *Mia* by *Thursday*, and wrote their fear and their hope in their own words, or that they have not answered yet.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You think your clients fear *wasting money*, and you are *mostly guessing*.
    - *Where you struggle. Don’t fight it.* People feel first and explain later. Don’t guess. Ask, and write their words.
    - *Where you shine. Don’t ignore it.* You named their fear and their hope. That is the start of every good message.
-   - *What you will do. Exactly.* By *Thursday* you ask *Luca*. Then you speak to their fear of *paying for nothing* and their hope for *full tables, without discounts*, honestly.
+   - *What you will do. Exactly.* By *Thursday* you ask *Mia*. Then you speak to their fear of *paying for nothing* and their hope for *full tables, without discounts*, honestly.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your marketing*): **Their fear, their hope**
-- *Luca* fears: ____ (their words)
+- *Mia* fears: ____ (their words)
 - And hopes for: ____ (their words)
 - The first line of my next message: “If you’re worried about ____, …”
 
@@ -633,7 +633,7 @@ Where each one lives. None is pasted on screen as a slogan.
    Scale 0 to 40, step 1; ends “None” and “40 hours”; starts at 10. Words: 0 reads “0 hours” · 20 reads “20 hours” · 40 reads “40 hours”.
 3. **Write once**, one blank per screen, the sentence building above it:  
    “My hour is worth ___. First, every day: ___. I hand back ___.”
-   - `hour`: enough ÷ hours you want (e.g. *€35*)
+   - `hour`: enough ÷ hours you want (e.g. *$35*)
    - `first`: your one priority (e.g. *two sales calls*)
    - `back`: one task (e.g. *the bookkeeping*)
 4. **Day** (new screen, day chips): Which day will you hand back the bookkeeping?
@@ -643,10 +643,10 @@ Where each one lives. None is pasted on screen as a slogan.
    - *Where you were. Admit it.* *12 hours* a week go to *admin*.
    - *Where you struggle. Don’t fight it.* Busy feels like progress. Don’t fight that. Put a price on the hour.
    - *Where you shine. Don’t ignore it.* Few of your hours leak. Guard the first one of the day.
-   - *What you will do. Exactly.* Your hour is worth *€35*. First comes *two sales calls*. You hand back *the bookkeeping*.
+   - *What you will do. Exactly.* Your hour is worth *$35*. First comes *two sales calls*. You hand back *the bookkeeping*.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *What you sell*): **My hour**
-- My hour is worth *€35*.
+- My hour is worth *$35*.
 - First, every day: *two sales calls*.
 - Handed back: *the bookkeeping*. Hours it gives me each week: ____
 
@@ -740,20 +740,20 @@ Where each one lives. None is pasted on screen as a slogan.
    Scale 0 to 10, step 1; ends “None” and “Ten”; starts at 1. Words: 0 reads “0 given” · 5 reads “5 given” · 10 reads “10 given”.
 3. **Write once**, one blank per screen, the sentence building above it:  
    “I thank ___ for ___. It changed ___.”
-   - `who`: a name (e.g. *Marta*)
+   - `who`: a name (e.g. *Jordan*)
    - `what`: what they did (e.g. *chasing the unpaid invoices*)
    - `changed`: what changed (e.g. *our cash this month*)
-4. **Day** (new screen, day chips): Which day will you tell Marta?
-5. **Done when** (shown, not typed): you told *Marta* on *Friday*, face to face or in writing, what they did and what it changed.  
+4. **Day** (new screen, day chips): Which day will you tell Jordan?
+5. **Done when** (shown, not typed): you told *Jordan* on *Friday*, face to face or in writing, what they did and what it changed.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* When people do well, you *say a quick thanks*. Last week: *1 given*.
    - *Where you struggle. Don’t fight it.* People repeat what gets noticed. Don’t wait for big wins. Name the small ones.
    - *Where you shine. Don’t ignore it.* You named one win and what it changed. That is how people grow.
-   - *What you will do. Exactly.* You thank *Marta* for *chasing the unpaid invoices*, and tell them it changed *our cash this month*.
+   - *What you will do. Exactly.* You thank *Jordan* for *chasing the unpaid invoices*, and tell them it changed *our cash this month*.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your people*): **The thank-you, ready to send**
-- *Marta*, thank you for *chasing the unpaid invoices*.
+- *Jordan*, thank you for *chasing the unpaid invoices*.
 - It changed *our cash this month*.
 - Next person to thank: ____
 
@@ -830,7 +830,7 @@ Where each one lives. None is pasted on screen as a slogan.
 
 **Change from Version 4.** The “Exactly” line said “by Friday”. It now says “by {on}”, the day the founder chose.
 
-### Chapter I reading · The Inner Pyramid (after Level 05)
+### Chapter I reading · Start with you (after Level 05)
 
 One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05’s four are checked when Level 06 opens.
 
@@ -844,9 +844,9 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 
 **In his words:** “The way you run your day is the way you run your company. If you avoid your numbers at home, you will avoid them at work.” (Worth Building · Business is life, and life is business).
 
-## Chapter II · The Engine Room
+## Chapter II · Run the business
 
-*The business inside: conversations, time, your offer and its price, and systems that run without you.*
+*Inside the business: the conversations, your time, your offer and its price, and systems that run without you.*
 
 ### Week 6 · Level 06 · TALK · The conversations you avoid
 
@@ -901,16 +901,16 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
    Scale 0% to 100%, step 10; ends “None” and “All of it”; starts at 70. Words: 0% reads “less than half” · 50% reads “half” · 100% reads “most of it”.
 3. **Write once**, one blank per screen, the sentence building above it:  
    “In my next talk with ___ I ask “___” and speak less than half.”
-   - `who`: a name (e.g. *Marta*)
+   - `who`: a name (e.g. *Jordan*)
    - `ask`: one open question (e.g. *What would make this easier for you?*)
-4. **Day** (new screen, day chips): Which day is the talk with Marta?
-5. **Done when** (shown, not typed): in the talk with *Marta* on *Friday* you asked “*What would make this easier for you?*”, and spoke less than half the time.  
+4. **Day** (new screen, day chips): Which day is the talk with Jordan?
+5. **Done when** (shown, not typed): in the talk with *Jordan* on *Friday* you asked “*What would make this easier for you?*”, and spoke less than half the time.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* In hard talks you *explain too much*, and you spoke *most of it* of the time.
    - *Where you struggle. Don’t fight it.* Talking feels like control. Don’t fight that urge. Ask, then count to three.
    - *Where you shine. Don’t ignore it.* You chose one open question. Questions open people.
-   - *What you will do. Exactly.* With *Marta*, you ask “*What would make this easier for you?*” and speak less than half.
+   - *What you will do. Exactly.* With *Jordan*, you ask “*What would make this easier for you?*” and speak less than half.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your people*): **The listening card**
 - My question: “*What would make this easier for you?*”
@@ -930,24 +930,24 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 1. **Tap.** The money talk I avoid is about…  
    Options: 1 an unpaid invoice · 2 a discount I regret · 3 extra work for free · 4 a supplier price
 2. **Slide.** How much money is stuck there?  
-   Scale €0 to €10,000, step €250; ends “€0” and “€10,000”; starts at 1500. Words: 0 reads “€0” · 5000 reads “€5,000” · 10000 reads “€10,000”.
+   Scale $0 to $10,000, step $250; ends “$0” and “$10,000”; starts at 1500. Words: 0 reads “$0” · 5000 reads “$5,000” · 10000 reads “$10,000”.
 3. **Write once**, one blank per screen, the sentence building above it:  
    “By ___ I write to ___: “Invoice ___ was due on ___. Please pay by ___.””
    - `day`: which day (e.g. *Tuesday*) · day chips
-   - `who`: a name (e.g. *Studio Rossi*)
+   - `who`: a name (e.g. *Parker Studio*)
    - `inv`: which invoice (e.g. *0412*)
    - `due`: the date (e.g. *1 Oct*)
    - `by`: a new date (e.g. *8 Nov*)
-4. **Done when** (shown, not typed): the message went to *Studio Rossi* on *Tuesday*. Being paid by *8 Nov* is theirs to do; sending it was yours.  
+4. **Done when** (shown, not typed): the message went to *Parker Studio* on *Tuesday*. Being paid by *8 Nov* is theirs to do; sending it was yours.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
-   - *Where you were. Admit it.* *€1,500* are stuck in *an unpaid invoice*.
+   - *Where you were. Admit it.* *$1,500* are stuck in *an unpaid invoice*.
    - *Where you struggle. Don’t fight it.* Asking for your own money feels rude. It isn’t. Don’t fight the discomfort. Send it.
    - *Where you shine. Don’t ignore it.* The amount is small. Clear it before it grows.
-   - *What you will do. Exactly.* By *Tuesday* you write to *Studio Rossi*: invoice *0412*, due *1 Oct*, please pay by *8 Nov*.
+   - *What you will do. Exactly.* By *Tuesday* you write to *Parker Studio*: invoice *0412*, due *1 Oct*, please pay by *8 Nov*.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your money*): **The payment message, ready to send**
-- Hi *Studio Rossi*, invoice *0412* was due on *1 Oct*.
+- Hi *Parker Studio*, invoice *0412* was due on *1 Oct*.
 - Please pay by *8 Nov*. Thank you.
 - If it is not paid by *8 Nov*, I call on ____.
 - From now on, new work starts with a deposit of ____.
@@ -1079,23 +1079,23 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
    Scale 0 to 40, step 1; ends “0” and “40 hours”; starts at 6. Words: 0 reads “0 hours” · 20 reads “20 hours” · 40 reads “40 hours”.
 3. **Write once**, one blank per screen, the sentence building above it:  
    “One job costs me ___ plus ___ hours × ___ = ___. I never sell it below ___.”
-   - `mat`: materials and fees (e.g. *€80*)
+   - `mat`: materials and fees (e.g. *$80*)
    - `hrs`: hours (e.g. *6*)
-   - `rate`: my hour (e.g. *€35*)
-   - `total`: the total (e.g. *€290*)
-   - `floor`: your floor (e.g. *€350*)
+   - `rate`: my hour (e.g. *$35*)
+   - `total`: the total (e.g. *$290*)
+   - `floor`: your floor (e.g. *$350*)
 4. **Day** (new screen, day chips): By which day will your lowest price be written next to your prices?
-5. **Done when** (shown, not typed): *€350* is written next to your price list by *Friday*, and every quote you sent this week was at or above it.  
+5. **Done when** (shown, not typed): *$350* is written next to your price list by *Friday*, and every quote you sent this week was at or above it.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You price *by guess*, and a job really takes *6 hours*.
    - *Where you struggle. Don’t fight it.* Most underpricing hides in the hours you don’t count. Don’t fight the number. Write it down.
    - *Where you shine. Don’t ignore it.* You know the real hours. Now price from them.
-   - *What you will do. Exactly.* One job costs you *€290*. You never sell it below *€350*.
+   - *What you will do. Exactly.* One job costs you *$290*. You never sell it below *$350*.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *What you sell*): **The line I never sell below**
-- One job: *€80* + *6* hours × *€35* = *€290*.
-- I never sell it below *€350*.
+- One job: *$80* + *6* hours × *$35* = *$290*.
+- I never sell it below *$350*.
 - If a client asks for less: “At that price I can offer ____ instead.”
 
 **If Sunday says Partly or Not yet:** Make it smaller: take your last job, count every hour it really took, and write the real cost.
@@ -1191,21 +1191,21 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
    - `s1`: step one (e.g. *a welcome call*)
    - `s2`: step two (e.g. *a plan in 48 hours*)
    - `s3`: step three (e.g. *a weekly update*)
-   - `who`: a name (e.g. *Marta*)
+   - `who`: a name (e.g. *Jordan*)
    - `which`: which step (e.g. *3*)
 4. **Day** (new screen, day chips): By which day will the three steps be written?
-5. **Done when** (shown, not typed): by *Friday*, the three steps are in the message every new client gets, and *Marta* knows step *3* is theirs.  
+5. **Done when** (shown, not typed): by *Friday*, the three steps are in the message every new client gets, and *Jordan* knows step *3* is theirs.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* Clients get confused *at the start*, across *9 steps*.
    - *Where you struggle. Don’t fight it.* Confusion costs referrals. Don’t fight it. Show them three clear steps.
    - *Where you shine. Don’t ignore it.* You wrote three steps and an owner. Clients feel led.
-   - *What you will do. Exactly.* Yes, then *a welcome call*, *a plan in 48 hours*, *a weekly update*. *Marta* owns step *3*.
+   - *What you will do. Exactly.* Yes, then *a welcome call*, *a plan in 48 hours*, *a weekly update*. *Jordan* owns step *3*.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your systems*): **The welcome message, ready to send**
 - Thank you for saying yes. Here is what happens now:
 - 1. *a welcome call* · 2. *a plan in 48 hours* · 3. *a weekly update*
-- *Marta* looks after step *3*. Any question, just reply.
+- *Jordan* looks after step *3*. Any question, just reply.
 
 **If Sunday says Partly or Not yet:** Make it smaller: send the three steps to your next client, even if the message is not perfect yet.
 
@@ -1226,11 +1226,11 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 3. **Write once**, one blank per screen, the sentence building above it:  
    “Essential: ___ at ___. Complete: ___ at ___. Premium: ___ at ___.”
    - `e1`: what’s in it (e.g. *the plan*)
-   - `p1`: price (e.g. *€390*)
+   - `p1`: price (e.g. *$390*)
    - `e2`: what’s in it (e.g. *plan and launch*)
-   - `p2`: price (e.g. *€890*)
+   - `p2`: price (e.g. *$890*)
    - `e3`: what’s in it (e.g. *done with you, 3 months*)
-   - `p3`: price (e.g. *€2,400*)
+   - `p3`: price (e.g. *$2,400*)
 4. **Day** (new screen, day chips): By which day will the three levels be on your offer page?
 5. **Done when** (shown, not typed): by *Friday*, the three levels are on your offer page, price list or a pinned post, and you said them out loud once to a buyer.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
@@ -1238,12 +1238,12 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
    - *Where you were. Admit it.* You price *by feel*, and you say it out loud *roughly*.
    - *Where you struggle. Don’t fight it.* A single price forces a yes or no. Don’t fight that. Give three choices.
    - *Where you shine. Don’t ignore it.* You built three levels. Most people choose the middle.
-   - *What you will do. Exactly.* Essential at *€390*, Complete at *€890*, Premium at *€2,400*.
+   - *What you will do. Exactly.* Essential at *$390*, Complete at *$890*, Premium at *$2,400*.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *What you sell*): **My three levels**
-- Essential: *the plan*, *€390*.
-- Complete: *plan and launch*, *€890*.
-- Premium: *done with you, 3 months*, *€2,400*.
+- Essential: *the plan*, *$390*.
+- Complete: *plan and launch*, *$890*.
+- Premium: *done with you, 3 months*, *$2,400*.
 - After the price: “Which one feels right for you?” Then stop talking.
 
 **If Sunday says Partly or Not yet:** Make it smaller: say the three levels out loud to one person you trust, then to one buyer.
@@ -1338,25 +1338,25 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
    Scale 0 to 20, step 1; ends “None” and “20”; starts at 9. Words: 0 reads “0 tasks” · 10 reads “10 tasks” · 20 reads “20 tasks”.
 3. **Write once**, one blank per screen, the sentence building above it:  
    “___ owns ___. They decide alone up to ___. They call me when ___.”
-   - `who`: a name (e.g. *Marta*)
+   - `who`: a name (e.g. *Jordan*)
    - `owns`: an area (e.g. *orders and suppliers*)
-   - `limit`: a limit (e.g. *€500*)
+   - `limit`: a limit (e.g. *$500*)
    - `call`: when (e.g. *a client complains*)
-4. **Day** (new screen, day chips): By which day will Marta know?
-5. **Done when** (shown, not typed): by *Friday*, *Marta* has it in writing: they own *orders and suppliers* up to *€500*, and you passed them the next decision in that area.  
+4. **Day** (new screen, day chips): By which day will Jordan know?
+5. **Done when** (shown, not typed): by *Friday*, *Jordan* has it in writing: they own *orders and suppliers* up to *$500*, and you passed them the next decision in that area.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* If you were sick, *the business stops*. *9 tasks* sit with you alone.
    - *Where you struggle. Don’t fight it.* Being needed feels good. It is also a ceiling. Don’t fight it. Give one area an owner.
    - *Where you shine. Don’t ignore it.* You gave one area an owner and a limit. That is a system.
-   - *What you will do. Exactly.* *Marta* owns *orders and suppliers*, decides up to *€500*, and calls you when *a client complains*.
+   - *What you will do. Exactly.* *Jordan* owns *orders and suppliers*, decides up to *$500*, and calls you when *a client complains*.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your systems*): **The owner note**
-- *Marta* owns *orders and suppliers*.
-- They decide alone up to *€500*.
+- *Jordan* owns *orders and suppliers*.
+- They decide alone up to *$500*.
 - They call me when *a client complains*. Otherwise, I trust their decision.
 
-**If Sunday says Partly or Not yet:** Make it smaller: give *Marta* one decision this week, up to *€500*, and let it stand.
+**If Sunday says Partly or Not yet:** Make it smaller: give *Jordan* one decision this week, up to *$500*, and let it stand.
 
 **Links.** Growth Plan step 9: feeds (one decision made without you). Planner: Monday page, as the one move (Start here) or one of three goals, with its day. Manual for your stage · Level 09 · Lead your people · Lean on roles (anchor #l09-people, built in Phase 4).
 
@@ -1375,21 +1375,21 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 3. **Write once**, one blank per screen, the sentence building above it:  
    “Every ___: money in ___, money out ___, left ___. My alert line is ___.”
    - `day`: which day (e.g. *Monday*) · day chips
-   - `in`: amount (e.g. *€6,200*)
-   - `out`: amount (e.g. *€4,900*)
-   - `left`: amount (e.g. *€1,300*)
-   - `alert`: the minimum (e.g. *€3,000 in the bank*)
-4. **Done when** (shown, not typed): on *Monday* the page shows this week’s in, out and left, and the line “Below *€3,000 in the bank*, the same day I …” is filled in.  
+   - `in`: amount (e.g. *$6,200*)
+   - `out`: amount (e.g. *$4,900*)
+   - `left`: amount (e.g. *$1,300*)
+   - `alert`: the minimum (e.g. *$3,000 in the bank*)
+4. **Done when** (shown, not typed): on *Monday* the page shows this week’s in, out and left, and the line “Below *$3,000 in the bank*, the same day I …” is filled in.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You check *the bank balance*, and you have *2 months* of runway.
    - *Where you struggle. Don’t fight it.* Cash surprises kill good businesses. Don’t fight the number. Look every week.
    - *Where you shine. Don’t ignore it.* You wrote one page of cash and an alert line. No more surprises.
-   - *What you will do. Exactly.* Every *Monday*: in *€6,200*, out *€4,900*, left *€1,300*. Below *€3,000 in the bank*, you act that day.
+   - *What you will do. Exactly.* Every *Monday*: in *$6,200*, out *$4,900*, left *$1,300*. Below *$3,000 in the bank*, you act that day.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your money*): **My cash page, every Monday**
-- In: *€6,200* · out: *€4,900* · left: *€1,300*
-- Alert line: *€3,000 in the bank*. Below it, the same day I: ____
+- In: *$6,200* · out: *$4,900* · left: *$1,300*
+- Alert line: *$3,000 in the bank*. Below it, the same day I: ____
 - Paid to myself this month: ____ · set aside for tax: ____
 - Next four weeks, expected in: ____ · out: ____
 
@@ -1433,7 +1433,7 @@ One screen each, in this order. Actions counted: Levels 01 to 04 (16). Level 05�
 
 **Stage notes.** *Growing:* Your repeat clients are the warmest names on the list: put them first, and ask each one who else they know. *Scaling:* Each person who sells keeps their own list; you read the total every week.
 
-### Chapter II reading · The Engine Room (after Level 09)
+### Chapter II reading · Run the business (after Level 09)
 
 One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Session 2.
 
@@ -1459,9 +1459,9 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
 
 **Done when:** ten names are chosen for Level 10, and a first draft of the twelve-week number is written.
 
-## Chapter III · The Open Market
+## Chapter III · Grow the market
 
-*The business outside: reach, advantage and leadership, so the market comes to you.*
+*Outside the business: reach, advantage and leadership, so customers come to you.*
 
 ### Week 10 · Level 10 · NAME · Your first hundred names
 
@@ -1483,23 +1483,23 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
 3. **Write once**, one blank per screen, the sentence building above it:  
    “This week I contact ___ people I already know, starting with ___. I say: “___””
    - `n`: how many (e.g. *10*)
-   - `first`: a name (e.g. *Giulia*)
+   - `first`: a name (e.g. *Emma*)
    - `say`: your opening line (e.g. *I’m helping cafés fill midweek tables. Who do you know?*)
 4. **Day** (new screen, day chips): By which day will the messages be sent?
-5. **Done when** (shown, not typed): by *Friday*, *10* messages are sent, starting with *Giulia*, and you counted the replies.  
+5. **Done when** (shown, not typed): by *Friday*, *10* messages are sent, starting with *Emma*, and you counted the replies.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* *fear of a no* stops you, and you know *20 people* who fit.
    - *Where you struggle. Don’t fight it.* Reaching out feels like begging. It is service. Don’t fight the nerves. Send the first ten.
    - *Where you shine. Don’t ignore it.* You wrote your opening line. The rest is repetition.
-   - *What you will do. Exactly.* This week, *10* people, starting with *Giulia*: “*I’m helping cafés fill midweek tables. Who do you know?*”
+   - *What you will do. Exactly.* This week, *10* people, starting with *Emma*: “*I’m helping cafés fill midweek tables. Who do you know?*”
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your marketing*): **The message to people you know**
 - “*I’m helping cafés fill midweek tables. Who do you know?*”
-- Sent to: *Giulia*, ____, ____ … (*10* in all)
+- Sent to: *Emma*, ____, ____ … (*10* in all)
 - Replies: ____ · introductions: ____
 
-**If Sunday says Partly or Not yet:** Make it smaller: send the message to three people today, starting with *Giulia*.
+**If Sunday says Partly or Not yet:** Make it smaller: send the message to three people today, starting with *Emma*.
 
 **Links.** Shows back: Session 2 · the ten names chosen from your warm list. Growth Plan step 16: uses. Growth Plan step 19: deepens (the no you are afraid of). Planner: Monday page, as the one move (Start here) or one of three goals, with its day. Manual for your stage · Level 10 · Lead yourself · Network (anchor #l10-self, built in Phase 4).
 
@@ -1515,24 +1515,24 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    Scale 0 to 20, step 1; ends “None” and “20”; starts at 2. Words: 0 reads “0 partners” · 10 reads “10 partners” · 20 reads “20 partners”.
 3. **Write once**, one blank per screen, the sentence building above it:  
    “I ask ___ to introduce me to two people who ___. In return I ___.”
-   - `who`: a name (e.g. *Paolo, the coffee supplier*)
+   - `who`: a name (e.g. *Dan, the coffee supplier*)
    - `need`: what they need (e.g. *want busier weekdays*)
    - `give`: what you give (e.g. *send clients his way*)
-4. **Day** (new screen, day chips): By which day will you ask Paolo, the coffee supplier?
-5. **Done when** (shown, not typed): by *Friday*, you asked for two introductions from *Paolo, the coffee supplier*, and offered your part first.  
+4. **Day** (new screen, day chips): By which day will you ask Dan, the coffee supplier?
+5. **Done when** (shown, not typed): by *Friday*, you asked for two introductions from *Dan, the coffee supplier*, and offered your part first.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* *a supplier* already meets your clients, and you can name *2 partners*.
    - *Where you struggle. Don’t fight it.* Asking for introductions feels like a favour. It is a trade. Don’t fight that. Offer first.
    - *Where you shine. Don’t ignore it.* You wrote one partner ask with something in return. That is fair.
-   - *What you will do. Exactly.* You ask *Paolo, the coffee supplier* for two introductions to people who *want busier weekdays*, and you *send clients his way*.
+   - *What you will do. Exactly.* You ask *Dan, the coffee supplier* for two introductions to people who *want busier weekdays*, and you *send clients his way*.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your marketing*): **The partner ask, ready to send**
 - Hi ____, could you introduce me to two people who *want busier weekdays*?
 - In return, I *send clients his way*.
 - Introductions received: ____
 
-**If Sunday says Partly or Not yet:** Make it smaller: send the message today, to *Paolo, the coffee supplier*. A no is fine; ask the next partner.
+**If Sunday says Partly or Not yet:** Make it smaller: send the message today, to *Dan, the coffee supplier*. A no is fine; ask the next partner.
 
 **Links.** Planner: Monday page, as the one move (Start here) or one of three goals, with its day. Manual for your stage · Level 10 · Lead your people · Ambassadors (anchor #l10-people, built in Phase 4).
 
@@ -1624,21 +1624,21 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    Scale 0 to 10, step 1; ends “None” and “Ten”; starts at 1. Words: 0 reads “0 people” · 5 reads “5 people” · 10 reads “10 people”.
 3. **Write once**, one blank per screen, the sentence building above it:  
    “I ask ___, ___ and ___: “What’s one thing I do that makes working with me harder?” I only say thank you.”
-   - `a`: one person (e.g. *Luca*)
-   - `b`: another (e.g. *Sara*)
+   - `a`: one person (e.g. *Mia*)
+   - `b`: another (e.g. *Sam*)
    - `c`: a third (e.g. *my accountant*)
 4. **Day** (new screen, day chips): By which day will you have asked all three?
-5. **Done when** (shown, not typed): by *Friday* you asked *Luca*, *Sara* and *my accountant*, wrote each answer down, and only said thank you. No answer counts too.  
+5. **Done when** (shown, not typed): by *Friday* you asked *Mia*, *Sam* and *my accountant*, wrote each answer down, and only said thank you. No answer counts too.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* With criticism you *defend myself*, and *1 people* told you something hard this month.
    - *Where you struggle. Don’t fight it.* Feedback stings because worth is involved. Yours is settled (Level 01). Don’t fight it. Collect it.
    - *Where you shine. Don’t ignore it.* You chose three people to ask. You’ll hear what competitors never hear.
-   - *What you will do. Exactly.* You ask *Luca*, *Sara* and *my accountant* the one question, and only say thank you.
+   - *What you will do. Exactly.* You ask *Mia*, *Sam* and *my accountant* the one question, and only say thank you.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your people*): **The feedback question**
 - “What’s one thing I do that makes working with me harder?”
-- Asked: *Luca*, *Sara*, *my accountant*.
+- Asked: *Mia*, *Sam*, *my accountant*.
 - What I heard: ____ · the one thing I change: ____
 
 **If Sunday says Partly or Not yet:** Make it smaller: ask one of the three today, and only say thank you.
@@ -1797,24 +1797,24 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
    Scale 0 to 10, step 1; ends “None” and “10 hours”; starts at 1. Words: 0 reads “0 hours” · 5 reads “5 hours” · 10 reads “10 hours”.
 3. **Write once**, one blank per screen, the sentence building above it:  
    “I grow ___ by giving them ___ to own. Every ___ I ask: “___””
-   - `who`: a name (e.g. *Marta*)
+   - `who`: a name (e.g. *Jordan*)
    - `own`: something to own (e.g. *all supplier decisions*)
    - `day`: which day (e.g. *Thursday*) · day chips
    - `ask`: your coaching question (e.g. *What did you decide, and why?*)
-4. **Done when** (shown, not typed): *Marta* knows, in writing, that they own *all supplier decisions*, and on *Thursday* you asked “*What did you decide, and why?*”  
+4. **Done when** (shown, not typed): *Jordan* knows, in writing, that they own *all supplier decisions*, and on *Thursday* you asked “*What did you decide, and why?*”  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 5. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* *someone on my team* could lead with you, and you’ll give it *1 hours*.
    - *Where you struggle. Don’t fight it.* Doing it yourself is faster today and slower forever. Don’t fight that. Hand over ownership.
    - *Where you shine. Don’t ignore it.* You chose a person and a question. That is how leaders grow leaders.
-   - *What you will do. Exactly.* You give *Marta* *all supplier decisions* to own, and every *Thursday* you ask: “*What did you decide, and why?*”
+   - *What you will do. Exactly.* You give *Jordan* *all supplier decisions* to own, and every *Thursday* you ask: “*What did you decide, and why?*”
 
-**Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your people*): **Growing Marta**
-- *Marta* owns *all supplier decisions*.
+**Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your people*): **Growing Jordan**
+- *Jordan* owns *all supplier decisions*.
 - Every *Thursday* I ask: “*What did you decide, and why?*”
 - What they decided well this month: ____
 
-**If Sunday says Partly or Not yet:** Make it smaller: ask *Marta* the question once this week, and only listen.
+**If Sunday says Partly or Not yet:** Make it smaller: ask *Jordan* the question once this week, and only listen.
 
 **Links.** Growth Plan step 10: uses. Planner: Monday page, as the one move (Start here) or one of three goals, with its day. Manual for your stage · Level 12 · Lead your people · Invest in people (anchor #l12-people, built in Phase 4).
 
@@ -1833,22 +1833,22 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
 3. **Write once**, one blank per screen, the sentence building above it:  
    “In twelve weeks: ___ from ___ to ___ a month. Checkpoints: ___, ___.”
    - `num`: the number (e.g. *profit*)
-   - `from`: today (e.g. *€1,300*)
-   - `to`: the target (e.g. *€2,000*)
-   - `c1`: week 4 (e.g. *€1,500*)
-   - `c2`: week 8 (e.g. *€1,750*)
+   - `from`: today (e.g. *$1,300*)
+   - `to`: the target (e.g. *$2,000*)
+   - `c1`: week 4 (e.g. *$1,500*)
+   - `c2`: week 8 (e.g. *$1,750*)
 4. **Day** (new screen, day chips): By which day will it be in your Planner?
-5. **Done when** (shown, not typed): by *Friday*, *profit* (from *€1,300* to *€2,000*) and both dated checkpoints are in your Planner, or on paper where you see them.  
+5. **Done when** (shown, not typed): by *Friday*, *profit* (from *$1,300* to *$2,000*) and both dated checkpoints are in your Planner, or on paper where you see them.  
    Then one slide: “How sure are you that this is done by Sunday?” 0–100%.
 6. **Four lines back** (the Version 4 example founder):
    - *Where you were. Admit it.* You chose *profit*, and a *bold* target of *50%*.
    - *Where you struggle. Don’t fight it.* Big targets scare, small ones bore. Don’t fight the fear. Break it into checkpoints.
    - *Where you shine. Don’t ignore it.* Bold, with checkpoints. That is how growth stays honest.
-   - *What you will do. Exactly.* *profit* from *€1,300* to *€2,000*, via *€1,500* and *€1,750*.
+   - *What you will do. Exactly.* *profit* from *$1,300* to *$2,000*, via *$1,500* and *$1,750*.
 
 **Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *Your next twelve weeks*): **My next twelve weeks**
-- The number: *profit*, from *€1,300* to *€2,000*.
-- Week 4: *€1,500* · week 8: *€1,750*.
+- The number: *profit*, from *$1,300* to *$2,000*.
+- Week 4: *$1,500* · week 8: *$1,750*.
 - If week 4 misses, the first thing I look at: ____
 
 **If Sunday says Partly or Not yet:** Make it smaller: write the number and the first checkpoint in your Planner today; the second can wait a week.
@@ -1892,7 +1892,7 @@ One screen each, in this order. Actions counted: Levels 05 to 08 (16). Then Sess
 
 **Links.** Planner: Monday page, as the one move (Start here) or one of three goals, with its day. Manual for your stage · Level 12 · Lead the market · Expand (anchor #l12-market, built in Phase 4).
 
-### Chapter III reading · The Open Market (after Level 12)
+### Chapter III reading · Grow the market (after Level 12)
 
 One screen each, in this order. Actions counted: Levels 09 to 11 (12), and the whole programme. Level 12’s four are checked in week 13 (on My Blueprint), which then opens the North Star again, to compare with where you began. Then Session 3.
 
