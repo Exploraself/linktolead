@@ -224,3 +224,15 @@ code. Mailchimp tag `TOOLS` the first time an account opens each tool.
 The North Star has the Growth Toolkit in its left bar. The 12-day letters need
 the hourly cron in `wrangler.toml` (`[triggers]`), which runs `JOBS` in
 `worker.js`.
+
+## The email journey map (2 Nov 2026)
+
+`node scripts/email-map.mjs out.html --exploraself ../exploraself` draws
+every letter a founder can get, in journey order (they find us → they open a
+door → they use it → we stay close → their account stays safe → the team
+hears), rendered by the real letter builders for a sample founder, Sam. With
+the exploraself repo, the assessment results letters of exploraself.com are
+drawn too (bundled with esbuild from that repo; set `ESBUILD=` to its path if
+it is not in that repo's node_modules). The page lives in /internal,
+Promotion. AGENTS.md rule 13 keeps it current; tests/email-map.test.mjs
+fails when a letter is missing.

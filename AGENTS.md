@@ -131,3 +131,18 @@ the code", an hourglass for "being built". The words beside the icon always
 carry the meaning too (icons are hidden from screen readers). One icon set
 per surface, drawn in the text colour; the toolkit's lives in
 public/tools/icons.js.
+
+## 13. Every email is on the map (Alexandru, 2 Nov 2026)
+
+The email journey map in exploraself.com/internal (Promotion) shows every
+letter a founder can get, in the order they meet them, drawn from the code
+that sends them. When you add or change a letter (functions/_letters.js,
+functions/_course-letters.js, or a new send() call), in the same work:
+
+1. add it to ENTRIES in scripts/email-map.mjs (stage, icon, when, who);
+2. run `node scripts/email-map.mjs <out.html> --exploraself <exploraself repo>`
+   and put the page in the exploraself repo, in the email-map folder of the
+   unlisted internal folder (never name that folder in this public repo);
+3. tell Alexandru what changed.
+
+tests/email-map.test.mjs fails when a letter builder is missing from the map.
