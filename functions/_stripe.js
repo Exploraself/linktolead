@@ -128,7 +128,7 @@ export async function checkout(env, D, base, me, step) {
   if (!S) return { ok: false, why: 'There is no such step.' };
   if (!above(step, me.tier)) return { ok: false, why: `${S.name} is already open for you.`, open: true };
   await ensureWebhook(env, D, base).catch(() => null); // best effort: coming back from Stripe also opens the step
-  const r = await stripe(env, 'POST', 'checkout/sessions', {
+  const plain = {
     mode: 'payment',
     line_items: [{ quantity: 1, price_data: { currency: 'usd', unit_amount: S.amount, product_data: { name: S.product, description: `Opens ${S.opens}. Includes ${S.sessions}.` } } }],
     customer_email: me.email,
@@ -137,9 +137,32 @@ export async function checkout(env, D, base, me, step) {
     payment_intent_data: { metadata: { student: me.id, step } },
     success_url: `${base}/pay/?step=${step}&cs={CHECKOUT_SESSION_ID}`,
     cancel_url: `${base}/pay/?step=${step}&cancelled=1`,
-  });
+  };
+  let r = await stripe(env, 'POST', 'checkout/sessions', { ...plain, ...INVOICE(S, me, step) });
+  // An invoice must never cost a sale: if Stripe refuses the invoice or the
+  // business box (a key without that permission, say), pay without them and
+  // keep the reason as a "stripe-invoice-off" event on the founder.
+  if (!r.ok && r.status >= 400 && r.status < 500) {
+    const why = r.why;
+    r = await stripe(env, 'POST', 'checkout/sessions', plain);
+    if (r.ok && D) await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(me.id, 'stripe-invoice-off', new Date().toISOString(), String(why || '').slice(0, 300)).run().catch(() => null);
+  }
   return r.ok ? { ok: true, url: r.data.url, id: r.data.id } : { ok: false, why: r.why };
 }
+
+/** Alexandru, 2 Nov 2026: an invoice for every payment, and a "purchasing as
+ *  a business" box for the business name and VAT number. Stripe makes the
+ *  invoice after the payment (0.4% of the total, at most $2 each) and emails
+ *  it in live mode; the business name and VAT number print on it. */
+export const INVOICE = (S, me, step) => ({
+  customer_creation: 'always',
+  tax_id_collection: { enabled: true },
+  invoice_creation: { enabled: true, invoice_data: {
+    description: `${S.product}. Opens ${S.opens}.`,
+    footer: 'ExploraSelf · Thank you for investing in yourself and your business.',
+    metadata: { student: me.id, step },
+  } },
+});
 
 /** Stripe's signature: "t=…,v1=…". HMAC-SHA256 of "t.payload" with the
  *  endpoint's secret, within five minutes. */

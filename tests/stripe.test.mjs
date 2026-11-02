@@ -87,6 +87,8 @@ ok(j.on === false && j.signedIn === false, 'no key: payments off; no token: not 
 [st, j] = await jsonOf(await payPost({ request: req('/api/checkout', { method: 'POST', token: maya, body: { step: 'session' } }), env }));
 ok(st === 200 && j.url === 'https://checkout.stripe.com/c/pay/cs_test_1', 'a Stripe Checkout page for The Boardroom');
 const made = calls.find((c) => c.url.endsWith('/checkout/sessions') && c.method === 'POST').body;
+ok(made.get('invoice_creation[enabled]') === 'true' && made.get('customer_creation') === 'always' && made.get('tax_id_collection[enabled]') === 'true', 'every payment gets an invoice, with the “purchasing as a business” box for the VAT number');
+ok(/^The Boardroom|Boardroom/.test(made.get('invoice_creation[invoice_data][description]') || '') && made.get('invoice_creation[invoice_data][metadata][step]') === 'session', 'the invoice names the step');
 ok(made.get('line_items[0][price_data][unit_amount]') === '2700' && made.get('line_items[0][price_data][currency]') === 'usd' && made.get('client_reference_id') === maya && made.get('metadata[step]') === 'session' && made.get('customer_email') === 'maya@example.com', 'the right amount, currency, founder and step go to Stripe');
 ok(/\/pay\/\?step=session&cs=\{CHECKOUT_SESSION_ID\}$/.test(made.get('success_url')) && /cancelled=1/.test(made.get('cancel_url')), 'back to /pay/ after paying or cancelling');
 ok(calls.some((c) => c.url.includes('webhook_endpoints/we_old') && c.method === 'DELETE') && calls.some((c) => c.url.endsWith('/webhook_endpoints') && c.method === 'POST' && c.body.get('url') === `${B}/api/stripe-webhook` && c.body.get('enabled_events[0]') === 'checkout.session.completed'), 'the webhook connects itself, replacing an older one for the same address');
@@ -140,6 +142,7 @@ ok(/<a class="cta" href="\$\{esc\(payHref\(g\)\)\}">Unlock for \$\{esc\(rung\.pr
 ok(/function boardroomCta\(cls\)/.test(app) && !/href="\$\{esc\(BOOKING\)\}" target="_blank" rel="noopener">Book my 1:1 with Alexandru ↗<\/a><\/li>/.test(app), 'The Boardroom: pay first while locked, book after');
 const pay = readFileSync(new URL('../public/pay/pay.js', import.meta.url), 'utf8');
 ok(/test \? '<p class="test"><b>Test mode\.<\/b>[^']*4242 4242 4242 4242/.test(pay), 'test mode shows the test card, and only in test mode');
+ok(/An invoice comes with every payment/.test(pay) && /purchasing as a business/.test(pay), '/pay/ says an invoice comes with it, and how to add a VAT number');
 ok(/if \(d && d\.paid\)/.test(pay) && !/It is open[^]*before/.test(pay), '/pay/ says “open” only when the site says Stripe confirmed it');
 
 // What /mentor says when the key in Cloudflare is the wrong kind (never the key itself).
@@ -149,5 +152,22 @@ ok(stripeMode(K('pk_test_abc123')) === '' && /publishable key/.test(keyProblem(K
 ok(/webhook signing secret/.test(keyProblem(K('whsec_abc'))), 'a webhook secret is named as the problem');
 ok(/not set/.test(keyProblem({})) && keyProblem(K('rk_test_abc')) === '', 'missing key: “not set”; a good key: no problem');
 ok(!keyProblem(K('xx_secret_value_9')).includes('secret_value'), 'the message never repeats the value');
+
+// Stripe refuses the invoice (a key without that permission): the payment still goes ahead, without it.
+{
+  const before = calls.length; const real = globalThis.fetch;
+  globalThis.fetch = async (url, opts = {}) => {
+    if (String(url).endsWith('/checkout/sessions') && opts.method === 'POST' && new URLSearchParams(opts.body).get('invoice_creation[enabled]')) {
+      calls.push({ url: String(url), method: 'POST', body: new URLSearchParams(opts.body), auth: opts.headers.authorization });
+      return { ok: false, status: 403, json: async () => ({ error: { message: 'The provided key does not have the required permissions for this endpoint.' } }) };
+    }
+    return real(url, opts);
+  };
+  const leo = await make('Leo', 'leo@example.com');
+  const [st2, j2] = await jsonOf(await payPost({ request: req('/api/checkout', { method: 'POST', token: leo, body: { step: 'hub' } }), env }));
+  const tries = calls.slice(before).filter((c) => c.url.endsWith('/checkout/sessions') && c.method === 'POST');
+  ok(st2 === 200 && !!j2.url && tries.length === 2 && !tries[1].body.get('invoice_creation[enabled]'), 'an invoice never costs a sale: refused → pay without it');
+  globalThis.fetch = real;
+}
 
 done();

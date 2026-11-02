@@ -35,7 +35,7 @@ function card(S, step, test) {
     </div>
     ${test ? '<p class="test"><b>Test mode.</b> No real money moves. On Stripe’s page use the card 4242 4242 4242 4242, any future date and any three numbers.</p>' : ''}
     <button class="go" type="button" id="go" data-step="${esc(step)}">${ICON.lock}Pay ${esc(S.price)} securely</button>
-    <p class="note">You pay on Stripe’s own secure page. Your step opens the moment the payment goes through, and we email you what opened and how to book your session.</p>
+    <p class="note">You pay on Stripe’s own secure page. Your step opens the moment the payment goes through, and we email you what opened and how to book your session. An invoice comes with every payment. Buying for your business? Tick “I’m purchasing as a business” on Stripe’s page to add the business name and VAT number.</p>
     <p class="err" id="err" role="alert" hidden></p>`;
 }
 
