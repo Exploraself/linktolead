@@ -60,7 +60,7 @@ ok(empty.every((s) => s.items.every((i) => !i.started)) && bp.every((s) => s.ite
 
 // ── The flow: one field on screen ─────────────────────────────────────────
 const s1 = V.stepsOf(1), s2 = V.stepsOf(2), s5 = V.stepsOf(5);
-ok(s1[0].join() === '0,idea' && s1[1].join() === '0,tap' && s2.slice(0, 4).every((s, i) => s[0] === i && s[1] === 'got') && s2[4].join() === '0,tap', 'Level 01 opens on its first concept, then its tap; every later level on last week’s four actions');
+ok(s1[0].join() === '-1,welcome' && s1.slice(1, 6).every((s) => s[1] === 'where') && s1[6].join() === '0,idea' && s1[7].join() === '0,tap' && s2.slice(0, 4).every((s, i) => s[0] === i && s[1] === 'got') && s2[4].join() === '0,tap', 'Level 01 opens on its welcome and “Where are you now?”, then its first concept and tap; Level 02 on last week’s four actions');
 { const k5 = s5.map((s) => s[1]), at = k5.indexOf('week');
   ok(k5.slice(at, at + 4).join() === 'week,reading,carry,carryday' && k5[k5.length - 1] === 'bpage' && V.stepsOf(4).slice(-1)[0][1] === 'week',
     'the week ends a level; after 05, 09 and 12, the reading, one action carried forward, and one page to build'); }
@@ -83,7 +83,7 @@ for (const n of [5, 9, 12]) { full[V.wkey(n, 'r', 'carry')] = '1.0'; full[V.wkey
 for (const [k, v] of Object.entries({ task: 'invoices', when: 'Friday', s1: 'a', s2: 'b', s3: 'c', who: 'Marta' })) full[V.wkey(5, 'b', k)] = v;
 full[V.wkey(9, 'b', 'who')] = 'Marta'; full[V.wkey(12, 'b', 'no')] = 'new projects'; full[V.wkey(12, 'b', 'life')] = 'Sunday afternoons';
 ok(L.every((x) => V.stepsOf(x.n)[V.firstOf(full, x.n)][1] === 'week'), 'a level fully answered opens on its week');
-ok(V.firstOf({ ...full, [V.wkey(3, 2, 'got')]: '' }, 4) === 2, 'a missing Sunday answer is asked first');
+ok(V.firstOf({ ...full, [V.wkey(3, 2, 'got')]: '' }, 4) === V.stepsOf(4).findIndex((x) => x[0] === 2 && x[1] === 'got'), 'a missing Sunday answer is asked first');
 // Progress still counts only the Version 4 moves: nobody already ahead is held back.
 ok(L.every((x) => V.levelUnits(w, x.n) === V.UNITS), 'the day and how sure never gate the next level');
 
