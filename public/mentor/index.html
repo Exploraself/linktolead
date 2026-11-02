@@ -238,6 +238,25 @@ td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
 .qlist li{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--line)}
 .qlist li:first-child{border-top:0}
 .qlist li>div{min-width:0;flex:1 1 260px}
+/* Bookings (2 Nov 2026): a request for a call, its answers, three times to confirm. */
+.bk .bk-h{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.bk-a{margin-top:10px;grid-template-columns:minmax(120px,190px) minmax(0,1fr)}
+.bk-times{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.bk-ok{margin-top:6px;color:var(--ok)}
+@media (max-width:520px){.bk-a{grid-template-columns:1fr}.bk-a dt{margin-top:4px}}
+/* 1:1 requests and Boardroom 1:1 (2 Nov 2026): full control of each request. */
+.bk-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0 4px}
+.bk-bar .chips{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 360px}
+.bk-q{flex:1 1 220px;min-width:0;min-height:40px;border:1px solid var(--line);border-radius:10px;padding:0 12px;background:var(--panel);color:var(--ink);font:inherit}
+.bk-tl{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px}
+.bk-t{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.bk-t.on{border-color:var(--ok)}
+.bk-own{margin-top:10px}.bk-own summary{cursor:pointer;font-weight:700;font-size:14px}
+.bk-ownrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+.bk-ownrow input{min-height:40px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:var(--panel);color:var(--ink);font:inherit}
+.bk-note{width:100%;min-height:56px;margin-top:4px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--panel);color:var(--ink);font:inherit;resize:vertical}
+.bk-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.bk.closed{opacity:.75}
 .cross{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
 .cross div{background:var(--soft);border-radius:10px;padding:12px 14px}
 .cross b{display:block;font:500 30px/1 var(--display);font-variant-numeric:tabular-nums}

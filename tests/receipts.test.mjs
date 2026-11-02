@@ -6,7 +6,7 @@
 // his photo kept, no unsubscribe header or link. Every other letter, the
 // welcome first, stays exactly as it was. Run: node tests/receipts.test.mjs
 
-import { unlockedLetter, signinLetter, passwordChangedLetter, noAccountLetter, launchpadWelcome, northStarWelcome, GOOD_WORDS, RECEIPTS } from '../functions/_letters.js';
+import { unlockedLetter, signinLetter, passwordChangedLetter, noAccountLetter, launchpadWelcome, northStarWelcome, bookingLetter, bookingConfirmedLetter, GOOD_WORDS, RECEIPTS, BOOKING } from '../functions/_letters.js';
 import { send } from '../functions/_mail.js';
 import { fakeResend, tally } from './_d1.mjs';
 
@@ -21,8 +21,12 @@ const receipts = {
   reset: signinLetter(B, `${B}/start?signin=abc&reset=1`, { first: 'Maya', reset: true, to: 'maya@example.com' }),
   password: passwordChangedLetter(B, { first: 'Maya', to: 'maya@example.com' }),
   'no-account': noAccountLetter(B, `${B}/road1/?email=x#join`, { to: 'x@example.com' }),
+  // A request for a call, and its confirmation (Alexandru, 2 Nov 2026).
+  booking: bookingLetter(B, { first: 'Maya', kind: 'discovery', times: ['2026-11-10T15:00:00.000Z', '2026-11-11T15:00:00.000Z', '2026-11-12T15:00:00.000Z'],
+    answers: { stage: 'solo', struggles: ['clients', 'cash'], goals: ['clients', 'cash'] }, tz: 'Europe/London', to: 'maya@example.com' }),
+  'booking-confirmed': bookingConfirmedLetter(B, { first: 'Maya', kind: 'boardroom', time: '2026-11-10T15:00:00.000Z', meet: 'https://meet.google.com/abc-defg-hij', tz: 'Europe/London', to: 'maya@example.com' }),
 };
-ok(Object.keys(receipts).every((k) => RECEIPTS.includes(k)) && RECEIPTS.length === 5, 'five receipts, named in one list');
+ok(Object.keys(receipts).every((k) => RECEIPTS.includes(k)) && RECEIPTS.length === Object.keys(receipts).length, 'seven receipts, named in one list');
 for (const [name, L] of Object.entries(receipts)) {
   ok(L.receipt === true, `${name}: marked as a receipt`);
   ok(!/Free assessments/.test(L.text) && !L.html.includes('exploraself.com/first-100-clients') && !L.html.includes('exploraself.com/eq'), `${name}: no assessments`);
@@ -35,8 +39,12 @@ for (const [name, L] of Object.entries(receipts)) {
 }
 // One button, plus the booking link in "It's unlocked".
 const U = links(receipts.unlocked.html);
-ok(U.length === 2 && U.some((u) => u.includes('/ground-plan/#programme-4')) && U.some((u) => !u.startsWith(B)), 'It’s unlocked: one button and the booking link, nothing else');
+ok(U.length === 2 && U.some((u) => u.includes('/ground-plan/#programme-4')) && U.some((u) => u === BOOKING) && BOOKING === `${B}/book/boardroom/`, 'It’s unlocked: one button and the booking link (/book/boardroom/), nothing else');
 for (const name of ['signin', 'reset', 'password', 'no-account']) ok(links(receipts[name].html).length <= 1, `${name}: one button at most`);
+// The booking letters: the copy has no button at all; the confirmation one, the Google Meet link.
+ok(links(receipts.booking.html).length === 0, 'booking: no button, no link to sell anything');
+const C = links(receipts['booking-confirmed'].html);
+ok(C.length === 2 && C[0] === 'https://meet.google.com/abc-defg-hij' && C[1].endsWith('/ground-plan/#home'), 'booking-confirmed: the Google Meet button, and the way to their first three levels');
 
 // Sending: a receipt goes without the unsubscribe header and link; the "why you got this" line stays.
 let sent = fakeResend();

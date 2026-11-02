@@ -15,7 +15,10 @@
 //                  reply (an answer in the thread, emailed as a letter) · tier (change step, and its step tags in Mailchimp) ·
 //                  pause · series-hold (pause or resume the letters that
 //                  follow each pain) · delete · signin-link · message · mc-test ·
-//                  mc-backfill. Every action is logged as an event; every
+//                  mc-backfill · book-confirm (one of the three times of a
+//                  request for a call: the person gets it with the Google
+//                  Meet link) · book-links (the Meet link per kind of call).
+//                  Every action is logged as an event; every
 //                  Mailchimp call also in mailchimp_log.
 
 import { teamList, teamAdd, teamRemove, teamDetails, isTeamMember, rightsOf, setRights, isOwner, TEAM_RIGHTS, ALL_RIGHTS, DEFAULT_RIGHTS, ACTION_RIGHT } from '../_team.js';
@@ -24,7 +27,8 @@ import { DOMAIN_STEPS, WHATIF_STEPS, ALL_STEP_IDS } from '../_plans.js';
 import { GROWTH_IDS, GROWTH_SQL, GROWTH_BLANK_IDS } from '../_growth.js';
 import { sendLink, signinUrl } from './signin.js';
 import { send, origin, mailState } from '../_mail.js';
-import { mentorLetter, answerLetter, teamInvite, giftLetter } from '../_letters.js';
+import { mentorLetter, answerLetter, teamInvite, giftLetter, bookingConfirmedLetter } from '../_letters.js';
+import { KINDS as BOOK_KINDS, BOOK_STATUS, BOOK_CLOSED, isOtherTime, bookingTables, bookingList, bookingRow, meetLink, meetLinks, setMeetLink } from '../_booking.js';
 import { letterContext, mentors, saveMentor } from '../_mentor.js';
 import { LIBRARY_ITEMS } from './library.js';
 import { toolNames } from '../_tools.js';
@@ -273,7 +277,11 @@ export async function onRequestGet({ request, env }) {
   const you = access.by === 'team' && access.me ? { name: access.me.name || '', team: true, can: rights } : { key: true, can: rights };
   // Refund requests from Base Camp (Alexandru, 2 Nov 2026): the Refunds tab, in red.
   const refunds = await refundList(D);
-  return json({ ok: true, you, students, paid, refunds, words: words.results || [], waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, totalGrowth: GROWTH_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
+  // Requests for a call (functions/_booking.js), newest first, and the Google
+  // Meet link per kind: Inbox → Bookings, and Settings → Booking links.
+  const bookings = await bookingList(D, 100);
+  const bookLinks = await meetLinks(D);
+  return json({ ok: true, you, students, paid, refunds, words: words.results || [], waiting: waiting.results || [], bookings, bookLinks, steps: STEPS, totalSteps: ALL_STEP_IDS.length, totalGrowth: GROWTH_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
     mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags,
       forgotten: (gone.results || []).map((r) => r.email).filter(Boolean), forgottenWhy: FORGOTTEN } });
 }
@@ -457,6 +465,88 @@ async function post({ request, env }) {
     if (out.error) return bad(out.error);
     await log('mentor', 'mentor-save', out.mentor.id);
     return json({ ok: true, mentor: out.mentor, mentors: await mentors(D) });
+  }
+
+  if (body.action === 'book-links') {
+    // The Google Meet link for each kind of call, pasted once (Alexandru,
+    // 2 Nov 2026). Every link is checked before any is saved; empty clears it.
+    const want = {};
+    for (const k of Object.keys(BOOK_KINDS)) {
+      if (body[k] === undefined) continue;
+      const raw = String(body[k] ?? '').trim(), link = meetLink(raw);
+      if (raw && !link) return bad(`The ${BOOK_KINDS[k].setting} must be a Google Meet link: it starts with https://meet.google.com/`);
+      want[k] = link;
+    }
+    for (const [k, link] of Object.entries(want)) await setMeetLink(D, k, link, now());
+    await log('mentor', 'mentor-book-links', Object.keys(want).join(',') || null);
+    return json({ ok: true, links: await meetLinks(D) });
+  }
+
+  if (body.action === 'book-confirm') {
+    // One of the three times a person suggested (functions/api/book.js). The
+    // confirmation leaves first; only then is the request marked confirmed
+    // (AGENTS.md rule 6). A request is confirmed once: a second tap sends nothing.
+    await bookingTables(D);
+    const b = await D.prepare('SELECT * FROM booking WHERE id = ?').bind(clean(body.booking, 80)).first();
+    if (!b) return bad('Unknown request.', 404);
+    const row = bookingRow(b);
+    if (b.status === 'confirmed' && !body.again) return bad('This request is already confirmed. Nothing was sent again.', 409);
+    if (BOOK_CLOSED.includes(b.status)) return bad('This request is closed. Reopen it first.', 409);
+    // One of their three times, or (Alexandru, 2 Nov 2026: "full control") a
+    // time he picks himself, which the email then names.
+    const own = !row.times.includes(body.time);
+    const time = own ? (isOtherTime(body.time) ? new Date(body.time).toISOString() : '') : body.time;
+    if (!time) return bad('Choose one of their three times, or a time in the next 60 days.');
+    if (Date.parse(time) <= Date.now()) return bad('That time has passed. Reply to them with a new one.');
+    const meet = (await meetLinks(D))[b.kind];
+    if (!meet) return bad(`Paste the ${BOOK_KINDS[b.kind].setting} first, in Settings → Booking links.`);
+    if (!mailState(env).ready) return bad('Email is not switched on yet, so the confirmation cannot go.', 503);
+    const claim = await D.prepare("UPDATE booking SET status = 'sending' WHERE id = ? AND status = ?").bind(b.id, b.status).run();
+    if (!claim || !claim.meta || claim.meta.changes !== 1) return bad('This request is being confirmed already. Refresh in a moment.', 409);
+    const base = origin(request);
+    const r = await send(env, { to: b.email, ...bookingConfirmedLetter(base, { first: String(b.name || '').split(/\s+/)[0], kind: b.kind, time, meet, tz: b.tz, to: b.email }),
+      why: b.kind === 'boardroom' ? 'You asked for your 1:1 with Alexandru at linktolead.exploraself.com.' : 'You asked for a free discovery call with Alexandru at linktolead.exploraself.com.' });
+    if (!r.ok) {
+      await D.prepare('UPDATE booking SET status = ? WHERE id = ?').bind(b.status, b.id).run();
+      return bad('The confirmation did not send. Nothing changed; try again in a minute.', 502);
+    }
+    const by = access.by === 'key' ? 'key' : String((access.me && access.me.email) || 'team');
+    await D.prepare("UPDATE booking SET status = 'confirmed', confirmed_time = ?, confirmed_at = ?, confirmed_by = ? WHERE id = ?").bind(time, now(), by, b.id).run();
+    if (b.student_id) await log(b.student_id, 'booking-confirmed', JSON.stringify({ kind: b.kind, time })).catch(() => {});
+    return json({ ok: true, time, email: b.email, own });
+  }
+
+  if (body.action === 'book-status' || body.action === 'book-note' || body.action === 'book-delete') {
+    // Full control of a request (Alexandru, 2 Nov 2026): file it as held,
+    // no-show, declined or cancelled (no email goes), reopen it, keep a private
+    // note, or delete it. Each one is logged with who did it.
+    await bookingTables(D);
+    const b = await D.prepare('SELECT * FROM booking WHERE id = ?').bind(clean(body.booking, 80)).first();
+    if (!b) return bad('Unknown request.', 404);
+    const by = access.by === 'key' ? 'key' : String((access.me && access.me.email) || 'team');
+    if (body.action === 'book-note') {
+      const note = String(body.note ?? '').replace(/\u0000/g, '').slice(0, 2000);
+      await D.prepare('UPDATE booking SET note = ? WHERE id = ?').bind(note, b.id).run();
+      await log('mentor', 'mentor-book-note', b.id);
+      return json({ ok: true });
+    }
+    if (body.action === 'book-delete') {
+      await D.prepare('DELETE FROM booking WHERE id = ?').bind(b.id).run();
+      await log('mentor', 'mentor-book-delete', b.kind);
+      return json({ ok: true });
+    }
+    const to = String(body.status || '');
+    if (to === 'open') {
+      const back = b.confirmed_time ? 'confirmed' : 'asked';
+      await D.prepare('UPDATE booking SET status = ?, closed_at = NULL, closed_by = NULL WHERE id = ?').bind(back, b.id).run();
+      await log('mentor', 'mentor-book-open', b.id);
+      return json({ ok: true, status: back });
+    }
+    if (!BOOK_CLOSED.includes(to)) return bad(`Say one of: ${BOOK_CLOSED.map((k) => BOOK_STATUS[k]).join(', ')}, or reopen.`);
+    if ((to === 'held' || to === 'noshow') && b.status !== 'confirmed') return bad('Confirm a time first: a call is held or missed only once it has a time.');
+    await D.prepare('UPDATE booking SET status = ?, closed_at = ?, closed_by = ? WHERE id = ?').bind(to, now(), by, b.id).run();
+    if (b.student_id) await log(b.student_id, `booking-${to}`, b.kind).catch(() => {});
+    return json({ ok: true, status: to });
   }
 
   const id = clean(body.student, 80);

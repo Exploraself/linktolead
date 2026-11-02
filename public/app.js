@@ -11,7 +11,7 @@
 
 import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, SHEETS, SECTIONS, loadStage,
   gateFor, levelFor, isWritten, weekTitle, videoFor, levelVideo, nextGain, holds,
-  LEAD, BOOKING, LIBRARY, payHref } from './content.js';
+  LEAD, BOOKING, DISCOVERY, LIBRARY, payHref } from './content.js';
 import { entry, programmeStage, groundPlan, stageNudge, PROGRAMME } from './home.js';
 import { cabinetHTML, cabinetShown, cabinetHidden, cabinetClick, dashboardShown, levelDots, compassStripHTML } from './cabinet.js';
 import { result as fwResult } from './frameworks.js';
@@ -1826,7 +1826,7 @@ function emphasisName(st, lv) {
 function drawNav() {
   const unread = inbox ? inbox.unread : 0, answers = askUnread();
   $('#tnav').innerHTML = account.joined() && !['signin', 'redirect', 'loading'].includes(view)
-    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Base Camp${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="blueprint" ${view === 'blueprint' ? 'aria-current="page"' : ''}>My Blueprint</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button><a class="ttools" href="/tools/">${ICONS.toolkit}Growth Toolkit</a><button type="button" data-go="ask" ${view === 'ask' ? 'aria-current="page"' : ''}>Ask Alexandru${answers ? `<span class="tdot" aria-label="${answers} new ${answers === 1 ? 'answer' : 'answers'}"></span>` : ''}</button>${holds(tierNow(), 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
+    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Base Camp${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="blueprint" ${view === 'blueprint' ? 'aria-current="page"' : ''}>My Blueprint</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button><a class="ttools" href="/tools/">${ICONS.toolkit}Growth Toolkit</a><button type="button" data-go="ask" ${view === 'ask' ? 'aria-current="page"' : ''}>Ask Alexandru${answers ? `<span class="tdot" aria-label="${answers} new ${answers === 1 ? 'answer' : 'answers'}"></span>` : ''}</button>${holds(tierNow(), 'session') ? '' : `<a class="tbook" href="${esc(DISCOVERY)}">${bookIcon}Book a free discovery call</a>`}`
     : '';
 }
 

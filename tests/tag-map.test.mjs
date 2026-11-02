@@ -10,6 +10,7 @@ import { tagsFor, LANDING_TAGS, STEP_TAGS, STAGE_TAGS, WEAKEST_TAGS, CROSS_TAGS,
 import { SERIES_TAGS } from '../functions/_series-letters.js';
 import { TOOLS_TAG } from '../functions/_tools.js';
 import { LIBRARY_ITEMS, libraryTag } from '../functions/api/library.js';
+import { BOOK_TAGS } from '../functions/_booking.js';
 import { page, siteTagIds, unknownSiteTags } from '../scripts/tag-map.mjs';
 import { onRequestGet as mentorGet, onRequestPost as mentorPost } from '../functions/api/mentor.js';
 import { onRequestPost as signup } from '../functions/api/signup.js';
@@ -23,7 +24,7 @@ const every = new Set();
 for (const landing of [...Object.keys(LANDING_TAGS), '']) for (const tier of TIER_ORDER) for (const stage of ['build', 'grow', 'scale']) for (const weakest of DOMAIN_TAGS) {
   for (const t of tagsFor({ source: landing ? '' : 'compass', landing, tier, stage, weakest })) every.add(t.name);
 }
-for (const n of [...every, ...Object.values(CROSS_TAGS), ...Object.values(SERIES_TAGS), TOOLS_TAG, ...Object.keys(LIBRARY_ITEMS).map(libraryTag)]) ok(names.has(n), `${n} is on the tag list (functions/_tag-list.js)`);
+for (const n of [...every, ...Object.values(CROSS_TAGS), ...Object.values(SERIES_TAGS), TOOLS_TAG, ...Object.keys(LIBRARY_ITEMS).map(libraryTag), ...Object.values(BOOK_TAGS)]) ok(names.has(n), `${n} is on the tag list (functions/_tag-list.js)`);
 for (const n of [...Object.values(STEP_TAGS), ...Object.values(STAGE_TAGS), ...Object.values(WEAKEST_TAGS)]) ok(names.has(n), `${n} is on the list`);
 
 // No new kind of tag slips in: every one-tag send names a tag the list knows.
@@ -32,7 +33,7 @@ const walk = (dir) => { for (const f of readdirSync(new URL(dir, import.meta.url
 walk('../functions');
 for (const [p, src] of sends) for (const m of src.matchAll(/syncFounder\([^)]*'tag',\s*\{\s*tag(?::\s*([^}]+))?\s*\}/g)) {
   const expr = (m[1] || 'tag').trim();
-  ok(['TOOLS_TAG', 'CROSS_TAGS[to]', 'libraryTag(key)', 'tag'].includes(expr), `${p}: the tag "${expr}" is a kind the list knows (add a new kind to functions/_tag-list.js)`);
+  ok(['TOOLS_TAG', 'CROSS_TAGS[to]', 'libraryTag(key)', 'BOOK_TAGS[kind]', 'tag'].includes(expr), `${p}: the tag "${expr}" is a kind the list knows (add a new kind to functions/_tag-list.js)`);
 }
 
 // The system: lowercase linktolead-… with dashes; "Growth Toolkit" is Alexandru's own name (2 Nov).

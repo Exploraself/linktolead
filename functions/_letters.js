@@ -17,9 +17,12 @@
 
 import { esc } from './_mail.js';
 import { asMentor } from './_mentor.js';
+import { whenText, timeLine, cityOf, answersText, RULES, KINDS } from './_booking.js';
 
-/** The same link as BOOKING in public/content.js (a test holds them equal). */
-export const BOOKING = 'https://forms.gle/opnxfhFTJJg69Qy77';
+/** The same link as BOOKING in public/content.js (a test holds them equal):
+ *  the page where a founder who paid picks three times for their 1:1
+ *  (functions/_booking.js). */
+export const BOOKING = 'https://linktolead.exploraself.com/book/boardroom/';
 export const SIGNATURE = '/mail/signature.png';
 export const PORTRAIT = '/mail/alexandru.jpg';
 
@@ -221,7 +224,7 @@ const close = (kind, { mentor, tz, at, to = '' } = {}, ask = 'start') => ({ ment
 const asReceipt = (c) => ({ ...c, receipt: true });
 /** Which letters are receipts: they answer something the founder just did.
  *  The welcomes and every other letter stay as they are. */
-export const RECEIPTS = ['unlocked', 'signin', 'reset', 'password', 'no-account'];
+export const RECEIPTS = ['unlocked', 'signin', 'reset', 'password', 'no-account', 'booking', 'booking-confirmed'];
 
 /** "launchpad-welcome": sent once, when the account is made. */
 export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {}) {
@@ -493,4 +496,78 @@ export function questionNotice(base, { name, email, question, level, domain }) {
     String(question || ''),
     ['Answer it in /mentor: ', link(`${base}/mentor`), '.'],
   ], null, { sign: false }) };
+}
+
+// ── Booking a call (functions/api/book.js; Alexandru, 2 Nov 2026) ───────────
+// Three letters: the person's copy of their request, the notice to
+// Alexandru, and the confirmation with the Google Meet link, sent from
+// /mentor (Inbox → Bookings → Confirm). Always from Alexandru, whoever the
+// founder's mentor is: the call is with him. The two letters to the person are
+// receipts (they answer what the person just did): no offer, no P.S.
+
+/** The three times, one per line, as the person reads them (their zone, and
+ *  Rome beside it when the clocks differ). */
+const timeLines = (times, tz) => times.map((iso) => `· ${timeLine(iso, tz)}`).join('\n');
+/** Their answers, one per line ("· Where you are now: Selling alone"). */
+const answerLines = (kind, answers, max = 200) => answersText(kind, answers, { max }).map(([l, w]) => `· ${l}: ${w}`).join('\n');
+/** What helps before the call: the 1:1 is built on the first three levels;
+ *  a discovery call starts from the decision they keep putting off. */
+const beforeWeSpeak = (base, kind) => (kind === 'boardroom'
+  ? ['Before we speak, the team and I read your first three levels, so the hour is spent on you. If one is still open, now is a good moment to finish it: ', link(`${base}/ground-plan/#home`, 'your Base Camp'), '.']
+  : 'One thing helps before we speak: write down the one decision you keep putting off. Bring it to the call, and we start there.');
+
+/** "booking": to the person who asked for a call on /book/discovery/ or
+ *  /book/boardroom/. Thanks, their three times (their zone and Rome), what
+ *  they told us, "I'll confirm one within 24 hours", Google Meet. */
+export function bookingLetter(base, { first, kind = 'discovery', times = [], answers = {}, tz = '', to = '', at } = {}) {
+  const one = kind === 'boardroom';
+  const told = answerLines(kind, answers);
+  return { subject: one ? 'Your three times for your 1:1' : 'Your three times for our call', ...letter(base, [
+    hi(first),
+    one ? 'Thank you for choosing your times. I’m looking forward to our hour together.'
+      : 'Thank you for asking for a free discovery call. I’m glad you did.',
+    `Here are the three times you suggested for ${one ? 'your 1:1' : 'our call'} (${KINDS[kind].minutes} minutes, online):`,
+    timeLines(times, tz),
+    `I’ll write back within ${RULES.confirmHours} hours to confirm one of them. We meet on ${RULES.where}: the link comes with my confirmation.`,
+    told ? `What you told us:\n${told}` : '',
+    beforeWeSpeak(base, kind),
+    'Plans change: if none of these times works any more, just reply with new ones. The team and I are here for you.',
+  ].filter(Boolean), null, asReceipt(close('booking', { tz, at, to }, null))) };
+}
+
+/** "booking-confirmed": Alexandru chose one of the three times in /mentor.
+ *  The time (their zone and Rome), the Google Meet button, what helps before
+ *  the call. Sent only from /mentor, only with a Meet link. */
+export function bookingConfirmedLetter(base, { first, kind = 'discovery', time = '', meet = '', tz = '', to = '', at } = {}) {
+  const one = kind === 'boardroom';
+  const w = whenText(time, tz);
+  return { subject: `Confirmed: ${one ? 'your 1:1' : 'our call'} on ${w.same ? w.romeDay : w.mine.split(',')[0]}`, ...letter(base, [
+    hi(first),
+    one ? 'Thank you for your patience. Your 1:1 is confirmed:' : 'Thank you for your patience. Our call is confirmed:',
+    `${timeLine(time, tz)} · ${KINDS[kind].minutes} minutes, online, on ${RULES.where}.`,
+    button(meet, 'Join on Google Meet →'),
+    'At that time, tap the button and you’re in. Keep this email, so the link is at hand.',
+    beforeWeSpeak(base, kind),
+    'If the time no longer works, just reply to this email and we find another. The team and I are here for you.',
+  ], null, asReceipt(close('booking-confirmed', { tz, at, to }, null))) };
+}
+
+/** To Alexandru: someone asked for a call. Who, which call, their three times
+ *  in Rome time (and theirs), everything they answered, where to confirm one
+ *  (/mentor: the confirmation carries the Google Meet link), and a reply link.
+ *  Plain, no offer. Replies go straight to the person. */
+export function bookingNotice(base, { name, email, kind = 'discovery', times = [], answers = {}, tz = '', step = '', account = false } = {}) {
+  const one = kind === 'boardroom';
+  const zone = tz || RULES.zone;
+  const away = zone !== RULES.zone;
+  const all = answersText(kind, answers).map(([l, w]) => `· ${l}: ${w}`).join('\n');
+  return { subject: `New ${one ? 'Boardroom 1:1' : 'discovery call'} request from ${name || email}`, ...letter(base, [
+    `${name || 'Someone'} (${email}) asked for ${one ? `their Boardroom 1:1 (60 minutes, paid${step ? `: ${step}` : ''})` : 'a free discovery call (30 minutes)'}, ${account ? 'with an account' : 'without an account'}.`,
+    `Their three times, in Rome time${away ? ` (they are in ${cityOf(zone)})` : ''}:\n` + times.map((iso) => { const w = whenText(iso, zone); return `· ${w.rome}${w.same ? '' : ` (${w.mineShort})`}`; }).join('\n'),
+    all ? `What they told us:\n${all}` : '',
+    'Confirm one in /mentor, Inbox, Bookings: they get the time and the Google Meet link by email.',
+    button(`${base}/mentor/#inbox`, 'Confirm a time →'),
+    ['Or reply to this email: it goes straight to them, ', link(`mailto:${email}`, email), '.'],
+    `They were told: Alexandru writes back within ${RULES.confirmHours} hours to confirm one, online on ${RULES.where}.`,
+  ].filter(Boolean), null, { sign: false }), replyTo: email };
 }
