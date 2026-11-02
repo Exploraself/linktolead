@@ -161,6 +161,16 @@ export const ENTRIES = [
     build: () => L.signinLetter(BASE, `${BASE}/ground-plan/?signin=…&reset=1`, { ...S, reset: true }),
   },
   {
+    id: 'no-account', stage: 'safe', icon: 'mail', fn: 'noAccountLetter',
+    name: 'No account here yet',
+    when: 'Someone asks for a sign-in or reset link for an address that has no account.',
+    who: 'That address. The page says the same at once, with the same button.',
+    from: '/ground-plan/, /northstar/, /pay/',
+    sentBy: 'functions/api/signin.js',
+    also: 'A security letter: no offer. The button opens the free account form with their email already in it, and brings them back to the page they were on.',
+    build: () => L.noAccountLetter(BASE, `${BASE}/road1/?email=sam%40example.com&next=%2Fpay%2F%3Fstep%3Dsession#join`, { ...S, to: 'sam@example.com' }),
+  },
+  {
     id: 'password', stage: 'safe', icon: 'shield', fn: 'passwordChangedLetter',
     name: 'Password changed',
     when: 'A password is set, changed or reset.',

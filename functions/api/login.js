@@ -2,13 +2,18 @@
 // starts the Launchpad). "Forgot your password? Email me a sign-in link"
 // (/api/signin) always works as well.
 //
-// The answer is the same whether the email has no account, has no password or
-// the password is wrong, so the form cannot be used to find out who has an
-// account. Failed tries are limited per address and per connection, counted
-// alike for addresses that exist and addresses that do not. A paused account
-// is told so plainly, but only after the right password.
+// An email with no account is told so plainly, with the way to make one
+// (Alexandru, 2 Nov 2026: "We're not a government agency"; a new founder who
+// typed into the sign-in form thought the account was made). A wrong password
+// and an account without a password get the same reply. Failed tries are
+// limited per address and per connection, counted alike for addresses that
+// exist and addresses that do not. A paused account is told so plainly, but
+// only after the right password.
 
 import { json, bad, db, now, clean, looksLikeEmail, accountTables } from '../_shared.js';
+
+/** The reply when no account has this email. */
+export const noAccountText = (email) => `There’s no account for ${email} yet.`;
 import { verifyPassword, hashPassword, PAUSED } from '../_auth.js';
 
 const NO = 'That email and password do not match. Check them, or use “Forgot your password?” to get a reset link.';
@@ -34,6 +39,7 @@ export async function onRequestPost({ request, env }) {
   if (!good) {
     await D.prepare('INSERT INTO auth_log (email, ip, at) VALUES (?,?,?)').bind(email, ip, Date.now()).run();
     await D.prepare('DELETE FROM auth_log WHERE at < ?').bind(Date.now() - 86400_000).run();
+    if (!me) return json({ ok: false, noAccount: true, email, error: noAccountText(email) }, 404);
     return bad(NO, 401);
   }
   if (me.paused) return bad(PAUSED, 403);

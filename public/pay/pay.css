@@ -37,3 +37,7 @@ h1{font-size:clamp(30px,7vw,40px);line-height:1.15;font-weight:700}
 .spin{width:28px;height:28px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--gold);animation:s 1s linear infinite;flex:none}
 @keyframes s{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
+
+/* The free account form (/account-box.js) opens over the page. */
+#gate{position:fixed;inset:0;z-index:60;background:rgba(16,13,9,.65);display:flex;align-items:center;justify-content:center;padding:20px 16px;overflow-y:auto}
+#gate[hidden]{display:none}

@@ -13,6 +13,18 @@ export const json = (data, status = 200) =>
 
 export const bad = (message, status = 400) => json({ ok: false, error: message }, status);
 
+/** Where to come back to after making an account: a path on this site only
+ *  ("/pay/?step=session"), never another site. '' for anything else. */
+export function safeNext(n) {
+  const s = String(n || '').trim();
+  return s.length <= 200 && /^\/(?![/\\])[^\s\\]*$/.test(s) ? s : '';
+}
+
+/** The free account form (/road1/, the full form with a password), with the
+ *  email already in it and the place to come back to (Alexandru, 2 Nov 2026). */
+export const joinUrl = (base, email, next = '') =>
+  `${base}/road1/?email=${encodeURIComponent(String(email || ''))}${safeNext(next) ? `&next=${encodeURIComponent(safeNext(next))}` : ''}#join`;
+
 /** A route cannot run without the database. Say so plainly rather than 500. */
 export function db(env) {
   if (!env || !env.DB) return null;

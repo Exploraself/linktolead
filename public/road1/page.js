@@ -7,6 +7,7 @@
 // another year like this costs" is counted by the founder (two sliders), kept
 // on this device only so Base Camp can say it back once (/road-kit.js).
 import { rememberUtm } from '/forms.js';
+import { safeNext } from '/account.js';
 import { remember, stickyJoin, countUp, count, trackScroll, matchHeadline, welcomeBack, miniMirror, stories, nowThen, fourLines, whenLine } from '/road-kit.js';
 
 rememberUtm();
@@ -18,8 +19,12 @@ function join(e) {
   const opener = e && e.currentTarget;
   gate.hidden = false;
   count('road1', 'form_open'); count('road1', 'cta');
-  loadBox().then((m) => m && m.open({ gate, opener, stage: null, variant: 'full', landing: 'road1' }));
+  loadBox().then((m) => m && m.open({ gate, opener, stage: null, variant: 'full', landing: 'road1', email: arrive.email, next: arrive.next }));
 }
+// From "Make my free account" (a sign-in screen, the no-account email):
+// /road1/?email=…&next=…#join opens the form with the email in it, and goes
+// back to `next` (a page on this site only) once the account is made.
+const arrive = (() => { try { const q = new URLSearchParams(location.search); return { email: (q.get('email') || '').slice(0, 120), next: safeNext(q.get('next')) }; } catch { return { email: '', next: '' }; } })();
 document.querySelectorAll('[data-join]').forEach((a) => a.addEventListener('click', join));
 if (location.hash === '#join') join();
 

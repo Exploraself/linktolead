@@ -1978,21 +1978,38 @@ const crownUp = (e) => {
 document.addEventListener('pointerup', crownUp);
 document.addEventListener('pointercancel', crownUp);
 
+/** ?next= on the sign-in page (the pay page sends founders here to sign in):
+ *  after signing in they go back there. A path on this site only. */
+const nextAfterSignin = () => { try { return account.safeNext(new URLSearchParams(location.search).get('next')); } catch { return ''; } };
+/** Signed in on the sign-in page: back to where they came from, or home. */
+function signedInHere() {
+  const nx = nextAfterSignin();
+  if (nx) { location.href = nx; return; }
+  view = 'home'; try { history.replaceState(null, '', '/ground-plan/#home'); } catch { /* old browser */ } comeHome();
+}
+
 /** "Continue with Google" on the sign-in page (google.js): signed in, or a new
  *  free account, then Your Base Camp, like the password sign-in. */
 function mountGoogle() {
   const el = document.querySelector('#signinform .g-slot');
   if (!el) return;
   import('./google.js').then((g) => g.mount(el, { source: 'home',
-    onDone: () => { view = 'home'; try { history.replaceState(null, '', '/ground-plan/#home'); } catch { /* old browser */ } comeHome(); },
+    onDone: () => signedInHere(),
     onError: (m) => { const msg = $('#si-msg'); if (msg) msg.textContent = m; } })).catch(() => {});
+}
+
+/** No account for this email (Alexandru, 2 Nov 2026): say so on the spot,
+ *  with the free account form one tap away, the email already in it. */
+function noAccountHere(email, text) {
+  const msg = $('#si-msg');
+  if (msg) msg.innerHTML = `${esc(text || `There’s no account for ${email} yet.`)} <a class="si-make" href="${esc(account.joinHref(email, nextAfterSignin() || '/ground-plan/'))}">Make my free account →</a>`;
 }
 
 async function sendSigninLink() {
   const msg = $('#si-msg'), email = ($('#si-email') || {}).value || '';
   const say = (t) => { if (msg) msg.textContent = t; };
   if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email.trim())) return say('Type your email first, then tap this again.');
-  try { const r = await account.signinLink(email.trim(), 'start', true); say(r.message); }
+  try { const r = await account.signinLink(email.trim(), 'start', true, nextAfterSignin() || '/ground-plan/'); if (r.noAccount) noAccountHere(email.trim(), r.message); else say(r.message); }
   catch (ex) { say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'We could not send a link just now. Try again in a minute.'); }
 }
 
@@ -2019,8 +2036,11 @@ document.addEventListener('submit', async (e) => {
     const say = (t) => { msg.textContent = t; };
     if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return say('That email does not look complete.');
     if (!pw) return say('Type your password, or use “Email me a sign-in link”.');
-    try { await account.login(email, pw); view = 'home'; try { history.replaceState(null, '', '/ground-plan/#home'); } catch { /* old browser */ } comeHome(); }
-    catch (ex) { say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'We could not reach the account service just now.'); }
+    try { await account.login(email, pw); signedInHere(); }
+    catch (ex) {
+      if (ex && ex.data && ex.data.noAccount) return noAccountHere(email, ex.message);
+      say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'We could not reach the account service just now.');
+    }
     return;
   }
   if (f.id === 'pwform') {
