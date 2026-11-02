@@ -349,3 +349,63 @@ export function stuckOnSunday(rows, limit = 12) {
   }
   return out.sort((a, b) => b.not - a.not || b.lv - a.lv).slice(0, limit);
 }
+
+// ── Letters ready to send (Alexandru, 2 Nov 2026) ───────────────────────────
+// Every letter button in /mentor opens a letter already written, from the
+// founder's own answers: their first name, the last level they wrote in, the
+// pain they named in the North Star and their newest sentence in the
+// Blueprint. A template, never a guess: what we do not know is left out. The
+// mentor reads it, changes a word, and sends. Every letter greets, thanks,
+// encourages, says the team is here and gives one thing to do; the letter
+// itself (functions/_letters.js mentorLetter) adds the good word, "just
+// reply", the signature and the P.S., so a draft stops before those.
+
+/** The kinds of letter, and the hint the dialog shows. */
+export const DRAFT_KINDS = { welcome: 'A welcome', checkin: 'A check-in', boardroom: 'Offer the Boardroom', blueprint: 'Invite to the Blueprint', northstar: 'Send them the North Star', note: 'A note' };
+/** The Boardroom's price, as public/content.js LADDER says (a test holds them equal). */
+export const BOARDROOM_PRICE = '$27';
+/** Which letter each "next action" and "Needs you today" row opens. */
+export const KIND_OF = { quiet: 'checkin', ready: 'boardroom', new: 'welcome', none: 'welcome', ns: 'blueprint', bp: 'northstar', ok: 'note', paused: 'note', question: 'note' };
+
+const firstOf = (s) => String((s && s.name) || '').trim().split(/\s+/)[0] || '';
+const lv2 = (n) => `Level ${String(n).padStart(2, '0')}`;
+
+/** The founder's newest finished sentence in the Blueprint, from theirWords() rows. */
+export const newestWord = (rows, id) => { const w = (rows || []).find((x) => x.id === id); return w ? String(w.text || '').trim() : ''; };
+
+/** A ready letter: { subject, body, kind, used: { word, pain } }. origin is the
+ *  site (location.origin), so the links work on a preview too. */
+export function draftLetter(s, kind = 'note', { word = '', origin = '' } = {}) {
+  const k = DRAFT_KINDS[kind] ? kind : 'note';
+  const first = firstOf(s), hi = first ? `Hi ${first},` : 'Hi,';
+  const t = told(s), pain = t.pains.length ? PAIN_NAMES[t.pains[0]] : '';
+  const L = [...levelSet(s)], lv = L.length ? Math.max(...L) : 0;
+  const w = String(word || '').trim(), said = w ? `You wrote: “${w.length > 220 ? w.slice(0, 220).trimEnd() + '…' : w}” That is an honest line, and honest lines are where change starts.` : '';
+  const hurt = pain ? `You told the North Star that what hurts most right now is “${pain}”. That is where we start.` : '';
+  const team = 'The team and I are here for you, every step of the way.';
+  const bp = `${origin}/ground-plan/`, ns = `${origin}/northstar/`;
+  const step = !nsDone(s) && !bpStarted(s) ? `One step for this week: take The Leader’s North Star. Eight questions, and you see which side of your business needs you first: ${ns}`
+    : !bpStarted(s) ? `One step for this week: open Level 01 of your Blueprint. It is free: ${bp}`
+    : `One step for this week: open your Base Camp and do one of this week’s actions: ${bp}`;
+  const D = {
+    welcome: [first ? `Welcome, ${first}` : 'Welcome', [hi, 'Thank you for joining us. I’m really glad you’re here.', hurt, step, team]],
+    checkin: [first ? `How are you, ${first}?` : 'How are you?', [hi, lv ? `Thank you for the work you put into ${lv2(lv)}.` : 'Thank you for being part of this.', said || hurt,
+      'It has been a little while, and that is all right. One small step this week is enough.', step, team]],
+    boardroom: [first ? `Well done, ${first}: your first three levels are done` : 'Well done: your first three levels are done', [hi, 'Well done. You finished Levels 01, 02 and 03. Thank you for the honest work.', said,
+      `The next step is The Boardroom: one 60-minute session on Google Meet, ${BOARDROOM_PRICE}. We read your first three levels before we speak, and we open Levels 04 and 05 together.`,
+      'Would you like a time? Reply to this letter and we will find one.', team]],
+    blueprint: [first ? `${first}, your next step is free` : 'Your next step is free', [hi, 'Thank you for taking The Leader’s North Star.', hurt,
+      `Your next step is free: the first three levels of The Founder’s Blueprint. In about an hour, Level 01 puts your business on paper, not only in your head: ${bp}`, team]],
+    northstar: [first ? `${first}, which side needs you first?` : 'Which side needs you first?', [hi, lv ? `Thank you for the work in your Blueprint, up to ${lv2(lv)}.` : 'Thank you for the work in your Blueprint.', said,
+      `One step that helps everything else: The Leader’s North Star. Eight questions, and you see which side of your business needs you first: ${ns}`, team]],
+    note: ['', [hi, '', team]],
+  };
+  const [subject, paras] = D[k];
+  return { kind: k, subject, body: (k === 'note' ? paras : paras.filter(Boolean)).join('\n\n'), used: { word: k === 'note' ? '' : (paras.includes(said) && said ? w : ''), pain: paras.includes(hurt) && hurt ? pain : '' } };
+}
+
+/** Your 3 for today: the three most urgent rows of today(), and how many more. */
+export function topThree(students, waiting, now = Date.now()) {
+  const all = today(students, waiting, now);
+  return { three: all.slice(0, 3), more: all.slice(3) };
+}
