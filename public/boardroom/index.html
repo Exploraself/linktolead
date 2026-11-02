@@ -93,6 +93,14 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
 .stack div b{color:var(--gold-ink)}
 .stack .tot{background:var(--deep);color:#F5EFE3;border-bottom:0}
 .stack .tot b{color:#F5EFE3;font-size:26px}
+.stack .gf{background:#FBF7EE}
+.stack .gf b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#F1E6CC;color:var(--gold-ink)}
+.stack .gf svg{width:19px;height:19px}
+.gift{margin-top:16px;display:inline-flex;align-items:center;gap:10px;padding:9px 16px 9px 10px;border-radius:999px;background:#FBF7EE;border:1px solid #E9DCC0;color:var(--gold-ink);font-size:15.5px;font-weight:700;line-height:1.3}
+.gift i{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#F1E6CC;flex:none}
+.gift svg{width:19px;height:19px;animation:nod 3.2s ease-in-out infinite;transform-origin:50% 80%}
+@keyframes nod{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-9deg)}90%{transform:rotate(7deg)}95%{transform:rotate(-4deg)}}
+@media(prefers-reduced-motion:reduce){.gift svg{animation:none}}
 .faq{margin-top:12px;border-top:1px solid var(--line)}
 .faq details{border-bottom:1px solid var(--line);padding:14px 2px}
 .faq summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:12px}
@@ -103,6 +111,65 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
 .end h2{margin-top:0}
 .end .cta{margin-top:18px}
 @media (prefers-reduced-motion:no-preference){.go{transition:background .2s ease}}
+
+.face{margin:0 0 26px;position:relative;border-radius:20px;overflow:hidden;background:#0B0907;aspect-ratio:16/9}
+.face img{width:100%;height:100%;object-fit:cover;object-position:50% 22%;display:block;animation:faceIn 1.4s ease both}
+.face figcaption{position:absolute;left:0;right:0;bottom:0;padding:44px 20px 16px;background:linear-gradient(180deg,transparent,rgba(11,9,7,.88));color:#F5EFE3;display:grid;gap:2px}
+.face b{font-size:17px}.face span{font-size:14px;color:#D9CDB6}
+@keyframes faceIn{from{opacity:0;transform:scale(1.04)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.face img{animation:none}}
+/* ── Illustrations and motion (Alexandru, 2 Nov 2026: "make it nicer, with
+   illustrations and animations"). Pure SVG and CSS, no images to load. All
+   motion stops for people who ask their device for less motion. */
+.art{display:block;width:100%;height:auto;margin:0 0 22px}
+.art text{font-family:var(--f)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes beam{0%,100%{opacity:.55}50%{opacity:.85}}
+.tw{transform-box:fill-box;transform-origin:center;animation:tw 2.4s ease-in-out infinite}
+.tw.b{animation-delay:.8s}.tw.c{animation-delay:1.6s}
+@keyframes tw{0%,100%{transform:scale(.3);opacity:0}50%{transform:scale(1);opacity:1}}
+.ask,.pains{clear:both}
+.js .road .line{stroke-dasharray:900;stroke-dashoffset:900;transition:stroke-dashoffset 2.2s cubic-bezier(.3,.6,.2,1)}
+.in .road .line,.road.in .line{stroke-dashoffset:0}
+.js .road .node{opacity:0;transform-box:fill-box;transform-origin:center;transition:opacity .5s,transform .5s}
+.in .road .node{opacity:1}
+.in .road .node.n1{transition-delay:.3s}.in .road .node.n2{transition-delay:1.1s}.in .road .node.n3{transition-delay:2s}
+.road .sunend{transform-box:fill-box;transform-origin:center;animation:glow 3s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.06)}}
+.stairs .me{animation:pulse 2s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{0%{transform:scale(.6);opacity:.9}100%{transform:scale(2.2);opacity:0}}
+.stairs .flag{transform-box:fill-box;transform-origin:0 50%;animation:flag 2.6s ease-in-out infinite}
+@keyframes flag{0%,100%{transform:skewY(0)}50%{transform:skewY(-8deg) scaleX(.92)}}
+.js .stairs .step{opacity:0;transform:translateY(10px);transition:opacity .5s,transform .5s}
+.in .stairs .step{opacity:1;transform:none}
+.in .stairs .s2{transition-delay:.15s}.in .stairs .s3{transition-delay:.3s}.in .stairs .s4{transition-delay:.45s}
+.ico{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#F1E6CC;color:var(--gold-ink);float:right;margin:-2px 0 4px 10px}
+.ico svg{width:20px;height:20px}
+.ico .hand{transform-origin:12px 12px;animation:spin 8s linear infinite}
+.ico .leaf{transform-box:fill-box;transform-origin:10% 90%;animation:leaf 3.6s ease-in-out infinite}
+@keyframes leaf{0%,100%{transform:rotate(0)}50%{transform:rotate(-8deg)}}
+/* Reveal as you scroll: added by the script, so without it all is visible. */
+.js .rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.js .rv.in{opacity:1;transform:none}
+.js .rv .st,.js .rv .stack>div,.js .rv .lvl,.js .rv .rung,.js .rv .pain{opacity:0;transform:translateY(12px);transition:opacity .55s ease,transform .55s ease;transition-delay:calc(var(--i,0) * 110ms + 150ms)}
+.js .rv.in .st,.js .rv.in .stack>div,.js .rv.in .lvl,.js .rv.in .rung,.js .rv.in .pain{opacity:1;transform:none}
+.steps{position:relative}
+.js .steps::after{content:"";position:absolute;left:-2px;top:0;width:2px;height:100%;background:var(--gold);transform:scaleY(0);transform-origin:top;transition:transform 1.6s ease .2s}
+.js .in .steps::after{transform:scaleY(1)}
+.stack .tot b{display:inline-block}
+.js .rv.in .stack .tot b{animation:pop .7s cubic-bezier(.3,1.6,.5,1) 1s both}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+.go{position:relative;overflow:hidden}
+.go::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-18deg);animation:shine 4.5s ease-in-out 1.5s infinite}
+@keyframes shine{0%{left:-60%}35%,100%{left:130%}}
+.stick{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);transform:translateY(110%);transition:transform .35s ease}
+.stick.on{transform:none}
+.stick .go{margin:0 auto;min-height:50px;font-size:17px}
+@media(min-width:900px){.stick{display:none}}
+@media(prefers-reduced-motion:reduce){
+  .js .rv,.js .rv *{opacity:1!important;transform:none!important;transition:none!important}
+  .road .line{stroke-dashoffset:0}.road .node,.stairs .step{opacity:1}.js .steps::after{transform:none}.stick{transition:none}
+}
 </style>
 </head>
 <body>
@@ -113,11 +180,13 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
 <main>
 
 <section aria-labelledby="h-top">
-  <p class="eb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="11" rx="2"/><path d="M7 9V6a5 5 0 0 1 10 0v3"/></svg>The Boardroom · Levels 04 and 05</p>
+  <figure class="face"><img src="/cabinet/alexandru.jpg" alt="Alexandru Cojocari" width="640" height="512" decoding="async"><figcaption><b>Your hour is with Alexandru Cojocari</b><span>Founder, ExploraSelf · online, from Rome</span></figcaption></figure>
+    <p class="eb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="11" rx="2"/><path d="M7 9V6a5 5 0 0 1 10 0v3"/></svg>The Boardroom · Levels 04 and 05</p>
   <h1 id="h-top" data-h>The future you is already in this room.</h1>
   <p class="lede">You have done the free part, and you have seen things. Now comes the part a page cannot do alone: Alexandru and the team read what you wrote, and you sit down with Alexandru. One hour that turns what you saw into what you do.</p>
   <div class="cta"><a class="go" href="/pay/?step=session">Unlock The Boardroom · $27 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-    <p class="under">Levels 04 and 05 open the moment you pay · one hour 1:1 with Alexandru · 14 days money back</p></div>
+    <p class="under">Levels 04 and 05 open the moment you pay · one hour 1:1 with Alexandru · 14 days money back</p>
+    <p class="gift"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4.5" rx="1"/><path d="M5 13v7.5h14V13M12 8.5v12"/><path d="M12 8.5C10.4 4.8 6.4 4.3 6.4 6.8c0 1.7 3.2 1.7 5.6 1.7Zm0 0c1.6-3.7 5.6-4.2 5.6-1.7 0 1.7-3.2 1.7-5.6 1.7Z"/></svg></i>And a gift inside, from Alexandru. You open it in your 1:1.</p></div>
 </section>
 
 <!-- Triangulation: three things the founder already told us, read from their
@@ -159,6 +228,13 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
 <section aria-labelledby="h-future">
   <p class="eb">Picture it</p>
   <h2 id="h-future">It is <span data-sun1>Sunday, two weeks from now</span>.</h2>
+  <svg class="art road" viewBox="0 0 640 160" aria-hidden="true">
+    <path d="M30 120 C140 120 170 92 250 86 S420 70 470 46 S580 24 610 22" fill="none" stroke="#EDE3D0" stroke-width="10" stroke-linecap="round"/>
+    <path class="line" d="M30 120 C140 120 170 92 250 86 S420 70 470 46 S580 24 610 22" fill="none" stroke="#B4975F" stroke-width="3" stroke-linecap="round"/>
+    <g class="node n1"><circle cx="30" cy="120" r="9" fill="#2A2117"/><text x="22" y="152" text-anchor="start" font-size="20" font-weight="700" fill="#5E574C">Now</text></g>
+    <g class="node n2"><circle cx="250" cy="86" r="9" fill="#B4975F"/><circle cx="250" cy="86" r="4" fill="#FFFDF8"/><text x="250" y="120" text-anchor="middle" font-size="20" font-weight="700" fill="#5E574C">In two weeks</text></g>
+    <g class="node n3"><circle class="sunend" cx="610" cy="22" r="16" fill="#F1D48E" opacity=".7"/><circle cx="610" cy="22" r="9" fill="#D9AE57"/><text x="618" y="66" text-anchor="end" font-size="20" font-weight="700" fill="#5E574C">In twelve weeks</text></g>
+  </svg>
   <div class="future">
     <p>You kept one if–then plan all week, even on the bad day. You asked one person for something clearly, with a date. You know what your hour is worth, and a selling hour sits in your calendar every week.</p>
     <p>A week later, you hold a dated proof of who you are becoming, one number you read without flinching, and three clients telling you, in their own words, why they buy.</p>
@@ -186,6 +262,7 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
     <div><span>One hour, 1:1, with Alexandru</span><b>✓</b></div>
     <div><span>Level 04 and Level 05, open at once: forty practical actions, twenty a level</span><b>✓</b></div>
     <div><span>A reading of your first five weeks, at the end of Level 05</span><b>✓</b></div>
+    <div class="gf"><span>A gift from Alexandru, given to you in your 1:1</span><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4.5" rx="1"/><path d="M5 13v7.5h14V13M12 8.5v12"/><path d="M12 8.5C10.4 4.8 6.4 4.3 6.4 6.8c0 1.7 3.2 1.7 5.6 1.7Zm0 0c1.6-3.7 5.6-4.2 5.6-1.7 0 1.7-3.2 1.7-5.6 1.7Z"/></svg></b></div>
     <div><span>14 days to change your mind, money back</span><b>✓</b></div>
     <div class="tot"><span>The weekly 1:1 with Alexandru is the heart of The Summit, at $1,989. Here you get the first hour.</span><b>$27</b></div>
   </div>
@@ -195,9 +272,9 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
   <p class="eb">Why this week</p>
   <h2 id="h-now">Three honest reasons not to wait.</h2>
   <div class="have">
-    <div class="lvl"><small>Your answers are fresh</small><p>What you wrote in the first three levels is still alive in you. The longer the gap, the more the old habit takes the week back.</p></div>
-    <div class="lvl"><small>The hours are few</small><p>Alexandru takes Boardroom calls on three afternoons a week: Tuesday, Wednesday and Thursday. Join this week, speak next week.</p></div>
-    <div class="lvl"><small>The cost of waiting is yours</small><p data-cost>Every week the same thing stays unsolved is a week your business pays for it. The Boardroom is one hour and $27.</p></div>
+    <div class="lvl"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="leaf" d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15M5 19l7-7"/></svg></span><small>Your answers are fresh</small><p>What you wrote in the first three levels is still alive in you. The longer the gap, the more the old habit takes the week back.</p></div>
+    <div class="lvl"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path class="hand" d="M12 12V7"/><path d="M12 12h3.5"/></svg></span><small>The hours are few</small><p>Alexandru takes Boardroom calls on three afternoons a week: Tuesday, Wednesday and Thursday. Join this week, speak next week.</p></div>
+    <div class="lvl"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6.5" rx="7" ry="2.5"/><path d="M5 6.5v4c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-4M5 10.5v4c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-4M5 14.5v3c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-3"/></svg></span><small>The cost of waiting is yours</small><p data-cost>Every week the same thing stays unsolved is a week your business pays for it. The Boardroom is one hour and $27.</p></div>
   </div>
   <div class="cta"><a class="go" href="/pay/?step=session">Unlock The Boardroom · $27 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     <p class="under">If The Boardroom isn’t for you, write to us within 14 days and you get your $27 back.</p></div>
@@ -206,6 +283,15 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
 <section aria-labelledby="h-climb">
   <p class="eb">The whole climb</p>
   <h2 id="h-climb">Start here, or start higher.</h2>
+  <svg class="art stairs" viewBox="0 0 640 240" aria-hidden="true">
+    <g class="step s1"><rect x="10" y="176" width="152" height="58" rx="8" fill="#FBF7EE" stroke="#B4975F" stroke-width="2.5"/><text x="86" y="201" text-anchor="middle" font-size="19" font-weight="700" fill="#6E5213">Boardroom</text><text x="86" y="224" text-anchor="middle" font-size="18" fill="#6E5213">$27</text></g>
+    <g class="step s2"><rect x="166" y="130" width="152" height="104" rx="8" fill="#F6F4EF" stroke="#E2D9C6"/><text x="242" y="156" text-anchor="middle" font-size="19" font-weight="700" fill="#5E574C">LAB</text><text x="242" y="179" text-anchor="middle" font-size="18" fill="#5E574C">$97</text></g>
+    <g class="step s3"><rect x="322" y="84" width="152" height="150" rx="8" fill="#F6F4EF" stroke="#E2D9C6"/><text x="398" y="110" text-anchor="middle" font-size="19" font-weight="700" fill="#5E574C">HUB</text><text x="398" y="133" text-anchor="middle" font-size="18" fill="#5E574C">$750</text></g>
+    <g class="step s4"><rect x="478" y="38" width="152" height="196" rx="8" fill="#2A2117"/><text x="554" y="64" text-anchor="middle" font-size="19" font-weight="700" fill="#F5EFE3">Summit</text><text x="554" y="87" text-anchor="middle" font-size="18" fill="#E2D2B2">$1,989</text>
+      <path d="M554 38V6" stroke="#F5EFE3" stroke-width="2.5"/><path class="flag" d="M555 7h28l-7 8 7 8h-28Z" fill="#D9AE57"/></g>
+    <circle class="me" cx="24" cy="156" r="8" fill="#D9AE57"/><circle cx="24" cy="156" r="8" fill="#B4975F" stroke="#FFFDF8" stroke-width="2.5"/>
+    <text x="40" y="162" font-size="18" font-weight="700" fill="#6E5213">You are here</text>
+  </svg>
   <p class="lede" style="font-size:17px">Each step includes every step below it. Pick the one that fits the size of your business today.</p>
   <div class="ladder">
     <div class="rung here"><b>The Boardroom<span class="tag">You are here</span></b><span class="p">$27</span><p>Levels 04–05, open at once · one hour 1:1 with Alexandru</p><p class="fit">Fits if you have an idea or your first clients, and want to see clearly before you spend more.</p></div>
@@ -235,6 +321,24 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
 </section>
 
 </main>
+<div class="stick" data-stick aria-hidden="true"><a class="go" href="/pay/?step=session" tabindex="-1">Unlock The Boardroom · $27 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+<script>
+// Motion for the Boardroom page: reveal each part as it comes into view, and
+// a slim pay bar on phones between the first button and the last one.
+(() => {
+  document.documentElement.classList.add('js');
+  const secs = [...document.querySelectorAll('main > section')].slice(1);
+  secs.forEach((s) => { s.classList.add('rv'); s.querySelectorAll('.st,.stack>div,.lvl,.rung,.pain').forEach((el, i) => el.style.setProperty('--i', i)); });
+  if (!('IntersectionObserver' in window)) { secs.forEach((s) => s.classList.add('in')); return; }
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  secs.forEach((s) => io.observe(s));
+  const bar = document.querySelector('[data-stick]'), top = document.querySelector('main > section .cta'), end = document.querySelector('.end');
+  let pastTop = false, atEnd = false;
+  const show = () => { const on = pastTop && !atEnd; bar.classList.toggle('on', on); document.body.style.paddingBottom = on ? '76px' : ''; };
+  new IntersectionObserver(([e]) => { pastTop = !e.isIntersecting && e.boundingClientRect.top < 0; show(); }).observe(top);
+  new IntersectionObserver(([e]) => { atEnd = e.isIntersecting; show(); }, { threshold: 0.05 }).observe(end);
+})();
+</script>
 <script type="module">
   // Everything here is read from the founder's own account and their taps on
   // this page. Nothing is sent. Without an account the page stays general.
