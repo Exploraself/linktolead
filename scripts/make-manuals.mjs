@@ -19,6 +19,7 @@ import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url.replace('/scripts/', '/'))('playwright');
 import { STAGES } from '../public/content.js';
 import { LEVELS4, CHAPTERS4, DOMS, DOM_NAMES, PLAN4, BUILD4, SESSIONS4, BLUEPRINT4, CLOSES, READ_QUOTES, fieldsOf } from '../public/levels-v4.js';
+import { actionsAt, SIZES4 } from '../public/actions-v4.js';
 
 const root = new URL('../', import.meta.url);
 const two = (n) => String(n).padStart(2, '0');
@@ -27,6 +28,11 @@ const strip = (h) => String(h).replace(/<em>|<\/em>/g, '').replace(/<[^>]+>/g, '
 const HEX = { self: '#8C5A3C', people: '#4C6B55', work: '#3E5C78', market: '#8A6A1F' };
 const STAGE_KEY = { build: 'building', grow: 'growing', scale: 'scaling' };
 const PARTS = Object.fromEntries(BLUEPRINT4.map((b) => [b.k, b.n]));
+/** The size each manual's actions are written for (the app writes them for the founder's own size). */
+const SIZE_OF = { build: 'start', grow: 'solo', scale: 'team' };
+const SIZE_NAME = Object.fromEntries(SIZES4);
+/** The five actions of a domain, Do first, as My Blueprint shows them. */
+const DO_FIRST = [2, 0, 1, 3, 4];
 
 /** A line to write on, with a small hint under it. */
 const blank = (hint = '', w = 34) => `<span class="bl" style="--w:${w}mm"><i>${esc(hint)}</i></span>`;
@@ -38,8 +44,9 @@ function domainHTML(L, d, stage) {
   const D = L.d[d], p = PLAN4[`${L.n}.${d}`], key = DOMS[d], note = p.stage && p.stage[STAGE_KEY[stage]];
   const sent = D.f.map((x) => (typeof x === 'string' ? esc(strip(x)) : blank(x[1]))).join('');
   return `<section class="dom" id="l${two(L.n)}-${key}" style="--c:${HEX[key]}">
-    <h3><span class="lt">${esc(D.l)}</span><span><small>${esc(DOM_NAMES[d])}</small>${esc(D.name)} · <em>${esc(p.topic)}</em></span></h3>
-    <p class="ins"><b>Why it matters</b>${esc(p.ins)}</p>
+    <div class="dhead"><h3><span class="lt">${esc(D.l)}</span><span><small>${esc(DOM_NAMES[d])}</small>${esc(D.name)} · <em>${esc(p.topic)}</em></span></h3>
+    ${p.idea ? `<p class="idea">${esc(p.idea)}</p>` : ''}
+    <p class="ins"><b>Why it matters</b>${esc(p.ins)}</p></div>
     <ol class="mv">
       <li><b>Tap.</b> ${esc(strip(D.t.q))}<span class="opts">${D.t.o.map((o) => `<span>☐ ${esc(o)}</span>`).join('')}</span></li>
       <li><b>Slide.</b> ${esc(D.s.q)}<span class="scale"><span>${esc(D.s.e[0])}</span><i></i><span>${esc(D.s.e[1])}</span></span><span class="num">My honest number: ${blank('', 22)}</span></li>
@@ -51,6 +58,7 @@ function domainHTML(L, d, stage) {
     <div class="four"><p class="lbl">Four lines back</p>
       ${[['Where you were', 'Admit it.'], ['Where you struggle', 'Don’t fight it.'], ['Where you shine', 'Don’t ignore it.'], ['What you will do', 'Exactly.']].map(([a, b]) => `<div><b>${a}</b> <i>${b}</i>${rules(1)}</div>`).join('')}</div>
     <div class="keep"><p class="lbl">Yours to keep · goes into your Blueprint: ${esc(PARTS[p.bp] || '')}</p><h4>${paper(p.take[0])}</h4><ol>${p.take.slice(1).map((l) => `<li>${paper(l)}</li>`).join('')}</ol></div>
+    ${actionsAt(L.n, d, SIZE_OF[stage]).length ? `<div class="five"><p class="lbl">Five actions this week · written for: ${esc(SIZE_NAME[SIZE_OF[stage]].toLowerCase())}</p><ol>${DO_FIRST.map((i) => { const a = actionsAt(L.n, d, SIZE_OF[stage])[i]; return `<li>☐ <b>${a.step}</b> ${i === 2 ? '<i>(your own action, from your sentence)</i> ' : ''}${esc(a.t)}${a.ex ? ` <i>${esc(a.exLabel)}: ${esc(a.ex)}</i>` : ''}</li>`; }).join('')}</ol></div>` : ''}
     <p class="sun"><b>Sunday:</b> ☐ Done &nbsp; ☐ Partly &nbsp; ☐ Not yet &nbsp;·&nbsp; <i>${esc(p.notyet.replace(/\{(\w+)\}/g, '…'))}</i></p>
   </section>`;
 }
@@ -161,6 +169,9 @@ td.n{font-family:Newsreader;font-size:14pt;color:#C9A24A;width:11mm}td.c{width:3
 .dom h3 em{color:#6B6153}
 .lt{display:inline-grid;place-items:center;width:9mm;height:9mm;border-radius:1.5mm;background:var(--c);color:#fff;font-family:Newsreader;font-size:14pt;flex:none}
 .ins{margin-top:2.5mm;padding:2.5mm 4mm;border-left:0.8mm solid #C9A24A;background:#FBF7EE;font-size:9pt;line-height:1.55}
+.dhead{break-inside:avoid;break-after:avoid}
+.idea{margin-top:2.5mm;font-weight:700;font-size:10.6pt;line-height:1.45}
+.five{margin-top:3mm;padding:2.5mm 4mm;border:0.3mm solid #DFD3B8;border-radius:1.5mm;break-inside:avoid}.five ol{list-style:none;margin:1mm 0 0;padding:0}.five li{font-size:8.8pt;line-height:1.5;margin-top:1.2mm}.five li i{color:#6B6153}
 .ins b{display:block;font:600 6.6pt Inter;letter-spacing:1.3px;text-transform:uppercase;color:#7A5C16}
 .mv{margin:3mm 0 0;padding-left:5mm}.mv li{margin-bottom:2.6mm;line-height:1.6}
 .opts{display:flex;flex-wrap:wrap;gap:1mm 5mm;margin-top:1mm;font-size:9pt}
@@ -194,11 +205,12 @@ cite{display:block;margin-top:1.5mm;font:normal 7.6pt Inter;color:#6B6153}
     <p class="sub">Twelve weeks. Four domains. One action plan a week.</p>
     <p class="lede">${esc(S.lede)}</p>
     <p class="lede">Each week has a word, and each letter of the word is one domain: you, your people, your business, your market. In every domain you tap the line that sounds like you, slide to the honest number, write one sentence, and leave with one action, its day, and how you will know on Sunday that it is done.</p>
-    <div class="facts"><span>12 levels</span><span>48 actions, each with a day</span><span>3 chapters, 3 readings</span><span>3 pages to build</span><span>${SESSIONS4.length} sessions with Alexandru and the team</span></div></div>
+    <div class="facts"><span>12 levels</span><span>20 actions a week, five in each domain</span><span>3 chapters, 3 readings</span><span>3 pages to build</span><span>${SESSIONS4.length} sessions with Alexandru and the team</span></div></div>
   <p class="foot">ExploraSelf · A Good People Company · Lead yourself. Grow your business.<br>linktolead.exploraself.com · A self-reflection and planning tool, not a diagnosis. The same programme as the app: what you write here, you can write there.</p>
 </section>
 <section class="howto page"><p class="lbl">Before the first level</p><h2>How to use this</h2>
-  <p><b>Inform, reform, transform.</b> Every domain opens with why it matters, ends in one action with a day, and leaves you something to keep in your own words.</p>
+  <p><b>Inform, reform, transform.</b> Every domain opens with its idea and why it matters, ends in one action with a day, and leaves you something to keep in your own words.</p>
+  <p><b>Five actions in each domain.</b> Your own action (Do), from your sentence, and four around it: Look (open and count), Decide (write the line), Involve (one person or customer), Keep (make it weekly). This manual writes them for ${esc(SIZE_NAME[SIZE_OF[stage]].toLowerCase())}; the app writes them for your own size.</p>
   <ol><li><b>Tap.</b> Tick the line that sounds most like you. Honest beats flattering.</li>
     <li><b>Slide.</b> Mark the honest number. Go and look it up if you can: the calendar, the bank statement, the messages.</li>
     <li><b>Write once.</b> One sentence, a few words in each blank. A real name, a real day, a real number.</li>
@@ -227,6 +239,8 @@ function sync() {
   lines.push(row(['Insights, “Done when”, what you keep, smaller steps', ...count(() => `${Object.keys(PLAN4).length} of 48`)]));
   lines.push(row(['Day screens added (the day question)', ...count(() => String(Object.values(PLAN4).filter((p) => p.on).length))]));
   lines.push(row(['Stage notes', ...count((st) => String(notes(st)))]));
+  lines.push(row(['Ideas (one sentence before the tap)', ...count(() => `${Object.values(PLAN4).filter((p) => p.idea).length} of 48`)]));
+  lines.push(row(['Five actions a domain, at the manual’s size', ...count((st) => `${LEVELS4.reduce((n, L) => n + L.d.filter((_, d) => actionsAt(L.n, d, SIZE_OF[st]).length === 5).length, 0)} of 48 · ${SIZE_NAME[SIZE_OF[st]].toLowerCase()}`)]));
   lines.push(row(['Chapter readings, build pages, sessions', ...count(() => `${Object.keys(CLOSES).length}, ${Object.keys(BUILD4).length}, ${SESSIONS4.length}`)]));
   lines.push(row(['Blueprint parts', ...count(() => String(BLUEPRINT4.length))]));
   lines.push('', '## Against the manuals they replace', '',
