@@ -11,7 +11,7 @@ ok(app.includes("if (e.key !== 'Enter' || e.shiftKey) return;") && app.includes(
 ok(app.includes('enterkeyhint="next"'), 'a phone keyboard shows Next');
 for (const k of ['Levels', 'Library', 'Music', 'Focus', 'Light', 'Ask Alexandru', 'Book 1:1']) ok(app.includes(`'${k}'`), `the Crown keeps ${k}`);
 ok(app.includes('M.openPlayer()') && app.includes("M.openPlayer('mp-light')") && app.includes("M.mode('focus')") && read('public/music.js').includes('export function openPlayer('), 'Music, Light and Focus reach the full player');
-ok(app.includes('${railHTML(st)}') && app.includes('underHTML(st)') && app.includes('videoBlock(') && app.includes('stageStrip(st)') && app.includes('readingHTML(CLOSES[level])'), 'nothing is lost: the levels, the video, the stage, and a chapter reading after 05, 09 and 12');
+ok(app.includes('${railHTML(st)}') && app.includes('underHTML(st)') && app.includes('videoBlock(') && app.includes('stageStrip(st)') && app.includes('readingHTML(ci)') && app.includes('const ci = CLOSES[level]'), 'nothing is lost: the levels, the video, the stage, and a chapter reading after 05, 09 and 12');
 ok(/state\.work\[key\] = String\(v\);\s*save\(\);\s*account\.touch\('work', key, String\(v\)\);/.test(app), 'Version 4 answers save to the device first, then to the account (with the worksheets)');
 ok(css.includes('@media(prefers-reduced-motion:reduce)') && css.includes('@media(max-width:760px)') && css.includes(':root[data-theme="dark"]'), 'reduced motion, the phone and the dark theme');
 ok(app.includes("e.key === 'Escape'") && app.includes('aria-expanded'), 'Escape closes; the Crown says whether it is open');

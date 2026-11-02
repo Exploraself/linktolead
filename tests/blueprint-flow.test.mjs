@@ -1,0 +1,155 @@
+// The Founder's Blueprint, one field on screen (the skeleton, Phase 3):
+// every domain an action with a day, a "Done when", how sure, and what the
+// founder keeps; every level opens with last week; the readings count what
+// was done; the founder's Blueprint is built from their answers only.
+import fs from 'node:fs';
+import { tally as T } from './_d1.mjs';
+const { ok, done } = T('blueprint-flow');
+const V = await import('../public/levels-v4.js');
+const { LEVELS4: L, PLAN4: P, BLUEPRINT4: B } = V;
+
+// ── The content: 48 domains, each an action plan ──────────────────────────
+const keys = L.flatMap((x) => x.d.map((_, d) => `${x.n}.${d}`));
+ok(Object.keys(P).length === 48 && keys.every((k) => P[k]), 'an action plan for each of the 48 domains');
+ok(Object.values(P).every((p) => p.topic && p.ins && p.done && p.notyet && Array.isArray(p.take) && p.take.length >= 3),
+  'each: a topic, an insight, a "Done when", what the founder keeps, a smaller step');
+ok(Object.values(P).every((p) => p.notyet.startsWith('Make it smaller')), 'the step after "Not yet" is always smaller, never a scolding');
+ok(Object.values(P).every((p) => p.ins.split(/(?<=[.!?])\s/).length <= 4 && p.ins.length <= 330), 'insights are short: the principle, not a lecture');
+
+// Every action has a day: the added screen (`on`), or a field of the sentence.
+let days = true;
+for (const x of L) x.d.forEach((D, d) => {
+  const k = V.dayKeyOf(x.n, d), fields = V.fieldsOf(D).map((f) => f[0]);
+  if (!(k === 'on' ? P[`${x.n}.${d}`].on : fields.includes(k))) days = false;
+  if (k !== 'on' && P[`${x.n}.${d}`].on) days = false;
+});
+ok(days, 'every action has a day, asked once');
+ok(Object.values(P).filter((p) => p.on).length === 29, '29 domains get a day screen');
+
+// Filled with the example founder, nothing is left as a token or a gap.
+const w = {};
+for (const x of L) x.d.forEach((D, d) => {
+  w[V.wkey(x.n, d, 't')] = String(D.x[0]); w[V.wkey(x.n, d, 's')] = String(D.x[1]);
+  V.fieldsOf(D).forEach((f) => { w[V.wkey(x.n, d, f[0])] = f[2]; });
+  w[V.wkey(x.n, d, 'on')] = 'Friday';
+});
+let clean = true;
+for (const x of L) for (let d = 0; d < 4; d++) {
+  const t = V.takeOf(w, x.n, d);
+  const h = [V.doneOf(w, x.n, d), t.title, ...t.lines, V.notyetOf(w, x.n, d), P[`${x.n}.${d}`].on ? V.plainOf(P[`${x.n}.${d}`].on, w, x.n, d) : ''].join(' ');
+  if (/[{}]|class="blank"/.test(h)) { clean = false; console.error('gap in', x.n, d, h.slice(0, 160)); }
+}
+ok(clean, 'every "Done when", template and day question fills from the founder’s own answers');
+ok(V.takeOf(w, 6, 2).lines[0].includes('Studio Rossi') && V.takeOf(w, 6, 2).lines.join('').includes('class="ln"'), 'what the founder keeps carries their words, and lines to fill in on paper');
+ok(!V.doneOf({ [V.wkey(1, 0, 'act')]: '<b>x</b>' }, 1, 0).includes('<b>'), 'founder text is escaped');
+
+// Rule 4: no tool names on the surface, not even as a topic or a title.
+const norm = (s) => String(s).toLowerCase().replace(/^(the|my|your|a|one)\s+/, '').replace(/[^a-z0-9 ]/g, '').trim();
+const tools = new Set(L.flatMap((x) => x.d.map((D) => norm(D.tool))));
+ok(Object.values(P).every((p) => !tools.has(norm(p.topic)) && !tools.has(norm(p.take[0]))), 'no topic or title is a tool name (AGENTS.md rule 4)');
+// Rule 6: no invented numbers. Percentages only ever come from the founder.
+ok(Object.values(P).every((p) => !/\d+\s?%|percent|studies|research shows|on average/i.test(p.ins + p.notyet)), 'no invented statistics in the insights');
+
+// ── The founder's Blueprint: eight parts, every domain in exactly one ─────
+ok(B.length === 8 && B.map((s) => s.k).join() === 'self,people,offer,marketing,sales,money,systems,grow', 'eight parts: leader, people, offer, marketing, sales, money, systems, next ninety days');
+ok(Object.values(P).every((p) => B.some((s) => s.k === p.bp)), 'every domain writes one part of the Blueprint');
+const bp = V.blueprint(w);
+ok(bp.reduce((n, s) => n + s.items.length, 0) === 48 && bp.every((s) => s.items.length >= 3), 'all 48 domains appear once; no part is thinner than three');
+const empty = V.blueprint({});
+ok(empty.every((s) => s.items.every((i) => !i.started)) && bp.every((s) => s.items.every((i) => i.started && !/[{}]/.test(i.sentence))), 'built only from answers: empty stays empty, nothing is filled in for them');
+
+// ── The flow: one field on screen ─────────────────────────────────────────
+const s1 = V.stepsOf(1), s2 = V.stepsOf(2), s5 = V.stepsOf(5);
+ok(s1[0].join() === '0,tap' && s2.slice(0, 4).every((s, i) => s[0] === i && s[1] === 'got') && s2[4].join() === '0,tap', 'Level 01 opens on its first tap; every later level on last week’s four actions');
+{ const k5 = s5.map((s) => s[1]), at = k5.indexOf('week');
+  ok(k5.slice(at, at + 4).join() === 'week,reading,carry,carryday' && k5[k5.length - 1] === 'bpage' && V.stepsOf(4).slice(-1)[0][1] === 'week',
+    'the week ends a level; after 05, 09 and 12, the reading, one action carried forward, and one page to build'); }
+let once = true;
+for (const x of L) x.d.forEach((D, d) => {
+  const S = V.stepsOf(x.n).filter((s) => s[0] === d && !['got'].includes(s[1]));
+  const fields = V.fieldsOf(D).map((f) => f[0]);
+  if (S.filter((s) => s[1] === 'done').length !== 1 || S.filter((s) => s[1] === 'lines').length !== 1) once = false;
+  for (const f of fields) if (S.filter((s) => s[2] === f).length !== 1) once = false;
+  if (S[0][1] !== 'tap' || S[1][1] !== 'slide' || S[S.length - 1][1] !== 'lines') once = false;
+});
+ok(once, 'per domain: tap, slide, each blank once, the day, "Done when", four lines');
+ok(V.stepsOf(1).filter((s) => s[1] === 'day').every((s) => ['day', 'when', 'on'].includes(s[2])), 'a day is a tap, never typed unless it is a date');
+
+ok(V.firstOf({}, 1) === 0 && V.firstOf({}, 2) === 0, 'a new level opens on its first question');
+const full = { ...w };
+for (const x of L) for (let d = 0; d < 4; d++) { full[V.wkey(x.n, d, 'sure')] = '70'; full[V.wkey(x.n, d, 'got')] = '0'; }
+for (const n of [5, 9, 12]) { full[V.wkey(n, 'r', 'carry')] = '1.0'; full[V.wkey(n, 'r', 'on')] = 'Monday'; full[V.wkey(n, 'b', 'day')] = 'Friday'; }
+for (const [k, v] of Object.entries({ task: 'invoices', when: 'Friday', s1: 'a', s2: 'b', s3: 'c', who: 'Marta' })) full[V.wkey(5, 'b', k)] = v;
+full[V.wkey(9, 'b', 'who')] = 'Marta'; full[V.wkey(12, 'b', 'no')] = 'new projects'; full[V.wkey(12, 'b', 'life')] = 'Sunday afternoons';
+ok(L.every((x) => V.stepsOf(x.n)[V.firstOf(full, x.n)][1] === 'week'), 'a level fully answered opens on its week');
+ok(V.firstOf({ ...full, [V.wkey(3, 2, 'got')]: '' }, 4) === 2, 'a missing Sunday answer is asked first');
+// Progress still counts only the Version 4 moves: nobody already ahead is held back.
+ok(L.every((x) => V.levelUnits(w, x.n) === V.UNITS), 'the day and how sure never gate the next level');
+
+// ── Sunday: done against promised, and the estimates ──────────────────────
+const sun = (gots, sure) => { const o = {}; gots.forEach((g, d) => { o[V.wkey(1, d, 'got')] = String(g); o[V.wkey(1, d, 'sure')] = String(sure); }); return o; };
+ok(V.tally(sun([0, 0, 2, 2], 90), [1]).est === 'too hopeful' && V.tally(sun([0, 0, 0, 1], 80), [1]).est === 'about right' && V.tally(sun([0, 0, 0, 0], 40), [1]).est === 'too careful',
+  'estimates read as too hopeful, about right or too careful, the Planner’s three words');
+const t0 = V.tally({}, [1, 2, 3]);
+ok(t0.n === 0 && t0.est === null && t0.real === null, 'no Sunday answers: nothing is claimed');
+ok(V.countedFor(0).join() === '1,2,3,4' && V.countedFor(1).join() === '5,6,7,8' && V.countedFor(2).join() === '9,10,11', 'each reading counts the actions checked since the one before');
+ok(V.READ_QUOTES.length === 3 && V.READ_QUOTES.every((q) => q.q && /^Worth Building/.test(q.src)), 'one quote per reading, from his own book');
+ok(V.carriedFrom({ [V.wkey(5, 'r', 'carry')]: '3.2' }, 5).join() === '3,2' && V.carriedFrom({ [V.wkey(5, 'r', 'carry')]: 'x' }, 5) === null, 'the action carried forward is read back exactly');
+
+// ── The screen ────────────────────────────────────────────────────────────
+const app = fs.readFileSync('public/app.js', 'utf8'), css = fs.readFileSync('public/crown.css', 'utf8');
+ok(!/STEPS4|firstStep\(/.test(app) && /stepsOf\(level\)/.test(app), 'the programme walks the new steps');
+ok(/data-got=/.test(app) && /data-v4day=/.test(app) && /data-v4u=/.test(app) && /data-carry=/.test(app) && /data-copytake=/.test(app), 'last week, the day taps, how sure, carry forward and copy are wired');
+ok(/keep4\(d, 'got', \+b\.dataset\.got, level - 1\)/.test(app), 'Sunday’s answer is kept on the week it belongs to');
+ok((app.match(/if \(qi === at\) moveQ\(1\)/g) || []).length === 2 && /classList\.contains\('cw-day'\)/.test(app), 'a day or a carried action, chosen by tap or by Enter, moves on exactly once');
+ok(/view === 'blueprint' \? blueprintView\(\)/.test(app) && /data-go="blueprint"/.test(app) && /data-print/.test(app), 'the founder can open, and print, their Blueprint');
+ok(/@media print/.test(css) && /prefers-reduced-motion:reduce\)\{\.cw-days/.test(css), 'print and reduced motion are handled');
+ok(/'#blueprint'\) return 'blueprint'/.test(fs.readFileSync('public/home.js', 'utf8')), '#blueprint opens the Blueprint');
+// Ask once: where the Growth Plan already holds the words, they are shown back.
+const gps = Object.entries(P).filter(([, p]) => p.gp);
+ok(gps.length === 4 && gps.every(([k, p]) => { const [lv, d] = k.split('.').map(Number); return p.gp.ids.every((id) => /^mgp-\d+\.\d+$/.test(id)) && (p.gp.at === 't' || V.fieldsOf(L[lv - 1].d[d]).some((f) => f[0] === p.gp.at)); }),
+  'Growth Plan words show back on four screens, at a tap or a blank that exists');
+ok(/function gpBack\(p, at\)/.test(app) && /account\.growthPlan\(\)/.test(app) && /gpAsked = true/.test(app), 'the Growth Plan is read once per visit, never on every screen');
+ok(/data-copyweek/.test(app) && /function lastSunday\(\)/.test(app) && /keep4\(d, 'got', g, 12\)/.test(app) && /href="\/northstar\/">Take the North Star again/.test(app), 'Copy my week; the last Sunday asks about Level 12, then the North Star again');
+// ── Options built (1 Nov): build-it pages, ten minutes, twelve weeks, counts ──
+ok(Object.keys(V.BUILD4).join() === '5,9,12' && V.BUILD4[5].part === 'systems' && V.BUILD4[9].part === 'systems' && V.BUILD4[12].part === 'grow', 'a page after each reading: two for systems, one for the next twelve weeks');
+ok([5, 9, 12].every((n) => V.stepsOf(n).slice(-1)[0][1] === 'bpage' && V.stepsOf(n).some((s) => s[1] === 'bday')), 'each page has its day, and ends the level');
+const bw = { [V.wkey(5, 'b', 'task')]: 'invoices', [V.wkey(5, 'b', 'when')]: 'Friday', [V.wkey(5, 'b', 's1')]: 'a', [V.wkey(5, 'b', 's2')]: 'b', [V.wkey(5, 'b', 's4')]: 'd' };
+ok(V.stepsWritten(bw, 5).join() === 'a,b' && V.buildPage(bw, 5).length === 4, 'the process stops at the first empty step');
+ok(V.stepDone({}, 5, [-1, 'bstep', 's4']) && !V.stepDone({}, 5, [-1, 'bstep', 's3']), 'three steps are needed, the rest are up to the founder');
+ok(V.buildPage(full, 12).length === 6 && V.buildPage(full, 12).some((x) => x[0].startsWith('For my health')) && V.buildPage(full, 9).length === 8 && !/[{}]/.test(V.buildPage(full, 9).map((x) => x[1]).join('')), 'the operations and twelve-week pages are built from answers already given, the personal side included');
+ok(!V.fillB('{who}', { [V.wkey(9, 'b', 'who')]: '<i>' }, 9).includes('<i>'), 'build answers are escaped');
+ok(V.blueprint(full).find((x) => x.k === 'systems').builds.length === 2, 'the build pages sit inside their part of the Blueprint');
+ok(/spend ten minutes/.test(V.LEVELS4[8].d[0].f.join('')) && !/30 minutes/.test(JSON.stringify(V.LEVELS4[8].d[0])), 'one weekly review: ten minutes (D3)');
+ok(!/90 days|ninety/.test(JSON.stringify(V.LEVELS4[11]) + JSON.stringify(V.PLAN4['12.0']) + JSON.stringify(V.PLAN4['12.2']) + JSON.stringify(V.BLUEPRINT4)), 'one horizon: twelve weeks (D5)');
+const LP = await import('../public/launchpad-plan.js');
+const lpt = Object.values(LP.ACTIONS).flat();
+ok(lpt.length === 20 && ['Count your clear asks', 'Count what came back', 'Count the hard truths', 'Count your thanks', 'Count where clients came from', 'Count your asks since Level 01'].every((t) => lpt.some((a) => a.title === t)), 'the Launchpad is the numbers: actions that repeated a level are now counts');
+ok([1, 2, 3].map((n) => lpt.filter((a) => a.w === n).length).join() === '8,8,4', 'the Launchpad keeps its three weeks: 8, 8 and 4');
+ok(!/Say one expectation|Give one thing away|Make three asks|Say your offer in one sentence/.test(fs.readFileSync('public/launchpad-plan.js', 'utf8')) && /Every Sunday, ten minutes/.test(fs.readFileSync('public/launchpad-plan.js', 'utf8')), 'no Launchpad action repeats a level; Sunday is ten minutes');
+ok(/function innerSide\(\)/.test(app) && /\/northstar\/growth-plan\.js/.test(app) && /id="bp-inner"/.test(app), 'the inner side: the Growth Plan as a ninth part, for those who wrote in it');
+// ── For Alexandru and the team: the session brief, and who is stuck ───────
+const D = await import('../public/mentor/dash.js');
+ok(V.SESSIONS4.length === 3 && V.SESSIONS4.map((x) => x.after).join() === '3,9,12' && V.SESSIONS4[0].levels.join() === '1,2,3' && V.SESSIONS4[1].levels.join() === '5,6,7,8,9' && V.SESSIONS4[2].levels.join() === '9,10,11,12', 'three sessions, as the ladder sells them, each reading the levels before it');
+const bw1 = {}; L.slice(0, 3).forEach((x) => x.d.forEach((D2, d) => { V.fieldsOf(D2).forEach((f) => { bw1[V.wkey(x.n, d, f[0])] = f[2]; }); bw1[V.wkey(x.n, d, 'got')] = String(d % 3); bw1[V.wkey(x.n, d, 'sure')] = '80'; }));
+const br = V.briefOf(bw1);
+ok(br.session.n === 1 && br.reached === 3 && br.actions.length === 12 && br.tally.n === 12 && br.ask.length === 3 && br.ask.every((a) => a.got === 2), 'Session 1 brief: twelve promises, Sunday’s answers, the three “Not yet” to ask about');
+ok(V.briefOf({ ...bw1, [V.wkey(6, 0, 'about')]: 'deadlines' }).session.n === 2 && V.briefOf({ ...bw1, [V.wkey(10, 0, 'say')]: 'hello' }).session.n === 3 && V.briefOf({}).reached === 0, 'past Level 05 the brief turns to Session 2, past Level 09 to Session 3; nothing written, no brief');
+ok(/function sessionCard\(lv\)/.test(app) && /sessionCard\(level\)/.test(app) && /Book Session \$\{S\.n\}/.test(app), 'each session is offered where it comes up: end of Level 03, after the readings of 09 and 12');
+const rows = [[1, 0, 2], [1, 1, 2], [1, 2, 0], [2, 0, 0]].map(([lv, d, g]) => ({ student_id: 'a', name: 'Ana', key: V.wkey(lv, d, 'got'), value: String(g) }))
+  .concat([[1, 0, 2], [1, 1, 0]].map(([lv, d, g]) => ({ student_id: 'b', name: 'Bo', key: V.wkey(lv, d, 'got'), value: String(g) })))
+  .concat([[3, 0, 2], [3, 1, 2], [3, 2, 2]].map(([lv, d, g]) => ({ student_id: 'c', name: 'Cy', key: V.wkey(lv, d, 'got'), value: String(g) })));
+const st = D.stuckOnSunday(rows);
+ok(st.length === 1 && st[0].id === 'c' && st[0].not === 3, 'stuck on Sunday: only the last checked week counts, two or more “Not yet”');
+const mjs = fs.readFileSync('public/mentor/mentor.js', 'utf8');
+ok(/briefPanel\(d\.work, C\)/.test(mjs) && /stuckHTML\(\)/.test(mjs) && /id="printbrief"/.test(mjs), 'the brief sits on each founder’s page, printable; the stuck list on Today');
+// ── The Launchpad plan online (option B) ─────────────────────────────────
+ok(Object.entries(LP.LP_PARTS).every(([d, parts]) => parts.length === LP.ACTIONS[d].length && parts.every((k) => V.BLUEPRINT4.some((b) => b.k === k))), 'every Launchpad action writes one part of the Blueprint');
+const keyOk = (k) => /^w\.[\w.:-]{1,80}$/.test(k);
+ok(Object.keys(LP.ACTIONS).every((d) => LP.ACTIONS[d].every((_, i) => keyOk(LP.lpKey(d, i, 12)) && keyOk(LP.lpKey(d, i, 'done')))), 'Launchpad blanks save as worksheet cells the account already accepts (no new table)');
+const lv = { [LP.lpKey('work', 1, 1)]: '6,200', [LP.lpKey('work', 1, 2)]: '<b>' };
+ok(LP.linesWith('work', 1, lv)[0].includes('In: $6,200') && LP.linesWith('work', 1, {})[0].includes('____'), 'the PDF carries their words, and keeps the lines where nothing is written');
+ok(!LP.linesHTML('work', 1, lv).join('').includes('<b>') && LP.launchpadFor('money', lv).length === 1 && LP.launchpadFor('money', {}).length === 0, 'their words escaped; the Blueprint shows only what they wrote');
+ok(/view === 'launchpad' \? launchpadOnlineHTML/.test(app) && /input\[data-lp\]/.test(app) && /values: state\.work/.test(app) && /launchpadFor\(S\.k, w\)/.test(app), 'the plan online saves like any answer, and fills the PDF and the Blueprint');
+ok(/'#launchpad'\) return 'launchpad'/.test(fs.readFileSync('public/home.js', 'utf8')) && /data-go="launchpad"/.test(fs.readFileSync('public/launchpad-plan.js', 'utf8')), '#launchpad opens it, and the Base Camp card links to it');
+done();

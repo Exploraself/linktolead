@@ -29,7 +29,7 @@ for (const f of ['cover-built-to-lead.jpg', 'cover-worth-building.jpg', 'cover-a
 
 const app = read('public/app.js'), js = read('public/cabinet.js');
 const mu = read('public/music.js');
-ok(/const DASHBOARD = \['home', 'work', 'library', 'ask'\]/.test(app) && /if \(!DASHBOARD\.includes\(view\)\) cabinetHidden\(\);/.test(app) && /else if \(DASHBOARD\.includes\(view\)\) dashboardShown\(\);/.test(app), 'music on Your Base Camp, the programme, the Library and Ask Alexandru');
+ok(/const DASHBOARD = \['home', 'work', 'library', 'ask', 'blueprint', 'launchpad'\]/.test(app) && /if \(!DASHBOARD\.includes\(view\)\) cabinetHidden\(\);/.test(app) && /else if \(DASHBOARD\.includes\(view\)\) dashboardShown\(\);/.test(app), 'music on Your Base Camp, the programme, the Library, Ask Alexandru, My Blueprint and the Launchpad plan');
 ok(/visibilitychange[\s\S]{0,120}document\.hidden[\s\S]{0,80}pause\(\)/.test(mu), 'music fades out when the tab is hidden');
 ok(/pointerdown/.test(mu) && !/\.start\(\);\s*\}\s*\)\(\);/.test(mu) && js.includes("import * as M from './music.js'"), 'it starts only after a click, never on its own');
 ok(read('public/cabinet.css').includes('@media(prefers-reduced-motion:reduce){.cab *{animation:none!important'), 'reduced motion: no spinning record');
