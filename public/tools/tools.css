@@ -38,6 +38,21 @@ button{font:inherit;color:inherit}
 .brand svg{width:24px;height:24px;color:var(--steel-ink);flex:none}
 .brand small{font-weight:500;letter-spacing:.12em;color:var(--muted)}
 .tk-right{display:flex;align-items:center;gap:10px}
+/* Where to go, from every toolkit page: All tools · Base Camp · North Star
+   (Alexandru, 2 Nov 2026). On a phone it takes its own row under the bar. */
+.tk-nav{display:flex;align-items:center;gap:4px;margin:0 auto 0 14px}
+.tk-nav a{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 11px;border-radius:10px;font-size:13.5px;font-weight:600;color:var(--muted);text-decoration:none;white-space:nowrap}
+.tk-nav a:hover{color:var(--ink);background:var(--steel-soft)}
+.tk-nav a[aria-current="page"]{color:var(--ink);background:var(--steel-soft)}
+.tk-nav svg{width:18px;height:18px;flex:none;color:var(--steel-ink)}
+@media (max-width:760px){.tk-bar .in{flex-wrap:wrap;row-gap:0}
+  .tk-nav{order:3;flex:1 0 100%;margin:0;padding:4px 0 6px;border-top:1px solid var(--line);justify-content:space-between}
+  .tk-nav a{flex:1 1 0;justify-content:center;padding:0 4px;font-size:13px;gap:6px}}
+/* You are here, on a tool page: Growth Toolkit › the tool. */
+.tk-crumb{max-width:760px;margin:16px auto 0;padding:0 max(16px,3vw);display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13.5px;color:var(--muted)}
+.tk-crumb a{color:var(--steel-ink);font-weight:600;text-decoration:none}
+.tk-crumb a:hover{text-decoration:underline}
+.tk-crumb [aria-current]{color:var(--ink)}
 @media (max-width:480px){.brand small{display:none}}
 
 /* ── A cover (navy card) ─────────────────────────────────── */
