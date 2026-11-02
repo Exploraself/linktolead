@@ -96,9 +96,9 @@ const DECK = `<svg viewBox="0 0 300 220" aria-hidden="true"><rect x="6" y="18" w
   <circle cx="244" cy="40" r="11" fill="#B88E36"/><circle cx="244" cy="40" r="5" fill="#5E4512"/><g class="cab-arm"><path d="M244 40 L250 150 L232 176" fill="none" stroke="#D9BC74" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="222" y="172" width="18" height="10" rx="2" fill="#D9BC74" transform="rotate(-30 231 177)"/></g><circle cx="268" cy="186" r="6" fill="#B88E36"/><circle cx="248" cy="186" r="6" fill="#6E5213"/></svg>`;
 
 const BOOKS = [
-  { css: 'I', t: 'Building', sub: 'The offer · first clients', cloth: '#5A1E1B', cap: 'Volume I · 79 pages' },
-  { css: 'II', t: 'Growing', sub: 'Clients repeat', cloth: '#1F3B2B', cap: 'Volume II · 77 pages' },
-  { css: 'III', t: 'Scaling', sub: 'A team · a new job', cloth: '#18263F', cap: 'Volume III · 80 pages' },
+  { css: 'I', t: 'Building', sub: 'The offer · first clients', cloth: '#5A1E1B', cap: 'Volume I · 76 pages' },
+  { css: 'II', t: 'Growing', sub: 'Clients repeat', cloth: '#1F3B2B', cap: 'Volume II · 76 pages' },
+  { css: 'III', t: 'Scaling', sub: 'A team · a new job', cloth: '#18263F', cap: 'Volume III · 76 pages' },
   { img: '/library/cover-built-to-lead.jpg', t: 'Built to Lead', cap: '99 tools' },
   { img: '/library/cover-worth-building.jpg', t: 'Worth Building', cap: 'The Founder’s Playbook · 32 frameworks' },
   { img: '/library/cover-a-new-way-of-winning.jpg', t: 'A New Way of Winning', cap: 'The Link to Lead Manual · 12 principles' },
