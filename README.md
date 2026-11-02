@@ -51,13 +51,18 @@ work is easy to remove by accident.
 
 ### Cloudflare settings
 
-The dashboard's defaults are correct as they stand:
+Two apps are built from this repo (checked 2 Nov 2026). The **Pages** app
+**linktolead** serves the live site, linktolead.exploraself.com, with its
+variables and secrets (section 8). The **Worker** **linktolead** runs the
+hourly letters (`wrangler.toml` `[triggers]`; `SERIES_MODE` is set there).
+The Worker's dashboard defaults are correct as they stand:
 
 - Build command: **empty**
 - Deploy command: **`npx wrangler deploy`**
 
-`wrangler.toml` points at `public/` and declares no Worker script, so Cloudflare
-serves the files directly.
+`wrangler.toml` is the Worker's: it points at `public/`, bundles `worker.js`
+(the hourly letters, and `/api/*` to `functions/api/`) and keeps the dashboard's
+variables (`keep_vars`).
 
 ## 8. Settings in Cloudflare
 

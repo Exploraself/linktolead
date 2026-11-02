@@ -53,7 +53,7 @@ for (const p of ['public/northstar/engine.js', 'functions/_plans.js', 'public/no
 // The Summit page keeps its placeholders until Alexandru fills them.
 const Su = read('public/northstar/summit/index.html');
 for (const ph of ['[SESSION LENGTH]', '[ONLINE OR IN PERSON]']) ok(Su.includes(ph), `summit keeps ${ph}`);
-ok(!Su.includes('[YOUR BOOKING LINK]') && (Su.match(/data-join/g) || []).length >= 3 && /landing: 'summit'/.test(Su) && /variant: 'full'/.test(Su), 'summit: every call to action opens the full account form (landing summit)');
+ok(!Su.includes('[YOUR BOOKING LINK]') && (Su.match(/href="\/pay\/\?step=premium&amp;from=summit"/g) || []).length === 3 && !/href="#join"/.test(Su) && /if \(location\.hash === '#join'\) location\.replace\(PAY\)/.test(Su), 'summit: every “Claim my place” goes to the pay page for The Summit (from=summit); old #join links too');
 ok(read('public/northstar/app.js').includes("price: '$27'") && !read('public/northstar/app.js').includes('[YOUR PRICE]'), 'Boardroom price: $27 (Alexandru, 2 Nov 2026)');
 
 // Every North Star page carries the favicon and the share image.

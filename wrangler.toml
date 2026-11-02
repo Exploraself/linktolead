@@ -1,7 +1,12 @@
-# Static site on Workers, plus a small front door for the API. No build step:
-# Cloudflare serves everything in public/ directly, and `npx wrangler deploy`
-# (the dashboard's own deploy command) bundles worker.js, which hands /api/*
-# to the files in functions/api/.
+# Two Cloudflare apps are built from this repo (checked 2 Nov 2026):
+# - the PAGES app "linktolead" serves the live site linktolead.exploraself.com
+#   (public/ + functions/ as Pages Functions). Its variables and secrets
+#   (MENTOR_KEY, MAILCHIMP_API_KEY, RESEND_API_KEY, STRIPE_SECRET_KEY …) live
+#   in that app; after changing one, Deployments → Retry deployment.
+# - this WORKER "linktolead" (this file, `npx wrangler deploy`) runs the hourly
+#   letters ([triggers] below; SERIES_MODE is set on the Worker). It also
+#   bundles worker.js, which hands /api/* to functions/api/, so it can serve
+#   the same site at its workers.dev address. No build step for either.
 name = "linktolead"
 compatibility_date = "2026-10-26"
 main = "worker.js"

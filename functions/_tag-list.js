@@ -50,6 +50,13 @@ const LANDING_PAGES = {
   north3: ['The Leader’s North Star sales page, North 3', '/north3/'], compass: ['The North Star box (The Leader’s North Star, with no sales page before it)', '/northstar/'],
   summit: ['The Summit sales page', '/northstar/summit/'],
 };
+/** Doors whose account can also be made on the pay page (Alexandru, 2 Nov
+ *  2026): not signed in, /pay/ makes the free account in place, with the
+ *  landing of the page that sent them there (public/pay/pay.js FROM). */
+const VIA_PAY = {
+  road1: ' Also on the pay page (/pay/), when someone not signed in taps Unlock.',
+  summit: ' Since 2 Nov 2026 “Claim my place” goes to the pay page for The Summit (/pay/?step=premium&from=summit), and the account is made there.',
+};
 const STAGE_WORDS = { build: 'Building', grow: 'Growing', scale: 'Scaling' };
 const SIDE_WORDS = { 'lead-yourself': 'Lead yourself', 'lead-your-people': 'Lead your people', 'lead-your-business': 'Lead your business', 'lead-the-market': 'Lead the market' };
 
@@ -58,11 +65,11 @@ export const TAG_LIST = [
   { name: 'linktolead', group: 'everyone', what: 'A founder with a free account on linktolead.exploraself.com.',
     from: `${LTL}/ground-plan/`, fromName: 'Any account box on linktolead', when: `The account is made, or letters are turned back on. ${CONSENT}`, by: 'functions/api/signup.js, functions/api/google.js, functions/_account.js' },
   ...Object.entries(LANDING_TAGS).map(([k, name]) => ({ name, group: 'door', what: `Signed up on ${LANDING_PAGES[k][0]}.`,
-    from: `${LTL}${LANDING_PAGES[k][1]}`, fromName: LANDING_PAGES[k][1], when: `The account is made on that page. ${CONSENT}`, by: 'functions/_mailchimp.js tagsFor' })),
+    from: `${LTL}${LANDING_PAGES[k][1]}`, fromName: LANDING_PAGES[k][1], when: `The account is made on that page.${VIA_PAY[k] || ''} ${CONSENT}`, by: 'functions/_mailchimp.js tagsFor' })),
   ...Object.entries(STEP_TAGS).map(([k, name], i) => ({ name, group: 'step', what: `On ${STEP_NAMES[k]}${i ? ', or a step after it' : ' (every founder starts here)'}.`,
-    from: i ? `${LTL}/mentor#founders` : `${LTL}/ground-plan/`, fromName: i ? '/mentor (Step, in a founder’s drawer)' : 'Any account box on linktolead',
-    when: i ? `Alexandru or the team move the founder to ${STEP_NAMES[k]} or higher in /mentor. A lower step takes no tag away. ${CONSENT}` : `The account is made. ${CONSENT}`,
-    by: 'functions/api/mentor.js (tier), functions/_mailchimp.js tagsFor' })),
+    from: i ? `${LTL}/pay/?step=${k}` : `${LTL}/ground-plan/`, fromName: i ? `/pay/?step=${k} (Stripe), or /mentor (Step, in a founder’s drawer)` : 'Any account box on linktolead',
+    when: i ? `Stripe confirms their payment for ${STEP_NAMES[k]}${i < Object.keys(STEP_TAGS).length - 1 ? ' or a higher step' : ''}, or Alexandru or the team move them there in /mentor. A lower step takes no tag away. ${CONSENT}` : `The account is made. ${CONSENT}`,
+    by: 'functions/_stripe.js (applyPaid), functions/api/mentor.js (tier), functions/_mailchimp.js tagsFor' })),
   ...Object.entries(STAGE_TAGS).map(([k, name]) => ({ name, group: 'stage', what: `Their business is ${STAGE_WORDS[k].toLowerCase()}, by their own answer.`,
     from: `${LTL}/northstar/`, fromName: 'The Leader’s North Star, or /start/', when: `They finish The Leader’s North Star, or change their stage. The old stage tag is taken off. ${CONSENT}`, by: 'functions/api/compass.js, functions/api/stage.js, functions/api/complete.js' })),
   ...Object.entries(WEAKEST_TAGS).map(([k, name]) => ({ name, group: 'weakest', what: `${SIDE_WORDS[k]} is the side with their lowest North Star score.`,
