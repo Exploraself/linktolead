@@ -87,3 +87,7 @@ body.fmopen .leaf-r button:focus-visible,body.fmopen .leaf-r input:focus-visible
 }
 @media(prefers-reduced-motion:reduce){.fm-bar i{transition:none}}
 body.fmopen .leaf-r .cw-tk{padding-right:64px}
+
+/* From a level to its twenty actions in My Blueprint. */
+.cw-five{margin:0;padding:12px 14px;border-radius:10px;background:var(--fm-soft,var(--leaf));font-size:15.5px;line-height:1.5}
+.cw-five .cw-all{margin-left:6px}
