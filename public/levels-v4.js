@@ -1504,7 +1504,9 @@ export function stepsOf(lv) {
     out.push([d, 'done'], [d, 'lines']);
   });
   out.push([-1, 'week']);
-  if (CLOSES[lv] != null) out.push([-1, 'reading'], [-1, 'carry'], [-1, 'carryday'], ...buildSteps(lv));
+  // After each chapter reading, the founder reads their direction again
+  // (Alexandru, 2 Nov 2026): it still holds, or they sharpen it.
+  if (CLOSES[lv] != null) out.push([-1, 'reading'], [-1, 'carry'], [-1, 'carryday'], [-1, 'dirlook'], ...buildSteps(lv));
   return out;
 }
 const filled = (work, lv, d, k) => raw(work, lv, d, k).trim() !== '';
@@ -1531,6 +1533,7 @@ export function stepDone(work, lv, s) {
   if (kind === 'done') return raw(work, lv, d, 'sure') !== '';
   if (kind === 'carry') return filled(work, lv, 'r', 'carry');
   if (kind === 'carryday') return filled(work, lv, 'r', 'on');
+  if (kind === 'dirlook') return filled(work, lv, 'r', 'dir');
   // Build it: the first three process steps are needed; after them, a gap is the end.
   if (kind === 'bask' || kind === 'bday') return filled(work, lv, 'b', k);
   if (kind === 'bstep') return Number(k.slice(1)) > 3 || filled(work, lv, 'b', k);

@@ -63,7 +63,7 @@ ok(app.includes('data-fmdone="${domainEnd ? \'next\' : \'end\'}">Done ✓</butto
 ok(app.includes("if (fm) { e.preventDefault(); fmClose(); return; }"), 'Esc closes the layer');
 ok(app.includes('#programme-${level}-q') && app.includes('history.pushState(null, \'\', url)') && app.includes('if (fm && !q) { fmShut();') && entry({ joined: true, old: false, hash: '#programme-3-q' }) === 'work', 'opening it is a history step; Back closes it');
 ok(app.includes('function fmAuto()') && app.includes("if (!tapReply(level, d, +b.dataset.v4t)) fmAuto();") && app.includes('if (+b.dataset.got === 0) fmAuto();'), 'a tap moves on by itself, unless a reply is there to read');
-ok(app.includes("['wask', 'where', 'you', 'still', 'tap', 'got', 'day', 'carry', 'carryday', 'bday'].includes(stepAt(qi)[1]) && !slideAt(level, stepAt(qi))"), 'keys 1–9 choose on every tap screen');
+ok(app.includes("['wask', 'where', 'you', 'still', 'tap', 'got', 'day', 'carry', 'carryday', 'dirlook', 'bday'].includes(stepAt(qi)[1]) && !slideAt(level, stepAt(qi))"), 'keys 1–9 choose on every tap screen');
 ok(app.includes("const FM_BEHIND = ['body > .top'") && !app.includes("'#libban', 'footer'"), 'everything behind the layer is set aside, not the layer’s own Next');
 
 // Light, white, one font; the page loads it.
