@@ -34,7 +34,7 @@ ok(!(await verifySignature('{"a":1}', sign('{"a":1}', 'whsec_1', Math.floor(Date
 
 // The letter.
 const U = unlockedLetter(B, { first: 'maya', step: 'session', to: 'm@x.com' });
-ok(U.subject === 'It’s unlocked: The Boardroom' && /^Hi Maya,/.test(U.text) && /Thank you/.test(U.text) && /Levels 04 and 05 are open/.test(U.text) && /forms\.gle/.test(U.text) && U.html.includes('/ground-plan/#programme-4') && /The team and I are here for you/.test(U.text), 'It’s unlocked: thanks, what opened, the session, the booking link, the first level, the team');
+ok(U.subject === 'It’s unlocked: The Boardroom' && /^Hi Maya,/.test(U.text) && /Thank you/.test(U.text) && /Levels 04 and 05 are open/.test(U.text) && U.text.includes('https://linktolead.exploraself.com/book/boardroom/') && U.html.includes('/ground-plan/#programme-4') && /The team and I are here for you/.test(U.text), 'It’s unlocked: thanks, what opened, the session, the booking link, the first level, the team');
 ok(!/P\.S\./.test(U.text), 'no offer in the letter: they just bought');
 // A higher step includes every step below it (Alexandru, 2 Nov 2026).
 const opened = (step, from) => unlockedLetter(B, { first: 'Maya', step, from }).text;

@@ -59,7 +59,7 @@ export const DID_WORDS = { message: ['letter', 'letters'], reply: ['answer', 'an
   pause: ['account pause', 'account pauses'], delete: ['founder deleted', 'founders deleted'], 'mentor-save': ['mentor profile saved', 'mentor profiles saved'],
   'mentor-assign': ['mentor chosen', 'mentors chosen'], 'mc-test': ['Mailchimp test', 'Mailchimp tests'], 'mc-backfill': ['Mailchimp send', 'Mailchimp sends'],
   'team-add': ['member added', 'members added'], 'team-remove': ['member removed', 'members removed'], 'team-can': ['rights change', 'rights changes'],
-  invite: ['founder invited', 'founders invited'] };
+  invite: ['founder invited', 'founders invited'], 'book-confirm': ['call confirmed', 'calls confirmed'], 'book-links': ['booking link saved', 'booking links saved'] };
 
 // ── What each team member may do (Alexandru, 2 Nov 2026: "choose per team
 // member what they can do … access like me on everything") ─────────────────
@@ -88,7 +88,10 @@ export const DEFAULT_RIGHTS = ['reply', 'message', 'signin-link', 'reset-link', 
 /** Which right each /mentor action needs. An action not here is the key's only. */
 export const ACTION_RIGHT = { reply: 'reply', message: 'message', 'signin-link': 'signin-link', 'reset-link': 'reset-link',
   'series-hold': 'series-hold', tier: 'tier', pause: 'pause', delete: 'delete', 'mentor-save': 'mentors', 'mentor-assign': 'mentors',
-  'mc-test': 'mailchimp', 'mc-backfill': 'mailchimp', 'team-add': 'team', 'team-remove': 'team', 'team-can': 'team', invite: 'invite' };
+  'mc-test': 'mailchimp', 'mc-backfill': 'mailchimp', 'team-add': 'team', 'team-remove': 'team', 'team-can': 'team', invite: 'invite',
+  // A request for a call (functions/_booking.js): confirming a time sends a
+  // letter, and the Google Meet links are what those letters carry.
+  'book-confirm': 'message', 'book-links': 'message' };
 
 async function rightsTable(D) {
   await D.prepare('CREATE TABLE IF NOT EXISTS team_right (email TEXT PRIMARY KEY, can TEXT NOT NULL, at TEXT)').run();

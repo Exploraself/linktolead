@@ -22,6 +22,7 @@ import { LANDING_TAGS, STEP_TAGS, STEP_NAMES, STAGE_TAGS, WEAKEST_TAGS, CROSS_TA
 import { SERIES_TAGS } from './_series-letters.js';
 import { TOOLS_TAG } from './_tools.js';
 import { LIBRARY_ITEMS, libraryTag } from './api/library.js';
+import { BOOK_TAGS } from './_booking.js';
 
 const LTL = 'https://linktolead.exploraself.com';
 const ES = 'https://exploraself.com';
@@ -38,6 +39,7 @@ export const TAG_GROUPS = [
   { key: 'library', icon: 'book', name: 'A book from the library', sub: 'One tag per book' },
   { key: 'toolkit', icon: 'toolkit', name: 'The Growth Toolkit', sub: 'The free tools' },
   { key: 'letters', icon: 'mail', name: 'The letters that follow each pain', sub: 'One tag per series' },
+  { key: 'booking', icon: 'calendar', name: 'They asked for a call', sub: 'A free discovery call, or the 1:1 that comes with The Boardroom' },
   { key: 'site', icon: 'form', name: 'exploraself.com forms', sub: 'Each form adds its own tag. Mailchimp shows its name; the live list in /mentor shows it too' },
 ];
 
@@ -88,6 +90,12 @@ export const TAG_LIST = [
     from: `${LTL}/ground-plan/`, fromName: 'Base Camp (The Founder’s Blueprint)', when: `Their series starts: account made, Level 01 empty. Only when the letters are switched on, never in test. ${CONSENT}`, by: 'functions/_series.js' },
   { name: SERIES_TAGS.level3, group: 'letters', what: 'Wrote in Levels 01, 02 and 03, and gets the two letters for that win.',
     from: `${LTL}/ground-plan/`, fromName: 'Base Camp (The Founder’s Blueprint)', when: `Their series starts: Level 03 written. Only when the letters are switched on, never in test. ${CONSENT}`, by: 'functions/_series.js' },
+  { name: BOOK_TAGS.discovery, group: 'booking', what: 'Asked for a free 30-minute discovery call with Alexandru, signed in to their account.',
+    from: `${LTL}/book/discovery/`, fromName: '/book/discovery/ (from Base Camp’s menu, exploraself.com and the letters)',
+    when: `They send their three times, signed in. Someone without an account, or not signed in, gets no tag: a typed address proves nothing. ${CONSENT}`, by: 'functions/api/book.js' },
+  { name: BOOK_TAGS.boardroom, group: 'booking', what: 'Asked for their 1:1 with Alexandru, the one that comes with The Boardroom (or a higher step).',
+    from: `${LTL}/book/boardroom/`, fromName: '/book/boardroom/ (from Base Camp, the “It’s unlocked” letter and the gift letter)',
+    when: `They send their three times. Only founders whose step holds the 1:1 can. ${CONSENT}`, by: 'functions/api/book.js' },
 ];
 
 /** The tags exploraself.com's forms add, by the number in the form. Never

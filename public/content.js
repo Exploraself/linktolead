@@ -194,8 +194,13 @@ export function holds(tier, needed) {
 // ── Names and links ──────────────────────────────────────────────────────────
 export const LEAD = { self: 'Lead yourself', people: 'Lead your people', work: 'Lead your business', market: 'Lead the market' };
 
-/** Where "Book my session" goes. The free 1:1 form linked from exploraself.com. */
-export const BOOKING = 'https://forms.gle/opnxfhFTJJg69Qy77';
+/** Where "Book my session" goes (Alexandru, 2 Nov 2026: it replaced the
+ *  Google Form): the page where a founder whose step holds the 1:1 picks
+ *  three times (public/book/, functions/_booking.js). The same link as
+ *  BOOKING in functions/_letters.js (a test holds them equal). */
+export const BOOKING = 'https://linktolead.exploraself.com/book/boardroom/';
+/** The free 30-minute discovery call, for anyone (public/book/discovery/). */
+export const DISCOVERY = '/book/discovery/';
 /** Where a founder pays for a step (Alexandru, 2 Nov 2026): /pay/, then
  *  Stripe; the step opens when Stripe confirms (functions/_stripe.js). They
  *  book their session after paying, from the letter or Base Camp. */

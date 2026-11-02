@@ -33,6 +33,7 @@ export const ICONS = {
   toolkit: svg('<path d="M9 8V6.4c0-.8.6-1.4 1.4-1.4h3.2c.8 0 1.4.6 1.4 1.4V8"/><rect x="3" y="8" width="18" height="12" rx="2.2"/><path d="M12 17.2v-5.4M9.6 14.1 12 11.7l2.4 2.4"/>'),
   mail: svg('<rect x="3" y="5.5" width="18" height="13" rx="2.2"/><path d="m3.8 7.2 8.2 6.2 8.2-6.2"/>'),
   form: svg('<rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>'),
+  calendar: svg('<rect x="3.5" y="5" width="17" height="15.5" rx="2.2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="m9 15 2 2 4-4"/>'),
   bin: svg('<path d="M4.5 7h15M9.5 7V4.8h5V7M6.5 7l1 13h9l1-13"/><path d="M10.5 10.5v6M13.5 10.5v6"/>'),
   search: svg('<circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/>'),
   rule: svg('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3 2"/>'),

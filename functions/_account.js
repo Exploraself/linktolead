@@ -67,6 +67,11 @@ export async function deleteFounder(env, D, me) {
     D.prepare('DELETE FROM auth_log WHERE email = ?').bind(me.email),
     D.prepare('DELETE FROM student WHERE id = ?').bind(me.id),
   ]);
+  // Their requests for a call (functions/_booking.js), when they made any.
+  try {
+    await D.batch([D.prepare('DELETE FROM booking WHERE student_id = ? OR email = ?').bind(me.id, me.email),
+      D.prepare('DELETE FROM booking_log WHERE email = ?').bind(me.email)]);
+  } catch { /* no booking table yet */ }
   return mcOut;
 }
 

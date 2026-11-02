@@ -133,7 +133,7 @@ async function load() {
 }
 
 function tabsHTML() {
-  const n = (data.waiting || []).length;
+  const n = (data.waiting || []).length + toConfirm().length;
   return TABS.map(([k, label]) => `<button type="button" role="tab" aria-selected="${tab === k}" data-tab="${k}">${icon(k)}<span>${esc(label)}</span>${k === 'inbox' && n ? `<b>${n}<span class="vh"> waiting</span></b>` : ''}</button>`).join('');
 }
 
@@ -355,6 +355,55 @@ function questionsHTML() {
       : '<p class="hint">No questions waiting. Every question has its answer.</p>'}</div>`;
 }
 
+// ── Bookings (Alexandru, 2 Nov 2026) ───────────────────────────────────────
+// Requests for a call from /book/discovery/ and /book/boardroom/
+// (functions/_booking.js), newest first: who, which call, what they answered,
+// their three times in Rome time. Confirm sends the chosen time, in their
+// zone and Rome's, with the Google Meet link pasted in Settings → Booking
+// links; the server checks the right (ACTION_RIGHT: 'message').
+
+const BOOK_NAMES = { discovery: 'Discovery call · 30 min', boardroom: 'Boardroom 1:1 · 60 min' };
+const BOOK_LINK_NAMES = { discovery: 'Discovery call link', boardroom: 'Boardroom link' };
+const toConfirm = () => ((data && data.bookings) || []).filter((b) => b.status === 'asked');
+/** "Tue 10 Nov, 16:00", always Rome time. */
+const romeTime = (iso) => { try { return new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso)); } catch { return String(iso); } };
+const cityOfTz = (tz) => String(tz || '').split('/').pop().replace(/_/g, ' ');
+function bookingsHTML() {
+  const B = data.bookings || [], L = data.bookLinks || {};
+  const missing = Object.keys(BOOK_NAMES).filter((k) => !L[k] && B.some((b) => b.kind === k && b.status === 'asked'));
+  const row = (b) => {
+    const known = b.student_id && data.students.some((x) => x.id === b.student_id);
+    const who = known ? `<button type="button" class="linkish" data-drawer="${esc(b.student_id)}">${esc(b.name || b.email)}</button>` : `<b>${esc(b.name || b.email)}</b>`;
+    const away = b.tz && b.tz !== 'Europe/Rome' ? ` · in ${esc(cityOfTz(b.tz))}` : '';
+    const future = (t) => Date.parse(t) > Date.now();
+    const canConfirm = b.status === 'asked' && can('message') && !!L[b.kind];
+    const times = b.status === 'confirmed'
+      ? `<p class="bk-ok">Confirmed: <b>${esc(romeTime(b.confirmed_time))}</b> Rome time · ${esc(when(b.confirmed_at))}</p>`
+      : `<div class="bk-times" role="group" aria-label="Their three times, Rome time">${b.times.map((t) => canConfirm && future(t)
+          ? `<button class="btn" data-bconf="${esc(b.id)}" data-time="${esc(t)}">Confirm ${esc(romeTime(t))}</button>`
+          : `<span class="pill">${esc(romeTime(t))}${future(t) ? '' : ' · passed'}</span>`).join('')}</div>`;
+    return `<li class="bk"><div>
+      <p class="bk-h"><span class="pill ${b.kind === 'boardroom' ? 'bp' : 'ns'}">${esc(BOOK_NAMES[b.kind] || b.kind)}</span>${b.status === 'confirmed' ? ' <span class="pill both">Confirmed</span>' : b.status === 'asked' ? ' <span class="pill warn">To confirm</span>' : ''}</p>
+      ${who}<span class="em">${esc(b.email)} · asked ${esc(when(b.created_at))}${away}</span>
+      ${b.answers && b.answers.length ? `<dl class="dkv bk-a">${b.answers.map(([l, w]) => `<dt>${esc(l)}</dt><dd>${esc(w)}</dd>`).join('')}</dl>` : ''}
+      <p class="lbl" style="margin-top:10px">${b.status === 'confirmed' ? 'The time' : 'Their three times, Rome time'}</p>${times}
+      ${b.status === 'asked' && !L[b.kind] ? `<p class="tiny warn">Paste the ${esc(BOOK_LINK_NAMES[b.kind])} in Settings → Booking links, then confirm here.</p>` : ''}
+      <p class="tiny"><a href="mailto:${esc(b.email)}">Reply to ${esc(b.name || b.email)}</a></p></div></li>`;
+  };
+  return `<div class="panel" id="bookings"><div><h2>Bookings${toConfirm().length ? ` · ${toConfirm().length} to confirm` : ''}</h2><p class="sub">Requests for a call, newest first. They were told Alexandru writes back within 24 hours. Confirm one of their three times: they get it by email, in their own time and Rome’s, with the Google Meet link.</p></div>
+    ${missing.length && can('message') ? `<p class="flash warn" role="status">No Google Meet link yet for: ${esc(missing.map((k) => BOOK_LINK_NAMES[k]).join(', '))}. <button type="button" class="linkish" data-tab="settings" style="display:inline">Paste it in Settings</button></p>` : ''}
+    ${B.length ? `<ul class="qlist">${B.map(row).join('')}</ul>` : '<p class="hint">No requests yet. They arrive from /book/discovery/ and /book/boardroom/.</p>'}</div>`;
+}
+/** Settings → Booking links: the Google Meet link per kind of call. */
+function bookLinksHTML() {
+  if (!can('message')) return '';
+  const L = data.bookLinks || {};
+  return `<section class="panel" id="booklinks"><h2>Booking links</h2>
+    <p class="tiny">The Google Meet link for each kind of call. Paste it once: every confirmation from Inbox → Bookings carries it. Only links that start with https://meet.google.com/.</p>
+    <div class="mform">${Object.keys(BOOK_LINK_NAMES).map((k) => `<label>${esc(BOOK_LINK_NAMES[k])}<input id="bl-${k}" type="url" inputmode="url" placeholder="https://meet.google.com/…" value="${esc(L[k] || '')}" autocomplete="off"></label>`).join('')}
+      <button type="button" id="bl-save">Save the links</button></div></section>`;
+}
+
 // ── Mailchimp ────────────────────────────────────────────────────────────────
 
 const MC_MODE = { test: 'Test', form: 'Form', api: 'Live API' };
@@ -521,7 +570,7 @@ export const TEAM_DID = { message: ['letter', 'letters'], reply: ['answer', 'ans
   pause: ['account pause', 'account pauses'], delete: ['founder deleted', 'founders deleted'], 'mentor-save': ['mentor profile saved', 'mentor profiles saved'],
   'mentor-assign': ['mentor chosen', 'mentors chosen'], 'mc-test': ['Mailchimp test', 'Mailchimp tests'], 'mc-backfill': ['Mailchimp send', 'Mailchimp sends'],
   'team-add': ['member added', 'members added'], 'team-remove': ['member removed', 'members removed'], 'team-can': ['rights change', 'rights changes'],
-  invite: ['founder invited', 'founders invited'] };
+  invite: ['founder invited', 'founders invited'], 'book-confirm': ['call confirmed', 'calls confirmed'], 'book-links': ['booking link saved', 'booking links saved'] };
 const didLine = (did) => Object.entries(did || {}).filter(([a, n]) => TEAM_DID[a] && n).map(([a, n]) => `${n} ${n === 1 ? TEAM_DID[a][0] : TEAM_DID[a][1]}`).join(' · ');
 async function loadTeam(msg = '') {
   const box = $('#team');
@@ -685,9 +734,9 @@ function draw() {
   const S = summary(data.students, data.waiting);
   const said = flash ? `<p class="flash" role="status">${esc(flash)}</p>` : '';
   const pane = tab === 'founders' ? foundersHTML()
-    : tab === 'inbox' ? `${questionsHTML()}<section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
+    : tab === 'inbox' ? `${questionsHTML()}${bookingsHTML()}<section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
     : tab === 'grow' ? growHTML(S)
-    : tab === 'settings' ? `${isTeam() ? teamCanHTML() : ''}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>${mailchimpHTML()}${can('payments') ? '<section class="panel" id="stripebox"><p class="tiny">Loading the payments…</p></section>' : ''}${can('mailchimp') ? '<section class="panel" id="mctags"></section>' : ''}${mentorsHTML()}`
+    : tab === 'settings' ? `${isTeam() ? teamCanHTML() : ''}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>${mailchimpHTML()}${can('payments') ? '<section class="panel" id="stripebox"><p class="tiny">Loading the payments…</p></section>' : ''}${can('mailchimp') ? '<section class="panel" id="mctags"></section>' : ''}${bookLinksHTML()}${mentorsHTML()}`
     : todayHTML(S);
   $('#main').innerHTML = `<div class="stack" role="tabpanel">${said}${pane}</div>`;
   if (tab === 'inbox') loadComments();
@@ -975,6 +1024,20 @@ document.addEventListener('click', async (e) => {
       : `Sent ${r.data.done}: ${r.data.ok || 0} in Mailchimp, ${r.data.test || 0} logged in test mode, ${r.data.failed || 0} failed.`
         + (r.data.tagged ? ` Step tags for ${r.data.tagged}: ${r.data.tags.ok || 0} sent, ${r.data.tags.test || 0} logged in test mode, ${r.data.tags.failed || 0} failed.` : '')
         + (r.data.left ? ` ${r.data.left} still waiting: press again.` : '');
+    return load();
+  }
+  if (d.bconf) {
+    const bk = (data.bookings || []).find((x) => x.id === d.bconf);
+    if (!bk || !confirm(`Confirm ${romeTime(d.time)} (Rome time) with ${bk.name || bk.email}? They get an email with this time and the Google Meet link.`)) return;
+    b.disabled = true; b.textContent = 'Sending…';
+    const r = await act({ action: 'book-confirm', booking: d.bconf, time: d.time });
+    flash = r.ok ? `Confirmed with ${bk.email}: ${romeTime(d.time)} Rome time. The email with the Google Meet link is on its way.` : (r.data.error || 'The confirmation did not send.');
+    return load();
+  }
+  if (b.id === 'bl-save') {
+    b.disabled = true;
+    const r = await act({ action: 'book-links', discovery: $('#bl-discovery').value, boardroom: $('#bl-boardroom').value });
+    flash = r.ok ? 'Booking links saved. Every confirmation carries them.' : (r.data.error || 'The links did not save.');
     return load();
   }
   if (d.link || d.reset) {

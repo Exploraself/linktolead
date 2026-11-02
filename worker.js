@@ -41,6 +41,7 @@ import * as course from './functions/api/course.js';
 import * as toolkit from './functions/api/toolkit.js';
 import * as checkout from './functions/api/checkout.js';
 import * as stripeWebhook from './functions/api/stripe-webhook.js';
+import * as book from './functions/api/book.js';
 import { sendDue } from './functions/_course.js';
 import { sendDue as sendSeries } from './functions/_series.js';
 import { json, db, accountTables } from './functions/_shared.js';
@@ -77,6 +78,7 @@ export const ROUTES = {
   '/api/toolkit': toolkit,
   '/api/checkout': checkout,
   '/api/stripe-webhook': stripeWebhook,
+  '/api/book': book,
 };
 
 /** The jobs the hourly cron runs (wrangler.toml [triggers]), in this order.

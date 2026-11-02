@@ -1,0 +1,126 @@
+/* /book/discovery/ and /book/boardroom/ (Alexandru, 2 Nov 2026): the light
+   look of /boardroom/ (AGENTS.md 11): white, Atkinson Hyperlegible, black
+   button, gold accents, one question per screen with the answer and Next
+   right under it. 390px wide with no sideways scroll (rule 7); nothing moves
+   under prefers-reduced-motion. */
+:root{--bg:#FFFFFF;--soft:#F6F4EF;--ink:#16130E;--muted:#5E574C;--line:#E7E1D6;--gold:#B4975F;--gold-ink:#6E5213;--deep:#2A2117;
+  --ok:#1F6B3A;--okbg:#E6F2E9;--warn:#8A3B12;--warnbg:#F8E9DE;
+  --f:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--f);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,p,ul{margin:0}
+a{color:var(--gold-ink)}
+:focus-visible{outline:2.5px solid var(--gold);outline-offset:3px;border-radius:6px}
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* The header, as on /boardroom/. */
+.bar{border-bottom:1px solid var(--line)}
+.bar .in{max-width:720px;margin:0 auto;padding:0 18px;min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:9px;font-size:12.5px;letter-spacing:.16em;font-weight:700;color:var(--ink);text-decoration:none}
+.brand svg{width:22px;height:22px;color:var(--gold-ink)}
+.home{font-size:15px;font-weight:700;text-decoration:none}
+
+main{max-width:720px;margin:0 auto;padding:0 18px 72px}
+.muted{color:var(--muted);font-size:15px}
+.loading{padding-top:40px}
+
+/* The top line: a thin bar, Back, where you are. */
+.top{position:sticky;top:0;z-index:3;background:#fff;margin:0 -18px;padding:0 18px;border-bottom:1px solid var(--line)}
+.pbar{height:4px;background:var(--soft);margin:0 -18px}
+.pbar i{display:block;height:100%;background:var(--gold)}
+.row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;min-height:50px}
+.back{justify-self:start;appearance:none;border:0;background:none;color:var(--ink);font:400 15.5px var(--f);min-height:44px;padding:0 8px 0 0;cursor:pointer}
+.back[disabled]{visibility:hidden}
+.where{font-size:14.5px;color:var(--muted);text-align:center}
+
+/* One question: the question, the answer, Next. */
+.q{padding-top:30px;display:grid;gap:14px}
+.eb{display:flex;align-items:center;gap:8px;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--gold-ink);line-height:1.35}
+.eb svg{width:18px;height:18px;flex:none}
+h1{font-size:clamp(26px,6.4vw,36px);line-height:1.18;font-weight:700;letter-spacing:-.005em;text-wrap:balance}
+h1:focus{outline:none}
+h1:focus-visible{outline:2.5px solid var(--gold);outline-offset:4px}
+.hint{color:var(--muted);font-size:16.5px;max-width:58ch}
+.lab{display:block;font-weight:700;font-size:15.5px;margin:6px 0 -6px}
+.field{display:block;width:100%;min-width:0;font:400 19px/1.45 var(--f);color:var(--ink);background:#fff;border:1.5px solid #CFC6B6;border-radius:12px;padding:13px 15px;min-height:56px}
+textarea.field{resize:vertical;min-height:132px}
+.field:focus{border-color:var(--ink);outline:2.5px solid var(--gold);outline-offset:1px}
+.field[aria-invalid="true"]{border-color:var(--warn)}
+.count{font-size:14px;color:var(--muted);text-align:right;margin-top:-6px}
+.act{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:4px}
+.go{appearance:none;border:0;border-radius:14px;min-height:58px;padding:0 24px;background:var(--ink);color:#fff;font:700 18px/1.2 var(--f);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;width:100%;max-width:420px}
+.go svg{width:20px;height:20px}
+.go:hover{background:#2B251C}
+.go[disabled]{opacity:.6;cursor:default}
+.key{display:none;font-size:14px;color:var(--muted)}
+@media (hover:hover) and (pointer:fine){.key{display:inline}.act .go{width:auto;min-width:200px}}
+.ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid var(--line);border-radius:14px;min-height:52px;padding:0 20px;font-weight:700;text-decoration:none;color:var(--ink);width:100%;max-width:420px}
+.ghost svg{width:18px;height:18px}
+.err{background:var(--warnbg);color:var(--warn);border-radius:12px;padding:12px 16px;font-size:16px}
+.note{display:flex;gap:10px;align-items:flex-start;background:#FBF7EE;border:1px solid #E9DCC0;border-radius:12px;padding:12px 14px;font-size:15.5px}
+.note svg{width:20px;height:20px;flex:none;color:var(--gold-ink);margin-top:2px}
+.under{display:flex;gap:8px;align-items:flex-start;font-size:15px;color:var(--muted)}
+.under svg{width:19px;height:19px;flex:none;margin-top:2px;color:var(--gold-ink)}
+
+/* Three times: grouped by day, big tap targets. */
+.days{display:grid;gap:22px;margin-top:4px}
+.day h2{font-size:17px;font-weight:700;margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(102px,1fr));gap:8px}
+.slot{appearance:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:0;min-height:58px;padding:7px 6px;
+  border:1.5px solid #CFC6B6;border-radius:12px;background:#fff;color:var(--ink);font:inherit;cursor:pointer;text-align:center}
+.slot b{font-size:17.5px;line-height:1.2;font-weight:700}
+.slot small{font-size:13px;line-height:1.25;color:var(--muted)}
+.slot:hover{border-color:var(--ink)}
+.slot[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.slot[aria-pressed="true"] small{color:#E4D8BE}
+.slot[aria-disabled="true"]{opacity:.45;cursor:default}
+.slot[aria-disabled="true"]:hover{border-color:#CFC6B6}
+.dock{position:sticky;bottom:0;z-index:2;margin:6px -18px 0;padding:14px 18px calc(14px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap}
+.dock .picked{flex:1 1 180px;font-weight:700;font-size:16px}
+.dock .picked span{display:block;font-weight:400;font-size:14.5px;color:var(--muted)}
+.dock .go{flex:1 1 180px;max-width:none;min-height:54px}
+@media (min-width:640px){.dock .go{flex:0 0 auto;min-width:200px}}
+.dock .err{flex:1 1 100%}
+
+/* Check and send. */
+.sum{display:grid;gap:12px;margin-top:4px}
+.it{border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;gap:8px;min-width:0}
+.ih{display:flex;align-items:center;gap:10px}
+.ih svg{width:20px;height:20px;flex:none;color:var(--gold-ink)}
+.ih b{flex:1;font-size:15.5px}
+.chg{appearance:none;border:0;background:none;color:var(--gold-ink);font:700 15px var(--f);text-decoration:underline;cursor:pointer;min-height:40px;padding:0 2px}
+.it p{overflow-wrap:anywhere}
+.it .said{font-size:17.5px}
+.tl{list-style:none;padding:0;display:grid;gap:6px}
+.tl li{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.tl li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);flex:none;transform:translateY(-2px)}
+.tl small{color:var(--muted);font-size:14.5px}
+.hp{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+
+/* Done, and the calm door for the 1:1. */
+.tick{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--okbg);color:var(--ok)}
+.tick svg{width:30px;height:30px}
+.lede{font-size:19px;color:var(--muted);max-width:58ch}
+.wait{background:var(--soft);border-radius:16px;padding:16px 18px;display:grid;gap:6px}
+.door{padding-top:40px;display:grid;gap:16px}
+.door .lock{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:#F1E6CC;color:var(--gold-ink)}
+.door .lock svg{width:26px;height:26px}
+
+@media (prefers-reduced-motion:no-preference){
+  .q,.door{animation:rise .22s ease-out}
+  .go,.slot{transition:background .15s ease,border-color .15s ease,color .15s ease}
+  .pbar i{transition:width .25s ease}
+}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* The answers to tap: one per row, the words first (number keys choose them). */
+.opts{display:grid;gap:10px;grid-template-columns:1fr;margin-top:2px}
+@media (min-width:600px){.opts{grid-template-columns:1fr 1fr}}
+.slot.opt{flex-direction:row;justify-content:space-between;align-items:center;gap:12px;text-align:left;padding:14px 18px;min-height:58px}
+.slot.opt b{font-size:17px;font-weight:700}
+.slot.opt small{font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:6px;min-width:24px;height:24px;display:none;place-items:center}
+@media (hover:hover) and (pointer:fine){.slot.opt small{display:grid}}
