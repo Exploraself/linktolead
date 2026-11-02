@@ -216,9 +216,9 @@ export const LIBRARY = {
       cover: '/library/cover-leaders-growth-planner-2027.jpg', preview: '/library/leaders-growth-planner-2027-preview.pdf', file: '/library/leaders-growth-planner-2027.pdf', print: null, tall: true },
   ],
   manuals: [
-    { k: 'build', n: 'The Founder’s Blueprint · Building', sub: 'Finding the offer and the first clients', pages: 79, file: '/library/blueprint-building.pdf' },
-    { k: 'grow', n: 'The Founder’s Blueprint · Growing', sub: 'Clients repeat, everything runs through you', pages: 77, file: '/library/blueprint-growing.pdf' },
-    { k: 'scale', n: 'The Founder’s Blueprint · Scaling', sub: 'There is a team, and your job has changed', pages: 80, file: '/library/blueprint-scaling.pdf' },
+    { k: 'build', n: 'The Founder’s Blueprint · Building', sub: 'Finding the offer and the first clients', pages: 76, file: '/library/blueprint-building.pdf' },
+    { k: 'grow', n: 'The Founder’s Blueprint · Growing', sub: 'Clients repeat, everything runs through you', pages: 76, file: '/library/blueprint-growing.pdf' },
+    { k: 'scale', n: 'The Founder’s Blueprint · Scaling', sub: 'There is a team, and your job has changed', pages: 76, file: '/library/blueprint-scaling.pdf' },
   ],
   books: [
     { k: 'btl', kicker: '99 practical tools', n: 'Built to Lead', sub: 'One leader in the making. A personal leadership field guide.',

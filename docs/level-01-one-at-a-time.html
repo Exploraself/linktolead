@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Level 01, one at a time</title>
+<link rel="stylesheet" href="/assets/fonts.css">
+<style>
+:root{--paper:#FBF7EE;--panel:#FFFDF7;--ink:#2B1B12;--soft:#6B5A4B;--line:#E4DAC8;--gold:#C9A24A;--gold-ink:#8A6A1F;
+--self:#8C5A3C;--people:#4C6B55;--work:#3E5C78;--market:#8A6A1F;--new:#2F6B4F;--display:Newsreader,Georgia,serif;--body:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--paper:#120D08;--panel:#1C150E;--ink:#F1E8D6;--soft:#B9A992;--line:#3A2E22;--gold:#D9B865;--gold-ink:#D9B865;
+--self:#D89873;--people:#93B99A;--work:#8FB2CF;--market:#D9B865;--new:#8FD1AE;color-scheme:dark}}
+:root[data-theme=dark]{--paper:#120D08;--panel:#1C150E;--ink:#F1E8D6;--soft:#B9A992;--line:#3A2E22;--gold:#D9B865;--gold-ink:#D9B865;
+--self:#D89873;--people:#93B99A;--work:#8FB2CF;--market:#D9B865;--new:#8FD1AE;color-scheme:dark}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 var(--body);overflow-wrap:anywhere}
+h1,h2,h3,h4{font-family:var(--display);font-weight:500;line-height:1.2}
+a{color:var(--gold-ink)}code{font:13px/1.4 ui-monospace,Menlo,monospace;background:var(--panel);border:1px solid var(--line);padding:0 4px;border-radius:4px}
+kbd{font:12px/1 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:2px 5px;background:var(--panel);margin-right:6px}
+.pv{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;background:var(--ink);color:var(--paper);font:12px/1.4 var(--body);text-align:center;padding:6px 12px;margin:0}
+.theme{background:transparent;color:var(--paper);border:1px solid currentColor;border-radius:999px;padding:2px 10px;font:12px var(--body);cursor:pointer}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{min-height:100vh;display:flex;flex-direction:column}
+.bar{position:sticky;top:0;background:var(--paper);border-bottom:1px solid var(--line);padding:10px 16px;z-index:5}
+.bar .row{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--soft)}
+.bar b{font-family:var(--display);font-size:16px;color:var(--ink);letter-spacing:.1em}
+.prog{max-width:560px;margin:8px auto 0;height:4px;background:var(--line);border-radius:4px;overflow:hidden}.prog i{display:block;height:100%;background:var(--c,var(--gold));width:0}
+.back{margin-left:auto;background:none;border:0;color:var(--soft);font:14px var(--body);cursor:pointer;padding:4px}
+.stage{flex:1;width:100%;max-width:560px;margin:0 auto;padding:26px 16px 120px}
+.scr:focus{outline:none}
+.dlab{font:600 12px/1.4 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--c,var(--gold-ink));margin:0 0 6px}
+.q{font:500 clamp(22px,6vw,28px)/1.25 var(--display);margin:0 0 18px}.q em{color:var(--c,var(--gold-ink))}
+.opts{display:grid;gap:8px}.opt{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:var(--panel);color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:13px 14px;font:16px/1.35 var(--body);cursor:pointer}
+.opt kbd{flex:none}.opt[aria-pressed=true]{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c)}
+.big{font:600 46px/1 var(--display);text-align:center;margin:10px 0 2px}.word{text-align:center;color:var(--soft);margin:0 0 14px}
+input[type=range]{width:100%;accent-color:var(--c,var(--gold));height:32px}
+.ends{display:flex;justify-content:space-between;font-size:13px;color:var(--soft)}
+.sent{font:400 19px/1.5 var(--display);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:0 0 16px}
+.sent .f{border-bottom:1.5px solid var(--line);color:var(--soft)}.sent .f.on{border-color:var(--c);color:var(--c);font-weight:600}.sent .f.has{color:var(--ink);border-color:transparent;font-weight:500}
+.txt{width:100%;font:16px/1.5 var(--body);color:var(--ink);background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:13px 14px}
+.txt:focus{outline:none;border-color:var(--c)}
+.hint{font-size:13.5px;color:var(--soft);margin:8px 0 0}.pvo{white-space:nowrap}
+.big2{font-size:21px}.lab2{display:block;font:600 12px/1.4 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--c);margin:0 0 6px}.hint button{background:none;border:0;color:var(--gold-ink);font:inherit;text-decoration:underline;cursor:pointer;padding:0}
+.days{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.days .opt{justify-content:center;padding:12px 6px}
+.done{border-left:3px solid var(--c);background:var(--panel);padding:12px 14px;border-radius:0 10px 10px 0;margin:0 0 18px;font-size:16px}
+.done b{color:var(--c)}
+.four{display:grid;gap:12px;margin:0}.four div{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.four h4{margin:0;font:600 12px/1.4 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--c)}.four h4 small{text-transform:none;letter-spacing:0;color:var(--soft);font-weight:400;margin-left:6px}
+.four p{margin:4px 0 0;font-family:var(--display);font-size:17px}.four mark{background:none;color:var(--ink);font-weight:600;border-bottom:1.5px solid var(--c)}.four .dw{font:14px/1.5 var(--body);color:var(--soft);margin-top:6px}
+.wk{display:grid;gap:10px}.wk div{border:1px solid var(--line);border-left:4px solid var(--c);background:var(--panel);border-radius:8px;padding:10px 12px}
+.wk h4{margin:0;font:600 12px/1.4 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--c)}.wk p{margin:4px 0 0}.wk .star{color:var(--gold-ink);font-weight:600}
+.lead{font-family:var(--display);font-size:19px}.promise{border-left:3px solid var(--gold);padding-left:12px;font-size:16px}
+.oldnew{font-family:var(--display);font-style:italic;font-size:18px}.oldnew s{color:var(--soft)}
+.foot{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.foot .row{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.next{margin-left:auto;background:var(--ink);color:var(--paper);border:0;border-radius:999px;padding:13px 22px;font:600 15px var(--body);cursor:pointer}
+.next:disabled{opacity:.35;cursor:default}.keys{font-size:12px;color:var(--soft)}
+.ns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.ns .opt{width:auto;padding:8px 12px;font-size:14px}
+.calib{font-family:var(--display);font-size:20px}
+.ins{margin:0 0 14px;padding:10px 14px;border-left:3px solid var(--gold);background:var(--panel);border-radius:0 10px 10px 0;font-size:15px;line-height:1.55}
+.ins b{display:block;font:600 11px/1.5 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink)}
+.take{position:relative;margin-top:14px;padding:12px 14px;border:1.5px dashed var(--gold);border-radius:10px;background:var(--panel)}
+.take h4{margin:2px 0 6px;font:500 18px/1.3 var(--display)}.take ol,.bpl{margin:0;padding-left:20px;font-size:15px;line-height:1.6}
+.tk{margin:0;font:600 11px/1.5 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink)}
+.ln{display:inline-block;width:6em;border-bottom:1px solid var(--soft);vertical-align:-2px}
+.smaller{margin:10px 0 0;padding:10px 12px;border-radius:8px;background:var(--panel);font-size:15px}
+mark{background:none;color:inherit;font-weight:600;border-bottom:1.5px solid var(--c,var(--gold))}
+@media (max-width:420px){.keys{display:none}}
+@media (prefers-reduced-motion:no-preference){.scr{animation:in .22s ease-out}@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}.prog i{transition:width .25s}}</style>
+</head>
+<body>
+<p class="pv"><span>Preview for Alexandru · not part of the live site · nothing is saved</span><button type="button" class="theme" aria-label="Switch between light and dark">Dark</button></p>
+
+<div class="bar"><div class="row"><b>SEED</b><span class="where">Level 01</span><button type="button" class="back" hidden>← Back</button></div><div class="prog"><i></i></div></div>
+<main class="stage" aria-live="polite"></main>
+<div class="foot"><div class="row"><span class="keys"><kbd>Enter</kbd>next <kbd>1</kbd>–<kbd>7</kbd>pick <kbd>←</kbd><kbd>→</kbd>slide <kbd>Esc</kbd>back</span><button type="button" class="next">Start</button></div></div>
+<script>(function(){var b=document.querySelector('.theme'),r=document.documentElement;function cur(){return r.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}
+function lab(){b.textContent=cur()==='dark'?'Light':'Dark';b.setAttribute('aria-pressed',cur()==='dark')}b.addEventListener('click',function(){r.dataset.theme=cur()==='dark'?'light':'dark';lab()});lab()})();</script><script>window.LEVEL={"n":1,"word":"SEED","title":"What you believe","promise":"One old rule tested, one task handed over, your enough as a number, three people asked to buy.","old":"This is just who I am.","neu":"What I believe was learned. It can be tested and renewed.","chapter":"Chapter I · The Inner Pyramid","next":{"n":2,"word":"VIEW","title":"How you read it"},"d":[{"l":"S","name":"Settled","dom":"Lead yourself","k":"self","tq":"Finish the sentence that runs your work: \u003cem>“If I ___, then I’m worth something.”\u003c/em>","o":["hit my numbers","work harder than everyone","never let anyone down","prove them wrong","get it perfect"],"s":{"q":"Last month, how often did that rule decide your day?","min":0,"max":10,"step":1,"d":5,"up":false,"e":["Never","Every day"],"sfx":"","raw":false,"word":["rarely","rarely","rarely","some days","some days","some days","most days","most days","most days","every day","every day"],"text":["0","1","2","3","4","5","6","7","8","9","10"]},"f":["I am ",["who","worth it, enough…","enough"]," before I achieve anything. On ",["day","which day","Thursday"]," I will ",["act","one thing the old rule forbids","take the evening off, phone in a drawer"],"."],"fb":["Last month the rule \u003cmark>If I {t}, then I’m worth something\u003c/mark> ran your day {w}.","It was learned, so it can be tested. Don’t argue with it. Test it once, on purpose.",["It ran {w}, not every day. Part of your week is already free of it.","You named your rule in one sentence. That is the first lever, and you pulled it."],"On {day} you will {act}, and write what really happened. You are {who} before you achieve anything."],"ex":[0,8],"done":"on {day} you did “{act}”, and wrote one line on what really happened.","on":null,"dayKey":"day","ins":"A rule like this was learned early, often from someone you wanted to please. It still decides how you rest, price and say no. You do not argue a rule away; you test it once and look at what really happens.","take":["The test card","Old rule: If I {t}, then I’m worth something.","The test: on {day} I {act}.","What I feared would happen: ____","What really happened: ____"],"notyet":"Make it smaller: a short version of it, on the next free day. Then write the line.","bp":"You, as a leader"},{"l":"E","name":"Entrust","dom":"Lead your people","k":"people","tq":"Finish it honestly: \u003cem>“People usually ___.”\u003c/em>","o":["let me down","do it worse than I would","need me to check everything","rise when they are trusted"],"s":{"q":"How much of last week’s work did you hold because “nobody else can do it right”?","min":0,"max":100,"step":10,"d":50,"up":false,"e":["None","All of it"],"sfx":"%","raw":false,"word":["some","some","some","some","a lot","a lot","a lot","almost all of it","almost all of it","almost all of it","almost all of it"],"text":["0%","10%","20%","30%","40%","50%","60%","70%","80%","90%","100%"]},"f":["I hand ",["task","one task","the weekly invoices"]," to ",["who","a name","Marta"]," on ",["day","which day","Monday"],". Done means ",["done","what finished looks like","all sent by 5 pm"],"."],"fb":["About {s} of last week, you held work because nobody else could do it right.","You believe people usually {t}. Don’t fight the feeling. Test it in one small step.",["Most of your week is already shared. Build on that.","You named one task to let go. That is where trust starts."],"On {day} you hand {task} to {who}. Done means {done}. You check once, not every hour."],"ex":[1,60],"done":"on {day} you handed {task} to {who}, with “{done}” in writing, and checked it only once.","on":null,"dayKey":"day","ins":"Every task you keep because “nobody does it right” costs you an hour you needed for the work only you can do. Trust is built in small, checked steps, not in one leap. A clear “done” protects both of you.","take":["The hand-over note","{who}, from {day}, this is yours: {task}.","Done means: {done}.","I will check it once, on ____. Ask me anything before you start."],"notyet":"Make it smaller: hand over one part of {task}, or do it once side by side, then let them do the next one.","bp":"Your people"},{"l":"E","name":"Enough","dom":"Lead your business","k":"work","tq":"Which money sentence did you hear most growing up?","o":["There is never enough","Money is for greedy people","We don’t talk about money","Money proves you are someone","Work hard and it will come"],"s":{"q":"Money in, fixed costs, what was left last month: how sure are you of all three?","min":0,"max":10,"step":1,"d":4,"up":true,"e":["Guessing","Exactly"],"sfx":"","raw":false,"word":["mostly guessing","mostly guessing","mostly guessing","mostly guessing","roughly","roughly","roughly","quite sure","quite sure","certain","certain"],"text":["0","1","2","3","4","5","6","7","8","9","10"]},"f":["My enough is ",["enough","an amount","€4,200"]," a month. On ",["day","which day","Wednesday"]," I will ",["move","one money move","raise my rate for new clients to €75"],"."],"fb":["You grew up with \u003cmark>{t}\u003c/mark>, and you are {w} about your own numbers.","A guess becomes a number the day you open the statement. Don’t fight the fear; open it.",["You know your numbers better than most guesses. Use them.","You wrote your enough as one number. Now money has a finish line."],"On {day} you will {move}. Your enough is {enough} a month: a plan, not your worth."],"ex":[0,3],"done":"on {day} you made the money move you wrote: “{move}”.","on":null,"dayKey":"day","ins":"Without a number for enough, every month feels short and every price feels too high. Enough is a finish line, not a ceiling: it tells you when to stop chasing and what to charge. The sentence you grew up with is not your business plan.","take":["My money line","Enough: {enough} a month.","Last month in: ____ · fixed costs: ____ · left: ____","The money move: {move}, on {day}."],"notyet":"Make it smaller: open last month’s statement and write the three numbers. The move can wait a week; the looking cannot.","bp":"Your money"},{"l":"D","name":"Dignity","dom":"Lead the market","k":"market","tq":"When I ask someone to buy, I feel like I am…","o":["begging","bothering them","showing off","helping"],"s":{"q":"In the last 30 days, how many times did you directly ask someone to buy or to book?","min":0,"max":20,"step":1,"d":2,"up":true,"e":["None","20 or more"],"sfx":"","raw":false,"word":["0 asks","1 asks","2 asks","3 asks","4 asks","5 asks","6 asks","7 asks","8 asks","9 asks","10 asks","11 asks","12 asks","13 asks","14 asks","15 asks","16 asks","17 asks","18 asks","19 asks","20 asks"],"text":["0 asks","1 asks","2 asks","3 asks","4 asks","5 asks","6 asks","7 asks","8 asks","9 asks","10 asks","11 asks","12 asks","13 asks","14 asks","15 asks","16 asks","17 asks","18 asks","19 asks","20 asks"]},"f":["My offer helps ",["whom","who","café owners"]," with ",["prob","which problem","empty tables on weekday afternoons"],". By ",["day","which day","Friday"]," I ask ",["names","three names","Luca, Sara and the bakery on Via Roma"],"."],"fb":["{s} in 30 days, and asking feels like {t}.","That feeling decides how often you ask. Don’t fight it. Let three real answers speak louder.",["That many asks takes courage. Keep the rhythm.","You can say who you help, in one line: {whom}, with {prob}."],"By {day} you ask {names}. Write what each one says, word for word."],"ex":[1,2],"done":"you asked {names} by {day}, and wrote each answer word for word. A yes, a no and no answer all count.","on":null,"dayKey":"day","ins":"If your offer helps, then not asking keeps help from the people who need it. Asking is service; the answer belongs to them. A no tells you something true about the offer or the timing, never about your worth.","take":["The ask, ready to send","Hi ____, I help {whom} with {prob}.","I think I can help you too. Could we talk for twenty minutes this week?","Asked: {names}. Their answers, word for word: ____"],"notyet":"Make it smaller: ask one of the three today, by message, with the two lines above.","bp":"Your sales"}]};</script><script>
+const L = window.LEVEL;
+const S = { i: 0, tap: {}, s: {}, f: {}, sure: {}, got: {}, weak: 'market', other: null };
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const idx = (D, v) => Math.round((v - D.s.min) / D.s.step);
+const sv = (d) => (S.s[d] == null ? L.d[d].s.d : S.s[d]);
+const fields = (D) => D.f.filter((p) => typeof p !== 'string');
+function val(d, k) {
+  const D = L.d[d];
+  if (k === 't') return S.tap[d] == null ? '' : D.o[S.tap[d]];
+  if (k === 's') return D.s.text[idx(D, sv(d))];
+  if (k === 'w') return D.s.word[idx(D, sv(d))];
+  return S.f[d + '.' + k] || '';
+}
+const fill = (tpl, d) => tpl.replace(/_{4}/g, '\u0001').replace(/\{(\w+)\}/g, (_, k) => { const x = val(d, k); return x ? '<mark>' + esc(x) + '</mark>' : '<mark>____</mark>'; }).replace(/\u0001/g, '<span class="ln"></span>');
+function strong(d) { const D = L.d[d], r = (sv(d) - D.s.min) / (D.s.max - D.s.min); return D.s.up ? r >= 0.5 : r <= 0.4; }
+// Screens: intro, then per domain tap, slide, one per blank, (day), done, lines; then week, then Level 02's opening.
+const SC = [{ t: 'intro' }];
+L.d.forEach((D, d) => {
+  SC.push({ t: 'tap', d }, { t: 'slide', d });
+  fields(D).forEach(([k, hint, ex]) => SC.push({ t: k === D.dayKey ? 'day' : 'blank', d, k, hint, ex }));
+  if (D.on) SC.push({ t: 'day', d, k: 'on', hint: D.on, ex: 'Friday', added: true });
+  SC.push({ t: 'done', d }, { t: 'lines', d });
+});
+SC.push({ t: 'week' }, { t: 'n2' });
+L.d.forEach((D, d) => SC.push({ t: 'got', d }));
+SC.push({ t: 'calib' }, { t: 'bp' });
+const order = () => { const w = L.d.findIndex((D) => D.k === S.weak); return [w, ...[0, 1, 2, 3].filter((d) => d !== w)]; };
+
+const $ = (s) => document.querySelector(s);
+function sentence(d, cur) {
+  return L.d[d].f.map((p) => typeof p === 'string' ? esc(p)
+    : '<span class="f' + (p[0] === cur ? ' on' : '') + (S.f[d + '.' + p[0]] ? ' has' : '') + '">' + esc(S.f[d + '.' + p[0]] || p[1]) + '</span>').join('');
+}
+function ok(sc) {
+  if (sc.t === 'tap') return S.tap[sc.d] != null;
+  if (sc.t === 'blank' || sc.t === 'day') return !!(S.f[sc.d + '.' + sc.k] || '').trim();
+  if (sc.t === 'got') return S.got[sc.d] != null;
+  return true;
+}
+function render() {
+  const sc = SC[S.i], D = sc.d != null ? L.d[sc.d] : null, st = $('.stage');
+  document.documentElement.style.setProperty('--c', D ? 'var(--' + D.k + ')' : 'var(--gold)');
+  $('.prog i').style.width = Math.round((S.i / (SC.length - 1)) * 100) + '%';
+  $('.where').textContent = D ? (sc.t === 'got' ? 'Level 02 opens · last week' : D.dom + ' · ' + D.name) : (sc.t === 'n2' || sc.t === 'calib' ? 'Level 02 opens' : 'Level 01');
+  $('.back').hidden = S.i === 0;
+  let h = '';
+  const lab = D ? '<p class="dlab">' + esc(D.l) + ' · ' + esc(D.dom) + (D.k === S.weak ? ' · ★ Start here' : '') + '</p>' : '';
+  if (sc.t === 'intro') {
+    h = '<p class="dlab">' + esc(L.chapter) + '</p><h1 class="q">Level 01 · ' + esc(L.word) + '<br><em>' + esc(L.title) + '</em></h1>' +
+      '<p class="promise"><b>By Sunday you will have:</b> ' + esc(L.promise) + '</p>' +
+      '<p class="oldnew"><s>“' + esc(L.old) + '”</s><br>“' + esc(L.neu) + '”</p>' +
+      '<p class="hint">For this preview, pick the weakest domain your North Star found. It gets the “Start here” mark.</p><div class="ns">' +
+      L.d.map((x, d) => '<button type="button" class="opt" data-weak="' + x.k + '" aria-pressed="' + (S.weak === x.k) + '">' + esc(x.dom) + '</button>').join('') + '</div>';
+  } else if (sc.t === 'tap') {
+    h = lab + '<h2 class="q">' + D.tq + '</h2><div class="opts" role="group">' + D.o.map((o, i) =>
+      '<button type="button" class="opt" data-tap="' + i + '" aria-pressed="' + (S.tap[sc.d] === i) + '"><kbd>' + (i + 1) + '</kbd>' + esc(o) + '</button>').join('') + '</div>';
+  } else if (sc.t === 'slide') {
+    const v = sv(sc.d);
+    h = lab + '<h2 class="q">' + esc(D.s.q) + '</h2><p class="big" aria-live="polite">' + esc(D.s.raw ? D.s.word[idx(D, v)] : v + D.s.sfx) + '</p><p class="word">' + esc(D.s.word[idx(D, v)]) + '</p>' +
+      '<input type="range" min="' + D.s.min + '" max="' + D.s.max + '" step="' + D.s.step + '" value="' + v + '" aria-label="' + esc(D.s.q) + '"><div class="ends"><span>' + esc(D.s.e[0]) + '</span><span>' + esc(D.s.e[1]) + '</span></div>';
+  } else if (sc.t === 'blank') {
+    const first = fields(D)[0][0] === sc.k;
+    h = lab + (first ? '<p class="ins"><b>Why it matters</b>' + esc(D.ins) + '</p>' : '') + '<div class="sent big2">' + sentence(sc.d, sc.k) + '</div><label class="lab2" for="in">' + esc(sc.hint) + '</label>' +
+      '<input id="in" class="txt" type="text" autocomplete="off" enterkeyhint="next" value="' + esc(S.f[sc.d + '.' + sc.k] || '') + '" placeholder="e.g. ' + esc(sc.ex) + '">' +
+      '<p class="hint">A few words is enough. <span class="pvo">Preview only: <button type="button" data-ex>use the example</button></span></p>';
+  } else if (sc.t === 'day') {
+    const cur = S.f[sc.d + '.' + sc.k] || '';
+    h = lab + (sc.added ? '' : '<div class="sent">' + sentence(sc.d, sc.k) + '</div>') + '<h2 class="q">' + esc(sc.added ? sc.hint.replace(/\{(\w+)\}/g, (_, k) => val(sc.d, k) || '…') : 'Which day?') + '</h2>' +
+      '<div class="days">' + DAYS.map((x, i) => '<button type="button" class="opt" data-day="' + x + '" aria-pressed="' + (cur === x) + '"><kbd>' + (i + 1) + '</kbd>' + x.slice(0, 3) + '</button>').join('') +
+      '<button type="button" class="opt" data-other aria-pressed="' + (!!cur && !DAYS.includes(cur)) + '">A date</button></div>' +
+      (S.other === sc.d + '.' + sc.k || (cur && !DAYS.includes(cur)) ? '<input id="in" class="txt" type="text" style="margin-top:10px" placeholder="e.g. 14 Nov" value="' + esc(DAYS.includes(cur) ? '' : cur) + '">' : '');
+  } else if (sc.t === 'done') {
+    const v = S.sure[sc.d] == null ? 50 : S.sure[sc.d];
+    h = lab + '<p class="done"><b>Done when</b> ' + fill(D.done, sc.d) + '</p><h2 class="q">How sure are you that this is done by Sunday?</h2>' +
+      '<p class="big" aria-live="polite">' + v + '%</p><input type="range" min="0" max="100" step="10" value="' + v + '" aria-label="How sure are you"><div class="ends"><span>Not sure</span><span>Certain</span></div>';
+  } else if (sc.t === 'lines') {
+    const L4 = [['Where you were', 'Admit it.', D.fb[0]], ['Where you struggle', 'Don’t fight it.', D.fb[1]], ['Where you shine', 'Don’t ignore it.', strong(sc.d) ? D.fb[2][0] : D.fb[2][1]], ['What you will do', 'Exactly.', D.fb[3]]];
+    h = lab + '<h2 class="q">' + esc(D.name) + ', in four lines</h2><div class="four">' + L4.map(([a, b, c], i) =>
+      '<div><h4>' + a + '<small>' + b + '</small></h4><p>' + fill(c, sc.d) + '</p>' + (i === 3 ? '<p class="dw"><b>Done when</b> ' + fill(D.done, sc.d) + ' · ' + (S.sure[sc.d] == null ? 50 : S.sure[sc.d]) + '% sure</p>' : '') + '</div>').join('') + '</div>' +
+      '<div class="take"><p class="tk">Yours to keep · it goes into your Blueprint: ' + esc(D.bp) + '</p><h4>' + fill(D.take[0], sc.d) + '</h4><ol>' + D.take.slice(1).map((l) => '<li>' + fill(l, sc.d) + '</li>').join('') + '</ol></div>';
+  } else if (sc.t === 'week') {
+    h = '<p class="dlab">Your week</p><h2 class="q">Four actions. Each has a day.</h2><div class="wk">' + order().map((d, i) => {
+      const x = L.d[d];
+      return '<div style="--c:var(--' + x.k + ')"><h4>' + (i === 0 ? '<span class="star">★ My one move · </span>' : 'Goal ' + i + ' · ') + esc(x.dom) + '</h4><p>' + fill(x.fb[3], d) + '</p><p class="hint"><b>Done when</b> ' + fill(x.done, d) + '</p></div>';
+    }).join('') + '</div><p class="hint">Write these on your Planner’s Monday page: the first as <b>My one move</b>, the other three as <b>Three goals</b>.</p>';
+  } else if (sc.t === 'n2') {
+    h = '<p class="dlab">Next Sunday · a preview</p><h2 class="q">This is how Level 02 · ' + esc(L.next.word) + ' opens.</h2><p class="lead">Before anything new, last week’s four actions, one at a time. Done, Partly or Not yet. A no is information, not a verdict.</p>';
+  } else if (sc.t === 'got') {
+    h = lab + '<p class="done"><b>Last week you said:</b> ' + fill(D.fb[3], sc.d) + '<br><span class="hint"><b>Done when</b> ' + fill(D.done, sc.d) + '</span></p><h2 class="q">Did it happen?</h2><div class="opts">' +
+      ['Done', 'Partly', 'Not yet'].map((o, i) => '<button type="button" class="opt" data-got="' + i + '" aria-pressed="' + (S.got[sc.d] === i) + '"><kbd>' + (i + 1) + '</kbd>' + o + '</button>').join('') + '</div>' +
+      (S.got[sc.d] != null ? '<p class="hint">You were ' + (S.sure[sc.d] == null ? 50 : S.sure[sc.d]) + '% sure. It happened: ' + ['yes', 'partly', 'not yet'][S.got[sc.d]] + '.</p>' : '') +
+      (S.got[sc.d] > 0 ? '<p class="smaller">' + fill(D.notyet, sc.d) + '</p>' : '');
+  } else if (sc.t === 'calib') {
+    const n = [0, 1, 2, 3], exp = n.reduce((a, d) => a + (S.sure[d] == null ? 50 : S.sure[d]), 0) / 400,
+      real = n.reduce((a, d) => a + [1, 0.5, 0][S.got[d]], 0) / 4, diff = exp - real,
+      word = diff > 0.15 ? 'too hopeful' : diff < -0.15 ? 'too careful' : 'about right',
+      cnt = (g) => n.filter((d) => S.got[d] === g).length;
+    h = '<p class="dlab">Last week, counted</p><h2 class="q">' + cnt(0) + ' done, ' + cnt(1) + ' partly, ' + cnt(2) + ' not yet.</h2>' +
+      '<p class="calib">Your estimates were <b>' + word + '</b>.</p><p class="hint">The same three words as the Sunday page of your Planner. The chapter reading after Level 05 adds them up.</p>' +
+      '<p class="lead">Then Level 02 begins: the promise, old and new, and the first tap.</p>';
+  } else if (sc.t === 'bp') {
+    h = '<p class="dlab">My Blueprint · after one week</p><h2 class="q">Four parts of your Blueprint, already written.</h2>' +
+      '<p class="hint">After twelve weeks: eight parts, all forty-eight in your own words. How you lead, your people, what you sell, your marketing, your sales, your money, your systems and your next twelve weeks. Printable.</p><div class="wk">' +
+      L.d.map((x, d) => '<div style="--c:var(--' + x.k + ')"><h4>' + esc(x.bp) + '</h4><p><b>' + fill(x.take[0], d) + '</b></p><ol class="bpl">' + x.take.slice(1).map((l) => '<li>' + fill(l, d) + '</li>').join('') + '</ol></div>').join('') +
+      '</div><p><button type="button" class="opt" data-restart style="width:auto;margin-top:14px">Start the preview again</button></p>';
+  }
+  st.innerHTML = '<div class="scr" tabindex="-1">' + h + '</div>';
+  const nx = $('.next'); nx.disabled = !ok(sc) || S.i === SC.length - 1; nx.textContent = S.i === SC.length - 1 ? 'The end' : sc.t === 'intro' ? 'Start' : 'Next';
+  const inp = st.querySelector('#in'), rng = st.querySelector('input[type=range]');
+  if (inp) {
+    inp.focus();
+    inp.addEventListener('input', () => {
+      S.f[sc.d + '.' + sc.k] = inp.value; nx.disabled = !ok(sc);
+      // The sentence above fills in as the founder types; nothing redraws.
+      const f = st.querySelector('.sent .f.on');
+      if (f) { f.textContent = inp.value || sc.hint; f.classList.toggle('has', !!inp.value.trim()); }
+    });
+  } else if (rng) {
+    rng.focus();
+    // Only the number and its word change while sliding, so a finger drag is never cut.
+    rng.addEventListener('input', () => {
+      const v = Number(rng.value), big = st.querySelector('.big'), w = st.querySelector('.word');
+      if (sc.t === 'slide') { S.s[sc.d] = v; big.textContent = D.s.raw ? D.s.word[idx(D, v)] : v + D.s.sfx; w.textContent = D.s.word[idx(D, v)]; }
+      else { S.sure[sc.d] = v; big.textContent = v + '%'; }
+    });
+  }
+  else st.querySelector('.scr').focus({ preventScroll: true });
+}
+function go(n) { const sc = SC[S.i]; if (n > 0 && !ok(sc)) return; if (sc.t === 'slide' && S.s[sc.d] == null) S.s[sc.d] = L.d[sc.d].s.d; if (sc.t === 'done' && S.sure[sc.d] == null) S.sure[sc.d] = 50;
+  S.i = Math.max(0, Math.min(SC.length - 1, S.i + n)); S.other = null; render(); window.scrollTo(0, 0); }
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return; const sc = SC[S.i];
+  if (b.matches('.next')) return go(1);
+  if (b.matches('.back')) return go(-1);
+  if (b.dataset.weak) { S.weak = b.dataset.weak; return render(); }
+  if (b.dataset.tap != null) { S.tap[sc.d] = Number(b.dataset.tap); render(); return setTimeout(() => go(1), 180); }
+  if (b.dataset.got != null) { S.got[sc.d] = Number(b.dataset.got); return render(); }
+  if (b.dataset.day) { S.f[sc.d + '.' + sc.k] = b.dataset.day; render(); return setTimeout(() => go(1), 180); }
+  if (b.hasAttribute('data-other')) { S.other = sc.d + '.' + sc.k; if (DAYS.includes(S.f[S.other])) S.f[S.other] = ''; return render(); }
+  if (b.hasAttribute('data-ex')) { S.f[sc.d + '.' + sc.k] = sc.ex; return render(); }
+  if (b.hasAttribute('data-restart')) { Object.assign(S, { i: 0, tap: {}, s: {}, f: {}, sure: {}, got: {}, other: null }); return render(); }
+});
+document.addEventListener('keydown', (e) => {
+  const sc = SC[S.i], typing = e.target.matches('input[type=text]');
+  if (e.key === 'Enter') { e.preventDefault(); return go(1); }
+  if (e.key === 'Escape') { e.preventDefault(); return go(-1); }
+  if (typing) return;
+  const n = Number(e.key);
+  if (n >= 1 && n <= 9) {
+    const b = document.querySelectorAll('.stage .opt')[n - 1];
+    if (b && (sc.t === 'tap' || sc.t === 'day' || sc.t === 'got')) { e.preventDefault(); b.click(); }
+  }
+});
+render();</script>
+</body>
+</html>

@@ -9,8 +9,8 @@
 // one-founder view, one(id).
 
 import { STEP_KEYS, STEP_NAMES, STEP_SHORT, GROUPS, LANDING_SHORT, summary, filter, byLanding, groupOf, nextAction, funnel, today, levelSet, levelCount, launchpadDone, crossedOf,
-  told, toldTally, theirWords, SIDES, PAIN_NAMES, WANT_NAMES, VALUE_NAMES, TEAM_NAMES, growthDone, growthGroups, growthWritten } from './dash.js';
-import { LEVELS4, wordOf } from '/levels-v4.js';
+  told, toldTally, theirWords, SIDES, PAIN_NAMES, WANT_NAMES, VALUE_NAMES, TEAM_NAMES, growthDone, growthGroups, growthWritten, stuckOnSunday } from './dash.js';
+import { LEVELS4, wordOf, briefOf, GOT } from '/levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
 const KEY = 'ftb-mentor-key';
@@ -164,10 +164,22 @@ function wordsHTML() {
       : '<p class="hint">No finished sentences yet. They appear here when founders complete a sentence in the Blueprint.</p>'}</div>`;
 }
 
+/** Stuck on Sunday: two or more of last week's actions "Not yet". A check-in
+ *  this week, before the habit of not doing sets in. */
+function stuckHTML() {
+  const L = stuckOnSunday(data.words, 12);
+  return `<div class="panel"><div><h2>Stuck on Sunday</h2><p class="sub">Two or more of last week’s four actions “Not yet”, from their own Sunday answers. A short, kind check-in this week.</p></div>
+    ${L.length ? `<ul class="needs">${L.map((x) => `<li><span class="sev" style="--c:var(--warn)"></span>
+      <div><button type="button" class="linkish" data-drawer="${esc(x.id)}">${esc(x.name || x.email || '—')}</button><span class="why">Level ${String(x.lv).padStart(2, '0')}: ${x.not} not yet${x.part ? `, ${x.part} partly` : ''}${x.done ? `, ${x.done} done` : ''} · ${esc(x.notDomains.map((d) => SIDES[d]).join(' · '))}</span></div>
+      <button class="btn" data-msg="${esc(x.id)}" data-hint="A check-in">Send a check-in</button></li>`).join('')}</ul>`
+      : '<p class="hint">Nobody is stuck. When a founder answers “Not yet” to two or more of last week’s actions, they appear here.</p>'}</div>`;
+}
+
 function todayHTML(S) {
   return `<div><h2>Where your founders are</h2><p class="sub">Tap a group to see who is in it. Each group has the one thing that moves them on.</p></div>
     ${groupsHTML(S)}
     <div class="row2">${needsHTML()}${funnelHTML()}</div>
+    ${stuckHTML()}
     <div class="row2">${toldHTML()}${wordsHTML()}</div>
     ${landingHTML()}`;
 }
@@ -468,6 +480,31 @@ function engine() {
   return engineP;
 }
 const strip = (x) => String(x ?? '').replace(/<[^>]*>/g, '');
+/** The session brief: read before the 1:1. The next session's agenda, and
+ *  the founder's record over the levels it reads, in their own words. */
+function briefPanel(work, C) {
+  const W = {};
+  for (const r of work || []) W[r.key] = r.value;
+  const B = briefOf(W), S = B.session, t = B.tally;
+  if (!B.reached) return '<div class="panel"><h2>Session brief</h2><p class="tiny" style="margin-top:8px">Nothing written in the Blueprint yet. The brief builds itself from their answers.</p></div>';
+  let weak = '';
+  try { const r = JSON.parse((C && C.results_json) || '{}') || {}, sc = r.scores || [], an = r.answered || []; let lo = -1; for (let i = 0; i < 4; i++) if (an[i] > 0 && Number.isFinite(sc[i]) && (lo < 0 || sc[i] < sc[lo])) lo = i; if (lo >= 0) weak = SIDES[lo]; } catch { weak = ''; }
+  const said = (g) => (g == null ? '<span class="tiny">not asked yet</span>' : `<b>${esc(GOT[g])}</b>`);
+  return `<div class="panel brief"><h2>Session brief · Session ${S.n}: ${esc(S.name)}</h2>
+    <p class="sub">${esc(S.at)}. Read before the call: built only from their own answers.</p>
+    <dl class="dkv">
+      <dt>Furthest level</dt><dd>Level ${String(B.reached).padStart(2, '0')} of 12</dd>
+      ${weak ? `<dt>North Star: start here</dt><dd>${esc(weak)}</dd>` : ''}
+      <dt>Sunday record</dt><dd>${t.n ? `${t.done} done · ${t.part} partly · ${t.not} not yet, of ${t.n} checked${t.est ? ` · estimates ${esc(t.est)}` : ''}` : 'No Sunday answers yet'}</dd>
+    </dl>
+    ${B.ask.length ? `<p class="lbl" style="margin-top:12px">Ask about</p><ul class="climb">${B.ask.map((a) => `<li><b>Level ${String(a.lv).padStart(2, '0')} · ${esc(a.name)}</b> · ${esc(GOT[a.got].toLowerCase())}<br>${strip(a.line)}<br><span class="tiny">${strip(a.notyet)}</span></li>`).join('')}</ul>` : ''}
+    ${B.show.length ? `<p class="lbl" style="margin-top:12px">Their offer and pipeline</p><dl class="dkv">${B.show.map((x) => `<dt>${esc(x.label)}</dt><dd>${strip(x.html)}</dd>`).join('')}</dl>` : ''}
+    <p class="lbl" style="margin-top:12px">What they promised, and what Sunday said</p>
+    <ul class="climb">${B.actions.map((a) => `<li>Level ${String(a.lv).padStart(2, '0')} · ${esc(a.name)}: ${strip(a.line)} · ${said(a.got)}${a.sure != null ? ` <span class="tiny">(${a.sure}% sure)</span>` : ''}</li>`).join('')}</ul>
+    <p class="lbl" style="margin-top:12px">The agenda</p><ol class="climb">${S.agenda.map((x) => `<li>${esc(x)}</li>`).join('')}</ol>
+    <p class="tiny" style="margin-top:8px"><b>Done when</b> ${esc(S.done)}</p>
+    <p style="margin-top:10px"><button class="ghost" type="button" id="printbrief">Print the brief</button></p></div>`;
+}
 /** Their Blueprint (Version 4), level by level: what they tapped, slid and wrote. */
 function v4Panel(work) {
   const W = {};
@@ -484,7 +521,10 @@ function v4Panel(work) {
         let slide = '';
         if (sv != null && Number.isFinite(Number(sv))) { const w = wordOf(D.s, Number(sv)); slide = `${sv}${D.s.sfx || ''}${w && String(w) !== String(sv) ? ' · ' + w : ''}`; }
         const sent = anyF ? D.f.map((x) => (typeof x === 'string' ? x : (String(g(x[0]) || '').trim() || '____'))).join('') : '';
-        return `<div class="v4d"><b>${esc(SIDES[di])}</b><span>${tap ? `Tapped: “${esc(tap)}”` : ''}${slide ? `${tap ? '<br>' : ''}Slid: ${esc(slide)} <span class="tiny">(${esc(strip(D.s.q))})</span>` : ''}${sent ? `${tap || slide ? '<br>' : ''}<q>${esc(strip(sent))}</q>` : ''}</span></div>`;
+        // The action: its added day, how sure they were, and what Sunday said.
+        const on = String(g('on') || '').trim(), sure = g('sure'), got = g('got');
+        const act = [on ? `Day: ${on}` : '', sure != null && sure !== '' ? `${sure}% sure` : '', got != null && got !== '' ? `Sunday: ${['done', 'partly', 'not yet'][Number(got)] || '—'}` : ''].filter(Boolean).join(' · ');
+        return `<div class="v4d"><b>${esc(SIDES[di])}</b><span>${tap ? `Tapped: “${esc(tap)}”` : ''}${slide ? `${tap ? '<br>' : ''}Slid: ${esc(slide)} <span class="tiny">(${esc(strip(D.s.q))})</span>` : ''}${sent ? `${tap || slide ? '<br>' : ''}<q>${esc(strip(sent))}</q>` : ''}${act ? `<br><span class="tiny">${esc(act)}</span>` : ''}</span></div>`;
       }).join('');
       return doms ? `<div class="v4l"><h3>Level ${String(lv).padStart(2, '0')} · ${esc(L.word)} · ${esc(L.title)}</h3>${doms}</div>` : '';
     }).join('')}</div>`;
@@ -531,6 +571,7 @@ async function one(id) {
     <div class="panel"><h2>Library</h2>
       ${LB.length ? `<ul class="climb" style="margin:8px 0 0;padding-left:18px">${LB.map((x) => `<li>${esc(x.name)} · ${esc(day(x.at))}</li>`).join('')}</ul>`
         : '<p class="tiny" style="margin-top:8px">Nothing downloaded yet.</p>'}</div>
+    ${briefPanel(d.work, C)}
     ${C ? compassPanel(C)
       : '<div class="panel"><h2>North Star</h2><p class="tiny" style="margin-top:8px">Not done yet.</p></div>'}
     ${v4Panel(d.work)}
@@ -550,6 +591,7 @@ async function one(id) {
         : '<p class="tiny" style="margin-top:8px">Nothing written yet.</p>'}</div>
     </div>`;
   $('#back').onclick = load;
+  const pb = $('#printbrief'); if (pb) pb.onclick = () => window.print();
   window.scrollTo(0, 0);
   document.querySelectorAll('.reply').forEach((b) => b.onclick = async () => {
     const t = document.querySelector(`textarea[data-note="${b.dataset.note}"]`);
