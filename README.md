@@ -272,6 +272,14 @@ it is not in that repo's node_modules). The page lives in /internal,
 Internal → Emails. AGENTS.md rule 14 keeps it current; tests/email-map.test.mjs
 fails when a letter is missing.
 
+## The team in /mentor (2 Nov 2026)
+
+A team account reads everything, answers, writes letters, sends sign-in
+links, pauses or resumes letters and changes a step. Pausing or deleting a
+founder, the team, the mentor profiles and the Mailchimp tools stay with the
+mentor key: `TEAM_CAN` / `KEY_ONLY` in `functions/api/mentor.js` (AGENTS.md
+rule 18). Settings shows a team account what it can and cannot do.
+
 ## The Mailchimp tag page (2 Nov 2026)
 
 `node scripts/tag-map.mjs out.html --exploraself ../exploraself` draws every
