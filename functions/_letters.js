@@ -396,8 +396,8 @@ export function answerLetter(base, { first, question, answer, to = '', tier, off
  *  just bought. The words of each step come from STEPS in _stripe.js. */
 export const UNLOCKED = {
   session: { name: 'The Boardroom', last: 5, extra: 'and so is your full North Star', sessions: 'One 1:1 session with me. Before we speak, the team and I read your first three levels, so the time is spent on you, not on catching up.' },
-  lab: { name: 'The LAB', last: 9, extra: 'each one with its questions and its twenty actions', sessions: 'Two 1:1 sessions with me.' },
-  hub: { name: 'The HUB', last: 12, extra: 'with the LAB included and every resource. Nothing is held back', sessions: 'Three 1:1 sessions with me in total, including the one from the LAB.' },
+  lab: { name: 'The LAB', last: 9, extra: 'each one with its questions and its twenty actions', sessions: 'Two 1:1 sessions with me in total: the Boardroom’s, and the second with the LAB.' },
+  hub: { name: 'The HUB', last: 12, extra: 'with the LAB included and every resource. Nothing is held back', sessions: 'Three 1:1 sessions with me in total: the Boardroom’s, the LAB’s, and the third with the HUB.' },
   premium: { name: 'The Summit', last: 12, extra: 'with the LAB, the HUB and every resource. Everything is yours', sessions: 'Me, every week. We will set the day together.' },
 };
 /** The first level a payment opens: the step after the one they had. A

@@ -1743,7 +1743,7 @@
             ${Array.from({ length: 12 }, (_, k) => `<span style="text-align: center; font-size: 12px; font-weight: 520; color: ${k < 3 ? '#D6BF8F' : '#8A7A5E'}; display: flex; flex-direction: column; align-items: center; gap: 4px">${k < 3 ? 'Week ' : ''}${k + 1}${k === 0 ? '<span class="pinp" style="width: 8px; height: 8px; border-radius: 50%; background: #D6BF8F"></span>' : ''}</span>`).join('')}</div>
           ${D.map(row).join('')}
           <div style="display: grid; grid-template-columns: 170px repeat(12, minmax(0, 1fr)); gap: 6px; margin-top: 8px"><span></span>
-            ${band(3, 'FOUNDER LAUNCHPAD · FREE · OPEN NOW', false, true)}${band(2, 'BOOK THE BOARDROOM · UNLOCKS 04–05', false, true)}${band(4, 'PERSONAL LEADERSHIP LAB · $97 · 2 SESSIONS')}${band(3, 'BUSINESS HUB · $750 · 3 SESSIONS IN TOTAL')}</div>
+            ${band(3, 'FOUNDER LAUNCHPAD · FREE · OPEN NOW', false, true)}${band(2, 'BOOK THE BOARDROOM · UNLOCKS 04–05', false, true)}${band(4, 'PERSONAL LEADERSHIP LAB · $97 · 2 SESSIONS IN TOTAL')}${band(3, 'BUSINESS HUB · $750 · 3 SESSIONS IN TOTAL')}</div>
         </div>
       </div>
       <div class="wfree-cta">
@@ -1758,8 +1758,8 @@
   const STOPS = [
     { n: '1', short: 'Founder Launchpad', unlock: 'You are one click from 3 of the 12 modules, free. You will know what you believe, read your business clearly and stay steady under pressure.', name: 'The Founder Launchpad', tag: 'Start here · free', line: 'Stop circling yourself. Settle who you are, then build.', modules: '01–03', sessions: '—', price: 'Free', cta: 'Start free', href: '/ground-plan/', x: 150, y: 360, lx: 136, ly: 364, anchor: 'end' },
     { n: '2', short: 'The Boardroom', unlock: 'Book one session with Alexandru. It unlocks modules 04–05 and the full North Star.', name: 'The Boardroom', tag: 'You and Alexandru', line: 'Sit at the table with Alexandru.', modules: '04–05', sessions: '1 session', price: '$27', cta: 'Book the Boardroom · unlock 04–05', href: BOOKING, ext: true, x: 290, y: 300, lx: 306, ly: 304, anchor: 'start' },
-    { n: '3', short: 'Leadership LAB', unlock: 'Joining unlocks modules 06–09.', name: 'The Personal Leadership LAB', tag: 'Go deeper', line: 'Lead yourself first.', modules: '06–09', sessions: '2 sessions', price: '$97', cta: 'Join the LAB', href: LAB_URL, ext: true, x: 175, y: 235, lx: 161, ly: 239, anchor: 'end' },
-    { n: '4', short: 'Business HUB', unlock: 'Joining unlocks modules 10–12.', name: 'The Business HUB', tag: 'Build the business', line: 'Build the business that carries it.', modules: '10–12', sessions: '3 in total (incl. 1 from the LAB)', price: '$750', cta: 'Join the HUB', href: HUB_URL, ext: true, x: 285, y: 160, lx: 301, ly: 164, anchor: 'start' },
+    { n: '3', short: 'Leadership LAB', unlock: 'Joining unlocks modules 06–09.', name: 'The Personal Leadership LAB', tag: 'Go deeper', line: 'Lead yourself first.', modules: '06–09', sessions: '2 in total (the 2nd is the LAB’s)', price: '$97', cta: 'Join the LAB', href: LAB_URL, ext: true, x: 175, y: 235, lx: 161, ly: 239, anchor: 'end' },
+    { n: '4', short: 'Business HUB', unlock: 'Joining unlocks modules 10–12.', name: 'The Business HUB', tag: 'Build the business', line: 'Build the business that carries it.', modules: '10–12', sessions: '3 in total (the 3rd is the HUB’s)', price: '$750', cta: 'Join the HUB', href: HUB_URL, ext: true, x: 285, y: 160, lx: 301, ly: 164, anchor: 'start' },
     { n: '5', short: 'The Summit', unlock: 'Every module, with Alexandru every week.', name: 'The Summit', tag: 'The top', line: 'The whole Blueprint, with Alexandru every week.', modules: 'All', sessions: 'Every week', price: '$1,989', cta: 'Talk about The Summit', href: '/northstar/summit', x: 230, y: 58, lx: 258, ly: 62, anchor: 'start' },
   ];
   /* The chosen stop opens right under it (31 Oct, round 4): no scrolling on a phone. */

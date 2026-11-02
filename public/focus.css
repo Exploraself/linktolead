@@ -65,16 +65,35 @@ body.fmopen .leaf-r button:focus-visible,body.fmopen .leaf-r input:focus-visible
 .fm-hint{margin:0;font-size:13.5px;color:var(--soft)}
 
 /* The welcome before each part: four steps, then what the founder will have. */
-.wl{display:flex;flex-direction:column;gap:16px}
+.wl{display:flex;flex-direction:column;gap:14px}
 .wl .cw-q{margin:0}
-.wl-sub{margin:0;font-size:16.5px;color:var(--fm-muted,var(--soft))}
-.wl-told{margin:0;padding:12px 14px;border-radius:10px;background:var(--fm-soft,var(--leaf));font-size:16px}
-.wl-beats{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:14px}
-.wl-beats li{display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px;align-items:start}
-.wl-ic{width:36px;height:36px;border-radius:10px;background:var(--fm-soft,var(--leaf));display:grid;place-items:center;color:var(--fm-gold-ink,var(--gold-ink))}
+body.fmopen .leaf-r .wl-eb,.wl-eb{margin:22px 0 0;font:700 12.5px/1.4 var(--fm-font,var(--body));letter-spacing:.08em;text-transform:uppercase;color:var(--fm-gold-ink,var(--gold-ink))}
+.wl .wl-eb{margin-top:22px}
+.wl-step{display:flex;align-items:center;gap:10px;margin:0;font-size:15px;color:var(--fm-muted,var(--soft))}
+.wl-p{margin:0;font-size:18px;line-height:1.6;color:var(--fm-ink,var(--qink))}
+.wl-told{margin:0;padding:12px 14px;border-radius:10px;background:var(--fm-soft,var(--leaf));font-size:16px;line-height:1.5}
+.wl-ns{display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px;align-items:start;margin:0;padding:12px 14px;border:1px solid var(--fm-line,var(--edge));border-radius:12px;font-size:16px;line-height:1.5}
+.wl-ns a{display:inline-block;margin-top:4px;font-weight:700;color:var(--fm-ink,var(--qink))}
+.wl-q{margin:0;padding:4px 0 4px 16px;border-left:3px solid var(--fm-gold,var(--gold))}
+.wl-q small{display:block;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--fm-muted,var(--soft))}
+.wl-q p{margin:4px 0 0;font-size:17px;line-height:1.55;font-style:italic}
+.wl-sign{margin:0;font:700 18px var(--fm-font,var(--body));color:var(--fm-ink,var(--qink))}
+.wl-ic{flex:none;width:36px;height:36px;border-radius:10px;background:var(--fm-soft,var(--leaf));display:grid;place-items:center;color:var(--fm-gold-ink,var(--gold-ink))}
 .wl-ic svg{width:20px;height:20px}
-.wl-beats h4,.wl-have h4{margin:0 0 2px;font:700 16.5px/1.35 var(--fm-font,var(--body));color:var(--fm-ink,var(--qink))}
-.wl-beats p{margin:0;font-size:16.5px;line-height:1.55}
+.wl-have h4,.wl-read h4{margin:0 0 2px;font:700 16.5px/1.35 var(--fm-font,var(--body));color:var(--fm-ink,var(--qink))}
+/* The door: the "not yet" taps under a slider, the four versions, the numbers read back. */
+.cw-alt{margin-top:-4px}
+.cw-alt .cw-o{min-height:46px}
+.cw-off input[type=range]{opacity:.45}
+.cw-types .cw-o span{display:flex;flex-direction:column;gap:2px;text-align:left}
+.cw-types .cw-o small{font-size:14px;color:var(--fm-muted,var(--soft));font-weight:400}
+.wl-read{padding:14px 16px;border-radius:12px;background:var(--fm-soft,var(--leaf))}
+.wl-read ul{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:16px;line-height:1.5}
+/* The switch: your own answers say you have moved up. */
+.cw-switch{padding:14px 16px;border:1px solid var(--fm-gold,var(--gold));border-radius:12px;background:#FFFFFF;color:#1F1F1F}
+.cw-switch .eyebrow{margin:0 0 4px}
+.cw-switch p{margin:0;font-size:16px;line-height:1.5}
+.cw-switch .cw-more{margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .wl-have{border-top:1px solid var(--fm-line,var(--edge));padding-top:14px}
 .wl-have ol{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
 .wl-have li{display:grid;grid-template-columns:78px minmax(0,1fr);gap:10px;font-size:16px}

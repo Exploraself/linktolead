@@ -50,9 +50,13 @@ for (const p of ['public/northstar/engine.js', 'functions/_plans.js', 'public/no
   ok(!/\b(most|some|many|almost every) founders?\b/i.test(s), `${p}: speaks to the founder, not about other founders`);
 }
 
-// The Summit page keeps its placeholders until Alexandru fills them.
+// The Summit's sessions, as Alexandru decided them (piece 19): one per level,
+// 45 minutes, every week, online on Google Meet. The library is free for
+// everyone, so it is never sold as part of a step (AGENTS.md 19).
 const Su = read('public/northstar/summit/index.html');
-for (const ph of ['[SESSION LENGTH]', '[ONLINE OR IN PERSON]']) ok(Su.includes(ph), `summit keeps ${ph}`);
+ok(!/\[[A-Z ]{6,}\]/.test(Su) && Su.includes('45 minutes each · Online, on Google Meet') && Su.includes('One session with Alexandru for each level'), 'summit: the sessions are named, no placeholder left');
+ok(!/library/i.test(noComments(Su)), 'summit: the library is not sold as part of the step');
+ok(Su.includes('Only with great people do we pull out greatness.'), 'summit: Greatness, in Alexandru’s words');
 ok(!Su.includes('[YOUR BOOKING LINK]') && (Su.match(/href="\/pay\/\?step=premium&amp;from=summit"/g) || []).length === 3 && !/href="#join"/.test(Su) && /if \(location\.hash === '#join'\) location\.replace\(PAY\)/.test(Su), 'summit: every “Claim my place” goes to the pay page for The Summit (from=summit); old #join links too');
 ok(read('public/northstar/app.js').includes("price: '$27'") && !read('public/northstar/app.js').includes('[YOUR PRICE]'), 'Boardroom price: $27 (Alexandru, 2 Nov 2026)');
 

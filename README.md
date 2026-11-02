@@ -21,8 +21,8 @@ spreads across all four.
 | --- | --- |
 | 1–3 | The Founder Launchpad. Free. |
 | 4–5 | The Boardroom: one session with Alexandru, and the full North Star. |
-| 1–9 | Personal Leadership LAB, self-paced, two sessions. $97. |
-| All 12 | Business HUB, three sessions in total and the LAB included. $397. |
+| 1–9 | Personal Leadership LAB, self-paced: the second session, two in total. $97. |
+| All 12 | Business HUB: the third session, three in total (the Boardroom’s, the LAB’s, the HUB’s), and the LAB included. $750. |
 | Everything | The Summit, with Alexandru every week. $1,989. (Internal tier key: `premium`.) |
 
 All twelve are built regardless of what anyone pays. The ladder decides what
