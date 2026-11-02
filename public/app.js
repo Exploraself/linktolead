@@ -12,7 +12,7 @@
 import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, SHEETS, SECTIONS, loadStage,
   gateFor, levelFor, isWritten, weekTitle, videoFor, levelVideo, nextGain, holds,
   LEAD, BOOKING, LIBRARY, payHref } from './content.js';
-import { entry, programmeStage, groundPlan, stageNudge } from './home.js';
+import { entry, programmeStage, groundPlan, stageNudge, PROGRAMME } from './home.js';
 import { cabinetHTML, cabinetShown, cabinetHidden, cabinetClick, dashboardShown, levelDots, compassStripHTML } from './cabinet.js';
 import { result as fwResult } from './frameworks.js';
 import { report } from './feedback.js';
@@ -37,6 +37,10 @@ const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* private mode */ } };
 
 let state = Object.assign({ stage: '', answers: {}, work: {}, tier: 'free', me: null }, load());
+// A stage saved by an older page ("growing", "leading") or damaged is read as
+// its programme stage, or none: an unknown one had no levels to load, so the
+// first render asked for them again and again, and Base Camp never drew.
+state.stage = PROGRAMME[state.stage] || '';
 /** Team accounts (Alexandru, 2 Nov 2026): every level open, in any order, so
  *  the team can read and test the whole programme. Only the server says so
  *  (/api/state me.openAll, from the signed-in account's own email); every

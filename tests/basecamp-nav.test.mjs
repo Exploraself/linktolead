@@ -27,4 +27,11 @@ ok(cab.includes("p && p.total ? 'Open the ledger →' : 'Take my North Star firs
 
 ok(rules.includes('## 10. Practical first, outside in') && rules.includes('## 11. Easy on the eye') && rules.includes('Atkinson Hyperlegible') && rules.includes('## 12. Examples at every size'), 'the rules are saved for every session');
 
+// An unknown saved stage froze Base Camp (render → loadStage → render, with
+// nothing to load): it is read through PROGRAMME when the page starts.
+{
+  const { PROGRAMME } = await import('../public/home.js');
+  ok(app.includes("state.stage = PROGRAMME[state.stage] || '';") && PROGRAMME.growing === 'grow' && PROGRAMME.leading === 'scale' && !PROGRAMME.nonsense, 'an old or damaged saved stage is read as its programme stage, or none, so the first render can draw');
+}
+
 done();
