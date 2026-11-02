@@ -10,7 +10,8 @@
 //   node scripts/blueprint-skeleton.mjs
 
 import { writeFileSync } from 'node:fs';
-import { LEVELS4, CHAPTERS4, DOM_NAMES, DOMS, wkey, lines4, wordOf, fieldsOf, PLAN4, BLUEPRINT4, takeOf, notyetOf, READ_QUOTES } from '../public/levels-v4.js';
+import { LEVELS4, CHAPTERS4, DOM_NAMES, DOMS, wkey, lines4, wordOf, fieldsOf, PLAN4, BLUEPRINT4, takeOf, notyetOf, READ_QUOTES, slideReply, shown } from '../public/levels-v4.js';
+import { ACTIONS4, SIZES4, STEPS5, STEP_SAYS } from '../public/actions-v4.js';
 import { DOMAINS, SESSIONS, READINGS, READING_SCREENS, LAUNCHPAD_CHANGES, DECISIONS, COVERAGE, GAPS, CONTRADICTIONS, PRINCIPLES, OPTIONS } from '../docs/blueprint-skeleton.data.mjs';
 import { SECTIONS } from '../public/content.js';
 
@@ -52,12 +53,23 @@ function slideWords(s) {
 }
 const scaleOf = (s) => `${s.raw ? s.w(s.min) : s.min + (s.sfx || '')} to ${s.raw ? s.w(s.max) : s.max + (s.sfx || '')}, step ${s.raw ? s.w(s.step) : s.step}`;
 
+/** The five actions of a domain, each with its text per size ([size name, text, example]). */
+function actsOf(key) {
+  const A = ACTIONS4[key];
+  if (!A) return [];
+  const one = (x, k) => (x == null ? '' : typeof x === 'string' ? x : x[k] || x.solo || '');
+  return A.map((a, i) => ({ step: STEPS5[i], says: STEP_SAYS[i], exLabel: a.exLabel || 'Example',
+    same: typeof a.t === 'string' && (a.ex == null || typeof a.ex === 'string'),
+    by: SIZES4.map(([k, n]) => [n, one(a.t, k), one(a.ex, k)]) }));
+}
+/** The check under a blank, in words. */
+const ckWords = (c) => (c ? [c.words ? `at least ${c.words} words` : '', c.digit ? 'a number' : '', c.names ? `${c.names} names` : '', c.not ? 'not a vague word' : ''].filter(Boolean).join(', ') : '');
 /** One domain, as plain data for both outputs. */
 function domainModel(L, d) {
   const D = L.d[d], key = `${L.n}.${d}`, ov = OV.get(key) || {}, ex = exampleWork(L.n), tk = takeOf(ex, L.n, d);
   const md2 = (h) => strip(String(h).replace(/<span class="ln"[^>]*><\/span>/g, '____').replace(/<mark>([^<]*)<\/mark>/g, '⟦$1⟧'));
   const dayKey = ov.on ? 'on' : ov.dayKey || 'day';
-  const blanks = fieldsOf(D).map(([k, hint, example]) => ({ k, hint, example,
+  const blanks = fieldsOf(D).map(([k, hint, example]) => ({ k, hint, example, ck: (D.ck && D.ck[k]) || null,
     day: k === dayKey && (DAYWORDS.test(example) || k === 'day' || k === 'when'),
     date: k === dayKey && !DAYWORDS.test(example) }));
   const sentence = D.f.map((p) => (typeof p === 'string' ? strip(p) : '___')).join('');
@@ -65,8 +77,11 @@ function domainModel(L, d) {
   const four = lines4(ex, L.n, d).map(([a, b, c]) => [a, b, strip(c.replace(/<mark>([^<]*)<\/mark>/g, '⟦$1⟧'))]);
   return {
     key, letter: D.l, name: D.name, dom: DOM_NAMES[d], domKey: DOMS[d], topic: ov.topic || '',
-    tap: { q: strip(D.t.q), o: D.t.o, ex: D.t.o[D.x[0]] },
-    slide: { q: D.s.q, scale: scaleOf(D.s), ends: D.s.e, words: slideWords(D.s), d: D.s.d, up: D.s.up, ex: D.x[1] },
+    idea: ov.idea || '', size: (SIZES4.find(([k]) => k === D.sz) || [])[1] || '',
+    tap: { q: strip(D.t.q), o: D.t.o, why: D.t.why || [], ex: D.t.o[D.x[0]] },
+    slide: { q: D.s.q, scale: scaleOf(D.s), ends: D.s.e, words: slideWords(D.s), d: D.s.d, up: D.s.up, ex: D.x[1],
+      costs: D.s.cost ? [...new Set([D.s.min, D.s.d, D.s.max])].sort((a, b) => a - b).map((v) => [shown(D.s, v), slideReply(L.n, d, v)]) : [] },
+    acts: actsOf(key),
     sentence, blanks, on: ov.on ? fillEx(ov.on, L.n, d) : null, dayKey,
     done: ov.done || '', doneEx: fillEx(ov.done || '', L.n, d, (x) => `⟦${x}⟧`),
     four, gp: ov.gp || [], lp: ov.lp || null, uses: ov.uses || null, pl: ov.pl || null, stage: ov.stage || null, change: ov.change || null,
@@ -105,11 +120,15 @@ function linksOf(x) {
 
 function mdDomain(L, x) {
   const s = [];
-  s.push(`#### ${x.letter} · ${x.dom} · ${x.name}`, '', `**Topic:** ${x.topic}`, '', `**Inform. Why it matters** (on the first blank): ${x.ins}`, '');
-  s.push(`1. **Tap.** ${x.tap.q}  `, `   Options: ${x.tap.o.map((o, i) => `${i + 1} ${o}`).join(' · ')}`);
+  s.push(`#### ${x.letter} · ${x.dom} · ${x.name}`, '', `**Topic:** ${x.topic}${x.size ? ` · examples speak to: *${x.size}*` : ''}`, '');
+  if (x.idea) s.push(`**Inform. The idea** (its own screen, before the tap): ${x.idea}`, '', `**Why it matters** (folded under the idea): ${x.ins}`, '');
+  else s.push(`**Inform. Why it matters** (on the first blank): ${x.ins}`, '');
+  s.push(`1. **Tap.** ${x.tap.q}  `, x.tap.why.length ? '   Options, each with its reply (Reform: why it doesn’t hold, or that it works):' : `   Options: ${x.tap.o.map((o, i) => `${i + 1} ${o}`).join(' · ')}`);
+  if (x.tap.why.length) x.tap.o.forEach((o, i) => s.push(`   - ${i + 1} *${o}*: ${x.tap.why[i]}`));
   s.push(`2. **Slide.** ${x.slide.q}  `, `   Scale ${x.slide.scale}; ends “${x.slide.ends[0]}” and “${x.slide.ends[1]}”; starts at ${x.slide.d}. Words: ${x.slide.words}.`);
+  if (x.slide.costs.length) s.push(`   What it costs, as it moves: ${x.slide.costs.map(([v, t]) => `at ${v}, “${t}”`).join(' · ')}`);
   s.push(`3. **Write once**, one blank per screen, the sentence building above it:  `, `   “${x.sentence}”`);
-  for (const b of x.blanks) s.push(`   - \`${b.k}\`: ${b.hint} (e.g. *${b.example}*)${b.day ? (b.date ? ' · a date: day chips and “A date”' : ' · day chips') : ''}`);
+  for (const b of x.blanks) s.push(`   - \`${b.k}\`: ${b.hint} (e.g. *${b.example}*)${b.day ? (b.date ? ' · a date: day chips and “A date”' : ' · day chips') : ''}${b.ck ? ` · check${ckWords(b.ck) ? ` (${ckWords(b.ck)})` : ''}: ✓ ${b.ck.ok}${b.ck.hint ? ` / → ${b.ck.hint}` : ''}${b.ck.note ? ` · note: ${b.ck.note}` : ''}` : ''}`);
   let n = 4;
   if (x.on) s.push(`${n++}. **Day** (new screen, day chips): ${x.on}`);
   s.push(`${n++}. **Done when** (shown, not typed): ${mdEx(x.doneEx)}  `, '   Then one slide: “How sure are you that this is done by Sunday?” 0–100%.');
@@ -118,6 +137,13 @@ function mdDomain(L, x) {
   s.push('', `**Transform. Yours to keep** (under the four lines, with a Copy button; it goes into the Blueprint part *${x.bp}*): **${mdEx(x.take.title)}**`);
   for (const l of x.take.lines) s.push(`- ${mdEx(l)}`);
   s.push('', `**If Sunday says Partly or Not yet:** ${mdEx(x.notyet)}`);
+  if (x.acts.length) {
+    s.push('', '**The five actions** (My Blueprint → This week, Do on top; written for the founder’s size):');
+    for (const a of x.acts) {
+      if (a.same) s.push(`- **${a.step}** (${a.says}): ${a.by[0][1]}${a.by[0][2] ? ` *${a.exLabel}: ${a.by[0][2]}*` : ''}`);
+      else { s.push(`- **${a.step}** (${a.says}):`); for (const [n, t, e] of a.by) s.push(`  - *${n}:* ${t}${e ? ` (${a.exLabel}: ${e})` : ''}`); }
+    }
+  }
   s.push('', `**Links.** ${linksOf(x).join(' ')}`);
   if (x.stage) s.push('', `**Stage notes.** ${Object.entries(x.stage).map(([k, v]) => `*${k[0].toUpperCase() + k.slice(1)}:* ${v}`).join(' ')}`);
   if (x.change) s.push('', `**Change from Version 4.** ${x.change}`);
@@ -146,6 +172,8 @@ function md() {
     '- **A true blueprint at week 12.** Everything the founder writes becomes one document in eight parts: leader, people, what you sell, marketing, sales, money, systems, the next twelve weeks.',
     '- **One question per screen.** Each blank of the sentence gets its own screen. Days are taps. Enter moves on.',
     '- **Every Sunday counts.** From Level 02, a level opens by asking about last week’s four actions: Done, Partly, Not yet. The readings show what was done and how good the estimates were.',
+    '- **Twenty actions a level, at the founder’s size.** The four from the founder’s own sentences are the **Do** actions. My Blueprint → This week adds, in each area, **Look** (open and count), **Decide** (write the line), **Involve** (one person or customer) and **Keep** (make it weekly): twenty in all, written for four sizes (before the first sale · selling alone · a team with payroll · 16 people or more). Every level, 01–12.',
+    '- **Feedback at every step** (Inform → Reform → Transform, never a label on screen). Every area opens on its idea, in one sentence; each tap gets a reply; the slider says what the number costs; each blank that needs it gets a check as it is written. All twelve levels.',
     '- **Nothing is asked twice.** Where the Launchpad plan or the Growth Plan already covers a step, the level shows that answer back or links to it. Seven Launchpad actions that repeat a level become counts (proposal).',
     `- **Decisions:** D1 to D7 are applied (1 Nov); D8, the book titles, is still yours. Saved answers keep their meaning: only new keys are added, so no migration.`, '');
   out.push('## Decisions', '', mdTable(['', 'Question', 'What I found', 'Recommendation and status'], DECISIONS), '');
@@ -247,18 +275,19 @@ function hDomain(L, x) {
   let n = 4;
   return `<section class="dom" style="--c:var(--${x.domKey})" id="l${two(L.n)}-${x.domKey}">
   <h4><span class="lt">${esc(x.letter)}</span><span>${esc(x.dom)} · <b>${esc(x.name)}</b></span></h4>
-  <p class="topic">${esc(x.topic)}</p>
-  <p class="ins"><b>Inform · why it matters</b> ${esc(x.ins)}</p>
+  <p class="topic">${esc(x.topic)}${x.size ? ` <span class="chip">examples: ${esc(x.size)}</span>` : ''}</p>
+  ${x.idea ? `<p class="ins"><b>Inform · the idea, before the tap</b> ${esc(x.idea)}</p><p class="sm"><b>Why it matters</b> (folded under it) ${esc(x.ins)}</p>` : `<p class="ins"><b>Inform · why it matters</b> ${esc(x.ins)}</p>`}
   <ol class="moves">
-    <li><b>Tap.</b> ${esc(x.tap.q)}<ul class="opts">${x.tap.o.map((o, i) => `<li><kbd>${i + 1}</kbd>${esc(o)}</li>`).join('')}</ul></li>
-    <li><b>Slide.</b> ${esc(x.slide.q)}<p class="sm">Scale ${esc(x.slide.scale)} · ends “${esc(x.slide.ends[0])}” and “${esc(x.slide.ends[1])}” · starts at ${esc(x.slide.d)}<br>${esc(x.slide.words)}</p></li>
-    <li><b>Write once</b>, one blank per screen<p class="sent">“${esc(x.sentence)}”</p><ul class="blanks">${x.blanks.map((b) => `<li><code>${esc(b.k)}</code> ${esc(b.hint)} <i>e.g. ${esc(b.example)}</i>${b.day ? `<span class="chip">${b.date ? 'a date' : 'day chips'}</span>` : ''}</li>`).join('')}</ul></li>
+    <li><b>Tap.</b> ${esc(x.tap.q)}<ul class="opts">${x.tap.o.map((o, i) => `<li><kbd>${i + 1}</kbd>${esc(o)}${x.tap.why[i] ? `<span class="sm"> → ${esc(x.tap.why[i])}</span>` : ''}</li>`).join('')}</ul></li>
+    <li><b>Slide.</b> ${esc(x.slide.q)}<p class="sm">Scale ${esc(x.slide.scale)} · ends “${esc(x.slide.ends[0])}” and “${esc(x.slide.ends[1])}” · starts at ${esc(x.slide.d)}<br>${esc(x.slide.words)}</p>${x.slide.costs.length ? `<ul class="blanks">${x.slide.costs.map(([v, t]) => `<li><b>${esc(v)}</b> ${esc(t)}</li>`).join('')}</ul>` : ''}</li>
+    <li><b>Write once</b>, one blank per screen<p class="sent">“${esc(x.sentence)}”</p><ul class="blanks">${x.blanks.map((b) => `<li><code>${esc(b.k)}</code> ${esc(b.hint)} <i>e.g. ${esc(b.example)}</i>${b.day ? `<span class="chip">${b.date ? 'a date' : 'day chips'}</span>` : ''}${b.ck ? `<span class="sm"><br>✓ ${esc(b.ck.ok)}${b.ck.hint ? ` · → ${esc(b.ck.hint)}` : ''}${b.ck.note ? ` · ${esc(b.ck.note)}` : ''}</span>` : ''}</li>`).join('')}</ul></li>
     ${x.on ? `<li class="new"><b>Day</b> <span class="chip">new</span> ${esc(x.on)}</li>` : ''}
     <li class="new"><b>Done when</b> <span class="chip">new</span> ${hEx(x.doneEx)}<p class="sm">Then: “How sure are you that this is done by Sunday?” 0–100%.</p></li>
     <li><b>Four lines back</b><dl class="four">${x.four.map(([a, b, c]) => `<dt>${esc(a)} <i>${esc(b)}</i></dt><dd>${hEx(c)}</dd>`).join('')}</dl></li>
   </ol>
   <div class="keep"><p class="kp">Transform · yours to keep · Blueprint part: ${esc(x.bp)}</p><h5>${hEx(x.take.title)}</h5><ol>${x.take.lines.map((l) => `<li>${hEx(l)}</li>`).join('')}</ol></div>
   <p class="ny"><b>If Sunday says Partly or Not yet:</b> ${hEx(x.notyet)}</p>
+  ${x.acts.length ? `<div class="keep"><p class="kp">The five actions · My Blueprint → This week · at four sizes</p><ol>${x.acts.map((a) => `<li><b>${esc(a.step)}</b> <i>${esc(a.says)}</i>${a.same ? ` ${esc(a.by[0][1])}${a.by[0][2] ? ` <i>(${esc(a.exLabel)}: ${esc(a.by[0][2])})</i>` : ''}` : `<ul>${a.by.map(([n, t, e]) => `<li><i>${esc(n)}:</i> ${esc(t)}${e ? ` <i>(${esc(a.exLabel)}: ${esc(e)})</i>` : ''}</li>`).join('')}</ul>`}</li>`).join('')}</ol></div>` : ''}
   <ul class="links">${linksOf(x).map((l) => `<li>${esc(l)}</li>`).join('')}</ul>
   ${x.stage ? `<p class="stage">${Object.entries(x.stage).map(([k, v]) => `<b>${esc(k[0].toUpperCase() + k.slice(1))}:</b> ${esc(v)}`).join(' ')}</p>` : ''}
   ${x.change ? `<p class="chg"><b>Change from Version 4.</b> ${esc(x.change)}</p>` : ''}
@@ -293,6 +322,8 @@ function html() {
 <li><b>A true blueprint at week 12.</b> Everything the founder writes becomes one document in eight parts: leader, people, what you sell, marketing, sales, money, systems, the next twelve weeks.</li>
 <li><b>One question per screen.</b> Each blank of the sentence gets its own screen. Days are taps. Enter moves on.</li>
 <li><b>Every Sunday counts.</b> From Level 02, a level opens with last week’s four actions: Done, Partly, Not yet. The readings show what was done and how good the estimates were.</li>
+<li><b>Twenty actions a level, at the founder’s size.</b> The four Do actions come from the founder’s sentences; My Blueprint → This week adds Look, Decide, Involve and Keep in each area, written for four sizes. Every level, 01–12.</li>
+<li><b>Feedback at every step.</b> The idea before the tap, a reply to each tap, what the number costs, a check on each blank that needs one. All twelve levels.</li>
 <li><b>Nothing is asked twice.</b> Where the Launchpad plan or the Growth Plan already covers a step, the level shows that answer back or links to it.</li>
 <li><b>Decisions:</b> D1 to D7 are applied (1 Nov); D8, the book titles, is still yours. Saved answers keep their meaning: only new keys are added, so no migration.</li>
 </ul>
