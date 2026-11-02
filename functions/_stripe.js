@@ -30,9 +30,9 @@ export const STEPS = {
   session: { amount: 2700, name: 'The Boardroom', product: 'The Boardroom · one session with Alexandru', opens: 'Levels 04 and 05', first: 4,
     sessions: 'one 1:1 session with Alexandru; Alexandru and the team read your first three levels before you speak' },
   lab: { amount: 9700, name: 'The LAB', product: 'Personal Leadership LAB', opens: 'Levels 06 to 09', first: 6,
-    sessions: 'two 1:1 sessions with Alexandru' },
+    sessions: 'two 1:1 sessions with Alexandru in total: the Boardroom’s, and the second with the LAB' },
   hub: { amount: 75000, name: 'The HUB', product: 'Business Growth HUB · the full Blueprint', opens: 'every level up to 12, with the LAB included', first: 10,
-    sessions: 'three 1:1 sessions with Alexandru in total, including the one from the LAB' },
+    sessions: 'three 1:1 sessions with Alexandru in total: the Boardroom’s, the LAB’s, and the third with the HUB' },
   premium: { amount: 198900, name: 'The Summit', product: 'The Summit · everything, and Alexandru every week', opens: 'all twelve levels, the LAB, the HUB and every resource', first: 4,
     sessions: 'Alexandru mentoring you every week' },
 };

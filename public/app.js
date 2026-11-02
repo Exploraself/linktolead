@@ -757,9 +757,9 @@ function toldHTML() {
 }
 /** The way back to the North Star: its number is the hidden potential. */
 const nsHTML = () => `<p class="wl-ns"><span class="wl-ic">${NS_IC}</span><span>${compassRec
-  ? 'Your North Star showed it to you as one number: the strength you see in yourself that is not at work yet.'
-  : 'The North Star shows it as one number: how much of the strength you see in yourself is not at work yet.'}
-  <a href="/northstar/" target="_blank" rel="noopener">${compassRec ? 'Open my North Star' : 'Take the North Star'} ↗</a></span></p>`;
+  ? 'By the way: go back to your North Star. It shows this as one number: the strength you see in yourself that is not at work yet.'
+  : 'By the way: take the North Star. It shows this as one number: how much of the strength you see in yourself is not at work yet.'}
+  <a href="/northstar/" target="_blank" rel="noopener">${compassRec ? 'Go to my North Star' : 'Take the North Star'} ↗</a></span></p>`;
 function welcomeHTML(i = 0) {
   const W = welcomeOf(level);
   if (!W) return '';

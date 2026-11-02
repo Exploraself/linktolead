@@ -210,8 +210,9 @@ sales, people paid, how clear the offer is, how many people it takes to win
 one customer, how many of ten said yes, how many come back, what is left of
 every $100, and the twelve-week win. Every number has its "not yet" or "I
 don't know"; before a first sale the selling questions are passed over. No
-customer yet: before the first sale; nobody else paid: selling alone; 1 to 14
-paid: a team with payroll; 15 or more: 16 people or more. "Your version"
+customer yet: before the first sale; customers, and nobody else paid:
+selling alone (working alone); 1 to 14 paid: a team with payroll; 15 or
+more: 16 people or more. "Your version"
 shows it, reads up to three numbers back (each pointing at a decision and a
 level, rule 9), and the founder says "That's me" or picks another. "Still
 …?" asks again at 04, 06 and 10. The version sets the size of the examples

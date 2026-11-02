@@ -1124,7 +1124,7 @@ export const WELCOME4 = [
       { t: 'We understand you', h: 'Three levels in{, first}. You have seen things.',
         p: 'A rule that runs your week. A feeling that decides before you do. A number you were avoiding. That took courage. And the elephant is still in the room: where you are today was built by the past, by choices you made before you knew what you know now.', told: true },
       { t: 'It is possible', h: 'The future you is already in this room.',
-        p: 'The person who decides calmly, asks plainly and keeps their word is not someone else. It is you, a few weeks of practice from here. For fifteen years I have built teams, developed leaders and helped each person grow into the best version of themselves. From here, you move forward with me.' },
+        p: 'The person who decides calmly, asks plainly and keeps their word is not someone else. It is you, a few weeks of practice from here. For a decade and a half I have built teams, developed leaders and helped each person grow into the best version of themselves. From here, you move forward with me.' },
       { t: 'The puzzle', h: 'Knowing is not yet doing.',
         p: 'Under pressure the old habit comes back first, and a plan that lives only in your head is gone by Tuesday afternoon. A page cannot see what you cannot see about yourself. A mentor can: I read what you wrote, I understand your business at its size, and I ask the question you hoped nobody would.' },
       { t: 'Here you are', h: 'The Boardroom: you, and me.',
@@ -1143,7 +1143,7 @@ export const WELCOME4 = [
       { t: 'The puzzle', h: 'The day-to-day always wins.',
         p: 'There is no time to fix the system, because the system takes all your time. We build what we like and call it what customers want. And the hard conversations are hard at every size: one customer, or five hundred.' },
       { t: 'Here you are', h: 'The LAB: build it to serve.',
-        p: 'Four levels about the inside of your business: the conversations you avoid, your week, your offer and its price, your systems. Each one asks the same question: does this serve the customer, or me? Two sessions with me on the way. Answer every question fully.',
+        p: 'Four levels about the inside of your business: the conversations you avoid, your week, your offer and its price, your systems. Each one asks the same question: does this serve the customer, or me? Your second session with me comes after Level 09. Answer every question fully.',
         summit: 'Four levels about the inside of your business: the conversations you avoid, your week, your offer and its price, your systems. Each one asks the same question: does this serve the customer, or me? We meet at every level. Answer every question fully.' }],
     asks: [
       { k: 'asked', q: 'When did you last ask a customer what they would change?', hint: 'Asked them directly, and listened to the answer.', o: ['This month', 'This year', 'Longer ago', 'Never, not directly', 'No customers yet'] },
@@ -1158,7 +1158,7 @@ export const WELCOME4 = [
       { t: 'The puzzle', h: 'The arithmetic is cheap. The choice is not.',
         p: 'A machine can add up your sales and draw the chart in seconds. It cannot decide which customer to let go, which price to say out loud, or what to stop doing. Growth brings more people to reach and competitors who look the same. What got you here will not take you further on its own.' },
       { t: 'Here you are', h: 'The HUB: grow the market.',
-        p: 'Three levels about the outside of your business: your first hundred names, your advantage, your next twelve weeks. Every number you write asks for a decision only you can make. Level 12 ends with one twelve-week number and the checkpoints to hold it. Answer every question fully.',
+        p: 'Three levels about the outside of your business: your first hundred names, your advantage, your next twelve weeks. Every number you write asks for a decision only you can make. Level 12 ends with one twelve-week number and the checkpoints to hold it, and your third session with me. Answer every question fully.',
         summit: 'Three levels about the outside of your business: your first hundred names, your advantage, your next twelve weeks. We meet at every level. Level 12 ends with one twelve-week number and the checkpoints to hold it. Answer every question fully.' }],
     asks: [
       { k: 'know', q: 'Do you know what one sale leaves you, after its costs?', hint: 'The money that stays, not the price.', o: ['Yes, to the dollar', 'Roughly', 'No', 'No sales yet'] },
@@ -1189,18 +1189,19 @@ export function askWords(work, lv, k) {
  * every founder"): customers, people paid, sales, how clear the offer is, how
  * many people it takes to win one customer, how many say yes, how many come
  * back, what a sale leaves. Every money question has its "not yet" answer.
- * The size follows the answers: no customers yet → before the first sale;
- * nobody else paid → selling alone; 1 to 14 paid → a team with payroll;
- * 15 or more → 16 people or more. Saved as w.v4.where.<k>; a question that
+ * The size follows the answers (Alexandru, 2 Nov 2026): no customer yet →
+ * before the first sale; customers, and nobody else paid → selling alone
+ * (working alone); 1 to 14 paid → a team with payroll; 15 or more → 16
+ * people or more. Saved as w.v4.where.<k>; a question that
  * does not apply (no customers yet) is skipped. */
 export const TYPES4 = [
   { k: 'start', n: 'Before the first sale', sub: 'An idea, or started with no paying customer yet',
     means: 'Every example and every action is written for a founder finding the first paying customers.' },
-  { k: 'solo', n: 'Selling alone', sub: 'Customers pay you, and you do the work',
-    means: 'Every example and every action is written for one person who sells and does the work.' },
-  { k: 'team', n: 'A team with payroll', sub: '2 to 15 people, paid every month',
+  { k: 'solo', n: 'Selling alone', sub: 'You have customers, and you work alone',
+    means: 'Every example and every action is written for one person with customers, working alone.' },
+  { k: 'team', n: 'A team with payroll', sub: 'You and 1 to 14 people you pay every month',
     means: 'Every example and every action is written for an owner who pays people every month.' },
-  { k: 'company', n: '16 people or more', sub: 'One decision moves many salaries',
+  { k: 'company', n: '16 people or more', sub: 'A bigger team: one decision moves many salaries',
     means: 'Every example and every action is written for a leader whose decisions move many salaries.' }];
 export const typeName = (k) => (TYPES4.find((t) => t.k === k) || {}).n || '';
 /** Asked unless the founder said no customer yet. */
@@ -1681,8 +1682,8 @@ export function buildPage(work, lv) {
 }
 
 /* ── The 1:1 sessions, and the brief for Alexandru and the team ───────────
- * Three, as the ladder sells them (content.js: The Boardroom one, the LAB
- * two, the HUB three in total). Session 1 opens Level 04; Session 2 follows
+ * Three in total, one per step, as the ladder sells them (Alexandru, 2 Nov
+ * 2026): the Boardroom's, the LAB's (the second), the HUB's (the third). Session 1 opens Level 04; Session 2 follows
  * the Chapter II reading; Session 3 follows the Chapter III reading. The
  * brief is built only from the founder's own answers (rule 6): what they
  * promised, what happened on Sunday, how good their estimates were. */
