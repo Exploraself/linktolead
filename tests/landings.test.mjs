@@ -34,7 +34,9 @@ for (const [k, [tag, door, welcome]] of Object.entries(MAP)) {
   ok(NORTH_STAR_LANDINGS.includes(k) === (welcome === 'northstar'), `${k}: ${welcome} welcome`);
 }
 ok(originOf({ landing: 'north1' }) === 'northstar' && NORTH_STAR_LANDINGS.includes('north1'), 'north1: North Star door and welcome');
-ok(Object.keys(LANDING_TAGS).every((k) => LANDING_TAGS[k] === (k === 'compass' ? 'linktolead-northstar' : 'linktolead-' + k)), "the rule: 'linktolead-' + the page address");
+// The rule, with Alexandru's one exception (2 Nov 2026): the free tools' tag is TOOLS.
+ok(Object.keys(LANDING_TAGS).every((k) => LANDING_TAGS[k] === (k === 'compass' ? 'linktolead-northstar' : k === 'tools' ? 'TOOLS' : 'linktolead-' + k)), "the rule: 'linktolead-' + the page address (tools: TOOLS)");
+ok(LANDINGS.includes('tools') && LANDING_TAGS.tools === 'TOOLS' && originOf({ landing: 'tools' }) === 'blueprint' && !NORTH_STAR_LANDINGS.includes('tools'), 'tools: a landing, tag TOOLS, the Launchpad welcome');
 ok(landingOf('road21') === 'north2' && OLD_LANDINGS.road21 === 'north2' && !('road2' in OLD_LANDINGS), "an old /north2/ tab sending 'road21' is stored as north2; 'road2' is the new page");
 ok(!('road21' in LANDING_TAGS), 'no tag is made for road21 any more');
 

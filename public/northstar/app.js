@@ -543,9 +543,11 @@
 
   /* ── Parts ──────────────────────────────────────────────────────────────── */
   const NAV = [['overview', '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><g><polygon points="12,4 14,12 12,13.5 10,12" fill="#6F93B8"/><polygon points="12,20 14,12 12,10.5 10,12" fill="currentColor" opacity=".5"/><animateTransform attributeName="transform" type="rotate" values="20 12 12;34 12 12;20 12 12" dur="7s" repeatCount="indefinite"/></g></svg>', 'Your North Star'],
-    ['clear', '1', 'Yourself'], ['people', '2', 'Your people'], ['numbers', '3', 'Your numbers'], ['plan', '4', 'Your next steps'], ['method', '⌘', 'How it works']];
+    ['clear', '1', 'Yourself'], ['people', '2', 'Your people'], ['numbers', '3', 'Your numbers'], ['plan', '4', 'Your next steps'], ['method', '⌘', 'How it works'],
+    // The free tools (2 Nov 2026): a link to the toolkit, not a part of this page.
+    ['tools', '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-.5-.5-2.5z"/></svg>', 'Tools', '/tools/']];
   const navOn = () => (typeof window !== 'undefined' && window.__nsSpy) || UI.page; // spy.js: the section on screen
-  const pNav = (c) => NAV.map(([id, ni, t]) => `<button type="button" class="nl ${navOn() === id ? 'on' : ''}" data-go="${id}" data-f="nav-${id}"${navOn() === id ? ' aria-current="true"' : ''}><span class="ni">${ni}</span>${t}${id === 'clear' ? `<small style="margin-left: auto; font-size: 9px">${p1Count(c).done}/${p1Count(c).total}</small>` : ''}</button>`).join('');
+  const pNav = (c) => NAV.map(([id, ni, t, href]) => href ? `<a class="nl" href="${href}" data-f="nav-${id}"><span class="ni">${ni}</span>${t}</a>` : `<button type="button" class="nl ${navOn() === id ? 'on' : ''}" data-go="${id}" data-f="nav-${id}"${navOn() === id ? ' aria-current="true"' : ''}><span class="ni">${ni}</span>${t}${id === 'clear' ? `<small style="margin-left: auto; font-size: 9px">${p1Count(c).done}/${p1Count(c).total}</small>` : ''}</button>`).join('');
 
   const STEP_CARDS = [['1', 'Yourself', 'Eleven quick questions', 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'clear'],
     ['2', 'Your people', 'Customers and team', D[1].icon, 'people'], ['3', 'Your numbers', 'One month, roughly', 'M4 20V10M10 20V4M16 20v-7M22 20H2', 'numbers'],

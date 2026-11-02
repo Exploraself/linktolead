@@ -149,10 +149,13 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
   // Every letter serves (Alexandru, 31 Oct 2026): greet, thank, encourage,
   // say we are here, and give something to do. Security letters (sign-in
   // link, reset, password changed) never sell: their P.S. is a free gift.
+  // `offer` is an OFFERS key, or a letter's own P.S. ({ paid, line(base) }:
+  // 12 Days to Start Winning, functions/_twelve-days.js).
   const free = Object.keys(OFFERS).filter((k) => !OFFERS[k].paid);
-  const use = security && offer && OFFERS[offer] && OFFERS[offer].paid ? free[seed % free.length] : offer;
+  const O = offer && typeof offer === 'object' ? offer : OFFERS[offer];
+  const use = security && O && O.paid ? OFFERS[free[seed % free.length]] : O;
   const tests = sign ? threeAssessments(seed) : [];
-  const ps = use && OFFERS[use] ? parts(['P.S. ', ...OFFERS[use].line(base)]) : null;
+  const ps = use && typeof use.line === 'function' ? parts(['P.S. ', ...use.line(base)]) : null;
   const good = sign ? GOOD_WORDS[seed % GOOD_WORDS.length] : '';
   const qs = !sign || ask === null ? [] : Array.isArray(ask) ? ask : (SHORTCUTS[ask] || SHORTCUTS.start);
   const bye = sign ? farewell(tz, at) : '';

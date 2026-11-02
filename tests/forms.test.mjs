@@ -190,7 +190,7 @@ const noRun = baseOf({ ...EXAMPLE, run: null, rate: null, hire: null }), nm = E.
 ok(noRun.fixed === 0 && nm.cash === null && nm.people === null && Number.isFinite(nm.mine), 'empty Fine-tune boxes: no money figure invented, the hours still move');
 
 // ── Mailchimp landing tags ──────────────────────────────────────────────────
-ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-road2', road3: 'linktolead-road3', road4: 'linktolead-road4', north1: 'linktolead-north1', north2: 'linktolead-north2', north3: 'linktolead-north3', compass: 'linktolead-northstar', summit: 'linktolead-summit' }), 'landing tags: linktolead- + the page address');
+ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-road2', road3: 'linktolead-road3', road4: 'linktolead-road4', north1: 'linktolead-north1', north2: 'linktolead-north2', north3: 'linktolead-north3', compass: 'linktolead-northstar', summit: 'linktolead-summit', tools: 'TOOLS' }), 'landing tags: linktolead- + the page address (the tools: TOOLS, Alexandru, 2 Nov 2026)');
 // North 2 (was Road 2.1): its own tag, no empty tag, the FULL form.
 {
   const { tagsFor } = await import('../functions/_mailchimp.js');

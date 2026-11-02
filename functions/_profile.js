@@ -11,7 +11,8 @@
 //          surname, email, consent. No password, ever: these founders sign
 //          in by email link.
 // signup_type says which; landing says which sales page ('road1' … 'road4',
-// 'north2', 'north3', 'summit' or 'compass'), and utm_* the tags the founder arrived with.
+// 'north2', 'north3', 'summit' or 'compass'), or 'tools' (the free tools and
+// the toolkit page, FULL form, 2 Nov 2026), and utm_* the tags the founder arrived with.
 //
 // Stored on student_profile: company '' means "No company yet"; NULL means it
 // was never asked.
@@ -25,7 +26,7 @@ export const INDUSTRIES = ['Coaching & consulting', 'Creative & design', 'E-comm
   'Beauty & personal care', 'Education & training', 'Professional services', 'Trades & construction', 'Technology & software',
   'Real estate', 'Manufacturing', 'Nonprofit & social impact', 'Other'];
 export const SIGNUP_TYPES = ['full', 'simple'];
-export const LANDINGS = ['road1', 'road2', 'road3', 'road4', 'north1', 'north2', 'north3', 'compass', 'summit'];
+export const LANDINGS = ['road1', 'road2', 'road3', 'road4', 'north1', 'north2', 'north3', 'compass', 'summit', 'tools'];
 /** Older landing keys, each to the page it is now. A page loaded before a
  *  rename may still send one; stored ones are moved over (functions/_shared.js).
  *  a, b, c: the first three sales pages. road21: /north2/ until 31 Oct 2026.

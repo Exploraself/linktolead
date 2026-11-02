@@ -30,6 +30,9 @@ export const DEFAULT_FORM = { host: 'exploraselfmba.us8.list-manage.com', server
  *   linktolead-stage-building …       their stage now (STAGE_TAGS)
  *   linktolead-weakest-people …       the North Star side that needs them first
  *   linktolead-library-built-to-lead  a book taken from the library
+ *   TOOLS                             opened a free tool, or joined 12 Days
+ *                                     to Start Winning (Alexandru's own name,
+ *                                     2 Nov 2026: the one tag outside the system)
  * Facts about the person (industry, interest, company) are contact fields,
  * never tags. Change a name here only with Alexandru: he keeps a system. */
 
@@ -104,12 +107,17 @@ export function mailchimpState(env = {}) {
  *  names ('Landing - Road 1' …) are sent as inactive, so a founder whose tags
  *  are sent again loses the old one (API mode). */
 /** Founders who cross from one door to the other (Alexandru, 31 Oct 2026). */
+/** The free tools (Alexandru, 2 Nov 2026): every founder who opens a tool or
+ *  subscribes to 12 Days to Start Winning carries the tag TOOLS, exactly that
+ *  name. His one exception to the linktolead- system; it is also the landing
+ *  tag of a sign-up from the tools (landing 'tools'). */
+export const TOOLS_TAG = 'TOOLS';
 export const CROSS_TAGS = { blueprint: 'linktolead-crossed-blueprint', northstar: 'linktolead-crossed-northstar' };
 /** Which door a founder came in through: the North Star (its box or its sales
  *  pages) or the Blueprint (the road pages, The Summit). */
 export const NORTH_STAR_DOORS = ['compass', 'north1', 'north2', 'north3'];
 export const originOf = ({ landing, source } = {}) => (NORTH_STAR_DOORS.includes(landing) || (!landing && source === 'compass') ? 'northstar' : 'blueprint');
-export const LANDING_TAGS = { road1: 'linktolead-road1', road2: 'linktolead-road2', road3: 'linktolead-road3', road4: 'linktolead-road4', north1: 'linktolead-north1', north2: 'linktolead-north2', north3: 'linktolead-north3', compass: 'linktolead-northstar', summit: 'linktolead-summit' };
+export const LANDING_TAGS = { road1: 'linktolead-road1', road2: 'linktolead-road2', road3: 'linktolead-road3', road4: 'linktolead-road4', north1: 'linktolead-north1', north2: 'linktolead-north2', north3: 'linktolead-north3', compass: 'linktolead-northstar', summit: 'linktolead-summit', tools: TOOLS_TAG };
 
 /** The tags for one founder. In API mode each stage and domain tag is sent as
  *  active or inactive, so a founder who moves on loses the old one. Step tags

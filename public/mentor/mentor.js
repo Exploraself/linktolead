@@ -8,7 +8,7 @@
 // in Founders opens a drawer with every action; "Open their work" is the
 // one-founder view, one(id).
 
-import { STEP_KEYS, STEP_NAMES, STEP_SHORT, GROUPS, LANDING_SHORT, summary, filter, byLanding, groupOf, nextAction, funnel, today, levelSet, levelCount, launchpadDone, crossedOf,
+import { STEP_KEYS, STEP_NAMES, STEP_SHORT, GROUPS, LANDING_SHORT, TOOL_NAMES, summary, filter, byLanding, groupOf, nextAction, funnel, today, levelSet, levelCount, launchpadDone, crossedOf,
   told, toldTally, theirWords, SIDES, PAIN_NAMES, WANT_NAMES, VALUE_NAMES, TEAM_NAMES, growthDone, growthGroups, growthWritten, stuckOnSunday } from './dash.js';
 import { LEVELS4, wordOf, briefOf, GOT } from '/levels-v4.js';
 
@@ -51,6 +51,11 @@ const groupPill = (s) => { const g = groupOf(s); return g ? `<span class="pill $
 const levelsBar = (s) => { const L = levelSet(s), n = levelCount(s), has = (i) => (s.level_list ? L.has(i + 1) : i < n);
   return `<span class="prog" role="img" aria-label="${n} of 12 levels">${Array.from({ length: 12 }, (_, i) => `<i class="${has(i) ? 'on' : ''}${i < 3 ? ' free' : ''}"></i>`).join('')}</span>`; };
 const landingName = (s) => LANDING_SHORT[s.landing] || '';
+/** The free tools (2 Nov 2026): which they used, and their 12 Days. */
+const toolsLine = (s) => { const t = String(s.tools || '').split(',').filter((k) => TOOL_NAMES[k] && k !== 'twelve-days'); return t.length ? esc(t.map((k) => TOOL_NAMES[k]).join(' · ')) + (s.tools_at ? `<span class="em">last ${esc(day(s.tools_at))}</span>` : '') : '—'; };
+const twelveLine = (d) => { if (d === null || d === undefined || d === '') return 'not subscribed'; const n = Number(d) || 0; return n >= 13 ? 'finished: all 12 and what next' : n > 0 ? `Day ${n} of 12 sent` : 'subscribed · Day 1 next'; };
+/** One use of a tool, in words: what they did, and their result's summary. */
+const useLine = (u) => `${esc(u.name)} · ${u.kind === 'result' ? 'reached the result' : u.kind === 'subscribe' ? 'subscribed' : 'opened'}${u.result && u.result.summary ? ': <b>' + esc(String(u.result.summary)) + '</b>' : ''} <span class="tiny">· ${esc(when(u.at))}</span>`;
 /** The Massive Growth Plan: "x/21", and the ticked steps by domain with
  *  their dates. Every word from window.GrowthPlan (/northstar/growth-plan.js). */
 const gpTotal = () => (data && data.totalGrowth) || 21;
@@ -199,7 +204,7 @@ function filtersHTML() {
     ${row('Step', 'step', [['all', 'All'], ...STEP_KEYS.map((k) => [k, STEP_SHORT[k]])])}
     ${row('Activity', 'act', [['all', 'All'], ['new', 'New this week'], ['active', 'Active'], ['quiet', 'Quiet 14+ days']])}
     ${row('Needs', 'need', [['all', 'Anything'], ['q', 'A question waiting'], ['ready', 'Ready for the Boardroom'], ['nopw', 'No password']])}
-    ${row('More', 'more', [['all', 'Everyone'], ['full', 'Full form'], ['simple', 'Simple form'], ['library', 'Took a library book']])}
+    ${row('More', 'more', [['all', 'Everyone'], ['full', 'Full form'], ['simple', 'Simple form'], ['library', 'Took a library book'], ['tools', 'Used a tool']])}
   </div>`;
 }
 
@@ -339,6 +344,8 @@ function drawerHTML(s) {
       <dt>Consent</dt><dd>${s.consent ? 'yes' : 'no'}${s.unsubscribed ? ' · <b class="warn">unsubscribed</b>' : ''}</dd>
       <dt>Mailchimp</dt><dd>${mcState(s)}</dd>
       <dt>Library</dt><dd>${books ? plural(books, 'book', 'books') + ' taken' : '—'}</dd>
+      <dt>Tools</dt><dd>${toolsLine(s)}</dd>
+      <dt>12 Days</dt><dd>${esc(twelveLine(s.twelve_day))}</dd>
     </dl>
     <div><p class="lbl">Their path</p><ul class="tl" style="margin-top:8px">
       <li>Signed up${land ? ' on ' + esc(land) : ''} <span>· ${esc(day(s.joined_at))}</span></li>
@@ -535,7 +542,7 @@ async function one(id) {
   if (!r.ok) return load();
   NSE = r.data && r.data.compass ? await engine() : null;
   const d = r.data, s = d.student, A = d.answers || [], C = d.compass, P = d.profile || {}, T = d.ticks || [], M = d.messages || [], K = d.climb || [];
-  const SC = d.stages || [], LB = d.library || [], TH = d.thread || [];
+  const SC = d.stages || [], LB = d.library || [], TH = d.thread || [], TU = d.tools || [], TW = d.twelve;
   const LEADN = { self: 'Lead yourself', people: 'Lead your people', work: 'Lead your business', market: 'Lead the market' };
   const answered = new Set(TH.filter((x) => x.from === 'mentor').map((x) => x.note));
   const DOMS = [['self', 'Lead yourself'], ['people', 'Lead your people'], ['work', 'Lead your business'], ['market', 'Lead the market']];
@@ -552,7 +559,7 @@ async function one(id) {
         <div class="k"><b>Step</b><span>${esc(STEP_NAMES[s.tier || 'free'] || s.tier)}</span></div>
         <div class="k"><b>Answers written</b><span>${A.filter((a) => a.body).length}</span></div>
         <div class="k"><b>Signed up with</b><span>${esc(P.signup_type ? P.signup_type + ' form' : '—')}</span></div>
-        <div class="k"><b>Landing</b><span>${esc(({ road1: 'Road 1 (/road1/)', road2: 'Road 2 (/road2/)', road3: 'Road 3 (/road3/)', road4: 'Road 4 (/road4/)', north2: 'North 2 (/north2/)', north3: 'North 3 (/north3/)', compass: 'The North Star box', summit: 'The Summit' })[P.landing] || '—')}${P.utm_source ? ' · ' + esc([P.utm_source, P.utm_medium, P.utm_campaign, P.utm_content, P.utm_term].filter(Boolean).join(' / ')) : ''}</span></div>
+        <div class="k"><b>Landing</b><span>${esc(({ road1: 'Road 1 (/road1/)', road2: 'Road 2 (/road2/)', road3: 'Road 3 (/road3/)', road4: 'Road 4 (/road4/)', north2: 'North 2 (/north2/)', north3: 'North 3 (/north3/)', compass: 'The North Star box', summit: 'The Summit', tools: 'The Tools (/tools/, /toolkit/)' })[P.landing] || '—')}${P.utm_source ? ' · ' + esc([P.utm_source, P.utm_medium, P.utm_campaign, P.utm_content, P.utm_term].filter(Boolean).join(' / ')) : ''}</span></div>
         <div class="k"><b>Company</b><span>${P.company === '' ? 'No company yet' : esc(P.company || '—')}</span></div>
         <div class="k"><b>Interest</b><span>${esc(P.interest || '—')}</span></div>
         <div class="k"><b>Industry</b><span>${esc(P.industry || '—')}</span></div>
@@ -571,6 +578,10 @@ async function one(id) {
     <div class="panel"><h2>Library</h2>
       ${LB.length ? `<ul class="climb" style="margin:8px 0 0;padding-left:18px">${LB.map((x) => `<li>${esc(x.name)} · ${esc(day(x.at))}</li>`).join('')}</ul>`
         : '<p class="tiny" style="margin-top:8px">Nothing downloaded yet.</p>'}</div>
+    <div class="panel"><h2>Tools</h2>
+      <p class="tiny" style="margin-top:8px">12 Days to Start Winning: ${esc(TW ? TW.words + ' · joined ' + day(TW.subscribed_at) + (TW.last_sent_at ? ' · last letter ' + when(TW.last_sent_at) : '') : 'not subscribed')}</p>
+      ${TU.length ? `<ul class="climb" style="margin:8px 0 0;padding-left:18px">${TU.map((u) => `<li>${useLine(u)}</li>`).join('')}</ul>`
+        : '<p class="tiny" style="margin-top:8px">No tool opened yet.</p>'}</div>
     ${briefPanel(d.work, C)}
     ${C ? compassPanel(C)
       : '<div class="panel"><h2>North Star</h2><p class="tiny" style="margin-top:8px">Not done yet.</p></div>'}

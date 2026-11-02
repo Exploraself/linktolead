@@ -95,9 +95,14 @@ export function summary(students, waiting, now = Date.now()) {
   };
 }
 
+/** Used a free tool, or joined 12 Days to Start Winning (2 Nov 2026). */
+export const usedTools = (s) => !!(s && (s.tools || (s.twelve_day !== null && s.twelve_day !== undefined)));
+/** The tools' names for /mentor, the same as TOOL_NAMES in functions/api/tools.js. */
+export const TOOL_NAMES = { 'off-switch': 'The off-switch check', 'twelve-days': '12 Days to Start Winning', bottleneck: 'The bottleneck test', runway: 'Cash runway' };
+
 /** The table's rows. The old tiles (tile) and the cockpit's chips: group
  *  (ns, bp, both), step, act (new, active, quiet), need (q, ready, nopw),
- *  more (full, simple, library) and the search (name, email, business). */
+ *  more (full, simple, library, tools) and the search (name, email, business). */
 export function filter(students, { tile = 'all', q = '', group = 'all', step = 'all', act = 'all', need = 'all', more = 'all' } = {}, now = Date.now()) {
   const needle = String(q).trim().toLowerCase();
   return (students || []).filter((s) => {
@@ -118,6 +123,7 @@ export function filter(students, { tile = 'all', q = '', group = 'all', step = '
     if (need === 'nopw' && s.has_password) return false;
     if ((more === 'full' || more === 'simple') && s.signup_type !== more) return false;
     if (more === 'library' && !s.library) return false;
+    if (more === 'tools' && !usedTools(s)) return false;
     if (needle && !`${s.name || ''} ${s.email || ''} ${s.company || ''}`.toLowerCase().includes(needle)) return false;
     return true;
   });
@@ -175,8 +181,8 @@ export function today(students, waiting, now = Date.now()) {
 /** Sign-ups per landing: Roads 1 to 4, North 2 and 3, the North Star
  *  box and The Summit. Each row: all of them, the last 7 days, how many used
  *  the full form, and the split by group. */
-export const LANDINGS = [['road1', 'Road 1 · /road1/'], ['road2', 'Road 2 · /road2/'], ['road3', 'Road 3 · /road3/'], ['road4', 'Road 4 · /road4/'], ['north1', 'North 1 · /north1/'], ['north2', 'North 2 · /north2/'], ['north3', 'North 3 · /north3/'], ['compass', 'North Star box'], ['summit', 'The Summit · /northstar/summit/']];
-export const LANDING_SHORT = { road1: 'Road 1', road2: 'Road 2', road3: 'Road 3', road4: 'Road 4', north2: 'North 2', north3: 'North 3', compass: 'the North Star box', summit: 'The Summit' };
+export const LANDINGS = [['road1', 'Road 1 · /road1/'], ['road2', 'Road 2 · /road2/'], ['road3', 'Road 3 · /road3/'], ['road4', 'Road 4 · /road4/'], ['north1', 'North 1 · /north1/'], ['north2', 'North 2 · /north2/'], ['north3', 'North 3 · /north3/'], ['compass', 'North Star box'], ['summit', 'The Summit · /northstar/summit/'], ['tools', 'Tools · /tools/']];
+export const LANDING_SHORT = { road1: 'Road 1', road2: 'Road 2', road3: 'Road 3', road4: 'Road 4', north2: 'North 2', north3: 'North 3', compass: 'the North Star box', summit: 'The Summit', tools: 'the Tools' };
 export function byLanding(students, now = Date.now()) {
   const row = (k, name, rows) => {
     const g = { ns: 0, bp: 0, both: 0, none: 0 };

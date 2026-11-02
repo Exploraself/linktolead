@@ -199,3 +199,25 @@ Growth Plan ticks share `plan_tick` with the Account Plans but are never
 counted with them: `/api/plans` ("x of 32"), the count `/api/plans/tick`
 returns and /mentor's "Plan steps done" stay the plans' own. No Mailchimp
 tags.
+
+## 11. The free tools (2 Nov 2026)
+
+Four free tools, a hub and a page for ads. A tool needs a **full free
+account** (Alexandru's rule): signed out, the full form one field at a time;
+details missing, only those, once; a full account, one button. The
+founder's answers stay on the device first; each use goes to their account.
+
+| What | Where |
+|---|---|
+| The toolkit hub, by the four domains | `/tools/`, drawn from `public/tools/catalog.js` (a new tool is one entry there) |
+| Cash runway · The bottleneck test · The off-switch check | `/runway/`, `/bottleneck/`, `/off-switch/`: the cover, the access step (`public/tools/access.js`), the tool (`public/tools/run.js`; every word and sum in `public/tools/engine.js`), the result with ONE button to The Leader's North Star |
+| 12 Days to Start Winning | `/12-days/`: subscribe; the welcome goes at once, then one letter at 8:00 in the founder's time zone (profile `tz`, else New York), Days 1–12 and Day 13, never twice, stopped by an unsubscribe or a pause. Letters: `functions/_twelve-days.js`; the clock: `scheduled` in `worker.js`, `[triggers]` in `wrangler.toml` (every hour) |
+| The toolkit page for ads | `/toolkit/`: one offer, one button, no links out; the button makes the account and lands on `/tools/` |
+| Each use, kept | `POST /api/tools` (`functions/api/tools.js`), tables `tool_use` and `twelve_days`; refused for an account that is not full |
+| Mailchimp | landing `tools`, tag **TOOLS** (Alexandru's own name), the first time a founder opens each tool or subscribes (API mode, with consent) |
+| /mentor | per founder: the tools used and when, each result, and where they are in 12 Days; a "Used a tool" filter; "Tools" and "12 Days" CSV columns |
+| Menus | "Tools" in Your Base Camp and in the North Star |
+
+A preview copy (`*.pages.dev`) has no accounts: each tool page says so and
+offers to open the tool without one, so it can be looked at. On
+linktolead.exploraself.com the account always comes first.

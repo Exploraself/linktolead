@@ -9,6 +9,9 @@
 //                  downloads and their "Ask Alexandru" thread
 // GET ?growth=id   one founder's Massive Growth Plan: ticks and what they
 //                  wrote in its blanks, with the date of each change
+// The free tools (2 Nov 2026): the roster says which tools each founder used
+// and whether they are on 12 Days to Start Winning; one founder's page lists
+// every use with its date and their result.
 // POST { action }  reply (an answer in the thread, emailed as a letter) · tier (change step, and its step tags in Mailchimp) ·
 //                  pause · delete · signin-link · message · mc-test ·
 //                  mc-backfill. Every action is logged as an event; every
@@ -22,6 +25,7 @@ import { send, origin, mailState } from '../_mail.js';
 import { mentorLetter, answerLetter } from '../_letters.js';
 import { letterContext, mentors, saveMentor } from '../_mentor.js';
 import { LIBRARY_ITEMS } from './library.js';
+import { TOOL_NAMES } from './tools.js';
 import { thread } from './thread.js';
 import { profile, unsubLink, deleteFounder } from '../_account.js';
 import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER } from '../_mailchimp.js';
@@ -76,6 +80,9 @@ async function roster(D) {
       (SELECT COUNT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS levels,
       (SELECT GROUP_CONCAT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS level_list,
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'crossed') AS crossed,
+      (SELECT GROUP_CONCAT(DISTINCT u.tool) FROM tool_use u WHERE u.student_id = s.id) AS tools,
+      (SELECT MAX(u.at) FROM tool_use u WHERE u.student_id = s.id) AS tools_at,
+      (SELECT t.last_day FROM twelve_days t WHERE t.student_id = s.id) AS twelve_day,
       p.avatar,
       p.industry, p.source, p.consent, p.unsubscribed, p.mailchimp_status, p.mailchimp_at, p.signup_type, p.company, p.interest, p.landing, p.utm_source, p.utm_medium, p.utm_campaign, p.utm_content,
       CASE WHEN au.pass_hash IS NULL THEN 0 ELSE 1 END AS has_password, COALESCE(au.paused, 0) AS paused
@@ -86,11 +93,12 @@ async function roster(D) {
   return rows.results || [];
 }
 
-const LANDING_NAMES = { road1: 'Road 1', road2: 'Road 2', road3: 'Road 3', road4: 'Road 4', north1: 'North 1', north2: 'North 2', north3: 'North 3', compass: 'North Star box', summit: 'The Summit' };
+const LANDING_NAMES = { road1: 'Road 1', road2: 'Road 2', road3: 'Road 3', road4: 'Road 4', north1: 'North 1', north2: 'North 2', north3: 'North 3', compass: 'North Star box', summit: 'The Summit', tools: 'Tools' };
 const CSV_COLS = [['name', 'Name'], ['email', 'Email'], ['joined_at', 'Joined'], ['last_seen_at', 'Last seen'], ['stage', 'Stage'], ['step', 'Step'],
   ['signup', 'Sign-up form'], ['landing_name', 'Landing'], ['utm_source', 'utm_source'], ['utm_medium', 'utm_medium'], ['utm_campaign', 'utm_campaign'], ['utm_content', 'utm_content'], ['company_name', 'Company'], ['interest', 'Interest'], ['industry', 'Industry'],
   ['compass', 'North Star done'], ['plan_ticks', 'Plan steps done'], ['library_names', 'Library'], ['has_password', 'Has password'], ['consent', 'Consent'], ['unsubscribed', 'Unsubscribed'], ['paused', 'Paused'], ['mailchimp_status', 'Mailchimp'],
   ['ns_wants', 'Wants (North Star)'], ['ns_pains', 'Hurts (North Star)'], ['ns_values', 'Cares about (North Star)'], ['ns_first', 'Needs them first'], ['ns_team', 'Works with'],
+  ['tool_names', 'Tools'], ['twelve_days', '12 Days'],
   ['growth_plan', 'Growth plan'],
   ['group', 'Group'], ['levels', 'Blueprint levels'], ['crossed_names', 'Crossed']];
 const NS = {
@@ -112,6 +120,14 @@ export function nsWords(s) {
   return { ns_wants: names([f.want, f.want2], NS.wants), ns_pains: names(f.pains, NS.pains), ns_values: names(f.values, NS.values),
     ns_first: first >= 0 ? NS.sides[first] : '', ns_team: NS.team[f.team] || '' };
 }
+/** Which tools a founder used, as names (the roster's `tools`). */
+export const toolNames = (v) => String(v || '').split(',').filter((k) => TOOL_NAMES[k]).map((k) => TOOL_NAMES[k]).join('; ');
+/** Where a founder is in 12 Days to Start Winning, in words ('' when not on it). */
+export function twelveWords(day) {
+  if (day === null || day === undefined || day === '') return '';
+  const d = Number(day) || 0;
+  return d >= 13 ? 'Finished (all 12 and what next)' : d >= 12 ? 'Day 12 of 12 sent' : d > 0 ? `Day ${d} of 12 sent` : 'Joined, Day 1 next';
+}
 /** The cockpit's groups, the same rule as groupOf in public/mentor/dash.js
  *  (a test holds them equal): North Star done = compass_at; Blueprint
  *  started = an answer written. */
@@ -127,7 +143,7 @@ export function toCSV(list) {
   const books = (v) => String(v || '').split(',').filter((k) => LIBRARY_ITEMS[k]).map((k) => LIBRARY_ITEMS[k].name).join('; ');
   const row = (s) => ({ ...s, step: STEPS[s.tier || 'free'] || s.tier, library_names: books(s.library), signup: s.signup_type || '',
     company_name: s.company === '' ? 'No company yet' : s.company || '', landing_name: LANDING_NAMES[s.landing] || '', compass: yes(s.compass_at), has_password: yes(s.has_password), consent: yes(s.consent), unsubscribed: yes(s.unsubscribed), paused: yes(s.paused),
-    ...nsWords(s), growth_plan: Number(s.growth_ticks) || 0, group: groupName(s), levels: s.levels || 0, crossed_names: String(s.crossed || '').split(',').filter((k) => CROSSED[k]).map((k) => CROSSED[k]).join('; ') });
+    ...nsWords(s), growth_plan: Number(s.growth_ticks) || 0, tool_names: toolNames(s.tools), twelve_days: twelveWords(s.twelve_day), group: groupName(s), levels: s.levels || 0, crossed_names: String(s.crossed || '').split(',').filter((k) => CROSSED[k]).map((k) => CROSSED[k]).join('; ') });
   return [CSV_COLS.map(([, h]) => cell(h)).join(','), ...list.map((s) => { const r = row(s); return CSV_COLS.map(([k]) => cell(r[k])).join(','); })].join('\r\n') + '\r\n';
 }
 
@@ -152,7 +168,7 @@ export async function onRequestGet({ request, env }) {
   if (one) {
     const me = await D.prepare('SELECT * FROM student WHERE id = ?').bind(one).first();
     if (!me) return bad('Not found.', 404);
-    const [answers, sheets, compass, notes, prof, ticks, growth, auth, messages, steps, stages, library, asked] = await Promise.all([
+    const [answers, sheets, compass, notes, prof, ticks, growth, auth, messages, steps, stages, library, asked, uses, twelve] = await Promise.all([
       D.prepare('SELECT stage,level,domain,step,body,updated_at FROM answer WHERE student_id=? ORDER BY level,domain,step').bind(one).all(),
       D.prepare('SELECT key,value FROM sheet WHERE student_id=?').bind(one).all(),
       D.prepare('SELECT * FROM compass WHERE student_id=?').bind(one).first(),
@@ -166,12 +182,17 @@ export async function onRequestGet({ request, env }) {
       D.prepare("SELECT detail, at FROM event WHERE student_id=? AND kind='stage-change' ORDER BY id").bind(one).all(),
       D.prepare("SELECT detail AS item, MIN(at) AS at FROM event WHERE student_id=? AND kind='library-download' GROUP BY detail ORDER BY MIN(at)").bind(one).all(),
       thread(D, one),
+      D.prepare('SELECT tool, kind, result_json, at FROM tool_use WHERE student_id=? ORDER BY id DESC LIMIT 100').bind(one).all(),
+      D.prepare('SELECT subscribed_at, last_day, last_sent_at, welcome_sent, stopped_at FROM twelve_days WHERE student_id=?').bind(one).first(),
     ]);
     delete me.diag_json;
     return json({ ok: true, student: me, answers: answers.results || [], work: sheets.results || [],
       compass: compass || null, notes: notes.results || [], profile: prof || null, auth: auth || null, messages: messages.results || [],
       climb: climbOf(me, steps.results || []), stages: stageChanges(stages.results || []), thread: asked.items,
       library: (library.results || []).filter((r) => LIBRARY_ITEMS[r.item]).map((r) => ({ item: r.item, name: LIBRARY_ITEMS[r.item].name, at: r.at })),
+      // Every use of a free tool, newest first, with the result they reached.
+      tools: (uses.results || []).filter((u) => TOOL_NAMES[u.tool]).map((u) => { let r = null; try { r = u.result_json ? JSON.parse(u.result_json) : null; } catch { r = null; } return { tool: u.tool, name: TOOL_NAMES[u.tool], kind: u.kind, at: u.at, result: r }; }),
+      twelve: twelve ? { ...twelve, words: twelveWords(twelve.last_day) } : null,
       ticks: (ticks.results || []).map((t) => ({ ...t, domain: STEP[t.step_id] ? STEP[t.step_id].domain : null, title: STEP[t.step_id] ? STEP[t.step_id].title : t.step_id })),
       growth: growth.results || [], totalGrowth: GROWTH_IDS.length,
       mentors: await mentors(D) });

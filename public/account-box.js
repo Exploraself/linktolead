@@ -18,7 +18,18 @@
  *
  * On /northstar (landing "compass", `stay`): a visitor from outside makes the
  * full account here, then stays on the North Star, signed in, with everything
- * open. An email that already has an account goes to `onExisting`. */
+ * open. An email that already has an account goes to `onExisting`.
+ *
+ * The free tools (landing "tools", 2 Nov 2026) use five more options, all
+ * off unless asked for, so every other page is unchanged:
+ *   steps     one field at a time (Alexandru: type, Next, the next field
+ *             opens): the same fields, checks and sign-up, one on screen
+ *   inline    drawn in the page, not as a dialog: no close, no "Not now"
+ *   head      [kicker, title, line] instead of the box's own words
+ *   cta       the last button's words ("OPEN CASH RUNWAY →")
+ *   onDone    called with the sign-up's answer instead of leaving the page
+ *   onSignin  "Already have an account? Sign in" calls it (with the email
+ *             typed so far) instead of opening Your Base Camp */
 import { detailFields, readDetails, CONSENT, utm } from '/forms.js';
 import { slot as googleSlot, mount as mountGoogle } from '/google.js';
 
@@ -64,11 +75,12 @@ const HEAD = {
   simple: ['START FREE', 'Your free account', 'One minute. Name and email. Free.'],
   summit: ['YOUR PLACE AT THE SUMMIT', 'Your account', 'Start now. You sign in with your email and a password.'],
   stay: ['YOUR NORTH STAR, IN FULL', 'Your free account', 'Your answers come with you, and the whole North Star opens: your feedback, your plans and your library. Free.'],
+  tools: ['YOUR FREE TOOLKIT', 'Open your free toolkit', 'One free account opens every tool, the North Star and the Launchpad. Your answers stay yours.'],
 };
 
-const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpop abox" role="dialog" aria-modal="true" aria-labelledby="gate-h" style="position: relative; width: 100%; max-width: 480px; background: #FFFDF8; color: #121C2D; border-radius: 10px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.4); margin: auto; font-family: 'Inter', Arial, sans-serif; box-sizing: border-box">
+const markup = (variant, head = HEAD[variant], stay = false, inline = false) => `<div class="gpop abox${inline ? ' ab-inline' : ''}" ${inline ? 'role="region"' : 'role="dialog" aria-modal="true"'} aria-labelledby="gate-h" style="position: relative; width: 100%; max-width: 480px; background: #FFFDF8; color: #121C2D; border-radius: 10px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.4); margin: auto; font-family: 'Inter', Arial, sans-serif; box-sizing: border-box">
     <style>${STYLE}</style>
-    <button type="button" class="ab-x" data-close aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #D8CDBB; background: #FFFFFF; color: #121C2D; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    ${inline ? '' : `<button type="button" class="ab-x" data-close aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #D8CDBB; background: #FFFFFF; color: #121C2D; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>`}
     <form id="gate-form" novalidate style="display: flex; flex-direction: column; gap: 14px">
       <span class="ab-k" style="font-size: 12px; font-weight: 600; letter-spacing: .16em; color: #7A5E26; padding-right: 44px">${head[0]}</span>
       <h2 id="gate-h" style="margin: 0; font:440 26px/1.25 Newsreader, Georgia, serif; padding-right: 40px">${head[1]}</h2>
@@ -87,7 +99,7 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
       <span id="gate-err" class="ab-err" role="alert" style="font-size: 13px; color: #B5512E; font-weight: 600"></span>
       <button type="submit" class="ab-go">${stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →'}</button>
       ${stay ? '' : '<button type="button" class="ab-no" data-close style="min-height: 44px; border-radius: 5px; border: 1px solid #D8CDBB; background: transparent; color: #121C2D; font-weight: 600; cursor: pointer">Not now · keep reading</button>'}
-      <span style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap"><a class="ab-link" href="/ground-plan/#signin" style="font-size: 13px; font-weight: 600; color: #7A5E26">Already have an account? Sign in</a><button type="button" class="ab-link" data-reset style="border: 0; background: none; padding: 0; font: 600 13px Inter, Arial, sans-serif; color: #7A5E26; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">Forgot your password?</button></span>
+      <span style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap"><a class="ab-link" href="/ground-plan/#signin" data-signin style="font-size: 13px; font-weight: 600; color: #7A5E26">Already have an account? Sign in</a><button type="button" class="ab-link" data-reset style="border: 0; background: none; padding: 0; font: 600 13px Inter, Arial, sans-serif; color: #7A5E26; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">Forgot your password?</button></span>
     </form>
   </div>`;
 
@@ -101,10 +113,14 @@ const NS_PAGES = ['north2', 'north3'];
 const after = () => ctx.next || (NS_HOME.includes(ctx.landing) ? '/northstar/' : '/ground-plan/#home');
 let ctx = { opener: null, stage: null, variant: 'full', landing: 'road1', stay: false, onExisting: null };
 function close() { if (ctx.gate) ctx.gate.hidden = true; if (ctx.opener && ctx.opener.focus) ctx.opener.focus(); }
+/** The last button's words: the page's own (cta), or where it goes. */
+const ctaText = () => ctx.cta || (ctx.stay || NS_HOME.includes(ctx.landing) || ctx.next === '/northstar/' ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →');
 
 function wire(gate, variant, landing) {
-  gate.innerHTML = markup(variant, HEAD[ctx.stay ? 'stay' : landing === 'summit' ? 'summit' : variant === 'full' && NS_PAGES.includes(landing) ? 'compass' : variant], ctx.stay);
-  gate.dataset.variant = variant + ' ' + landing;
+  gate.innerHTML = markup(variant, ctx.head || HEAD[ctx.stay ? 'stay' : landing === 'summit' ? 'summit' : landing === 'tools' ? 'tools' : variant === 'full' && NS_PAGES.includes(landing) ? 'compass' : variant], ctx.stay, ctx.inline);
+  gate.dataset.variant = wiredAs(variant, landing);
+  // In the page (`inline`) there is nothing to close: no "Not now".
+  if (ctx.inline) gate.querySelectorAll('.ab-no').forEach((b) => b.remove());
   gate.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
   gate.querySelectorAll('[data-eye]').forEach((b) => b.addEventListener('click', (e) => {
     e.preventDefault();
@@ -124,9 +140,11 @@ function wire(gate, variant, landing) {
     // drag or a text selection that ends outside never closes it.
     let downOut = false;
     gate.addEventListener('pointerdown', (e) => { downOut = e.target === gate; });
-    gate.addEventListener('click', (e) => { if (e.target === gate && downOut) close(); downOut = false; });
+    gate.addEventListener('click', (e) => { if (e.target === gate && downOut && !ctx.inline) close(); downOut = false; });
+    // "Already have an account? Sign in": the page's own sign-in, when it has one.
+    gate.addEventListener('click', (e) => { const a = e.target.closest('[data-signin]'); if (!a || !ctx.onSignin) return; e.preventDefault(); const em = gate.querySelector('#j-email'); const fn = ctx.onSignin; close(); fn(em ? em.value.trim() : ''); });
     gate.addEventListener('click', (e) => { const b = e.target.closest('[data-reset]'); if (!b) return; e.preventDefault(); const em = gate.querySelector('#j-email'); import('/reset-box.js').then((m) => m.openReset({ email: em ? em.value.trim() : '' })); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !gate.hidden) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !gate.hidden && !ctx.inline) close(); });
     gate.dataset.wired = '1';
   }
   // "Continue with Google" (google.js): the account opens or is made in one
@@ -135,10 +153,11 @@ function wire(gate, variant, landing) {
   mountGoogle($('.g-slot'), { landing: ctx.landing, source: ctx.landing === 'compass' ? 'compass' : NS_PAGES.includes(ctx.landing) ? 'sales-page' : 'home',
     onError: (m) => { $('#gate-err').textContent = m; },
     onDone: (out) => {
-      const go = () => { if (ctx.stay) location.reload(); else location.href = after(); };
+      const go = () => { if (ctx.onDone) { const fn = ctx.onDone; close(); fn(out); } else if (ctx.stay) location.reload(); else location.href = after(); };
       const me = out.me || {};
       try { localStorage.setItem(KEY, JSON.stringify({ first: me.first || '', last: me.last || '', email: me.email || '' })); } catch { /* private mode */ }
-      if (variant === 'full' && out.missing && out.missing.length) {
+      // A page with its own onDone asks for what is missing itself (the tools).
+      if (variant === 'full' && out.missing && out.missing.length && !ctx.onDone) {
         close();
         import('/reset-box.js').then((m) => m.openComplete({ name: `${me.first || ''} ${me.last || ''}`.trim(), email: me.email || '', missing: out.missing, done: go })).catch(go);
         return;
@@ -170,32 +189,98 @@ function wire(gate, variant, landing) {
       const out = A.joined() ? { token: A.token() } : await A.signup({ first, last, email, consent, source, stage: p.stage, type: variant,
         landing: ctx.landing, utm: utm(),
         ...(d ? { company: d.company, noCompany: d.noCompany, interest: d.interest, industry: d.industry, password: pw, confirm: pw2 } : {}) });
-      if (out.token) { if (ctx.stay) location.reload(); else location.href = after(); return; }
+      if (out.token) { if (ctx.onDone) { const fn = ctx.onDone; close(); fn(out); } else if (ctx.stay) location.reload(); else location.href = after(); return; }
       if (ctx.onExisting) { close(); ctx.onExisting(email); return; }
       // An address that already has an account is never handed its key here.
       $('#gate-err').innerHTML = 'This email already has an account. Sign in to open your plans. <a href="/ground-plan/#signin">Sign in →</a> or <button type="button" data-reset style="border: 0; background: none; padding: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer">reset your password</button>.';
     } catch (ex) {
       err(ex && ex.message && !/fetch|network|load failed|import/i.test(ex.message) ? ex.message : 'We could not reach the account service just now. Try again in a minute.');
     }
-    go.disabled = false; go.textContent = ctx.stay || NS_HOME.includes(ctx.landing) || ctx.next === '/northstar/' ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →';
+    go.disabled = false; go.textContent = ctaText();
   });
+  if (ctx.steps) stepper(gate, variant);
+}
+
+/** The box is wired again when what it shows changes. */
+const wiredAs = (variant, landing) => [variant, landing, ctx.steps ? 'steps' : '', ctx.inline ? 'inline' : '', ctx.head ? ctx.head.join('|') : ''].join(' ');
+
+/** One field at a time (`steps`, the free tools, 2 Nov 2026). The same form,
+ *  the same checks and the same sign-up: only one field is on screen, with
+ *  Next (or Enter) to the next one and Back to the one before. The last step
+ *  is the consent tick and the button that makes the account. */
+function stepper(gate, variant) {
+  const q = (sel) => gate.querySelector(sel);
+  const form = q('#gate-form'), lab = (id) => { const el = q('#' + id); return el ? el.closest('label') : null; };
+  const two = q('.ab-two'); if (two) two.style.gridTemplateColumns = '1fr';
+  const pw2 = lab('j-pw2'), fine = pw2 && pw2.nextElementSibling && pw2.nextElementSibling.matches('.ab-fine') ? pw2.nextElementSibling : null;
+  const val = (id) => (q('#' + id) || { value: '' }).value;
+  const steps = [
+    { els: [lab('j-first')], check: () => (val('j-first').trim() ? '' : 'Your first name, please.') },
+    { els: [lab('j-last')], check: () => (val('j-last').trim() ? '' : 'Your surname, please.') },
+    { els: [lab('j-email')], check: () => (/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(val('j-email').trim()) ? '' : 'That email does not look complete.') },
+    ...(variant === 'full' ? [
+      { els: [lab('j-company'), lab('j-nocompany')], check: () => readDetails('j', ['company']).problem },
+      { els: [lab('j-interest')], check: () => readDetails('j', ['interest']).problem },
+      { els: [lab('j-industry')], check: () => readDetails('j', ['industry']).problem },
+      { els: [lab('j-pw'), fine], check: () => (val('j-pw').length >= 10 ? '' : 'A password of at least 10 characters, please.') },
+      { els: [pw2], check: () => (val('j-pw2') === val('j-pw') ? '' : 'The two passwords are different. Type it again.') },
+    ] : []),
+    { els: [lab('j-consent')], last: true },
+  ].map((st) => ({ ...st, els: st.els.filter(Boolean) }));
+  const all = steps.flatMap((st) => st.els);
+  const submit = q('.ab-go'), err = q('#gate-err'), google = q('.g-slot');
+  const nav = document.createElement('div');
+  nav.className = 'ab-steps';
+  nav.style.cssText = 'display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12.5px; color: #5A6580';
+  nav.innerHTML = '<button type="button" class="ab-link" data-step-back style="border: 0; background: none; padding: 6px 0; font: 600 13px Inter, Arial, sans-serif; color: #7A5E26; cursor: pointer">← Back</button><span class="ab-fine" data-step-count aria-live="polite"></span>';
+  const next = document.createElement('button');
+  next.type = 'button'; next.className = 'ab-go'; next.dataset.stepNext = ''; next.textContent = 'NEXT →';
+  submit.before(nav); submit.before(next);
+  let i = 0;
+  const show = (n, focus = true, keepErr = false) => {
+    i = Math.max(0, Math.min(steps.length - 1, n));
+    for (const el of all) el.hidden = !steps[i].els.includes(el);
+    for (const el of steps[i].els) el.style.display = el === fine ? '' : 'flex';
+    for (const el of all) if (!steps[i].els.includes(el)) el.style.display = 'none';
+    if (google) google.style.display = i === 0 && !google.hidden ? 'flex' : 'none';
+    nav.querySelector('[data-step-back]').style.visibility = i ? 'visible' : 'hidden';
+    nav.querySelector('[data-step-count]').textContent = `${i + 1} of ${steps.length}`;
+    next.hidden = !!steps[i].last; next.style.display = steps[i].last ? 'none' : '';
+    submit.style.display = steps[i].last ? '' : 'none';
+    if (!keepErr) err.textContent = '';
+    if (focus) { const f = steps[i].els[0] && steps[i].els[0].querySelector('input, select'); if (f) f.focus(); }
+  };
+  const forward = () => { const p = steps[i].check ? steps[i].check() : ''; if (p) { err.textContent = p; return; } show(i + 1); };
+  next.addEventListener('click', forward);
+  nav.querySelector('[data-step-back]').addEventListener('click', () => show(i - 1));
+  // Enter moves on, and makes the account only on the last step.
+  form.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || e.isComposing || steps[i].last || e.target.matches('button, a')) return;
+    e.preventDefault(); forward();
+  });
+  // A check the server makes (an email already taken, say) sends the founder
+  // back to the field it is about.
+  form.addEventListener('submit', () => { for (let k = 0; k < steps.length - 1; k++) if (steps[k].check && steps[k].check()) { show(k, false, true); return; } }, true);
+  show(0, false);
 }
 
 /** Open the box. A founder already signed in on this device goes straight to
  *  their Base Camp. */
-export function open({ gate, opener, stage, variant = 'full', landing = variant === 'full' ? 'road1' : 'road3', stay = false, onExisting = null, next = '' }) {
-  ctx = { gate, opener, stage, variant, landing, stay, onExisting, next };
+export function open({ gate, opener, stage, variant = 'full', landing = variant === 'full' ? 'road1' : 'road3', stay = false, onExisting = null, next = '',
+  steps = false, inline = false, head = null, cta = '', onDone = null, onSignin = null }) {
+  ctx = { gate, opener, stage, variant, landing, stay, onExisting, next, steps, inline, head, cta, onDone, onSignin };
   if (hasAccount() && stay) return;
   if (hasAccount()) {
     if (stage) { const p = known() || {}; p.stage = stage.id; try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* private mode */ } }
     location.href = after();
     return;
   }
-  if (gate.dataset.variant !== variant + ' ' + landing) wire(gate, variant, landing);
+  if (gate.dataset.variant !== wiredAs(variant, landing)) wire(gate, variant, landing);
   // The button says where it goes.
-  { const g = gate.querySelector('.ab-go'); if (g && !ctx.stay) g.textContent = NS_HOME.includes(landing) || ctx.next === '/northstar/' ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →'; }
+  { const g = gate.querySelector('[type=submit].ab-go'); if (g && (!ctx.stay || ctx.cta)) g.textContent = ctaText(); }
   const p = known();
   if (p) { $('#j-first').value = p.first || ''; $('#j-last').value = p.last || ''; $('#j-email').value = p.email || ''; }
   gate.hidden = false;
-  $('#j-first').focus();
+  // A page that draws the box in place does not pull the focus to it.
+  if (!ctx.inline) $('#j-first').focus();
 }

@@ -81,6 +81,17 @@ export async function accountTables(D) {
       level INTEGER NOT NULL, body TEXT NOT NULL, created_at TEXT NOT NULL, hidden INTEGER DEFAULT 0)`),
     D.prepare(`CREATE TABLE IF NOT EXISTS mailchimp_log (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id TEXT NOT NULL,
       email TEXT, action TEXT NOT NULL, mode TEXT NOT NULL, status TEXT NOT NULL, detail TEXT, at TEXT NOT NULL)`),
+    // The free tools (functions/api/tools.js, 2 Nov 2026): one row each time a
+    // founder opens a tool, reaches its result (result_json: their own answers
+    // and the sums made from them) or subscribes to 12 Days to Start Winning.
+    D.prepare(`CREATE TABLE IF NOT EXISTS tool_use (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id TEXT NOT NULL,
+      tool TEXT NOT NULL, kind TEXT NOT NULL, result_json TEXT, at TEXT NOT NULL)`),
+    D.prepare('CREATE INDEX IF NOT EXISTS tool_use_student ON tool_use (student_id, tool)'),
+    // 12 Days to Start Winning (functions/_twelve-days.js): one row per
+    // subscriber. last_day: the last letter sent (0 = the welcome);
+    // last_local_date: the founder's own date it went, so never two a day.
+    D.prepare(`CREATE TABLE IF NOT EXISTS twelve_days (student_id TEXT PRIMARY KEY, subscribed_at TEXT NOT NULL,
+      last_day INTEGER NOT NULL DEFAULT 0, last_local_date TEXT, last_sent_at TEXT, welcome_sent INTEGER DEFAULT 0, stopped_at TEXT)`),
   ]);
   // The last Mailchimp sync, the step whose tags it carried, and what the
   // sign-up form asked (functions/_profile.js), on the profile. SQLite cannot add a column "if not exists", so an error here only
@@ -146,4 +157,4 @@ export async function studentBy(D, token) {
 }
 
 /** Every table that holds a row for a student, for a full delete. */
-export const STUDENT_TABLES = ['answer', 'sheet', 'compass', 'note', 'event', 'student_profile', 'signin_code', 'plan_tick', 'growth_word', 'account_auth', 'message', 'mailchimp_log', 'video_comment'];
+export const STUDENT_TABLES = ['answer', 'sheet', 'compass', 'note', 'event', 'student_profile', 'signin_code', 'plan_tick', 'growth_word', 'account_auth', 'message', 'mailchimp_log', 'video_comment', 'tool_use', 'twelve_days'];

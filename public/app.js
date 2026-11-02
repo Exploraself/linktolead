@@ -1195,6 +1195,8 @@ function drawNav() {
   $('#tnav').innerHTML = account.joined() && !['signin', 'redirect', 'loading'].includes(view)
     ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Base Camp${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button><button type="button" data-go="ask" ${view === 'ask' ? 'aria-current="page"' : ''}>Ask Alexandru${answers ? `<span class="tdot" aria-label="${answers} new ${answers === 1 ? 'answer' : 'answers'}"></span>` : ''}</button>${holds(tierNow(), 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
     : '';
+  // Tools (2 Nov 2026): one entry after the Library, to the toolkit at /tools/.
+  { const lib = $('#tnav [data-go="library"]'); if (lib) lib.insertAdjacentHTML('afterend', '<a class="tbook" href="/tools/" style="background:transparent;border:1px solid #5B4835;color:#E7DCC7">Tools</a>'); }
 }
 
 function render() {

@@ -5,6 +5,10 @@
 // in functions/api/, called the same way Cloudflare Pages Functions would call
 // it: onRequestGet / onRequestPost with { request, env, waitUntil }.
 //
+// The clock (wrangler.toml [triggers], every hour on the hour) calls
+// `scheduled`: it sends 12 Days to Start Winning to every subscriber whose
+// local time is 8:00 (functions/_twelve-days.js).
+//
 // Without this file the Worker was "static assets only": no route in
 // functions/ ever ran on the live site, and no binding (the database, the
 // Resend key) could attach. Wrangler bundles this on deploy — still no build
@@ -37,6 +41,8 @@ import * as complete from './functions/api/complete.js';
 import * as accountDelete from './functions/api/account-delete.js';
 import * as count from './functions/api/count.js';
 import * as google from './functions/api/google.js';
+import * as tools from './functions/api/tools.js';
+import { twelveDaysTick } from './functions/_twelve-days.js';
 
 /** One line per route. A new file in functions/api/ needs its line here. */
 export const ROUTES = {
@@ -65,6 +71,7 @@ export const ROUTES = {
   '/api/account-delete': accountDelete,
   '/api/count': count,
   '/api/google': google,
+  '/api/tools': tools,
 };
 
 export default {
@@ -91,5 +98,14 @@ export default {
       console.error(path, err && err.stack || err);
       return json({ ok: false, error: 'Something went wrong on our side. Your work is still in this browser.' }, 500);
     }
+  },
+
+  /** Every hour on the hour: the 12 Days letters due at 8:00 local time. */
+  async scheduled(event, env, ctx) {
+    const at = new Date(event && event.scheduledTime ? event.scheduledTime : Date.now());
+    const job = twelveDaysTick(env, at)
+      .then((r) => { if (r.sent || r.failed) console.log('12 days', JSON.stringify(r)); })
+      .catch((err) => console.error('12 days', err && err.stack || err));
+    if (ctx && ctx.waitUntil) ctx.waitUntil(job); else await job;
   },
 };
