@@ -40,8 +40,7 @@ main{max-width:720px;margin:0 auto;padding:0 18px 72px}
 .eb{display:flex;align-items:center;gap:8px;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--gold-ink);line-height:1.35}
 .eb svg{width:18px;height:18px;flex:none}
 h1{font-size:clamp(26px,6.4vw,36px);line-height:1.18;font-weight:700;letter-spacing:-.005em;text-wrap:balance}
-h1:focus{outline:none}
-h1:focus-visible{outline:2.5px solid var(--gold);outline-offset:4px}
+h1:focus,h1:focus-visible{outline:none}
 .hint{color:var(--muted);font-size:16.5px;max-width:58ch}
 .lab{display:block;font-weight:700;font-size:15.5px;margin:6px 0 -6px}
 .field{display:block;width:100%;min-width:0;font:400 19px/1.45 var(--f);color:var(--ink);background:#fff;border:1.5px solid #CFC6B6;border-radius:12px;padding:13px 15px;min-height:56px}

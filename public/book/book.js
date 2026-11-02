@@ -154,7 +154,7 @@ function render(focus = true) {
   root.innerHTML = top() + screen();
   if (!focus) return;
   const f = root.querySelector('input.field, textarea.field');
-  if (f && matchMedia('(hover:hover) and (pointer:fine)').matches) { f.focus(); f.setSelectionRange?.(f.value.length, f.value.length); } else root.querySelector('h1')?.focus();
+  if (f && matchMedia('(hover:hover) and (pointer:fine)').matches) { f.focus(); try { f.setSelectionRange(f.value.length, f.value.length); } catch { /* email fields have no caret range */ } } else root.querySelector('h1')?.focus();
 }
 const go = (i) => { S.step = Math.max(0, Math.min(STEPS.length - 1, i)); keep(); render(); window.scrollTo(0, 0); };
 const next = () => { if (canNext()) go(S.step + 1); };
