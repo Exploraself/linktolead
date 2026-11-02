@@ -249,7 +249,7 @@ export const TOOLKIT_OFFERS = {
 };
 /** Tool → offer, then the founder's answer to "What do you want most from
  *  the business?" (public/forms.js INTERESTS) → offer. */
-export const TOOLKIT_BY_TOOL = { 'runway': 'first100', 'bottleneck': 'twoweek', 'off-switch': 'tower', '12-days': 'unbound', 'teleprompter': 'conversations' };
+export const TOOLKIT_BY_TOOL = { 'runway': 'first100', 'bottleneck': 'twoweek', 'off-switch': 'tower', '12-days': 'unbound', 'teleprompter': 'conversations', 'reel-structure': 'conversations', 'branding-structure': 'first100' };
 export const TOOLKIT_BY_INTEREST = { 'More free time': 'twoweek', 'Higher income': 'first100', 'Steady clients': 'conversations', 'A team I trust': 'eq', 'Clarity on direction': 'unbound', 'A new market': 'first100' };
 export const toolkitOfferKey = ({ tool = '', interest = '' } = {}) => TOOLKIT_BY_TOOL[tool] || TOOLKIT_BY_INTEREST[interest] || 'twoweek';
 export const BROADCAST = 'https://broadcast.exploraself.com';
@@ -267,7 +267,7 @@ export function toolsWelcome(base, { first, to = '', tier, offer, path = '/tools
   return { subject: 'Welcome to the Growth Toolkit', ...letter(base, [
     hi(first),
     'Welcome to the Growth Toolkit. Here we go, to your growth.',
-    'Each tool reads your own numbers and gives you one move for this week. Start with the one that brought you here.',
+    'Each tool reads your own answers and gives you one move for this week. Start with the one that brought you here.',
     button(`${base}${home}`, home === '/tools/' ? 'Open my Growth Toolkit →' : 'Open my tool →'),
     ['Every tool is on one page, in two lists, Personal leadership and Business: ', link(`${base}/tools/`)],
     account ? ['Any question? Ask your mentor at your Base Camp: ', link(`${base}/ground-plan/#ask`, 'Ask Alexandru')]
@@ -289,7 +289,7 @@ export function toolkitCodeLetter(base, { first, code, url, tools = [], to = '',
     button(url, 'Open my Growth Toolkit →'),
     'The button opens it with your code already in. Or go to the Tools page and type the code when it asks.',
     ...tools.map(([name, list]) => `${name}: ${list.join(' · ')}.`),
-    'Each tool reads your own numbers and gives you one move for this week. Alexandru and the team are right here if you want help with any of it.',
+    'Each tool reads your own answers and gives you one move for this week. Alexandru and the team are right here if you want help with any of it.',
   ], 'play', close('signin', { ...o, to }, 'security')) };
 }
 

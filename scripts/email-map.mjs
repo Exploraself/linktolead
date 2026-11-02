@@ -26,6 +26,7 @@ import * as L from '../functions/_letters.js';
 import { courseLetter, COURSE_NAME, SEND_HOUR, LATEST_HOUR } from '../functions/_course.js';
 import { COURSE_LETTERS } from '../functions/_course-letters.js';
 import { MENTOR_EMAIL } from '../functions/api/note.js';
+import { TOOLKIT_PREVIEW } from '../functions/api/toolkit.js';
 import { SERIES_GROUPS, SERIES_TAGS } from '../functions/_series-letters.js';
 import { SERIES_STATUS, SERIES, PARSED, LATE_DAYS, seriesLetter, seriesOf, addDays, byDay, weekday, lettersOf } from '../functions/_series.js';
 
@@ -60,7 +61,7 @@ export const ENTRIES = [
     sentBy: 'functions/api/toolkit.js',
     also: 'Addresses on the TOOLKIT_EMAILS list, and the team, skip the code and get no letter.',
     build: () => L.toolkitCodeLetter(BASE, { ...S, code: '5689', url: `${BASE}/tools/?email=${encodeURIComponent(S.to)}&code=5689`,
-      tools: [['Personal leadership', ['The off-switch check', '12 Days to Start Winning', 'The bottleneck test']], ['Business', ['Cash runway', 'Teleprompter']]] }),
+      tools: TOOLKIT_PREVIEW }),
   },
   {
     id: 'tools-welcome', stage: 'door', icon: 'toolkit', fn: 'toolsWelcome',

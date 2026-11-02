@@ -219,6 +219,7 @@ there, a page of its own, and its key in `functions/_tools.js`.
 | `/tools/` | Every tool in its list; signed in, the last result of each |
 | `/runway/`, `/bottleneck/`, `/off-switch/` | Cover → the way in → one question per screen → the reading → The Leader's North Star |
 | `/teleprompter/` | The teleprompter (Business), scripts kept on the device |
+| `/reel-structure/`, `/branding-structure/` | The two writing tools (`public/tools/writer.js`, words in `writer-data.js`): one field per screen → a Reel script timed at 140 words a minute with three gold words and an “Open in the Teleprompter” button / the brand on one page, printable, and a message asking three customers “Is this you?” |
 | `/12-days/` | 12 Days to Start Winning: letters sent by the site (`functions/_course.js`), the welcome at once, then one a morning from 8:00 the founder's time, Day 1 to 12 and a last "what next". Needs an account |
 | `/toolkit/` | The page for ads and links: one offer, one button |
 

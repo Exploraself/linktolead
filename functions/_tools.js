@@ -41,6 +41,8 @@ export const TOOL_LIST = {
   'off-switch': { name: 'The off-switch check', domain: 'Lead yourself' },
   '12-days': { name: '12 Days to Start Winning', domain: 'Lead yourself' },
   'teleprompter': { name: 'Teleprompter', domain: 'Lead the market' },
+  'reel-structure': { name: 'Reel structure', domain: 'Lead the market' },
+  'branding-structure': { name: 'Branding structure', domain: 'Lead the market' },
 };
 export const isTool = (k) => Object.hasOwn(TOOL_LIST, k);
 export const toolNames = (csv) => String(csv || '').split(',').filter(isTool).map((k) => TOOL_LIST[k].name);

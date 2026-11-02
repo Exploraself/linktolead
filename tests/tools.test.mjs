@@ -44,7 +44,7 @@ ok(CATALOG.filter((c) => c.category === 'business').map((c) => c.key).join() ===
 ok(CATALOG.filter((c) => c.soon).every((c) => !c.href && /Being built\.$/.test(c.sub)), 'what is not written yet says “Being built”, with no link');
 ok(JSON.stringify(TOOLKIT_PREVIEW) === JSON.stringify(CATEGORIES.map((g) => [g.name, CATALOG.filter((c) => c.category === g.key && !c.soon).map((c) => c.name)])), 'the code letter’s look inside = the Tools page');
 const covers = read('public/tools/catalog.js');
-for (const h of ['Your bank balance is <em>lying to you.</em>', 'What stops <em>when you stop?</em>', 'Your laptop is closed. <em>Is your head?</em>', 'Lead your day <em>before it leads you.</em>']) ok(covers.includes(h), `cover A: ${h.replace(/<\/?em>/g, '')}`);
+for (const h of ['Your bank balance is <em>lying to you.</em>', 'What stops <em>when you stop?</em>', 'Your laptop is closed. <em>Is your head?</em>', 'Lead your day <em>before it leads you.</em>', 'Three seconds to <em>earn the next thirty.</em>', 'If they can’t say it, <em>they can’t share it.</em>']) ok(covers.includes(h), `cover A: ${h.replace(/<\/?em>/g, '')}`);
 const days = read('public/12-days/days.js');
 const D12 = JSON.parse(/export const DAYS12 = (\[[\s\S]*?\]);/.exec(days)[1].replace(/'/g, '"'));
 ok(JSON.stringify(D12) === JSON.stringify(COURSE_LETTERS.slice(1, 13).map((l) => l.subject.replace(/^Day \d+ · /, ''))), '/12-days/ lists the letters’ own subjects');

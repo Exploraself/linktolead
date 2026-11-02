@@ -24,7 +24,7 @@ import { toolkitCodeLetter } from '../_letters.js';
  *  test holds them equal). */
 export const TOOLKIT_PREVIEW = [
   ['Personal leadership', ['The off-switch check', '12 Days to Start Winning', 'The bottleneck test']],
-  ['Business', ['Cash runway', 'Teleprompter']],
+  ['Business', ['Cash runway', 'Teleprompter', 'Reel structure', 'Branding structure']],
 ];
 const WHY = 'You asked for a code to open the Growth Toolkit at linktolead.exploraself.com. If it was not you, nothing happens.';
 

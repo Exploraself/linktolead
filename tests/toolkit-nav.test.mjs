@@ -8,7 +8,7 @@ import { tally } from './_d1.mjs';
 
 const { ok, done } = tally('toolkit-nav');
 const read = (p) => readFileSync(new URL(`../public/${p}`, import.meta.url), 'utf8');
-const TOOLS = { runway: 'Cash runway', bottleneck: 'The bottleneck test', 'off-switch': 'The off-switch check', '12-days': '12 Days to Start Winning' };
+const TOOLS = { runway: 'Cash runway', bottleneck: 'The bottleneck test', 'off-switch': 'The off-switch check', '12-days': '12 Days to Start Winning', 'reel-structure': 'Reel structure', 'branding-structure': 'Branding structure' };
 
 for (const p of ['tools', ...Object.keys(TOOLS)]) {
   const h = read(`${p}/index.html`);
