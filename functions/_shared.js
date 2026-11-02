@@ -81,6 +81,14 @@ export async function accountTables(D) {
       level INTEGER NOT NULL, body TEXT NOT NULL, created_at TEXT NOT NULL, hidden INTEGER DEFAULT 0)`),
     D.prepare(`CREATE TABLE IF NOT EXISTS mailchimp_log (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id TEXT NOT NULL,
       email TEXT, action TEXT NOT NULL, mode TEXT NOT NULL, status TEXT NOT NULL, detail TEXT, at TEXT NOT NULL)`),
+    // The free tools (functions/_tools.js): a founder's last answers and the
+    // one-line result of each tool, and the 12-day letters they asked for
+    // (functions/_course.js).
+    D.prepare(`CREATE TABLE IF NOT EXISTS tool_run (student_id TEXT NOT NULL, tool TEXT NOT NULL, answers_json TEXT,
+      summary TEXT, updated_at TEXT NOT NULL, PRIMARY KEY (student_id, tool))`),
+    D.prepare(`CREATE TABLE IF NOT EXISTS course_sub (student_id TEXT NOT NULL, course TEXT NOT NULL, started_at TEXT NOT NULL,
+      tz TEXT, day_sent INTEGER NOT NULL DEFAULT -1, last_local TEXT, last_sent_at TEXT, stopped_at TEXT,
+      PRIMARY KEY (student_id, course))`),
   ]);
   // The last Mailchimp sync, the step whose tags it carried, and what the
   // sign-up form asked (functions/_profile.js), on the profile. SQLite cannot add a column "if not exists", so an error here only
@@ -146,4 +154,4 @@ export async function studentBy(D, token) {
 }
 
 /** Every table that holds a row for a student, for a full delete. */
-export const STUDENT_TABLES = ['answer', 'sheet', 'compass', 'note', 'event', 'student_profile', 'signin_code', 'plan_tick', 'growth_word', 'account_auth', 'message', 'mailchimp_log', 'video_comment'];
+export const STUDENT_TABLES = ['answer', 'sheet', 'compass', 'note', 'event', 'student_profile', 'signin_code', 'plan_tick', 'growth_word', 'account_auth', 'message', 'mailchimp_log', 'video_comment', 'tool_run', 'course_sub'];

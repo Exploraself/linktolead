@@ -10,7 +10,6 @@
 // Resend key) could attach. Wrangler bundles this on deploy — still no build
 // step and no package.json.
 
-import { json } from './functions/_shared.js';
 import { redirect } from './functions/_landing.js';
 import * as state from './functions/api/state.js';
 import * as compass from './functions/api/compass.js';
@@ -37,6 +36,10 @@ import * as complete from './functions/api/complete.js';
 import * as accountDelete from './functions/api/account-delete.js';
 import * as count from './functions/api/count.js';
 import * as google from './functions/api/google.js';
+import * as tools from './functions/api/tools.js';
+import * as course from './functions/api/course.js';
+import { sendDue } from './functions/_course.js';
+import { json, db, accountTables } from './functions/_shared.js';
 
 /** One line per route. A new file in functions/api/ needs its line here. */
 export const ROUTES = {
@@ -65,9 +68,33 @@ export const ROUTES = {
   '/api/account-delete': accountDelete,
   '/api/count': count,
   '/api/google': google,
+  '/api/tools': tools,
+  '/api/course': course,
 };
 
+/** The jobs the hourly cron runs (wrangler.toml [triggers]). One line per
+ *  job; each gets (env, D) and must never throw. Today: the 12-day letters
+ *  (functions/_course.js). */
+export const JOBS = {
+  'course-letters': (env, D) => sendDue(env, D),
+};
+
+/** Every job, one after the other; one failing never stops the next. */
+export async function runJobs(env) {
+  const D = db(env);
+  if (!D) return {};
+  await accountTables(D);
+  const out = {};
+  for (const [name, job] of Object.entries(JOBS)) {
+    try { out[name] = await job(env, D); } catch (err) { out[name] = { error: String(err && err.message || err) }; console.error('job', name, err && err.stack || err); }
+  }
+  return out;
+}
+
 export default {
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(runJobs(env));
+  },
   async fetch(request, env, ctx) {
     const path = new URL(request.url).pathname.replace(/\/+$/, '');
     // The old sales-page addresses: a 302 to their road, query string kept.

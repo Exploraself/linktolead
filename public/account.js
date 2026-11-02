@@ -88,10 +88,11 @@ export async function note({ body, level, domain }) {
 /** Create the free account, or find it. `type` is 'full' (company, interest,
  *  industry and a password) or 'simple' (no password, ever). `landing` is the
  *  sales page ('a', 'b', 'c' or 'compass'); `utm` the tags the founder
- *  arrived with. A new email returns a token, kept here. An email that already has an account returns { existing: true } and
+ *  arrived with; `door` 'tools' and `path` say a free tool made it (the toolkit
+ *  welcome). A new email returns a token, kept here. An email that already has an account returns { existing: true } and
  *  no token: that browser signs in by email link instead. */
-export async function signup({ first, last, email, industry, consent, source, stage, type, company, noCompany, interest, password, confirm, landing, utm }) {
-  const out = await post('/api/signup', { first, last, email, industry, consent, source, stage, type, company, noCompany, interest, password, confirm, landing, utm, token: token() });
+export async function signup({ first, last, email, industry, consent, source, stage, type, company, noCompany, interest, password, confirm, landing, utm, door, path }) {
+  const out = await post('/api/signup', { first, last, email, industry, consent, source, stage, type, company, noCompany, interest, password, confirm, landing, utm, door, path, token: token() });
   if (out.token) keep(out.token);
   return out;
 }

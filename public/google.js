@@ -33,7 +33,7 @@ export const slot = (consentFor = '', dark = false) => `<div class="g-slot" hidd
 </div>`;
 
 /** Show the button in `el` (a .g-slot). Resolves true when it is on screen. */
-export async function mount(el, { landing = '', source = 'compass', onDone = null, onError = null } = {}) {
+export async function mount(el, { landing = '', source = 'compass', door = '', path = '', onDone = null, onError = null } = {}) {
   if (!el) return false;
   const c = await config();
   if (!c.ready || !c.clientId) { el.hidden = true; return false; }
@@ -49,7 +49,7 @@ export async function mount(el, { landing = '', source = 'compass', onDone = nul
   onCredential = async (resp) => {
     try {
       const A = await import('/account.js');
-      const out = await A.google(resp.credential, { consent: !!(theirs ? theirs.checked : mine && mine.checked), landing, source, utm: utm() });
+      const out = await A.google(resp.credential, { consent: !!(theirs ? theirs.checked : mine && mine.checked), landing, source, utm: utm(), ...(door ? { door, path } : {}) });
       if (onDone) onDone(out);
     } catch (ex) {
       if (onError) onError(ex && ex.message && !/fetch|network|load failed|import/i.test(ex.message) ? ex.message : 'We could not reach the account service just now. Try again in a minute.');

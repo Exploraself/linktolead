@@ -12,7 +12,8 @@
 // browser is told to sign in by email link instead. The one exception is the
 // browser that already holds this record's token.
 //
-// The welcome letter ("launchpad-welcome") is sent once, to new accounts that
+// The welcome letter ("launchpad-welcome"; from a free tool, door 'tools', the
+// toolkit welcome) is sent once, to new accounts that
 // consented and have not unsubscribed, within the mail limits. It is the only
 // email a new account gets, so nobody receives two. The same founders are
 // added to the Mailchimp audience (functions/_mailchimp.js). Both happen after
@@ -96,7 +97,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
     const go = (async () => {
       if (!(await allowed(D, email, ip))) return;
-      const r = await sendWelcome(env, origin(request), { email, first, p, D, tz: body.tz, landing });
+      const r = await sendWelcome(env, origin(request), { email, first, p, D, tz: body.tz, landing, door: body.door === 'tools' ? 'tools' : '', path: clean(body.path, 40) });
       if (r.ok) await logged(D, email, ip);
       await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)')
         .bind(id, r.ok ? 'launchpad-welcome' : 'launchpad-welcome-failed', now(), r.why || null).run();

@@ -310,6 +310,16 @@ async function loadComments() {
 
 // ── The drawer: one founder, every action ────────────────────────────────────
 
+/** The free tools a founder opened, and where they are in the 12 days
+ *  (functions/_tools.js TOOL_LIST, functions/api/mentor.js courseLine; a test
+ *  holds the names equal). */
+export const TOOL_NAMES = { 'runway': 'Cash runway', 'bottleneck': 'The bottleneck test', 'off-switch': 'The off-switch check', '12-days': '12 Days to Start Winning' };
+function toolsOf(s) {
+  const used = String(s.tools || '').split(',').filter((k) => TOOL_NAMES[k]).map((k) => TOOL_NAMES[k]);
+  const [d, st] = String(s.course || '').split('|'), n = Number(d);
+  const c = s.course ? (n < 0 ? 'welcome pending' : n === 0 ? 'welcome sent' : `day ${n} of 13`) + (st ? ', stopped' : '') : '';
+  return used.map((x) => (x === TOOL_NAMES['12-days'] && c ? `${x} (${c})` : x)).join(' · ');
+}
 function drawerHTML(s) {
   const n = nextAction(s), g = groupOf(s), cr = crossedOf(s), lv = levelCount(s), lp = launchpadDone(s), id = esc(s.id);
   const main = n.does === 'open' ? `<button class="btn gold" data-open="${id}">${esc(n.button)}</button>`
@@ -339,6 +349,7 @@ function drawerHTML(s) {
       <dt>Consent</dt><dd>${s.consent ? 'yes' : 'no'}${s.unsubscribed ? ' · <b class="warn">unsubscribed</b>' : ''}</dd>
       <dt>Mailchimp</dt><dd>${mcState(s)}</dd>
       <dt>Library</dt><dd>${books ? plural(books, 'book', 'books') + ' taken' : '—'}</dd>
+      <dt>Tools</dt><dd>${esc(toolsOf(s)) || '—'}</dd>
     </dl>
     <div><p class="lbl">Their path</p><ul class="tl" style="margin-top:8px">
       <li>Signed up${land ? ' on ' + esc(land) : ''} <span>· ${esc(day(s.joined_at))}</span></li>
