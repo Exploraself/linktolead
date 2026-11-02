@@ -38,6 +38,7 @@ import * as count from './functions/api/count.js';
 import * as google from './functions/api/google.js';
 import * as tools from './functions/api/tools.js';
 import * as course from './functions/api/course.js';
+import * as toolkit from './functions/api/toolkit.js';
 import { sendDue } from './functions/_course.js';
 import { json, db, accountTables } from './functions/_shared.js';
 
@@ -70,6 +71,7 @@ export const ROUTES = {
   '/api/google': google,
   '/api/tools': tools,
   '/api/course': course,
+  '/api/toolkit': toolkit,
 };
 
 /** The jobs the hourly cron runs (wrangler.toml [triggers]). One line per

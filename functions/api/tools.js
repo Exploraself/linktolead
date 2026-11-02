@@ -1,6 +1,8 @@
 // The free tools (functions/_tools.js), for a signed-in founder.
 //
-// POST { token, tool, step: 'open' }                    a tool was opened: logged, tag TOOLS the first time
+// POST { token, step: 'hello' }                         the Tools page was opened: the welcome, once
+// POST { token, tool, step: 'open' }                    a tool was opened: logged, tag "Growth Toolkit" the
+//                                                       first time, and the welcome once per address
 // POST { token, tool, step: 'done', answers, summary }  the founder reached their reading: the answers
 //                                                       and a one-line result are kept (/mentor shows them)
 // GET  ?t=token                                         which tools this founder has used, for the Tools page
@@ -9,7 +11,8 @@
 // this copy is what lets Alexandru and the team read them before a session.
 
 import { json, bad, db, now, clean, accountTables, studentBy } from '../_shared.js';
-import { isTool, opened } from '../_tools.js';
+import { isTool, opened, welcomeOnce } from '../_tools.js';
+import { origin } from '../_mail.js';
 
 export async function onRequestPost({ request, env, waitUntil }) {
   const D = db(env);
@@ -19,10 +22,17 @@ export async function onRequestPost({ request, env, waitUntil }) {
   await accountTables(D);
   const me = await studentBy(D, clean(body.token, 80));
   if (!me) return bad('Sign in first.', 401);
+  const tz = clean(body.tz, 60);
+  if (body.step === 'hello') {
+    await welcomeOnce(env, D, origin(request), me, { tz, waitUntil });
+    return json({ ok: true });
+  }
   const tool = clean(body.tool, 30);
   if (!isTool(tool) || tool === '12-days') return bad('There is no such tool.', 404);
+  if (tool === 'teleprompter' && body.step !== 'open') return bad('The teleprompter keeps your scripts on your device.');
   if (body.step === 'open') {
     await opened(env, D, me.id, tool, waitUntil);
+    await welcomeOnce(env, D, origin(request), me, { tool, tz, waitUntil });
     return json({ ok: true });
   }
   if (body.step === 'done') {

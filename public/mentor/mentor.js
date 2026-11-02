@@ -313,7 +313,7 @@ async function loadComments() {
 /** The free tools a founder opened, and where they are in the 12 days
  *  (functions/_tools.js TOOL_LIST, functions/api/mentor.js courseLine; a test
  *  holds the names equal). */
-export const TOOL_NAMES = { 'runway': 'Cash runway', 'bottleneck': 'The bottleneck test', 'off-switch': 'The off-switch check', '12-days': '12 Days to Start Winning' };
+export const TOOL_NAMES = { 'runway': 'Cash runway', 'bottleneck': 'The bottleneck test', 'off-switch': 'The off-switch check', '12-days': '12 Days to Start Winning', 'teleprompter': 'Teleprompter' };
 function toolsOf(s) {
   const used = String(s.tools || '').split(',').filter((k) => TOOL_NAMES[k]).map((k) => TOOL_NAMES[k]);
   const [d, st] = String(s.course || '').split('|'), n = Number(d);
