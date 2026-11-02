@@ -45,6 +45,6 @@ ok(j2.ok && j2.invited === false && j2.inviteWhy && j2.team.some((m) => m.email 
 
 const js = readFileSync('public/mentor/mentor.js', 'utf8');
 ok(js.includes('An invitation is on its way to them') && js.includes('the invitation did not send'), '/mentor says whether the invitation went');
-ok(js.indexOf('id="team"') < js.indexOf('${mailchimpHTML()}${mentorsHTML()}'), 'Settings opens with the team first');
+ok(js.indexOf('id="team"') < js.indexOf('${mailchimpHTML()}') && js.indexOf('${mailchimpHTML()}') < js.indexOf('${mentorsHTML()}'), 'Settings opens with the team first');
 
 done();
