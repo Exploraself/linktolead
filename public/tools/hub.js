@@ -9,6 +9,7 @@
 import { CATEGORIES, CATALOG, coverHTML, byKey } from '/tools/catalog.js';
 import * as G from '/tools/gate.js';
 import * as A from '/account.js';
+import { ICONS } from '/tools/icons.js';
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const $ = (id) => document.getElementById(id);
@@ -19,9 +20,9 @@ function draw(used = {}, course = null) {
   host.innerHTML = CATEGORIES.map((g) => {
     const items = CATALOG.filter((c) => c.category === g.key);
     return `<section class="dom" style="--c:${g.color}" aria-labelledby="g-${g.key}">
-      <h2 id="g-${g.key}"><i aria-hidden="true"></i>${esc(g.name)}<small>&nbsp;· ${esc(g.sub)}</small></h2>
+      <h2 id="g-${g.key}"><i aria-hidden="true">${ICONS[g.key] || ''}</i>${esc(g.name)}<small>&nbsp;· ${esc(g.sub)}</small></h2>
       <div class="shelf">${items.map((c) => {
-        if (c.soon) return `<div class="soon"><b>${esc(c.name)}</b><span>${esc(c.sub)}</span></div>`;
+        if (c.soon) return `<div class="soon"><i aria-hidden="true">${ICONS.soon}</i><b>${esc(c.name)}</b><span>${esc(c.sub)}</span></div>`;
         const u = used[c.key];
         const line = c.key === '12-days' && course
           ? (course.stopped ? 'Your letters are stopped. You can start them again.' : course.day >= 13 ? 'All 12 days done.' : course.day > 0 ? `You are on day ${course.day} of 12.` : 'Your welcome letter is on its way.')

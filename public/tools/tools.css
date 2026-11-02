@@ -190,15 +190,23 @@ input[type=range]{width:100%;margin:14px 0 4px;height:34px;accent-color:var(--ac
 .hub .lede{max-width:60ch}
 .dom{margin-top:40px}
 .dom > h2{display:flex;align-items:center;gap:10px;font:600 12px/1.2 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--ink);padding-bottom:12px;border-bottom:1px solid var(--line)}
-.dom > h2 i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.dom > h2 i{width:34px;height:34px;flex:none;border-radius:10px;display:grid;place-items:center;color:var(--ink);background:color-mix(in srgb,var(--c) 26%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 55%,transparent)}
+.dom > h2 i svg{width:20px;height:20px}
 .dom > h2 small{font:500 12px/1.2 var(--body);letter-spacing:.04em;text-transform:none;color:var(--muted)}
-@media (max-width:520px){.dom > h2{flex-wrap:wrap}.dom > h2 small{flex-basis:100%;padding-left:20px}}
+@media (max-width:520px){.dom > h2{flex-wrap:wrap}.dom > h2 small{flex-basis:100%;padding-left:44px}}
 .shelf{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
 .slot{display:grid;gap:10px;align-content:start}
 .used{font-size:13.5px;color:var(--muted)}
 .used b{color:var(--ink);font-weight:600}
 .soon{border:1.5px dashed var(--line);border-radius:18px;padding:22px 20px;min-height:180px;display:flex;flex-direction:column;justify-content:center;gap:6px;color:var(--muted)}
 .soon b{font:500 22px/1.2 var(--display);color:var(--ink)}
+.soon > i{width:22px;height:22px;color:var(--muted);margin-bottom:4px}
+.soon > i svg{width:22px;height:22px;display:block}
+/* The small picture above each sign-in screen. */
+.qic{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;margin:0 0 16px;color:var(--steel-ink);background:var(--steel-soft);box-shadow:inset 0 0 0 1px var(--line)}
+.qic svg{width:24px;height:24px}
+@media (prefers-reduced-motion: no-preference){.scr.enter .qic{animation:qicIn .45s ease-out both}}
+@keyframes qicIn{from{opacity:0;transform:translateY(4px) scale(.94)}to{opacity:1;transform:none}}
 .hub-foot{margin-top:46px;padding-top:20px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
 
 /* ── The toolkit page and the 12-day page ───────────────── */

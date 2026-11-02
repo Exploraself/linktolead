@@ -116,3 +116,18 @@ The Founder's Blueprint and My Blueprint are light and white, in one
 easy-to-read font, with few colours, one thing at a time: the way Google's
 sign-in asks for one field per screen. A number that scares is left out:
 show this level's twenty actions, never "240 actions".
+
+## 12. Design the journey, and let a small picture speak (Alexandru, 2 Nov 2026)
+
+Think as a designer about the founder's comfort, on every page, letter and
+deck. The journey makes sense in every direction: from any place, the
+founder can see where they are, what comes next and how to get back. Each
+step is simple, pleasant and productive.
+
+Every way in, place, button group or heading wears a small line icon that
+tells the founder something before they read: a toolbox with a rising arrow
+for the Growth Toolkit, a letter for "we email you a code", a key for "type
+the code", an hourglass for "being built". The words beside the icon always
+carry the meaning too (icons are hidden from screen readers). One icon set
+per surface, drawn in the text colour; the toolkit's lives in
+public/tools/icons.js.

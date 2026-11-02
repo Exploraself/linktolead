@@ -16,6 +16,7 @@
 import * as A from '/account.js';
 import { INTERESTS, INDUSTRIES, CONSENT, utm } from '/forms.js';
 import { slot as googleSlot, mount as mountGoogle } from '/google.js';
+import { ICONS } from '/tools/icons.js';
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const RM = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -125,8 +126,14 @@ export function open(host, { name = 'Growth Toolkit', path = '/tools/', st = { k
       mode === 'signin' && needAccount ? '<button type="button" class="linkbtn" data-g="signup">New here? Make a free account</button>' : '',
       mode === 'signup' && i === 0 && !needAccount ? '<button type="button" class="linkbtn" data-g="code">Just the toolkit? Get a free code</button>' : '',
     ].filter(Boolean);
+    // One small picture per screen that says what is happening: the toolkit
+    // door, a letter on its way, the key to type, an account, a sign-in.
+    const pic = k === 'askcode' ? ICONS.mail : k === 'code' ? ICONS.key
+      : i === 0 && mode === 'code' ? ICONS.toolkit : i === 0 && mode === 'signin' ? ICONS.signin
+      : i === 0 && mode === 'signup' ? ICONS.account : '';
     host.innerHTML = `<div class="scr${RM.matches ? '' : ' enter'}">
       <div class="qtop"><button type="button" class="back" data-g="back">← Back</button><span class="count">${top}</span></div>
+      ${pic ? `<div class="qic" aria-hidden="true">${pic}</div>` : ''}
       ${firstScreen && mode === 'signup' ? `${googleSlot('g-gconsent')}<input type="checkbox" id="g-gconsent" hidden>` : ''}
       <h2 class="qh" id="g-q">${esc(q)}</h2>
       <p class="hint" id="g-h">${esc(hint)}</p>
