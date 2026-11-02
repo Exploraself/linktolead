@@ -295,9 +295,10 @@ async function post({ request, env }) {
     // The invitation (Alexandru, 2 Nov 2026): signed in at one tap when the
     // address has an account, else "make your free account" first.
     const base = origin(request);
-    const acct = await D.prepare('SELECT id FROM student WHERE email = ?').bind(email).first();
+    const acct = await D.prepare('SELECT id, name FROM student WHERE email = ?').bind(email).first();
     const url = acct ? await signinUrl(D, base, acct.id, { ttl: 7 * 24 * 3600_000 }) : '';
-    const r = await send(env, { to: email, ...teamInvite(base, { to: email, signinUrl: url }),
+    const first = acct ? String(acct.name || '').trim().split(/\s+/)[0] : '';
+    const r = await send(env, { to: email, ...teamInvite(base, { to: email, first, signinUrl: url }),
       why: 'Alexandru added this address to the ExploraSelf team in the mentor cockpit.' });
     if (acct) await log(acct.id, r.ok ? 'team-invite' : 'team-invite-failed', r.ok ? null : r.why || null);
     return json({ ok: true, team: await teamList(D, env), invited: r.ok, inviteWhy: r.ok ? null : (r.why || 'The email did not send.') });
