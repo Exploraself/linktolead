@@ -105,7 +105,7 @@ ok(BL[''].total === 1 && BL[''].none === 1 && BL.road4.total === 0 && BL.summit.
 const js = fs.readFileSync('public/mentor/mentor.js', 'utf8'), html = fs.readFileSync('public/mentor/index.html', 'utf8');
 for (const a of ['data-open=', 'data-msg=', 'data-link=', 'data-reset=', 'data-pause=', 'data-del=', 'data-step=', 'data-mentorof=', 'data-vhide=', 'data-medit=', "id=\"mform\"", 'id="mc-test"', 'id="mc-backfill"'])
   ok(js.includes(a), `the cockpit keeps ${a.replace(/[=:]$/, '')}`);
-for (const f of ['function one(id)', 'function messageBox(', 'function deleteBox(', 'async function csv()', 'function gate(', 'function loadComments(', 'function compassPanel(C)'])
+for (const f of ['function one(id, at', 'function messageBox(', 'function deleteBox(', 'async function csv()', 'function gate(', 'function loadComments(', 'function compassPanel(C)'])
   ok(js.includes(f), `the cockpit keeps ${f}`);
 ok(html.includes('<h1>Mentor cockpit</h1>') && /id="csv">Export CSV</.test(html) && /id="refresh">Refresh</.test(html) && html.includes('aria-label="Search founders"'), 'header: name, search, Export CSV, Refresh');
 ok(["['today', 'Today']", "['founders', 'Founders']", "['inbox', 'Inbox']", "['grow', 'Grow']", "['settings', 'Settings']"].every((t) => js.includes(t)), 'the five tabs (2 Nov 2026): Today, Founders, Inbox, Grow, Settings');

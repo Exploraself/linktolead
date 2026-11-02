@@ -9,6 +9,8 @@
 //                  downloads and their "Ask Alexandru" thread
 // GET ?growth=id   one founder's Massive Growth Plan: ticks and what they
 //                  wrote in its blanks, with the date of each change
+// GET ?email=a@b   everything tied to one address: its accounts, ways in,
+//                  calls, refunds, payments, letters and Mailchimp (functions/_trail.js)
 // GET ?tags=1      every Mailchimp tag of the audience, sorted Keep / Old /
 //                  Ask (functions/_tag-list.js). The key, or the 'mailchimp' right
 // POST { action }  (a team account: only the rights ticked for it, functions/_team.js; the key: everything)
@@ -39,6 +41,7 @@ import { sortTags } from '../_tag-list.js';
 import { webhookState, payments } from '../_stripe.js';
 import { refundList, refundTable } from '../_refund.js';
 import { holdLetters } from '../_series.js';
+import { emailTrail } from '../_trail.js';
 
 /** The actions a new team member cannot do until a right is ticked for them
  *  (Alexandru, 2 Nov 2026: first "only Alexandru", then "choose per team
@@ -212,6 +215,9 @@ export async function onRequestGet({ request, env }) {
   }
   const one = url.searchParams.get('student');
 
+  // "Everything for this email" (Alexandru, 3 Nov 2026): read-only.
+  if (url.searchParams.has('email')) return json({ ok: true, ...(await emailTrail(D, env, url.searchParams.get('email'), { money: rights.includes('payments') })) });
+
   // The drawer's Growth Plan: ticks and words, nothing else.
   const gp = url.searchParams.get('growth');
   if (gp) {
@@ -254,7 +260,7 @@ export async function onRequestGet({ request, env }) {
   if (url.searchParams.get('csv')) {
     return new Response(toCSV(students), { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="founders.csv"', 'cache-control': 'no-store' } });
   }
-  const waiting = await D.prepare(`SELECT n.id, n.student_id, n.body, n.created_at, s.name, s.email FROM note n JOIN student s ON s.id = n.student_id
+  const waiting = await D.prepare(`SELECT n.id, n.student_id, n.body, n.level, n.domain, n.created_at, s.name, s.email FROM note n JOIN student s ON s.id = n.student_id
       WHERE n.status = 'new' ORDER BY n.created_at DESC LIMIT 100`).all();
   const mc = mailchimpState(env);
   const mcLog = await D.prepare('SELECT student_id, email, action, mode, status, detail, at FROM mailchimp_log ORDER BY id DESC LIMIT 20').all();

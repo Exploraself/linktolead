@@ -279,6 +279,20 @@ footer{max-width:1280px;margin:0 auto;padding:10px 22px 50px;font-size:12px;colo
 @media (max-width:520px){.top,.tabs{padding-left:14px;padding-right:14px}main{padding:16px 14px 30px}.panel{padding:14px}.top .tr{margin-left:0;flex:1 1 100%}.top .tr #themehost{margin-left:auto}
   .tw table{font-size:12.5px}.tw th{white-space:normal;font-size:10.5px;letter-spacing:.03em}.tw th,.tw td{padding:8px 5px}}
 @media (prefers-reduced-motion:reduce){.drawer,.drawer.open{transition:none}}
+/* Everything for this email (Alexandru, 3 Nov 2026): every email is a button. */
+.emailbtn{appearance:none;background:none;border:0;padding:0;min-height:0;font:inherit;color:var(--gold-ink);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;cursor:pointer;text-align:left;overflow-wrap:anywhere}
+.emailbtn:hover{text-decoration-thickness:2px}
+.emailbtn.tiny{font-size:12.5px;display:block;margin-top:2px}
+.trail .lbl{display:flex;align-items:center;gap:6px}
+.trail .lbl .ico,.trl .ico{width:18px;height:18px;flex:0 0 18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;color:var(--gold-ink)}
+.trail-mail{font-size:clamp(20px,5vw,26px);overflow-wrap:anywhere;margin:4px 0 2px}
+.trl{list-style:none;padding:0;margin:10px 0 0;display:grid}
+.trl li{display:grid;grid-template-columns:18px 1fr;gap:4px 10px;align-items:start;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;min-width:0}
+.trl li > span{min-width:0;overflow-wrap:anywhere}
+.trl li > small{grid-column:2;color:var(--muted);font-size:12.5px}
+.trl a{color:var(--gold-ink);overflow-wrap:anywhere}
+.trl .warn,.trail .warn{color:#A33A1F}
+@media (min-width:760px){.trl li{grid-template-columns:18px 1fr auto}.trl li > small{grid-column:3;text-align:right;white-space:nowrap}}
 </style>
 </head>
 <body>
