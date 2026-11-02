@@ -51,7 +51,6 @@ const signedOut = (() => { try { return new URLSearchParams(location.search).get
 /** Arrived from a password-reset email: open the password box once signed in. */
 let resetAsk = (() => { try { return new URLSearchParams(location.search).get('reset') === '1'; } catch { return false; } })();
 let view = linkCode ? 'loading' : entry({ joined: account.joined(), old: oldEntrance, hash: hashNow });
-if (view === 'redirect') { try { location.replace('/north3/#join'); } catch { /* no location */ } }
 let level = 1, dom = 'self';
 /** The North Star record from the account, the notes, and whether a password is set. */
 let compassRec = null, inbox = null, hasPassword = false, replyTo = null;
@@ -146,7 +145,9 @@ function levelDone(st, lv) {
   return levelUnits(state.work, lv);
 }
 /** A level's name and promise, from Version 4. */
-const titleOf = (st, n) => { const x = LEVELS4[n - 1]; return x ? `${x.word} · ${x.title}` : weekTitle(st, n); };
+// Plain words on every surface outside a level (AGENTS.md 10): “What you believe”,
+// not “SEED · What you believe”. The level word appears inside the level.
+const titleOf = (st, n) => { const x = LEVELS4[n - 1]; return x ? x.title : weekTitle(st, n); };
 const promise4 = (st, n) => (LEVELS4[n - 1] ? LEVELS4[n - 1].promise : promiseOf(st, n));
 // (level access now comes from levelState and the tier — see the workspace below)
 
@@ -1193,15 +1194,22 @@ function emphasisName(st, lv) {
 function drawNav() {
   const unread = inbox ? inbox.unread : 0, answers = askUnread();
   $('#tnav').innerHTML = account.joined() && !['signin', 'redirect', 'loading'].includes(view)
-    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Base Camp${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button><button type="button" data-go="ask" ${view === 'ask' ? 'aria-current="page"' : ''}>Ask Alexandru${answers ? `<span class="tdot" aria-label="${answers} new ${answers === 1 ? 'answer' : 'answers'}"></span>` : ''}</button>${holds(tierNow(), 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
+    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Base Camp${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button><a class="tbook ttools" href="/tools/">Growth Toolkit</a><button type="button" data-go="ask" ${view === 'ask' ? 'aria-current="page"' : ''}>Ask Alexandru${answers ? `<span class="tdot" aria-label="${answers} new ${answers === 1 ? 'answer' : 'answers'}"></span>` : ''}</button>${holds(tierNow(), 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
     : '';
 }
 
+/** The top bar's height, so the always-on level bar sits right under it. */
+function topbar() {
+  const t = document.querySelector('.top');
+  if (t) document.documentElement.style.setProperty('--topbar', `${Math.round(t.getBoundingClientRect().height)}px`);
+}
+addEventListener('resize', topbar, { passive: true });
 function render() {
   const st = state.stage || 'build';
   document.body.classList.toggle('inwork', view === 'work');
   document.body.classList.remove('crownopen', 'stepsopen');
   drawNav();
+  topbar();
   if ((view === 'work' || view === 'home') && !LEVELS[st]) {
     // Only this founder's stage is loaded, and only when needed.
     $('#main').innerHTML = '<section class="band qband"><div class="wrap narrow"><p class="sec-lede" role="status">Opening your programme…</p></div></section>';

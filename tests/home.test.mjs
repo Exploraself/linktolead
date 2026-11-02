@@ -14,8 +14,8 @@ const promise = (st, n) => (LEVELS[st][n] && LEVELS[st][n].promise) || '';
 const C = { STAGES, weekTitle, promise };
 
 // ── Where /start opens ──────────────────────────────────────────────────────
-ok(entry({ joined: false, old: false }) === 'redirect', '/start without an account redirects to the sales page');
-ok(entry({ joined: false, old: true }) === 'redirect', 'old local work without an account still redirects');
+ok(entry({ joined: false, old: false }) === 'signin', 'Base Camp without an account shows sign-in, never a sales page');
+ok(entry({ joined: false, old: true }) === 'signin' && entry({ joined: false, old: false, hash: '#home' }) === 'signin', 'signed out, “See your progress” lands on sign-in too');
 ok(entry({ joined: false, old: false, hash: '#signin' }) === 'signin', '#signin shows the sign-in screen');
 ok(entry({ joined: true, old: true }) === 'work', 'an old founder opens on their programme');
 ok(entry({ joined: true, old: false }) === 'home', 'a new founder opens on the Base Camp');
@@ -23,12 +23,14 @@ ok(entry({ joined: true, old: true, hash: '#home' }) === 'home', '#home is honou
 ok(entry({ joined: true, old: false, hash: '#programme' }) === 'work', '#programme is honoured');
 ok(entry({ joined: true, old: false, hash: '#library' }) === 'library', '#library is honoured');
 
-// The page itself sends a visitor with no account away before any programme
-// code loads, but leaves the sign-in screen and a sign-in link alone.
+// A visitor with no account on this device sees the sign-in screen, never a
+// sales page (Alexandru, 2 Nov 2026): the page marks the address #signin
+// before any programme code loads, and leaves sign-in links alone.
 const html = readFileSync(new URL('../public/ground-plan/index.html', import.meta.url), 'utf8');
-const early = html.indexOf("location.replace('/north3/#join')");
-ok(early > 0 && early < html.indexOf('<link rel="stylesheet"') && early < html.indexOf('app.js'), '/start redirects before its styles and programme load');
-ok(/location\.hash !== '#signin'/.test(html) && /signin=/.test(html), 'the early redirect spares #signin and sign-in links');
+const early = html.indexOf("history.replaceState(null, '', location.pathname + location.search + '#signin')");
+ok(early > 0 && early < html.indexOf('<link rel="stylesheet"') && early < html.indexOf('app.js'), 'Base Camp marks #signin before its styles and programme load');
+ok(!html.includes("location.replace('/north3/#join')") && !readFileSync(new URL('../public/app.js', import.meta.url), 'utf8').includes("location.replace('/north3/#join')"), 'no sales-page redirect left in Base Camp');
+ok(/location\.hash !== '#signin'/.test(html) && /signin=/.test(html), 'sign-in links and #signin are left alone');
 
 // ── Which programme ─────────────────────────────────────────────────────────
 ok(programmeStage({}) === 'build', 'nothing known: Building, where the programme starts');

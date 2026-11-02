@@ -113,9 +113,20 @@ it without moving their business, rewrite it.
 ## 11. Easy on the eye (Alexandru, 2 Nov 2026)
 
 The Founder's Blueprint and My Blueprint are light and white, in one
-easy-to-read font, with few colours, one thing at a time: the way Google's
+easy-to-read font (Atkinson Hyperlegible, Alexandru's pick, 2 Nov 2026; not
+Lexend), with few colours, one thing at a time: the way Google's
 sign-in asks for one field per screen. A number that scares is left out:
 show this level's twenty actions, never "240 actions".
+
+## 12. Examples at every size (Alexandru, 2 Nov 2026)
+
+Level 01 is not only for someone who cannot pay the rent. Alternate the
+examples across the levels and domains: the founder with only an idea and no
+money yet; the owner with ten or fifteen people and payroll every month; the
+company with fifty people or $50 million, where one decision moves many
+salaries. Name the pressure plainly, above all in Lead yourself: the rent,
+the payroll, the bank, the investors, the people who depend on you. An
+example is always marked as one, never presented as a real founder.
 
 ## 13. Design the journey, and let a small picture speak (Alexandru, 2 Nov 2026)
 

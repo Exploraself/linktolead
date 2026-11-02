@@ -160,8 +160,8 @@ export function cabinetHTML(c) {
         <a class="cab-btn" href="/northstar/">${anyBand ? 'Open my reading →' : 'Take my North Star →'}</a></article>
       <article class="cab-obj"><p class="cab-eb">The ledger · Account Plans</p>
         ${p && p.total ? `<div class="cab-ring"><svg viewBox="0 0 80 80" aria-hidden="true"><rect x="14" y="10" width="52" height="62" rx="4" fill="none" stroke="var(--gold)" stroke-width="2"/><path d="M24 26h32M24 36h32M24 46h20" stroke="var(--line)" stroke-width="2"/><path d="M24 56l5 5 9-10" fill="none" stroke="var(--gold)" stroke-width="2.4" stroke-linecap="round"/></svg><div><b>${p.count} of ${p.total}</b><small>steps ticked</small></div></div>
-        ${p.next ? `<div class="cab-next"><span class="cab-k">Next · ${esc(p.next.domain)}</span>${esc(p.next.title)}</div>` : ''}` : '<p>Your step-by-step plans open from your North Star reading.</p>'}
-        <button type="button" class="cab-btn" data-cab="plans">Open the ledger →</button></article>
+        ${p.next ? `<div class="cab-next"><span class="cab-k">Next · ${esc(p.next.domain)}</span>${esc(p.next.title)}</div>` : ''}` : '<p>Your step-by-step plans come from your North Star reading. Take it first, and they open here.</p>'}
+        <button type="button" class="cab-btn" data-cab="plans">${p && p.total ? 'Open the ledger →' : 'Take my North Star first →'}</button></article>
       <article class="cab-obj"><p class="cab-eb">Ask Alexandru</p>
         <div class="cab-portrait"><img src="/cabinet/alexandru.jpg" alt="Alexandru Cojocari" width="640" height="512" loading="lazy"></div>
         <img class="cab-sig" src="/mail/signature.png" alt="Alexandru" width="150" height="60">
