@@ -155,7 +155,7 @@ function refundsHTML() {
     const paidLine = pays.length ? pays.map((p) => `Paid ${esc(STEP_NAMES[p.step] || p.step)}${p.amount != null ? ` · ${esc(money(p.amount))}` : ''} · ${esc(day(p.at))}`).join('<br>')
       : x.student_id ? 'No live Stripe payment on this account.' : 'No account with this email.';
     return `<li class="rf-row${x.done_at ? ' done' : ''}">
-      <div class="rf-who"><b>${esc(x.name)}</b><span class="tiny sel">${esc(x.email)}</span>${s ? `<button type="button" class="linkish tiny" data-drawer="${esc(s.id)}">Open their account</button>` : ''}</div>
+      <div class="rf-who"><b>${esc(x.name)}</b>${emailBtn(x.email, 'tiny')}${s ? `<button type="button" class="linkish tiny" data-drawer="${esc(s.id)}">Open their account</button>` : ''}</div>
       <div class="rf-what"><span class="rf-step">${esc(STEP_NAMES[x.step] || x.step)} · ${esc(STEP_PRICE[x.step] || '')}</span><span class="tiny">Asked ${esc(when(x.asked_at))} · ${esc(day(x.asked_at))}</span><span class="tiny">${paidLine}</span></div>
       <div class="rf-act">${x.done_at ? `<span class="tiny">Done ${esc(day(x.done_at))}${x.done_by ? ` · ${esc(x.done_by)}` : ''}</span>` : ''}
         ${can('payments') ? `<button type="button" class="btn${x.done_at ? '' : ' red'}" data-rfdone="${esc(x.id)}" data-v="${x.done_at ? '0' : '1'}">${x.done_at ? 'Open again' : 'Mark done'}</button>` : ''}</div>
@@ -361,7 +361,7 @@ function foundersHTML() {
   const any = Object.keys(NO_FILTER).some((k) => F[k] !== 'all') || q;
   const row = (s) => { const n = nextAction(s);
     return `<tr data-drawer="${esc(s.id)}" tabindex="0"${openId === s.id ? ' class="on"' : ''} aria-label="${esc(s.name || s.email)}: open the details">
-      <td class="c-who"><span class="who">${avatar(s)}<span style="min-width:0"><b>${esc(s.name || '—')}</b><span class="em">${esc(s.email)}</span>${toldLine(s)}</span></span></td>
+      <td class="c-who"><span class="who">${avatar(s)}<span style="min-width:0"><b>${esc(s.name || '—')}</b><span class="em">${emailBtn(s.email)}</span>${toldLine(s)}</span></span></td>
       <td class="c-group">${groupPill(s)}</td><td class="c-step">${esc(STEP_SHORT[s.tier || 'free'] || s.tier)}</td>
       <td class="c-lv">${levelsBar(s)}</td>
       <td class="c-stage">${esc(stageName(s.stage))}</td><td class="c-gp num">${esc(gpCount(s))}</td><td class="c-seen num">${esc(when(s.last_seen_at || s.joined_at))}</td>
@@ -380,9 +380,9 @@ function foundersHTML() {
 function questionsHTML() {
   const W = [...(data.waiting || [])].sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
   return `<div class="panel"><div><h2>Questions waiting</h2><p class="sub">The “Ask Alexandru” questions, oldest first. Your answer shows at their Base Camp and goes by email as a letter.</p></div>
-    ${W.length ? `<ul class="qlist">${W.map((n) => `<li><div><button type="button" class="linkish" data-drawer="${esc(n.student_id)}">${esc(n.name || n.email)}</button><span class="em">${esc(n.email)} · asked ${esc(when(n.created_at))}</span>
+    ${W.length ? `<ul class="qlist">${W.map((n) => `<li><div><button type="button" class="linkish" data-drawer="${esc(n.student_id)}">${esc(n.name || n.email)}</button><span class="em">${emailBtn(n.email)} · asked ${esc(when(n.created_at))}${n.level ? ' · Level ' + String(n.level).padStart(2, '0') : ''}${n.domain ? ' · ' + esc(DOMAIN_NAME[n.domain] || n.domain) : ''}</span>
         <p style="margin-top:6px;white-space:pre-wrap;overflow-wrap:anywhere">“${esc(String(n.body || '').slice(0, 400))}${String(n.body || '').length > 400 ? '…' : ''}”</p></div>
-      <span class="acts"><button class="btn gold" data-open="${esc(n.student_id)}">Read and answer</button><button class="btn" data-msg="${esc(n.student_id)}">Send a message</button></span></li>`).join('')}</ul>`
+      <span class="acts"><button class="btn gold" data-open="${esc(n.student_id)}" data-at="ask">Read and answer</button><button class="btn" data-msg="${esc(n.student_id)}">Send a message</button></span></li>`).join('')}</ul>`
       : '<p class="hint">No questions waiting. Every question has its answer.</p>'}</div>`;
 }
 
@@ -456,7 +456,7 @@ function requestsHTML(kind) {
     const reply = `mailto:${b.email}?subject=${encodeURIComponent(kind === 'boardroom' ? 'Your 1:1 with Alexandru' : 'Our call')}&body=${encodeURIComponent(`Hi ${String(b.name || '').split(/\s+/)[0]},\n\n`)}`;
     return `<li class="bk${open ? '' : ' closed'}" id="bk-${esc(b.id)}"><div>
       <p class="bk-h"><span class="pill ${BK_PILL[b.status] || ''}">${esc(BK_STATUS[b.status] || b.status)}</span>${s ? `<span class="pill">${esc(STEP_NAMES[s.tier] || s.tier || 'Free')}</span>` : '<span class="pill">No account</span>'}</p>
-      ${who} <span class="em sel">${esc(b.email)}</span>
+      ${who} <span class="em">${emailBtn(b.email)}</span>
       <p class="tiny">Asked ${esc(when(b.created_at))} · ${esc(day(b.created_at))}${zone ? ` · lives on ${esc(zone)} time` : ' · Rome time'}${b.confirmed_at ? ` · confirmed ${esc(when(b.confirmed_at))}${b.confirmed_by ? ` by ${esc(b.confirmed_by)}` : ''}` : ''}${b.closed_at ? ` · ${esc((BK_STATUS[b.status] || '').toLowerCase())} ${esc(when(b.closed_at))}${b.closed_by ? ` by ${esc(b.closed_by)}` : ''}` : ''}</p>
       ${b.answers && b.answers.length ? `<dl class="dkv bk-a">${b.answers.map(([l, w]) => `<dt>${esc(l)}</dt><dd>${esc(w)}</dd>`).join('')}</dl>` : ''}
       <p class="lbl" style="margin-top:12px">Their three times</p><ul class="bk-tl">${b.times.map(timeRow).join('')}${ownTime}</ul>
@@ -730,6 +730,134 @@ async function loadComments() {
       </tbody></table></div>` : '<p class="tiny">No comments yet. They appear here, and in your inbox, as founders leave them under the level videos.</p>'}`;
 }
 
+// ── Everything for this email (Alexandru, 3 Nov 2026: "the email must become
+// clickable and show the other connections the email has, and everything
+// else, with the linktolead entry points"). Every email in the cockpit is a
+// button; it opens one page: the accounts with that address, how they came
+// in (each page as a full link), and one dated timeline. Read-only:
+// GET ?email= (functions/_trail.js).
+const SITE = 'https://linktolead.exploraself.com';
+/** The page each landing key is, as a full link (functions/_profile.js LANDINGS). */
+export const LANDING_PATH = { road1: '/road1/', road2: '/road2/', road3: '/road3/', road4: '/road4/', road5: '/road5/', north1: '/north1/', north2: '/north2/', north3: '/north3/', compass: '/northstar/', summit: '/northstar/summit/' };
+const TOOL_PATH = { 'runway': '/runway/', 'bottleneck': '/bottleneck/', 'off-switch': '/off-switch/', '12-days': '/12-days/', 'teleprompter': '/teleprompter/' };
+const BOOK_PATH = { discovery: '/book/discovery/', boardroom: '/book/boardroom/' };
+const CROSS_NAME = { northstar: 'The Leader’s North Star', blueprint: 'The Founder’s Blueprint' };
+const DOMAIN_NAME = { self: 'Lead yourself', people: 'Lead your people', work: 'Lead your business', market: 'Lead the market' };
+const emailBtn = (email, cls = '') => (email ? `<button type="button" class="emailbtn${cls ? ' ' + cls : ''}" data-email="${esc(email)}" title="Everything for this email">${esc(email)}</button>` : '');
+const link = (path) => `<a href="${esc(SITE + path)}" target="_blank" rel="noopener">${esc(SITE + path)}</a>`;
+/** "3 Nov 2026, 00:12", Rome time. */
+const stamp = (s) => { try { return new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(s)); } catch { return String(s || '—'); } };
+const T_ICONS = {
+  door: '<path d="M5 21V4h10v17M15 6h4v15M11 12h.01"/>', star: '<path d="M12 2.8 21.2 12 12 21.2 2.8 12Z"/><path d="m12 7 1.5 3.5L17 12l-3.5 1.5L12 17l-1.5-3.5L7 12l3.5-1.5Z"/>',
+  level: '<path d="M4 20h16M7 16V9M12 16V5M17 16v-4"/>', tool: '<path d="M14.5 6.5a4 4 0 0 0-5.3 5.3L4 17l3 3 5.2-5.2a4 4 0 0 0 5.3-5.3L15 12l-3-3z"/>',
+  mail: '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/>', ask: '<path d="M4 5h16v11H8l-4 4z"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5M12 15h.01"/>',
+  call: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/>', pay: '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>',
+  refund: '<path d="M9 7H5V3"/><path d="M5.4 7A8 8 0 1 1 4 12"/>', book: '<path d="M5 4.5h11a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+  key: '<circle cx="8" cy="15" r="4"/><path d="m11 12 8-8M16 7l2 2"/>', tag: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.2"/>', dot: '<circle cx="12" cy="12" r="3"/>',
+};
+const ti = (k) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${T_ICONS[k] || T_ICONS.dot}</svg>`;
+/** One account's events in plain words: [icon, words] or null to leave out. */
+function eventWords(e) {
+  const d = String(e.detail || '');
+  const W = {
+    signup: ['door', 'Made an account'], completed: ['door', 'Completed their account details'], unsubscribed: ['mail', 'Said no to letters (unsubscribed)'],
+    crossed: ['door', `Crossed to ${CROSS_NAME[d] || d}, confirmed name and email`], 'tool-open': ['tool', `Opened ${TOOL_NAMES[d] || d}`], 'tool-done': ['tool', `Finished ${TOOL_NAMES[d] || d}`],
+    'course-start': ['mail', 'Started 12 Days to Start Winning'], 'course-stop': ['mail', 'Stopped 12 Days to Start Winning'], 'library-download': ['book', `Took ${d} from the library`],
+    paid: ['pay', `Paid${d ? ': ' + (STEP_NAMES[d] || d) : ''}`], 'unlocked-letter': ['mail', 'Got the “It’s unlocked” letter'], 'unlocked-letter-failed': ['mail', 'The “It’s unlocked” letter did not send'],
+    'toolkit-welcome': ['mail', 'Got “Welcome to the Growth Toolkit”'], 'toolkit-welcome-failed': ['mail', 'The Growth Toolkit welcome did not send'], 'toolkit-confirmed': ['tool', 'Opened the Growth Toolkit (“Yes, that’s me”)'],
+    'stage-change': ['level', `Changed where they stand${d ? ': ' + d : ''}`], 'mentor-step': ['key', `Step changed in /mentor${d ? ': ' + d : ''}`], booking: ['call', 'Asked for a call'],
+    'signin-link': ['key', 'Asked for a sign-in link'], 'signin-link-failed': ['key', `A sign-in link did not send${d ? ' (' + d + ')' : ''}`], 'founder-deleted-self': ['key', 'Deleted their own account'],
+  };
+  if (['login', 'signin', 'compass', 'signup', 'paid', 'course-start'].includes(e.kind)) return null; // counted, or drawn from their own rows (joined, North Star dates, payments, 12 Days)
+  if (W[e.kind]) return W[e.kind];
+  if (/^mentor-/.test(e.kind) || e.kind === 'team-did' || e.kind === 'stripe-invoice-off') return null;
+  return ['dot', String(e.kind).replace(/-/g, ' ')];
+}
+/** Everything tied to one address, as one list newest first: { at, icon, what }. */
+export function trailRows(t) {
+  const out = [];
+  const add = (at, icon, what) => { if (at) out.push({ at, icon, what }); };
+  for (const a of t.accounts || []) {
+    const P = a.profile || {}, path = LANDING_PATH[P.landing];
+    add(a.joined_at, 'door', `Made an account${path ? ` on ${link(path)}` : ''}${P.signup_type ? ` · ${esc(P.signup_type)} form` : ''}`);
+    for (const at of a.northStar || []) add(at, 'star', 'Took The Leader’s North Star');
+    for (const L of a.levels || []) { const x = LEVELS4[L.level - 1]; add(L.first, 'level', `Started Level ${String(L.level).padStart(2, '0')}${x ? ' · ' + esc(x.title) : ''}`); }
+    for (const r of a.tools || []) add(r.updated_at, 'tool', `${esc(TOOL_NAMES[r.tool] || r.tool)}, their last result${r.summary ? ': ' + esc(r.summary) : ''}`);
+    for (const c of a.course || []) { add(c.started_at, 'mail', `Started 12 Days to Start Winning · now on day ${Math.max(0, Number(c.day_sent) || 0)} of 13${c.stopped_at ? ', stopped' : ''}`); }
+    for (const x of a.series || []) add(x.started_at, 'mail', `Pain letters (${esc(x.series)}) · ${plural(Number(x.sent) || 0, 'letter', 'letters')} sent${x.test ? ' · test mode' : ''}${x.stopped_at ? ` · stopped${x.stop_why ? ': ' + esc(x.stop_why) : ''}` : ''}`);
+    for (const n of a.notes || []) add(n.created_at, 'ask', `Asked Alexandru${n.level ? ' · Level ' + String(n.level).padStart(2, '0') : ''}${n.domain ? ' · ' + esc(DOMAIN_NAME[n.domain] || n.domain) : ''} · ${n.status === 'new' ? '<b class="warn">waiting</b>' : 'answered'}`);
+    for (const m of a.messages || []) add(m.at, 'mail', `${m.answer ? 'Alexandru answered their question' : `Letter: “${esc(m.subject || '—')}”`} · ${m.read ? 'read' : 'not read yet'}`);
+    for (const p of a.payments || []) add(p.at, 'pay', `Paid for ${esc(STEP_NAMES[p.step] || p.step)} · ${p.mode === 'live' ? 'live' : '<b class="warn">test</b>'}${p.amount != null ? ` · ${(p.amount / 100).toLocaleString('en-US', { style: 'currency', currency: String(p.currency || 'usd').toUpperCase() })}` : ''}`);
+    for (const e of a.events || []) { const w = eventWords(e); if (w) add(e.at, w[0], esc(w[1])); }
+  }
+  for (const b of t.bookings || []) add(b.created_at, 'call', `Asked for ${b.kind === 'boardroom' ? 'the Boardroom 1:1' : 'a free discovery call'} on ${link(BOOK_PATH[b.kind] || '/book/discovery/')} · ${esc(b.status)}${b.confirmed_time ? ' · ' + esc(stamp(b.confirmed_time)) + ' Rome' : ''}`);
+  for (const r of t.refunds || []) add(r.asked_at, 'refund', `Asked for a refund · ${esc(STEP_NAMES[r.step] || r.step)} · ${r.done_at ? 'done' : '<b class="warn">open</b>'}`);
+  // Two events of the same kind at the same moment (a page and its API) count once.
+  const seen = new Set();
+  return out.filter((x) => { const k = x.at.slice(0, 16) + x.what; if (seen.has(k)) return false; seen.add(k); return true; })
+    .sort((x, y) => String(y.at).localeCompare(String(x.at)));
+}
+/** The ways in: every linktolead page this address came through, as full links. */
+export function waysIn(t) {
+  const rows = [];
+  for (const a of t.accounts || []) {
+    const P = a.profile || {};
+    if (LANDING_PATH[P.landing]) rows.push(['door', `Signed up on ${link(LANDING_PATH[P.landing])}`, day(a.joined_at)]);
+    const src = [P.utm_source, P.utm_medium, P.utm_campaign, P.utm_content].filter(Boolean).join(' · ') || P.source;
+    if (src) rows.push(['tag', `Came from: ${esc(src)}`, '']);
+    const firstOf = (kind, d) => { const e = (a.events || []).filter((x) => x.kind === kind && (!d || x.detail === d)).map((x) => x.at).sort()[0]; return e ? day(e) : ''; };
+    for (const d of [...new Set((a.events || []).filter((e) => e.kind === 'crossed').map((e) => e.detail))]) rows.push(['door', `Crossed to ${esc(CROSS_NAME[d] || d)} · ${link(d === 'northstar' ? '/northstar/' : '/ground-plan/')}`, firstOf('crossed', d)]);
+    if ((a.northStar || []).length) rows.push(['star', `The Leader’s North Star · ${link('/northstar/')}`, `${plural(a.northStar.length, 'time', 'times')}`]);
+    for (const k of [...new Set([...(a.tools || []).map((r) => r.tool), ...(a.events || []).filter((e) => e.kind === 'tool-open').map((e) => e.detail)])]) if (TOOL_PATH[k]) rows.push(['tool', `${esc(TOOL_NAMES[k] || k)} · ${link(TOOL_PATH[k])}`, firstOf('tool-open', k)]);
+    if ((a.levels || []).length) rows.push(['level', `The Blueprint · ${link('/ground-plan/')}`, `${plural(a.levels.length, 'level', 'levels')} touched`]);
+  }
+  for (const k of [...new Set((t.bookings || []).map((b) => b.kind))]) rows.push(['call', `${k === 'boardroom' ? 'Boardroom 1:1' : 'Free discovery call'} · ${link(BOOK_PATH[k] || '/book/discovery/')}`, plural((t.bookings || []).filter((b) => b.kind === k).length, 'request', 'requests')]);
+  if ((t.refunds || []).length) rows.push(['refund', 'Ask for a refund (Base Camp)', plural(t.refunds.length, 'request', 'requests')]);
+  return rows;
+}
+
+let TRAIL_ALL = false;
+async function trail(email) {
+  closeDrawer();
+  $('#main').innerHTML = '<p class="hint" style="padding:20px">Loading everything for this email…</p>';
+  const r = await api('?email=' + encodeURIComponent(email));
+  const t = r.ok ? r.data : null;
+  if (!t || t.bad) { $('#main').innerHTML = `<div class="stack"><div class="bar"><button class="ghost" id="back">← Back to the cockpit</button></div><div class="panel"><p>${esc(r.data && r.data.error ? r.data.error : 'That does not look like an email.')}</p></div></div>`; $('#back').onclick = load; return; }
+  const A = t.accounts || [], a = A[0];
+  const signs = A.reduce((n, x) => n + (x.events || []).filter((e) => e.kind === 'login' || e.kind === 'signin').length, 0);
+  const lastSign = A.flatMap((x) => (x.events || []).filter((e) => e.kind === 'login' || e.kind === 'signin').map((e) => e.at)).sort().pop();
+  const rowsAll = trailRows(t), rows = TRAIL_ALL ? rowsAll : rowsAll.slice(0, 40);
+  const ways = waysIn(t);
+  const n = (list) => (list || []).length;
+  const chips = [
+    [A.length ? plural(A.length, 'account', 'accounts') : 'No account', A.length ? '' : 'warn'],
+    [plural(A.reduce((x, y) => x + n(y.notes), 0), 'question', 'questions'), ''],
+    [plural(n(t.bookings), 'call asked', 'calls asked'), ''],
+    [plural(A.reduce((x, y) => x + n(y.messages), 0), 'letter', 'letters'), ''],
+    [plural(A.reduce((x, y) => x + n(y.payments), 0), 'payment', 'payments'), ''],
+    ...(n(t.refunds) ? [[plural(n(t.refunds), 'refund asked', 'refunds asked'), 'warn']] : []),
+  ];
+  $('#main').innerHTML = `<div class="stack trail"><div class="bar"><button class="ghost" id="back">← Back to the cockpit</button>${a ? `<button class="ghost" data-msg="${esc(a.id)}">Send a message</button>` : ''}</div>
+    <div class="panel"><p class="lbl">${ti('mail')} Everything for this email</p>
+      <h2 class="trail-mail">${esc(t.email)}</h2>
+      <p class="tiny">${a ? `${esc(a.name || '—')} · ${esc(STEP_NAMES[a.tier || 'free'] || a.tier)} · joined ${esc(day(a.joined_at))} · last seen ${esc(when(a.last_seen_at || a.joined_at))}` : 'No account has this address. What it did without one is below.'}${t.team ? ' · <b>on the team</b>' : ''}</p>
+      <div class="acts" style="margin-top:10px">${chips.map(([w, c]) => `<span class="pill${c ? ' ' + c : ''}">${esc(w)}</span>`).join(' ')}</div>
+      <div class="acts" style="margin-top:12px">${a ? `<button class="btn gold" data-open="${esc(a.id)}">Open their work</button><button class="btn" data-drawer="${esc(a.id)}">Their account</button>` : ''}<button class="btn" data-copy="${esc(t.email)}">Copy the email</button></div>
+      ${A.length > 1 ? `<p class="tiny warn" style="margin-top:10px">This address has ${A.length} accounts: ${A.map((x) => `<button type="button" class="linkish" data-open="${esc(x.id)}">${esc(x.name || x.id)}</button>`).join(', ')}.</p>` : ''}</div>
+    <div class="panel"><h2>Ways in</h2><p class="sub">Every page this email came through, as a full link.</p>
+      ${ways.length ? `<ul class="trl">${ways.map(([ic, w, when2]) => `<li>${ti(ic)}<span>${w}</span>${when2 ? `<small>${esc(when2)}</small>` : ''}</li>`).join('')}</ul>` : '<p class="tiny" style="margin-top:8px">No pages recorded yet.</p>'}
+      ${signs ? `<p class="tiny" style="margin-top:10px">Signed in ${plural(signs, 'time', 'times')} · last ${esc(when(lastSign))}</p>` : ''}</div>
+    <div class="panel"><h2>Timeline</h2><p class="sub">Newest first, Rome time.</p>
+      ${rows.length ? `<ol class="trl tline">${rows.map((x) => `<li>${ti(x.icon)}<span>${x.what}</span><small>${esc(stamp(x.at))}</small></li>`).join('')}</ol>` : '<p class="tiny" style="margin-top:8px">Nothing yet.</p>'}
+      ${rowsAll.length > rows.length ? `<p style="margin-top:10px"><button class="ghost" id="trail-all">Show all ${rowsAll.length}</button></p>` : ''}</div>
+    ${n(t.mailchimp) ? `<div class="panel"><details><summary><h2 style="display:inline">What Mailchimp was told · ${n(t.mailchimp)}</h2></summary>
+      <ul class="trl" style="margin-top:10px">${t.mailchimp.map((m) => `<li>${ti('tag')}<span>${esc(m.action)} · ${esc(m.status)}${m.mode && m.mode !== 'live' ? ' · ' + esc(m.mode) : ''}${m.detail ? `<span class="em">${esc(m.detail)}</span>` : ''}</span><small>${esc(stamp(m.at))}</small></li>`).join('')}</ul></details></div>` : ''}
+  </div>`;
+  $('#back').onclick = load;
+  const all = $('#trail-all'); if (all) all.onclick = () => { TRAIL_ALL = true; trail(email); };
+  window.scrollTo(0, 0);
+}
+
 // ── The drawer: one founder, every action ────────────────────────────────────
 
 /** The free tools a founder opened, and where they are in the 12 days
@@ -751,7 +879,7 @@ function drawerHTML(s) {
   const books = String(s.library || '').split(',').filter(Boolean).length;
   const said = flash;
   return `<button type="button" class="x" data-xdrawer aria-label="Close">×</button>
-    <div class="head">${avatar(s, true)}<div><h3>${esc(s.name || s.email)}</h3><span class="sub">${esc(s.email)}${s.company ? ' · ' + esc(s.company) : s.company === '' ? ' · No company yet' : ''}</span></div></div>
+    <div class="head">${avatar(s, true)}<div><h3>${esc(s.name || s.email)}</h3><span class="sub">${emailBtn(s.email)}${s.company ? ' · ' + esc(s.company) : s.company === '' ? ' · No company yet' : ''}</span></div></div>
     <div class="acts">${groupPill(s)} <span class="pill">${esc(STEP_SHORT[s.tier || 'free'] || s.tier)}</span>${s.open_notes ? ` <span class="pill warn">${s.open_notes > 1 ? s.open_notes + ' questions waiting' : 'Question waiting'}</span>` : ''}${s.paused ? ' <span class="pill warn">Paused</span>' : ''}${s.unsubscribed ? ' <span class="pill warn">Unsubscribed</span>' : ''}</div>
     ${said ? `<p class="flash" role="status">${esc(said)}</p>` : ''}
     <div class="panel" style="padding:12px 14px"><b>Next: ${esc(n.label)}</b><div class="acts">${main}</div></div>
@@ -983,7 +1111,7 @@ function v4Panel(work) {
     }).join('')}</div>`;
 }
 
-async function one(id) {
+async function one(id, at = '') {
   const r = await api('?student=' + encodeURIComponent(id));
   if (!r.ok) return load();
   NSE = r.data && r.data.compass ? await engine() : null;
@@ -999,7 +1127,7 @@ async function one(id) {
   $('#main').innerHTML = `<div class="stack"><div class="bar"><button class="ghost" id="back">← Back to the cockpit</button><button class="ghost" data-msg="${esc(id)}">Send a message</button></div>
     ${said ? `<p class="flash" role="status">${esc(said)}</p>` : ''}
     <div class="panel"><h2>${esc(s.name || s.email)}</h2>
-      <p class="tiny">${esc(s.email)} · joined ${when(s.joined_at)}</p>
+      <p class="tiny">${emailBtn(s.email)} · joined ${when(s.joined_at)}</p>
       <div class="kv">
         <div class="k"><b>Stage</b><span>${esc(s.stage || '—')}</span></div>
         <div class="k"><b>Step</b><span>${esc(STEP_NAMES[s.tier || 'free'] || s.tier)}</span></div>
@@ -1032,7 +1160,7 @@ async function one(id) {
       ${T.length ? DOMS.map(([k, label]) => { const rows = T.filter((t) => t.domain === k); return rows.length ? `<div class="dom ${k}" style="padding-top:10px"><h3>${label}</h3>${rows.map((t) => `<div class="ans"><em>${esc(t.title || t.step_id)}</em><p>Done ${when(t.done_at)}</p></div>`).join('')}</div>` : ''; }).join('')
         : '<p class="tiny" style="margin-top:8px">No steps ticked yet.</p>'}</div>
     ${M.length ? `<div class="panel"><h2>Messages sent</h2>${M.map((m) => `<div class="note"><p class="meta">${esc(m.channel)} · ${when(m.sent_at)} · ${m.read_at ? 'read' : 'not read yet'}</p><p><b>${esc(m.subject)}</b></p><p>${esc(m.body)}</p></div>`).join('')}</div>` : ''}
-    <div class="panel"><h2>Ask Alexandru · their thread</h2>
+    <div class="panel" id="ask-thread"><h2>Ask Alexandru · their thread</h2>
       ${TH.length ? TH.map((x) => x.from === 'founder' ? `<div class="note">
         <p class="meta">They asked · ${esc(day(x.at))}${x.level ? ' · Level ' + String(x.level).padStart(2, '0') : ''}${x.domain ? ' · ' + esc(LEADN[x.domain] || x.domain) : ''}</p>
         <p>${esc(x.body)}</p>
@@ -1045,7 +1173,8 @@ async function one(id) {
     </div>`;
   $('#back').onclick = load;
   const pb = $('#printbrief'); if (pb) pb.onclick = () => window.print();
-  window.scrollTo(0, 0);
+  const to = at === 'ask' ? $('#ask-thread') : null;
+  if (to) { to.scrollIntoView({ block: 'start' }); const ta = to.querySelector('textarea'); if (ta) ta.focus({ preventScroll: true }); } else window.scrollTo(0, 0);
   document.querySelectorAll('.reply').forEach((b) => b.onclick = async () => {
     const t = document.querySelector(`textarea[data-note="${b.dataset.note}"]`);
     if (!t || !t.value.trim()) return;
@@ -1096,7 +1225,9 @@ document.addEventListener('click', async (e) => {
   if ('fclear' in d) { F = { ...NO_FILTER }; q = ''; $('#q').value = ''; flash = ''; return draw(); }
   if (d.drawer) return openDrawer(d.drawer, true);
   if ('xdrawer' in d) return closeDrawer();
-  if (d.open) { closeDrawer(); return one(d.open); }
+  if (d.email) return trail(d.email);
+  if (d.copy) { try { await navigator.clipboard.writeText(d.copy); b.textContent = 'Copied'; } catch { b.textContent = d.copy; } return; }
+  if (d.open) { closeDrawer(); return one(d.open, d.at); }
   if (d.msg) return messageBox(d.msg, d.hint, d.kind);
   if (d.medit) {
     const m = (data.mentors || []).find((x) => x.id === d.medit); if (!m) return;
