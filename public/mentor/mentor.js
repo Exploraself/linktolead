@@ -256,15 +256,15 @@ function todayHTML(S) {
    share that paid, who did not pay yet, who just paid, and the money in, for
    today, 7 days, 30 days or all. Paid = a real Stripe payment; test payments
    never count. Each number opens Founders with that filter. */
-const PAY_WORDS = { paid: ['Paid', 'pill both'], given: ['Given free', 'pill bp'], free: ['Not paid', 'pill'] };
+const PAY_WORDS = { paid: ['Paid', 'pill both', 'var(--both)'], given: ['Given free', 'pill bp', 'var(--bp)'], free: ['Not paid', 'pill', 'var(--line)'] };
 function pulseHTML() {
   const P = pulse(data.students, data.paid, GW), win = { today: 'today', 7: 'in the last 7 days', 30: 'in the last 30 days', all: 'so far' }[GW];
   const byId = Object.fromEntries((data.students || []).map((s) => [s.id, s]));
   const money = (c) => `$${(Number(c) / 100).toLocaleString('en-US')}`;
   const tile = (n, t, d, pf, c) => `<button type="button" class="g" style="--c:var(--${c})" data-pf="${pf}"><span class="n">${n}</span><span class="t">${t}</span><span class="d">${d}</span><span class="act">See who →</span></button>`;
   const who = (s) => `<button type="button" class="linkish" data-drawer="${esc(s.id)}">${esc(s.name || s.email || '—')}</button>`;
-  const joined = P.joined.slice(0, 10).map((s) => { const k = payOf(s, LIVE); return `<li><div>${who(s)}<span class="why">${esc(s.email || '')} · joined ${esc(when(s.joined_at))} · ${esc(STEP_SHORT[s.tier || 'free'] || s.tier)}</span></div><span class="${PAY_WORDS[k][1]}">${PAY_WORDS[k][0]}</span></li>`; }).join('');
-  const pays = P.pays.slice(0, 10).map((p) => { const s = byId[p.student_id] || { id: p.student_id }; return `<li><div>${who(s)}<span class="why">${esc(STEP_NAMES[p.step] || p.step)}${'amount' in p ? ' · ' + esc(money(p.amount)) : ''} · ${esc(when(p.at))}</span></div>${p.mode === 'live' ? '<span class="pill both">Real</span>' : '<span class="pill">Test</span>'}</li>`; }).join('');
+  const joined = P.joined.slice(0, 10).map((s) => { const k = payOf(s, LIVE); return `<li><span class="sev" style="--c:${PAY_WORDS[k][2]}"></span><div>${who(s)}<span class="why">${esc(s.email || '')} · joined ${esc(when(s.joined_at))} · ${esc(STEP_SHORT[s.tier || 'free'] || s.tier)}</span></div><span class="${PAY_WORDS[k][1]}">${PAY_WORDS[k][0]}</span></li>`; }).join('');
+  const pays = P.pays.slice(0, 10).map((p) => { const s = byId[p.student_id] || { id: p.student_id }; return `<li><span class="sev" style="--c:${p.mode === 'live' ? 'var(--both)' : 'var(--line)'}"></span><div>${who(s)}<span class="why">${esc(STEP_NAMES[p.step] || p.step)}${'amount' in p ? ' · ' + esc(money(p.amount)) : ''} · ${esc(when(p.at))}</span></div>${p.mode === 'live' ? '<span class="pill both">Real</span>' : '<span class="pill">Test</span>'}</li>`; }).join('');
   return `<div class="panel"><div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><h2>Joined and paid</h2>
       <div class="fl" role="group" aria-label="When" style="margin-left:auto">${WINDOWS.map(([v, t]) => `<button type="button" class="chip" data-gw="${v}" aria-pressed="${GW === v}">${t}</button>`).join('')}</div></div>
     <div class="groups" style="margin-top:12px">
