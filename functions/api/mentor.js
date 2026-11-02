@@ -18,9 +18,9 @@ import { teamList, teamAdd, teamRemove } from '../_team.js';
 import { json, bad, db, now, mentorAccess, clean, looksLikeEmail, accountTables, newToken } from '../_shared.js';
 import { DOMAIN_STEPS, WHATIF_STEPS, ALL_STEP_IDS } from '../_plans.js';
 import { GROWTH_IDS, GROWTH_SQL, GROWTH_BLANK_IDS } from '../_growth.js';
-import { sendLink } from './signin.js';
+import { sendLink, signinUrl } from './signin.js';
 import { send, origin, mailState } from '../_mail.js';
-import { mentorLetter, answerLetter } from '../_letters.js';
+import { mentorLetter, answerLetter, teamInvite } from '../_letters.js';
 import { letterContext, mentors, saveMentor } from '../_mentor.js';
 import { LIBRARY_ITEMS } from './library.js';
 import { toolNames } from '../_tools.js';
@@ -226,8 +226,17 @@ export async function onRequestPost({ request, env }) {
     if (access.by !== 'key') return bad('Only the mentor key can change the team.', 403);
     const email = clean(body.email, 200).toLowerCase();
     if (!looksLikeEmail(email)) return bad('That email does not look complete.');
-    if (body.action === 'team-add') await teamAdd(D, email, now()); else await teamRemove(D, email);
-    return json({ ok: true, team: await teamList(D, env) });
+    if (body.action === 'team-remove') { await teamRemove(D, email); return json({ ok: true, team: await teamList(D, env) }); }
+    await teamAdd(D, email, now());
+    // The invitation (Alexandru, 2 Nov 2026): signed in at one tap when the
+    // address has an account, else "make your free account" first.
+    const base = origin(request);
+    const acct = await D.prepare('SELECT id FROM student WHERE email = ?').bind(email).first();
+    const url = acct ? await signinUrl(D, base, acct.id, { ttl: 7 * 24 * 3600_000 }) : '';
+    const r = await send(env, { to: email, ...teamInvite(base, { to: email, signinUrl: url }),
+      why: 'Alexandru added this address to the ExploraSelf team in the mentor cockpit.' });
+    if (acct) await log(acct.id, r.ok ? 'team-invite' : 'team-invite-failed', r.ok ? null : r.why || null);
+    return json({ ok: true, team: await teamList(D, env), invited: r.ok, inviteWhy: r.ok ? null : (r.why || 'The email did not send.') });
   }
 
   if (body.action === 'reply' && body.note) {

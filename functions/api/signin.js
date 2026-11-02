@@ -26,16 +26,22 @@ const SAME = { ok: true, message: 'If there is an account for that address, a si
  *  opens their Base Camp (/ground-plan/), the dashboard. `reset` (a forgotten
  *  password, or the mentor's "Send a password reset link") adds &reset=1, so
  *  the Base Camp opens the password box at once. Also used by /mentor. */
-export async function sendLink(env, D, base, me, page = 'start', { reset = false, tz = '' } = {}) {
+/** A fresh one-time sign-in link to this founder's Base Camp (30 minutes). */
+export async function signinUrl(D, base, studentId, { reset = false, ttl = TTL } = {}) {
   const code = newToken() + newToken().slice(0, 16);
   await D.prepare('DELETE FROM signin_code WHERE expires_at < ?').bind(Date.now()).run();
   await D.prepare('INSERT INTO signin_code (code_hash, student_id, expires_at) VALUES (?,?,?)')
-    .bind(await sha256(code), me.id, Date.now() + TTL).run();
+    .bind(await sha256(code), studentId, Date.now() + ttl).run();
+  return `${base}/ground-plan/?signin=${code}${reset ? '&reset=1' : ''}`;
+}
+
+export async function sendLink(env, D, base, me, page = 'start', { reset = false, tz = '' } = {}) {
+  const url = await signinUrl(D, base, me.id, { reset });
   const p = await profile(D, me.id);
   const who = me.name !== undefined ? me : await D.prepare('SELECT name FROM student WHERE id = ?').bind(me.id).first();
   const first = String((who && who.name) || '').split(' ')[0];
   const ctx = await letterContext(D, me.id, tz);
-  return send(env, { to: me.email, ...signinLetter(base, `${base}/ground-plan/?signin=${code}${reset ? '&reset=1' : ''}`, { first, to: me.email, reset, ...ctx }),
+  return send(env, { to: me.email, ...signinLetter(base, url, { first, to: me.email, reset, ...ctx }),
     why: 'Someone asked for a sign-in link to this ExploraSelf account. If it was not you, nothing changes.', unsubUrl: unsubLink(base, p) });
 }
 
