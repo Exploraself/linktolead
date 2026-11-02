@@ -184,25 +184,43 @@ business is, the customer, serving, what stops them, their attitude to
 serving, their relationship with money and with goals). From Level 06 the
 questions go deeper into the business itself.
 
-## 16. A welcome before each part, "Where are you now?", and focus mode (Alexandru, 2 Nov 2026)
+## 16. The elephant in the room, the door, and focus mode (Alexandru, 2 Nov 2026)
 
-**A welcome page** opens Levels 01, 04 (the Boardroom), 06 (the LAB) and 10
-(the HUB), with its own version for The Summit at Level 01. It is short and
-follows four steps, in this order: we understand you (the pain, the problem,
-the struggles, the dreams); it is possible (you are the hero, we are here to
-help you grow); the puzzle (so much to do, a mindset that holds us back,
-advice that does not fit); here you are (answer every question, fully). Then
-what the founder will have at the end: each level's own promise, word for
-word. It is personal: the founder's first name, and from Level 04 on, their
-own answers. Shown once, then one tap back from the level.
+**The elephant in the room** opens Levels 01 (Your hidden potential), 04 (the
+Boardroom: The future you), 06 (the LAB: The customer, not the ego) and 10
+(the HUB: The money); a Summit founder meets Greatness at Level 01, and their
+own last words at 04, 06 and 10. Four screens, one at a time, in this order:
+we understand you (the pain, the problem, the struggles, the dreams); it is
+possible (you are the hero, we are here to help you grow); the puzzle (so
+much to do, a mindset that holds us back, advice that does not fit); here you
+are (answer every question, fully). Alexandru speaks as "I", never he or him,
+and only in his own story and words (his books, his profile, what he has
+said): nothing invented. The last screen holds what the founder will have at
+the end: each level's own promise, word for word. It is personal: the
+founder's first name, and from Level 04 on, their own answers. Then three
+questions, each a tap or a slider, never a sentence (Level 01 asks what stops
+them; Level 04 reads it back). No welcome promises a video or the library.
+Shown once, then one tap back from the level.
 
-**"Where are you now?"** opens Level 01, before any question about mindset:
-five taps on where the business really is (an idea or running, sales or
-none, alone or a team, who they serve, what weighs most, what would tell them
-it worked). Practical, never a psychological test. Asked again at 04, 06 and
-10. The answers set the size of the examples and actions in the levels that
-follow (rule 12): before the first sale, selling alone, a team with payroll,
-sixteen people or more.
+**The door** opens Level 01, before any question about mindset: which of the
+four versions the founder sees (before the first sale, selling alone, a team
+with payroll, 16 people or more), decided only from taps and sliders, because
+nobody reads every founder's answers: customers in the last three months,
+sales, people paid, how clear the offer is, how many people it takes to win
+one customer, how many of ten said yes, how many come back, what is left of
+every $100, and the twelve-week win. Every number has its "not yet" or "I
+don't know"; before a first sale the selling questions are passed over. No
+customer yet: before the first sale; nobody else paid: selling alone; 1 to 14
+paid: a team with payroll; 15 or more: 16 people or more. "Your version"
+shows it, reads up to three numbers back (each pointing at a decision and a
+level, rule 9), and the founder says "That's me" or picks another. "Still
+…?" asks again at 04, 06 and 10. The version sets the size of the examples
+and actions (rule 12).
+
+**The switch**: when the founder's own answers in the levels say they are
+further on (a sale before the first sale, someone else running the work),
+the week, "Still …?" and My Blueprint say so and offer the version that fits;
+"Keep mine" is remembered. Practical, never a psychological test.
 
 **Focus mode** is the only way to answer: one full-screen layer, the same on
 a computer and a phone. One question in one centred column, the answer right

@@ -27,7 +27,7 @@ import { LEVELS4, CHAPTERS4, DOMS, UNITS, CLOSES, wkey, tapOf, slideOf, wordOf, 
   lines4, sentence, reading, fieldsOf, fill, stepsOf, stepDone, firstOf, planOf, plainOf, doneOf, takeOf, notyetOf,
   sureOf, gotOf, GOT, tally, countedFor, READ_QUOTES, carriedFrom, blueprint, BUILD4, fillB, buildPage, stepsWritten, SESSIONS4,
   tapReply, slideReply, blankCheck, blankNote, smallOf, SMALL_UNDER, DIRECTION4, directionOf, goalFor, dayKeyOf, buildStarted, strong,
-  WELCOME_AT, welcomeOf, WHERE4, whereOf, whereWords, sizeOf } from './levels-v4.js';
+  WELCOME_AT, welcomeOf, WHERE4, whereOf, whereWords, sizeOf, beatsOf, askOf, askWords, TYPES4, typeName, typeOf, readBack, switchOf, skipsStep, slideAt } from './levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -486,8 +486,8 @@ const steps = () => stepsOf(level);
 const stepAt = (i) => steps()[i] || [-1, 'week'];
 /** A screen that asks for an answer needs one before Next; the slides keep
  *  where they start, and the screens that only show are always ready. */
-const ASKS = ['where', 'still', 'got', 'tap', 'blank', 'day', 'carry', 'carryday', 'bask', 'bstep', 'bday'];
-const ready = (i) => { const s = stepAt(i); return !ASKS.includes(s[1]) || stepDone(state.work, level, s); };
+const ASKS = ['wask', 'where', 'still', 'got', 'tap', 'blank', 'day', 'carry', 'carryday', 'bask', 'bstep', 'bday'];
+const ready = (i) => { const s = stepAt(i); return !ASKS.includes(s[1]) || !!slideAt(level, s) || stepDone(state.work, level, s); };
 const lastStep = () => steps().length - 1;
 /** The domain the North Star found weakest (0 to 3), or -1: it gets the
  *  "Start here" mark, and its action is the week's one move. */
@@ -574,13 +574,13 @@ function saidNote(msg) {
 }
 // The slider and the sentence: asked before the first move, not after.
 document.addEventListener('pointerdown', (e) => {
-  const v = e.target && e.target.closest && e.target.closest('input[data-v4s], input[data-v4u]');
+  const v = e.target && e.target.closest && e.target.closest('input[data-v4s], input[data-v4u], input[data-qs]');
   if (!v || !needsAccount()) return;
   e.preventDefault();
   askAccount(() => { const x = document.getElementById(v.id); if (x) x.focus(); });
 }, true);
 document.addEventListener('focusin', (e) => {
-  const v = e.target && e.target.closest && e.target.closest('input[data-v4s], input[data-v4f], input[data-v4u], input[data-lp]');
+  const v = e.target && e.target.closest && e.target.closest('input[data-v4s], input[data-v4f], input[data-v4u], input[data-lp], input[data-qs]');
   if (!v || !needsAccount()) return;
   v.blur();
   askAccount(() => { const x = document.getElementById(v.id); if (x) x.focus(); });
@@ -662,9 +662,10 @@ function leftHTML(st, x, open) {
 let fm = false, fmT = 0;
 /** "Lead yourself · 3 of 5": where the founder is, in plain words. */
 function fmWhere(d, kind) {
-  if (kind === 'welcome') return `Welcome · Level ${pad(level)}`;
-  if (kind === 'where') { const i = steps().filter((s) => s[1] === 'where').findIndex((s) => s[2] === stepAt(qi)[2]); return `Where you are now · ${i + 1} of ${WHERE4.length}`; }
-  if (kind === 'still') return 'Where you are now';
+  if (kind === 'welcome') return `${esc(elephantName())} · ${stepAt(qi)[2] + 1} of 4`;
+  if (kind === 'wask') { const A = welcomeOf(level).asks; return `${esc(elephantName())} · question ${A.findIndex((a) => a.k === stepAt(qi)[2]) + 1} of ${A.length}`; }
+  if (kind === 'where') { const [n, of] = doorAt(); return `Where you are now · ${n} of ${of}`; }
+  if (kind === 'still' || kind === 'you') return 'Where you are now';
   if (kind === 'got') return `Last week · ${d + 1} of 4`;
   if (d >= 0) {
     const mine = steps().map((s, i) => [s, i]).filter(([s]) => s[0] === d && s[1] !== 'got');
@@ -713,7 +714,7 @@ function fmAuto() {
 /** The right page, when the layer is closed: where the founder is, and the way in. */
 function goHTML(st, x) {
   const [d, kind] = stepAt(qi), done = levelDone(st, level), started = done > 0 || qi > 0;
-  const at = kind === 'welcome' ? 'The welcome' : kind === 'where' || kind === 'still' ? 'Where you are now' : kind === 'got' ? 'Last week’s four actions'
+  const at = kind === 'welcome' || kind === 'wask' ? `The elephant in the room: ${elephantName().toLowerCase()}` : kind === 'where' || kind === 'still' || kind === 'you' ? 'Where you are now' : kind === 'got' ? 'Last week’s four actions'
     : d >= 0 ? LEAD[DOMS[d]] : kind === 'week' ? 'Your week' : kind[0] === 'b' ? 'Build it' : 'Your chapter reading';
   return `<button type="button" class="cw-phone" data-crown="steps" aria-label="Show the four domains of this level">
       <span><i aria-hidden="true"></i>Level ${pad(level)} · ${done} of ${UNITS} done</span><span aria-hidden="true">Domains ▾</span></button>
@@ -726,38 +727,111 @@ function goHTML(st, x) {
       <p class="fm-hint">One question at a time, on the whole screen. Done ✓ or Esc brings you back here.</p>
     </div>`;
 }
-/** A welcome before each part (Levels 01, 04, 06, 10): four steps, and what
- *  the founder will have at the end. Personal: the first name, and from
- *  Level 04 on, the founder's own answers. A Summit founder has their own. */
+/** The elephant in the room (Alexandru, 2 Nov 2026): before Levels 01, 04,
+ *  06 and 10, four screens one at a time (we understand you, it is possible,
+ *  the puzzle, here you are), in Alexandru's own voice, then three taps or
+ *  sliders. Personal: the first name, and from Level 04 on, the founder's
+ *  own answers. A Summit founder has Greatness at Level 01. */
 const WL_IC = [
   '<path d="M4 5.5h11v8H8.5L4 17z"/><path d="M15 9h5v8l-3-2.5h-6V13.5"/>',
   '<path d="M3 19.5 9.5 8l3.5 6 2-3 6 8.5z"/><path d="M9.5 8V3.5l4 1.5-4 1.5"/>',
   '<path d="M5 8h3.2a2 2 0 1 1 3.6 0H15v3.2a2 2 0 1 1 0 3.6V18H5z"/>',
   '<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h5a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h5"/>'].map((d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${d}</svg>`);
-function welcomeHTML() {
+/** A star, for the way back to the North Star. */
+const NS_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3l2.2 6.8L21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2z"/></svg>';
+const isSummit = () => (state.tier || 'free') === 'premium' && !team();
+/** This welcome's name: Your hidden potential, The future you, … */
+function elephantName() {
+  const W = welcomeOf(level);
+  return W ? (isSummit() && W.summit && W.summit.name) || W.name : '';
+}
+/** What the founder told us before, read back from Level 04 on. */
+function toldHTML() {
+  const w = state.work, bits = [], ty = whereWords(w, 'stage');
+  if (ty) bits.push(`Your version: <b>${esc(ty)}</b>.`);
+  if (level === 4 && askWords(w, 1, 'stops')) bits.push(`In Level 01, what stopped you most: “${esc(askWords(w, 1, 'stops'))}”.`);
+  if (level === 6 && askWords(w, 4, 'past')) bits.push(`In Level 04 you said old habits ran ${esc(askWords(w, 4, 'past'))} of your week.`);
+  if (level === 10 && askWords(w, 6, 'only')) bits.push(`In Level 06 you said ${esc(askWords(w, 6, 'only'))} of the work could only be done by you.`);
+  if (whereWords(w, 'win')) bits.push(`In twelve weeks: “${esc(whereWords(w, 'win'))}”.`);
+  return bits.length ? `<p class="wl-told">${bits.join(' ')}</p>` : '';
+}
+/** The way back to the North Star: its number is the hidden potential. */
+const nsHTML = () => `<p class="wl-ns"><span class="wl-ic">${NS_IC}</span><span>${compassRec
+  ? 'Your North Star showed it to you as one number: the strength you see in yourself that is not at work yet.'
+  : 'The North Star shows it as one number: how much of the strength you see in yourself is not at work yet.'}
+  <a href="/northstar/" target="_blank" rel="noopener">${compassRec ? 'Open my North Star' : 'Take the North Star'} ↗</a></span></p>`;
+function welcomeHTML(i = 0) {
   const W = welcomeOf(level);
   if (!W) return '';
-  const summit = (state.tier || 'free') === 'premium' && !team(), first = firstName(), w = state.work;
-  const h = ((summit && W.summit && W.summit.h) || W.h).replace('{, first}', first ? `, ${first}` : '');
-  const sub = (summit && W.summit && W.summit.sub) || W.sub;
-  const told = level > 1 && whereWords(w, 'stage') ? `You told us: “${esc(whereWords(w, 'stage'))}”.${whereWords(w, 'weight') ? ` What weighs most: “${esc(whereWords(w, 'weight'))}”.` : ''}${whereWords(w, 'win') ? ` In twelve weeks: “${esc(whereWords(w, 'win'))}”.` : ''} If that has changed, the next screen asks.` : '';
+  const all = beatsOf(level, isSummit()), B = all[i] || all[0], first = firstName();
   const lvs = []; for (let n = W.lv[0]; n <= W.lv[1]; n++) lvs.push(n);
   return `<div class="wl">
-    <p class="cw-topic">Welcome · ${esc(W.where)}</p>
-    <h3 class="cw-q" id="cwq">${esc(h)}</h3>
-    <p class="wl-sub">${esc(sub)}</p>
-    ${told ? `<p class="wl-told">${told}</p>` : ''}
-    <ol class="wl-beats">${W.beats.map(([t, b], i) => `<li><span class="wl-ic">${WL_IC[i]}</span><div><h4>${esc(t)}</h4><p>${esc(b)}</p></div></li>`).join('')}</ol>
-    <div class="wl-have"><h4>By the end, you will have:</h4><ol>${lvs.map((n) => `<li><span>Level ${pad(n)}</span><p>${esc(LEVELS4[n - 1].promise)}</p></li>`).join('')}</ol></div>
+    <p class="wl-eb">The elephant in the room · ${esc(elephantName())}</p>
+    <p class="wl-step"><span class="wl-ic">${WL_IC[i]}</span>${i + 1} of 4 · ${esc(B.t)}</p>
+    <h3 class="cw-q" id="cwq">${esc(B.h.replace('{, first}', first ? `, ${first}` : ''))}</h3>
+    <p class="wl-p">${esc(B.p)}</p>
+    ${B.told && level > 1 ? toldHTML() : ''}
+    ${B.ns ? nsHTML() : ''}
+    ${B.q ? `<blockquote class="wl-q"><small>What a business is</small><p>“${esc(B.q)}”</p></blockquote>` : ''}
+    ${i === 3 ? `<div class="wl-have"><h4>By the end, you will have:</h4><ol>${lvs.map((n) => `<li><span>Level ${pad(n)}</span><p>${esc(LEVELS4[n - 1].promise)}</p></li>`).join('')}</ol></div>
+    <p class="wl-sign">Alexandru</p>` : ''}
   </div>`;
 }
-/** "Where are you now?": saved on the account like every answer. A change
- *  of stage across "before the first sale" clears the money answer, whose
- *  question changes with it. */
+/** Where the founder is in the door: [n, of], counting only the questions that apply. */
+function doorAt() {
+  const on = steps().filter((s) => s[1] === 'where' && !skipsStep(state.work, s));
+  return [Math.max(1, on.findIndex((s) => s[2] === stepAt(qi)[2]) + 1), on.length];
+}
+/** A tap question of a welcome or the door. name: "w:<key>" or "d:<key>". */
+function tapsHTML(topic, q, hint, opts, picked, name, after = '') {
+  return `${topic}<h3 class="cw-q" id="cwq">${esc(q)}</h3>
+    ${hint ? `<p class="cw-hint">${esc(hint)}</p>` : ''}
+    <div class="cw-opts" role="group" aria-labelledby="cwq">${opts.map((o, i) => `<button type="button" class="cw-o" data-qt="${name}:${i}" aria-pressed="${picked === i}"><kbd aria-hidden="true">${i + 1}</kbd><span>${esc(o)}</span></button>`).join('')}</div>
+    ${after}<p class="cw-keys"><kbd>1–${opts.length}</kbd> choose</p>`;
+}
+/** A slider of a welcome or the door, with its "not yet" taps under it. */
+const qShown = (S, n) => `${S.pre || ''}${n}${S.unit || ''}`;
+function slideQHTML(topic, q, hint, S, x, v, name) {
+  const num = typeof v === 'number' ? v : null, at = num == null ? S.d : num, alt = typeof v === 'string' && /^x\d$/.test(v) ? Number(v.slice(1)) : -1;
+  return `${topic}<h3 class="cw-q" id="cwq">${esc(q)}</h3>
+    ${hint ? `<p class="cw-hint">${esc(hint)}</p>` : ''}
+    <div class="cw-slide${alt >= 0 ? ' cw-off' : ''}"><div class="cw-big"><span id="cwbig">${alt >= 0 ? '–' : esc(qShown(S, at))}</span></div>
+    <input type="range" id="cwr" data-qs="${name}" min="${S.min}" max="${S.max}" step="${S.step}" value="${at}" style="--p:${(at - S.min) / (S.max - S.min) * 100}%" aria-labelledby="cwq">
+    <div class="cw-ends"><span>${esc(S.e[0])}</span><span>${esc(S.e[1])}</span></div></div>
+    ${x && x.length ? `<div class="cw-opts cw-alt" role="group" aria-label="Or">${x.map((o, i) => `<button type="button" class="cw-o" data-qx="${name}:${i}" aria-pressed="${alt === i}"><span>${esc(o)}</span></button>`).join('')}</div>` : ''}
+    <p class="cw-keys"><kbd>← →</kbd> slide · <kbd>Enter ↵</kbd> next</p>`;
+}
+/** A welcome answer, or a door answer: saved on the account like every answer. */
+function keepAsk(name, v) {
+  const [t, k] = name.split(':');
+  if (t === 'w') keep4('w', k, v); else keepWhere(k, v);
+}
+/** The four versions as taps: on "your version" (Level 01) and "Still …?" (04, 06, 10). */
+function typesHTML(picked, mark) {
+  return `<div class="cw-opts cw-types" role="group" aria-labelledby="cwq">${TYPES4.map((x, i) => `<button type="button" class="cw-o cw-type" data-type="${x.k}" aria-pressed="${x.k === picked}"><kbd aria-hidden="true">${i + 1}</kbd><span><b>${esc(x.n)}</b><small>${esc(x.sub)}${x.k === mark ? ' · what your numbers say' : ''}</small></span></button>`).join('')}</div>`;
+}
+/** The switch (Alexandru, 2 Nov 2026): the founder's own answers say they
+ *  are further on than they told us. We say so, and offer the version that
+ *  fits; "Keep mine" is remembered. On the week, and in My Blueprint. */
+function switchHTML() {
+  const sw = switchOf(state.work);
+  if (!sw) return '';
+  const T = TYPES4.find((t) => t.k === sw.to);
+  return `<div class="cw-switch" role="region" aria-label="Your version"><p class="eyebrow">Your version</p>
+    <p><b>Your answers say you have moved up.</b> ${esc(sw.why)} That is ${esc(T.n.toLowerCase())}, not ${esc(typeName(sw.from).toLowerCase())}. So now we adapt: ${esc(T.means.charAt(0).toLowerCase() + T.means.slice(1))}</p>
+    <p class="cw-more"><button type="button" class="cta" data-switch="${sw.to}">That’s me: switch to ${esc(T.n.toLowerCase())}</button><button type="button" class="cw-all" data-keepsize="${sw.to}">Keep mine</button></p></div>`;
+}
+/** "Still …?" at 04, 06 and 10: moving up shows a reply, so it waits to be read. */
+let movedUp = null;
+/** "Where are you now?": saved on the account like every answer. A new
+ *  number of customers or people paid asks for the version again. Before a
+ *  first sale, the questions about selling are cleared. */
 function keepWhere(k, v) {
   if (needsAccount()) { askAccount(() => keepWhere(k, v)); return; }
   const set = (key, val) => { state.work[key] = String(val); account.touch('work', key, String(val)); };
-  if (k === 'stage') { const was = whereOf(state.work).stage; if (was != null && (was < 2) !== (+v < 2)) set('w.v4.where.money', ''); }
+  const was = state.work[`w.v4.where.${k}`];
+  if ((k === 'cust' || k === 'team') && was != null && was !== '' && String(was) !== String(v)) set('w.v4.where.stage', '');
+  if (k === 'cust' && +v === 0) for (const x of ['sales', 'reach', 'back', 'margin']) if (state.work[`w.v4.where.${x}`]) set(`w.v4.where.${x}`, '');
   set(`w.v4.where.${k}`, v);
   save();
 }
@@ -766,7 +840,7 @@ function keepWhere(k, v) {
  *  skeleton). Tap, slide, one blank at a time, the day as a tap, "Done when"
  *  with how sure, four lines back; the week as four actions; last week's four
  *  first; the chapter reading and one action carried forward. */
-const KIND = { welcome: 'Welcome', where: 'Where you are now', still: 'Where you are now', got: 'Last week', idea: 'The idea', tap: 'Tap', slide: 'Slide', blank: 'Write once', day: 'The day', done: 'Done when',
+const KIND = { welcome: 'The elephant in the room', wask: 'The elephant in the room', where: 'Where you are now', you: 'Your version', still: 'Where you are now', got: 'Last week', idea: 'The idea', tap: 'Tap', slide: 'Slide', blank: 'Write once', day: 'The day', done: 'Done when',
   lines: 'Your four lines', week: 'Your week', reading: 'Chapter reading', carry: 'Carry one forward', carryday: 'Its day',
   bask: 'Build it', bstep: 'Build it', bday: 'Its day', bpage: 'Your page' };
 /** Inform → Reform → Transform (2 Nov 2026): the replies and checks, drawn
@@ -883,22 +957,38 @@ function pageHTML(st, x) {
     <p class="cw-lab vh">${label} · ${KIND[kind]}</p>`;
   void seg;
   let body = '';
-  if (kind === 'welcome') body = welcomeHTML(st);
-  else if (kind === 'where') {
-    const Q = WHERE4.find((q) => q.k === key), a = whereOf(w), opts = typeof Q.o === 'function' ? Q.o(a) : Q.o;
-    const picked = key === 'money' ? opts.indexOf(a.money) : a[key] == null ? -1 : a[key], n = WHERE4.indexOf(Q) + 1;
-    body = `<p class="cw-topic">Where you are now · ${n} of ${WHERE4.length}</p>
-      <h3 class="cw-q" id="cwq">${esc(typeof Q.q === 'function' ? Q.q(a) : Q.q)}</h3>
-      <p class="cw-hint">${esc(typeof Q.hint === 'function' ? Q.hint(a) : Q.hint)}</p>
-      <div class="cw-opts" role="group" aria-labelledby="cwq">${opts.map((o, i) => `<button type="button" class="cw-o" data-where="${key}:${i}" aria-pressed="${picked === i}"><kbd aria-hidden="true">${i + 1}</kbd><span>${esc(o)}</span></button>`).join('')}</div>
-      <p class="cw-keys"><kbd>1–${opts.length}</kbd> choose</p>`;
+  if (kind === 'welcome') body = welcomeHTML(key);
+  else if (kind === 'wask') {
+    const A = askOf(level, key), raw = w[wkey(level, 'w', key)], v = raw == null || raw === '' ? null : /^x\d$/.test(raw) ? raw : Number(raw);
+    const topic = `<p class="wl-eb">The elephant in the room · ${esc(elephantName())}</p>`;
+    let after = '';
+    if (A.was && v != null) {
+      const then = askWords(w, A.was[0], A.was[1]), now = A.o[v];
+      if (then) after = `<div class="cw-reply" role="status">${replyHTML(`Since Level ${pad(A.was[0])}`, then === now ? `The same: “${then}”. It has a name now. Bring it to your session, and we look at it together.` : `It was “${then}”. Now it is “${now}”. Bring both to your session: what moved, and why.`)}</div>`;
+    }
+    body = A.s ? slideQHTML(topic, A.q, A.hint, A.s, A.x, v, `w:${key}`) : tapsHTML(topic, A.q, A.hint, A.o, v ?? -1, `w:${key}`, after);
+  } else if (kind === 'where') {
+    const Q = WHERE4.find((q) => q.k === key), a = whereOf(w), [n, of] = doorAt();
+    const topic = `<p class="cw-topic">Where you are now · ${n} of ${of}</p>`;
+    body = Q.s ? slideQHTML(topic, Q.q, Q.hint, Q.s, Q.x, a[key], `d:${key}`) : tapsHTML(topic, Q.q, Q.hint, Q.o, a[key] ?? -1, `d:${key}`);
+  } else if (kind === 'you') {
+    const t = typeOf(w) || 'solo', cur = sizeOf(w) || t, T = TYPES4.find((x) => x.k === cur), lines = readBack(w);
+    body = `<p class="cw-topic">Where you are now · your version</p>
+      <h3 class="cw-q" id="cwq">Your version: ${esc(T.n)}.</h3>
+      <p class="cw-hint">${esc(T.means)} If that changes, the levels tell you, and the version changes with you.</p>
+      ${typesHTML(cur, t)}
+      ${cur !== t ? `<div class="cw-reply" role="status">${replyHTML('Your numbers say', `${typeName(t)}. You chose ${T.n.toLowerCase()}: the examples follow your choice, and you can change it any time in My Blueprint.`)}</div>` : ''}
+      ${lines.length ? `<section class="wl-read" aria-labelledby="wlrd"><h4 id="wlrd">Your numbers, read back</h4><ul>${lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></section>` : ''}
+      <p class="cw-keys"><kbd>1–4</kbd> change it · <kbd>Enter ↵</kbd> that’s me</p>`;
   } else if (kind === 'still') {
-    const had = whereWords(w, 'stage'), cur = String(w[wkey(level, 'w', 'stage')] ?? '');
+    const had = sizeOf(w), mine = w[wkey(level, 'w', 'stage')], picked = mine != null && mine !== '' ? sizeOf({ 'w.v4.where.stage': mine }) : '', sw = switchOf(w);
+    const T = TYPES4.find((x) => x.k === picked);
     body = `<p class="cw-topic">Where you are now</p>
-      <h3 class="cw-q" id="cwq">${had ? 'Still where you were?' : esc(WHERE4[0].q)}</h3>
-      <p class="cw-hint">${had ? `Last time you said: “${esc(had)}”. Tap the one that is true today.` : esc(WHERE4[0].hint)}</p>
-      <div class="cw-opts" role="group" aria-labelledby="cwq">${WHERE4[0].o.map((o, i) => `<button type="button" class="cw-o" data-still="${i}" aria-pressed="${cur === String(i)}"><kbd aria-hidden="true">${i + 1}</kbd><span>${esc(o)}</span></button>`).join('')}</div>
-      <p class="cw-keys"><kbd>1–${WHERE4[0].o.length}</kbd> choose</p>`;
+      <h3 class="cw-q" id="cwq">${had ? `Still ${esc(typeName(had).toLowerCase())}?` : 'Which of the four are you today?'}</h3>
+      <p class="cw-hint">${sw ? `${esc(sw.why)} That sounds like ${esc(typeName(sw.to).toLowerCase())}.` : 'Tap the one that is true today. The examples and actions follow it.'}</p>
+      ${typesHTML(picked, sw ? sw.to : '')}
+      ${movedUp && T ? `<div class="cw-reply" role="status">${replyHTML('You have moved up', `From ${typeName(movedUp).toLowerCase()} to ${T.n.toLowerCase()}. So from here we adapt: ${T.means.charAt(0).toLowerCase() + T.means.slice(1)}`)}</div>` : ''}
+      <p class="cw-keys"><kbd>1–4</kbd> choose</p>`;
   } else if (kind === 'got') {
     const g = gotOf(w, level - 1, d), u = sureOf(w, level - 1, d);
     body = `<h3 class="cw-q" id="cwq">Last week: <em>did it happen?</em></h3>
@@ -968,6 +1058,7 @@ function pageHTML(st, x) {
     const sh = startHere(), pc = CLOSES[level - 1] != null ? carriedFrom(w, level - 1) : null, next = LEVELS4[level];
     body = `<h3 class="cw-q">Your week. <em>Four actions, each with its day.</em></h3>
       ${weekList(level, sh)}
+      ${switchHTML()}
       ${ACTIONS4[`${level}.0`] ? `<p class="cw-five">These four are yours, from your sentences. With them, sixteen more at your size: twenty this week, in My Blueprint. <button type="button" class="cw-all" data-go="blueprint" data-bpto="week">Open This week</button></p>` : ''}
       ${pc ? `<p class="cw-carry"><b>Carried forward from your reading</b> ${fill(LEVELS4[pc[0] - 1].d[pc[1]].fb[3], w, pc[0], pc[1])}${w[wkey(level - 1, 'r', 'on')] ? ` · by ${esc(w[wkey(level - 1, 'r', 'on')])}` : ''}</p>` : ''}
       <p class="cw-planner">Write them on your Planner’s Monday page: ${sh >= 0 ? 'the first as <b>My one move</b>, the other three as <b>Three goals</b>' : 'the one you most want to avoid as <b>My one move</b>, the other three as <b>Three goals</b>'}. On Sunday, the next level asks what happened.</p>
@@ -995,7 +1086,7 @@ function pageHTML(st, x) {
   }
   else if (kind === 'bask' || kind === 'bstep' || kind === 'bday' || kind === 'bpage') body = buildHTML(st, kind, key, ci);
   const last = qi >= lastStep(), domainEnd = kind === 'lines' && d < 3;
-  const nextLabel = kind === 'welcome' ? 'Start →' : kind === 'lines' ? 'See my week →' : kind === 'week' && ci != null ? 'My chapter reading →' : 'Next ↵';
+  const nextLabel = kind === 'welcome' ? (key === 3 ? 'Begin →' : 'Next →') : kind === 'you' ? 'That’s me →' : kind === 'lines' ? 'See my week →' : kind === 'week' && ci != null ? 'My chapter reading →' : 'Next ↵';
   return `${top}${body}
     <footer class="cw-foot">
       ${last || domainEnd ? `<button type="button" class="cw-next" data-fmdone="${domainEnd ? 'next' : 'end'}">Done ✓</button>`
@@ -1112,8 +1203,17 @@ function moveQ(d) {
   const st = state.stage || 'build';
   if (view !== 'work' || !writable(st) || qi === null) return;
   if (d > 0 && !ready(qi)) return;
-  if (d > 0 && stepAt(qi)[1] === 'welcome' && !state.work[wkey(level, 'w', 'seen')]) keep4('w', 'seen', '1');
+  const [, kind, key] = stepAt(qi);
+  if (d > 0 && kind === 'welcome' && key === 3 && !state.work[wkey(level, 'w', 'seen')]) keep4('w', 'seen', '1');
+  // A slider keeps where it starts: Next saves it as shown.
+  const S = d > 0 && slideAt(level, stepAt(qi));
+  if (S && !stepDone(state.work, level, stepAt(qi))) keepAsk(`${kind === 'wask' ? 'w' : 'd'}:${key}`, S.s.d);
+  // "That's me": the version the numbers point to, unless the founder chose another.
+  if (d > 0 && kind === 'you' && !String(state.work['w.v4.where.stage'] ?? '')) keepWhere('stage', SIZE_STAGE[typeOf(state.work) || 'solo']);
+  movedUp = null;
   let to = Math.max(0, Math.min(lastStep(), qi + d));
+  // A door question that does not apply (no customers yet) is passed over.
+  while (to > 0 && to < lastStep() && skipsStep(state.work, stepAt(to))) to += d > 0 ? 1 : -1;
   // Build it: after the third step, an empty step is the end of the process,
   // and Back skips the empty ones.
   const emptyStep = (i) => stepAt(i)[1] === 'bstep' && !String(state.work[wkey(level, 'b', stepAt(i)[2])] || '').trim();
@@ -1302,7 +1402,7 @@ function weekPane() {
     const L = LEVELS4[lv - 1], size = mbSize();
     return `<h2 class="mb-h2" tabindex="-1">This week: 20 things to do</h2>
       <p class="mb-lead">From Level ${pad(lv)}, ${esc(L.title)}. Five in each area of your business, written for your size. <b>Do</b> is your own action, from your sentence: Sunday asks about it.</p>
-      ${sizesHTML()}
+      ${switchHTML()}${sizesHTML()}
       <p class="mb-count"><b>${actsDone(lv)}</b> of 20 done</p>
       ${L.d.map((D, d) => {
         const p = planOf(lv, d), k = goalFor(d), A = actionsAt(lv, d, size);
@@ -1700,21 +1800,29 @@ document.addEventListener('click', (e) => {
   if (b.hasAttribute('data-fmopen')) { fmOpen(); return; }
   if (b.hasAttribute('data-fmclose')) { fmClose(); return; }
   if (b.dataset.fmdone) { if (b.dataset.fmdone === 'next') moveQ(1); fmClose(); return; }
-  if (b.dataset.where) {
-    const [k, i] = b.dataset.where.split(':'), Q = WHERE4.find((q) => q.k === k), a = whereOf(state.work);
-    const opts = typeof Q.o === 'function' ? Q.o(a) : Q.o;
-    keepWhere(k, k === 'money' ? opts[+i] : +i);
+  if (b.dataset.qt || b.dataset.qx) {
+    const alt = !!b.dataset.qx, [t, k, i] = (b.dataset.qt || b.dataset.qx).split(':');
+    keepAsk(`${t}:${k}`, alt ? `x${i}` : +i);
     drawBook(false);
-    const x = document.querySelector(`.cw-o[data-where="${b.dataset.where}"]`); if (x) x.focus({ preventScroll: true });
-    fmAuto(); return;
+    const x = document.querySelector(`.cw-o[data-q${alt ? 'x' : 't'}="${b.dataset.qt || b.dataset.qx}"]`); if (x) x.focus({ preventScroll: true });
+    // Level 04 shows what Level 01 said: it waits to be read.
+    if (!(t === 'w' && askOf(level, k) && askOf(level, k).was)) fmAuto();
+    return;
   }
-  if (b.dataset.still != null) {
-    keep4('w', 'stage', +b.dataset.still);
-    keepWhere('stage', +b.dataset.still);
+  if (b.dataset.type) {
+    const kind = stepAt(qi)[1], was = sizeOf(state.work), order = TYPES4.map((x) => x.k);
+    keepWhere('stage', SIZE_STAGE[b.dataset.type]);
+    if (kind === 'still') {
+      keep4('w', 'stage', SIZE_STAGE[b.dataset.type]);
+      movedUp = order.indexOf(b.dataset.type) > order.indexOf(was) && was ? was : null;
+    }
     drawBook(false);
-    const x = document.querySelector(`.cw-o[data-still="${b.dataset.still}"]`); if (x) x.focus({ preventScroll: true });
-    fmAuto(); return;
+    const x = document.querySelector(`.cw-o[data-type="${b.dataset.type}"]`); if (x) x.focus({ preventScroll: true });
+    if (kind === 'still' && !movedUp) fmAuto();
+    return;
   }
+  if (b.dataset.switch) { keepWhere('stage', SIZE_STAGE[b.dataset.switch]); render(); return; }
+  if (b.dataset.keepsize) { keepWhere('keep', b.dataset.keepsize); render(); return; }
   if (b.hasAttribute('data-print')) { document.querySelectorAll('.mb details').forEach((x) => { x.open = true; }); window.print(); return; }
   if (b.dataset.lpdone) {
     if (needsAccount()) { const k = b.dataset.lpdone; askAccount(() => { const x = document.querySelector(`[data-lpdone="${k}"]`); if (x) x.click(); }); return; }
@@ -1927,7 +2035,7 @@ document.addEventListener('keydown', (e) => {
   const inPage = t.closest('.leaf-r') || t === document.body;
   if (!inPage || t.closest('.cw-foot, .gain, .gate, .wait')) return;
   // Number keys choose on a tap.
-  if (/^[1-9]$/.test(e.key) && ['where', 'still', 'tap', 'got', 'day', 'carry', 'carryday', 'bday'].includes(stepAt(qi)[1]) && t.tagName !== 'INPUT') {
+  if (/^[1-9]$/.test(e.key) && ['wask', 'where', 'you', 'still', 'tap', 'got', 'day', 'carry', 'carryday', 'bday'].includes(stepAt(qi)[1]) && !slideAt(level, stepAt(qi)) && t.tagName !== 'INPUT') {
     const b = document.querySelectorAll('.leaf-r .cw-o')[Number(e.key) - 1];
     if (b) { e.preventDefault(); b.click(); }
     return;
@@ -2104,6 +2212,17 @@ document.addEventListener('input', (e) => {
     const st = state.stage || 'build', fw = fwFor(st, level, dom);
     const host = fw && document.querySelector(`[data-rhost="${fw.k}"]`);
     if (host) host.innerHTML = windowHTML(fw, st, level, dom);
+    return;
+  }
+  // The elephant in the room and the door: their sliders save as they move.
+  const qs = e.target.closest('input[data-qs]');
+  if (qs) {
+    const [t, k] = qs.dataset.qs.split(':'), Q = t === 'w' ? askOf(level, k) : WHERE4.find((x) => x.k === k), n = +qs.value;
+    keepAsk(qs.dataset.qs, n);
+    qs.style.setProperty('--p', `${(n - Q.s.min) / (Q.s.max - Q.s.min) * 100}%`);
+    const big = $('#cwbig'); if (big) big.textContent = qShown(Q.s, n);
+    const box = qs.closest('.cw-slide'); if (box) box.classList.remove('cw-off');
+    document.querySelectorAll('.leaf-r [data-qx]').forEach((x) => x.setAttribute('aria-pressed', 'false'));
     return;
   }
   // Version 4: the slider and the sentence save as they move.

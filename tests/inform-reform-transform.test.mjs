@@ -13,8 +13,8 @@ const L1 = V.LEVELS4[0];
 // ── Inform: the concept, one sentence, its own screen before the tap ────────
 ok([0, 1, 2, 3].every((d) => { const p = V.planOf(1, d); return p.idea && p.idea.split(/\s+/).length <= 22 && p.idea.split(/\s+/).length < p.ins.split(/\s+/).length; }), 'Level 01: each domain has a concept, shorter than its full paragraph');
 ok([0, 1, 2, 3].every((d) => { const S = V.stepsOf(1).filter((s) => s[0] === d); return S[0][1] === 'idea' && S[1][1] === 'tap'; }), 'the concept comes first in every Level 01 domain');
-const seen = { 'w.v4.1.w.seen': '1', 'w.v4.where.stage': '2', 'w.v4.where.money': 'Lower', 'w.v4.where.who': '1', 'w.v4.where.weight': '0', 'w.v4.where.win': '1' };
-ok(V.firstOf({}, 1) === 0 && V.stepsOf(1)[V.firstOf({}, 1)][1] === 'welcome' && V.stepsOf(1)[V.firstOf(seen, 1)][1] === 'idea', 'a new founder opens Level 01 on its welcome, then, after “Where are you now?”, on its concept');
+const seen = { 'w.v4.1.w.seen': '1', 'w.v4.1.w.stops': '0', 'w.v4.1.w.use': '50', 'w.v4.1.w.walk': '0', 'w.v4.where.cust': '2', 'w.v4.where.sales': '1', 'w.v4.where.team': '0', 'w.v4.where.offer': '6', 'w.v4.where.reach': '1', 'w.v4.where.yes': '3', 'w.v4.where.back': '5', 'w.v4.where.margin': '40', 'w.v4.where.win': '1', 'w.v4.where.stage': '2' };
+ok(V.firstOf({}, 1) === 0 && V.stepsOf(1)[V.firstOf({}, 1)][1] === 'welcome' && V.stepsOf(1)[V.firstOf(seen, 1)][1] === 'idea', 'a new founder opens Level 01 on the elephant in the room, then, after the door, on its concept');
 { const w = { [V.wkey(1, 0, 't')]: '1' }; ok(V.stepDone(w, 1, [0, 'idea']) && !V.stepDone({}, 1, [0, 'idea']), 'the concept counts as seen once its tap is answered'); }
 
 // ── Reform: every tap answer and every slider gets a reply ─────────────────
