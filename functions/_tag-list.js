@@ -46,6 +46,7 @@ const CONSENT = 'Only with their yes to letters, and only while Mailchimp runs o
 const LANDING_PAGES = {
   road1: ['The Founder’s Blueprint sales page, Road 1', '/road1/'], road2: ['The Founder’s Blueprint sales page, Road 2', '/road2/'],
   road3: ['The Founder’s Blueprint sales page, Road 3', '/road3/'], road4: ['The Founder’s Blueprint sales page, Road 4', '/road4/'],
+  road5: ['The Boardroom sales page for ads, Road 5', '/road5/'],
   north1: ['The Leader’s North Star sales page, North 1', '/north1/'], north2: ['The Leader’s North Star sales page, North 2', '/north2/'],
   north3: ['The Leader’s North Star sales page, North 3', '/north3/'], compass: ['The North Star box (The Leader’s North Star, with no sales page before it)', '/northstar/'],
   summit: ['The Summit sales page', '/northstar/summit/'],
@@ -55,6 +56,7 @@ const LANDING_PAGES = {
  *  landing of the page that sent them there (public/pay/pay.js FROM). */
 const VIA_PAY = {
   road1: ' Also on the pay page (/pay/), when someone not signed in taps Unlock.',
+  road5: ' Its only button goes to the pay page for The Boardroom (/pay/?step=session&from=road5), and the account is made there.',
   summit: ' Since 2 Nov 2026 “Claim my place” goes to the pay page for The Summit (/pay/?step=premium&from=summit), and the account is made there.',
 };
 const STAGE_WORDS = { build: 'Building', grow: 'Growing', scale: 'Scaling' };

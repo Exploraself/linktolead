@@ -178,8 +178,8 @@ export function today(students, waiting, now = Date.now()) {
 /** Sign-ups per landing: Roads 1 to 4, North 2 and 3, the North Star
  *  box and The Summit. Each row: all of them, the last 7 days, how many used
  *  the full form, and the split by group. */
-export const LANDINGS = [['road1', 'Road 1 · /road1/'], ['road2', 'Road 2 · /road2/'], ['road3', 'Road 3 · /road3/'], ['road4', 'Road 4 · /road4/'], ['north1', 'North 1 · /north1/'], ['north2', 'North 2 · /north2/'], ['north3', 'North 3 · /north3/'], ['compass', 'North Star box'], ['summit', 'The Summit · /northstar/summit/']];
-export const LANDING_SHORT = { road1: 'Road 1', road2: 'Road 2', road3: 'Road 3', road4: 'Road 4', north2: 'North 2', north3: 'North 3', compass: 'the North Star box', summit: 'The Summit' };
+export const LANDINGS = [['road1', 'Road 1 · /road1/'], ['road2', 'Road 2 · /road2/'], ['road3', 'Road 3 · /road3/'], ['road4', 'Road 4 · /road4/'], ['road5', 'Road 5 · /road5/ (The Boardroom)'], ['north1', 'North 1 · /north1/'], ['north2', 'North 2 · /north2/'], ['north3', 'North 3 · /north3/'], ['compass', 'North Star box'], ['summit', 'The Summit · /northstar/summit/']];
+export const LANDING_SHORT = { road1: 'Road 1', road2: 'Road 2', road3: 'Road 3', road4: 'Road 4', road5: 'Road 5', north2: 'North 2', north3: 'North 3', compass: 'the North Star box', summit: 'The Summit' };
 export function byLanding(students, now = Date.now()) {
   const row = (k, name, rows) => {
     const g = { ns: 0, bp: 0, both: 0, none: 0 };

@@ -85,7 +85,7 @@ export const ENTRIES = [
   {
     id: 'launchpad-welcome', stage: 'door', icon: 'flag', fn: 'launchpadWelcome',
     name: 'Welcome from every other page',
-    when: 'An account is made anywhere else: the road pages (/road1/ … /road4/), The Summit, Base Camp.',
+    when: 'An account is made anywhere else: the road pages (/road1/ … /road5/), The Summit, Base Camp.',
     who: 'Only when they said yes to letters. Once.',
     from: '/road1/',
     sentBy: 'functions/_account.js sendWelcome',
