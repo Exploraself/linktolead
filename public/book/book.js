@@ -32,7 +32,60 @@ const ICON = {
   lock: I('<rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>'),
   meet: I('<rect x="3" y="6.5" width="12" height="11" rx="2"/><path d="m15 10.5 6-3.5v10l-6-3.5"/>'),
   note: I('<path d="M6 3.5h9l3 3V20.5H6z"/><path d="M9 10h6M9 13.5h6M9 17h4"/>'),
+  gift: I('<rect x="3.5" y="8.5" width="17" height="4.5" rx="1"/><path d="M5 13v7.5h14V13M12 8.5v12"/><path d="M12 8.5C10.4 4.8 6.4 4.3 6.4 6.8c0 1.7 3.2 1.7 5.6 1.7Zm0 0c1.6-3.7 5.6-4.2 5.6-1.7 0 1.7-3.2 1.7-5.6 1.7Z"/>'),
+  star: I('<path d="M12 2.8 21.2 12 12 21.2 2.8 12Z"/><path d="m12 7 1.5 3.5L17 12l-3.5 1.5L12 17l-1.5-3.5L7 12l3.5-1.5Z"/>'),
+  hourglass: I('<path d="M7 3.5h10M7 20.5h10"/><path d="M8 3.5c0 4.5 8 5 8 8.5s-8 4-8 8.5M16 3.5c0 4.5-8 5-8 8.5s8 4 8 8.5"/>'),
+  people: I('<circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c.9-3.2 3.1-4.6 5.5-4.6s4.6 1.4 5.5 4.6"/><circle cx="17" cy="9.5" r="2.4"/><path d="M15.8 14.6c2.2.1 3.9 1.4 4.7 4.4"/>'),
+  rise: I('<path d="M3.5 19.5 9 13l4 3.5 7.5-9"/><path d="M15 7.5h5.5V13"/>'),
+  pulse: I('<path d="M3 12.5h4l2-5 4 10 2.5-5H21"/>'),
+  shield: I('<path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/>'),
 };
+
+// ── Where to go next (Alexandru, 2 Nov 2026: "something sweet" after the
+// form, never a dry "back to exploraself.com"). The free tests, with the
+// words, counts and minutes their own pages use (exploraself
+// src/data/assessments.ts; the North Star's own page). Discovery picks by the
+// first struggle, the 1:1 by the side costing most; the North Star is always
+// offered (again, with its date, when it was taken).
+const EXP = 'https://exploraself.com';
+const PICKS = {
+  northstar: { href: '/northstar/', icon: 'star', name: 'The Leader’s North Star', q: 'Where do you stand on all four sides: yourself, your people, your business and the market?', meta: 'Free · 8 questions · about ten minutes', get: 'Feedback on all four sides, and your road from here.' },
+  twoweek: { href: `${EXP}/two-week-test`, icon: 'hourglass', name: 'The Two-Week Test', q: 'If you stepped away for two weeks, what would break first?', meta: 'Free · 20 questions · about 6 minutes', get: 'What breaks first, and a 7-day handover plan.' },
+  first100: { href: `${EXP}/first-100-clients`, icon: 'people', name: 'First 100 Perfect Clients', q: 'What is really standing between you and your first 100 perfect clients?', meta: 'Free · 16 questions · about 6 minutes', get: 'The gap costing you clients, a 7-day plan and the free e-book.' },
+  unbound: { href: `${EXP}/unbound`, icon: 'table', name: 'The Inner Boardroom', q: 'Who really makes the decisions inside your head?', meta: 'Free · 16 questions · about 5 minutes', get: 'Which voice rules your decisions, a 7-day plan and the free e-book.' },
+  rise: { href: `${EXP}/rise`, icon: 'rise', name: 'Allow Yourself to Rise', q: 'Which of your five forces is the lid on your potential?', meta: 'Free · 15 questions · about 4 minutes', get: 'The force holding you down, a 7-day plan and the free e-book.' },
+  eq: { href: `${EXP}/eq`, icon: 'pulse', name: 'The EQ Dividend', q: 'Is your emotional intelligence paying you back, or leaking?', meta: 'Free · 20 questions · about 5 minutes', get: 'The dividend that is leaking, a 7-day plan and the free e-book.' },
+};
+const BY_STRUGGLE = { clients: 'first100', price: 'first100', time: 'twoweek', direction: 'northstar', cash: 'northstar', team: 'rise', switch: 'eq', alone: 'unbound' };
+const BY_SIDE = { self: 'rise', people: 'eq', work: 'twoweek', market: 'first100' };
+const pickHref = (id) => `${PICKS[id].href}?utm_source=linktolead&utm_medium=booking&utm_campaign=${KIND}&utm_content=${id}`;
+
+// ── The welcome (Alexandru, 2 Nov 2026: "no hello, no nothing, not good …
+// premium service, make them feel cared for and important"). His own words
+// only: the Level 04 welcome (public/levels-v4.js), as on /boardroom/.
+const HELLO = {
+  discovery: {
+    eb: 'A free call with Alexandru · 30 minutes', face: 'Your call is with Alexandru Cojocari',
+    lede: 'Thank you for taking this step. These thirty minutes are yours: where you are, what weighs on you, and what you want next. Free, online, one to one.',
+    quote: 'For a decade and a half I have built teams, developed leaders and helped each person grow into the best version of themselves.',
+    steps: [['note', 'Four short questions', 'Where you are, two struggles, two goals, and anything else. Mostly taps.'],
+      ['clock', 'Three times that suit you', 'Tuesday to Thursday afternoons, shown in your own time.'],
+      ['meet', 'Alexandru confirms one', 'Within 24 hours, by email, with the Google Meet link. Your answers reach Alexandru before the call.']],
+    go: 'Let’s begin',
+    under: 'Private. Your answers stay on this device until you press Send.',
+  },
+  boardroom: {
+    eb: 'Your 1:1 with Alexandru · 60 minutes', face: 'Your hour is with Alexandru Cojocari',
+    lede: 'You hold The Boardroom, and one hour one to one with Alexandru comes with it. A few questions first, so the whole hour is spent on you, not on catching up.',
+    quote: 'The person who decides calmly, asks plainly and keeps their word is not someone else. It is you, a few weeks of practice from here.',
+    steps: [['note', 'Twenty questions, in six parts', 'Where you are, the four sides of your business, and the hour itself. Most take one sentence.'],
+      ['clock', 'Three times that suit you', 'Tuesday to Thursday afternoons, shown in your own time.'],
+      ['meet', 'Alexandru confirms one', 'Within 24 hours, by email, with the Google Meet link. Your answers reach Alexandru before the hour.']],
+    go: 'Let’s prepare my hour',
+    under: 'Take your time. It saves on this device as you go, and you can change any answer before you send.',
+  },
+};
+const firstName = (n) => String(n || '').trim().split(/\s+/)[0] || '';
 
 // ── State, kept on this device ─────────────────────────────────────────────
 let S = { answers: {}, name: '', email: '', times: [], step: 0 };
@@ -41,24 +94,26 @@ const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch
 const forget = () => { try { localStorage.removeItem(KEY); } catch { /* private mode */ } };
 
 let me = null; // the signed-in founder, if any
+let starAt = ''; // when they last took The Leader’s North Star, if they did
 let STEPS = [];
 let slots = [];
 let busy = false;
 
-/** The screens, in order: the form's questions, then (discovery) name and
- *  email, then three times, then check and send. */
+/** The screens, in order: the welcome, the form's questions, then
+ *  (discovery) name and email, then three times, then check and send. */
 function buildSteps() {
-  STEPS = FORMS[KIND].map((f) => ({ id: f.k, kind: 'q', f }));
+  STEPS = [{ id: 'hello', kind: 'hello' }, ...FORMS[KIND].map((f) => ({ id: f.k, kind: 'q', f }))];
   if (KIND === 'discovery') STEPS.push({ id: 'name', kind: 'name' }, { id: 'email', kind: 'email' });
   STEPS.push({ id: 'times', kind: 'times' }, { id: 'check', kind: 'check' });
 }
 
 // ── Drawing ─────────────────────────────────────────────────────────────────
 function top() {
-  const n = STEPS.length, i = S.step;
-  const label = STEPS[i].kind === 'check' ? 'Check and send' : `${i + 1} of ${n - 1}`;
-  return `<div class="top"><div class="pbar" aria-hidden="true"><i style="width:${Math.round(((i + 1) / n) * 100)}%"></i></div>
-    <div class="row"><button type="button" class="back" data-back ${i === 0 ? 'disabled' : ''}>← Back</button><span class="where">${label}</span><span></span></div></div>`;
+  const n = STEPS.length - 1, i = S.step, st = STEPS[i];
+  if (st.kind === 'hello') return '';
+  const label = st.kind === 'check' ? 'Check and send' : `${st.kind === 'q' && st.f.part ? `${esc(st.f.part)} · ` : ''}${i} of ${n - 1}`;
+  return `<div class="top"><div class="pbar" aria-hidden="true"><i style="width:${Math.round((i / n) * 100)}%"></i></div>
+    <div class="row"><button type="button" class="back" data-back>← Back</button><span class="where">${label}</span><span></span></div></div>`;
 }
 const eyebrow = (part = '') => (KIND === 'boardroom'
   ? `<p class="eb">${ICON.table}Your 1:1 with Alexandru${part ? ` · ${esc(part)}` : ' · 60 minutes'}</p>`
@@ -67,6 +122,7 @@ const goBtn = (label = 'Next', dis = false) => `<div class="act"><button type="b
 
 function screen() {
   const st = STEPS[S.step];
+  if (st.kind === 'hello') return hello();
   if (st.kind === 'q') return question(st.f);
   if (st.kind === 'name') return `<section class="q">${eyebrow()}<h1 tabindex="-1">${me ? 'Your name, as Alexandru should say it' : 'Your name'}</h1>
     <label class="vh" for="f-name">Your name</label><input id="f-name" class="field" data-field="name" autocomplete="name" maxlength="${NAME_MAX}" value="${esc(S.name)}">
@@ -77,6 +133,23 @@ function screen() {
     ${goBtn('Next', !looksLikeEmail(S.email))}</section>`;
   if (st.kind === 'times') return timesScreen();
   return checkScreen();
+}
+/** The first screen: who they will talk to, how it works, one button. */
+function hello() {
+  const H = HELLO[KIND];
+  const name = firstName(me ? me.name : S.name);
+  const started = Object.keys(S.answers).length > 0 || S.times.length > 0;
+  const steps = H.steps.map(([ic, b, p], i) => `<li><span class="n" aria-hidden="true">${ICON[ic]}</span><div><b>${i + 1}. ${esc(b)}</b><p>${esc(p)}</p></div></li>`).join('');
+  return `<section class="hello">
+    <figure class="face"><img src="/cabinet/alexandru.jpg" alt="Alexandru Cojocari" width="640" height="512" decoding="async"><figcaption><b>${esc(H.face)}</b><span>Founder, ExploraSelf · online, from Rome</span></figcaption></figure>
+    <p class="eb">${KIND === 'boardroom' ? ICON.table : ICON.call}${esc(H.eb)}</p>
+    <h1 tabindex="-1" class="serif">${name ? `Hello, ${esc(name)}.` : 'Hello, and welcome.'}${KIND === 'boardroom' ? ' <em>This hour is yours.</em>' : ''}</h1>
+    <p class="lede">${esc(H.lede)}</p>
+    <blockquote class="word"><p>“${esc(H.quote)}”</p><footer><img src="/mail/signature.png" alt="Alexandru Cojocari" width="190" height="53" loading="lazy"></footer></blockquote>
+    <h2 class="how">How it works</h2>
+    <ol class="steps">${steps}</ol>
+    <div class="act"><button type="button" class="go" data-start>${started ? 'Carry on where I left off' : esc(H.go)} ${ICON.arrow}</button><span class="key">or press Enter ↵</span></div>
+    <p class="under">${ICON.shield}${esc(H.under)}</p></section>`;
 }
 const looksLikeEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(e || '').trim());
 
@@ -132,11 +205,61 @@ function checkScreen() {
     <div class="act"><button type="button" class="go" data-send>${KIND === 'boardroom' ? 'Send my request' : 'Send my request'} ${ICON.arrow}</button></div></section>`;
 }
 
-function doneScreen(email, copy) {
-  return `<section class="q"><div class="tick">${ICON.check}</div><h1 tabindex="-1">Sent. Thank you.</h1>
-    <p class="lede">Alexandru writes back within 24 hours to confirm one of your three times. Online, on Google Meet.</p>
-    <div class="wait"><p><b>What happens now</b></p><p>${copy ? `A copy of your request is on its way to <b>${esc(email)}</b>.` : 'Keep an eye on your inbox.'} When Alexandru confirms, you get the time and the link to the call.</p></div>
-    ${me ? '<a class="ghost" href="/ground-plan/#home">Back to my Base Camp</a>' : '<a class="ghost" href="https://exploraself.com/">Back to exploraself.com</a>'}</section>`;
+/** Where the founder goes next: one picked for them, the North Star (or
+ *  another), then the rest in a quiet list. */
+function nextPicks(sent) {
+  const a = sent.answers || {};
+  if (KIND === 'boardroom') {
+    const side = BY_SIDE[a.side];
+    return [['northstar', starAt ? 'Read it again before your hour' : 'Start here'],
+      side ? [side, `Because you said “${words('side', a.side)}” costs you most`] : ['unbound', 'For the decision you bring']];
+  }
+  const s = Array.isArray(a.struggles) ? a.struggles : [];
+  const first = BY_STRUGGLE[s[0]] || 'northstar';
+  const cards = [[first, s[0] ? `Picked for you · you chose “${words('struggles', s[0])}”` : 'Picked for you']];
+  if (first !== 'northstar') cards.push(['northstar', 'The full picture']);
+  else {
+    const two = BY_STRUGGLE[s[1]];
+    cards.push(two && two !== 'northstar' ? [two, `And for “${words('struggles', s[1])}”`] : ['twoweek', 'Can it run without you?']);
+  }
+  return cards;
+}
+
+function pickCard([id, why], i) {
+  const P = PICKS[id];
+  const again = id === 'northstar' && starAt;
+  const when = again ? new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long' }).format(new Date(starAt)) : '';
+  return `<article class="pick${i === 0 ? ' main' : ''}">
+    <p class="why">${esc(why)}</p>
+    <div class="ph"><span class="pi" aria-hidden="true">${ICON[P.icon]}</span><div><h3>${again ? 'Your North Star, again' : esc(P.name)}</h3><p class="meta">${again ? `You took it on ${esc(when)} · about ten minutes` : esc(P.meta)}</p></div></div>
+    <p class="pq">${again ? 'Take it again and see what has moved since. Both readings stay in your account.' : esc(P.q)}</p>
+    ${again ? '' : `<p class="get"><b>You get</b> ${esc(P.get)}</p>`}
+    <a class="${i === 0 ? 'go' : 'ghost'}" href="${pickHref(id)}">${again ? 'Open my North Star' : i === 0 ? 'Start it now' : 'Start it'} ${ICON.arrow}</a></article>`;
+}
+
+function doneScreen(email, copy, sent = {}) {
+  const one = KIND === 'boardroom';
+  const name = firstName(me ? me.name : sent.name);
+  const a = sent.answers || {};
+  const told = !one && Array.isArray(a.struggles) && a.struggles.length ? a.struggles.map((k) => words('struggles', k)).join(' · ') : '';
+  const cards = nextPicks(sent);
+  const shown = new Set(cards.map(([id]) => id));
+  const more = Object.keys(PICKS).filter((id) => !shown.has(id)).map((id) => `<li><a href="${pickHref(id)}"><span class="pi" aria-hidden="true">${ICON[PICKS[id].icon]}</span><span><b>${esc(PICKS[id].name)}</b><small>${esc(PICKS[id].meta)}</small></span>${ICON.arrow}</a></li>`).join('');
+  return `<section class="q done"><div class="tick">${ICON.check}</div>
+    <h1 tabindex="-1" class="serif">Sent. Thank you${name ? `, ${esc(name)}` : ''}.</h1>
+    <p class="lede">${one ? 'Your request is with Alexandru, with all twenty of your answers.' : 'Your request is with Alexandru. We look forward to meeting you.'}</p>
+    <div class="wait"><p class="wh">What happens now</p><ol class="tl2">
+      <li><span class="dot" aria-hidden="true">${ICON.mail}</span><div><b>Now</b><p>${copy ? `A copy of your request is on its way to <b>${esc(email)}</b>.` : 'Keep an eye on your inbox.'}</p></div></li>
+      <li><span class="dot" aria-hidden="true">${ICON.clock}</span><div><b>Within 24 hours</b><p>Alexandru confirms one of your three times, by email, with the Google Meet link.</p></div></li>
+      <li><span class="dot" aria-hidden="true">${ICON.meet}</span><div><b>${one ? 'Your hour' : 'The call'}</b><p>${one ? '60 minutes, one to one. Your answers reach Alexandru before it, and you bring the decision you named.' : `30 minutes, one to one${told ? `, about what you told us: ${esc(told)}` : ''}.`}</p></div></li>
+    </ol></div>
+    <div class="gifts"><p class="eb">${ICON.gift}${one ? 'Before your hour' : 'While you wait'}</p>
+      <h2 class="serif">${one ? 'Two things that make the hour go further' : 'Something for you before the call'}</h2>
+      <p class="hint">${one ? 'Take one, and bring what you find to the table.' : 'Take it before the call and bring your result: your thirty minutes go further.'}</p>
+      <div class="picks">${cards.map(pickCard).join('')}</div>
+      <p class="mh">Or another free test</p><ul class="more">${more}</ul>
+      <p class="all"><a href="${EXP}/assessments?utm_source=linktolead&utm_medium=booking&utm_campaign=${KIND}">See every assessment</a></p></div>
+    <p class="leave">${me ? '<a href="/ground-plan/#home">Back to my Base Camp</a>' : `<a href="${EXP}/">Back to exploraself.com</a>`}</p></section>`;
 }
 
 /** The calm door for anyone who may not book the 1:1 yet. */
@@ -155,6 +278,12 @@ function render(focus = true) {
   if (!focus) return;
   const f = root.querySelector('input.field, textarea.field');
   if (f && matchMedia('(hover:hover) and (pointer:fine)').matches) { f.focus(); try { f.setSelectionRange(f.value.length, f.value.length); } catch { /* email fields have no caret range */ } } else root.querySelector('h1')?.focus();
+}
+/** The first screen still waiting for an answer (the check screen when all are given). */
+function firstOpen() {
+  const at = S.step;
+  for (let i = 1; i < STEPS.length; i++) { S.step = i; if (STEPS[i].kind === 'check' || !canNext()) { S.step = at; return i; } }
+  S.step = at; return STEPS.length - 1;
 }
 const go = (i) => { S.step = Math.max(0, Math.min(STEPS.length - 1, i)); keep(); render(); window.scrollTo(0, 0); };
 const next = () => { if (canNext()) go(S.step + 1); };
@@ -178,6 +307,7 @@ root.addEventListener('click', (e) => {
   const t = e.target.closest('button, a');
   if (!t || busy) return;
   if (t.matches('[data-back]')) return go(S.step - 1);
+  if (t.matches('[data-start]')) return go(firstOpen());
   if (t.matches('[data-next]')) return next();
   if (t.matches('[data-goto]')) return go(Number(t.dataset.goto));
   if (t.matches('[data-send]')) return send();
@@ -223,6 +353,7 @@ root.addEventListener('input', (e) => {
 root.addEventListener('keydown', (e) => {
   const st = STEPS[S.step];
   if (!st) return;
+  if (st.kind === 'hello' && e.key === 'Enter' && !e.target.matches('a, button')) { e.preventDefault(); go(firstOpen()); return; }
   if (e.key === 'Enter' && !e.shiftKey && (e.target.matches('input.field') || (e.target.matches('textarea') && (e.metaKey || e.ctrlKey)))) { e.preventDefault(); next(); return; }
   if (st.kind === 'q' && st.f.type === 'one' && /^[1-9]$/.test(e.key) && !e.target.matches('input, textarea')) {
     root.querySelectorAll('[data-one]')[Number(e.key) - 1]?.click();
@@ -244,8 +375,9 @@ async function send() {
   } catch { d = null; }
   busy = false;
   if (d && d.ok) {
+    const sent = { answers: { ...S.answers }, name: S.name };
     forget();
-    root.innerHTML = doneScreen(d.email || body.email || (me && me.email) || '', !!d.copy);
+    root.innerHTML = doneScreen(d.email || body.email || (me && me.email) || '', !!d.copy, sent);
     root.querySelector('h1').focus(); window.scrollTo(0, 0);
     return;
   }
@@ -260,6 +392,8 @@ async function send() {
   root.innerHTML = '<p class="muted loading">One moment…</p>';
   const st = A.joined() ? await A.pull() : null;
   me = st && st.ok && st.me ? st.me : null;
+  const taken = st && st.ok && st.compass && Array.isArray(st.compass.taken) ? st.compass.taken : [];
+  starAt = taken.length && !Number.isNaN(Date.parse(taken[taken.length - 1])) ? taken[taken.length - 1] : '';
   if (KIND === 'boardroom') {
     const ORDER = ['free', 'session', 'lab', 'hub', 'premium'];
     const holds = me && (me.openAll || ORDER.indexOf(me.tier || 'free') >= 1);
