@@ -51,7 +51,7 @@ ok(app.includes("keep4(d, `a${i}`, on ? '' : isoToday(), lv);") && app.includes(
 ok(/^w\.[\w.:-]{1,80}$/.test(V.wkey(5, 3, 'a4')), 'the account keeps the ticks (the /api/state key rule)');
 ok(app.includes('data-mbsize=') && app.includes("keepWhere('stage', SIZE_STAGE[b.dataset.mbsize])"), 'the founder can switch size in My Blueprint');
 ok(app.includes('Done, day by day') && app.includes("ticks.sort((a, b) => a[0].localeCompare(b[0]));"), 'My journey: every action done, in date order');
-ok(app.includes('twenty actions a level, five in each area of your business, written for your size') && app.includes('class="mb-five"'), 'My playbook lists each level’s twenty');
+ok(app.includes('Its five actions · ${twenty} done') && app.includes('class="mb-five"'), 'the Blueprint keeps each level’s twenty: five in each part, the done ones ticked');
 ok(app.includes('data-go="blueprint" data-bpto="week">See them</button>'), 'each area of a level points to its five actions');
 ok(css.includes('.mb-sizes button[aria-pressed="true"]') && css.includes('.mb-acts li.mb-dostep'), 'the size switch and the Do action are drawn');
 

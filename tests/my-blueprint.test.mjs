@@ -44,6 +44,11 @@ ok(app.includes('This week: 4 things to do') && app.includes('Serves: ${goalLine
 ok(app.includes("keep4(d, 'got', gotOf(state.work, lv, d) === 0 ? '' : 0, lv);"), 'a tick is Sunday’s “Done”, saved on its level');
 ok(app.includes('<b>By the end:</b> ${esc(L.promise)}') && app.includes('Opens with ${') && app.includes('Open it · ${esc(rung.price)}'), 'a level not begun shows what it gives; a locked one, what opens it');
 ok(app.includes('function planGrid(') && app.includes('Fills in when you write it in Level') && app.includes('nothing here is a form'), 'all twelve levels from day one, filled only with what was written and done');
+ok(app.includes('function nextSquare(') && app.includes('Your next square') && app.includes('Fill it →'), 'your next square: the first part not yet written, with one button');
+ok(app.includes("wkey(n, 'w', 'inbp')") && app.includes('is in your Blueprint.'), 'a level finished: one quiet line, once, kept beside the welcome marks (never counted as an answer)');
+const ex = fs.readFileSync('public/blueprint-example.js', 'utf8');
+ok(/AN EXAMPLE, not a real\n\/\/ founder/.test(ex) && /An example, not a real founder\./.test(app) && app.includes("import('./blueprint-example.js')"), 'see a finished Blueprint: an example, always marked as one, loaded only when asked for (rule 12)');
+ok(app.includes('class="bpx-ph"') && app.includes('class="bpx-tb"') && css.includes('.bpx-ch{break-before:page}'), 'the printout: a plan with the name, the date and the filled squares, a chapter a page');
 ok(!/240/.test(app.slice(app.indexOf('// ── My Blueprint (Alexandru'), app.indexOf('function libraryView()'))), 'no scary totals');
 ok(app.includes('function blueprintDoc()') && app.includes('data-bpdoc="1"') && app.includes('data-bpdoc="0"'), 'every answer, in the eight parts, is still one tap away');
 ok(!/L\.word|\.word\)/.test(app.slice(app.indexOf('// ── My Blueprint (Alexandru'), app.indexOf('function libraryView()'))), 'plain level names, never the level words (rule 10)');

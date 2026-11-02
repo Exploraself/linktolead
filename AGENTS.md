@@ -165,7 +165,17 @@ tests/email-map.test.mjs fails when a letter builder is missing from the map.
 
 ## 15. My direction, and what the first five levels are for (Alexandru, 2 Nov 2026)
 
-My Blueprint opens on **My direction**, written once, one field per screen:
+**My Blueprint opens on the Blueprint itself** (Alexandru, 2 Nov 2026: "the
+Blueprint is not fillable; it is filled while they do the work"). From the
+first day the founder sees all twelve levels, in their three chapters, with
+their titles and their four parts. A part fills only with what the founder
+wrote and did; an empty part says what fills it; a locked level shows what
+opens it. At the top, the plan (four squares a level) and "Your next square"
+with one button; a finished level gets one quiet line, once. "See a finished
+Blueprint" shows Rosa, always marked as an example. "Print my Blueprint" is
+a plan worth keeping: the name, the date, the squares, a chapter a page.
+
+The tab **My direction** is the one thing written there on purpose, once, one field per screen:
 the mission, the vision, the values (locked in: changed only on purpose), two
 goals for the twelve weeks (one for the business, one for the founder as a
 leader) and two mini-goals for the week (one for the work, one personal).

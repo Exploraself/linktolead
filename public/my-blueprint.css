@@ -228,10 +228,51 @@ details.mb-take dd{margin:0}
 .bpx-built dl{margin:6px 0 0;display:grid;gap:4px 12px;grid-template-columns:auto 1fr;font-size:15px}
 .bpx-built dt{font-weight:700}.bpx-built dd{margin:0}
 .bpx-go{margin-top:2px}
+/* Your next square: the first part not yet written, and one button. */
+.bpx-next{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-radius:12px;border:1.5px solid var(--mb-ink);background:var(--mb-card)}
+.bpx-next p{font-size:15.5px;min-width:0}
+.bpx-next small{display:block;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mb-gold-ink)}
+.bpx-next b{margin-right:4px}
+.bpx-nsq{width:22px;height:22px;border-radius:5px;border:2px dashed var(--c);animation:bpxBlink 2.4s ease-in-out infinite}
+.bpx-nsq.all{border:0;background:var(--mb-gold);animation:none}
+.bpx-next.all{grid-template-columns:auto minmax(0,1fr);border-color:var(--mb-gold)}
+@keyframes bpxBlink{0%,100%{opacity:1}50%{opacity:.35}}
+/* A level finished: its four squares, and one quiet line, once. */
+.bpx-fresh{display:flex;align-items:center;gap:8px;font-size:15.5px;font-weight:700;color:var(--mb-ok);animation:bpxRise .6s ease both}
+.bpx-fresh span{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--mb-ok-bg)}
+.bpx-l.fresh{border-color:var(--mb-gold);box-shadow:0 0 0 2px var(--mb-gold);animation:bpxGlow 1.6s ease-out 2}
+@keyframes bpxRise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes bpxGlow{0%{box-shadow:0 0 0 2px var(--mb-gold),0 0 0 0 rgba(180,151,95,.55)}100%{box-shadow:0 0 0 2px var(--mb-gold),0 0 0 12px rgba(180,151,95,0)}}
+/* See a finished Blueprint: always marked as an example. */
+.bpx-ex{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:12px;background:#FFF8E6;border:1px solid #E9D9AE}
+.bpx-ex p{font-size:15px;flex:1 1 280px}
+.bpx-ex:focus{outline:none}
+/* The printout: a real plan, with a title block (screen: hidden). */
+.bpx-ph,.bpx-tb{display:none}
 @media(max-width:520px){
   .bpx-plan{grid-template-columns:1fr;gap:12px}
+  .bpx-next{grid-template-columns:auto minmax(0,1fr)}
+  .bpx-next > .no-print{grid-column:1 / -1}
+  .bpx-next .mb-btn{width:100%;justify-content:center}
   .bpx-q{max-width:40px}
 }
-@media(prefers-reduced-motion:reduce){.bpx-q i.on{animation:none}}
-@media print{.bpx-lv,.bpx-a{break-inside:avoid}.bpx-q i.on{animation:none}}
+@media(prefers-reduced-motion:reduce){.bpx-q i.on,.bpx-nsq,.bpx-fresh,.bpx-l.fresh{animation:none}}
+@media print{
+  @page{size:A4;margin:14mm}
+  .mb,.mb *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .bpx-a,.bpx-lv > header{break-inside:avoid}.bpx-q i,.bpx-nsq,.bpx-fresh,.bpx-l{animation:none!important}
+  .mb-who{display:none!important}
+  .bpx-fresh,.bpx-ex{display:none}
+  .bpx-ph{display:block;padding:0 0 10px;margin-bottom:6px;border-bottom:3px double #1F1F1F}
+  .bpx-ph p:first-child{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#6E5213}
+  .bpx-ph h2{font-size:28px;margin:2px 0}
+  .bpx-ph p:last-child{font-size:12px;color:#5F6368}
+  .mb-pane > .mb-h2,.mb-pane > .mb-lead{display:none}
+  .bpx-plan{border:1.5px solid #1F1F1F;padding:22px 18px}
+  .bpx-q{max-width:40px}
+  .bpx-next{border-width:1px}
+  .bpx-ch{break-before:page}
+  .bpx-chh{break-after:avoid}
+  .bpx-tb{display:grid;grid-template-columns:repeat(4,auto);justify-content:space-between;gap:8px;margin-top:14px;padding:8px 10px;border:1.5px solid #1F1F1F;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+}
 
