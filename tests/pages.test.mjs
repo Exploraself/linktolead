@@ -54,7 +54,7 @@ for (const p of ['public/northstar/engine.js', 'functions/_plans.js', 'public/no
 const Su = read('public/northstar/summit/index.html');
 for (const ph of ['[SESSION LENGTH]', '[ONLINE OR IN PERSON]']) ok(Su.includes(ph), `summit keeps ${ph}`);
 ok(!Su.includes('[YOUR BOOKING LINK]') && (Su.match(/data-join/g) || []).length >= 3 && /landing: 'summit'/.test(Su) && /variant: 'full'/.test(Su), 'summit: every call to action opens the full account form (landing summit)');
-ok(read('public/northstar/app.js').includes('[YOUR PRICE]'), 'Boardroom price placeholder kept');
+ok(read('public/northstar/app.js').includes("price: '$27'") && !read('public/northstar/app.js').includes('[YOUR PRICE]'), 'Boardroom price: $27 (Alexandru, 2 Nov 2026)');
 
 // Every North Star page carries the favicon and the share image.
 for (const f of ['public/northstar/index.html', 'public/northstar/summit/index.html', 'public/north3/index.html']) {
