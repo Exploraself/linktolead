@@ -411,3 +411,19 @@ mark{background:none;color:inherit}
 .bp-build dd{margin:0;font:400 16px/1.5 var(--display);color:var(--qink)}
 .cw-sess{max-width:760px;padding:16px 18px;border:2px solid var(--gold);border-radius:10px;background:var(--leaf)}
 .cw-sess .cta{margin-top:12px}
+
+/* ── The twelve levels, always on the left (Alexandru, 2 Nov 2026) ────────
+   On a wide screen the levels are a bar under the top bar, like the North
+   Star's, each with its progress; on a phone they stay a drawer, opened by
+   a button big enough to see. */
+.cw-all[data-go="rail"]{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border:1px solid var(--gold);border-radius:999px;
+  font:600 14px var(--body);color:var(--qink);text-decoration:none}
+.cw-all[data-go="rail"]:hover{background:rgba(180,151,95,.12)}
+@media (min-width:1180px){
+  body.inwork .cw-drawer{top:var(--topbar,72px);width:300px;padding:16px 12px 48px;transform:none;visibility:visible;transition:none;
+    box-shadow:none;border-right:1px solid var(--edge);z-index:20}
+  body.inwork .cw-dx,body.inwork .cw-dveil{display:none!important}
+  body.inwork .cw{margin-left:300px;max-width:none}
+  body.inwork .crown-wrap{--crx:calc(50% + 150px + 210px)}
+  body.inwork .cw-all[data-go="rail"]{display:none}
+}

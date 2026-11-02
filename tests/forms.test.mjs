@@ -202,7 +202,7 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
   ok(labels.size === 1 && labels.has('Start my North Star →'), 'road2.1: one button label, everywhere');
   const AB = read('public/account-box.js');
   ok(AB.includes("const NS_HOME = ['north2'];") && AB.includes("? '/northstar/' : '/ground-plan/#home'") && J21.includes("location.replace('/northstar/')") && read('functions/_landing.js').includes("'/road2.1': '/north2/'"), 'north2 (was road2.1): Start my North Star opens the North Star, and the old address still lands');
-  ok(read('public/north3/sales.js').includes("landing: 'north3', next: opener ? '/northstar/' : ''") && AB.includes('const after = () => ctx.next ||') && !read('functions/_landing.js').includes("'/road2': '/north3/'") && read('public/ground-plan/index.html').includes("/north3/#join"), 'north3 (was road2): its buttons open the North Star; sign-ups sent from the Blueprint still land on Base Camp; /road2/ is a page again, not a redirect');
+  ok(read('public/north3/sales.js').includes("landing: 'north3', next: opener ? '/northstar/' : ''") && AB.includes('const after = () => ctx.next ||') && !read('functions/_landing.js').includes("'/road2': '/north3/'") && !read('public/ground-plan/index.html').includes("location.replace('/north3/#join')"), 'north3 (was road2): its buttons open the North Star; sign-ups sent from the Blueprint still land on Base Camp; /road2/ is a page again, not a redirect; Base Camp no longer sends a signed-out visitor to it (2 Nov 2026)');
   ok(!/most founders|incubator/i.test(R21.replace(/<!--[\s\S]*?-->/g, '')), 'road2.1: no banned words on the page');
 }
 // Road 4 (31 Oct): the sales page for The Founder's Blueprint, taps only.

@@ -18,7 +18,9 @@ const COMPASS_STAGE_NAME = { building: 'Building', growing: 'Growing', scaling: 
  * honoured.
  */
 export function entry({ joined, old, hash = '' }) {
-  if (!joined) return hash === '#signin' ? 'signin' : 'redirect';
+  // Signed out (or a browser that has never signed in): the sign-in screen,
+  // never a sales page (Alexandru, 2 Nov 2026). It links to a free account.
+  if (!joined) return 'signin';
   if (hash === '#library') return 'library';
   if (hash === '#blueprint') return 'blueprint';
   if (hash === '#launchpad') return 'launchpad';
