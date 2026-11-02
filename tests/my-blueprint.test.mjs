@@ -37,12 +37,13 @@ ok(app.includes('if (needsAccount()) { askAccount(keepDir); return; }'), 'an inc
 ok(app.includes('class="mb-one" data-dirform=') && app.includes('id="mb-in"') && app.includes("'Write one line, or skip it for now.'"), 'one field on screen, with Back, Next and Skip');
 
 // The five tabs and the top menu.
-ok(['My direction', 'This week', 'My playbook', 'Strengths', 'My journey'].every((t) => app.includes(`'${t}'`)), 'five tabs');
+ok(['My Blueprint', 'This week', 'My direction', 'Strengths', 'My journey'].every((t) => app.includes(`'${t}'`)) && app.includes("let bpTab = 'book'"), 'five tabs, and My Blueprint opens on the Blueprint itself (Alexandru, 2 Nov 2026)');
 ok(app.includes('role="tablist" aria-label="My Blueprint"') && app.includes("['ArrowLeft', 'ArrowRight', 'Home', 'End']"), 'the tabs are a tab list, with the arrow keys');
 ok(app.includes(`data-go="blueprint" \${view === 'blueprint' ? 'aria-current="page"' : ''}>My Blueprint</button>`), 'My Blueprint in the top menu');
 ok(app.includes('This week: 4 things to do') && app.includes('Serves: ${goalLine(d)}') && app.includes('Done when: <span class="mb-ink">${doneOf(w, lv, d)}</span>'), 'This week: four actions, the goal each serves, Done when');
 ok(app.includes("keep4(d, 'got', gotOf(state.work, lv, d) === 0 ? '' : 0, lv);"), 'a tick is Sunday’s “Done”, saved on its level');
-ok(app.includes('<b>After this level you will have:</b> ${esc(L.promise)}') && app.includes('Opens with ${esc(rung.n)} · ${esc(rung.price)}'), 'a locked level shows what it gives and what opens it');
+ok(app.includes('<b>By the end:</b> ${esc(L.promise)}') && app.includes('Opens with ${') && app.includes('Open it · ${esc(rung.price)}'), 'a level not begun shows what it gives; a locked one, what opens it');
+ok(app.includes('function planGrid(') && app.includes('Fills in when you write it in Level') && app.includes('nothing here is a form'), 'all twelve levels from day one, filled only with what was written and done');
 ok(!/240/.test(app.slice(app.indexOf('// ── My Blueprint (Alexandru'), app.indexOf('function libraryView()'))), 'no scary totals');
 ok(app.includes('function blueprintDoc()') && app.includes('data-bpdoc="1"') && app.includes('data-bpdoc="0"'), 'every answer, in the eight parts, is still one tap away');
 ok(!/L\.word|\.word\)/.test(app.slice(app.indexOf('// ── My Blueprint (Alexandru'), app.indexOf('function libraryView()'))), 'plain level names, never the level words (rule 10)');

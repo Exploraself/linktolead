@@ -1356,12 +1356,12 @@ function blueprintDoc() {
 // light and white, one thing at a time. Five tabs: My direction (written once,
 // one field per screen), This week (four actions), My playbook (every level),
 // Strengths and My journey. Built only from the founder's own answers.
-let bpTab = 'dir', dirAt = null, dirBack = false, bpDoc = false;
+let bpTab = 'book', dirAt = null, dirBack = false, bpDoc = false;
 const mbI = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${d}</svg>`;
 const MB_TABS = [
-  ['dir', 'My direction', mbI('<circle cx="12" cy="12" r="9"/><path d="m15.6 8.4-2.2 5-5 2.2 2.2-5z"/>')],
+  ['book', 'My Blueprint', mbI('<path d="M12 6.6C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.6 2-1.6 5-2.1 8-1.6V5c-3-.5-6 0-8 1.6z"/><path d="M12 6.6v13"/>')],
   ['week', 'This week', mbI('<rect x="3.5" y="5" width="17" height="15" rx="2.2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M9 14.6l2 2 4-4"/>')],
-  ['book', 'My playbook', mbI('<path d="M12 6.6C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.6 2-1.6 5-2.1 8-1.6V5c-3-.5-6 0-8 1.6z"/><path d="M12 6.6v13"/>')],
+  ['dir', 'My direction', mbI('<circle cx="12" cy="12" r="9"/><path d="m15.6 8.4-2.2 5-5 2.2 2.2-5z"/>')],
   ['strong', 'Strengths', mbI('<path d="m12 3.6 2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/>')],
   ['path', 'My journey', mbI('<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h5a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h5"/>')]];
 const MB_LOCK = mbI('<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>');
@@ -1474,45 +1474,61 @@ function weekPane() {
     <p class="mb-row no-print"><button type="button" class="mb-btn" data-print>Print my week</button></p>`;
 }
 
+/** The Blueprint (Alexandru, 2 Nov 2026): "the Blueprint is not fillable. It
+ *  is filled while they do the work. Before they do the work they can see
+ *  the Blueprint, all twelve modules with the chapters and titles, filled only
+ *  with what they have accomplished, so it pulls them forward." My Blueprint
+ *  opens here. At the top, the plan: twelve levels in three chapters, four
+ *  squares each, coloured only when the founder has written that part (and
+ *  marked once Sunday says it was done). Under it, every level with its title
+ *  and its four parts: the founder's own sentence and result where it is done,
+ *  an empty frame that says what fills it where it is not, and the gate where
+ *  the level is not open. Nothing here asks a question. */
+const AREA_C = ['#8C5A3C', '#4C6B55', '#3E5C78', '#8A6A1F'];
+function planGrid(w, now) {
+  return `<div class="bpx-plan" aria-hidden="true">${CHAPTERS4.map((C) => `<div class="bpx-chp"><p>${esc(C.name)}</p><div class="bpx-lvs">${C.lv.map((i) => {
+    const n = i + 1, open = holds(tierNow(), gateFor(n));
+    return `<span class="bpx-l${open ? '' : ' lock'}${n === now ? ' now' : ''}"><b>${pad(n)}</b><span class="bpx-q">${[0, 1, 2, 3].map((d) => `<i class="${begun(n, d) ? 'on' : ''}${gotOf(w, n, d) === 0 ? ' did' : ''}" style="--c:${AREA_C[d]}"></i>`).join('')}</span></span>`;
+  }).join('')}</div></div>`).join('')}</div>`;
+}
 function bookPane() {
-  const w = state.work, st = state.stage || 'build', now = weekLevel();
-  const levelBox = (L) => {
+  const w = state.work, st = state.stage || 'build', now = weekLevel() || 1;
+  const parts = LEVELS4.reduce((n, L) => n + [0, 1, 2, 3].filter((d) => begun(L.n, d)).length, 0);
+  const levelCard = (L) => {
     const n = L.n, rung = LADDER.find((r) => r.key === gateFor(n)), open = holds(tierNow(), gateFor(n)), ls = levelState(st, n), on = levelBegun(n);
-    const t = tally(w, [n]);
     const tag = !open ? `<span class="mb-tag">${MB_LOCK}${esc(rung.price)}</span>`
-      : n === now && ls !== 'done' ? '<span class="mb-tag mb-now">This week</span>'
-      : ls === 'done' ? '<span class="mb-tag mb-done">Written</span>'
-      : on ? '<span class="mb-tag">Started</span>' : '<span class="mb-tag">Open</span>';
-    const twenty = !!ACTIONS4[`${n}.0`];
-    const small = twenty ? (on ? `${actsDone(n)} of 20 actions done` : '20 actions, five in each area')
-      : t.n ? `${t.done} of 4 actions done${t.part ? `, ${t.part} partly` : ''}` : on ? `${[0, 1, 2, 3].filter((d) => begun(n, d)).length} of 4 actions written` : '4 actions, one in each area';
-    let body;
-    if (!open) body = `<p class="mb-have"><b>After this level you will have:</b> ${esc(L.promise)}</p>
-      <p class="mb-sub">Opens with ${esc(rung.n)} · ${esc(rung.price)}</p>
-      <p class="no-print"><a class="mb-btn mb-gold" href="${esc(payHref(gateFor(n)))}">${MB_LOCK}Unlock · ${esc(rung.price)}</a>${rung.url ? ` <a class="mb-btn" href="${esc(rung.url)}" target="_blank" rel="noopener">See what opens it ↗</a>` : ''}</p>`;
-    else if (!on) body = `<p class="mb-have"><b>After this level you will have:</b> ${esc(L.promise)}</p>
-      ${ls === 'waiting' ? `<p class="mb-sub">Opens when Level ${pad(n - 1)} is written.</p>` : `<p class="no-print"><button type="button" class="mb-btn" data-level="${n}">Open Level ${pad(n)} →</button></p>`}`;
-    else body = L.d.map((D, d) => {
-      const p = planOf(n, d), g = gotOf(w, n, d), tk = begun(n, d) ? takeOf(w, n, d) : null;
-      if (twenty) {
-        const A = actionsAt(n, d, mbSize());
-        return `<div class="mb-dom"><h4>${esc(DOM_LEAD[d])}${p ? `: ${esc(p.topic)}` : ''}</h4>
-          <ol class="mb-five">${DO_FIRST.map((i) => { const own = i === 2 && begun(n, d), at = mbv(n, d, `a${i}`);
-            return `<li class="${actOn(n, d, i) ? 'mb-on' : ''}"><b>${A[i].step}</b> ${own ? fill(D.fb[3], w, n, d) : esc(A[i].t)}${actOn(n, d, i) ? ` <span class="mb-when">Done${at ? ` ${esc(dayOf(at))}` : ''}</span>` : ''}</li>`; }).join('')}</ol>
-          ${tk ? `<details class="mb-take"><summary>${esc(tk.title)}</summary><ol>${tk.lines.map((l) => `<li>${l}</li>`).join('')}</ol></details>` : ''}</div>`;
+      : ls === 'done' ? '<span class="mb-tag mb-done">Written ✓</span>'
+      : n === now && on ? '<span class="mb-tag mb-now">This week</span>'
+      : on ? '<span class="mb-tag">Started</span>' : '';
+    const areas = L.d.map((D, d) => {
+      const p = planOf(n, d), g = gotOf(w, n, d), mine = begun(n, d), tk = mine ? takeOf(w, n, d) : null;
+      const head = `<p class="bpx-ak"><span>${esc(DOM_LEAD[d])}</span>${p ? ` · ${esc(p.topic)}` : ''}</p>`;
+      if (!mine) {
+        const why = !open ? `Opens with ${({ session: 'The Boardroom', lab: 'The LAB', hub: 'The HUB', premium: 'The Summit' })[gateFor(n)] || 'the next step'}` : ls === 'waiting' ? `Fills in at Level ${pad(n)}, after Level ${pad(n - 1)}` : `Fills in when you write it in Level ${pad(n)}`;
+        return `<li class="bpx-a empty" style="--c:${AREA_C[d]}">${head}<p class="bpx-wait">${why}</p></li>`;
       }
-      return `<div class="mb-dom"><h4>${esc(DOM_LEAD[d])}${p ? `: ${esc(p.topic)}` : ''}</h4>
-        ${begun(n, d) ? `<p><b>Do:</b> ${fill(D.fb[3], w, n, d)}</p><p><b>Done when:</b> ${doneOf(w, n, d)}</p>${g != null ? `<p class="mb-sub">Sunday: ${GOT[g]}</p>` : ''}
-          ${tk ? `<details class="mb-take"><summary>${esc(tk.title)}</summary><ol>${tk.lines.map((l) => `<li>${l}</li>`).join('')}</ol></details>` : ''}`
-        : `<p class="mb-sub">Not written yet. <button type="button" class="mb-text no-print" data-level="${n}">Write it</button></p>`}</div>`;
-    }).join('') + (BUILD4[n] && buildStarted(w, n) ? `<details class="mb-take"><summary>The page you built: ${esc(BUILD4[n].title)}</summary><dl>${buildPage(w, n).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl></details>` : '');
-    return `<details class="mb-lv"${n === now ? ' open' : ''}><summary><span class="mb-lvt"><b>Level ${pad(n)} · ${esc(L.title)}</b><small>${small}</small></span>${tag}</summary><div class="mb-lvb">${body}</div></details>`;
+      const twenty = ACTIONS4[`${n}.${d}`] ? [0, 1, 2, 3, 4].filter((i) => actOn(n, d, i)).length : null;
+      return `<li class="bpx-a on" style="--c:${AREA_C[d]}">${head}
+        <p class="bpx-do">${fill(D.fb[3], w, n, d)}</p>
+        <p class="bpx-dw"><b>Done when</b> ${doneOf(w, n, d)}</p>
+        <p class="bpx-res">${g === 0 ? '<span class="bpx-did">Done ✓</span>' : g === 1 ? '<span class="bpx-part">Partly</span>' : g === 2 ? '<span class="bpx-not">Not yet</span>' : '<span class="bpx-wk">This week</span>'}${twenty != null ? ` <span class="bpx-n5">${twenty} of 5 actions done</span>` : ''}</p>
+        ${tk ? `<details class="bpx-take"><summary>${esc(tk.title)}</summary><ol>${tk.lines.map((l) => `<li>${l}</li>`).join('')}</ol></details>` : ''}</li>`;
+    }).join('');
+    const foot = !open ? `<p class="no-print bpx-go"><a class="mb-btn mb-gold" href="${esc(payHref(gateFor(n)))}">${MB_LOCK}Open it · ${esc(rung.price)}</a></p>`
+      : !on && ls !== 'waiting' ? `<p class="no-print bpx-go"><button type="button" class="mb-btn" data-level="${n}">Open Level ${pad(n)} →</button></p>` : '';
+    const built = BUILD4[n] && buildStarted(w, n) ? `<details class="bpx-take bpx-built"><summary>The page you built: ${esc(BUILD4[n].title)}</summary><dl>${buildPage(w, n).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl></details>` : '';
+    return `<article class="bpx-lv${on ? ' on' : ''}${open ? '' : ' lock'}${n === now ? ' now' : ''}" aria-labelledby="bpx-${n}">
+      <header><p class="bpx-num">Level ${pad(n)}</p><h3 id="bpx-${n}">${esc(L.title)}</h3>${tag}</header>
+      ${on ? '' : `<p class="bpx-promise"><b>By the end:</b> ${esc(L.promise)}</p>`}
+      <ol class="bpx-areas">${areas}</ol>${built}${foot}</article>`;
   };
-  return `<h2 class="mb-h2" tabindex="-1">My playbook</h2>
-    <p class="mb-lead">Everything you work out inside the programme, as things to do: twenty actions a level, five in each area of your business, written for your size.</p>
-    ${CHAPTERS4.map((C) => `<h3 class="mb-ch">${esc(C.name)} <small>Levels ${pad(C.lv[0] + 1)}–${pad(C.lv[C.lv.length - 1] + 1)}</small></h3>
-      ${C.lv.map((i) => levelBox(LEVELS4[i])).join('')}`).join('')}
-    <p class="mb-row no-print"><button type="button" class="mb-btn" data-print>Print my playbook</button><button type="button" class="mb-text" data-bpdoc="1">Every answer, in eight parts</button></p>`;
+  return `<h2 class="mb-h2" tabindex="-1">Your Blueprint</h2>
+    <p class="mb-lead">All twelve levels, from the first day. It fills in only with what you have written and done: nothing here is a form.</p>
+    ${planGrid(w, now)}
+    <p class="bpx-sum">${parts ? `You are in Level ${pad(now)}. Every coloured square is a part of your business you have worked out, in your own words.` : 'Every square fills with colour when you write that part in its level. The first four are in Level 01.'}</p>
+    ${CHAPTERS4.map((C, ci) => `<section class="bpx-ch" aria-labelledby="bpx-c${ci}"><header class="bpx-chh"><p>${esc(C.n)} · Levels ${pad(C.lv[0] + 1)}–${pad(C.lv[C.lv.length - 1] + 1)}</p><h3 id="bpx-c${ci}">${esc(C.name)}</h3><p class="bpx-about">${esc(C.about)}</p></header>
+      ${C.lv.map((i) => levelCard(LEVELS4[i])).join('')}</section>`).join('')}
+    <p class="mb-row no-print"><button type="button" class="mb-btn" data-print>Print my Blueprint</button><button type="button" class="mb-text" data-bpdoc="1">Every answer, in eight parts</button></p>`;
 }
 
 function strongPane() {
@@ -1573,7 +1589,7 @@ function pathPane() {
 function blueprintView() {
   if (bpDoc) return blueprintDoc();
   const name = (state.me && state.me.name) || '', lv = weekLevel();
-  const pane = bpTab === 'week' ? weekPane() : bpTab === 'book' ? bookPane() : bpTab === 'strong' ? strongPane() : bpTab === 'path' ? pathPane() : dirPane();
+  const pane = bpTab === 'week' ? weekPane() : bpTab === 'dir' ? dirPane() : bpTab === 'strong' ? strongPane() : bpTab === 'path' ? pathPane() : bookPane();
   return `<section class="mb" aria-labelledby="mb-h"><div class="mb-in">
     <header class="mb-who"><p class="mb-k">My Blueprint</p><h1 id="mb-h">${name ? esc(name) : 'My Blueprint'}</h1>
       <p>${lv ? `Level ${pad(lv)} of 12 · ${esc(LEVELS4[lv - 1].title)} · ${ACTIONS4[`${lv}.0`] ? `${actsDone(lv)} of 20` : `${doneThisWeek(lv)} of 4`} done this week` : 'Twelve levels · it fills in as you go'}</p></header>
