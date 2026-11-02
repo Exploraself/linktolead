@@ -25,7 +25,7 @@ export const INDUSTRIES = ['Coaching & consulting', 'Creative & design', 'E-comm
   'Beauty & personal care', 'Education & training', 'Professional services', 'Trades & construction', 'Technology & software',
   'Real estate', 'Manufacturing', 'Nonprofit & social impact', 'Other'];
 export const SIGNUP_TYPES = ['full', 'simple'];
-export const LANDINGS = ['road1', 'road2', 'road3', 'road4', 'north2', 'north3', 'compass', 'summit'];
+export const LANDINGS = ['road1', 'road2', 'road3', 'road4', 'north1', 'north2', 'north3', 'compass', 'summit'];
 /** Older landing keys, each to the page it is now. A page loaded before a
  *  rename may still send one; stored ones are moved over (functions/_shared.js).
  *  a, b, c: the first three sales pages. road21: /north2/ until 31 Oct 2026.

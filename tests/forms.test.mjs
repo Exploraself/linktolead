@@ -77,6 +77,9 @@ ok(st === 200 && hasPw(bea) && prof(bea).signup_type === 'full' && prof(bea).lan
 [st, out] = await S({ first: 'Cora', last: 'Box', email: 'cora@example.com', consent: true, source: 'compass', type: 'simple', landing: 'compass' });
 const cora = out.token;
 ok(st === 200 && prof(cora).landing === 'compass' && /"linktolead-northstar"/.test(mcLog(cora)), 'the North Star box: landing "compass", tag "linktolead-northstar"');
+[st, out] = await S({ first: 'Nora', last: 'One', email: 'nora@example.com', consent: true, source: 'compass', type: 'simple', landing: 'north1' });
+const nora = out.token;
+ok(st === 200 && prof(nora).landing === 'north1' && /"linktolead-north1"/.test(mcLog(nora)), 'a founder sent by /north1/: landing "north1", tag "linktolead-north1"');
 [st, out] = await S({ first: 'Olly', last: 'Old', email: 'olly@example.com', consent: false, type: 'simple', landing: 'a' });
 ok(st === 200 && prof(out.token).landing === 'road3', 'a page loaded before the rename sends "a": stored as road3');
 // Landings stored before the roads move to the road their page became, once.
@@ -106,7 +109,7 @@ ok(row('fay@example.com').signup_type === 'full' && row('fay@example.com').landi
 const BL = Object.fromEntries(byLanding(L.students).map((x) => [x.k, x]));
 ok(BL.road3.total === 2 && BL.road1.total === 1 && BL.road1.full === 1 && BL.north3.total === 1 && BL.north3.full === 1 && BL.road2.total === 0 && BL.compass.total === 1 && BL.road3.week === 2, '/mentor: sign-ups per landing (Roads 1, 3, North 3, the North Star box)');
 const Sm = summary(L.students, []);
-ok(Sm.full === 2 && Sm.simple === 4 && filter(L.students, { tile: 'full' }).length === 2, '/mentor: Full / Simple filters');
+ok(Sm.full === 2 && Sm.simple === 5 && filter(L.students, { tile: 'full' }).length === 2, '/mentor: Full / Simple filters');
 const csv = await (await mGet({ request: new Request('https://x/api/mentor?csv=1', { headers: { 'x-mentor-key': 'mentor-key-123' } }), env })).text();
 ok(/"Sign-up form","Landing","utm_source"/.test(csv) && csv.includes('"Fay & Co"') && csv.includes('"meta"'), 'CSV: form, landing and utm columns');
 
@@ -153,7 +156,7 @@ ok(!/PHOTO/.test(A) && read('public/road3/page.js').includes("variant: 'simple',
 ok([1, 3, 4, 5, 6, 11, 12].map(band).join() === 'free,free,with,with,,,last', 'Road 3: the levels’ bands');
 const WB = read('public/north3/index.html');
 for (const W of [WB]) ok(W.includes('<button type="button" data-gate class="cta gold-btn" style="min-height: 56px; padding: 0 32px; font-size: 17px">Show me my road →</button>') && !W.includes('href="#dream"') && !/<a [^>]*href="\/(?!compass\/assets|assets)/.test(W), 'Road 2: "Show me my road" opens the full form; no link leaves the page');
-ok(read('public/north3/sales.js').includes("variant: 'full', landing: 'north3'") && WB.includes('src="/north3/sales.js"') && WB.includes('content="https://linktolead.exploraself.com/north3/"') && read('public/northstar/app.js').includes("type: 'simple', landing: 'compass'"), 'Road 2 stays FULL, landing road2; the /northstar box stays SIMPLE');
+ok(read('public/north3/sales.js').includes("variant: 'full', landing: 'north3'") && WB.includes('src="/north3/sales.js"') && WB.includes('content="https://linktolead.exploraself.com/north3/"') && read('public/northstar/app.js').includes("type: 'simple', landing: doorOf(utm)") && read('public/northstar/app.js').includes("return src === 'north1' ? 'north1' : 'compass';"), 'Road 2 stays FULL, landing road2; the /northstar box stays SIMPLE');
 const box = read('public/account-box.js');
 ok(/pwInput\('j-pw'\)/.test(box) && /pwInput\('j-pw2'\)/.test(box) && /data-eye=/.test(box) && /variant === 'full' \? detailFields/.test(box) && /landing: ctx\.landing, utm: utm\(\)/.test(box), 'the account box: a password (with the show-password eye) on the full form only, landing and utm sent');
 
@@ -187,7 +190,7 @@ const noRun = baseOf({ ...EXAMPLE, run: null, rate: null, hire: null }), nm = E.
 ok(noRun.fixed === 0 && nm.cash === null && nm.people === null && Number.isFinite(nm.mine), 'empty Fine-tune boxes: no money figure invented, the hours still move');
 
 // ── Mailchimp landing tags ──────────────────────────────────────────────────
-ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-road2', road3: 'linktolead-road3', road4: 'linktolead-road4', north2: 'linktolead-north2', north3: 'linktolead-north3', compass: 'linktolead-northstar', summit: 'linktolead-summit' }), 'landing tags: linktolead- + the page address');
+ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', road2: 'linktolead-road2', road3: 'linktolead-road3', road4: 'linktolead-road4', north1: 'linktolead-north1', north2: 'linktolead-north2', north3: 'linktolead-north3', compass: 'linktolead-northstar', summit: 'linktolead-summit' }), 'landing tags: linktolead- + the page address');
 // North 2 (was Road 2.1): its own tag, no empty tag, the FULL form.
 {
   const { tagsFor } = await import('../functions/_mailchimp.js');
