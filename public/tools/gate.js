@@ -2,8 +2,8 @@
  *
  *   an account           in at once: one "Open" tap on the cover.
  *   a pass               in at once (a code was typed before, on this browser).
- *   neither              their own code by email, one field at a time: first
- *                        name, email, consent, "Send my code"; then the six
+ *   neither              the code by email, one field at a time: first
+ *                        name, email, consent, "Send my code"; then the four
  *                        digits. Or sign in, or make the free account, one
  *                        field at a time as on every ExploraSelf form.
  *   needAccount          (12 Days to Start Winning: letters need an account)
@@ -37,10 +37,68 @@ async function post(body) {
   return d;
 }
 /** A code from the email's button (?email=…&code=…): checked, kept as a pass. */
-export async function redeem(email, code) {
-  const d = await post({ action: 'check', email, code });
+export async function redeem(email, code, tool = '') {
+  const d = await post({ action: 'check', email, code, tool, tz: zone() });
   if (d.pass) keepPass(d.pass);
   return !!d.pass;
+}
+
+const zone = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; } };
+const toolOf = (path) => (/^\/([a-z0-9-]+)\/$/.exec(path || '') || [])[1] || '';
+
+/* ── "Yes, that's me" (Alexandru, 2 Nov 2026) ─────────────────────────────
+ * An account opening the Growth Toolkit for the first time confirms it is
+ * them, once: then the welcome letter and the "Growth Toolkit" tag (the
+ * server sends them, once per address). Remembered on this device. */
+const OK_KEY = 'ftb-toolkit-ok';
+const okHere = () => { try { return localStorage.getItem(OK_KEY) === A.token(); } catch { return false; } };
+const markOk = () => { try { localStorage.setItem(OK_KEY, A.token()); } catch { /* private mode */ } };
+
+/** True when this signed-in account has not confirmed the toolkit yet. */
+export async function needsConfirm() {
+  if (!A.joined() || okHere()) return false;
+  try {
+    const r = await fetch(`/api/tools?t=${encodeURIComponent(A.token())}`);
+    const d = r.ok ? await r.json() : null;
+    if (d && d.ok && d.confirmed) { markOk(); return false; }
+    return !!(d && d.ok);
+  } catch { return false; }
+}
+
+/** The one screen: "Open the Growth Toolkit as Sam?" → "Yes, that's me". */
+export function confirmMe(host, { me = {}, tool = '', ready, cancel } = {}) {
+  const first = firstOf(me), mail = me.email || '';
+  let busy = false;
+  const draw = (note = '') => {
+    host.innerHTML = `<div class="scr${RM.matches ? '' : ' enter'}">
+      <div class="qtop"><button type="button" class="back" data-c="back">← Back</button><span class="count">Growth Toolkit · free</span></div>
+      <div class="qic" aria-hidden="true">${ICONS.toolkit}</div>
+      <h2 class="qh" id="c-q">Open the Growth Toolkit${first ? ` as ${esc(first)}` : ''}?</h2>
+      <p class="hint">${mail ? `You’re signed in as <b>${esc(mail)}</b>. ` : ''}${me.letters === false ? 'One tap to open it.' : 'One tap, and your welcome letter is on its way.'}</p>
+      <div class="ctl"><div class="okrow"><button type="button" class="btn big" data-c="yes" data-primary ${busy ? 'disabled' : ''}>${busy ? 'One moment…' : 'Yes, that’s me <span aria-hidden="true">→</span>'}</button><span class="kbd">or press Enter ↵</span></div>
+      <p class="nudge" role="status">${esc(note)}</p></div>
+      <p class="alt"><button type="button" class="linkbtn" data-c="other">Not you? Sign in with another account</button></p>
+    </div>`;
+    const b = host.querySelector('[data-primary]'); if (b && !busy) b.focus();
+  };
+  const yes = async () => {
+    if (busy) return; busy = true; draw();
+    try {
+      const r = await fetch('/api/tools', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: A.token(), step: 'hello', tool, tz: zone() }) });
+      const d = await r.json().catch(() => ({}));
+      busy = false;
+      if (!r.ok || !d.ok) return draw(d.error || 'We could not reach the toolkit just now. Try again in a minute.');
+      markOk(); host.onclick = null; host.onkeydown = null; ready(me);
+    } catch { busy = false; draw('We could not reach the toolkit just now. Try again in a minute.'); }
+  };
+  host.onclick = (e) => {
+    const t = e.target.closest('[data-c]'); if (!t) return;
+    if (t.dataset.c === 'yes') return yes();
+    if (t.dataset.c === 'back') { host.onclick = null; host.onkeydown = null; return cancel && cancel(); }
+    if (t.dataset.c === 'other') { A.signOut(); try { localStorage.removeItem(OK_KEY); } catch { /* ignore */ } location.reload(); }
+  };
+  host.onkeydown = (e) => { if (e.key === 'Enter' && !e.target.closest('.linkbtn')) { e.preventDefault(); yes(); } };
+  draw();
 }
 
 /** 'full' (an account), 'pass', 'guest' or 'offline', and the founder. */
@@ -62,7 +120,7 @@ const ENTER = ['code'];
 const Q = {
   first: { q: 'What’s your first name?', hint: 'The Growth Toolkit is free. Your answers stay on your device.', type: 'text', ac: 'given-name', max: 60 },
   last: { q: (v) => `Nice to meet you${v.first ? ', ' + v.first : ''}. Your surname?`, hint: 'As you would sign a letter.', type: 'text', ac: 'family-name', max: 60 },
-  email: { q: 'Your email', hint: (m) => (m === 'code' ? 'Your own code goes there, with a look inside the toolkit.' : 'You sign in with it.'), type: 'email', ac: 'email', max: 120 },
+  email: { q: 'Your email', hint: (m) => (m === 'code' ? 'The code goes there, with a look inside the toolkit.' : 'You sign in with it.'), type: 'email', ac: 'email', max: 120 },
   company: { q: 'Your company’s name', hint: 'Just starting? Tap “No company yet”.', type: 'company', ac: 'organization', max: 120 },
   interest: { q: 'What do you want most from the business?', hint: 'The first one that is true.', type: 'pick', list: INTERESTS },
   industry: { q: 'Your industry', hint: 'The closest one. “Other” is fine.', type: 'pick', list: INDUSTRIES, two: true },
@@ -71,7 +129,7 @@ const Q = {
   consent: { q: 'Last step', hint: 'Your account opens the moment you tap.', type: 'consent' },
   login: { q: 'Your password', hint: 'The one you chose when you made your account.', type: 'password', ac: 'current-password' },
   askcode: { q: 'Last step', hint: 'Your code arrives in a minute. Alexandru and the team are here if it doesn’t.', type: 'consent' },
-  code: { q: (v) => `Your code${v.first ? ', ' + v.first : ''}`, hint: (m, v) => `The six digits we sent to ${v.email}. Nothing yet? Check your spam folder.`, type: 'code' },
+  code: { q: (v) => `Your code${v.first ? ', ' + v.first : ''}`, hint: (m, v) => `The four digits we sent to ${v.email}. Nothing yet? Check your spam folder.`, type: 'code' },
 };
 
 /**
@@ -97,8 +155,8 @@ export function open(host, { name = 'Growth Toolkit', path = '/tools/', st = { k
     if (d.type === 'text' || d.type === 'email') {
       ctl = `<input class="txt" id="g-in" type="${d.type}" autocomplete="${d.ac}" maxlength="${d.max}" value="${esc(v[k])}" ${d.type === 'email' ? 'inputmode="email" autocapitalize="off" spellcheck="false"' : 'autocapitalize="words"'} aria-labelledby="g-q" aria-describedby="g-h">`;
     } else if (d.type === 'code') {
-      ctl = `<input class="txt" id="g-in" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" value="${esc(v.code)}" style="letter-spacing:.3em;font-size:28px;max-width:240px" aria-labelledby="g-q" aria-describedby="g-h">
-        <div style="margin-top:10px"><button type="button" class="linkbtn" data-g="again">Send me a new code</button></div>`;
+      ctl = `<input class="txt" id="g-in" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="4" pattern="[0-9]*" value="${esc(v.code)}" style="letter-spacing:.4em;font-size:28px;max-width:200px" aria-labelledby="g-q" aria-describedby="g-h">
+        <div style="margin-top:10px"><button type="button" class="linkbtn" data-g="again">Send me the code again</button></div>`;
     } else if (d.type === 'company') {
       ctl = `<input class="txt" id="g-in" type="text" autocomplete="organization" maxlength="120" value="${esc(v.company)}" aria-labelledby="g-q" aria-describedby="g-h">
         <div style="margin-top:10px"><button type="button" class="linkbtn" data-g="nocompany">No company yet →</button></div>`;
@@ -160,7 +218,7 @@ export function open(host, { name = 'Growth Toolkit', path = '/tools/', st = { k
   async function askCode() {
     const d = await post({ action: 'request', first: v.first, email: v.email, consent: v.consent, tz: A.tz() });
     if (d.pass) { keepPass(d.pass); return ready(null); }
-    into('enter', ENTER, 0, `Sent. Check ${v.email} for your six digits.`);
+    into('enter', ENTER, 0, `Sent. Check ${v.email} for the four digits.`);
   }
 
   async function next() {
@@ -174,13 +232,13 @@ export function open(host, { name = 'Growth Toolkit', path = '/tools/', st = { k
     if (k === 'password' && v.password.length < 10) return say('At least 10 characters, please.');
     if (k === 'confirm' && v.confirm !== v.password) { v.confirm = ''; return say('The two passwords are different. Type it once more.'); }
     if (k === 'login' && !v.password) return say('Your password, please.');
-    if (k === 'code' && !/^\d{6}$/.test(v.code)) return say('The six digits from the email, please.');
+    if (k === 'code' && !/^\d{4}$/.test(v.code)) return say('The four digits from the email, please.');
     if (Q[k].type === 'consent') v.consent = !!(host.querySelector('#g-consent') || {}).checked;
     if (i < steps.length - 1) { i++; draw(); return; }
     busy = true; draw(false);
     try {
       if (mode === 'code') { busy = false; return await askCode(); }
-      if (mode === 'enter') { const okd = await redeem(v.email, v.code); busy = false; return okd ? ready(null) : draw(); }
+      if (mode === 'enter') { const okd = await redeem(v.email, v.code, toolOf(path)); busy = false; return okd ? ready(null) : draw(); }
       if (mode === 'signup') {
         const out = await A.signup({ first: v.first, last: v.last, email: v.email, consent: v.consent, source: 'home', type: 'full',
           company: v.noCompany ? '' : v.company, noCompany: v.noCompany, interest: v.interest, industry: v.industry,

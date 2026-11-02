@@ -14,7 +14,8 @@
 //                  mc-backfill. Every action is logged as an event; every
 //                  Mailchimp call also in mailchimp_log.
 
-import { json, bad, db, now, mentorOk, clean, looksLikeEmail, accountTables, newToken } from '../_shared.js';
+import { teamList, teamAdd, teamRemove } from '../_team.js';
+import { json, bad, db, now, mentorAccess, clean, looksLikeEmail, accountTables, newToken } from '../_shared.js';
 import { DOMAIN_STEPS, WHATIF_STEPS, ALL_STEP_IDS } from '../_plans.js';
 import { GROWTH_IDS, GROWTH_SQL, GROWTH_BLANK_IDS } from '../_growth.js';
 import { sendLink } from './signin.js';
@@ -144,9 +145,13 @@ export function toCSV(list) {
 export async function onRequestGet({ request, env }) {
   const D = db(env);
   if (!D) return bad('Not configured.', 503);
-  if (!mentorOk(request, env)) return bad('Not authorised.', 401);
+  const access = await mentorAccess(request, env, D);
+  if (!access.ok) return bad('Not authorised.', 401);
   await accountTables(D);
   const url = new URL(request.url);
+  // The team (functions/_team.js): who has every level, the toolkit without a
+  // code, and /mentor with their own account. Only the key may change it.
+  if (url.searchParams.get('team')) return json({ ok: true, team: await teamList(D, env), canEdit: access.by === 'key' });
   const one = url.searchParams.get('student');
 
   // The drawer's Growth Plan: ticks and words, nothing else.
@@ -208,11 +213,20 @@ export async function onRequestGet({ request, env }) {
 export async function onRequestPost({ request, env }) {
   const D = db(env);
   if (!D) return bad('Not configured.', 503);
-  if (!mentorOk(request, env)) return bad('Not authorised.', 401);
+  const access = await mentorAccess(request, env, D);
+  if (!access.ok) return bad('Not authorised.', 401);
   let body;
   try { body = await request.json(); } catch { return bad('Could not read that.'); }
   await accountTables(D);
   const log = (student, kind, detail = null) => D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(student, kind, now(), detail).run();
+
+  if (body.action === 'team-add' || body.action === 'team-remove') {
+    if (access.by !== 'key') return bad('Only the mentor key can change the team.', 403);
+    const email = clean(body.email, 200).toLowerCase();
+    if (!looksLikeEmail(email)) return bad('That email does not look complete.');
+    if (body.action === 'team-add') await teamAdd(D, email, now()); else await teamRemove(D, email);
+    return json({ ok: true, team: await teamList(D, env) });
+  }
 
   if (body.action === 'reply' && body.note) {
     // An answer in "Ask Alexandru": kept on the question, added to the

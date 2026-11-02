@@ -1,46 +1,59 @@
-// Team accounts (Alexandru, 2 Nov 2026): every Blueprint level open for the
-// team, matched on the signed-in account's own email; every founder keeps the
-// ladder. And the profile menu shows the email the account was made with.
+// The team (2 Nov 2026): Alexandru adds an exact address in /mentor (only
+// with the mentor key); that account gets every level, the Growth Toolkit
+// without a code, and /mentor with its own sign-in. Never matched on part of
+// an address.
 
-import fs from 'node:fs';
+import { onRequestGet as mentorGet, onRequestPost as mentorPost } from '../functions/api/mentor.js';
 import { onRequestPost as signup } from '../functions/api/signup.js';
 import { onRequestGet as stateGet } from '../functions/api/state.js';
-import { isTeam, TEAM } from '../functions/_team.js';
-import { fakeD1, fakeResend, post, get, tally } from './_d1.mjs';
+import { onRequestPost as kitPost } from '../functions/api/toolkit.js';
+import { readFileSync } from 'node:fs';
+import { fakeD1, fakeResend, tally } from './_d1.mjs';
 
 const { ok, done } = tally('team');
-
-// ── The rule ─────────────────────────────────────────────────────────────────
-ok(TEAM.includes('alex@exploraself.com') && TEAM.includes('sales@exploraself.com'), 'Alexandru’s two addresses are on the team');
-ok(isTeam('Alex@ExploraSelf.com ', {}), 'matched without case or spaces');
-ok(!isTeam('', {}) && !isTeam(null, {}) && !isTeam('someone@example.com', {}), 'no email, or anyone else: not the team');
-ok(isTeam('test@example.com', { TEAM_EMAILS: 'a@b.co, Test@Example.com' }) && !isTeam('test@example.com', {}), 'more addresses from TEAM_EMAILS in the Pages settings');
-
-// ── /api/state says so, from the account’s own email ────────────────────────
-const DB = fakeD1();
-const env = { DB, RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Via Esempio 1, Rome' };
 fakeResend();
-const J = async (r) => [r.status, await r.json()];
-const state = async (t) => (await stateGet({ request: get(`/api/state?t=${t}`), env })).json();
-const [, a] = await J(await signup({ request: post('/api/signup', { first: 'Alexandru', last: 'Cojocari', email: 'alex@exploraself.com', type: 'simple', landing: 'road3', consent: true }), env }));
-const [, b] = await J(await signup({ request: post('/api/signup', { first: 'Sam', last: 'Ray', email: 'sam@example.com', type: 'simple', landing: 'road3', consent: true }), env }));
-const sa = await state(a.token), sb = await state(b.token);
-ok(sa.me.openAll === true && sa.me.email === 'alex@exploraself.com', 'state: the team account has every level open, and its email');
-ok(sb.me.openAll === false && sb.me.email === 'sam@example.com', 'state: a founder keeps the ladder, and sees their own email');
-ok((await stateGet({ request: get('/api/state?t=not-a-token-at-all-xxxxxxxx&openAll=1'), env })).status === 404, 'state: nothing a page sends opens anything');
+const DB = fakeD1();
+const env = { DB, MENTOR_KEY: 'k'.repeat(24) };
+const B = 'https://linktolead.exploraself.com';
+const req = (path, { method = 'GET', body, key, token } = {}) => new Request(B + path, { method,
+  headers: { 'content-type': 'application/json', ...(key ? { 'x-mentor-key': key } : {}), ...(token ? { 'x-account-token': token } : {}) },
+  ...(body ? { body: JSON.stringify(body) } : {}) });
+const jsonOf = async (r) => [r.status, await r.json()];
+const make = async (first, email) => (await jsonOf(await signup({ request: req('/api/signup', { method: 'POST', body: { first, last: 'T', email, consent: false, source: 'home', type: 'full', company: 'X', interest: 'More free time', industry: 'Other', password: 'longenough1', confirm: 'longenough1' } }), env })))[1].token;
 
-// ── Base Camp: one helper decides every gate ────────────────────────────────
-const app = fs.readFileSync('public/app.js', 'utf8');
-ok(!/holds\(state\.tier/.test(app), 'Base Camp: no gate reads the tier directly');
-ok(app.includes("const team = () => account.joined() && !!state.openAll;") && app.includes("const tierNow = () => (team() ? 'premium' : (state.tier || 'free'));"), 'Base Camp: team access needs a signed-in account the server marked');
-ok(app.includes("if (n === 1 || team()) return 'open';"), 'Base Camp: the team can open any level, in any order');
-ok(app.includes('state.openAll = !!r.me.openAll;'), 'Base Camp: read from /api/state on every pull');
-ok(app.includes("tier: state.tier || 'free',"), 'Base Camp: the founder’s real step is still what is shown');
+const sheba = await make('Sheba', 'sheba.partner@example.com');
+const stranger = await make('Sheba', 'sheba123@example.com');
+ok(sheba && stranger, 'two accounts');
 
-// ── The profile menu shows the email ────────────────────────────────────────
-const pm = fs.readFileSync('public/profile-menu.js', 'utf8');
-ok(pm.includes("email: r.me.email || ''") && pm.includes('<span class="pm-mail">${esc(me.email)}</span>'), 'menu: the email under the name, escaped');
-ok(pm.includes('.pm-who .pm-mail{') && pm.includes('overflow-wrap:anywhere') && pm.includes(':root[data-theme="dark"] .pm-who .pm-mail{'), 'menu: a long address wraps; readable in light and dark');
-ok(pm.includes("all 12 levels open (team)"), 'menu: the team sees why every level is open');
+let [st] = await jsonOf(await mentorGet({ request: req('/api/mentor', { token: sheba }), env }));
+ok(st === 401, 'not on the team yet: /mentor refuses her account');
+[st] = await jsonOf(await mentorPost({ request: req('/api/mentor', { method: 'POST', token: sheba, body: { action: 'team-add', email: 'sheba.partner@example.com' } }), env }));
+ok(st === 401, 'an account cannot add itself');
+
+let [, j] = await jsonOf(await mentorPost({ request: req('/api/mentor', { method: 'POST', key: env.MENTOR_KEY, body: { action: 'team-add', email: 'Sheba.Partner@example.com' } }), env }));
+ok(j.ok && j.team.some((m) => m.email === 'sheba.partner@example.com' && m.removable), 'with the key: her exact address is on the team');
+
+[st, j] = await jsonOf(await mentorGet({ request: req('/api/mentor', { token: sheba }), env }));
+ok(st === 200 && j.ok, 'on the team: /mentor opens with her own account');
+[st, j] = await jsonOf(await mentorGet({ request: req('/api/mentor?team=1', { token: sheba }), env }));
+ok(j.canEdit === false, 'a team account sees the team but cannot change it');
+[st] = await jsonOf(await mentorPost({ request: req('/api/mentor', { method: 'POST', token: sheba, body: { action: 'team-add', email: 'someone@example.com' } }), env }));
+ok(st === 403, 'only the key changes the team');
+[st] = await jsonOf(await mentorGet({ request: req('/api/mentor', { token: stranger }), env }));
+ok(st === 401, 'a stranger with "sheba" in the address gets nothing');
+
+[, j] = await jsonOf(await stateGet({ request: req(`/api/state?t=${sheba}`, { token: sheba }), env }));
+ok(j.me && j.me.openAll === true, 'every level open for her');
+[, j] = await jsonOf(await stateGet({ request: req(`/api/state?t=${stranger}`, { token: stranger }), env }));
+ok(j.me && j.me.openAll === false, 'not for the stranger');
+ok(/if \(me && me\.openAll\) list\.push\(\['\/mentor', 'Mentor'/.test(readFileSync(new URL('../public/profile-menu.js', import.meta.url), 'utf8')), 'team profile menu: Mentor, only for the team');
+
+[, j] = await jsonOf(await kitPost({ request: req('/api/toolkit', { method: 'POST', body: { action: 'request', first: 'Sheba', email: 'sheba.partner@example.com' } }), env }));
+ok(j.pass, 'the Growth Toolkit without a code');
+
+[, j] = await jsonOf(await mentorPost({ request: req('/api/mentor', { method: 'POST', key: env.MENTOR_KEY, body: { action: 'team-remove', email: 'sheba.partner@example.com' } }), env }));
+ok(!j.team.some((m) => m.email === 'sheba.partner@example.com'), 'removed with the key');
+[st] = await jsonOf(await mentorGet({ request: req('/api/mentor', { token: sheba }), env }));
+ok(st === 401, 'and /mentor closes again');
 
 done();

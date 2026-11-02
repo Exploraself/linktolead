@@ -108,7 +108,7 @@ for (const a of ['data-open=', 'data-msg=', 'data-link=', 'data-reset=', 'data-p
 for (const f of ['function one(id)', 'function messageBox(', 'function deleteBox(', 'async function csv()', 'function gate(', 'function loadComments(', 'function compassPanel(C)'])
   ok(js.includes(f), `the cockpit keeps ${f}`);
 ok(html.includes('<h1>Mentor cockpit</h1>') && /id="csv">Export CSV</.test(html) && /id="refresh">Refresh</.test(html) && html.includes('aria-label="Search founders"'), 'header: name, search, Export CSV, Refresh');
-ok(["'Today'", "'Founders'", "'Questions'", "'Mailchimp'", "'Mentors & comments'"].every((t) => js.includes(t)), 'the five tabs');
+ok(["'Today'", "'Founders'", "'Questions'", "'Mailchimp'", "'Mentors & team'"].every((t) => js.includes(t)), 'the five tabs');
 ok(html.includes('prefers-reduced-motion') && html.includes('.drawer{position:fixed'), 'the drawer, still under reduced motion');
 ok(!/\b(Math\.random|sample|example\.com)\b/.test(js), 'no invented founders or numbers in the page');
 

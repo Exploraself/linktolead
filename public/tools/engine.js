@@ -179,6 +179,11 @@ function start(me) {
 }
 async function openTool() {
   if (acct.kind === 'checking' || acct.kind === 'offline') acct = await G.state();
+  // An account opening the toolkit for the first time: "Yes, that's me" once.
+  if (acct.kind === 'full' && (await G.needsConfirm())) {
+    st.key = 'gate'; bar.style.width = '0%';
+    return G.confirmMe(body, { me: acct.me, tool: KEY, ready: start, cancel: () => { st.key = 'cover'; render(); } });
+  }
   if (acct.kind === 'full' || acct.kind === 'pass') return start(acct.me);
   st.key = 'gate'; bar.style.width = '0%';
   G.open(body, { name: cover.name, path: cover.href, st: acct, ready: start, cancel: () => { st.key = 'cover'; render(); } });

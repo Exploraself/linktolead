@@ -33,6 +33,8 @@ export function items(me) {
     ['/ground-plan/#ask', 'Ask Alexandru', 'M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z'],
   ];
   if (!(me && me.signupType === 'simple' && !me.hasPassword)) list.push(['/ground-plan/#account', me && me.hasPassword ? 'Change my password' : 'Set my password', 'M6 11h12v10H6zM8 11V8a4 4 0 0 1 8 0v3']);
+  // The team (functions/_team.js): the mentor's cockpit, with their own account.
+  if (me && me.openAll) list.push(['/mentor', 'Mentor', 'M12 3l7 3v5c0 4.4-3 8.3-7 9.5-4-1.2-7-5.1-7-9.5V6zM9 12l2 2 4-4']);
   return list;
 }
 
