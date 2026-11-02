@@ -26,6 +26,7 @@ import * as L from '../functions/_letters.js';
 import { courseLetter, COURSE_NAME, SEND_HOUR, LATEST_HOUR } from '../functions/_course.js';
 import { COURSE_LETTERS } from '../functions/_course-letters.js';
 import { MENTOR_EMAIL } from '../functions/api/note.js';
+import { SERIES_LETTERS, SERIES_GROUPS, SERIES_STATUS, SERIES_TAGS } from '../functions/_series-letters.js';
 
 const BASE = 'https://linktolead.exploraself.com';
 const AT = new Date('2026-11-02T09:00:00Z');
@@ -37,6 +38,7 @@ export const STAGES = [
   { key: 'find', icon: 'search', name: 'They find us', sub: 'A free assessment on exploraself.com' },
   { key: 'door', icon: 'door', name: 'They open a door', sub: 'An account, or a code for the Growth Toolkit' },
   { key: 'use', icon: 'spark', name: 'They use it', sub: 'Their North Star, and 12 Days to Start Winning' },
+  { key: 'follow', icon: 'path', name: 'We follow their answers', sub: 'Letters that follow each pain · approved, not sending yet' },
   { key: 'close', icon: 'chat', name: 'We stay close', sub: 'Letters and answers from Alexandru and the team' },
   { key: 'safe', icon: 'lock', name: 'Their account stays safe', sub: 'Sign-in, new password, password changed' },
   { key: 'team', icon: 'bell', name: 'The team hears', sub: 'Notices to Alexandru, never to a founder' },
@@ -231,6 +233,7 @@ export const ICONS = {
   link: svg('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'),
   shield: svg('<path d="M12 3.2 19 6v5.5c0 4.3-3 7.7-7 9.3-4-1.6-7-5-7-9.3V6Z"/><path d="m9 12 2.2 2.2L15.2 10"/>'),
   mail: svg('<rect x="3" y="5.5" width="18" height="13" rx="2.2"/><path d="m3.8 7.2 8.2 6.2 8.2-6.2"/>'),
+  path: svg('<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h6a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h6"/>'),
   chart: svg('<path d="M4 20h16"/><path d="M7.5 17v-3M12 17v-5.5M16.5 17V9"/>'),
 };
 
@@ -275,12 +278,54 @@ export async function collect({ exploraself } = {}) {
       attach: (r.attachments || []).map((a) => a.filename), sample: /\[/.test(r.text) ? 'The words in [brackets] are written each time.' : '',
       subject: r.subject, html: r.html, text: r.text, ps: psOf(r.text), preview: previewOf(r.text) });
   }
+  // The letters that follow each pain: approved copy, not sending yet
+  // (functions/_series-letters.js). Shown here so the whole system is in one
+  // place; the engine is the next PR.
+  const G = Object.fromEntries(SERIES_GROUPS.map((g) => [g.id, g]));
+  const plain = (t) => String(t || '').replace(/⟦([^⟧]*)⟧/g, '$1');
+  const asHtml = (t) => `<!doctype html><html><body style="margin:0;background:#FBF7EE"><div style="max-width:560px;margin:0 auto;padding:32px 22px;font:16px/1.7 Georgia,'Times New Roman',serif;color:#14100B">${plain(t).split(/\n\n/).map((p) => `<p style="margin:0 0 16px;white-space:pre-wrap">${esc(p)}</p>`).join('')}</div></body></html>`;
+  const index = (stage) => out.findIndex((l) => STAGES.findIndex((s) => s.key === l.stage) > STAGES.findIndex((s) => s.key === stage));
+  const series = SERIES_LETTERS.map((l) => {
+    const g = G[l.g] || {}, kind = g.kind || 'pain';
+    const when = kind === 'pain' ? `They finish The Leader’s North Star and pick “${g.name}” first. Letter ${l.n} of 4, day ${l.day}, 8:00 their time.`
+      : kind === 'never' ? `Account made, Level 01 never started. Letter ${l.n} of 3, day ${l.day} after the account, 8:00 their time.`
+      : `They finish Level 03. Letter ${l.n} of 2, ${l.day === 1 ? 'the morning after' : `day ${l.day}`}, 8:00 their time.`;
+    const tag = SERIES_TAGS[kind === 'pain' ? 'northstar' : kind];
+    return { id: `series-${l.id}`, stage: 'follow', icon: 'path', site: 'linktolead', group: 'series', series: l.g, n: l.n, day: l.day, name: `${g.name} · ${l.n}`,
+      when, who: `Founders with an account and a yes to letters. Stops on unsubscribe, pause, a question in Ask Alexandru, or the next series. Mailchimp tag: ${tag}.`,
+      from: kind === 'level3' || kind === 'never' ? '/ground-plan/' : '/northstar/', sentBy: `functions/_series-letters.js · ${SERIES_STATUS}`,
+      fromLine: 'Alexandru Cojocari · support@exploraself.com', replyTo: MENTOR_EMAIL, sample: 'Example founder Sam. The highlighted parts are filled from their own answers.',
+      subject: l.subject, html: asHtml(l.text), text: plain(l.text), ps: psOf(plain(l.text)), preview: previewOf(plain(l.text)) };
+  });
+  const at = index('follow');
+  out.splice(at < 0 ? out.length : at, 0, ...series);
   return { letters: out, withExploraself: exList.length > 0 };
+}
+
+/** The letters that follow each pain: how they connect, then each series. */
+function followHTML(s, si, series) {
+  if (!series.length) return '';
+  const groups = SERIES_GROUPS.filter((g) => series.some((l) => l.series === g.id));
+  const row = (a, b, c, d) => `<div class="fl"><span class="fb">${a}</span><span class="fa" aria-hidden="true">→</span><span class="fb">${b}</span><span class="fa" aria-hidden="true">→</span><span class="fb">${c}</span><span class="fa" aria-hidden="true">→</span><span class="fb gold">${d}</span></div>`;
+  return `<section class="stage" id="st-${s.key}" aria-labelledby="h-${s.key}">
+      <h2 id="h-${s.key}"><span class="n">${si + 1}</span><span class="sic">${ICONS[s.icon]}</span><span>${esc(s.name)}<small>${esc(s.sub)}</small></span></h2>
+      <div class="flow">
+        <p class="badge">${esc(SERIES_STATUS)} · ${series.length} letters · 8:00 their time · one automatic letter a day at most</p>
+        ${row('They finish The Leader’s North Star', 'The first pain they pick (8 pains)', '4 letters: day 1 · 3 · 6 · 10', 'Letter 4’s P.S.: The Boardroom, $27')}
+        ${row('They make an account', 'Level 01 not started', '3 letters: day 2 · 5 · 9', 'Free P.S. only, “not now” is fine')}
+        ${row('They finish Level 03', 'A win, in their own words', '2 letters: the morning after · day 4', 'The Boardroom, $27, “not now” made easy')}
+        <p class="mut">Each letter: their pain and their want in their words, one idea, one step with a day and “done when”, one question, one link. Stops on unsubscribe, pause, a question in Ask Alexandru, or the next series. Mailchimp tags: ${Object.values(SERIES_TAGS).map(esc).join(' · ')}.</p>
+      </div>
+      ${groups.map((g) => { const L = series.filter((l) => l.series === g.id);
+        return `<div class="course"><div class="ch"><span class="ic" style="color:${esc(g.col || '')}">${ICONS.path}</span><div><b>${esc(g.name)}</b><p>${esc(g.sub || '')}</p><p class="mut">${esc(L[0].when.replace(/ Letter 1 of \d.*$/, ''))}</p></div></div>
+        <ol class="days">${L.map((d) => `<li><button type="button" data-open="${esc(d.id)}"><span class="dn">Day ${esc(d.day)}</span><span class="ds">${esc(d.subject)}</span></button></li>`).join('')}</ol></div>`; }).join('')}
+    </section>`;
 }
 
 export function page({ letters, withExploraself }, { date = '2 Nov 2026' } = {}) {
   const course = letters.filter((l) => l.group === 'course');
-  const singles = letters.filter((l) => l.group !== 'course');
+  const singles = letters.filter((l) => !l.group);
+  const series = letters.filter((l) => l.group === 'series');
   const count = (k) => letters.filter((l) => l.stage === k).length;
   const linkFrom = (u) => (/^https?:/.test(u) ? u : `${BASE}${u}`);
   const card = (l, i) => `<button type="button" class="card" data-open="${esc(l.id)}">
@@ -294,6 +339,7 @@ export function page({ letters, withExploraself }, { date = '2 Nov 2026' } = {})
   const stageHTML = STAGES.map((s, si) => {
     const list = singles.filter((l) => l.stage === s.key);
     const days = s.key === 'use' ? course : [];
+    if (s.key === 'follow') return followHTML(s, si, series);
     if (!list.length && !days.length) {
       if (s.key !== 'find') return '';
       return `<section class="stage" id="st-${s.key}" aria-labelledby="h-${s.key}">
@@ -430,6 +476,13 @@ code{font:12.5px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--soft
   .about summary{display:block}.about summary::after{content:" ▾"}.about[open] summary::after{content:" ▴"}.about dl{margin-top:8px}
   .dlg .nav{margin-top:0;order:-1}.dlg .nav button{flex:1}.dlg .seg{align-self:flex-start}
   .dlg .head{padding:10px 14px;font-size:12.5px}.dlg .head b{font-size:16px}}
+/* The letters that follow each pain: how they connect. */
+.flow{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px 18px;margin-top:14px}
+.flow .badge{display:inline-block;margin:0 0 12px;padding:3px 10px;border-radius:999px;background:#F6E7CF;color:#7A4E12;font-size:13px;font-weight:600}
+.fl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:0 0 10px}
+.fb{padding:7px 11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:14px}
+.fb.gold{border-color:var(--gold)}
+.fa{color:var(--gold);font-weight:700}
 </style>
 </head>
 <body>
@@ -520,7 +573,7 @@ code{font:12.5px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--soft
     document.querySelectorAll('.stage').forEach(function(s){
       var any = s.querySelector('[data-open]:not(.hide), li:not(.hide) [data-open]');
       s.classList.toggle('hide', !!w && !any);
-      var c = s.querySelector('.course'); if (c) c.classList.toggle('hide', !!w && !c.querySelector('li:not(.hide)'));
+      s.querySelectorAll('.course').forEach(function(c){ c.classList.toggle('hide', !!w && !c.querySelector('li:not(.hide)')); });
     });
   });
   // The strip lights the stage being read.
