@@ -93,6 +93,14 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
 .stack div b{color:var(--gold-ink)}
 .stack .tot{background:var(--deep);color:#F5EFE3;border-bottom:0}
 .stack .tot b{color:#F5EFE3;font-size:26px}
+.stack .gf{background:#FBF7EE}
+.stack .gf b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#F1E6CC;color:var(--gold-ink)}
+.stack .gf svg{width:19px;height:19px}
+.gift{margin-top:16px;display:inline-flex;align-items:center;gap:10px;padding:9px 16px 9px 10px;border-radius:999px;background:#FBF7EE;border:1px solid #E9DCC0;color:var(--gold-ink);font-size:15.5px;font-weight:700;line-height:1.3}
+.gift i{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#F1E6CC;flex:none}
+.gift svg{width:19px;height:19px;animation:nod 3.2s ease-in-out infinite;transform-origin:50% 80%}
+@keyframes nod{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-9deg)}90%{transform:rotate(7deg)}95%{transform:rotate(-4deg)}}
+@media(prefers-reduced-motion:reduce){.gift svg{animation:none}}
 .faq{margin-top:12px;border-top:1px solid var(--line)}
 .faq details{border-bottom:1px solid var(--line);padding:14px 2px}
 .faq summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:12px}
@@ -117,7 +125,8 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
   <h1 id="h-top" data-h>The future you is already in this room.</h1>
   <p class="lede">You have done the free part, and you have seen things. Now comes the part a page cannot do alone: Alexandru and the team read what you wrote, and you sit down with Alexandru. One hour that turns what you saw into what you do.</p>
   <div class="cta"><a class="go" href="/pay/?step=session">Unlock The Boardroom · $27 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-    <p class="under">Levels 04 and 05 open the moment you pay · one hour 1:1 with Alexandru · 14 days money back</p></div>
+    <p class="under">Levels 04 and 05 open the moment you pay · one hour 1:1 with Alexandru · 14 days money back</p>
+    <p class="gift"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4.5" rx="1"/><path d="M5 13v7.5h14V13M12 8.5v12"/><path d="M12 8.5C10.4 4.8 6.4 4.3 6.4 6.8c0 1.7 3.2 1.7 5.6 1.7Zm0 0c1.6-3.7 5.6-4.2 5.6-1.7 0 1.7-3.2 1.7-5.6 1.7Z"/></svg></i>And a gift inside, from Alexandru. You open it in your 1:1.</p></div>
 </section>
 
 <!-- Triangulation: three things the founder already told us, read from their
@@ -186,6 +195,7 @@ h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px
     <div><span>One hour, 1:1, with Alexandru</span><b>✓</b></div>
     <div><span>Level 04 and Level 05, open at once: forty practical actions, twenty a level</span><b>✓</b></div>
     <div><span>A reading of your first five weeks, at the end of Level 05</span><b>✓</b></div>
+    <div class="gf"><span>A gift from Alexandru, given to you in your 1:1</span><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4.5" rx="1"/><path d="M5 13v7.5h14V13M12 8.5v12"/><path d="M12 8.5C10.4 4.8 6.4 4.3 6.4 6.8c0 1.7 3.2 1.7 5.6 1.7Zm0 0c1.6-3.7 5.6-4.2 5.6-1.7 0 1.7-3.2 1.7-5.6 1.7Z"/></svg></b></div>
     <div><span>14 days to change your mind, money back</span><b>✓</b></div>
     <div class="tot"><span>The weekly 1:1 with Alexandru is the heart of The Summit, at $1,989. Here you get the first hour.</span><b>$27</b></div>
   </div>
