@@ -1,0 +1,85 @@
+/* Focus mode (Alexandru, 2 Nov 2026; issue #113, 13:41). The questions of a
+ * level open in one full-screen layer, the same on a computer and a phone:
+ * one question in one centred column, the answer right under it, Next right
+ * under the answer. Light and white, in Atkinson Hyperlegible (AGENTS.md 11),
+ * whatever the theme of the page behind. Nothing moves under
+ * prefers-reduced-motion. */
+body.fmopen{overflow:hidden}
+body.fmopen .leaf-r{
+  --fm-ink:#1F1F1F; --fm-muted:#5F6368; --fm-line:#DADCE0; --fm-soft:#F1F3F4; --fm-gold:#B4975F; --fm-gold-ink:#6E5213;
+  --fm-font:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  /* The book's own tokens, set light for the layer. */
+  --leaf:#F6F6F4; --leaf2:#FFFFFF; --edge:#DADCE0; --rule:#ECEDEF; --qink:#1F1F1F; --soft:#5F6368; --hand:#6E5213;
+  --goldink:#6E5213; --gold-ink:#6E5213; --display:var(--fm-font); --body:var(--fm-font);
+  color-scheme:light;
+  position:fixed;inset:0;z-index:120;margin:0;border-radius:0;min-height:0;max-width:none;
+  overflow-y:auto;overscroll-behavior:contain;
+  background:#FFFFFF;color:var(--fm-ink);font-family:var(--fm-font);
+  display:flex;flex-direction:column;gap:16px;
+  padding:0 0 calc(48px + env(safe-area-inset-bottom,0px));
+}
+body.fmopen .leaf-r > *{box-sizing:border-box;width:100%;max-width:640px;margin-left:auto;margin-right:auto;
+  padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+body.fmopen .leaf-r > .fm-top{max-width:none;padding:env(safe-area-inset-top,0px) 0 0}
+body.fmopen .leaf-r > .vh{padding:0}
+/* Behind the layer: nothing floats over it. */
+body.fmopen .crown-wrap,body.fmopen .mp,body.fmopen .cw-pb,body.fmopen .cw-pk,body.fmopen .cw-hush{display:none!important}
+
+/* The top line: a thin progress bar, Back, where you are, Close. */
+.fm-top{position:sticky;top:0;z-index:2;background:#FFFFFF;border-bottom:1px solid var(--fm-line)}
+.fm-bar{height:4px;background:var(--fm-soft)}
+.fm-bar i{display:block;height:100%;background:var(--fm-gold);transition:width .25s ease}
+.fm-row{max-width:680px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;
+  padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+.fm-where{font-size:14.5px;color:var(--fm-muted);text-align:center;min-width:0}
+.fm-back,.fm-x{min-height:44px;padding:0 8px;border:0;background:none;color:var(--fm-ink);font:400 15.5px var(--fm-font);cursor:pointer;white-space:nowrap}
+.fm-back[disabled]{visibility:hidden}
+
+/* The question, the answer, Next: one hand-span. */
+body.fmopen .leaf-r .cw-topic{margin-top:22px;font:400 14.5px/1.4 var(--fm-font);letter-spacing:0;text-transform:none;color:var(--fm-muted)}
+body.fmopen .leaf-r .cw-q,body.fmopen .leaf-r .cw-sent{font:700 24px/1.3 var(--fm-font);color:var(--fm-ink);letter-spacing:0;text-wrap:balance}
+body.fmopen .leaf-r .cw-q:first-of-type{margin-top:22px}
+body.fmopen .leaf-r .cw-topic + .cw-q,body.fmopen .leaf-r .cw-topic + h3{margin-top:0}
+body.fmopen .leaf-r .cw-q em,body.fmopen .leaf-r .cw-sent em{font-style:normal;color:var(--fm-muted)}
+body.fmopen .leaf-r .cw-hint{margin:0;font-size:16px;color:var(--fm-muted)}
+body.fmopen .leaf-r .cw-o{font-family:var(--fm-font)}
+body.fmopen .leaf-r .cw-o[aria-pressed="true"]{outline:2px solid var(--fm-ink);outline-offset:-2px}
+body.fmopen .leaf-r .cw-in{font-family:var(--fm-font);font-size:18px}
+body.fmopen .leaf-r .cw-keys{font-size:13.5px;color:var(--fm-muted)}
+body.fmopen .leaf-r mark{color:var(--fm-ink);font-style:normal;font-weight:700}
+body.fmopen .leaf-r .cw-foot{display:flex;justify-content:flex-start;gap:12px;margin-top:2px;padding-top:0;border-top:0}
+body.fmopen .leaf-r .cw-next{min-height:50px;padding:0 26px;border-radius:999px;background:var(--fm-ink);color:#FFFFFF;font:700 16.5px var(--fm-font)}
+body.fmopen .leaf-r .cw-next[disabled]{background:#C4C7C5;color:#FFFFFF;cursor:default;filter:none}
+body.fmopen .leaf-r button:focus-visible,body.fmopen .leaf-r input:focus-visible,body.fmopen .leaf-r summary:focus-visible{outline:2px solid var(--fm-ink);outline-offset:2px}
+
+/* The way in, on the right page when the layer is closed. */
+.fm-go{display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin:auto 0;max-width:560px}
+.fm-go .cw-q{margin:0}
+.fm-at{margin:0;font-size:16px;color:var(--soft)}
+.fm-at b{color:var(--qink)}
+.fm-go .cw-promise{margin:0}
+.fm-open{margin-top:6px;min-height:52px;padding:0 28px;font-size:16px}
+.fm-hint{margin:0;font-size:13.5px;color:var(--soft)}
+
+/* The welcome before each part: four steps, then what the founder will have. */
+.wl{display:flex;flex-direction:column;gap:16px}
+.wl .cw-q{margin:0}
+.wl-sub{margin:0;font-size:16.5px;color:var(--fm-muted,var(--soft))}
+.wl-told{margin:0;padding:12px 14px;border-radius:10px;background:var(--fm-soft,var(--leaf));font-size:16px}
+.wl-beats{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:14px}
+.wl-beats li{display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px;align-items:start}
+.wl-ic{width:36px;height:36px;border-radius:10px;background:var(--fm-soft,var(--leaf));display:grid;place-items:center;color:var(--fm-gold-ink,var(--gold-ink))}
+.wl-ic svg{width:20px;height:20px}
+.wl-beats h4,.wl-have h4{margin:0 0 2px;font:700 16.5px/1.35 var(--fm-font,var(--body));color:var(--fm-ink,var(--qink))}
+.wl-beats p{margin:0;font-size:16.5px;line-height:1.55}
+.wl-have{border-top:1px solid var(--fm-line,var(--edge));padding-top:14px}
+.wl-have ol{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.wl-have li{display:grid;grid-template-columns:78px minmax(0,1fr);gap:10px;font-size:16px}
+.wl-have li span{font-size:14px;color:var(--fm-muted,var(--soft));padding-top:2px}
+.wl-have p{margin:0}
+
+@media(max-width:420px){
+  body.fmopen .leaf-r .cw-q,body.fmopen .leaf-r .cw-sent{font-size:22px}
+  .fm-where{font-size:13.5px}
+}
+@media(prefers-reduced-motion:reduce){.fm-bar i{transition:none}}

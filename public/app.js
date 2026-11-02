@@ -25,7 +25,8 @@ import { ICONS } from './tools/icons.js';
 import { LEVELS4, CHAPTERS4, DOMS, UNITS, CLOSES, wkey, tapOf, slideOf, wordOf, shown, domainUnits, levelUnits,
   lines4, sentence, reading, fieldsOf, fill, stepsOf, stepDone, firstOf, planOf, plainOf, doneOf, takeOf, notyetOf,
   sureOf, gotOf, GOT, tally, countedFor, READ_QUOTES, carriedFrom, blueprint, BUILD4, fillB, buildPage, stepsWritten, SESSIONS4,
-  tapReply, slideReply, blankCheck, blankNote, smallOf, SMALL_UNDER, DIRECTION4, directionOf, goalFor, dayKeyOf, buildStarted, strong } from './levels-v4.js';
+  tapReply, slideReply, blankCheck, blankNote, smallOf, SMALL_UNDER, DIRECTION4, directionOf, goalFor, dayKeyOf, buildStarted, strong,
+  WELCOME_AT, welcomeOf, WHERE4, whereOf, whereWords } from './levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -54,7 +55,9 @@ let resetAsk = (() => { try { return new URLSearchParams(location.search).get('r
 let view = linkCode ? 'loading' : entry({ joined: account.joined(), old: oldEntrance, hash: hashNow });
 let level = 1, dom = 'self';
 // A level in the address (#programme-6, from Back and Forward or a link) opens that level.
-{ const m = /^#programme-(\d{1,2})$/.exec(hashNow); if (m) level = Math.min(12, Math.max(1, +m[1])); }
+{ const m = /^#programme-(\d{1,2})(-q)?$/.exec(hashNow); if (m) level = Math.min(12, Math.max(1, +m[1]));
+  // Arriving on the layer's own address opens the level; the layer itself opens from its button.
+  if (m && m[2]) { try { history.replaceState(null, '', `${location.pathname}${location.search}#programme-${level}`); } catch { /* old browser */ } } }
 /** The North Star record from the account, the notes, and whether a password is set. */
 let compassRec = null, inbox = null, hasPassword = false, replyTo = null;
 /** The "Ask Alexandru" thread (null until loaded), and the stage picker. */
@@ -471,7 +474,7 @@ const steps = () => stepsOf(level);
 const stepAt = (i) => steps()[i] || [-1, 'week'];
 /** A screen that asks for an answer needs one before Next; the slides keep
  *  where they start, and the screens that only show are always ready. */
-const ASKS = ['got', 'tap', 'blank', 'day', 'carry', 'carryday', 'bask', 'bstep', 'bday'];
+const ASKS = ['where', 'still', 'got', 'tap', 'blank', 'day', 'carry', 'carryday', 'bask', 'bstep', 'bday'];
 const ready = (i) => { const s = stepAt(i); return !ASKS.includes(s[1]) || stepDone(state.work, level, s); };
 const lastStep = () => steps().length - 1;
 /** The domain the North Star found weakest (0 to 3), or -1: it gets the
@@ -604,9 +607,10 @@ function bookHTML(st) {
   const open = !right;
   if (open && (qi === null || qi > lastStep())) qi = firstOf(state.work, level);
   if (open) dom = DOMS[Math.max(0, stepAt(qi)[0])];
+  const inFm = open && fm;
   return `<div class="book${open ? '' : ' shut'}">
     <aside class="leaf leaf-l" id="leafl" aria-label="Level ${pad(level)} and its four domains">${leftHTML(st, x, open)}</aside>
-    <section class="leaf leaf-r" aria-label="${open ? 'This move' : 'This level'}">${right || pageHTML(st, x)}</section>
+    <section class="leaf leaf-r"${inFm ? ` role="dialog" aria-modal="true" aria-label="Level ${pad(level)}, one question at a time"` : ` aria-label="${open ? 'Where you are in this level' : 'This level'}"`}>${right || (inFm ? pageHTML(st, x) : goHTML(st, x))}</section>
   </div>`;
 }
 
@@ -638,11 +642,118 @@ function leftHTML(st, x, open) {
     <p class="cw-more"><a href="#cw-video">▶ This level’s teaching</a><button type="button" class="cw-all" data-go="blueprint">My Blueprint</button>${all}</p>`;
 }
 
+// ── Focus mode (Alexandru, 2 Nov 2026; the spec of 13:41 on issue #113) ────
+// The questions open in one full-screen layer: one question, its answer right
+// under it, Next right under the answer. Done ✓ closes it and the founder is
+// back at the levels, where the new tick shows. It is the only way to answer.
+let fm = false, fmT = 0;
+/** "Lead yourself · 3 of 5": where the founder is, in plain words. */
+function fmWhere(d, kind) {
+  if (kind === 'welcome') return `Welcome · Level ${pad(level)}`;
+  if (kind === 'where') { const i = steps().filter((s) => s[1] === 'where').findIndex((s) => s[2] === stepAt(qi)[2]); return `Where you are now · ${i + 1} of ${WHERE4.length}`; }
+  if (kind === 'still') return 'Where you are now';
+  if (kind === 'got') return `Last week · ${d + 1} of 4`;
+  if (d >= 0) {
+    const mine = steps().map((s, i) => [s, i]).filter(([s]) => s[0] === d && s[1] !== 'got');
+    return `${esc(LEAD[DOMS[d]])} · ${mine.findIndex(([, i]) => i === qi) + 1} of ${mine.length}`;
+  }
+  return kind === 'week' ? 'Your week' : kind[0] === 'b' ? 'Build it' : 'Your chapter reading';
+}
+/** Everything behind the layer is set aside, so Tab stays inside it. */
+const FM_BEHIND = ['.top', '.skip', '.leaf-l', '#under', '.cw-drawer', '.cw-dveil', '#crown', '.crown-wrap', '#cban', '#libban', 'footer', '.mp'];
+function fmInert(on) {
+  for (const sel of FM_BEHIND) document.querySelectorAll(sel).forEach((x) => { if (on) x.setAttribute('inert', ''); else x.removeAttribute('inert'); });
+}
+function fmOpen(at) {
+  if (at != null && at >= 0) qi = at;
+  fm = true;
+  try {
+    const url = `${location.pathname}${location.search}#programme-${level}-q`;
+    if (/-q$/.test(location.hash)) history.replaceState(null, '', url); else history.pushState(null, '', url);
+  } catch { /* old browser */ }
+  document.body.classList.add('fmopen');
+  drawBook();
+}
+/** Close the layer here (the answers are already saved, as they were given). */
+function fmShut() {
+  if (!fm) return;
+  fm = false; clearTimeout(fmT);
+  document.body.classList.remove('fmopen');
+  fmInert(false);
+  drawBook(false); refreshRail();
+  const b = document.querySelector('[data-fmopen]'); if (b) b.focus({ preventScroll: true });
+}
+/** Close it from a button or Esc: through the browser's history when the
+ *  layer added a step, so Back and Forward stay in order. */
+function fmClose() {
+  if (!fm) return;
+  if (/-q$/.test(location.hash)) { try { history.back(); return; } catch { /* old browser */ } }
+  fmShut();
+}
+/** A tap moves on by itself after a short pause, unless it shows a reply to read. */
+function fmAuto() {
+  clearTimeout(fmT);
+  if (!fm) return;
+  const at = qi;
+  fmT = setTimeout(() => { if (fm && qi === at && ready(qi)) moveQ(1); }, 450);
+}
+/** The right page, when the layer is closed: where the founder is, and the way in. */
+function goHTML(st, x) {
+  const [d, kind] = stepAt(qi), done = levelDone(st, level), started = done > 0 || qi > 0;
+  const at = kind === 'welcome' ? 'The welcome' : kind === 'where' || kind === 'still' ? 'Where you are now' : kind === 'got' ? 'Last week’s four actions'
+    : d >= 0 ? LEAD[DOMS[d]] : kind === 'week' ? 'Your week' : kind[0] === 'b' ? 'Build it' : 'Your chapter reading';
+  return `<button type="button" class="cw-phone" data-crown="steps" aria-label="Show the four domains of this level">
+      <span><i aria-hidden="true"></i>Level ${pad(level)} · ${done} of ${UNITS} done</span><span aria-hidden="true">Domains ▾</span></button>
+    <div class="fm-go">
+      <p class="eyebrow">Level ${pad(level)} · ${esc(x.title)}</p>
+      <h3 class="cw-q">${started ? (done === UNITS && kind === 'week' ? 'Your week is written.' : 'Pick up where you left off.') : `Start Level ${pad(level)}.`}</h3>
+      <p class="fm-at">Next: <b>${esc(at)}</b></p>
+      <p class="cw-promise"><b>By Sunday.</b> ${esc(x.promise)}</p>
+      <button type="button" class="cta fm-open" data-fmopen>${started ? 'Continue →' : 'Start →'}</button>
+      <p class="fm-hint">One question at a time, on the whole screen. Done ✓ or Esc brings you back here.</p>
+    </div>`;
+}
+/** A welcome before each part (Levels 01, 04, 06, 10): four steps, and what
+ *  the founder will have at the end. Personal: the first name, and from
+ *  Level 04 on, the founder's own answers. A Summit founder has their own. */
+const WL_IC = [
+  '<path d="M4 5.5h11v8H8.5L4 17z"/><path d="M15 9h5v8l-3-2.5h-6V13.5"/>',
+  '<path d="M3 19.5 9.5 8l3.5 6 2-3 6 8.5z"/><path d="M9.5 8V3.5l4 1.5-4 1.5"/>',
+  '<path d="M5 8h3.2a2 2 0 1 1 3.6 0H15v3.2a2 2 0 1 1 0 3.6V18H5z"/>',
+  '<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h5a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h5"/>'].map((d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${d}</svg>`);
+function welcomeHTML() {
+  const W = welcomeOf(level);
+  if (!W) return '';
+  const summit = (state.tier || 'free') === 'premium' && !team(), first = firstName(), w = state.work;
+  const h = ((summit && W.summit && W.summit.h) || W.h).replace('{, first}', first ? `, ${first}` : '');
+  const sub = (summit && W.summit && W.summit.sub) || W.sub;
+  const told = level > 1 && whereWords(w, 'stage') ? `You told us: “${esc(whereWords(w, 'stage'))}”.${whereWords(w, 'weight') ? ` What weighs most: “${esc(whereWords(w, 'weight'))}”.` : ''}${whereWords(w, 'win') ? ` In twelve weeks: “${esc(whereWords(w, 'win'))}”.` : ''} We kept it in mind for what comes next.` : '';
+  const lvs = []; for (let n = W.lv[0]; n <= W.lv[1]; n++) lvs.push(n);
+  return `<div class="wl">
+    <p class="cw-topic">Welcome · ${esc(W.where)}</p>
+    <h3 class="cw-q" id="cwq">${esc(h)}</h3>
+    <p class="wl-sub">${esc(sub)}</p>
+    ${told ? `<p class="wl-told">${told}</p>` : ''}
+    <ol class="wl-beats">${W.beats.map(([t, b], i) => `<li><span class="wl-ic">${WL_IC[i]}</span><div><h4>${esc(t)}</h4><p>${esc(b)}</p></div></li>`).join('')}</ol>
+    <div class="wl-have"><h4>By the end, you will have:</h4><ol>${lvs.map((n) => `<li><span>Level ${pad(n)}</span><p>${esc(LEVELS4[n - 1].promise)}</p></li>`).join('')}</ol></div>
+  </div>`;
+}
+/** "Where are you now?": saved on the account like every answer. A change
+ *  of stage across "before the first sale" clears the money answer, whose
+ *  question changes with it. */
+function keepWhere(k, v) {
+  if (needsAccount()) { askAccount(() => keepWhere(k, v)); return; }
+  const set = (key, val) => { state.work[key] = String(val); account.touch('work', key, String(val)); };
+  if (k === 'stage') { const was = whereOf(state.work).stage; if (was != null && (was < 2) !== (+v < 2)) set('w.v4.where.money', ''); }
+  set(`w.v4.where.${k}`, v);
+  save();
+}
+
 /** The right page: one field on screen (31 Oct 2026, the Blueprint
  *  skeleton). Tap, slide, one blank at a time, the day as a tap, "Done when"
  *  with how sure, four lines back; the week as four actions; last week's four
  *  first; the chapter reading and one action carried forward. */
-const KIND = { got: 'Last week', idea: 'The idea', tap: 'Tap', slide: 'Slide', blank: 'Write once', day: 'The day', done: 'Done when',
+const KIND = { welcome: 'Welcome', where: 'Where you are now', still: 'Where you are now', got: 'Last week', idea: 'The idea', tap: 'Tap', slide: 'Slide', blank: 'Write once', day: 'The day', done: 'Done when',
   lines: 'Your four lines', week: 'Your week', reading: 'Chapter reading', carry: 'Carry one forward', carryday: 'Its day',
   bask: 'Build it', bstep: 'Build it', bday: 'Its day', bpage: 'Your page' };
 /** Inform → Reform → Transform (2 Nov 2026): the replies and checks, drawn
@@ -750,12 +861,32 @@ function pageHTML(st, x) {
   const label = kind === 'got' ? `Last week · Level ${pad(level - 1)} · ${esc(LEAD[DOMS[d]])}`
     : D ? `${esc(D.l)} · ${esc(D.name)} · ${esc(LEAD[DOMS[d]])}` : kind === 'week' ? `Level ${pad(level)} · ${esc(x.word)} · your week`
     : kind[0] === 'b' && BUILD4[level] ? `Build it · ${esc(BUILD4[level].title)}` : 'Your chapter reading';
-  const top = `<button type="button" class="cw-phone" data-crown="steps" aria-label="Show the four domains of this level">
-      <span><i aria-hidden="true"></i>Level ${pad(level)} · ${esc(x.word)} · ${qi + 1} of ${total}</span><span aria-hidden="true">Domains ▾</span></button>
-    <div class="cw-seg" aria-hidden="true">${seg}</div>
-    <p class="cw-lab"${D ? ` style="color:var(--${DOMS[d]})"` : ''}>${label} <span class="cw-kind">${KIND[kind]}</span>${d >= 0 && kind !== 'got' && d === startHere() ? ' <span class="cw-start">★ Start here</span>' : ''}</p>`;
+  // Focus mode (Alexandru, 2 Nov 2026): the top line is a thin progress bar,
+  // where the founder is ("Lead yourself · 3 of 5") and Back.
+  const top = `<div class="fm-top"><div class="fm-bar" aria-hidden="true"><i style="width:${Math.round(qi / Math.max(1, total - 1) * 100)}%"></i></div>
+    <div class="fm-row"><button type="button" class="fm-back" data-qmove="-1"${qi === 0 ? ' disabled' : ''}>← Back</button>
+    <span class="fm-where">${fmWhere(d, kind)}${d >= 0 && kind !== 'got' && d === startHere() ? ' · ★ Start here' : ''}</span>
+    <button type="button" class="fm-x" data-fmclose aria-label="Close, and go back to the levels">Close ✕</button></div></div>
+    <p class="cw-lab vh">${label} · ${KIND[kind]}</p>`;
+  void seg;
   let body = '';
-  if (kind === 'got') {
+  if (kind === 'welcome') body = welcomeHTML(st);
+  else if (kind === 'where') {
+    const Q = WHERE4.find((q) => q.k === key), a = whereOf(w), opts = typeof Q.o === 'function' ? Q.o(a) : Q.o;
+    const picked = key === 'money' ? opts.indexOf(a.money) : a[key] == null ? -1 : a[key], n = WHERE4.indexOf(Q) + 1;
+    body = `<p class="cw-topic">Where you are now · ${n} of ${WHERE4.length}</p>
+      <h3 class="cw-q" id="cwq">${esc(typeof Q.q === 'function' ? Q.q(a) : Q.q)}</h3>
+      <p class="cw-hint">${esc(typeof Q.hint === 'function' ? Q.hint(a) : Q.hint)}</p>
+      <div class="cw-opts" role="group" aria-labelledby="cwq">${opts.map((o, i) => `<button type="button" class="cw-o" data-where="${key}:${i}" aria-pressed="${picked === i}"><kbd aria-hidden="true">${i + 1}</kbd><span>${esc(o)}</span></button>`).join('')}</div>
+      <p class="cw-keys"><kbd>1–${opts.length}</kbd> choose</p>`;
+  } else if (kind === 'still') {
+    const had = whereWords(w, 'stage'), cur = String(w[wkey(level, 'w', 'stage')] ?? '');
+    body = `<p class="cw-topic">Where you are now</p>
+      <h3 class="cw-q" id="cwq">${had ? 'Still where you were?' : esc(WHERE4[0].q)}</h3>
+      <p class="cw-hint">${had ? `Last time you said: “${esc(had)}”. Tap the one that is true today.` : esc(WHERE4[0].hint)}</p>
+      <div class="cw-opts" role="group" aria-labelledby="cwq">${WHERE4[0].o.map((o, i) => `<button type="button" class="cw-o" data-still="${i}" aria-pressed="${cur === String(i)}"><kbd aria-hidden="true">${i + 1}</kbd><span>${esc(o)}</span></button>`).join('')}</div>
+      <p class="cw-keys"><kbd>1–${WHERE4[0].o.length}</kbd> choose</p>`;
+  } else if (kind === 'got') {
     const g = gotOf(w, level - 1, d), u = sureOf(w, level - 1, d);
     body = `<h3 class="cw-q" id="cwq">Last week: <em>did it happen?</em></h3>
       <div class="cw-was"><p>${fill(D.fb[3], w, level - 1, d)}</p><p class="cw-dw"><b>Done when</b> ${doneOf(w, level - 1, d)}</p></div>
@@ -848,12 +979,12 @@ function pageHTML(st, x) {
         : `<p class="cw-planner">Twelve weeks, written. <button type="button" class="cw-all" data-go="blueprint">Open your Blueprint</button></p>`}`;
   }
   else if (kind === 'bask' || kind === 'bstep' || kind === 'bday' || kind === 'bpage') body = buildHTML(st, kind, key, ci);
-  const last = qi >= lastStep();
-  const nextLabel = kind === 'lines' ? (d < 3 ? 'Next domain →' : 'See my week') : kind === 'week' && ci != null ? 'My chapter reading' : 'Next ↵';
+  const last = qi >= lastStep(), domainEnd = kind === 'lines' && d < 3;
+  const nextLabel = kind === 'welcome' ? 'Start →' : kind === 'lines' ? 'See my week →' : kind === 'week' && ci != null ? 'My chapter reading →' : 'Next ↵';
   return `${top}${body}
     <footer class="cw-foot">
-      <button type="button" class="cw-back" data-qmove="-1"${qi === 0 ? ' disabled' : ''}>← Back</button>
-      ${last ? '<span></span>' : `<button type="button" class="cw-next" data-qmove="1"${ready(qi) ? '' : ' disabled'}>${nextLabel}</button>`}
+      ${last || domainEnd ? `<button type="button" class="cw-next" data-fmdone="${domainEnd ? 'next' : 'end'}">Done ✓</button>`
+        : `<button type="button" class="cw-next" data-qmove="1"${ready(qi) ? '' : ' disabled'}>${nextLabel}</button>`}
     </footer>`;
 }
 
@@ -951,6 +1082,8 @@ function drawBook(focus = true) {
   if (!m) return render();
   m.innerHTML = bookHTML(st);
   document.body.classList.toggle('cw-shut', !writable(st));
+  document.body.classList.toggle('fmopen', fm && writable(st));
+  fmInert(fm && writable(st));
   if (focus) {
     const r = document.querySelector('.leaf-r');
     const f = document.querySelector('#cwr') || document.querySelector('.leaf-r .cw-in:not(.cw-date)')
@@ -964,6 +1097,7 @@ function moveQ(d) {
   const st = state.stage || 'build';
   if (view !== 'work' || !writable(st) || qi === null) return;
   if (d > 0 && !ready(qi)) return;
+  if (d > 0 && stepAt(qi)[1] === 'welcome' && !state.work[wkey(level, 'w', 'seen')]) keep4('w', 'seen', '1');
   let to = Math.max(0, Math.min(lastStep(), qi + d));
   // Build it: after the third step, an empty step is the end of the process,
   // and Back skips the empty ones.
@@ -1392,9 +1526,14 @@ function remember() {
 }
 addEventListener('popstate', () => {
   if (!account.joined()) return;
-  const h = location.hash, m = /^#programme-(\d{1,2})$/.exec(h);
+  const h = location.hash, q = /^#programme-(\d{1,2})-q$/.exec(h);
+  // Forward into the layer opens it again; Back out of it closes it.
+  if (q && view === 'work' && level === +q[1]) { if (!fm) { fm = true; document.body.classList.add('fmopen'); drawBook(); } return; }
+  if (fm && !q) { fmShut(); if (h === `#programme-${level}` && view === 'work') return; }
+  const m = /^#programme-(\d{1,2})(?:-q)?$/.exec(h);
   if (m) { level = Math.min(12, Math.max(1, +m[1])); dom = 'self'; qi = null; view = 'work'; }
   else view = entry({ joined: true, old: oldEntrance, hash: h });
+  fm = !!q && view === 'work';
   bpDoc = false; dirAt = null; dirBack = false;
   document.body.classList.remove('railopen', 'crownopen', 'stepsopen');
   render(); window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1438,6 +1577,9 @@ function render() {
   // The Lamp's candles count the domain on screen, in the programme only.
   M.setCandles(view === 'work' ? answered(st, level, dom) : -1);
   if (view === 'work') document.body.classList.toggle('cw-shut', !writable(st));
+  if (view !== 'work') fm = false;
+  document.body.classList.toggle('fmopen', view === 'work' && fm && writable(st));
+  fmInert(view === 'work' && fm && writable(st));
 }
 const DASHBOARD = ['home', 'work', 'library', 'ask', 'blueprint', 'launchpad'];
 
@@ -1477,6 +1619,26 @@ document.addEventListener('click', (e) => {
     return;
   }
   if (b.dataset.qmove) { moveQ(+b.dataset.qmove); return; }
+  // Focus mode: open, close, and Done ✓ (at the end of a domain, the next
+  // domain is where the founder picks up).
+  if (b.hasAttribute('data-fmopen')) { fmOpen(); return; }
+  if (b.hasAttribute('data-fmclose')) { fmClose(); return; }
+  if (b.dataset.fmdone) { if (b.dataset.fmdone === 'next') moveQ(1); fmClose(); return; }
+  if (b.dataset.where) {
+    const [k, i] = b.dataset.where.split(':'), Q = WHERE4.find((q) => q.k === k), a = whereOf(state.work);
+    const opts = typeof Q.o === 'function' ? Q.o(a) : Q.o;
+    keepWhere(k, k === 'money' ? opts[+i] : +i);
+    drawBook(false);
+    const x = document.querySelector(`.cw-o[data-where="${b.dataset.where}"]`); if (x) x.focus({ preventScroll: true });
+    fmAuto(); return;
+  }
+  if (b.dataset.still != null) {
+    keep4('w', 'stage', +b.dataset.still);
+    keepWhere('stage', +b.dataset.still);
+    drawBook(false);
+    const x = document.querySelector(`.cw-o[data-still="${b.dataset.still}"]`); if (x) x.focus({ preventScroll: true });
+    fmAuto(); return;
+  }
   if (b.hasAttribute('data-print')) { document.querySelectorAll('.mb details').forEach((x) => { x.open = true; }); window.print(); return; }
   if (b.dataset.lpdone) {
     if (needsAccount()) { const k = b.dataset.lpdone; askAccount(() => { const x = document.querySelector(`[data-lpdone="${k}"]`); if (x) x.click(); }); return; }
@@ -1486,7 +1648,7 @@ document.addEventListener('click', (e) => {
     const li = b.closest('.lpo-a'); if (li) li.classList.toggle('on', on);
     return;
   }
-  if (b.dataset.qd) { qi = steps().findIndex((x) => x[0] === +b.dataset.qd && x[1] === 'tap'); document.body.classList.remove('stepsopen'); drawBook(); return; }
+  if (b.dataset.qd) { document.body.classList.remove('stepsopen'); fmOpen(steps().findIndex((x) => x[0] === +b.dataset.qd && x[1] !== 'got')); return; }
   // Every answer waits for a complete account first (the account box), then lands.
   const ans = ['v4t', 'got', 'v4day', 'carry'].find((k) => b.dataset[k] != null);
   if (ans && needsAccount()) {
@@ -1500,6 +1662,7 @@ document.addEventListener('click', (e) => {
     keep4(d, 'got', +b.dataset.got, level - 1);
     drawBook(false);
     const x = document.querySelector(`.cw-o[data-got="${b.dataset.got}"]`); if (x) x.focus({ preventScroll: true });
+    if (+b.dataset.got === 0) fmAuto();
     return;
   }
   // A day, as a tap: saved, and on to the next screen.
@@ -1564,6 +1727,7 @@ document.addEventListener('click', (e) => {
     const x = document.querySelector(`.cw-o[data-v4t="${b.dataset.v4t}"]`); if (x) x.focus({ preventScroll: true });
     if (answered(st, level, dom) > had) M.answered(answered(st, level, dom));
     refreshRail();
+    if (!tapReply(level, d, +b.dataset.v4t)) fmAuto();
     return;
   }
   if (b.dataset.go === 'rail') {
@@ -1665,6 +1829,7 @@ document.addEventListener('keydown', (e) => {
   if (view !== 'work') return;
   const body = document.body;
   if (e.key === 'Escape') {
+    if (fm) { e.preventDefault(); fmClose(); return; }
     if (body.classList.contains('crownopen')) { crownOpen(false); const c = $('#crownb'); if (c) c.focus(); return; }
     if (body.classList.contains('railopen')) { body.classList.remove('railopen'); return; }
     if (body.classList.contains('stepsopen')) { body.classList.remove('stepsopen'); return; }
@@ -1675,7 +1840,7 @@ document.addEventListener('keydown', (e) => {
   const inPage = t.closest('.leaf-r') || t === document.body;
   if (!inPage || t.closest('.cw-foot, .gain, .gate, .wait')) return;
   // Number keys choose on a tap.
-  if (/^[1-9]$/.test(e.key) && ['tap', 'got', 'day', 'carry', 'carryday', 'bday'].includes(stepAt(qi)[1]) && t.tagName !== 'INPUT') {
+  if (/^[1-9]$/.test(e.key) && ['where', 'still', 'tap', 'got', 'day', 'carry', 'carryday', 'bday'].includes(stepAt(qi)[1]) && t.tagName !== 'INPUT') {
     const b = document.querySelectorAll('.leaf-r .cw-o')[Number(e.key) - 1];
     if (b) { e.preventDefault(); b.click(); }
     return;
