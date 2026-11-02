@@ -33,6 +33,7 @@ import { profile, unsubLink, deleteFounder } from '../_account.js';
 import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER, readTags, FORGOTTEN } from '../_mailchimp.js';
 import { sortTags } from '../_tag-list.js';
 import { webhookState, payments } from '../_stripe.js';
+import { refundList, refundTable } from '../_refund.js';
 import { holdLetters } from '../_series.js';
 
 /** The actions a new team member cannot do until a right is ticked for them
@@ -270,7 +271,9 @@ export async function onRequestGet({ request, env }) {
     .map((x) => ({ student_id: x.student_id, step: x.step, mode: x.mode, at: x.at, ...(seeMoney ? { amount: x.amount } : {}) }));
   // Who is looking, for the greeting on Today: a team member by name; the key is the default mentor.
   const you = access.by === 'team' && access.me ? { name: access.me.name || '', team: true, can: rights } : { key: true, can: rights };
-  return json({ ok: true, you, students, paid, words: words.results || [], waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, totalGrowth: GROWTH_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
+  // Refund requests from Base Camp (Alexandru, 2 Nov 2026): the Refunds tab, in red.
+  const refunds = await refundList(D);
+  return json({ ok: true, you, students, paid, refunds, words: words.results || [], waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, totalGrowth: GROWTH_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
     mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags,
       forgotten: (gone.results || []).map((r) => r.email).filter(Boolean), forgottenWhy: FORGOTTEN } });
 }
@@ -317,6 +320,17 @@ async function post({ request, env }) {
     if (access.by !== 'key' && access.me && String(access.me.email || '').toLowerCase() === email) return bad('Nobody changes their own rights. Ask Alexandru.', 403);
     if (!Array.isArray(body.can)) return bad('Choose the rights first.');
     return json({ ok: true, email, can: await setRights(D, email, body.can, now()) });
+  }
+
+  // A refund request handled (Alexandru gets in touch himself; this only
+  // marks it done, or open again). The payments right.
+  if (body.action === 'refund-done') {
+    await refundTable(D);
+    const id = clean(body.id, 80), done = body.done !== false;
+    const by = access.by === 'team' && access.me ? (access.me.name || access.me.email || 'team') : 'Alexandru';
+    const r = await D.prepare('UPDATE refund_ask SET done_at = ?, done_by = ? WHERE id = ?').bind(done ? now() : null, done ? by : null, id).run();
+    if (!r.meta || !r.meta.changes) return bad('That request is not there any more.', 404);
+    return json({ ok: true, id, done });
   }
 
   if (body.action === 'invite') {

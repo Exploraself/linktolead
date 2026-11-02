@@ -88,7 +88,8 @@ export const DEFAULT_RIGHTS = ['reply', 'message', 'signin-link', 'reset-link', 
 /** Which right each /mentor action needs. An action not here is the key's only. */
 export const ACTION_RIGHT = { reply: 'reply', message: 'message', 'signin-link': 'signin-link', 'reset-link': 'reset-link',
   'series-hold': 'series-hold', tier: 'tier', pause: 'pause', delete: 'delete', 'mentor-save': 'mentors', 'mentor-assign': 'mentors',
-  'mc-test': 'mailchimp', 'mc-backfill': 'mailchimp', 'team-add': 'team', 'team-remove': 'team', 'team-can': 'team', invite: 'invite' };
+  'mc-test': 'mailchimp', 'mc-backfill': 'mailchimp', 'team-add': 'team', 'team-remove': 'team', 'team-can': 'team', invite: 'invite',
+  'refund-done': 'payments' };
 
 async function rightsTable(D) {
   await D.prepare('CREATE TABLE IF NOT EXISTS team_right (email TEXT PRIMARY KEY, can TEXT NOT NULL, at TEXT)').run();

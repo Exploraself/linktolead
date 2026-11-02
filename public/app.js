@@ -358,7 +358,32 @@ function homeView() {
     ${nudgeHTML(st)}
     ${gp ? planHTML(gp, st) : `<section class="gp-wrap gp-two gp-grid">${standHTML(st)}</section>${howItWorks(st)}`}
     ${accountHTML()}
+    ${refundHTML()}
   </div>`;
+}
+
+/** Ask for a refund (Alexandru, 2 Nov 2026): in every founder's Base Camp.
+ *  They choose the programme they paid for and confirm their name and email;
+ *  the request goes to /mentor → Refunds and Alexandru gets in touch himself.
+ *  It never says a refund was made (AGENTS.md 6). */
+const REFUND_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M14.5 9.2c-.5-.9-1.5-1.4-2.6-1.4-1.5 0-2.6.8-2.6 2 0 2.7 5.4 1.4 5.4 4.2 0 1.2-1.2 2.1-2.8 2.1-1.2 0-2.3-.6-2.8-1.5M12 6.2v1.6M12 16.1v1.6"/></svg>';
+let refundSent = '';
+function refundHTML() {
+  const me = state.me || {}, rungs = ['session', 'lab', 'hub', 'premium'].map((k) => [k, LADDER.find((r) => r.key === k)]).filter(([, r]) => r);
+  const NAMES = { session: 'The Boardroom', lab: 'The LAB', hub: 'The HUB', premium: 'The Summit' };
+  return `<section class="gp-wrap gp-refund" aria-labelledby="rf-h">
+    <details class="rf"${refundSent ? ' open' : ''}><summary><span class="rf-ic">${REFUND_IC}</span><span><b id="rf-h">Ask for a refund</b><small>Not right for you? Alexandru gets in touch with you personally.</small></span></summary>
+    ${refundSent ? `<p class="rf-sent" role="status" tabindex="-1"><b>Sent.</b> Alexandru gets in touch with you personally, at ${esc(refundSent)}.</p>`
+    : `<form id="refundform" class="rf-form" novalidate>
+      <fieldset class="rf-steps"><legend>Which programme did you pay for?</legend>
+        ${rungs.map(([k, r]) => `<label><input type="radio" name="rf-step" value="${k}"><span>${esc(NAMES[k])} · ${esc(r.price)}</span></label>`).join('')}
+      </fieldset>
+      <label class="rf-l"><span>Your name</span><input id="rf-name" autocomplete="name" value="${esc(me.name || '')}"></label>
+      <label class="rf-l"><span>The email you paid with</span><input id="rf-email" type="email" autocomplete="email" value="${esc(me.email || '')}"></label>
+      <button class="cta" type="submit">Send my request</button>
+      <p class="joinerr" id="rf-msg" role="status"></p>
+    </form>`}</details>
+  </section>`;
 }
 
 /** Signing in on this device: email and password, or a one-time email link. */
@@ -2164,6 +2189,18 @@ document.addEventListener('submit', async (e) => {
       if (ex && ex.data && ex.data.noAccount) return noAccountHere(email, ex.message);
       say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'We could not reach the account service just now.');
     }
+    return;
+  }
+  if (f.id === 'refundform') {
+    e.preventDefault();
+    const msg = $('#rf-msg'), pick = f.querySelector('input[name="rf-step"]:checked'), name = $('#rf-name').value.trim(), email = $('#rf-email').value.trim();
+    const say = (t) => { msg.textContent = t; };
+    if (!pick) return say('Choose the programme you paid for.');
+    if (!name) return say('Write your name.');
+    if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return say('Write the email you paid with.');
+    const go = f.querySelector('button[type="submit"]'); go.disabled = true; say('Sending…');
+    try { await account.refund({ step: pick.value, name, email }); refundSent = email; render(); const s = document.querySelector('.rf-sent'); if (s) s.focus({ preventScroll: false }); }
+    catch (ex) { go.disabled = false; say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'It did not send. Try again in a minute.'); }
     return;
   }
   if (f.id === 'pwform') {
