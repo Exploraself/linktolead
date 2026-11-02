@@ -43,7 +43,7 @@
 // they never get real letters.
 
 import { now } from './_shared.js';
-import { letter, link, button, GOOD_WORDS, threeAssessments } from './_letters.js';
+import { letter, link, button, GOOD_WORDS, threeAssessments, nameCase } from './_letters.js';
 import { SERIES_LETTERS, SERIES_GROUPS, SERIES_TAGS } from './_series-letters.js';
 import { send, mailState } from './_mail.js';
 import { unsubLink } from './_account.js';
@@ -198,7 +198,7 @@ export const lettersOf = (g) => PARSED.filter((p) => p.g === g).sort((a, b) => a
 /** Why the footer says each series came. */
 export const WHY = Object.fromEntries(Object.keys(SERIES).map((k) => [k, (PARSED.find((p) => p.series === k) || {}).why || '']));
 
-const hi = (first) => (first ? `Hi ${first},` : 'Hi,');
+const hi = (first) => (first ? `Hi ${nameCase(first)},` : 'Hi,');
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /**

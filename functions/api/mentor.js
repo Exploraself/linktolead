@@ -9,13 +9,16 @@
 //                  downloads and their "Ask Alexandru" thread
 // GET ?growth=id   one founder's Massive Growth Plan: ticks and what they
 //                  wrote in its blanks, with the date of each change
-// POST { action }  reply (an answer in the thread, emailed as a letter) · tier (change step, and its step tags in Mailchimp) ·
+// GET ?tags=1      every Mailchimp tag of the audience, sorted Keep / Old /
+//                  Ask (functions/_tag-list.js). The mentor key only
+// POST { action }  (a team account: only TEAM_CAN; the key: everything)
+//                  reply (an answer in the thread, emailed as a letter) · tier (change step, and its step tags in Mailchimp) ·
 //                  pause · series-hold (pause or resume the letters that
 //                  follow each pain) · delete · signin-link · message · mc-test ·
 //                  mc-backfill. Every action is logged as an event; every
 //                  Mailchimp call also in mailchimp_log.
 
-import { teamList, teamAdd, teamRemove } from '../_team.js';
+import { teamList, teamAdd, teamRemove, teamDetails } from '../_team.js';
 import { json, bad, db, now, mentorAccess, clean, looksLikeEmail, accountTables, newToken } from '../_shared.js';
 import { DOMAIN_STEPS, WHATIF_STEPS, ALL_STEP_IDS } from '../_plans.js';
 import { GROWTH_IDS, GROWTH_SQL, GROWTH_BLANK_IDS } from '../_growth.js';
@@ -27,8 +30,19 @@ import { LIBRARY_ITEMS } from './library.js';
 import { toolNames } from '../_tools.js';
 import { thread } from './thread.js';
 import { profile, unsubLink, deleteFounder } from '../_account.js';
-import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER } from '../_mailchimp.js';
+import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER, readTags, FORGOTTEN } from '../_mailchimp.js';
+import { sortTags } from '../_tag-list.js';
 import { holdLetters } from '../_series.js';
+
+/** What only the mentor key may do (Alexandru, 2 Nov 2026). A team account
+ *  reads everything, answers questions, writes letters and notes, sends a
+ *  sign-in or reset link, pauses or resumes a founder's letters, and changes
+ *  a founder's step. It never changes the team or the mentor profiles, never
+ *  uses the Mailchimp tools, and never pauses or deletes a founder. Checked
+ *  here, on the server; the page only hides the buttons. */
+export const KEY_ONLY = ['team-add', 'team-remove', 'mentor-save', 'mentor-assign', 'mc-test', 'mc-backfill', 'pause', 'delete'];
+/** What a team account may do, for the page and the tests. */
+export const TEAM_CAN = ['reply', 'message', 'signin-link', 'reset-link', 'series-hold', 'tier'];
 
 /** Each plan step's domain and title, so ticks can be read by domain. */
 const STEP = Object.fromEntries([...DOMAIN_STEPS, ...WHATIF_STEPS].map((s) => [s.id, s]));
@@ -57,8 +71,8 @@ export function stageChanges(events) {
 }
 
 /** Every founder, with what the cockpit needs. levels: how many of the
- *  twelve Blueprint levels hold at least one written answer (level_list:
- *  which ones). crossed: the doors they crossed ('blueprint', 'northstar';
+ *  twelve Blueprint levels hold at least one written answer, earlier or
+ *  Version 4 (level_list: which ones). crossed: the doors they crossed ('blueprint', 'northstar';
  *  functions/api/cross.js). avatar: their profile photo, a small data: URL,
  *  or null. plan_ticks counts the Account Plans only; growth_ticks the
  *  Massive Growth Plan (growth_list: "id|done_at,…"). */
@@ -79,6 +93,8 @@ async function roster(D) {
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'library-download') AS library,
       (SELECT COUNT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS levels,
       (SELECT GROUP_CONCAT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS level_list,
+      (SELECT GROUP_CONCAT(DISTINCT CAST(substr(w.key, 6, instr(substr(w.key, 6), '.') - 1) AS INTEGER)) FROM sheet w
+        WHERE w.student_id = s.id AND w.key GLOB 'w.v4.[0-9]*.*' AND w.key NOT GLOB 'w.v4.[0-9]*.w.*' AND COALESCE(w.value, '') <> '') AS level_list_v4,
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'crossed') AS crossed,
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'tool-open') AS tools,
       (SELECT cs.day_sent || '|' || CASE WHEN cs.stopped_at IS NULL THEN '' ELSE 'stopped' END FROM course_sub cs WHERE cs.student_id = s.id AND cs.course = 'win12') AS course,
@@ -92,7 +108,14 @@ async function roster(D) {
       LEFT JOIN student_profile p ON p.student_id = s.id
       LEFT JOIN account_auth au ON au.student_id = s.id
     ORDER BY COALESCE(s.last_seen_at, s.joined_at) DESC LIMIT 2000`).all();
-  return rows.results || [];
+  // A level counts as written with an earlier seven-step answer OR any
+  // Version 4 answer (w.v4.<level>.…, never the welcome page's w.v4.<level>.w.…):
+  // the same rule as levelsWritten in functions/_series.js, so "Launchpad
+  // done" and "Ready for the Boardroom" match the letters (2 Nov 2026).
+  return (rows.results || []).map(({ level_list_v4: v4, ...s }) => {
+    const L = [...new Set([s.level_list, v4].flatMap((x) => String(x || '').split(',')).map((x) => parseInt(x, 10)).filter((n) => n >= 1 && n <= 12))].sort((a, b) => a - b);
+    return { ...s, levels: L.length, level_list: L.join(',') };
+  });
 }
 
 const LANDING_NAMES = { road1: 'Road 1', road2: 'Road 2', road3: 'Road 3', road4: 'Road 4', north1: 'North 1', north2: 'North 2', north3: 'North 3', compass: 'North Star box', summit: 'The Summit' };
@@ -156,7 +179,19 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   // The team (functions/_team.js): who has every level, the toolkit without a
   // code, and /mentor with their own account. Only the key may change it.
-  if (url.searchParams.get('team')) return json({ ok: true, team: await teamList(D, env), canEdit: access.by === 'key' });
+  if (url.searchParams.get('team')) return json({ ok: true, team: await teamDetails(D, await teamList(D, env)), canEdit: access.by === 'key' });
+  // Every tag of the audience, sorted Keep / Old / Ask against the code's own
+  // list (functions/_tag-list.js), so Alexandru deletes from a clear list.
+  // A Mailchimp tool: the key only.
+  if (url.searchParams.get('tags')) {
+    if (access.by !== 'key') return bad('Only the mentor key can read the Mailchimp tags.', 403);
+    const live = await readTags(env);
+    if (!live.ok) return json({ ok: true, read: false, why: live.why });
+    const kept = await D.prepare("SELECT DISTINCT landing_tag AS t FROM student_profile WHERE landing_tag IS NOT NULL AND landing_tag <> ''").all();
+    const mc = mailchimpState(env);
+    const waiting = canTag(env) ? (await stepsBackfillList(D, 5000, mc.mode)).length : 0;
+    return json({ ok: true, read: true, total: live.total, waiting, ...sortTags(live.tags, { kept: (kept.results || []).map((r) => r.t) }) });
+  }
   const one = url.searchParams.get('student');
 
   // The drawer's Growth Plan: ticks and words, nothing else.
@@ -207,17 +242,38 @@ export async function onRequestGet({ request, env }) {
   const mcLog = await D.prepare('SELECT student_id, email, action, mode, status, detail, at FROM mailchimp_log ORDER BY id DESC LIMIT 20').all();
   const waitingJoin = (await backfillList(D, 5000, mc.mode)).length;
   const waitingTags = canTag(env) ? (await stepsBackfillList(D, 5000, mc.mode)).length : 0;
+  // Addresses Mailchimp deleted for good: shown in plain words, never as a failure.
+  const gone = await D.prepare("SELECT DISTINCT email FROM mailchimp_log WHERE status = 'forgotten' OR detail LIKE '%Forgotten Email%'").all();
   // Their own words: the newest Blueprint (Version 4) worksheet answers; the
   // page builds whole sentences from them (theirWords in dash.js).
   const words = await D.prepare(`SELECT w.student_id, w.key, w.value, w.updated_at, s.name, s.email FROM sheet w JOIN student s ON s.id = w.student_id
       WHERE w.key LIKE 'w.v4.%' AND w.value <> '' ORDER BY w.updated_at DESC LIMIT 600`).all();
   // Who is looking, for the greeting on Today: a team member by name; the key is the default mentor.
-  const you = access.by === 'team' && access.me ? { name: access.me.name || '', team: true } : { key: true };
+  const you = access.by === 'team' && access.me ? { name: access.me.name || '', team: true, can: TEAM_CAN } : { key: true };
   return json({ ok: true, you, students, words: words.results || [], waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, totalGrowth: GROWTH_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
-    mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags } });
+    mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags,
+      forgotten: (gone.results || []).map((r) => r.email).filter(Boolean), forgottenWhy: FORGOTTEN } });
 }
 
-export async function onRequestPost({ request, env }) {
+/** Every action a team member made, once it succeeded, logged on their own
+ *  account ('team-did'), so the Team box shows who did what. */
+export async function onRequestPost(ctx) {
+  const copy = ctx.request.clone();
+  const res = await post(ctx);
+  if (res.status !== 200) return res;
+  try {
+    const D = db(ctx.env), access = await mentorAccess(copy, ctx.env, D);
+    if (access.ok && access.by === 'team' && access.me) {
+      const b = await copy.json().catch(() => ({}));
+      if (TEAM_CAN.includes(b.action)) {
+        await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(access.me.id, 'team-did', now(), JSON.stringify({ action: b.action, student: clean(b.student, 80) || null })).run();
+      }
+    }
+  } catch { /* the action itself already succeeded */ }
+  return res;
+}
+
+async function post({ request, env }) {
   const D = db(env);
   if (!D) return bad('Not configured.', 503);
   const access = await mentorAccess(request, env, D);
@@ -226,6 +282,9 @@ export async function onRequestPost({ request, env }) {
   try { body = await request.json(); } catch { return bad('Could not read that.'); }
   await accountTables(D);
   const log = (student, kind, detail = null) => D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(student, kind, now(), detail).run();
+  if (access.by !== 'key' && !TEAM_CAN.includes(body.action)) {
+    return bad(KEY_ONLY.includes(body.action) ? 'Only Alexandru can do this (with the mentor key).' : 'Unknown action.', 403);
+  }
 
   if (body.action === 'team-add' || body.action === 'team-remove') {
     if (access.by !== 'key') return bad('Only the mentor key can change the team.', 403);
@@ -236,9 +295,10 @@ export async function onRequestPost({ request, env }) {
     // The invitation (Alexandru, 2 Nov 2026): signed in at one tap when the
     // address has an account, else "make your free account" first.
     const base = origin(request);
-    const acct = await D.prepare('SELECT id FROM student WHERE email = ?').bind(email).first();
+    const acct = await D.prepare('SELECT id, name FROM student WHERE email = ?').bind(email).first();
     const url = acct ? await signinUrl(D, base, acct.id, { ttl: 7 * 24 * 3600_000 }) : '';
-    const r = await send(env, { to: email, ...teamInvite(base, { to: email, signinUrl: url }),
+    const first = acct ? String(acct.name || '').trim().split(/\s+/)[0] : '';
+    const r = await send(env, { to: email, ...teamInvite(base, { to: email, first, signinUrl: url }),
       why: 'Alexandru added this address to the ExploraSelf team in the mentor cockpit.' });
     if (acct) await log(acct.id, r.ok ? 'team-invite' : 'team-invite-failed', r.ok ? null : r.why || null);
     return json({ ok: true, team: await teamList(D, env), invited: r.ok, inviteWhy: r.ok ? null : (r.why || 'The email did not send.') });

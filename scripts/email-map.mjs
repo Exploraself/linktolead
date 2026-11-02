@@ -184,7 +184,8 @@ export const ENTRIES = [
     who: 'The new team member. Everything they send goes out signed by Alexandru, and replies come back to Alexandru.',
     from: '/mentor#settings',
     sentBy: 'functions/api/mentor.js',
-    build: () => L.teamInvite(BASE, { to: 'new.member@example.com', signinUrl: `${BASE}/ground-plan/?signin=${placeholder('one-time code')}` }),
+    also: 'Written to make a new member feel honoured to join (Alexandru, 2 Nov 2026): why ExploraSelf exists, its mission and vision word for word from exploraself.com, where they come in. Signed by Alexandru, with the photo and the handwritten signature; no offer.',
+    build: () => L.teamInvite(BASE, { to: 'new.member@example.com', first: 'Sam', signinUrl: `${BASE}/ground-plan/?signin=${placeholder('one-time code')}`, tz: S.tz, at: S.at }),
   },
 ];
 

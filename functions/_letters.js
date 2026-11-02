@@ -137,7 +137,7 @@ const mailto = (to, q) => `mailto:${to}?subject=${encodeURIComponent(q)}`;
  *   sign    false leaves out the whole close (the notice to the mentor)
  * Returns { html, text, replyTo, fromName } for send().
  */
-export function letter(base, paras, offer = null, { sign = true, mentor, tz = '', at, ask = 'start', seed = 0, intro = false, security = false } = {}) {
+export function letter(base, paras, offer = null, { sign = true, mentor, tz = '', at, ask = 'start', seed = 0, intro = false, security = false, founder = true } = {}) {
   const M = asMentor(mentor);
   const pic = (u) => (/^https:\/\//.test(u) ? u : `${base}${u}`);
   const P = paras.map(parts);
@@ -154,9 +154,12 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
   // letters (functions/_course.js) each have one, written and checked with them.
   const own = offer && typeof offer === 'object' && typeof offer.line === 'function' ? offer : null;
   const use = own ? null : security && offer && OFFERS[offer] && OFFERS[offer].paid ? free[seed % free.length] : offer;
-  const tests = sign ? threeAssessments(seed) : [];
+  // founder: false (a letter to the team) keeps the signature, the reply
+  // line and the farewell, but not the founder's encouragement line or the
+  // free assessments.
+  const tests = sign && founder ? threeAssessments(seed) : [];
   const ps = own ? parts(['P.S. ', ...own.line(base)]) : use && OFFERS[use] ? parts(['P.S. ', ...OFFERS[use].line(base)]) : null;
-  const good = sign ? GOOD_WORDS[seed % GOOD_WORDS.length] : '';
+  const good = sign && founder ? GOOD_WORDS[seed % GOOD_WORDS.length] : '';
   const qs = !sign || ask === null ? [] : Array.isArray(ask) ? ask : (SHORTCUTS[ask] || SHORTCUTS.start);
   const bye = sign ? farewell(tz, at) : '';
   const replyLine = 'Any question at all, big or small? Just reply to this email. It comes straight to me, and I read every one.';
@@ -188,7 +191,18 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
   return { html, text, replyTo: M.email, fromName: `${M.first} at ExploraSelf` };
 }
 
-const hi = (first) => (first ? `Hi ${first},` : 'Hi,');
+/** A first name as people write it to a friend (Alexandru, 2 Nov 2026: a
+ *  reset letter said "Hi ALEXANDRU"). A name typed all in capitals or all in
+ *  small letters gets a capital at the start of each part ("ALEXANDRU" →
+ *  "Alexandru", "anne-marie" → "Anne-Marie", "o'neil" → "O'Neil"); a name
+ *  with its own mix of capitals ("McKenzie", "DeShawn") is left exactly as
+ *  typed. Same rule in public/mentor/dash.js nameCase (a test holds them equal). */
+export function nameCase(first) {
+  const s = String(first || '').trim();
+  if (!s || (s !== s.toUpperCase() && s !== s.toLowerCase())) return s;
+  return s.toLowerCase().replace(/(^|[\s'’-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
+}
+const hi = (first) => (first ? `Hi ${nameCase(first)},` : 'Hi,');
 /** The offer for one letter to one address, unless the caller chose one. */
 const offerFor = (kind, to, tier, offer) => (offer !== undefined ? offer : 'unshakeable');
 /** The close of a letter: who it is from, their time, which good word. */
@@ -355,18 +369,32 @@ export function answerLetter(base, { first, question, answer, to = '', tier, off
  *  threads in /mentor. With an account: a button that lands them signed in
  *  (a one-time link, valid 7 days). Without one: make the free account with
  *  this address first. No offer: it is for the team, not a founder. */
-export function teamInvite(base, { to = '', signinUrl = '', joinUrl = '' } = {}) {
-  return { subject: 'You’re on the ExploraSelf team', ...letter(base, [
-    'Hi,',
-    'Welcome to the ExploraSelf team, and thank you for helping our founders grow.',
-    'In the mentor cockpit you see every founder: where they are, what they wrote and what they asked. You can answer their questions and send them letters. Everything goes out signed by me, and their replies come back to me, so nothing gets lost.',
+/** The invitation to a new team member (Alexandru, 2 Nov 2026: "make them
+ *  feel honoured to join"): the honour and the thanks, why ExploraSelf
+ *  exists, its mission and vision word for word from exploraself.com (the
+ *  home page's "Why we exist"), where they come in, then the one first step.
+ *  Signed by Alexandru with his photo and handwritten signature; no founder
+ *  encouragement line, no assessments, no offer. */
+export const TEAM_WHY = 'The first system a founder leads is themselves.';
+export const TEAM_MISSION = 'Equip leaders and entrepreneurs with tools and mentoring that turn self-understanding into clearer decisions and a growing business.';
+export const TEAM_VISION = 'A community of unshakeable founders who lead themselves first, build businesses that grow with them, and equip and empower others in turn.';
+export function teamInvite(base, { to = '', first = '', signinUrl = '', joinUrl = '', tz = '', at } = {}) {
+  const lc = (t) => t.charAt(0).toLowerCase() + t.slice(1);
+  return { subject: 'Welcome to the ExploraSelf team', ...letter(base, [
+    hi(first),
+    'It is an honour to welcome you to the ExploraSelf team. Thank you for saying yes.',
+    `Here is why we exist: ${lc(TEAM_WHY)}`,
+    `Our mission: to ${lc(TEAM_MISSION)}`,
+    `Our vision: ${lc(TEAM_VISION)}`,
+    'That last part is where you come in. Every question you answer and every letter you write helps a founder take their next step, in their work and in their life. That is real work, and it matters.',
+    'We call ExploraSelf a Good People Company. Thank you for being one of the good people.',
+    'In the mentor cockpit you see every founder: where they are, what they wrote and what they asked. You answer their questions, write to them, and help them on to their next step. Everything goes out signed by me, and their replies come back to me, so nothing gets lost.',
     signinUrl ? 'Your first step: tap the button. You arrive signed in. Then open Mentor in the menu under your name.'
       : `Your first step: make your free account with this address${to ? ` (${to})` : ''}. Then open the mentor cockpit.`,
     signinUrl ? button(signinUrl, 'Open my account') : button(joinUrl || `${base}/north3/#join`, 'Make my free account'),
     ['The mentor cockpit, any time: ', link(`${base}/mentor/`)],
-    'Any question at all, just reply to this email. The team and I are here for you.',
-    'See you inside,\nAlexandru',
-  ], null, { sign: false }) };
+    'I am glad we do this together. The team and I are here for you, any time. Welcome aboard.',
+  ], null, { founder: false, tz, at, ask: ['Where do I start?', 'Can we talk this week?', 'I can’t open the mentor cockpit'] }) };
 }
 
 /** To Alexandru: a founder asked a question. Plain, no offer. */

@@ -278,8 +278,11 @@ export async function push(env, member, action = 'join') {
         return { status: out.ok ? 'ok' : 'failed', detail: out.why, request: req };
       }
       if (!res.ok) {
-        let why = '';
-        try { const j = JSON.parse(body); why = [j.title, j.detail].filter(Boolean).join(': '); } catch { why = body.slice(0, 160); }
+        let why = '', title = '';
+        try { const j = JSON.parse(body); title = j.title || ''; why = [j.title, j.detail].filter(Boolean).join(': '); } catch { why = body.slice(0, 160); }
+        // Deleted for good in Mailchimp: it will never take this address back
+        // from here, so it is not a failure to retry (and not "waiting").
+        if (res.status === 400 && /forgotten email/i.test(title)) return { status: 'forgotten', detail: FORGOTTEN, request: req };
         return { status: 'failed', detail: `Mailchimp API said no (HTTP ${res.status}): ${why || 'no reason given'}`.slice(0, 300), request: req };
       }
     }
@@ -288,6 +291,9 @@ export async function push(env, member, action = 'join') {
     return { status: 'failed', detail: `Could not reach Mailchimp: ${String((e && e.message) || e).slice(0, 160)}`, request: req };
   }
 }
+
+/** What /mentor says about an address deleted for good in Mailchimp. */
+export const FORGOTTEN = 'Permanently deleted in Mailchimp, so Mailchimp will not take this address back from here. Only the person can re-subscribe, through a Mailchimp sign-up form. Not a bug.';
 
 /** One row in the log, and the last status on the profile. */
 export async function record(D, { studentId, email, action, mode, status, detail }) {
@@ -310,8 +316,11 @@ export async function record(D, { studentId, email, action, mode, status, detail
 export async function syncFounder(env, D, studentId, action = 'join', { keepLog = true, tag = '' } = {}) {
   const s = await D.prepare('SELECT id, email, name, stage, tier FROM student WHERE id = ?').bind(studentId).first();
   if (!s) return { status: 'skipped', detail: 'No such founder.' };
-  const p = await D.prepare('SELECT consent, unsubscribed, source, signup_type, company, interest, industry, landing, landing_tag FROM student_profile WHERE student_id = ?').bind(studentId).first();
+  const p = await D.prepare('SELECT consent, unsubscribed, source, signup_type, company, interest, industry, landing, landing_tag, mailchimp_status FROM student_profile WHERE student_id = ?').bind(studentId).first();
   if (!p || !p.consent) return { status: 'skipped', detail: 'No consent.' };
+  // Deleted for good in Mailchimp: no tag can land (there is no contact). A
+  // join may still be tried: if the person re-subscribed, it goes through.
+  if (p.mailchimp_status === 'forgotten' && (action === 'tags' || action === 'tag')) return { status: 'skipped', detail: FORGOTTEN };
   if (action !== 'unsubscribe') {
     if (p.unsubscribed) return { status: 'skipped', detail: 'Unsubscribed.' };
     const paused = await D.prepare('SELECT paused FROM account_auth WHERE student_id = ? AND paused = 1').bind(studentId).first();
@@ -349,6 +358,27 @@ export function canTag(env = {}) {
   return (st.mode === 'api' && st.ready) || (st.mode === 'test' && !!env.MAILCHIMP_API_KEY);
 }
 
+/** Every tag of the audience, as Mailchimp has it: [{ id, name, count }].
+ *  Tags are Mailchimp's static segments, and a form's `tags` number is the
+ *  segment's id. A read changes nothing in Mailchimp, so it also works in
+ *  test mode when the key is set. Never throws. */
+export async function readTags(env = {}) {
+  const st = mailchimpState(env);
+  if (!env.MAILCHIMP_API_KEY) return { ok: false, why: 'Mailchimp’s API key (MAILCHIMP_API_KEY) is not set, so the tags cannot be read from here.' };
+  const key = await apiKey(env);
+  const audience = st.audience || text(env.MAILCHIMP_AUDIENCE_ID) || (st.form && st.form.id) || '';
+  if (!key || !audience) return { ok: false, why: st.reason || 'The API key or the audience is missing.' };
+  try {
+    const r = await fetch(`https://${apiServer(key, st)}.api.mailchimp.com/3.0/lists/${audience}/segments?type=static&count=1000&fields=segments.id,segments.name,segments.member_count,total_items`,
+      { headers: { authorization: 'Basic ' + btoa('linktolead:' + key), 'user-agent': 'exploraself-linktolead' } });
+    if (!r.ok) return { ok: false, why: `Mailchimp API said no (HTTP ${r.status}).` };
+    const j = await r.json();
+    return { ok: true, tags: (j.segments || []).map((s) => ({ id: s.id, name: s.name, count: s.member_count || 0 })), total: j.total_items || 0 };
+  } catch (e) {
+    return { ok: false, why: `Could not reach Mailchimp: ${String((e && e.message) || e).slice(0, 160)}` };
+  }
+}
+
 /** The mentor's test join, for an address Alexandru types himself. */
 export async function testJoin(env, D, { email, first, last }) {
   const st = mailchimpState(env);
@@ -358,14 +388,16 @@ export async function testJoin(env, D, { email, first, last }) {
 }
 
 /** Everyone with consent, not unsubscribed, not paused and not yet synced.
- *  In TEST mode a founder already logged as a test counts as done, so the
+ *  An address Mailchimp deleted for good is never waiting (it cannot come
+ *  back from here; logged before 2 Nov as a failed join). In TEST mode a founder already logged as a test counts as done, so the
  *  button empties; once live, those are sent for real. */
 export async function backfillList(D, limit = 50, mode = 'form') {
-  const done = mode === 'test' ? "('ok','test')" : "('ok')";
+  const done = mode === 'test' ? "('ok','test','forgotten')" : "('ok','forgotten')";
   const rows = await D.prepare(`SELECT s.id FROM student s JOIN student_profile p ON p.student_id = s.id
       LEFT JOIN account_auth au ON au.student_id = s.id
     WHERE p.consent = 1 AND COALESCE(p.unsubscribed, 0) = 0 AND COALESCE(au.paused, 0) = 0
       AND COALESCE(p.mailchimp_status, '') NOT IN ${done}
+      AND NOT EXISTS (SELECT 1 FROM mailchimp_log l WHERE l.student_id = s.id AND l.detail LIKE '%Forgotten Email%')
     ORDER BY s.joined_at LIMIT ?`).bind(limit).all();
   return (rows.results || []).map((r) => r.id);
 }

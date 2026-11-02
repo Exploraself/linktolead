@@ -37,6 +37,12 @@ const icon = (k) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${T
 const tabOf = (h) => { const k = String(h || '').replace(/^#/, ''); const t = OLD_TABS[k] || k; return TABS.some(([x]) => x === t) ? t : 'today'; };
 const NO_FILTER = { group: 'all', step: 'all', act: 'all', need: 'all', more: 'all' };
 let data = null, q = '', flash = '', openId = null;
+/** A team account (Alexandru, 2 Nov 2026): reads everything, answers, writes
+ *  letters, sends sign-in links, pauses or resumes letters and changes a
+ *  step. The pause, delete, team, mentor and Mailchimp buttons are Alexandru's
+ *  (the mentor key); the server refuses them anyway (KEY_ONLY in
+ *  functions/api/mentor.js). */
+const isTeam = () => !!(data && data.you && data.you.team);
 let tab = tabOf(location.hash);
 let F = { ...NO_FILTER };
 
@@ -297,8 +303,11 @@ function questionsHTML() {
 // ── Mailchimp ────────────────────────────────────────────────────────────────
 
 const MC_MODE = { test: 'Test', form: 'Form', api: 'Live API' };
-const MC_STATUS = { ok: 'in Mailchimp', test: 'test only', failed: 'failed' };
-const mcState = (s) => (s.mailchimp_status ? (s.mailchimp_status === 'failed' ? '<b class="warn">failed</b>' : esc(MC_STATUS[s.mailchimp_status] || s.mailchimp_status)) + ' · ' + when(s.mailchimp_at)
+const MC_STATUS = { ok: 'in Mailchimp', test: 'test only', failed: 'failed', forgotten: 'deleted in Mailchimp' };
+/** Addresses Mailchimp deleted for good: plain words, never a failure. */
+const gone = (email) => !!(data && data.mailchimp && (data.mailchimp.forgotten || []).includes(email));
+const mcState = (s) => (gone(s.email) ? 'deleted in Mailchimp for good (only they can re-subscribe) · ' + when(s.mailchimp_at)
+  : s.mailchimp_status ? (s.mailchimp_status === 'failed' ? '<b class="warn">failed</b>' : esc(MC_STATUS[s.mailchimp_status] || s.mailchimp_status)) + ' · ' + when(s.mailchimp_at)
   : (s.consent && !s.unsubscribed ? 'not sent yet' : '—'));
 
 /** The founders who crossed between the doors, each way, with the tag Mailchimp keeps. */
@@ -312,20 +321,73 @@ function crossedHTML(S) {
  *  last 20 calls. Nothing here is a secret; the API key never leaves Cloudflare. */
 function mailchimpHTML() {
   const M = data.mailchimp;
-  if (!M) return '';
+  if (!M || isTeam()) return '';
   const last = (M.log || [])[0];
-  const lastFail = last && last.status === 'failed' ? `<p class="flash warn" role="status"><b>Last call failed:</b> ${esc(last.detail)}</p>` : '';
+  const lastFail = last && last.status === 'failed' && !gone(last.email) ? `<p class="flash warn" role="status"><b>Last call failed:</b> ${esc(last.detail)}</p>` : '';
+  const G = M.forgotten || [];
+  const goneNote = G.length ? `<p class="tiny">${G.length === 1 ? `${esc(G[0])} was` : `${G.length} addresses were`} deleted for good in Mailchimp. ${esc(M.forgottenWhy || '')}</p>` : '';
   return `<div class="panel mc"><h2>Mailchimp · ${esc(MC_MODE[M.mode] || M.mode)}</h2>
-    <p class="tiny">${esc(M.reason)}</p>${lastFail}
+    <p class="tiny">${esc(M.reason)}</p>${lastFail}${goneNote}
     <div class="bar"><input id="mc-email" type="email" placeholder="Email for a test join" autocomplete="off" style="max-width:280px">
       <button class="ghost" id="mc-test">Send a test join</button><span style="flex:1"></span>
       <button class="ghost" id="mc-backfill"${M.waiting ? '' : ' disabled'}>Send everyone with consent (${M.waiting} waiting)</button></div>
     ${M.waitingTags ? `<p class="tiny">${M.waitingTags} of them ${M.waitingTags === 1 ? 'is' : 'are'} already in Mailchimp and only need${M.waitingTags === 1 ? 's' : ''} their step tags.</p>` : ''}
     ${(M.log || []).length ? `<div class="tscroll"><table class="mclog"><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Mode</th><th>Status</th><th>Detail</th></tr></thead><tbody>
       ${M.log.map((r) => `<tr><td class="tiny">${when(r.at)}</td><td class="tiny">${esc(r.email || (r.student_id === 'mentor' ? 'mentor' : '—'))}</td><td class="tiny">${esc(r.action)}</td><td class="tiny">${esc(r.mode)}</td>
-        <td>${r.status === 'failed' ? '<b class="warn">failed</b>' : esc(r.status)}</td><td class="tiny">${esc(r.detail || '')}</td></tr>`).join('')}</tbody></table></div>`
+        <td>${gone(r.email) && r.status !== 'ok' ? 'deleted in Mailchimp' : r.status === 'failed' ? '<b class="warn">failed</b>' : esc(r.status)}</td><td class="tiny">${esc(gone(r.email) && r.status !== 'ok' ? M.forgottenWhy : r.detail || '')}</td></tr>`).join('')}</tbody></table></div>`
       : '<p class="tiny">No Mailchimp calls yet.</p>'}
   </div>`;
+}
+
+/* ── Mailchimp tags (Alexandru, 2 Nov 2026) ───────────────────────────────
+   Every tag of the audience, read from Mailchimp and sorted against the list
+   in the code (functions/_tag-list.js): Old = safe to delete, Ask = not made
+   by the code, Keep = the code adds it. Mailchimp can only delete a tag, not
+   rename it. Names only, never numbers. The mentor key only. */
+const tagRow = (t, extra) => `<li><div style="flex:1;min-width:0"><b>${esc(t.name)}</b><span class="em">${esc(plural(t.count, 'person', 'people'))}${extra ? ' · ' + extra : ''}</span></div></li>`;
+function tagsBox(r) {
+  if (!r) return `<h2>Mailchimp tags</h2>
+    <p class="tiny">Every tag in your audience, read from Mailchimp and checked against the code. You see which tags to keep, which are safe to delete, and which to ask about. Mailchimp cannot rename a tag, only delete it.</p>
+    <p><button class="ghost" id="mct-read">Read the tags from Mailchimp</button></p>`;
+  if (!r.read) return `<h2>Mailchimp tags</h2><p class="flash warn" role="status">${esc(r.why || 'Could not read the tags.')}</p><p><button class="ghost" id="mct-read">Try again</button></p>`;
+  const wait = r.waiting ? `<p class="flash warn" role="status"><b>Wait before deleting.</b> ${esc(plural(r.waiting, 'founder still needs', 'founders still need'))} the new tags. Press “Send everyone with consent” above until it shows 0 waiting, then delete the Old ones.</p>` : '';
+  return `<h2>Mailchimp tags · ${r.keep.length + r.old.length + r.ask.length}</h2>
+    <p class="tiny">Read from Mailchimp just now. ${r.keep.length} to keep · ${r.old.length} safe to delete · ${r.ask.length} to ask about.</p>${wait}
+    <div><p class="lbl">Safe to delete · ${r.old.length}</p>
+      ${r.old.length ? `<p class="tiny">No code adds these any more. Deleting a tag only removes the label: the people stay in your audience.</p><ul class="list" style="margin-top:8px">${r.old.map((t) => tagRow(t, esc(t.why))).join('')}</ul>
+      <p style="margin-top:8px"><button class="ghost" id="mct-copy">Copy these names</button></p>` : '<p class="tiny">Nothing to delete. Every tag is in use.</p>'}</div>
+    ${r.ask.length ? `<div><p class="lbl">Ask before deleting · ${r.ask.length}</p><p class="tiny">Not made by the code: made by hand in Mailchimp, by a Mailchimp form setting, or by an import. Delete one only if you know what it was for.</p>
+      <ul class="list" style="margin-top:8px">${r.ask.map((t) => tagRow(t)).join('')}</ul></div>` : ''}
+    <details><summary class="lbl" style="cursor:pointer">Keep · ${r.keep.length}</summary><p class="tiny" style="margin-top:6px">The code adds these. Never delete them.</p>
+      <ul class="list" style="margin-top:8px">${r.keep.map((t) => tagRow(t, `${esc(t.what)} <a href="${esc(t.from)}" target="_blank" rel="noopener">${esc(t.fromName || t.from)}</a>. ${esc(t.when)}`)).join('')}</ul></details>
+    ${r.notYet.length ? `<details><summary class="tiny" style="cursor:pointer">Not in Mailchimp yet · ${r.notYet.length}</summary><p class="tiny" style="margin-top:6px">Each one is made the first time it is added: ${esc(r.notYet.join(' · '))}.</p></details>` : ''}
+    <p><button class="ghost" id="mct-read">Read again</button></p>`;
+}
+let tagsRead = null;
+async function loadTags(read) {
+  const box = $('#mctags');
+  if (!box) return;
+  if (!read) { box.innerHTML = tagsBox(tagsRead); }
+  else {
+    box.innerHTML = '<h2>Mailchimp tags</h2><p class="tiny">Reading the tags from Mailchimp…</p>';
+    const r = await api('?tags=1');
+    tagsRead = r.ok ? r.data : { read: false, why: r.data.error || 'Could not read the tags.' };
+    if (!$('#mctags')) return;
+    box.innerHTML = tagsBox(tagsRead);
+  }
+  const b = $('#mct-read'); if (b) b.onclick = () => loadTags(true);
+  const c = $('#mct-copy');
+  if (c) c.onclick = async () => { try { await navigator.clipboard.writeText(tagsRead.old.map((t) => t.name).join('\n')); c.textContent = 'Copied'; } catch { c.textContent = 'Could not copy'; } };
+}
+
+/** For a team account: what they can and cannot do here, in plain words. */
+function teamCanHTML() {
+  const yes = ['Read every founder, their answers and their path', 'Answer questions in Ask Alexandru', 'Write letters and notes (signed by Alexandru; replies go to Alexandru)', 'Send a sign-in or password reset link', 'Pause or resume a founder’s letters', 'Change a founder’s step, when they have paid', 'Hide or show a video comment', 'Export the founders as CSV'];
+  const no = ['Pause or delete a founder', 'Change the team', 'Change the mentor profiles', 'Use the Mailchimp tools'];
+  return `<section class="panel"><h2>What you can do here</h2>
+    <div class="tgrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
+      <div><p class="lbl">You can</p><ul class="list" style="margin-top:6px">${yes.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
+      <div><p class="lbl">Only Alexandru</p><ul class="list" style="margin-top:6px">${no.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div></div></section>`;
 }
 
 // ── Mentors & comments ───────────────────────────────────────────────────────
@@ -333,6 +395,7 @@ function mailchimpHTML() {
 /** Mentors: who the letters come from. Everyone's mentor (the default), and
  *  others a founder can be given on their own page. */
 function mentorsHTML() {
+  if (isTeam()) return '';
   const L = data.mentors || [];
   const row = (m) => `<li><img src="${esc(m.photo)}" alt="" width="40" height="40" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid var(--gold)">
     <div style="min-width:0;flex:1 1 200px"><b>${esc(m.name)}</b>${m.isDefault ? ' <span class="pill both">Everyone’s mentor</span>' : ''}<span class="em">${esc(m.title)} · replies to ${esc(m.email)}</span></div>
@@ -358,6 +421,10 @@ function mentorsHTML() {
    Addresses with every Blueprint level open, the Growth Toolkit without a
    code, and /mentor with their own account. Added by exact address, once;
    only the mentor key can add or remove. */
+/** What a team member did in /mentor, in words (functions/_team.js DID_WORDS; a test holds them equal). */
+export const TEAM_DID = { message: ['letter', 'letters'], reply: ['answer', 'answers'], tier: ['step change', 'step changes'],
+  'series-hold': ['pause or resume', 'pauses or resumes'], 'signin-link': ['sign-in link', 'sign-in links'], 'reset-link': ['reset link', 'reset links'] };
+const didLine = (did) => Object.entries(did || {}).filter(([a, n]) => TEAM_DID[a] && n).map(([a, n]) => `${n} ${n === 1 ? TEAM_DID[a][0] : TEAM_DID[a][1]}`).join(' · ');
 async function loadTeam(msg = '') {
   const box = $('#team');
   if (!box) return;
@@ -365,10 +432,12 @@ async function loadTeam(msg = '') {
   if (!r.ok) { box.innerHTML = '<p class="tiny">Could not load the team.</p>'; return; }
   const T = r.data.team || [], edit = !!r.data.canEdit;
   box.innerHTML = `<h2>Team · ${T.length}</h2>
-    <p class="tiny">Add their exact email: they get an invitation with a button to start. They see every Blueprint level, the Growth Toolkit without a code, and this page. Everything they send goes out signed by you, and replies come back to you.</p>
-    <ul class="list" style="margin-top:10px">${T.map((m) => `<li><div style="flex:1;min-width:0"><b>${esc(m.email)}</b><span class="em">${esc(m.from)}${m.at ? ' · ' + esc(when(m.at)) : ''}</span></div>${edit && m.removable ? `<button class="ghost" data-team-rm="${esc(m.email)}">Remove</button>` : ''}</li>`).join('')}</ul>
+    <p class="tiny">Add their exact email: they get an invitation with a button to start. They see every Blueprint level, the Growth Toolkit without a code, and this page. Everything they send goes out signed by ${isTeam() ? 'Alexandru' : 'you'}, and replies come back to ${isTeam() ? 'Alexandru' : 'you'}.</p>
+    <ul class="list" style="margin-top:10px">${T.map((m) => `<li><div style="flex:1;min-width:0"><b>${esc(m.name || m.email)}</b>
+      <span class="em">${m.name ? esc(m.email) + ' · ' : ''}${m.account ? `account ready · last active ${esc(when(m.lastSeen))}` : `<span class="warn">${m.removable ? 'invited, no account yet' : 'no account yet'}</span>`} · ${esc(m.from)}${m.at ? ' ' + esc(when(m.at)) : ''}</span>
+      ${didLine(m.did) ? `<span class="em">In /mentor: ${esc(didLine(m.did))}</span>` : ''}</div>${edit && m.removable ? `<button class="ghost" data-team-rm="${esc(m.email)}">Remove</button>` : ''}</li>`).join('')}</ul>
     ${edit ? `<p style="margin-top:12px;display:flex;gap:6px;max-width:460px;flex-wrap:wrap"><input id="team-new" type="email" placeholder="Their email, exactly" autocomplete="off" style="flex:1 1 220px;min-width:0"><button id="team-add">Add to the team</button></p>`
-      : '<p class="tiny" style="margin-top:10px">Only the mentor key can change the team.</p>'}
+      : '<p class="tiny" style="margin-top:10px">Only Alexandru can change the team.</p>'}
     ${msg ? `<p class="flash" role="status">${esc(msg)}</p>` : ''}`;
   const add = $('#team-add');
   if (add) {
@@ -417,7 +486,7 @@ function toolsOf(s) {
 function drawerHTML(s) {
   const n = nextAction(s), g = groupOf(s), cr = crossedOf(s), lv = levelCount(s), lp = launchpadDone(s), id = esc(s.id);
   const main = n.does === 'open' ? `<button class="btn gold" data-open="${id}">${esc(n.button)}</button>`
-    : n.does === 'unpause' ? `<button class="btn gold" data-pause="${id}" data-v="0">${esc(n.button)}</button>`
+    : n.does === 'unpause' ? (isTeam() ? '<span class="pill warn">Paused by Alexandru. Only Alexandru can unpause.</span>' : `<button class="btn gold" data-pause="${id}" data-v="0">${esc(n.button)}</button>`)
     : `<button class="btn gold" data-msg="${id}" data-kind="${KIND_OF[n.key] || 'note'}">${esc(n.button)}</button>`;
   const land = landingName(s);
   const books = String(s.library || '').split(',').filter(Boolean).length;
@@ -460,8 +529,8 @@ function drawerHTML(s) {
       <button class="btn" data-msg="${id}">Send a message</button>
       <button class="btn" data-link="${id}">Send sign-in link</button>
       <button class="btn" data-reset="${id}">Send a password reset link</button>
-      <button class="btn" data-pause="${id}" data-v="${s.paused ? 0 : 1}">${s.paused ? 'Unpause' : 'Pause'}</button>
-      <button class="btn danger" data-del="${id}">Delete</button></div>
+      ${isTeam() ? '' : `<button class="btn" data-pause="${id}" data-v="${s.paused ? 0 : 1}">${s.paused ? 'Unpause' : 'Pause'}</button>
+      <button class="btn danger" data-del="${id}">Delete</button>`}</div>
       <label class="tiny" style="display:flex;align-items:center;gap:8px;margin-top:12px">Step
         <select data-step="${id}" aria-label="Step for ${esc(s.name || s.email)}">${STEP_KEYS.map((k) => `<option value="${k}"${(s.tier || 'free') === k ? ' selected' : ''}>${STEP_NAMES[k]}</option>`).join('')}</select></label>
       <p class="tiny" style="margin-top:6px">A new step sends its step tags to Mailchimp.</p></div>`;
@@ -499,11 +568,11 @@ function draw() {
   const pane = tab === 'founders' ? foundersHTML()
     : tab === 'inbox' ? `${questionsHTML()}<section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
     : tab === 'grow' ? growHTML(S)
-    : tab === 'settings' ? `<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>${mailchimpHTML()}${mentorsHTML()}`
+    : tab === 'settings' ? `${isTeam() ? teamCanHTML() : ''}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>${mailchimpHTML()}${data.you && data.you.key ? '<section class="panel" id="mctags"></section>' : ''}${mentorsHTML()}`
     : todayHTML(S);
   $('#main').innerHTML = `<div class="stack" role="tabpanel">${said}${pane}</div>`;
   if (tab === 'inbox') loadComments();
-  if (tab === 'settings') loadTeam();
+  if (tab === 'settings') { loadTeam(); loadTags(false); }
   if (openId) openDrawer(openId); else closeDrawer();
 }
 
@@ -681,7 +750,7 @@ async function one(id) {
         <div class="k"><b>Came from</b><span>${esc(P.source || 'programme')}</span></div>
         <div class="k"><b>Consent</b><span>${P.consent ? 'yes' + (P.consent_at ? ' · ' + when(P.consent_at) : '') : 'no'}</span></div>
         <div class="k"><b>Letters from mentor</b><span>${P.consent && !P.unsubscribed ? 'on' : 'off'}</span></div>
-        <div class="k"><b>Mentor</b><span><select data-mentorof="${esc(id)}" aria-label="This founder’s mentor"><option value="">Everyone’s mentor</option>${(d.mentors || []).map((m) => `<option value="${esc(m.id)}"${P.mentor_id === m.id ? ' selected' : ''}>${esc(m.name)}</option>`).join('')}</select></span></div>
+        <div class="k"><b>Mentor</b><span>${isTeam() ? esc(((d.mentors || []).find((m) => m.id === P.mentor_id) || {}).name || 'Everyone’s mentor') : `<select data-mentorof="${esc(id)}" aria-label="This founder’s mentor"><option value="">Everyone’s mentor</option>${(d.mentors || []).map((m) => `<option value="${esc(m.id)}"${P.mentor_id === m.id ? ' selected' : ''}>${esc(m.name)}</option>`).join('')}</select>`}</span></div>
         <div class="k"><b>Time zone</b><span>${esc(P.tz || '—')}</span></div>
         <div class="k"><b>Password</b><span>${d.auth && d.auth.has_password ? 'yes' : P.signup_type === 'simple' ? 'none (signs in by email link)' : 'no'}${d.auth && d.auth.paused ? ' · paused' : ''}</span></div>
       </div></div>

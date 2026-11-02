@@ -212,3 +212,49 @@ choose, the arrows move a slider, Enter is Next, Esc closes. A tap moves on
 by itself after a short pause, unless it shows a reply to read. Done ✓ at
 the end of a domain or a level closes the layer, back at the levels with the
 new tick. Opening it is a step in the browser's history, so Back closes it.
+
+## 17. Every Mailchimp tag is on the tag page (Alexandru, 2 Nov 2026)
+
+The people who work at ExploraSelf see every Mailchimp tag in
+exploraself.com/internal (Internal → Mailchimp tags): what it means, where it
+comes from (the sales page or form, as a full link) and at which moment it is
+added. The page is drawn from functions/_tag-list.js, which /mentor → Settings
+→ Mailchimp tags also reads to sort the audience's tags into Keep, Old (safe
+to delete) and Ask.
+
+Mailchimp can only delete a tag, never rename it: a new name is a new tag. So
+a name is never invented: propose one that follows the system
+(`linktolead-<group>-<value>`, small letters, dashes) and Alexandru approves
+it first. Facts about a person (industry, interest, company) are contact
+fields, never tags.
+
+When you add, change or stop sending a tag (here, or in an exploraself.com
+form), in the same work:
+
+1. update functions/_tag-list.js: TAG_LIST (a linktolead tag), SITE_TAGS (an
+   exploraself.com form's tag number, with the form in words) or OLD_TAGS (a
+   name no code sends any more);
+2. run `node scripts/tag-map.mjs <out.html> --exploraself <exploraself repo>`
+   and put the page in the exploraself repo, in the tags folder beside the
+   email map in the unlisted internal folder (never name that folder here);
+   the run fails when an exploraself.com form adds a number the list does not
+   describe;
+3. tell Alexandru what changed, with the tag's name (never its number).
+
+tests/tag-map.test.mjs fails when the code can send a tag the list does not
+know.
+
+## 18. What the team can do in /mentor (Alexandru, 2 Nov 2026)
+
+A team account (added in /mentor → Settings → Team) reads everything,
+answers questions, writes letters and notes (signed by Alexandru, replies to
+Alexandru), sends a sign-in or reset link, pauses or resumes a founder's
+letters, and changes a founder's step. Only Alexandru, with the mentor key,
+pauses or deletes a founder, changes the team or the mentor profiles, and
+uses the Mailchimp tools.
+
+This is enforced on the server, as an allow-list: TEAM_CAN in
+functions/api/mentor.js. A new /mentor action is the key's only until
+Alexandru says the team may use it; then add it to TEAM_CAN, and hide or show
+its button with isTeam() in public/mentor/mentor.js.
+tests/team-permissions.test.mjs holds both lists.

@@ -50,6 +50,25 @@ export async function teamList(D, env) {
   for (const r of rows) if (!out.some((x) => x.email === r.email)) out.push({ email: r.email, from: 'added in /mentor', at: r.added_at, removable: true });
   return out;
 }
+/** What /mentor shows for each team member (Alexandru, 2 Nov 2026): their
+ *  name from their own free account (no mentor profile), whether that
+ *  account exists yet, when they were last active, and what they did in
+ *  /mentor (the 'team-did' events, logged only when an action succeeded). */
+export const DID_WORDS = { message: ['letter', 'letters'], reply: ['answer', 'answers'], tier: ['step change', 'step changes'],
+  'series-hold': ['pause or resume', 'pauses or resumes'], 'signin-link': ['sign-in link', 'sign-in links'], 'reset-link': ['reset link', 'reset links'] };
+export async function teamDetails(D, list) {
+  const out = [];
+  for (const m of list) {
+    const acct = await D.prepare('SELECT id, name, joined_at, last_seen_at FROM student WHERE email = ?').bind(norm(m.email)).first();
+    const did = {};
+    if (acct) {
+      const rows = (await D.prepare("SELECT detail FROM event WHERE student_id = ? AND kind = 'team-did'").bind(acct.id).all()).results || [];
+      for (const r of rows) { let a = ''; try { a = JSON.parse(r.detail).action; } catch { a = ''; } if (DID_WORDS[a]) did[a] = (did[a] || 0) + 1; }
+    }
+    out.push({ ...m, name: acct ? String(acct.name || '').trim() : '', account: !!acct, lastSeen: acct ? acct.last_seen_at || acct.joined_at : null, did });
+  }
+  return out;
+}
 export async function teamAdd(D, email, at) {
   await teamTable(D);
   await D.prepare('INSERT OR IGNORE INTO team_member (email, added_at) VALUES (?,?)').bind(norm(email), at).run();
