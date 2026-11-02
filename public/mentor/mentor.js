@@ -354,7 +354,7 @@ function tagsBox(r) {
       <ul class="list" style="margin-top:8px">${r.ask.map((t) => tagRow(t)).join('')}</ul></div>` : ''}
     <details><summary class="lbl" style="cursor:pointer">Keep · ${r.keep.length}</summary><p class="tiny" style="margin-top:6px">The code adds these. Never delete them.</p>
       <ul class="list" style="margin-top:8px">${r.keep.map((t) => tagRow(t, `${esc(t.what)} <a href="${esc(t.from)}" target="_blank" rel="noopener">${esc(t.fromName || t.from)}</a>. ${esc(t.when)}`)).join('')}</ul></details>
-    ${r.notYet.length ? `<p class="tiny">Not in Mailchimp yet: ${esc(r.notYet.join(' · '))}. Each one is made the first time it is added.</p>` : ''}
+    ${r.notYet.length ? `<details><summary class="tiny" style="cursor:pointer">Not in Mailchimp yet · ${r.notYet.length}</summary><p class="tiny" style="margin-top:6px">Each one is made the first time it is added: ${esc(r.notYet.join(' · '))}.</p></details>` : ''}
     <p><button class="ghost" id="mct-read">Read again</button></p>`;
 }
 let tagsRead = null;
