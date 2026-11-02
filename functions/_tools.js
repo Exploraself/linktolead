@@ -10,16 +10,26 @@
 // Keys are the page addresses. The same keys and names are in
 // public/tools/tools-data.js (a test holds them equal).
 //
-// Mailchimp: the tag "TOOLS" (Alexandru's name, 2 Nov 2026), sent the first
-// time a founder opens each tool or starts the 12 days. Tags only add up, so
-// sending it again is harmless; API mode only, and only with consent
-// (functions/_mailchimp.js syncFounder keeps those rules).
+// Mailchimp: the tag "Growth Toolkit" (Alexandru's name, 2 Nov 2026; it
+// replaced "TOOLS"), sent the first time a founder opens each tool or starts
+// the 12 days. Tags only add up, so sending it again is harmless; API mode
+// only, and only with consent (functions/_mailchimp.js syncFounder keeps
+// those rules).
+//
+// The welcome ("Welcome to the Growth Toolkit", functions/_letters.js
+// toolsWelcome): once per address, the first time an account opens the
+// toolkit, new or existing (Alexandru, 2 Nov 2026), and only with their yes
+// to letters. A code holder's welcome is the code letter itself.
 
 import { now, newToken, sha256 } from './_shared.js';
 import { syncFounder } from './_mailchimp.js';
 import { isTeam } from './_team.js';
+import { send, mailState } from './_mail.js';
+import { toolsWelcome } from './_letters.js';
+import { letterContext } from './_mentor.js';
+import { unsubLink, claimWelcome } from './_account.js';
 
-export const TOOLS_TAG = 'TOOLS';
+export const TOOLS_TAG = 'Growth Toolkit';
 
 /** Every tool, in the order of the Tools page. */
 export const TOOL_LIST = {
@@ -33,12 +43,37 @@ export const isTool = (k) => Object.hasOwn(TOOL_LIST, k);
 export const toolNames = (csv) => String(csv || '').split(',').filter(isTool).map((k) => TOOL_LIST[k].name);
 
 /** Log that a founder opened a tool; the first time for this tool, tag them
- *  TOOLS in Mailchimp (after the reply when the platform allows it). */
+ *  "Growth Toolkit" in Mailchimp (after the reply when the platform allows it). */
 export async function opened(env, D, studentId, tool, waitUntil) {
   const before = await D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'tool-open' AND detail = ? LIMIT 1").bind(studentId, tool).first();
   await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(studentId, 'tool-open', now(), tool).run();
   if (before) return false;
   const job = syncFounder(env, D, studentId, 'tag', { tag: TOOLS_TAG }).catch(() => {});
+  if (typeof waitUntil === 'function') waitUntil(job); else await job;
+  return true;
+}
+
+// ── The welcome, once per address ───────────────────────────────────────────
+export { claimWelcome };
+const WELCOME_WHY = 'You opened the Growth Toolkit at linktolead.exploraself.com with your free ExploraSelf account.';
+
+/** An account opened the toolkit (`tool`, or '' for the Tools page): the
+ *  welcome, if this address never had it and said yes to letters. Sent after
+ *  the reply when the platform allows it. Returns true when one was sent. */
+export async function welcomeOnce(env, D, base, me, { tool = '', tz = '', waitUntil } = {}) {
+  if (!me || !me.email || !mailState(env).ready) return false;
+  const p = await D.prepare('SELECT consent, unsubscribed, unsub_id, interest FROM student_profile WHERE student_id = ?').bind(me.id).first();
+  if (!p || !p.consent || p.unsubscribed) return false;
+  if (!(await claimWelcome(D, me.email, tool ? `tool:${tool}` : 'tools-page'))) return false;
+  const job = (async () => {
+    const ctx = await letterContext(D, me.id, tz);
+    const first = String(me.name || '').trim().split(/\s+/)[0] || '';
+    const r = await send(env, { to: me.email, ...toolsWelcome(base, { first, to: me.email, tool, interest: p.interest || '', path: tool ? `/${tool}/` : '/tools/', ...ctx }),
+      why: WELCOME_WHY, unsubUrl: unsubLink(base, p) });
+    // A failed send gives the claim back, so the next visit tries again.
+    if (!r.ok) await D.prepare('DELETE FROM toolkit_welcome WHERE email = ?').bind(norm(me.email)).run();
+    await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(me.id, r.ok ? 'toolkit-welcome' : 'toolkit-welcome-failed', now(), tool || 'tools').run();
+  })().catch(() => {});
   if (typeof waitUntil === 'function') waitUntil(job); else await job;
   return true;
 }

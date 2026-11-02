@@ -1,4 +1,4 @@
-// The email journey map (scripts/email-map.mjs, AGENTS.md rule 13): every
+// The email journey map (scripts/email-map.mjs, AGENTS.md rule 14): every
 // letter builder in functions/_letters.js is on the map, every course letter
 // is there, each one renders, and the page reads them in journey order.
 
@@ -42,10 +42,10 @@ ok((html.match(/data-open="/g) || []).length === data.letters.length, 'one butto
 ok(/The results letters of exploraself\.com were not drawn/.test(html), 'says plainly when the exploraself letters are missing');
 ok(/name="robots" content="noindex/.test(html), 'kept out of search');
 ok(!/constellation|horoscope|most founders|incubator/i.test(html), 'no banned words on the map');
-ok(/AGENTS\.md rule 13/.test(html), 'the page says how it is kept up to date');
+ok(/AGENTS\.md rule 14/.test(html), 'the page says how it is kept up to date');
 
 const agents = readFileSync(new URL('../AGENTS.md', import.meta.url), 'utf8');
-ok(/## 13\. Every email is on the map/.test(agents), 'AGENTS.md rule 13');
+ok(/## 14\. Every material follows a change; every email is on the map/.test(agents), 'AGENTS.md rule 14');
 ok(!/x-a30ae6b34bdce23dff3a21c2/.test(agents + readFileSync(new URL('../scripts/email-map.mjs', import.meta.url), 'utf8')), 'the unlisted internal folder is never named in this public repo');
 
 done();

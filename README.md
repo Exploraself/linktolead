@@ -219,7 +219,14 @@ The way in (`public/tools/gate.js`): an account opens it at once. Without one,
 the visitor asks for a code (`/api/toolkit`), gets their own six digits by
 email, types them in, and keeps a pass in the browser. Addresses in
 `TOOLKIT_EMAILS` (Cloudflare settings, comma separated) and the team skip the
-code. Mailchimp tag `TOOLS` the first time an account opens each tool.
+code. Mailchimp tag `Growth Toolkit` (it replaced `TOOLS`) the first time an
+account opens each tool. The welcome, "Welcome to the Growth Toolkit", goes
+once per address the first time an account opens the toolkit, new or
+existing, with their yes to letters (`toolkit_welcome` table); its P.S. is one
+free assessment or article on exploraself.com, matched by the tool they
+opened, or on the Tools page by what they want most (`TOOLKIT_BY_TOOL`,
+`TOOLKIT_BY_INTEREST` in `functions/_letters.js`). A code holder's welcome is
+the code letter itself.
 `/mentor` shows which tools each founder opened and their day in the 12 days.
 The North Star has the Growth Toolkit in its left bar. The 12-day letters need
 the hourly cron in `wrangler.toml` (`[triggers]`), which runs `JOBS` in
@@ -234,5 +241,5 @@ hears), rendered by the real letter builders for a sample founder, Sam. With
 the exploraself repo, the assessment results letters of exploraself.com are
 drawn too (bundled with esbuild from that repo; set `ESBUILD=` to its path if
 it is not in that repo's node_modules). The page lives in /internal,
-Promotion. AGENTS.md rule 13 keeps it current; tests/email-map.test.mjs
+Promotion. AGENTS.md rule 14 keeps it current; tests/email-map.test.mjs
 fails when a letter is missing.

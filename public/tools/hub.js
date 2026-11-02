@@ -53,6 +53,9 @@ async function arrive() {
 draw();
 arrive();
 if (A.joined()) {
+  // Opening the toolkit with an account: the welcome letter, once per address.
+  const tz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; } })();
+  fetch('/api/tools', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: A.token(), step: 'hello', tz }) }).catch(() => {});
   fetch(`/api/tools?t=${encodeURIComponent(A.token())}`).then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.ok) draw(d.used || {}, d.course); }).catch(() => {});
 }
 import('/profile-menu.js').then((m) => m.mount($('pmhost'), { guest: true })).catch(() => {});

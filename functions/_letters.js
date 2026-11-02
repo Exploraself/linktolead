@@ -207,19 +207,45 @@ export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {
   ], offerFor('launchpad-welcome', to, tier, offer), close('launchpad-welcome', { ...o, to })) };
 }
 
-/** "tools-welcome": sent once, when the account is made from the Growth
- *  Toolkit (/runway/, /bottleneck/, /off-switch/, /12-days/, /toolkit/,
- *  /tools/). They came for a tool, so the letter opens the toolkit, not the
- *  Launchpad. `path` is the tool they came from, or the Tools page. */
-export function toolsWelcome(base, { first, to = '', tier, offer, path = '/tools/', ...o } = {}) {
+/** The one promotion in the Growth Toolkit welcome, matched to the founder
+ *  (Alexandru, 2 Nov 2026): by the tool they opened, which says what is on
+ *  their mind today; on the Tools page itself, by what they said they want
+ *  most from the business. Only free things on exploraself.com: an
+ *  assessment, an ebook or an article. Never the paid Unshakeable. */
+const ES = 'https://exploraself.com';
+export const TOOLKIT_OFFERS = {
+  first100: { name: 'First 100 Clients assessment', line: () => ['When the numbers are tight, clients are the lever. The First 100 Clients assessment is free and takes ten minutes: ', link(`${ES}/first-100-clients`)] },
+  twoweek: { name: 'The Two-Week Test', line: () => ['Could your business run two weeks without you? The Two-Week Test is free: twenty plain questions, and you see what breaks first. ', link(`${ES}/two-week-test`)] },
+  tower: { name: 'Article: Lead from the tower', line: () => ['If the work keeps eating your evenings, read Lead from the tower: why focus is the first skill of leadership. ', link(`${ES}/resources/lead-from-the-tower`)] },
+  unbound: { name: 'The Inner Boardroom assessment', line: () => ['Who really makes your business decisions? The Inner Boardroom assessment is free, and its ebook comes with it: ', link(`${ES}/unbound`)] },
+  conversations: { name: 'Article: Win your first 100 perfect clients', line: () => ['On camera or on a call, people buy what they understand. Read Win your first 100 perfect clients with better conversations: ', link(`${ES}/resources/first-100-perfect-clients-communication-problem`)] },
+  eq: { name: 'The EQ Dividend assessment', line: () => ['A team you can trust starts with how you lead under pressure. The EQ Dividend is free: twenty statements, five dividends. ', link(`${ES}/eq`)] },
+};
+/** Tool → offer, then the founder's answer to "What do you want most from
+ *  the business?" (public/forms.js INTERESTS) → offer. */
+export const TOOLKIT_BY_TOOL = { 'runway': 'first100', 'bottleneck': 'twoweek', 'off-switch': 'tower', '12-days': 'unbound', 'teleprompter': 'conversations' };
+export const TOOLKIT_BY_INTEREST = { 'More free time': 'twoweek', 'Higher income': 'first100', 'Steady clients': 'conversations', 'A team I trust': 'eq', 'Clarity on direction': 'unbound', 'A new market': 'first100' };
+export const toolkitOfferKey = ({ tool = '', interest = '' } = {}) => TOOLKIT_BY_TOOL[tool] || TOOLKIT_BY_INTEREST[interest] || 'twoweek';
+export const BROADCAST = 'https://broadcast.exploraself.com';
+
+/** "tools-welcome": "Welcome to the Growth Toolkit" (Alexandru, 2 Nov 2026).
+ *  Sent once per address, the first time an account opens the toolkit: made
+ *  from a toolkit page, or an existing account opening /tools/ or a tool
+ *  (functions/_tools.js welcomeOnce). `path` is the tool they came from, or
+ *  the Tools page; `tool` and `interest` choose the P.S. */
+export function toolsWelcome(base, { first, to = '', tier, offer, path = '/tools/', tool = '', interest = '', ...o } = {}) {
   const home = /^\/[a-z0-9-]+\/$/.test(path) ? path : '/tools/';
-  return { subject: 'Your Growth Toolkit is open', ...letter(base, [
+  const t = tool || (home !== '/tools/' ? home.slice(1, -1) : '');
+  const ps = offer !== undefined ? offer : TOOLKIT_OFFERS[toolkitOfferKey({ tool: t, interest })];
+  return { subject: 'Welcome to the Growth Toolkit', ...letter(base, [
     hi(first),
-    'You’re in. Your free Growth Toolkit is open, and I’m really glad you’re here.',
+    'Welcome to the Growth Toolkit. Here we go, to your growth.',
     'Each tool reads your own numbers and gives you one move for this week. Start with the one that brought you here.',
     button(`${base}${home}`, home === '/tools/' ? 'Open my Growth Toolkit →' : 'Open my tool →'),
-    ['Every tool is on one page, in two lists, Personal leadership and Business: ', link(`${base}/tools/`), '. When you want the whole picture, The Leader’s North Star is free with the same account.'],
-  ], offerFor('launchpad-welcome', to, tier, offer), close('launchpad-welcome', { ...o, to })) };
+    ['Every tool is on one page, in two lists, Personal leadership and Business: ', link(`${base}/tools/`)],
+    ['Any question? Ask your mentor at your Base Camp: ', link(`${base}/ground-plan/#ask`, 'Ask Alexandru')],
+    ['And when you have a quiet minute, read the Broadcast: ', link(BROADCAST)],
+  ], ps, close('launchpad-welcome', { ...o, to })) };
 }
 
 /** "toolkit-code": someone without an account asked to open the Growth

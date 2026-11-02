@@ -117,7 +117,7 @@ easy-to-read font, with few colours, one thing at a time: the way Google's
 sign-in asks for one field per screen. A number that scares is left out:
 show this level's twenty actions, never "240 actions".
 
-## 12. Design the journey, and let a small picture speak (Alexandru, 2 Nov 2026)
+## 13. Design the journey, and let a small picture speak (Alexandru, 2 Nov 2026)
 
 Think as a designer about the founder's comfort, on every page, letter and
 deck. The journey makes sense in every direction: from any place, the
@@ -132,7 +132,12 @@ carry the meaning too (icons are hidden from screen readers). One icon set
 per surface, drawn in the text colour; the toolkit's lives in
 public/tools/icons.js.
 
-## 13. Every email is on the map (Alexandru, 2 Nov 2026)
+## 14. Every material follows a change; every email is on the map (Alexandru, 2 Nov 2026)
+
+When anything merges, everything tied to it is updated in the same work, or
+right after: the email journey map, the emails, the /internal decks, the
+README, the START HERE doc. A change is not finished while a page, letter or
+deck still describes the old way.
 
 The email journey map in exploraself.com/internal (Promotion) shows every
 letter a founder can get, in the order they meet them, drawn from the code

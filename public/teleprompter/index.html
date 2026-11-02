@@ -14,7 +14,13 @@
      Scripts and settings stay on this device. -->
 <script type="module">
   import { mayOpen } from '/tools/gate.js';
+  import * as A from '/account.js';
   if (!mayOpen()) location.replace('/tools/?open=teleprompter');
+  // With an account: logged as opened, and the toolkit welcome once per address.
+  else if (A.joined()) {
+    let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch {}
+    fetch('/api/tools', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: A.token(), tool: 'teleprompter', step: 'open', tz }) }).catch(() => {});
+  }
 </script>
 <style>
 /* Fonts from this site (SIL Open Font Licence). No third-party requests. */

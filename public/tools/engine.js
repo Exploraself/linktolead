@@ -31,7 +31,8 @@ const visibleQs = (a) => t.qs.filter((q) => !q.cond || q.cond(a));
 const keysOf = () => ['cover', ...visibleQs(st.a).map((q) => 'q:' + q.id), 'insight', 'result'];
 const val = (x, a) => (typeof x === 'function' ? x(a) : x);
 const done = () => visibleQs(st.a).every((q) => q.optional || st.a[q.id] !== undefined);
-const api = (path, payload) => fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: A.token(), tool: KEY, ...payload }) }).catch(() => null);
+const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; } })();
+const api = (path, payload) => fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: A.token(), tool: KEY, tz: TZ, ...payload }) }).catch(() => null);
 
 function go(dir) {
   const ks = keysOf(), i = ks.indexOf(st.key);

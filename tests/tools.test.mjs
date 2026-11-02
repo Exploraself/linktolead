@@ -37,7 +37,7 @@ for (const k of ['runway', 'bottleneck', 'off-switch']) {
   const html = read(`public/${k}/index.html`);
   ok(html.includes(`data-tool="${k}"`) && html.includes('/tools/engine.js') && html.includes('/theme.js') && html.includes('id="cardcv"'), `${k}: page loads the engine, theme and card canvas`);
 }
-ok(TOOLS_TAG === 'TOOLS', 'the Mailchimp tag is Alexandru’s own name: TOOLS');
+ok(TOOLS_TAG === 'Growth Toolkit', 'the Mailchimp tag is Alexandru’s own name: Growth Toolkit (it replaced TOOLS)');
 ok(CATEGORIES.map((g) => g.name).join() === 'Personal leadership,Business', 'two lists: Personal leadership and Business');
 ok(CATALOG.filter((c) => c.category === 'personal').map((c) => c.key).join() === 'off-switch,12-days,bottleneck', 'Personal leadership: the off-switch check, the 12 days, the bottleneck test');
 ok(CATALOG.filter((c) => c.category === 'business').map((c) => c.key).join() === 'runway,teleprompter,reel-structure,branding-structure', 'Business: cash runway, the teleprompter, then Reel and branding structure');
@@ -117,11 +117,17 @@ const maria = { first: 'Maria', last: 'Rossi', email: 'maria@example.com', conse
 let [st, j] = await jsonOf(await signup({ request: post('/api/signup', maria), env }));
 const token = j.token;
 ok(st === 200 && token, 'a full account from a tool');
-ok(sent.length === 1 && sent[0].body.subject === 'Your Growth Toolkit is open' && sent[0].body.html.includes(`${B}/runway/`), 'tool sign-up: the Growth Toolkit welcome, opening the tool they came from');
+ok(sent.length === 1 && sent[0].body.subject === 'Welcome to the Growth Toolkit' && sent[0].body.html.includes(`${B}/runway/`), 'tool sign-up: the Growth Toolkit welcome, opening the tool they came from');
+ok(sent[0].body.text.includes('Here we go, to your growth.') && sent[0].body.text.includes('Ask your mentor') && sent[0].body.text.includes('https://broadcast.exploraself.com'), 'the welcome: his words, Ask your mentor, and the Broadcast');
+ok(sent[0].body.text.includes('P.S. When the numbers are tight') && sent[0].body.text.includes('exploraself.com/first-100-clients'), 'came from Cash runway: the P.S. is about the numbers (First 100 Clients)');
+ok(!/\$9\.99|Unshakeable/.test(sent[0].body.text.split('P.S.')[1].split('Free assessments')[0]), 'the toolkit P.S. is free, never the paid Unshakeable');
 ok(toolsWelcome(B, { first: 'X', path: 'javascript:alert(1)' }).html.includes(`${B}/tools/`), 'toolkit welcome: a strange path falls back to the Tools page');
 
+sent = fakeResend();
 [st, j] = await jsonOf(await toolsPost({ request: post('/api/tools', { token, tool: 'runway', step: 'open' }), env }));
 ok(st === 200 && DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id = ? AND kind = 'tool-open' AND detail = 'runway'").get(token).n === 1, '/api/tools open: logged');
+await toolsPost({ request: post('/api/tools', { token, step: 'hello' }), env });
+ok(sent.length === 0, 'made from a tool, then opening tools and the Tools page: no second welcome');
 [st] = await jsonOf(await toolsPost({ request: post('/api/tools', { token, tool: 'payroll', step: 'open' }), env }));
 ok(st === 404, '/api/tools: an unknown tool is refused');
 [st] = await jsonOf(await toolsPost({ request: post('/api/tools', { token: 'x'.repeat(48), tool: 'runway', step: 'open' }), env }));
@@ -184,6 +190,45 @@ ok(!read('public/profile-menu.js').includes("'/tools/'"), 'not in the profile me
 ok(/<aside class="side"[\s\S]*class="tk-link" href="\/tools\/"[\s\S]*Growth Toolkit[\s\S]*<\/aside>/.test(read('public/northstar/index.html')), 'North Star: the Growth Toolkit in the left bar');
 const tp = read('public/teleprompter/index.html');
 ok(tp.includes("location.replace('/tools/?open=teleprompter')") && tp.includes('/assets/fonts/inter.woff2') && !tp.includes('Promotion bank'), 'teleprompter: in the toolkit, asks the way in first, fonts from this site');
+
+// ── An existing account opens the toolkit: the welcome, once ───────────────
+{
+  sent = fakeResend();
+  const ana = { first: 'Ana', last: 'Pop', email: 'ana@example.com', consent: true, source: 'home', type: 'full', company: 'Pop Ltd', interest: 'A team I trust',
+    industry: 'Professional services', password: 'longenough1', confirm: 'longenough1', landing: 'road1', tz: NY };
+  const [, a] = await jsonOf(await signup({ request: post('/api/signup', ana), env }));
+  ok(sent.length === 1 && sent[0].body.subject !== 'Welcome to the Growth Toolkit', 'an account made elsewhere: its own welcome, not the toolkit one');
+  sent = fakeResend();
+  await toolsPost({ request: post('/api/tools', { token: a.token, step: 'hello', tz: NY }), env });
+  ok(sent.length === 1 && sent[0].body.subject === 'Welcome to the Growth Toolkit' && sent[0].body.to[0] === 'ana@example.com', 'existing account opens the Tools page: the Growth Toolkit welcome');
+  ok(sent[0].body.text.includes('exploraself.com/eq') && sent[0].body.text.includes('P.S. A team you can trust'), 'on the Tools page, the P.S. follows what they want most (a team they trust → The EQ Dividend)');
+  ok(sent[0].body.headers['List-Unsubscribe'] && sent[0].body.text.includes('You opened the Growth Toolkit'), 'the welcome says why it came, and how to unsubscribe');
+  sent = fakeResend();
+  await toolsPost({ request: post('/api/tools', { token: a.token, tool: 'bottleneck', step: 'open' }), env });
+  await toolsPost({ request: post('/api/tools', { token: a.token, step: 'hello' }), env });
+  ok(sent.length === 0, 'once per address: no second welcome');
+
+  sent = fakeResend();
+  const ben = { ...ana, first: 'Ben', email: 'ben@example.com', consent: false };
+  const [, b] = await jsonOf(await signup({ request: post('/api/signup', ben), env }));
+  await toolsPost({ request: post('/api/tools', { token: b.token, tool: 'off-switch', step: 'open' }), env });
+  ok(sent.length === 0, 'no yes to letters: no welcome');
+
+  const cara = { ...ana, first: 'Cara', email: 'cara@example.com', interest: 'Higher income' };
+  const [, c] = await jsonOf(await signup({ request: post('/api/signup', cara), env }));
+  sent = fakeResend();
+  await toolsPost({ request: post('/api/tools', { token: c.token, tool: 'bottleneck', step: 'open' }), env });
+  ok(sent.length === 1 && sent[0].body.html.includes(`${B}/bottleneck/`) && sent[0].body.text.includes('exploraself.com/two-week-test'), 'opening a tool first: the P.S. follows the tool (the bottleneck test → The Two-Week Test)');
+  ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE kind = 'toolkit-welcome'").get().n === 2, 'each welcome is logged');
+
+  sent = fakeResend(false);
+  const dan = { ...ana, first: 'Dan', email: 'dan@example.com' };
+  const [, d] = await jsonOf(await signup({ request: post('/api/signup', dan), env }));
+  await toolsPost({ request: post('/api/tools', { token: d.token, step: 'hello' }), env });
+  sent = fakeResend();
+  await toolsPost({ request: post('/api/tools', { token: d.token, step: 'hello' }), env });
+  ok(sent.length === 1 && sent[0].body.subject === 'Welcome to the Growth Toolkit', 'a failed send is tried again on the next visit');
+}
 
 // ── The Growth Toolkit without an account: a code by email ─────────────────
 const env2 = { DB: fakeD1(), RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Rome', TOOLKIT_EMAILS: 'friend@example.com, Partner@Example.com' };

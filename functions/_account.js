@@ -28,12 +28,27 @@ export async function profile(D, studentId, { industry, consent, source } = {}) 
 
 export const unsubLink = (base, p) => (p && p.unsub_id ? `${base}/api/unsubscribe?u=${p.unsub_id}` : '');
 
+/** The Growth Toolkit welcome goes once per address (functions/_tools.js
+ *  welcomeOnce): the first caller claims it here. */
+export async function claimWelcome(D, email, how) {
+  await D.prepare('CREATE TABLE IF NOT EXISTS toolkit_welcome (email TEXT PRIMARY KEY, sent_at TEXT NOT NULL, how TEXT)').run();
+  const r = await D.prepare('INSERT OR IGNORE INTO toolkit_welcome (email, sent_at, how) VALUES (?,?,?)').bind(String(email || '').trim().toLowerCase(), now(), how).run();
+  return !!(r && r.meta && r.meta.changes);
+}
+
 /** The welcome: sent once, when the account is made. A free tool (door
  *  'tools', `path` the tool's page) gets the toolkit welcome; a North Star page
  *  the North Star welcome; every other door the Launchpad welcome. */
 export async function sendWelcome(env, base, { email, first, p, D, tz, landing = '', door = '', path = '' }) {
   const ctx = D && p ? await letterContext(D, p.student_id, tz) : {};
   const tools = door === 'tools';
+  // Made from a toolkit page: this is their Growth Toolkit welcome, so a
+  // first tool open right after does not send a second one.
+  if (tools && D) {
+    if (!(await claimWelcome(D, email, 'signup'))) return { ok: false, why: 'Already welcomed to the Growth Toolkit.' };
+    const row = p && p.student_id ? await D.prepare('SELECT interest FROM student_profile WHERE student_id = ?').bind(p.student_id).first().catch(() => null) : null;
+    ctx.interest = (row && row.interest) || '';
+  }
   const welcome = tools ? toolsWelcome : NORTH_STAR_LANDINGS.includes(landing) ? northStarWelcome : launchpadWelcome;
   return send(env, { to: email, ...welcome(base, { first, to: email, ...ctx, ...(tools ? { path } : {}) }),
     why: 'You created a free ExploraSelf account at linktolead.exploraself.com.', unsubUrl: unsubLink(base, p) });
