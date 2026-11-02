@@ -20,7 +20,7 @@ ok(V.firstOf({}, 1) === 0 && V.stepsOf(1)[V.firstOf({}, 1)][1] === 'welcome' && 
 // ── Reform: every tap answer and every slider gets a reply ─────────────────
 ok(L1.d.every((D) => D.t.why && D.t.why.length === D.t.o.length && D.t.why.every((x) => x.length > 20)), 'one reply for each of the 18 tap answers');
 ok(L1.d.reduce((n, D) => n + D.t.why.length, 0) === 18, 'exactly 18 replies in Level 01');
-ok(V.tapReply(1, 0, 1).startsWith('Someone will always work longer') && V.tapReply(1, 0, null) === '' && V.tapReply(7, 0, 0) === '', 'the reply follows the tap; nothing before a tap, nothing where none is written');
+ok(V.tapReply(1, 0, 1).startsWith('Someone will always work longer') && V.tapReply(1, 0, null) === '' && V.tapReply(13, 0, 0) === '', 'the reply follows the tap; nothing before a tap, nothing where none is written');
 ok(V.slideReply(1, 0, 0).startsWith('Never') && V.slideReply(1, 0, 8) === 'The rule chose for you most days. Those are days you did not choose.', 'the slider reply reads the number in words');
 ok(V.slideReply(1, 1, 60).startsWith('60% of last week') && V.slideReply(1, 2, 9).startsWith('You know your numbers') && V.slideReply(1, 3, 1).startsWith('1 ask in 30 days'), 'each Level 01 slider answers in its own terms');
 const text = [...L1.d.flatMap((D) => D.t.why), ...[0, 1, 2, 3].map((d) => V.planOf(1, d).idea)].join(' ');
@@ -53,23 +53,23 @@ const css = fs.readFileSync('public/crown.css', 'utf8');
 ok(['.cw-idea{', '.cw-reply{', '.cw-chk{', '.cw-small{', '.cw-why summary:focus-visible'].every((c) => css.includes(c)), 'styled, with a visible focus');
 
 // ── The same standard in every level reviewed so far ─────────────────────────
-// Chapter I (Start with you): Levels 01–05. The levels after it keep their order
-// until their chapter is written.
-const REVIEWED = [1, 2, 3, 4, 5];
+// Chapter I (Start with you): Levels 01–05; Chapter II (Run the business):
+// 06–09. The levels after them keep their order until their chapter is written.
+const REVIEWED = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 const wc = (s) => String(s).split(/\s+/).filter(Boolean).length;
 const each = (fn) => REVIEWED.every((lv) => V.LEVELS4[lv - 1].d.every((D, d) => fn(D, d, lv, V.planOf(lv, d))));
-ok(each((D, d, lv, p) => p.idea && wc(p.idea) <= 22 && wc(p.idea) < wc(p.ins)), 'Levels 01–05: every area opens on its idea, in one short sentence');
-ok(each((D, d, lv) => { const S = V.stepsOf(lv).filter((s) => s[0] === d && s[1] !== 'got'); return S[0][1] === 'idea' && S[1][1] === 'tap'; }), 'the idea comes before the tap, in every area of 01–05 (after last week’s check)');
-ok(V.stepsOf(6).every((s) => s[1] !== 'idea'), 'levels not yet reviewed keep their order');
+ok(each((D, d, lv, p) => p.idea && wc(p.idea) <= 22 && wc(p.idea) < wc(p.ins)), 'Levels 01–09: every area opens on its idea, in one short sentence');
+ok(each((D, d, lv) => { const S = V.stepsOf(lv).filter((s) => s[0] === d && s[1] !== 'got'); return S[0][1] === 'idea' && S[1][1] === 'tap'; }), 'the idea comes before the tap, in every area of 01–09 (after last week’s check)');
+ok(V.stepsOf(10).every((s) => s[1] !== 'idea'), 'levels not yet reviewed keep their order');
 ok(each((D) => D.t.why && D.t.why.length === D.t.o.length && D.t.why.every((x) => x.length > 20 && x.length < 200)), 'a reply to every tap answer, short enough to read at once');
 ok(each((D, d, lv) => { for (let v = D.s.min; v <= D.s.max; v += D.s.step) { const r = V.slideReply(lv, d, v); if (!r || /undefined|NaN|\b0 of\b/.test(r)) return false; } return true; }), 'every slider answers at every value, in words (never “0 of 10”)');
 ok(each((D) => D.ck && Object.keys(D.ck).length && Object.keys(D.ck).every((k) => V.fieldsOf(D).some((f) => f[0] === k) && D.ck[k].ok)), 'every area checks at least one blank, and every check belongs to a blank of its sentence');
 ok(REVIEWED.slice(1).every((lv) => new Set(V.LEVELS4[lv - 1].d.map((D) => D.sz)).size === 4), 'from Level 02, the four areas of a level speak to the four sizes');
-ok([0, 1, 2, 3].every((d) => new Set(REVIEWED.slice(1).map((lv) => V.LEVELS4[lv - 1].d[d].sz)).size === 4), 'and each area meets every size across Levels 02–05 (rule 12)');
+ok([[2, 3, 4, 5], [6, 7, 8, 9]].every((ch) => [0, 1, 2, 3].every((d) => new Set(ch.map((lv) => V.LEVELS4[lv - 1].d[d].sz)).size === 4)), 'and each area meets every size within a chapter: 02–05, 06–09 (rule 12)');
 ok(each((D) => D.x && D.x[0] < D.t.o.length && D.x[1] >= D.s.min && D.x[1] <= D.s.max), 'the example founder’s tap and slide are real answers');
 {
   const words = REVIEWED.flatMap((lv) => V.LEVELS4[lv - 1].d.flatMap((D, d) => [V.planOf(lv, d).idea, ...D.t.why, ...V.fieldsOf(D).map((f) => f[2]), ...D.fb.flat(), ...Object.values(D.ck).flatMap((c) => [c.ok, c.hint || ''])])).join(' ');
-  ok(!/most founders|percentile|average founder|benchmark|compass|incubator|constellation|horoscope/i.test(words), 'Levels 01–05: no “most founders”, no benchmarks, no banned words');
+  ok(!/most founders|percentile|average founder|benchmark|compass|incubator|constellation|horoscope/i.test(words), 'Levels 01–09: no “most founders”, no benchmarks, no banned words');
   ok(!/\b(breathe|take a walk|walk ten minutes)\b/i.test(words), 'no “breathe” or “take a walk” offered as the step (rule 10)');
 }
 {
@@ -82,6 +82,11 @@ ok(each((D) => D.x && D.x[0] < D.t.o.length && D.x[1] >= D.s.min && D.x[1] <= D.
   put(4, 2, 'hour', 'a fair amount'); ok(!V.blankCheck(w2, 4, 2, 'hour').good && V.blankNote(4, 2, 'hour').includes('calculator'), 'the hour is a price, and a calculator does the division (rule 9)');
   put(5, 0, 'proof', 'I stayed calm'); ok(!V.blankCheck(w2, 5, 0, 'proof').good, 'a proof carries its date');
   put(5, 0, 'proof', '14 Nov, I let the team set the price'); ok(V.blankCheck(w2, 5, 0, 'proof').good, 'a dated proof passes');
+  put(6, 1, 'ask', 'Do you agree with me?'); ok(!V.blankCheck(w2, 6, 1, 'ask').good, 'a question that can be answered yes or no is not open');
+  put(6, 1, 'ask', '“What would make this easier for you?”'); ok(V.blankCheck(w2, 6, 1, 'ask').good, 'an open question passes, quotes and all');
+  put(7, 2, 'total', 'a lot'); ok(!V.blankCheck(w2, 7, 2, 'total').good && V.blankNote(7, 2, 'total').includes('calculator'), 'the real cost is an amount, and a calculator does the sum (rule 9)');
+  put(9, 0, 'three', '5'); ok(!V.blankCheck(w2, 9, 0, 'three').good, 'five priorities are too many to come first');
+  put(7, 3, 'where', 'online'); ok(!V.blankCheck(w2, 7, 3, 'where').good, '“online” is not a place where buyers gather');
 }
 
 // ── Examples in dollars, with US names ──────────────────────────────────────
