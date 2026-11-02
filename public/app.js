@@ -660,7 +660,7 @@ function fmWhere(d, kind) {
   return kind === 'week' ? 'Your week' : kind[0] === 'b' ? 'Build it' : 'Your chapter reading';
 }
 /** Everything behind the layer is set aside, so Tab stays inside it. */
-const FM_BEHIND = ['.top', '.skip', '.leaf-l', '#under', '.cw-drawer', '.cw-dveil', '#crown', '.crown-wrap', '#cban', '#libban', 'footer', '.mp'];
+const FM_BEHIND = ['body > .top', 'body > .skip', 'body > .foot', '.leaf-l', '#under', '.cw-drawer', '.cw-dveil', '#crown', '.crown-wrap', '#cban', '#libban', '.mp'];
 function fmInert(on) {
   for (const sel of FM_BEHIND) document.querySelectorAll(sel).forEach((x) => { if (on) x.setAttribute('inert', ''); else x.removeAttribute('inert'); });
 }
@@ -1087,7 +1087,7 @@ function drawBook(focus = true) {
   if (focus) {
     const r = document.querySelector('.leaf-r');
     const f = document.querySelector('#cwr') || document.querySelector('.leaf-r .cw-in:not(.cw-date)')
-      || document.querySelector('.leaf-r .cw-o[aria-pressed="true"]') || document.querySelector('.leaf-r .cw-o') || document.querySelector('.leaf-r .cw-lab');
+      || document.querySelector('.leaf-r .cw-o[aria-pressed="true"]') || document.querySelector('.leaf-r .cw-o') || document.querySelector('.leaf-r .cw-next:not([disabled])') || document.querySelector('.leaf-r .cw-lab');
     if (f) { if (!/^(INPUT|BUTTON)$/.test(f.tagName)) f.setAttribute('tabindex', '-1'); f.focus({ preventScroll: true }); }
     if (r && r.getBoundingClientRect().top < 0) r.scrollIntoView({ block: 'start' });
   }
@@ -1234,6 +1234,7 @@ function dirPane() {
       <p class="mb-step">${i + 1} of ${n} · ${esc(F.label)}</p>
       <h2 class="mb-q"><label for="mb-in">${esc(F.q)}</label></h2>
       <p class="mb-hint" id="mb-hint">${esc(F.hint.replace('{by}', twelveOn()))}</p>
+      ${F.k === 'goalBiz' && !D[F.k] && whereWords(state.work, 'win') ? `<p class="mb-ask">${MB_ASK}<span>In Level 01 you said: “${esc(whereWords(state.work, 'win'))}”. Make it one number, with its date.</span></p>` : ''}
       <input id="mb-in" class="mb-input" type="text" maxlength="300" autocomplete="off" value="${esc(D[F.k])}" placeholder="${esc(F.ph)}" aria-describedby="mb-hint mb-err">
       <p class="mb-err" id="mb-err" role="status"></p>
       ${D[F.k] ? '' : `<p><button type="button" class="mb-text mb-skip" data-dirskip="${i}">Skip for now</button></p>`}
