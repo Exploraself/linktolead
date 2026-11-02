@@ -14,7 +14,10 @@ const cab = fs.readFileSync('public/cabinet.js', 'utf8'), rules = fs.readFileSyn
 ok(['#home', '#programme', '#blueprint', '#library', ''].every((h) => entry({ joined: false, old: false, hash: h }) === 'signin'), 'signed out, every Base Camp address shows sign-in');
 ok(!app.includes("location.replace('/north3/#join')") && app.includes('New here? <a href="/north3/#join">Create your free account →</a>'), 'no sales-page redirect; sign-in still links to a free account');
 
-ok(app.includes('<a class="tbook ttools" href="/tools/">Growth Toolkit</a>'), 'Growth Toolkit in the top menu, to /tools/');
+ok(app.includes('<a class="ttools" href="/tools/">${ICONS.toolkit}Growth Toolkit</a>') && app.includes("import { ICONS } from './tools/icons.js';"), 'Growth Toolkit in the top menu, to /tools/, with its toolbox');
+ok(!app.includes('class="tbook ttools"') && fs.readFileSync('public/style.css', 'utf8').includes('.tnav button,.tnav a.ttools{border:1px solid #5B4835;'), 'it looks like the other menu items, so only the page you are on looks selected');
+ok(app.includes("history.pushState(null, '', location.pathname + location.search + h)") && app.includes("addEventListener('popstate', () => {") && (app.match(/render\(\); remember\(\);/g) || []).length === 2, 'every change of view or level is a step in history; Back and Forward redraw it');
+ok(entry({ joined: true, old: false, hash: '#programme-6' }) === 'work' && app.includes('#programme-${level}'), 'a level in the address opens that level');
 ok(/@media \(min-width:1180px\)\{\s*body\.inwork \.cw-drawer\{top:var\(--topbar,72px\);width:300px/.test(css) && css.includes('body.inwork .cw{margin-left:300px;max-width:none}'), 'wide screens: the twelve levels stay on the left, under the top bar');
 ok(css.includes('.cw-all[data-go="rail"]{display:inline-flex') && css.includes('min-height:40px'), 'phones: the levels button is big enough to see');
 ok(app.includes("document.documentElement.style.setProperty('--topbar'") && app.includes("addEventListener('resize', topbar"), 'the bar sits under the top bar at every width');

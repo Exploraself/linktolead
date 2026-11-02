@@ -43,9 +43,12 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .bsmall{display:block;font:520 9px/1 var(--body);letter-spacing:3.4px;color:#C0B19A}
 .bname{display:block;font-family:var(--display);font-size:23px;margin-top:4px;letter-spacing:-.3px}
 .tnav{display:flex;gap:8px;flex-wrap:wrap}
-.tnav button{border:1px solid #5B4835;border-radius:999px;padding:8px 15px;font-size:11.5px;font-weight:520;color:#E7DCC7}
-.tnav button:hover{border-color:var(--gold);color:var(--gold)}
+.tnav button,.tnav a.ttools{border:1px solid #5B4835;border-radius:999px;padding:8px 15px;font-size:11.5px;font-weight:520;color:#E7DCC7}
+.tnav button:hover,.tnav a.ttools:hover{border-color:var(--gold);color:var(--gold)}
 .tnav button[aria-current="page"]{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+/* Growth Toolkit: a link to its own page, drawn like the other menu items, with its toolbox. */
+.tnav a.ttools{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.tnav a.ttools svg{width:14px;height:14px;flex:none}
 
 /* bands */
 .band{border-top:1px solid var(--line)}
@@ -735,7 +738,7 @@ body.inwork .foot{display:none}
   .tnav{grid-column:1/-1;grid-row:2;flex-wrap:nowrap;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
     margin-inline:calc(-1 * max(18px,env(safe-area-inset-left,0px)));padding-inline:max(18px,env(safe-area-inset-left,0px))}
   .tnav::-webkit-scrollbar{display:none}
-  .tnav button,.tnav a.tbook{flex:none;white-space:nowrap;padding:6px 12px;font-size:11px}
+  .tnav button,.tnav a.tbook,.tnav a.ttools{flex:none;white-space:nowrap;padding:6px 12px;font-size:11px}
   .tnav a.tbook svg{width:13px;height:13px}
 }
 @media(min-width:1280px){
@@ -747,7 +750,7 @@ body.inwork .foot{display:none}
   .top .wrap{max-width:1180px}
   .topin{flex-wrap:nowrap;gap:16px}
   .tnav{flex-wrap:nowrap;gap:6px}
-  .tnav button,.tnav a.tbook{white-space:nowrap;padding:8px 13px}
+  .tnav button,.tnav a.tbook,.tnav a.ttools{white-space:nowrap;padding:8px 13px}
 }
 @media(min-width:1280px) and (max-width:1499px){
   .topin{gap:12px}
@@ -756,11 +759,11 @@ body.inwork .foot{display:none}
   /* Seven items since "My Blueprint" joined (2 Nov 2026): less padding, so
      the profile button stays on screen. */
   .tnav{gap:4px}
-  .tnav button,.tnav a.tbook{padding:7px 7px;font-size:11px}
+  .tnav button,.tnav a.tbook,.tnav a.ttools{padding:7px 7px;font-size:11px}
   .topin{gap:10px}
 }
 @media(min-width:1500px) and (max-width:1699px){
-  .tnav button,.tnav a.tbook{padding:8px 10px}
+  .tnav button,.tnav a.tbook,.tnav a.ttools{padding:8px 10px}
 }
 @media(min-width:1280px){.bname{white-space:nowrap}}
 

@@ -25,7 +25,7 @@ export function entry({ joined, old, hash = '' }) {
   if (hash === '#blueprint') return 'blueprint';
   if (hash === '#launchpad') return 'launchpad';
   if (hash === '#ask') return 'ask';
-  if (hash === '#programme') return 'work';
+  if (hash === '#programme' || /^#programme-\d{1,2}$/.test(hash)) return 'work';
   if (hash === '#home' || hash === '#account') return 'home';
   return old ? 'work' : 'home';
 }

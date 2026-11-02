@@ -21,6 +21,7 @@ import { launchpadCardHTML, downloadLaunchpadPlan, launchpadOnlineHTML, launchpa
 import { slot as googleSlot } from './google.js';
 import { videoBlock } from './video-talk.js';
 import * as M from './music.js';
+import { ICONS } from './tools/icons.js';
 import { LEVELS4, CHAPTERS4, DOMS, UNITS, CLOSES, wkey, tapOf, slideOf, wordOf, shown, domainUnits, levelUnits,
   lines4, sentence, reading, fieldsOf, fill, stepsOf, stepDone, firstOf, planOf, plainOf, doneOf, takeOf, notyetOf,
   sureOf, gotOf, GOT, tally, countedFor, READ_QUOTES, carriedFrom, blueprint, BUILD4, fillB, buildPage, stepsWritten, SESSIONS4,
@@ -52,6 +53,8 @@ const signedOut = (() => { try { return new URLSearchParams(location.search).get
 let resetAsk = (() => { try { return new URLSearchParams(location.search).get('reset') === '1'; } catch { return false; } })();
 let view = linkCode ? 'loading' : entry({ joined: account.joined(), old: oldEntrance, hash: hashNow });
 let level = 1, dom = 'self';
+// A level in the address (#programme-6, from Back and Forward or a link) opens that level.
+{ const m = /^#programme-(\d{1,2})$/.exec(hashNow); if (m) level = Math.min(12, Math.max(1, +m[1])); }
 /** The North Star record from the account, the notes, and whether a password is set. */
 let compassRec = null, inbox = null, hasPassword = false, replyTo = null;
 /** The "Ask Alexandru" thread (null until loaded), and the stage picker. */
@@ -1374,9 +1377,29 @@ function emphasisName(st, lv) {
 function drawNav() {
   const unread = inbox ? inbox.unread : 0, answers = askUnread();
   $('#tnav').innerHTML = account.joined() && !['signin', 'redirect', 'loading'].includes(view)
-    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Base Camp${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="blueprint" ${view === 'blueprint' ? 'aria-current="page"' : ''}>My Blueprint</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button><a class="tbook ttools" href="/tools/">Growth Toolkit</a><button type="button" data-go="ask" ${view === 'ask' ? 'aria-current="page"' : ''}>Ask Alexandru${answers ? `<span class="tdot" aria-label="${answers} new ${answers === 1 ? 'answer' : 'answers'}"></span>` : ''}</button>${holds(tierNow(), 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
+    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Base Camp${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="blueprint" ${view === 'blueprint' ? 'aria-current="page"' : ''}>My Blueprint</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button><a class="ttools" href="/tools/">${ICONS.toolkit}Growth Toolkit</a><button type="button" data-go="ask" ${view === 'ask' ? 'aria-current="page"' : ''}>Ask Alexandru${answers ? `<span class="tdot" aria-label="${answers} new ${answers === 1 ? 'answer' : 'answers'}"></span>` : ''}</button>${holds(tierNow(), 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
     : '';
 }
+
+/** Back and Forward walk Base Camp (Alexandru, 2 Nov 2026; rule 13): every
+ *  change of view, or of level, is a step in the browser's history, so Back
+ *  goes to the last place inside Base Camp instead of leaving it. */
+const HASHES = { home: '#home', blueprint: '#blueprint', library: '#library', ask: '#ask', launchpad: '#launchpad' };
+function remember() {
+  const h = view === 'work' ? `#programme-${level}` : HASHES[view];
+  if (!h || location.hash === h) return;
+  try { history.pushState(null, '', location.pathname + location.search + h); } catch { /* old browser */ }
+}
+addEventListener('popstate', () => {
+  if (!account.joined()) return;
+  const h = location.hash, m = /^#programme-(\d{1,2})$/.exec(h);
+  if (m) { level = Math.min(12, Math.max(1, +m[1])); dom = 'self'; qi = null; view = 'work'; }
+  else view = entry({ joined: true, old: oldEntrance, hash: h });
+  bpDoc = false; dirAt = null; dirBack = false;
+  document.body.classList.remove('railopen', 'crownopen', 'stepsopen');
+  render(); window.scrollTo({ top: 0, behavior: 'instant' });
+  if (view === 'ask') openAsk();
+});
 
 /** The top bar's height, so the always-on level bar sits right under it. */
 function topbar() {
@@ -1579,7 +1602,7 @@ document.addEventListener('click', (e) => {
   if (b.dataset.go === 'blueprint') { bpDoc = false; dirAt = null; dirBack = false; }
   if (b.dataset.go === 'library') bannerDone();
   if (b.dataset.go) {
-    view = b.dataset.go; document.body.classList.remove('railopen'); render();
+    view = b.dataset.go; document.body.classList.remove('railopen'); render(); remember();
     window.scrollTo({ top: 0, behavior: 'instant' });
     if (view === 'ask') openAsk();
     return;
@@ -1613,7 +1636,7 @@ document.addEventListener('click', (e) => {
   if (b.dataset.level) {
     level = +b.dataset.level; dom = 'self'; view = 'work'; qi = null;
     document.body.classList.remove('railopen');
-    render(); window.scrollTo({ top: 0, behavior: 'instant' }); return;
+    render(); remember(); window.scrollTo({ top: 0, behavior: 'instant' }); return;
   }
   if (b.dataset.dom) { dom = b.dataset.dom; qi = null; redrawModule(); return; }
 });
