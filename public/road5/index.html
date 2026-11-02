@@ -52,11 +52,9 @@ h1 i,h2 i{font-style:italic}
 /* hero */
 .hero .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:56px 72px;padding-top:clamp(48px,8vw,108px);padding-bottom:clamp(64px,9vw,116px)}
 .hero .txt{flex:1 1 520px;min-width:0;display:flex;flex-direction:column;gap:26px}
-.hero figure{flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:14px}
 .ph{position:relative;aspect-ratio:4/5;overflow:hidden;background:#0B0907}
 .ph img{width:100%;height:100%;object-fit:cover;object-position:52% 20%;display:block}
 .ph::after{content:"";position:absolute;inset:14px;border:1px solid rgba(214,191,143,.35);pointer-events:none}
-.hero figcaption{display:flex;justify-content:space-between;gap:12px;font-size:12px;letter-spacing:.18em;color:#A99C86}
 .go{display:inline-flex;align-items:center;justify-content:center;gap:14px;min-height:58px;padding:0 32px;background:var(--bone);color:var(--ink);font:500 16px/1.2 var(--sans);text-decoration:none;transition:background .3s}
 .go:hover{background:#fff}
 .go span{transition:transform .3s}.go:hover span{transform:translateX(5px)}
@@ -153,12 +151,19 @@ blockquote i{color:var(--gl)}
 .plan{max-width:560px;margin:8px auto 4px}
 .plan .lbl{font-size:15px}
 @media(max-width:600px){.hz .lbl{display:none}.plan .lbl{font-size:20px}}
+.top-plan{flex:1 1 380px;min-width:0;display:flex;align-items:center}
+.top-plan .plan{margin:0 auto;max-width:520px}
+.top-plan .draw{stroke-dasharray:1;stroke-dashoffset:1;animation:drawIn 2.4s cubic-bezier(.3,.6,.2,1) .3s forwards}
+.top-plan .lbl,.top-plan .fill{opacity:0;animation:fadeIn 1s ease 1.8s forwards}
+@keyframes drawIn{to{stroke-dashoffset:0}}
+@keyframes fadeIn{to{opacity:1}}
+.alx-ph{margin:0 0 10px;max-width:280px}
+.alx-ph .ph{aspect-ratio:4/5}
 /* quiet motion */
 .js .rv{opacity:0;transform:translateY(18px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
 .js .rv.in{opacity:1;transform:none}
-.hero .ph img{animation:settle 1.6s ease both}
 @keyframes settle{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){.js .rv .draw{stroke-dashoffset:0;transition:none}.js .rv .lbl,.js .rv .fill{opacity:1;transition:none}html{scroll-behavior:auto}.js .rv{opacity:1;transform:none;transition:none}.hero .ph img{animation:none}.stick,.go,.go span{transition:none}}
+@media(prefers-reduced-motion:reduce){.top-plan .draw{animation:none;stroke-dashoffset:0}.top-plan .lbl,.top-plan .fill{animation:none;opacity:1}.js .rv .draw{stroke-dashoffset:0;transition:none}.js .rv .lbl,.js .rv .fill{opacity:1;transition:none}html{scroll-behavior:auto}.js .rv{opacity:1;transform:none;transition:none}.stick,.go,.go span{transition:none}}
 </style>
 </head>
 <body>
@@ -177,10 +182,21 @@ blockquote i{color:var(--gl)}
     <p class="meta">Online · Tuesday, Wednesday or Thursday afternoon, Rome time</p>
     <p class="gift"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4.5" rx="1"/><path d="M5 13v7.5h14V13M12 8.5v12"/><path d="M12 8.5C10.4 4.8 6.4 4.3 6.4 6.8c0 1.7 3.2 1.7 5.6 1.7Zm0 0c1.6-3.7 5.6-4.2 5.6-1.7 0 1.7-3.2 1.7-5.6 1.7Z"/></svg>And a gift from Alexandru, given to you in the call.</p>
   </div>
-  <figure>
-    <div class="ph"><img src="/cabinet/alexandru.jpg" alt="Alexandru Cojocari" width="640" height="512" decoding="async" fetchpriority="high"></div>
-    <figcaption><span>ALEXANDRU COJOCARI</span><span>ROME</span></figcaption>
-  </figure>
+  <div class="top-plan">
+    <svg class="ill plan" viewBox="0 0 640 300" role="img" aria-label="A plan of the Boardroom: one table, your seat at one end, Alexandru at the other.">
+    <path class="draw" pathLength="1" d="M40 30H250M390 30H600V270H140M80 270H40V30" stroke="rgba(214,191,143,.5)" stroke-width="1.2" fill="none"/>
+    <path class="draw" pathLength="1" d="M250 30a70 70 0 0 0 140 0" stroke="rgba(214,191,143,.35)" stroke-width="1" fill="none"/>
+    <path class="draw" pathLength="1" d="M80 270a60 60 0 0 1 60-60" stroke="rgba(214,191,143,.35)" stroke-width="1" fill="none"/>
+    <rect class="draw" pathLength="1" x="190" y="118" width="260" height="74" rx="2" stroke="#D6BF8F" stroke-width="1.4" fill="none"/>
+    <rect class="draw" pathLength="1" x="198" y="126" width="244" height="58" rx="1" stroke="rgba(214,191,143,.4)" stroke-width="1" fill="none"/>
+    <rect class="fill" x="128" y="133" width="40" height="44" rx="6" fill="#D6BF8F"/>
+    <rect class="draw" pathLength="1" x="472" y="133" width="40" height="44" rx="6" stroke="#D6BF8F" stroke-width="1.4" fill="none"/>
+    <path class="draw" pathLength="1" d="M190 222H450M190 216v12M450 216v12" stroke="rgba(214,191,143,.6)" stroke-width="1" fill="none"/>
+    <text class="lbl" x="148" y="112" text-anchor="middle">YOUR SEAT</text>
+    <text class="lbl" x="492" y="112" text-anchor="middle">ALEXANDRU</text>
+    <text class="lbl" x="320" y="250" text-anchor="middle">ONE HOUR</text>
+  </svg>
+  </div>
 </div></section>
 
 <section class="bone band" aria-labelledby="h-qs"><div class="wrap">
@@ -277,6 +293,7 @@ blockquote i{color:var(--gl)}
 <section class="esp band" aria-labelledby="h-alx"><div class="wrap">
   <div class="alx rv">
     <div class="facts">
+      <figure class="alx-ph"><div class="ph"><img src="/cabinet/alexandru.jpg" alt="Alexandru Cojocari" width="640" height="512" loading="lazy" decoding="async"></div></figure>
       <p class="lab" id="h-alx">Across the table</p>
       <p>Alexandru Cojocari.<br>Born in Moldova. Lives and works in Rome.<br>Degree in business and management.<br>Master’s in political science.<br>Founder of ExploraSelf.</p>
     </div>
@@ -322,19 +339,7 @@ blockquote i{color:var(--gl)}
 </div></section>
 
 <section class="dark band end" aria-labelledby="h-end"><div class="wrap">
-  <svg class="ill plan rv" viewBox="0 0 640 300" role="img" aria-label="A plan of the Boardroom: one table, your seat at one end, Alexandru at the other.">
-    <path class="draw" pathLength="1" d="M40 30H250M390 30H600V270H140M80 270H40V30" stroke="rgba(214,191,143,.5)" stroke-width="1.2" fill="none"/>
-    <path class="draw" pathLength="1" d="M250 30a70 70 0 0 0 140 0" stroke="rgba(214,191,143,.35)" stroke-width="1" fill="none"/>
-    <path class="draw" pathLength="1" d="M80 270a60 60 0 0 1 60-60" stroke="rgba(214,191,143,.35)" stroke-width="1" fill="none"/>
-    <rect class="draw" pathLength="1" x="190" y="118" width="260" height="74" rx="2" stroke="#D6BF8F" stroke-width="1.4" fill="none"/>
-    <rect class="draw" pathLength="1" x="198" y="126" width="244" height="58" rx="1" stroke="rgba(214,191,143,.4)" stroke-width="1" fill="none"/>
-    <rect class="fill" x="128" y="133" width="40" height="44" rx="6" fill="#D6BF8F"/>
-    <rect class="draw" pathLength="1" x="472" y="133" width="40" height="44" rx="6" stroke="#D6BF8F" stroke-width="1.4" fill="none"/>
-    <path class="draw" pathLength="1" d="M190 222H450M190 216v12M450 216v12" stroke="rgba(214,191,143,.6)" stroke-width="1" fill="none"/>
-    <text class="lbl" x="148" y="112" text-anchor="middle">YOUR SEAT</text>
-    <text class="lbl" x="492" y="112" text-anchor="middle">ALEXANDRU</text>
-    <text class="lbl" x="320" y="250" text-anchor="middle">ONE HOUR</text>
-  </svg>
+  <span class="rule" aria-hidden="true"></span>
   <h2 id="h-end">Take your seat.</h2>
   <p class="lede">One hour. One decision named. One road chosen together.</p>
   <a class="go" href="/pay/?step=session&amp;from=road5" data-pay>Take your seat · $27 <span aria-hidden="true">→</span></a>
