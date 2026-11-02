@@ -20,12 +20,16 @@ globalThis.fetch = async (url, init = {}) => {
 const ask = async (form, e = env) => { const r = await onRequestGet({ request: new Request('https://linktolead.exploraself.com/api/site-tag?form=' + encodeURIComponent(form)), env: e }); return { status: r.status, j: await r.json() }; };
 
 const T = SITE_TAGS.find((t) => t.label === 'The Two-Week Test form');
-ok(T && T.name === 'Assessment 2 weektest', 'the Two-Week Test form is on the list, with its tag name');
-let r = await ask('The Two-Week Test form');
-ok(r.status === 200 && r.j.id === '4242' && r.j.made === true && calls.some(([m, u, b]) => m === 'POST' && u.endsWith('/lists/41448b6750/segments') && JSON.parse(b).name === 'Assessment 2 weektest'), 'missing in Mailchimp: made as a tag, with the list’s exact name, and its number said');
-r = await ask('The Two-Week Test form');
+ok(T && T.name === 'Assessment 2 weektest' && T.id === '3359695', 'the Two-Week Test form has its number now (made on 2 Nov 2026 by this endpoint)');
+ok((await ask('The Two-Week Test form')).status === 404, 'so it is not asked again');
+// A form on the list still waiting for its number (a test entry, removed after).
+SITE_TAGS.push({ id: '', name: 'Waiting form tag', label: 'A waiting form' });
+let r = await ask('A waiting form');
+ok(r.status === 200 && r.j.id === '4242' && r.j.made === true && calls.some(([m, u, b]) => m === 'POST' && u.endsWith('/lists/41448b6750/segments') && JSON.parse(b).name === 'Waiting form tag'), 'missing in Mailchimp: made as a tag, with the list’s exact name, and its number said');
+r = await ask('A waiting form');
 ok(r.status === 200 && r.j.id === '4242' && r.j.made === false && calls.filter(([m]) => m === 'POST').length === 1, 'asked again: found by name, never made twice');
 ok((await ask('The LAB form')).status === 404, 'a form whose number is already written: nothing to do');
 ok((await ask('linktolead-anything')).status === 404, 'a name that is not on the list is never made');
-ok((await ask('The Two-Week Test form', {})).status === 503, 'without the API key: it says so, and makes nothing');
+ok((await ask('A waiting form', {})).status === 503, 'without the API key: it says so, and makes nothing');
+SITE_TAGS.pop();
 done();
