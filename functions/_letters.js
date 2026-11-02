@@ -296,7 +296,7 @@ export function toolkitCodeLetter(base, { first, code, url, tools = [], to = '',
 /** Sign-ups from a North Star page (/north1/, /north2/, /north3/, the North
  *  Star box) came for the North Star, so their welcome opens it; the
  *  Launchpad is the next step, not the subject (Alexandru, 30 Oct). The road
- *  pages (/road1/ … /road4/) and The Summit get the Launchpad welcome. */
+ *  pages (/road1/ … /road5/) and The Summit get the Launchpad welcome. */
 export const NORTH_STAR_LANDINGS = ['compass', 'north1', 'north2', 'north3'];
 /** The Massive Growth Plan, attached to the North Star welcome (Alexandru,
  *  31 Oct 2026). Resend fetches it from the live Library, so the address is

@@ -23,8 +23,9 @@ const q = new URLSearchParams(location.search);
 const want = q.get('step');
 /** Where the founder came from, for the free account's landing (and so its
  *  Mailchimp tag): a sales page that sends to /pay/ names itself with
- *  ?from=…; anything else is /road1/'s, as before. */
-const FROM = { summit: 'summit' };
+ *  ?from=… (/northstar/summit/ → summit, /road5/ → road5); anything else is
+ *  /road1/'s, as before. */
+const FROM = { summit: 'summit', road5: 'road5' };
 const landing = FROM[q.get('from')] || 'road1';
 const H = () => ({ 'x-account-token': token(), 'content-type': 'application/json' });
 
