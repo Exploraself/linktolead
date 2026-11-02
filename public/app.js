@@ -23,7 +23,8 @@ import { videoBlock } from './video-talk.js';
 import * as M from './music.js';
 import { LEVELS4, CHAPTERS4, DOMS, UNITS, CLOSES, wkey, tapOf, slideOf, wordOf, shown, domainUnits, levelUnits,
   lines4, sentence, reading, fieldsOf, fill, stepsOf, stepDone, firstOf, planOf, plainOf, doneOf, takeOf, notyetOf,
-  sureOf, gotOf, GOT, tally, countedFor, READ_QUOTES, carriedFrom, blueprint, BUILD4, fillB, buildPage, stepsWritten, SESSIONS4 } from './levels-v4.js';
+  sureOf, gotOf, GOT, tally, countedFor, READ_QUOTES, carriedFrom, blueprint, BUILD4, fillB, buildPage, stepsWritten, SESSIONS4,
+  tapReply, slideReply, blankCheck, blankNote, smallOf, SMALL_UNDER } from './levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -637,9 +638,27 @@ function leftHTML(st, x, open) {
  *  skeleton). Tap, slide, one blank at a time, the day as a tap, "Done when"
  *  with how sure, four lines back; the week as four actions; last week's four
  *  first; the chapter reading and one action carried forward. */
-const KIND = { got: 'Last week', tap: 'Tap', slide: 'Slide', blank: 'Write once', day: 'The day', done: 'Done when',
+const KIND = { got: 'Last week', idea: 'The idea', tap: 'Tap', slide: 'Slide', blank: 'Write once', day: 'The day', done: 'Done when',
   lines: 'Your four lines', week: 'Your week', reading: 'Chapter reading', carry: 'Carry one forward', carryday: 'Its day',
   bask: 'Build it', bstep: 'Build it', bday: 'Its day', bpage: 'Your page' };
+/** Inform → Reform → Transform (2 Nov 2026): the replies and checks, drawn
+ *  on the screen and again as the founder slides or types. */
+const replyHTML = (head, text) => (text ? `<b>${head}</b> ${esc(text)}` : '');
+function checkHTML(d, key) {
+  const c = blankCheck(state.work, level, d, key);
+  return c ? `<span class="${c.good ? 'ok' : 'hint'}"><i aria-hidden="true">${c.good ? '✓' : '→'}</i> ${esc(c.text)}</span>` : '';
+}
+/** Under SMALL_UNDER per cent sure, the smaller step is offered now, not only
+ *  after a Sunday "Not yet". Shown once the founder has moved the slider (or
+ *  saved a value other than the starting 50). */
+const sureMoved = new Set();
+function smallHTML(d) {
+  const w = state.work, u = sureOf(w, level, d), p = planOf(level, d);
+  if (!p || !p.notyet || u == null || u >= SMALL_UNDER || (u === 50 && !sureMoved.has(`${level}.${d}`))) return '';
+  const on = smallOf(w, level, d);
+  return `<div class="cw-small"><p><b>Under ${SMALL_UNDER}% sure.</b> ${notyetOf(w, level, d)}</p>
+    <button type="button" class="cw-o cw-smallbtn" data-v4small="${d}" aria-pressed="${on}"><span>${on ? '✓ The smaller step is in your week' : 'Use the smaller step this week'}</span></button></div>`;
+}
 /** The sentence, with the blank being written lit and the rest as written so far. */
 function sentenceAt(w, lv, d, cur) {
   return LEVELS4[lv - 1].d[d].f.map((p) => {
@@ -660,7 +679,7 @@ function weekList(lv, sh) {
   return `<ol class="cw-week">${order.map((k, i) => {
     const u = sureOf(w, lv, k);
     return `<li style="--c:var(--${DOMS[k]})"><p class="cw-wk">${sh >= 0 && i === 0 ? '★ My one move' : `Goal ${sh >= 0 ? i : i + 1}`} · ${esc(LEAD[DOMS[k]])}</p>
-      <p class="cw-wa">${fill(x.d[k].fb[3], w, lv, k)}</p>
+      <p class="cw-wa">${smallOf(w, lv, k) ? notyetOf(w, lv, k) : fill(x.d[k].fb[3], w, lv, k)}</p>
       <p class="cw-dw"><b>Done when</b> ${doneOf(w, lv, k)}${u != null ? ` <span class="cw-u">· ${u}% sure</span>` : ''}</p></li>`;
   }).join('')}</ol>`;
 }
@@ -739,11 +758,17 @@ function pageHTML(st, x) {
       <div class="cw-opts" role="group" aria-labelledby="cwq">${GOT.map((o, k) => `<button type="button" class="cw-o" data-got="${k}" aria-pressed="${g === k}"><kbd aria-hidden="true">${k + 1}</kbd><span>${o}</span></button>`).join('')}</div>
       ${g == null ? '<p class="cw-keys"><kbd>1–3</kbd> choose · a no is information, not a verdict</p>'
         : `<p class="cw-said">${u != null ? `You were ${u}% sure. ` : ''}It happened: ${['yes', 'partly', 'not yet'][g]}.</p>${g > 0 ? `<p class="cw-smaller">${notyetOf(w, level - 1, d)}</p>` : ''}`}`;
+  } else if (kind === 'idea') {
+    body = `<p class="cw-topic">${esc(p.topic)}</p>
+      <h3 class="cw-q cw-idea" id="cwq">${esc(p.idea)}</h3>
+      <details class="cw-why"><summary>Why it matters</summary><p>${esc(p.ins)}</p></details>
+      <p class="cw-keys"><kbd>Enter ↵</kbd> next</p>`;
   } else if (kind === 'tap') {
-    const t = tapOf(w, level, d);
+    const t = tapOf(w, level, d), why = tapReply(level, d, t);
     growthWords();
     body = `${p ? `<p class="cw-topic">${esc(p.topic)}</p>` : ''}${gpBack(p, 't')}<h3 class="cw-q" id="cwq">${D.t.q}</h3>
       <div class="cw-opts" role="group" aria-labelledby="cwq">${D.t.o.map((o, k) => `<button type="button" class="cw-o" data-v4t="${k}" aria-pressed="${t === k}"><kbd aria-hidden="true">${k + 1}</kbd><span>${esc(o)}</span></button>`).join('')}</div>
+      ${why ? `<div class="cw-reply" role="status">${replyHTML('Why it doesn’t hold', why)}</div>` : ''}
       <p class="cw-keys"><kbd>1–${D.t.o.length}</kbd> choose · <kbd>Enter ↵</kbd> next</p>`;
   } else if (kind === 'slide') {
     let v = slideOf(w, level, d);
@@ -753,15 +778,18 @@ function pageHTML(st, x) {
       <div class="cw-slide"><div class="cw-big"><span id="cwbig">${esc(shown(D.s, v))}</span><small id="cwword">${D.s.raw ? '' : esc(wordOf(D.s, v))}</small></div>
       <input type="range" id="cwr" data-v4s="${d}" min="${D.s.min}" max="${D.s.max}" step="${D.s.step}" value="${v}" style="--p:${pc}%" aria-labelledby="cwq">
       <div class="cw-ends"><span>${esc(D.s.e[0])}</span><span>${esc(D.s.e[1])}</span></div></div>
+      ${D.s.cost ? `<div class="cw-reply" id="cwcost" role="status">${replyHTML('What it costs', slideReply(level, d, v))}</div>` : ''}
       <p class="cw-keys"><kbd>← →</kbd> slide · <kbd>Enter ↵</kbd> next</p>`;
   } else if (kind === 'blank') {
     const fs = fieldsOf(D), f = fs.find((x2) => x2[0] === key) || fs[0], first = fs[0][0] === key, v = w[wkey(level, d, key)] || '';
     const note = p && p.stage && p.stage[STAGE_NOTE[st]];
-    body = `${first && p ? `<p class="cw-ins"><b>Why it matters</b> ${esc(p.ins)}</p>` : ''}
+    body = `${first && p && !p.idea ? `<p class="cw-ins"><b>Why it matters</b> ${esc(p.ins)}</p>` : ''}
       <h3 class="cw-sent" id="cwq">${sentenceAt(w, level, d, key)}</h3>
       ${gpBack(p, key)}
       <label class="cw-bl" for="cwin">${esc(f[1])}</label>
       <input id="cwin" class="cw-in" data-v4f="${d}.${esc(key)}" value="${esc(v)}" placeholder="e.g. ${esc(f[2])}" enterkeyhint="next" autocomplete="off" autocapitalize="sentences">
+      ${D.ck && D.ck[key] ? `<p class="cw-chk" id="cwchk" aria-live="polite">${checkHTML(d, key)}</p>` : ''}
+      ${blankNote(level, d, key) ? `<p class="cw-mnote">${esc(blankNote(level, d, key))}</p>` : ''}
       ${first && note ? `<p class="cw-stage"><b>${esc(STAGES[st] ? STAGES[st].n : '')}</b> ${esc(note)}</p>` : ''}
       <p class="cw-keys">A few words is enough · <kbd>Enter ↵</kbd> next</p>`;
   } else if (kind === 'day') {
@@ -778,6 +806,7 @@ function pageHTML(st, x) {
       <div class="cw-slide"><div class="cw-big"><span id="cwbig">${u}%</span><small id="cwword">${esc(sureWord(u))}</small></div>
       <input type="range" id="cwr" data-v4u="${d}" min="0" max="100" step="10" value="${u}" style="--p:${u}%" aria-labelledby="cwq">
       <div class="cw-ends"><span>Not sure</span><span>Certain</span></div></div>
+      <div id="cwsmall">${smallHTML(d)}</div>
       <p class="cw-keys">On Sunday, the next level asks what happened · <kbd>Enter ↵</kbd> next</p>`;
   } else if (kind === 'lines') {
     const t = takeOf(w, level, d);
@@ -1309,6 +1338,13 @@ document.addEventListener('click', (e) => {
     try { navigator.clipboard.writeText(text).then(() => doneCopy(true), () => doneCopy(false)); } catch { doneCopy(false); }
     return;
   }
+  if (b.dataset.v4small != null) {
+    const d = +b.dataset.v4small;
+    keep4(d, 'small', smallOf(state.work, level, d) ? '' : '1');
+    const sb = $('#cwsmall'); if (sb) sb.innerHTML = smallHTML(d);
+    const x = document.querySelector('[data-v4small]'); if (x) x.focus({ preventScroll: true });
+    return;
+  }
   if (b.dataset.v4t) {
     const d = stepAt(qi)[0], st = state.stage || 'build', had = answered(st, level, dom);
     keep4(d, 't', +b.dataset.v4t);
@@ -1551,6 +1587,10 @@ document.addEventListener('input', (e) => {
     const big = $('#cwbig'), wd = $('#cwword');
     if (big) big.textContent = `${n}%`;
     if (wd) wd.textContent = sureWord(n);
+    const du = +v.dataset.v4u;
+    sureMoved.add(`${level}.${du}`);
+    if (n >= SMALL_UNDER && smallOf(state.work, level, du)) keep4(du, 'small', '');
+    const sb = $('#cwsmall'); if (sb) sb.innerHTML = smallHTML(du);
     return;
   }
   if (v.dataset.v4s != null) {
@@ -1560,12 +1600,14 @@ document.addEventListener('input', (e) => {
     const big = $('#cwbig'), wd = $('#cwword');
     if (big) big.textContent = shown(D.s, n);
     if (wd) wd.textContent = D.s.raw ? '' : wordOf(D.s, n);
+    const cost = $('#cwcost'); if (cost) cost.innerHTML = replyHTML('What it costs', slideReply(level, d, n));
   } else {
     const [d, k] = v.dataset.v4f.split('.');
     keep4(d === 'r' || d === 'b' ? d : +d, k, v.value);
     // The sentence above fills in as the founder types; nothing redraws.
     const f = document.querySelector(`.cw-f[data-fk="${k}"]`);
     if (f) { f.textContent = v.value.trim() || (fieldsOf(LEVELS4[level - 1].d[+d] || { f: [] }).find((x) => x[0] === k) || [0, ''])[1]; f.classList.toggle('has', !!v.value.trim()); }
+    const chk = $('#cwchk'); if (chk && d !== 'r' && d !== 'b') chk.innerHTML = checkHTML(+d, k);
     // A date written over a day tap: the tap lets go.
     document.querySelectorAll('.cw-day[aria-pressed="true"]').forEach((x) => x.setAttribute('aria-pressed', 'false'));
     hush();

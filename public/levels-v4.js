@@ -28,28 +28,61 @@ const N = (unit) => (v) => `${v} ${unit}`;
 export const LEVELS4 = [
 { n: 1, promise: 'One old rule tested, one task handed over, your enough as a number, three people asked to buy.', word: 'SEED', ch: 0, floor: 'Conviction · what you believe', title: 'What you believe', old: 'This is just who I am.', neu: 'What I believe was learned. It can be tested and renewed.',
   d: [
-  { l: 'S', name: 'Settled', t: { q: 'Finish the sentence that runs your work: <em>“If I ___, then I’m worth something.”</em>', o: ['hit my numbers', 'work harder than everyone', 'never let anyone down', 'prove them wrong', 'get it perfect'] },
-    s: { q: 'Last month, how often did that rule decide your day?', min: 0, max: 10, step: 1, d: 5, w: DAYS, e: ['Never', 'Every day'], up: false },
+  { l: 'S', name: 'Settled', t: { q: 'Finish the sentence that runs your work: <em>“If I ___, then I’m worth something.”</em>', o: ['hit my numbers', 'work harder than everyone', 'never let anyone down', 'prove them wrong', 'get it perfect'],
+      why: ['Numbers move with markets, seasons and luck. If your worth moves with them, every bad month becomes a verdict on you.',
+        'Someone will always work longer. This rule has no finish line, so it never lets you rest.',
+        'Someone is always let down: a client, your family, or you. The rule only chooses who.',
+        'Then they still decide your week, even when they are not in the room.',
+        'Perfect never ships. The rule keeps the work in your hands and off the market.'] },
+    s: { q: 'Last month, how often did that rule decide your day?', min: 0, max: 10, step: 1, d: 5, w: DAYS, e: ['Never', 'Every day'], up: false,
+      cost: (v, w) => (v === 0 ? 'Never: the rule is already quiet. Test it once anyway, on purpose.' : `The rule chose for you ${w}. Those are days you did not choose.`) },
     f: ['I am ', ['who', 'worth it, enough…', 'enough'], ' before I achieve anything. On ', ['day', 'which day', 'Thursday'], ' I will ', ['act', 'one thing the old rule forbids', 'take the evening off, phone in a drawer'], '.'],
+    ck: { who: { ok: 'Good. That is who you are before any result.' },
+      act: { words: 3, ok: 'Good: on {day} anyone could see you do it.', hint: 'Make it something someone could see you do. A few more words.' } },
     tool: 'The worth rule', x: [0, 8],
     fb: ['Last month the rule <mark>If I {t}, then I’m worth something</mark> ran your day {w}.', 'It was learned, so it can be tested. Don’t argue with it. Test it once, on purpose.',
       ['It ran {w}, not every day. Part of your week is already free of it.', 'You named your rule in one sentence. That is the first lever, and you pulled it.'],
       'On {day} you will {act}, and write what really happened. You are {who} before you achieve anything.'] },
-  { l: 'E', name: 'Entrust', t: { q: 'Finish it honestly: <em>“People usually ___.”</em>', o: ['let me down', 'do it worse than I would', 'need me to check everything', 'rise when they are trusted'] },
-    s: { q: 'How much of last week’s work did you hold because “nobody else can do it right”?', min: 0, max: 100, step: 10, d: 50, sfx: '%', w: function (v) { return v >= 70 ? 'almost all of it' : v >= 40 ? 'a lot' : 'some'; }, e: ['None', 'All of it'], up: false },
-    f: ['I hand ', ['task', 'one task', 'the weekly invoices'], ' to ', ['who', 'a name', 'Marta'], ' on ', ['day', 'which day', 'Monday'], '. Done means ', ['done', 'what finished looks like', 'all sent by 5 pm'], '.'],
+  { l: 'E', name: 'Entrust', t: { q: 'Finish it honestly: <em>“People usually ___.”</em>', o: ['let me down', 'do it worse than I would', 'need me to check everything', 'rise when they are trusted'],
+      why: ['Expecting it, you hand over half a task and check every hour. Nobody can rise to a task they were never fully given.',
+        'At first, maybe. But your way can be written down. A task you never hand over can never get better without you.',
+        'Checking everything makes you the bottleneck and leaves them unsure. One agreed “done”, checked once, does more.',
+        'That belief works. Now give it one real task this week.'] },
+    s: { q: 'How much of last week’s work did you hold because “nobody else can do it right”?', min: 0, max: 100, step: 10, d: 50, sfx: '%', w: function (v) { return v >= 70 ? 'almost all of it' : v >= 40 ? 'a lot' : 'some'; }, e: ['None', 'All of it'], up: false,
+      cost: (v) => (v === 0 ? 'None. Your week is already shared; keep it that way.' : `${v}% of last week stayed with you. Every hour of it came out of the work only you can do.`) },
+    f: ['I hand ', ['task', 'one task', 'the weekly invoices'], ' to ', ['who', 'a name', 'Jordan'], ' on ', ['day', 'which day', 'Monday'], '. Done means ', ['done', 'what finished looks like', 'all sent by 5 pm'], '.'],
+    ck: { task: { words: 2, ok: 'One task, named.', hint: 'Name the task so they would know exactly what it is.' },
+      who: { not: '\\b(someone|somebody|anyone|a person|the team)\\b', ok: 'Good: a real name.', hint: 'A real name, so it can happen on the day.' },
+      done: { words: 3, ok: 'Good: they will know when it is finished, and you check once.', hint: 'Say what finished looks like, so you only check once.' } },
     tool: 'Trust in steps', x: [1, 60],
     fb: ['About {s} of last week, you held work because nobody else could do it right.', 'You believe people usually {t}. Don’t fight the feeling. Test it in one small step.',
       ['Most of your week is already shared. Build on that.', 'You named one task to let go. That is where trust starts.'], 'On {day} you hand {task} to {who}. Done means {done}. You check once, not every hour.'] },
-  { l: 'E', name: 'Enough', t: { q: 'Which money sentence did you hear most growing up?', o: ['There is never enough', 'Money is for greedy people', 'We don’t talk about money', 'Money proves you are someone', 'Work hard and it will come'] },
-    s: { q: 'Money in, fixed costs, what was left last month: how sure are you of all three?', min: 0, max: 10, step: 1, d: 4, w: SURE, e: ['Guessing', 'Exactly'], up: true },
-    f: ['My enough is ', ['enough', 'an amount', '€4,200'], ' a month. On ', ['day', 'which day', 'Wednesday'], ' I will ', ['move', 'one money move', 'raise my rate for new clients to €75'], '.'],
+  { l: 'E', name: 'Enough', t: { q: 'Which money sentence did you hear most growing up?', o: ['There is never enough', 'Money is for greedy people', 'We don’t talk about money', 'Money proves you are someone', 'Work hard and it will come'],
+      why: ['Then no amount will ever feel like enough, because you never set one. A number ends the chase.',
+        'Then charging fairly feels wrong, and your prices stay low. Fair pay is how the business keeps serving.',
+        'Silence keeps the numbers vague, and vague numbers turn every decision into a guess.',
+        'Then every price is a test of your worth. Money is a tool; your worth is not on the invoice.',
+        'Hard work with no number can run forever. Enough tells you when the work has done its job.'] },
+    s: { q: 'Money in, fixed costs, what was left last month: how sure are you of all three?', min: 0, max: 10, step: 1, d: 4, w: SURE, e: ['Guessing', 'Exactly'], up: true,
+      cost: (v, w) => (v >= 8 ? 'You know your numbers. Now give them a finish line.' : `You are ${w} about the three numbers. From a guess, you cannot tell when you have enough.`) },
+    f: ['My enough is ', ['enough', 'an amount', '$4,200'], ' a month. On ', ['day', 'which day', 'Wednesday'], ' I will ', ['move', 'one money move', 'raise my rate for new clients to $75'], '.'],
+    ck: { enough: { digit: true, ok: 'A number. Now money has a finish line.', hint: 'Enough is a number: write an amount, like $4,200.',
+        note: 'A spreadsheet adds money in, costs and what was left in seconds. Deciding what is enough is yours.' },
+      move: { words: 3, ok: 'Good: one move you can make on {day}.', hint: 'One money move you could make on the day: a few more words.' } },
     tool: 'Your enough, as a number', x: [0, 3],
     fb: ['You grew up with <mark>{t}</mark>, and you are {w} about your own numbers.', 'A guess becomes a number the day you open the statement. Don’t fight the fear; open it.',
       ['You know your numbers better than most guesses. Use them.', 'You wrote your enough as one number. Now money has a finish line.'], 'On {day} you will {move}. Your enough is {enough} a month: a plan, not your worth.'] },
-  { l: 'D', name: 'Dignity', t: { q: 'When I ask someone to buy, I feel like I am…', o: ['begging', 'bothering them', 'showing off', 'helping'] },
-    s: { q: 'In the last 30 days, how many times did you directly ask someone to buy or to book?', min: 0, max: 20, step: 1, d: 2, w: N('asks'), e: ['None', '20 or more'], up: true },
-    f: ['My offer helps ', ['whom', 'who', 'café owners'], ' with ', ['prob', 'which problem', 'empty tables on weekday afternoons'], '. By ', ['day', 'which day', 'Friday'], ' I ask ', ['names', 'three names', 'Luca, Sara and the bakery on Via Roma'], '.'],
+  { l: 'D', name: 'Dignity', t: { q: 'When I ask someone to buy, I feel like I am…', o: ['begging', 'bothering them', 'showing off', 'helping'],
+      why: ['Begging asks for a favour. An offer that helps gives one. The feeling comes from an old story, not from the offer.',
+        'A short, clear ask takes a minute and leaves them free to say no. Not asking decides for them.',
+        'Saying who you help is information, not pride. They cannot choose you if they do not know.',
+        'That belief works. Now let three real asks prove it this week.'] },
+    s: { q: 'In the last 30 days, how many times did you directly ask someone to buy or to book?', min: 0, max: 20, step: 1, d: 2, w: N('asks'), e: ['None', '20 or more'], up: true,
+      cost: (v) => (v === 0 ? 'No direct asks in 30 days. If your offer helps, someone who needed it never heard about it.' : `${v} ${v === 1 ? 'ask' : 'asks'} in 30 days. Each one let a person decide. Three more this week.`) },
+    f: ['My offer helps ', ['whom', 'who', 'café owners'], ' with ', ['prob', 'which problem', 'empty tables on weekday afternoons'], '. By ', ['day', 'which day', 'Friday'], ' I ask ', ['names', 'three names', 'Mia, Sam and the bakery on Main Street'], '.'],
+    ck: { whom: { ok: 'Good: one kind of person.' },
+      prob: { words: 3, ok: 'One problem, in the words they would use.', hint: 'Say the problem the way they would say it: a few more words.' },
+      names: { names: 3, ok: 'Three names. Three real answers by {day}.', hint: 'That’s {n} of 3. Who else?' } },
     tool: 'Selling is serving', x: [1, 2],
     fb: ['{s} in 30 days, and asking feels like {t}.', 'That feeling decides how often you ask. Don’t fight it. Let three real answers speak louder.',
       ['That many asks takes courage. Keep the rhythm.', 'You can say who you help, in one line: {whom}, with {prob}.'], 'By {day} you ask {names}. Write what each one says, word for word.'] }] },
@@ -91,7 +124,7 @@ export const LEVELS4 = [
       ['It stays manageable most days. You have more steadiness than you think.', 'You found the feeling under the word. That is the hardest step.'], 'When {feeling} comes, you {help}. Then you decide, not before.'] },
   { l: 'A', name: 'Atmosphere', t: { q: 'Under pressure, the people around me see me…', o: ['snap', 'go silent', 'work alone', 'stay steady'] },
     s: { q: 'How safe is it for someone to bring you bad news?', min: 0, max: 10, step: 1, d: 5, w: SAFE, e: ['Not safe', 'Safe'], up: true },
-    f: ['Under pressure, I will ', ['will', 'what you’ll do', 'say “thank you for telling me” first'], ' instead of ', ['instead', 'what you do now', 'sighing'], '. I ask ', ['who', 'a name', 'Marta'], ' to tell me when I slip.'],
+    f: ['Under pressure, I will ', ['will', 'what you’ll do', 'say “thank you for telling me” first'], ' instead of ', ['instead', 'what you do now', 'sighing'], '. I ask ', ['who', 'a name', 'Jordan'], ' to tell me when I slip.'],
     tool: 'The room’s weather', x: [0, 4],
     fb: ['Under pressure you {t}, and bringing you bad news feels {w}.', 'People read your face before your plan. Don’t fight the pressure. Change the first five seconds.',
       ['People already feel safe telling you hard things. Protect that.', 'You chose one new first reaction. The room will notice in a week.'], 'You will {will} instead of {instead}, and {who} will tell you when you slip.'] },
@@ -103,7 +136,7 @@ export const LEVELS4 = [
       ['You already wait before deciding. That is rare discipline.', 'You wrote a storm rule while calm. That is the lag.'], 'When you feel {feel} above 7, you wait {hours} hours before you decide about {about}.'] },
   { l: 'M', name: 'Meet their fear', t: { q: 'My clients’ biggest fear is…', o: ['wasting money', 'looking foolish', 'losing time', 'being let down again', 'I don’t know'] },
     s: { q: 'How sure are you, from their own words?', min: 0, max: 10, step: 1, d: 3, w: SURE, e: ['Guessing', 'Their exact words'], up: true },
-    f: ['My clients fear ', ['fear', 'their fear', 'paying for nothing'], ' and hope for ', ['hope', 'their hope', 'full tables, without discounts'], '. By ', ['day', 'which day', 'Thursday'], ' I ask ', ['who', 'a client', 'Luca'], ' in their words.'],
+    f: ['My clients fear ', ['fear', 'their fear', 'paying for nothing'], ' and hope for ', ['hope', 'their hope', 'full tables, without discounts'], '. By ', ['day', 'which day', 'Thursday'], ' I ask ', ['who', 'a client', 'Mia'], ' in their words.'],
     tool: 'Fear and hope, in their words', x: [0, 3],
     fb: ['You think your clients fear {t}, and you are {w}.', 'People feel first and explain later. Don’t guess. Ask, and write their words.',
       ['You already know their fear in their words. Speak to it.', 'You named their fear and their hope. That is the start of every good message.'], 'By {day} you ask {who}. Then you speak to their fear of {fear} and their hope for {hope}, honestly.'] }] },
@@ -124,7 +157,7 @@ export const LEVELS4 = [
       ['Your asks are mostly clear. Keep the date in every one.', 'You wrote one ask with a date and a “done”. Watch what changes.'], 'You ask {who} for {what} by {when}. Done looks like {done}.'] },
   { l: 'E', name: 'Essential first', t: { q: 'Where my hours go that are not mine', o: ['admin', 'messages', 'fixing others’ work', 'low-paid jobs'] },
     s: { q: 'Hours a week on work someone cheaper could do', min: 0, max: 40, step: 1, d: 10, w: N('hours'), e: ['None', '40 hours'], up: false },
-    f: ['My hour is worth ', ['hour', 'enough ÷ hours you want', '€35'], '. First, every day: ', ['first', 'your one priority', 'two sales calls'], '. I hand back ', ['back', 'one task', 'the bookkeeping'], '.'],
+    f: ['My hour is worth ', ['hour', 'enough ÷ hours you want', '$35'], '. First, every day: ', ['first', 'your one priority', 'two sales calls'], '. I hand back ', ['back', 'one task', 'the bookkeeping'], '.'],
     tool: 'Price your hour', x: [0, 12],
     fb: ['{s} a week go to {t}.', 'Busy feels like progress. Don’t fight that. Put a price on the hour.',
       ['Few of your hours leak. Guard the first one of the day.', 'You priced your hour. Every task now has a cost.'], 'Your hour is worth {hour}. First comes {first}. You hand back {back}.'] },
@@ -145,7 +178,7 @@ export const LEVELS4 = [
       ['You believe it more than half. Proof did that.', 'You wrote one dated proof. One is how every identity starts.'], 'You are becoming someone who {who}. Proof: {proof}. Add one more this week.'] },
   { l: 'A', name: 'Applaud', t: { q: 'When people do well, I…', o: ['rarely say it', 'say a quick thanks', 'name exactly what they did', 'pay them, that’s enough'] },
     s: { q: 'Specific thanks you gave last week', min: 0, max: 10, step: 1, d: 1, w: N('given'), e: ['None', 'Ten'], up: true },
-    f: ['I thank ', ['who', 'a name', 'Marta'], ' for ', ['what', 'what they did', 'chasing the unpaid invoices'], '. It changed ', ['changed', 'what changed', 'our cash this month'], '.'],
+    f: ['I thank ', ['who', 'a name', 'Jordan'], ' for ', ['what', 'what they did', 'chasing the unpaid invoices'], '. It changed ', ['changed', 'what changed', 'our cash this month'], '.'],
     tool: 'Name the win', x: [1, 1],
     fb: ['When people do well, you {t}. Last week: {s}.', 'People repeat what gets noticed. Don’t wait for big wins. Name the small ones.',
       ['You already name wins. Make them more specific.', 'You named one win and what it changed. That is how people grow.'], 'You thank {who} for {what}, and tell them it changed {changed}.'] },
@@ -172,13 +205,13 @@ export const LEVELS4 = [
       ['It’s only been {s}. Say it before it hardens.', 'You wrote the opening line. Most of the courage is in that line.'], 'On {day} you tell {who}: “What I see is {see}. What I need is {need}.”'] },
   { l: 'A', name: 'Ask, then listen', t: { q: 'In hard talks I usually…', o: ['defend', 'go quiet', 'explain too much', 'listen first'] },
     s: { q: 'In your last hard talk, how much of the time did you speak?', min: 0, max: 100, step: 10, d: 70, sfx: '%', w: function (v) { return v > 60 ? 'most of it' : v > 40 ? 'half' : 'less than half'; }, e: ['None', 'All of it'], up: false },
-    f: ['In my next talk with ', ['who', 'a name', 'Marta'], ' I ask “', ['ask', 'one open question', 'What would make this easier for you?'], '” and speak less than half.'],
+    f: ['In my next talk with ', ['who', 'a name', 'Jordan'], ' I ask “', ['ask', 'one open question', 'What would make this easier for you?'], '” and speak less than half.'],
     tool: 'Two ears, one mouth', x: [2, 70],
     fb: ['In hard talks you {t}, and you spoke {w} of the time.', 'Talking feels like control. Don’t fight that urge. Ask, then count to three.',
       ['You already listen more than you speak. People trust that.', 'You chose one open question. Questions open people.'], 'With {who}, you ask “{ask}” and speak less than half.'] },
   { l: 'L', name: 'Late money', t: { q: 'The money talk I avoid is about…', o: ['an unpaid invoice', 'a discount I regret', 'extra work for free', 'a supplier price'] },
-    s: { q: 'How much money is stuck there?', min: 0, max: 10000, step: 250, d: 1500, w: function (v) { return '€' + v.toLocaleString('en-US'); }, e: ['€0', '€10,000'], up: false, raw: true },
-    f: ['By ', ['day', 'which day', 'Tuesday'], ' I write to ', ['who', 'a name', 'Studio Rossi'], ': “Invoice ', ['inv', 'which invoice', '0412'], ' was due on ', ['due', 'the date', '1 Oct'], '. Please pay by ', ['by', 'a new date', '8 Nov'], '.”'],
+    s: { q: 'How much money is stuck there?', min: 0, max: 10000, step: 250, d: 1500, w: function (v) { return '$' + v.toLocaleString('en-US'); }, e: ['$0', '$10,000'], up: false, raw: true },
+    f: ['By ', ['day', 'which day', 'Tuesday'], ' I write to ', ['who', 'a name', 'Parker Studio'], ': “Invoice ', ['inv', 'which invoice', '0412'], ' was due on ', ['due', 'the date', '1 Oct'], '. Please pay by ', ['by', 'a new date', '8 Nov'], '.”'],
     tool: 'The polite, firm invoice', x: [0, 1500],
     fb: ['{w} are stuck in {t}.', 'Asking for your own money feels rude. It isn’t. Don’t fight the discomfort. Send it.',
       ['The amount is small. Clear it before it grows.', 'You wrote the message in one line. Firm and polite.'], 'By {day} you write to {who}: invoice {inv}, due {due}, please pay by {by}.'] },
@@ -205,7 +238,7 @@ export const LEVELS4 = [
       ['It’s already shared. Finish the last step.', 'You moved one task up one step. That is how a team is built.'], 'By {day}, {task} moves from “{from}” to “{to}”.'] },
   { l: 'U', name: 'Unit cost', t: { q: 'What I sell most is priced…', o: ['by the hour', 'per job', 'as a package', 'by guess'] },
     s: { q: 'Hours a typical job really takes, start to finish', min: 0, max: 40, step: 1, d: 6, w: N('hours'), e: ['0', '40 hours'], up: false },
-    f: ['One job costs me ', ['mat', 'materials and fees', '€80'], ' plus ', ['hrs', 'hours', '6'], ' hours × ', ['rate', 'my hour', '€35'], ' = ', ['total', 'the total', '€290'], '. I never sell it below ', ['floor', 'your floor', '€350'], '.'],
+    f: ['One job costs me ', ['mat', 'materials and fees', '$80'], ' plus ', ['hrs', 'hours', '6'], ' hours × ', ['rate', 'my hour', '$35'], ' = ', ['total', 'the total', '$290'], '. I never sell it below ', ['floor', 'your floor', '$350'], '.'],
     tool: 'The price floor', x: [3, 6],
     fb: ['You price {t}, and a job really takes {s}.', 'Most underpricing hides in the hours you don’t count. Don’t fight the number. Write it down.',
       ['You know the real hours. Now price from them.', 'You wrote your price floor. Below it, you pay to work.'], 'One job costs you {total}. You never sell it below {floor}.'] },
@@ -226,13 +259,13 @@ export const LEVELS4 = [
       ['Most of your work already uses your gift. Charge for it.', 'You named your gift and what to stop. That is an offer forming.'], 'You sell {pay}, built on {best}, and stop selling {stop}.'] },
   { l: 'O', name: 'Others in it', t: { q: 'Where clients wait or get confused', o: ['at the start', 'during delivery', 'at payment', 'after it’s done'] },
     s: { q: 'Steps from “yes” to delivered', min: 1, max: 15, step: 1, d: 7, w: N('steps'), e: ['1', '15'], up: false },
-    f: ['After a client says yes, they get: 1 ', ['s1', 'step one', 'a welcome call'], ', 2 ', ['s2', 'step two', 'a plan in 48 hours'], ', 3 ', ['s3', 'step three', 'a weekly update'], '. ', ['who', 'a name', 'Marta'], ' handles step ', ['which', 'which step', '3'], '.'],
+    f: ['After a client says yes, they get: 1 ', ['s1', 'step one', 'a welcome call'], ', 2 ', ['s2', 'step two', 'a plan in 48 hours'], ', 3 ', ['s3', 'step three', 'a weekly update'], '. ', ['who', 'a name', 'Jordan'], ' handles step ', ['which', 'which step', '3'], '.'],
     tool: 'The client journey', x: [0, 9],
     fb: ['Clients get confused {t}, across {s}.', 'Confusion costs referrals. Don’t fight it. Show them three clear steps.',
       ['Your journey is short. Make every step visible.', 'You wrote three steps and an owner. Clients feel led.'], 'Yes, then {s1}, {s2}, {s3}. {who} owns step {which}.'] },
   { l: 'L', name: 'Levels', t: { q: 'How I set prices now', o: ['same as others', 'by the hour', 'by feel', 'from my costs and value'] },
     s: { q: 'How confident are you saying your price out loud?', min: 0, max: 10, step: 1, d: 4, w: SURE, e: ['I mumble', 'I say it calmly'], up: true },
-    f: ['Essential: ', ['e1', 'what’s in it', 'the plan'], ' at ', ['p1', 'price', '€390'], '. Complete: ', ['e2', 'what’s in it', 'plan and launch'], ' at ', ['p2', 'price', '€890'], '. Premium: ', ['e3', 'what’s in it', 'done with you, 3 months'], ' at ', ['p3', 'price', '€2,400'], '.'],
+    f: ['Essential: ', ['e1', 'what’s in it', 'the plan'], ' at ', ['p1', 'price', '$390'], '. Complete: ', ['e2', 'what’s in it', 'plan and launch'], ' at ', ['p2', 'price', '$890'], '. Premium: ', ['e3', 'what’s in it', 'done with you, 3 months'], ' at ', ['p3', 'price', '$2,400'], '.'],
     tool: 'Three price levels', x: [2, 4],
     fb: ['You price {t}, and you say it out loud {w}.', 'A single price forces a yes or no. Don’t fight that. Give three choices.',
       ['You say your price calmly. Now add a higher level.', 'You built three levels. Most people choose the middle.'], 'Essential at {p1}, Complete at {p2}, Premium at {p3}.'] },
@@ -253,13 +286,13 @@ export const LEVELS4 = [
       ['You keep most promises. A review will make it all of them.', 'You set a weekly review. It is the steering wheel.'], 'Every {day} at {time}: look back, read the numbers, choose {three} priorities.'] },
   { l: 'L', name: 'Lean on roles', t: { q: 'If I were sick for a week…', o: ['the business stops', 'things slow down', 'most of it runs', 'it runs fine'] },
     s: { q: 'Tasks only you can do today', min: 0, max: 20, step: 1, d: 9, w: N('tasks'), e: ['None', '20'], up: false },
-    f: ['', ['who', 'a name', 'Marta'], ' owns ', ['owns', 'an area', 'orders and suppliers'], '. They decide alone up to ', ['limit', 'a limit', '€500'], '. They call me when ', ['call', 'when', 'a client complains'], '.'],
+    f: ['', ['who', 'a name', 'Jordan'], ' owns ', ['owns', 'an area', 'orders and suppliers'], '. They decide alone up to ', ['limit', 'a limit', '$500'], '. They call me when ', ['call', 'when', 'a client complains'], '.'],
     tool: 'Owner, limit, call', x: [0, 9],
     fb: ['If you were sick, {t}. {s} sit with you alone.', 'Being needed feels good. It is also a ceiling. Don’t fight it. Give one area an owner.',
       ['Most things run without you. Write it down so it lasts.', 'You gave one area an owner and a limit. That is a system.'], '{who} owns {owns}, decides up to {limit}, and calls you when {call}.'] },
   { l: 'O', name: 'One page of cash', t: { q: 'What I check every week', o: ['nothing', 'the bank balance', 'sales', 'money in, out and left'] },
     s: { q: 'Months you could pay all costs if sales stopped today', min: 0, max: 12, step: 1, d: 2, w: N('months'), e: ['0', '12 months'], up: true },
-    f: ['Every ', ['day', 'which day', 'Monday'], ': money in ', ['in', 'amount', '€6,200'], ', money out ', ['out', 'amount', '€4,900'], ', left ', ['left', 'amount', '€1,300'], '. My alert line is ', ['alert', 'the minimum', '€3,000 in the bank'], '.'],
+    f: ['Every ', ['day', 'which day', 'Monday'], ': money in ', ['in', 'amount', '$6,200'], ', money out ', ['out', 'amount', '$4,900'], ', left ', ['left', 'amount', '$1,300'], '. My alert line is ', ['alert', 'the minimum', '$3,000 in the bank'], '.'],
     tool: 'The weekly cash view', x: [1, 2],
     fb: ['You check {t}, and you have {s} of runway.', 'Cash surprises kill good businesses. Don’t fight the number. Look every week.',
       ['You have real runway. Protect it with an alert line.', 'You wrote one page of cash and an alert line. No more surprises.'], 'Every {day}: in {in}, out {out}, left {left}. Below {alert}, you act that day.'] },
@@ -274,13 +307,13 @@ export const LEVELS4 = [
   d: [
   { l: 'N', name: 'Network', t: { q: 'What stops me reaching out', o: ['fear of a no', 'not wanting to bother', 'no time', 'not knowing who'] },
     s: { q: 'People in your phone who fit your client, or know one', min: 0, max: 100, step: 5, d: 20, w: N('people'), e: ['None', '100'], up: true },
-    f: ['This week I contact ', ['n', 'how many', '10'], ' people I already know, starting with ', ['first', 'a name', 'Giulia'], '. I say: “', ['say', 'your opening line', 'I’m helping cafés fill midweek tables. Who do you know?'], '”'],
+    f: ['This week I contact ', ['n', 'how many', '10'], ' people I already know, starting with ', ['first', 'a name', 'Emma'], '. I say: “', ['say', 'your opening line', 'I’m helping cafés fill midweek tables. Who do you know?'], '”'],
     tool: 'The hundred names list', x: [0, 20],
     fb: ['{t} stops you, and you know {s} who fit.', 'Reaching out feels like begging. It is service. Don’t fight the nerves. Send the first ten.',
       ['You know many people already. Your list is ready.', 'You wrote your opening line. The rest is repetition.'], 'This week, {n} people, starting with {first}: “{say}”'] },
   { l: 'A', name: 'Ambassadors', t: { q: 'Who already meets my clients', o: ['an accountant', 'a supplier', 'another professional', 'past clients'] },
     s: { q: 'Possible partners you could name today', min: 0, max: 20, step: 1, d: 2, w: N('partners'), e: ['None', '20'], up: true },
-    f: ['I ask ', ['who', 'a name', 'Paolo, the coffee supplier'], ' to introduce me to two people who ', ['need', 'what they need', 'want busier weekdays'], '. In return I ', ['give', 'what you give', 'send clients his way'], '.'],
+    f: ['I ask ', ['who', 'a name', 'Dan, the coffee supplier'], ' to introduce me to two people who ', ['need', 'what they need', 'want busier weekdays'], '. In return I ', ['give', 'what you give', 'send clients his way'], '.'],
     tool: 'The referral partner', x: [1, 2],
     fb: ['{t} already meets your clients, and you can name {s}.', 'Asking for introductions feels like a favour. It is a trade. Don’t fight that. Offer first.',
       ['You have partners to call. Start with the warmest.', 'You wrote one partner ask with something in return. That is fair.'], 'You ask {who} for two introductions to people who {need}, and you {give}.'] },
@@ -301,7 +334,7 @@ export const LEVELS4 = [
   d: [
   { l: 'E', name: 'Ego check', t: { q: 'When I get criticism, I…', o: ['defend myself', 'shut down', 'overthink for days', 'use it'] },
     s: { q: 'People who told you something hard this month', min: 0, max: 10, step: 1, d: 1, w: N('people'), e: ['None', 'Ten'], up: true },
-    f: ['I ask ', ['a', 'one person', 'Luca'], ', ', ['b', 'another', 'Sara'], ' and ', ['c', 'a third', 'my accountant'], ': “What’s one thing I do that makes working with me harder?” I only say thank you.'],
+    f: ['I ask ', ['a', 'one person', 'Mia'], ', ', ['b', 'another', 'Sam'], ' and ', ['c', 'a third', 'my accountant'], ': “What’s one thing I do that makes working with me harder?” I only say thank you.'],
     tool: 'Feedback, asked for', x: [0, 1],
     fb: ['With criticism you {t}, and {s} told you something hard this month.', 'Feedback stings because worth is involved. Yours is settled (Level 01). Don’t fight it. Collect it.',
       ['People tell you the truth. That is an advantage few have.', 'You chose three people to ask. You’ll hear what competitors never hear.'], 'You ask {a}, {b} and {c} the one question, and only say thank you.'] },
@@ -334,13 +367,13 @@ export const LEVELS4 = [
       ['You trust your decisions. That is leadership.', 'You wrote who you are now. Read it every Monday.'], 'You are a leader who {who}. In twelve weeks, you are known for {known}.'] },
   { l: 'I', name: 'Invest in people', t: { q: 'Who could lead with me', o: ['someone on my team', 'a partner', 'a client', 'nobody yet'] },
     s: { q: 'Hours a week you will invest in them', min: 0, max: 10, step: 1, d: 1, w: N('hours'), e: ['None', '10 hours'], up: true },
-    f: ['I grow ', ['who', 'a name', 'Marta'], ' by giving them ', ['own', 'something to own', 'all supplier decisions'], ' to own. Every ', ['day', 'which day', 'Thursday'], ' I ask: “', ['ask', 'your coaching question', 'What did you decide, and why?'], '”'],
+    f: ['I grow ', ['who', 'a name', 'Jordan'], ' by giving them ', ['own', 'something to own', 'all supplier decisions'], ' to own. Every ', ['day', 'which day', 'Thursday'], ' I ask: “', ['ask', 'your coaching question', 'What did you decide, and why?'], '”'],
     tool: 'Grow one leader', x: [0, 1],
     fb: ['{t} could lead with you, and you’ll give it {s}.', 'Doing it yourself is faster today and slower forever. Don’t fight that. Hand over ownership.',
       ['That is real time for a leader. Keep the day fixed.', 'You chose a person and a question. That is how leaders grow leaders.'], 'You give {who} {own} to own, and every {day} you ask: “{ask}”'] },
   { l: 'S', name: 'Scale the number', t: { q: 'The one number that matters most for the next twelve weeks', o: ['profit', 'clients', 'price', 'cash', 'my hours'] },
     s: { q: 'Growth you aim for in twelve weeks', min: 0, max: 100, step: 5, d: 20, sfx: '%', w: function (v) { return v >= 50 ? 'bold' : v >= 20 ? 'stretching' : 'steady'; }, e: ['0%', '100%'], up: true },
-    f: ['In twelve weeks: ', ['num', 'the number', 'profit'], ' from ', ['from', 'today', '€1,300'], ' to ', ['to', 'the target', '€2,000'], ' a month. Checkpoints: ', ['c1', 'week 4', '€1,500'], ', ', ['c2', 'week 8', '€1,750'], '.'],
+    f: ['In twelve weeks: ', ['num', 'the number', 'profit'], ' from ', ['from', 'today', '$1,300'], ' to ', ['to', 'the target', '$2,000'], ' a month. Checkpoints: ', ['c1', 'week 4', '$1,500'], ', ', ['c2', 'week 8', '$1,750'], '.'],
     tool: 'The 90-day plan', x: [0, 50],
     fb: ['You chose {t}, and a {w} target of {s}.', 'Big targets scare, small ones bore. Don’t fight the fear. Break it into checkpoints.',
       ['Bold, with checkpoints. That is how growth stays honest.', 'You wrote a number and two checkpoints. Progress you can see.'], '{num} from {from} to {to}, via {c1} and {c2}.'] },
@@ -376,23 +409,27 @@ export const LEVELS4 = [
  *   w.v4.L.r.on    and its day (L = 5, 9, 12) */
 export const PLAN4 = {
   '1.0': { topic: 'The rule that decides your worth', on: null, bp: 'self',
+    idea: 'Somewhere you learned a rule for being worth something. It still runs your week, until you test it.',
     ins: 'A rule like this was learned early, often from someone you wanted to please. It still decides how you rest, price and say no. You do not argue a rule away; you test it once and look at what really happens.',
     done: 'on {day} you did “{act}”, and wrote one line on what really happened.',
     take: ['The test card', 'Old rule: If I {t}, then I’m worth something.', 'The test: on {day} I {act}.', 'What I feared would happen: ____', 'What really happened: ____'],
     notyet: 'Make it smaller: a short version of it, on the next free day. Then write the line.' },
   '1.1': { topic: 'One task out of your hands', on: null, bp: 'people',
+    idea: 'Trust is built in small, checked steps. A clear “done” protects both of you.',
     ins: 'Every task you keep because “nobody does it right” costs you an hour you needed for the work only you can do. Trust is built in small, checked steps, not in one leap. A clear “done” protects both of you.',
     done: 'on {day} you handed {task} to {who}, with “{done}” in writing, and checked it only once.',
     take: ['The hand-over note', '{who}, from {day}, this is yours: {task}.', 'Done means: {done}.', 'I will check it once, on ____. Ask me anything before you start.'],
     notyet: 'Make it smaller: hand over one part of {task}, or do it once side by side, then let them do the next one.',
     stage: { growing: 'You already have help, but the work comes back to you. Hand over the task that comes back most often.', building: 'No team yet? Hand it to a tool, a template, or a freelancer for two hours.' } },
   '1.2': { topic: 'Money: the sentence you grew up with, and your enough', on: null, bp: 'money',
+    idea: 'Enough is a finish line, not a ceiling. Without a number, every month feels short.',
     gp: { at: 't', step: 12, ids: ['mgp-12.1'] },
     ins: 'Without a number for enough, every month feels short and every price feels too high. Enough is a finish line, not a ceiling: it tells you when to stop chasing and what to charge. The sentence you grew up with is not your business plan.',
     done: 'on {day} you made the money move you wrote: “{move}”.',
     take: ['My money line', 'Enough: {enough} a month.', 'Last month in: ____ · fixed costs: ____ · left: ____', 'The money move: {move}, on {day}.'],
     notyet: 'Make it smaller: open last month’s statement and write the three numbers. The move can wait a week; the looking cannot.' },
   '1.3': { topic: 'Asking someone to buy', on: null, bp: 'sales',
+    idea: 'If your offer helps, asking is service. The answer belongs to them.',
     gp: { at: 'names', step: 16, ids: ['mgp-16.3', 'mgp-16.4', 'mgp-16.5'] },
     ins: 'If your offer helps, then not asking keeps help from the people who need it. Asking is service; the answer belongs to them. A no tells you something true about the offer or the timing, never about your worth.',
     done: 'you asked {names} by {day}, and wrote each answer word for word. A yes, a no and no answer all count.',
@@ -667,7 +704,7 @@ export const wkey = (lv, d, k) => `w.v4.${lv}.${d}.${k}`;
 const raw = (work, lv, d, k) => { const v = work && work[wkey(lv, d, k)]; return v == null ? '' : String(v); };
 export const fieldsOf = (D) => D.f.filter((p) => typeof p !== 'string');
 
-/** The word a slider value reads as ('most days', '6 weeks', '€1,500'). */
+/** The word a slider value reads as ('most days', '6 weeks', '$1,500'). */
 export function wordOf(sl, v) {
   if (typeof sl.w === 'function') return sl.w(v);
   for (const [max, w] of sl.w) if (v <= max) return w;
@@ -713,6 +750,41 @@ export function fill(tpl, work, lv, d) {
     return String(x).trim() ? `<mark>${esc(x)}</mark>` : '<mark class="blank">____</mark>';
   });
 }
+/* ── Inform → Reform → Transform (Alexandru, 2 Nov 2026) ─────────────────
+ * Where a domain carries them (Level 01 first; the others as each chapter is
+ * reviewed): PLAN4 `idea` is the concept in one sentence, its own screen
+ * before the tap, with `ins` folded under it (Inform); t.why[i] answers tap i
+ * at once, why that old belief doesn't hold, and s.cost answers the slider as
+ * it moves, what the number costs (Reform); ck[key] checks one blank as it is
+ * written, and under SMALL_UNDER per cent sure the smaller step is offered
+ * now, taken as the saved key `small` (Transform). */
+export const SMALL_UNDER = 60;
+const domOf = (lv, d) => (LEVELS4[lv - 1] ? LEVELS4[lv - 1].d[d] : null);
+/** The reply to a tap: why that old belief doesn't hold. */
+export function tapReply(lv, d, t) {
+  const D = domOf(lv, d);
+  return D && D.t.why && t != null ? D.t.why[t] || '' : '';
+}
+/** The reply to the slider: what the number costs. */
+export function slideReply(lv, d, v) {
+  const D = domOf(lv, d);
+  return D && D.s.cost && v != null ? D.s.cost(v, wordOf(D.s, v)) : '';
+}
+const wordsIn = (t) => String(t || '').trim().split(/\s+/).filter(Boolean).length;
+/** A check on one blank, as it is written: { good, text }, or null. */
+export function blankCheck(work, lv, d, key) {
+  const D = domOf(lv, d), c = D && D.ck && D.ck[key], v = raw(work, lv, d, key).trim();
+  if (!c || !v) return null;
+  const n = v.split(/,|\band\b|&|\n/).map((x) => x.trim()).filter(Boolean).length;
+  const good = (!c.words || wordsIn(v) >= c.words) && (!c.digit || /\d/.test(v)) && (!c.names || n >= c.names) && (!c.not || !new RegExp(c.not, 'i').test(v));
+  const text = (good ? c.ok : c.hint || c.ok).replace(/\{(\w+)\}/g, (_, k) => (k === 'n' ? String(n) : raw(work, lv, d, k).trim() || 'the day'));
+  return { good, text };
+}
+/** A plain note under a blank (rule 9: what a machine can do, and what is theirs). */
+export const blankNote = (lv, d, key) => { const D = domOf(lv, d); return (D && D.ck && D.ck[key] && D.ck[key].note) || ''; };
+/** The founder took the smaller step for this week. */
+export const smallOf = (work, lv, d) => raw(work, lv, d, 'small') === '1';
+
 /** Strong in this domain, from the slider (some read better high, some low). */
 export function strong(work, lv, d) {
   const D = LEVELS4[lv - 1].d[d], r = (slideOr(work, lv, d) - D.s.min) / (D.s.max - D.s.min);
@@ -769,6 +841,7 @@ export function stepsOf(lv) {
   if (lv > 1) for (let d = 0; d < 4; d++) out.push([d, 'got']);
   L.d.forEach((D, d) => {
     const dk = dayKeyOf(lv, d), p = planOf(lv, d);
+    if (p && p.idea) out.push([d, 'idea']);
     out.push([d, 'tap'], [d, 'slide']);
     for (const [k] of fieldsOf(D)) out.push([d, k === dk && DAYISH.includes(k) ? 'day' : 'blank', k]);
     if (p && p.on) out.push([d, 'day', 'on']);
@@ -783,7 +856,9 @@ const filled = (work, lv, d, k) => raw(work, lv, d, k).trim() !== '';
 export function stepDone(work, lv, s) {
   const [d, kind, k] = s;
   if (kind === 'got') return raw(work, lv - 1, d, 'got') !== '';
-  if (kind === 'tap') return tapOf(work, lv, d) != null;
+  // The concept counts as seen once its domain's tap is answered, so a new
+  // level opens on it and a returning founder picks up where they left off.
+  if (kind === 'idea' || kind === 'tap') return tapOf(work, lv, d) != null;
   if (kind === 'slide') return slideOf(work, lv, d) != null;
   if (kind === 'blank' || kind === 'day') return filled(work, lv, d, k);
   if (kind === 'done') return raw(work, lv, d, 'sure') !== '';
@@ -878,11 +953,11 @@ export const BUILD4 = {
     asks: [['task', 'The thing you do most often that someone else could do', 'sending the weekly invoices'],
       ['when', 'It starts when…', 'the last order of the week is delivered']],
     steps: 10, day: 'By which day will someone else follow it once?',
-    who: ['who', 'Who follows it first?', 'Marta'],
+    who: ['who', 'Who follows it first?', 'Jordan'],
     done: '{who} followed the steps once, by {day}, without asking you.' },
   9: { title: 'Your operations page', part: 'systems',
     ins: 'Everything Levels 07 to 09 wrote, on one page: who owns what, what happens after a client says yes, the cash you watch and the review you keep. A page someone else can run the week from.',
-    asks: [['who', 'Who gets a copy of this page?', 'Marta']],
+    asks: [['who', 'Who gets a copy of this page?', 'Jordan']],
     day: 'By which day will you read it together?',
     from: [[9, 1, 'Who owns what'], [8, 1, 'After a client says yes'], [7, 1, 'Moving up, one step'], [7, 0, 'Protected hours'], [9, 2, 'Cash, every week'], [9, 0, 'The weekly review'], [9, 3, 'The warm list']],
     done: '{who} has the page, and you read it together by {day}.' },
