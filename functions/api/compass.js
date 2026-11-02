@@ -9,6 +9,7 @@
 
 import { json, bad, db, now, clean, studentBy, accountTables } from '../_shared.js';
 import { mailchimpState, syncFounder, weakestTag } from '../_mailchimp.js';
+import { seriesMode, afterNorthStar } from '../_series.js';
 
 /** Kept whole or not at all: a JSON string cut short could never be read back. */
 const cap = (o, n) => { if (!o || typeof o !== 'object') return null; const s = JSON.stringify(o); return s.length <= n ? s : null; };
@@ -50,6 +51,12 @@ export async function onRequestPost({ request, env, waitUntil }) {
       const go = (async () => { await accountTables(D); await syncFounder(env, D, me.id, 'tags'); })().catch(() => {});
       if (typeof waitUntil === 'function') waitUntil(go); else await go;
     }
+  }
+  // A North Star finished with a first pain starts that pain's letters
+  // (functions/_series.js), after the reply. Nothing when SERIES_MODE is off.
+  if (seriesMode(env) !== 'off') {
+    const go = (async () => { await accountTables(D); await afterNorthStar(env, D, me.id); })().catch(() => {});
+    if (typeof waitUntil === 'function') waitUntil(go); else await go;
   }
   return json({ ok: true });
 }

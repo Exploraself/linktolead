@@ -7,7 +7,8 @@
 // founder an hour, so a stuck key cannot flood his inbox; every question is
 // still saved and shown in /mentor.
 
-import { json, bad, db, now, newToken, clean } from '../_shared.js';
+import { json, bad, db, now, newToken, clean, accountTables } from '../_shared.js';
+import { seriesMode, afterQuestion } from '../_series.js';
 import { mailState, origin, send } from '../_mail.js';
 import { questionNotice } from '../_letters.js';
 
@@ -30,6 +31,12 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const stamp = now();
   await D.prepare('INSERT INTO note (id,student_id,level,domain,body,status,created_at) VALUES (?,?,?,?,?,?,?)')
     .bind(newToken(), me.id, lvl, dom, text, 'new', stamp).run();
+  // A question pauses the letters that follow each pain until the mentor
+  // resumes them in /mentor (functions/_series.js).
+  if (seriesMode(env) !== 'off') {
+    const hold = (async () => { await accountTables(D); await afterQuestion(env, D, me.id); })().catch(() => {});
+    if (typeof waitUntil === 'function') waitUntil(hold); else await hold;
+  }
 
   if (mailState(env).ready) {
     const job = (async () => {

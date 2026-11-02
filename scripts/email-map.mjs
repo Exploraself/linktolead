@@ -5,7 +5,7 @@
  *   node scripts/email-map.mjs <out.html> [--exploraself <path to the exploraself repo>]
  *
  * Every linktolead letter is rendered here with the real builders
- * (functions/_letters.js, functions/_course.js), for a sample founder called
+ * (functions/_letters.js, functions/_course.js, functions/_series.js), for a sample founder called
  * Sam, so the map shows exactly what lands in the inbox. With --exploraself,
  * the results letters of exploraself.com's assessments are rendered too, from
  * that repo's src/server/results-email.ts (bundled with esbuild, found in
@@ -26,7 +26,8 @@ import * as L from '../functions/_letters.js';
 import { courseLetter, COURSE_NAME, SEND_HOUR, LATEST_HOUR } from '../functions/_course.js';
 import { COURSE_LETTERS } from '../functions/_course-letters.js';
 import { MENTOR_EMAIL } from '../functions/api/note.js';
-import { SERIES_LETTERS, SERIES_GROUPS, SERIES_STATUS, SERIES_TAGS } from '../functions/_series-letters.js';
+import { SERIES_GROUPS, SERIES_TAGS } from '../functions/_series-letters.js';
+import { SERIES_STATUS, SERIES, PARSED, LATE_DAYS, seriesLetter, seriesOf, addDays, byDay, weekday, lettersOf } from '../functions/_series.js';
 
 const BASE = 'https://linktolead.exploraself.com';
 const AT = new Date('2026-11-02T09:00:00Z');
@@ -38,7 +39,7 @@ export const STAGES = [
   { key: 'find', icon: 'search', name: 'They find us', sub: 'A free assessment on exploraself.com' },
   { key: 'door', icon: 'door', name: 'They open a door', sub: 'An account, or a code for the Growth Toolkit' },
   { key: 'use', icon: 'spark', name: 'They use it', sub: 'Their North Star, and 12 Days to Start Winning' },
-  { key: 'follow', icon: 'path', name: 'We follow their answers', sub: 'Letters that follow each pain · approved, not sending yet' },
+  { key: 'follow', icon: 'path', name: 'We follow their answers', sub: `Letters that follow each pain · ${SERIES_STATUS}` },
   { key: 'close', icon: 'chat', name: 'We stay close', sub: 'Letters and answers from Alexandru and the team' },
   { key: 'safe', icon: 'lock', name: 'Their account stays safe', sub: 'Sign-in, new password, password changed' },
   { key: 'team', icon: 'bell', name: 'The team hears', sub: 'Notices to Alexandru, and the invitation to a new team member. Never to a founder' },
@@ -287,24 +288,30 @@ export async function collect({ exploraself } = {}) {
       attach: (r.attachments || []).map((a) => a.filename), sample: /\[/.test(r.text) ? 'The words in [brackets] are written each time.' : '',
       subject: r.subject, html: r.html, text: r.text, ps: psOf(r.text), preview: previewOf(r.text) });
   }
-  // The letters that follow each pain: approved copy, not sending yet
-  // (functions/_series-letters.js). Shown here so the whole system is in one
-  // place; the engine is the next PR.
+  // The letters that follow each pain (functions/_series.js, the words in
+  // functions/_series-letters.js), rendered by the engine for Sam: the want
+  // is the one each pain was written for, the storm rule the Level 03
+  // example, and each letter goes on its day after Sam's own start (the
+  // North Star and the account on Sunday 1 Nov 2026, Level 03 on 19 Nov).
   const G = Object.fromEntries(SERIES_GROUPS.map((g) => [g.id, g]));
-  const plain = (t) => String(t || '').replace(/⟦([^⟧]*)⟧/g, '$1');
-  const asHtml = (t) => `<!doctype html><html><body style="margin:0;background:#FBF7EE"><div style="max-width:560px;margin:0 auto;padding:32px 22px;font:16px/1.7 Georgia,'Times New Roman',serif;color:#14100B">${plain(t).split(/\n\n/).map((p) => `<p style="margin:0 0 16px;white-space:pre-wrap">${esc(p)}</p>`).join('')}</div></body></html>`;
   const index = (stage) => out.findIndex((l) => STAGES.findIndex((s) => s.key === l.stage) > STAGES.findIndex((s) => s.key === stage));
-  const series = SERIES_LETTERS.map((l) => {
-    const g = G[l.g] || {}, kind = g.kind || 'pain';
-    const when = kind === 'pain' ? `They finish The Leader’s North Star and pick “${g.name}” first. Letter ${l.n} of 4, day ${l.day}, 8:00 their time.`
-      : kind === 'never' ? `Account made, Level 01 never started. Letter ${l.n} of 3, day ${l.day} after the account, 8:00 their time.`
-      : `They finish Level 03. Letter ${l.n} of 2, ${l.day === 1 ? 'the morning after' : `day ${l.day}`}, 8:00 their time.`;
-    const tag = SERIES_TAGS[kind === 'pain' ? 'northstar' : kind];
+  const after = { pain: 'they finish', never: 'the account', level3: 'they finish Level 03' };
+  const series = PARSED.map((l) => {
+    const g = G[l.g] || {}, kind = g.kind || 'pain', key = seriesOf(l.g), total = lettersOf(l.g).length;
+    const date = addDays(SERIES[key].start, l.day);
+    const r = seriesLetter(BASE, l.id, { ...S, want: g.want || '', storm: { feel: 'panic', hours: '24', about: 'money' }, date, at: new Date(`${date}T08:07:00Z`) });
+    const first = kind === 'pain' ? `They finish The Leader’s North Star and pick “${g.name}” first.` : kind === 'never' ? 'Account made, nothing written in Level 01.' : 'They have written in Levels 01, 02 and 03.';
+    const day = kind === 'level3' && l.day === 1 ? 'the morning after' : `day ${l.day} after ${after[kind]}`;
+    const step = l.by.length ? ` Its step is due ${l.by[0] === 0 ? 'that same day (“today”)' : `${l.by[0]} ${l.by[0] === 1 ? 'day' : 'days'} later (“${byDay(date, l.by[0])}” when it goes on a ${weekday(date)})`}.` : '';
+    const late = l.exact ? ' Its words count the days, so it goes on its own day or not at all.'
+      : ` If its day is missed, it goes at the next chance, up to ${LATE_DAYS} days late and never on the next letter’s day; else it is skipped.`;
+    const when = `${first} Letter ${l.n} of ${total}: ${day}, from 8:00 their time (never after 21:00).${step}${late}${l.needsPrev ? ` Only if letter ${l.n - 1} went: it speaks of it.` : ''}`;
+    const stops = kind === 'never' ? 'unsubscribe, writing in Level 01, or the next series' : 'unsubscribe or the next series';
     return { id: `series-${l.id}`, stage: 'follow', icon: 'path', site: 'linktolead', group: 'series', series: l.g, n: l.n, day: l.day, name: `${g.name} · ${l.n}`,
-      when, who: `Founders with an account and a yes to letters. Stops on unsubscribe, pause, a question in Ask Alexandru, or the next series. Mailchimp tag: ${tag}.`,
-      from: kind === 'level3' || kind === 'never' ? '/ground-plan/' : '/northstar/', sentBy: `functions/_series-letters.js · ${SERIES_STATUS}`,
-      fromLine: 'Alexandru Cojocari · support@exploraself.com', replyTo: MENTOR_EMAIL, sample: 'Example founder Sam. The highlighted parts are filled from their own answers.',
-      subject: l.subject, html: asHtml(l.text), text: plain(l.text), ps: psOf(plain(l.text)), preview: previewOf(plain(l.text)) };
+      when, who: `Founders with an account and a yes to letters. Stops on ${stops}; waits while paused, and after a question in Ask Alexandru until the mentor resumes it in /mentor. At most one automatic letter a day, with 12 Days too. Mailchimp tag: ${SERIES[key].tag}.`,
+      from: kind === 'level3' || kind === 'never' ? '/ground-plan/' : '/northstar/', sentBy: `functions/_series.js (the hourly job in worker.js) · ${SERIES_STATUS}`,
+      fromLine: `${r.fromName} · support@exploraself.com`, replyTo: r.replyTo, sample: 'Example founder Sam. The name, the want, the day the step is due and the storm rule are filled from each founder’s own answers.',
+      subject: r.subject, html: r.html, text: r.text, ps: psOf(r.text), preview: previewOf(r.text) };
   });
   const at = index('follow');
   out.splice(at < 0 ? out.length : at, 0, ...series);

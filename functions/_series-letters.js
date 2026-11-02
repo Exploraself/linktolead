@@ -14,13 +14,15 @@
 // linktolead-letters-northstar, linktolead-letters-not-started,
 // linktolead-letters-level3 (Alexandru, 2 Nov 2026).
 //
-// STATUS: approved copy, NOT SENDING YET. The engine is the next PR. The words
-// are as rendered for an example founder, Sam; ⟦…⟧ marks what is filled from
-// the founder's own answers (name, want, the day their step is due, their
-// storm rule). No "Launchpad" in these letters; The Boardroom is $27.
+// The words are as rendered for an example founder, Sam; ⟦…⟧ marks what is
+// filled from the founder's own answers (name, want, the day their step is
+// due, their storm rule). No "Launchpad" in these letters; The Boardroom is
+// $27. Change none of them without Alexandru: the engine reads each letter
+// from its `text` (functions/_series.js parseLetter, SERIES_MODE in the
+// Cloudflare settings switches it on), and tests/series.test.mjs renders all
+// 37 for Sam and holds them equal to it.
 // Shown on the email map in /internal (scripts/email-map.mjs).
 
-export const SERIES_STATUS = 'Approved, not sending yet';
 export const SERIES_TAGS = { northstar: 'linktolead-letters-northstar', never: 'linktolead-letters-not-started', level3: 'linktolead-letters-level3' };
 export const SERIES_GROUPS = [
  {

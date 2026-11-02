@@ -10,7 +10,8 @@
 // GET ?growth=id   one founder's Massive Growth Plan: ticks and what they
 //                  wrote in its blanks, with the date of each change
 // POST { action }  reply (an answer in the thread, emailed as a letter) · tier (change step, and its step tags in Mailchimp) ·
-//                  pause · delete · signin-link · message · mc-test ·
+//                  pause · series-hold (pause or resume the letters that
+//                  follow each pain) · delete · signin-link · message · mc-test ·
 //                  mc-backfill. Every action is logged as an event; every
 //                  Mailchimp call also in mailchimp_log.
 
@@ -27,6 +28,7 @@ import { toolNames } from '../_tools.js';
 import { thread } from './thread.js';
 import { profile, unsubLink, deleteFounder } from '../_account.js';
 import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER } from '../_mailchimp.js';
+import { holdLetters } from '../_series.js';
 
 /** Each plan step's domain and title, so ticks can be read by domain. */
 const STEP = Object.fromEntries([...DOMAIN_STEPS, ...WHATIF_STEPS].map((s) => [s.id, s]));
@@ -80,6 +82,9 @@ async function roster(D) {
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'crossed') AS crossed,
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'tool-open') AS tools,
       (SELECT cs.day_sent || '|' || CASE WHEN cs.stopped_at IS NULL THEN '' ELSE 'stopped' END FROM course_sub cs WHERE cs.student_id = s.id AND cs.course = 'win12') AS course,
+      (SELECT ss.series || '|' || ss.grp || '|' || ss.sent || '|' || ss.step || '|' || COALESCE(ss.stop_why, '') || '|' || ss.test
+        FROM series_sub ss WHERE ss.student_id = s.id ORDER BY ss.started_at DESC LIMIT 1) AS series,
+      p.series_hold,
       p.avatar,
       p.industry, p.source, p.consent, p.unsubscribed, p.mailchimp_status, p.mailchimp_at, p.signup_type, p.company, p.interest, p.landing, p.utm_source, p.utm_medium, p.utm_campaign, p.utm_content,
       CASE WHEN au.pass_hash IS NULL THEN 0 ELSE 1 END AS has_password, COALESCE(au.paused, 0) AS paused
@@ -324,6 +329,12 @@ export async function onRequestPost({ request, env }) {
     // skipped there). Tags only accumulate: a lower step removes none.
     const mcOut = await syncFounder(env, D, me.id, 'tags');
     return json({ ok: true, mailchimp: mcOut.status, mailchimpDetail: mcOut.detail });
+  }
+  if (body.action === 'series-hold') {
+    // The letters that follow each pain (functions/_series.js): pause them,
+    // or resume them after a question in Ask Alexandru paused them.
+    await holdLetters(D, me.id, !!body.hold, 'mentor');
+    return json({ ok: true, hold: !!body.hold });
   }
   if (body.action === 'pause') {
     const paused = body.paused ? 1 : 0;

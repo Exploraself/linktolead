@@ -78,6 +78,8 @@ so a deploy never removes them.
 | `MAILCHIMP_AUDIENCE_ID` | Text, optional | The audience for API mode. Empty uses the form's list id. |
 | `MAILCHIMP_API_KEY` | **Secret** | Switches Mailchimp to API mode: tags, updates and unsubscribes, and no form fields to satisfy. |
 | `MAILCHIMP_DOUBLE_OPTIN` | Text, optional | `yes` makes Mailchimp send its own confirmation email before someone joins (API mode). |
+| `SERIES_MODE` | Text, optional | The letters that follow each pain (`functions/_series.js`). Empty or `off` (the default): nobody is enrolled and nothing is sent. `test`: founders are enrolled and each letter that would go is logged (event `series-test`); nothing goes to founders and no Mailchimp tag is sent. `on`: the letters go, and each founder gets the series tag in Mailchimp. |
+| `TOOLKIT_CODE` | Text, optional | The one 4-digit code that opens the Growth Toolkit for people without an account. Empty means `5689`. |
 
 ### Three roads, two forms, one account
 
@@ -230,7 +232,33 @@ the code letter itself.
 `/mentor` shows which tools each founder opened and their day in the 12 days.
 The North Star has the Growth Toolkit in its left bar. The 12-day letters need
 the hourly cron in `wrangler.toml` (`[triggers]`), which runs `JOBS` in
-`worker.js`.
+`worker.js` (the letters that follow each pain first, then 12 Days).
+
+## The letters that follow each pain (2 Nov 2026)
+
+37 letters approved by Alexandru, word for word, in
+`functions/_series-letters.js`; the engine is `functions/_series.js`, sent by
+the site (Resend) like 12 Days, from the same hourly cron. Off until
+`SERIES_MODE` says otherwise (see 8. Settings in Cloudflare).
+
+| Series | Starts when | Letters | Mailchimp tag |
+| --- | --- | --- | --- |
+| After the North Star | The Leader's North Star is finished (every domain answered) with a first pain | That pain's 4: day 1, 3, 6, 10 after | `linktolead-letters-northstar` |
+| Never started | An account is made (sign-up or Google) and nothing is written in Level 01 | 3: day 2, 5, 9 after; stops when they write in Level 01 | `linktolead-letters-not-started` |
+| Finished Level 03 | Levels 01, 02 and 03 all hold an answer | 2: the morning after, then day 4 | `linktolead-letters-level3` |
+
+Each letter goes from 8:00 in the founder's time zone (never after 21:00).
+At most one automatic letter a day across every series and 12 Days: the
+series run first in the hour, so 12 Days waits for tomorrow on that day.
+Letters that count the days ("Ten days ago…") go on their own day or not at
+all; any other goes up to 3 days late, never on the next letter's day. Only
+founders who said yes to letters. A later series stops an earlier one;
+unsubscribing stops it; a paused account waits; a question in Ask Alexandru
+pauses the letters until the mentor presses **Resume letters** in the
+founder's drawer in `/mentor` (which also shows the series, the letter and
+**Pause letters**). The name, the want, the day the step is due ("by
+Wednesday") and the storm rule from Level 03 are filled from the founder's
+own answers; one that is not known is left out, never invented.
 
 ## The email journey map (2 Nov 2026)
 

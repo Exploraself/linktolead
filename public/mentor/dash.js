@@ -211,6 +211,27 @@ export const TEAM_NAMES = { solo: 'Just me', help: 'Me and some help', team: 'A 
 export const SIDES = ['Lead yourself', 'Lead your people', 'Lead your business', 'Lead the market'];
 const parseJSON = (v) => { if (v && typeof v === 'object') return v; try { return JSON.parse(v || 'null') || {}; } catch { return {}; } };
 
+/** The letters that follow each pain (functions/_series.js): each series by
+ *  its group's name and length (the same as SERIES_GROUPS in
+ *  functions/_series-letters.js; a test holds them equal). */
+export const SERIES_NAMES = { ...PAIN_NAMES, never: 'Never started', level3: 'Finished Level 03' };
+export const SERIES_LENGTH = { never: 3, level3: 2 };
+const HOLD_WHY = { question: 'paused: a question in Ask Alexandru', mentor: 'paused in /mentor' };
+const STOP_WHY = { done: 'finished', unsubscribed: 'stopped: unsubscribed', 'wrote in Level 01': 'stopped: they started Level 01' };
+/** Where a founder is in those letters, for the drawer. `s.series` is
+ *  "series|group|sent|step|stop_why|test" (functions/api/mentor.js), the
+ *  newest; `s.series_hold` why they are paused. Null when there is nothing. */
+export function seriesInfo(s) {
+  if (!s || (!s.series && !s.series_hold)) return null;
+  const held = s.series_hold ? HOLD_WHY[s.series_hold] || 'paused' : '';
+  if (!s.series) return { line: held, active: false, held: !!held };
+  const [, grp, sent, step, why, test] = String(s.series).split('|');
+  const total = SERIES_LENGTH[grp] || 4, n = Number(step) || 0;
+  const where = why ? STOP_WHY[why] || (/^next series/.test(why) ? 'stopped: a later series started' : `stopped: ${why}`) : n >= total ? 'finished' : `next: letter ${n + 1} of ${total}`;
+  const line = [SERIES_NAMES[grp] || grp, `${Number(sent) || 0} of ${total} ${test === '1' ? 'logged in test mode, none sent' : 'sent'}`, where, held].filter(Boolean).join(' · ');
+  return { line, active: !why, held: !!held };
+}
+
 /** One founder's answers, as names. first/best: index into SIDES, or -1. */
 export function told(s) {
   const f = parseJSON(s && s.ns_flags), r = parseJSON(s && s.ns_results);

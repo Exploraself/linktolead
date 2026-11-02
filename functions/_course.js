@@ -9,7 +9,10 @@
 // An hourly cron (worker.js `scheduled`, wrangler.toml [triggers]) calls
 // sendDue(). Each founder gets at most one letter per day of their own
 // calendar: a missed hour sends later that day, a missed day shifts the course
-// by a day, and nobody ever gets two in one day. Unsubscribing (the footer
+// by a day, and nobody ever gets two in one day: not even with the letters
+// that follow each pain (functions/_series.js), which run first in the hour,
+// so on a day one of those went, the next 12-day letter waits for tomorrow
+// (the welcome, which the founder asked for, never waits). Unsubscribing (the footer
 // link, the profile menu) or "Stop the letters" on /12-days/ ends it.
 //
 // The words live in functions/_course-letters.js, checked word for word
@@ -87,7 +90,8 @@ export async function sendDue(env, D, base = SITE, at = new Date()) {
   const st = mailState(env);
   if (!st.ready) return { sent: 0, failed: 0, why: st.reason };
   const rows = (await D.prepare(`SELECT cs.student_id, cs.day_sent, cs.last_local, cs.stopped_at, COALESCE(NULLIF(cs.tz, ''), p.tz) AS tz,
-      s.email, s.name, p.unsubscribed, p.unsub_id, COALESCE(au.paused, 0) AS paused
+      s.email, s.name, p.unsubscribed, p.unsub_id, COALESCE(au.paused, 0) AS paused,
+      (SELECT MAX(ss.last_sent_at) FROM series_sub ss WHERE ss.student_id = cs.student_id AND ss.test = 0) AS series_last
     FROM course_sub cs JOIN student s ON s.id = cs.student_id
       LEFT JOIN student_profile p ON p.student_id = cs.student_id
       LEFT JOIN account_auth au ON au.student_id = cs.student_id
@@ -102,6 +106,8 @@ export async function sendDue(env, D, base = SITE, at = new Date()) {
     if (row.paused) continue;
     const d = due(row, at);
     if (!d) continue;
+    // One automatic letter a day: a series letter went today, so tomorrow.
+    if (d.day >= 1 && row.series_last && localParts(row.tz, new Date(row.series_last)).date === d.date) continue;
     const r = await sendOne(env, D, base, row, d, at);
     if (r.ok) sent++; else failed++;
   }
