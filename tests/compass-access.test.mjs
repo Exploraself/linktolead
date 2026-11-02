@@ -9,7 +9,7 @@ const compass = read('public/northstar/app.js'), box = read('public/account-box.
 
 // The North Star: outsiders make the full account; signed-in founders see all.
 ok(/function gated\(change\)[\s\S]{0,200}if \(!signedIn\(\)\) fullAccount\(\)/.test(compass), 'a first answer without an account opens the full account form');
-ok(/variant: 'full', landing: 'compass', stay: true/.test(compass), 'the North Star form is the full one (password, company, interest, industry), landing "compass"');
+ok(/variant: 'full', landing: doorOf\(\), stay: true/.test(compass) && /return src === 'north1' \? 'north1' : 'compass';/.test(compass), 'the North Star form is the full one (password, company, interest, industry), landing "compass" (or "north1" for founders sent by /north1/)');
 ok(!/createAccount\(fromSales \? 'sales-page' : 'compass', true\)/.test(compass), 'no quiet simple account from the North Star any more');
 ok(/if \(!signedIn\(\)\) \{ fullAccount\(\); return; \}/.test(compass), '"Email me my results" without an account: the full form first');
 ok(/if \(ctx\.stay\) location\.reload\(\)/.test(box) && /OPEN MY NORTH STAR →/.test(box), 'after the form: back on the North Star, signed in');

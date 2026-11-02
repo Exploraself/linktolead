@@ -308,13 +308,21 @@
    *  account at once and this browser's answers go into it. An email that
    *  already has one is never handed its token: unless this is the silent
    *  carry-over, a sign-in link is sent instead. */
+  /** The door a founder came in by: /north1/ sends them here with utm_source=north1
+   *  (2 Nov 2026), so their sign-up is kept as north1; everyone else is 'compass'. */
+  function doorOf(u) {
+    let src = u && u.utm_source;
+    if (!src) { try { src = (JSON.parse(localStorage.getItem('ftb-utm') || '{}') || {}).utm_source; } catch { src = ''; } }
+    if (!src) { try { src = new URLSearchParams(location.search).get('utm_source'); } catch { src = ''; } }
+    return src === 'north1' ? 'north1' : 'compass';
+  }
   async function createAccount(source, silent) {
     if (!A || signedIn() || !identified()) return signedIn();
     const P = S.profile;
     let out;
     let utm = {};
     try { utm = (await import('/forms.js')).utm(); } catch { /* no tags kept */ }
-    try { out = await A.signup({ first: P.first, last: P.last, email: P.email, industry: P.industry, consent: P.consent, source, stage: S.stage, type: 'simple', landing: 'compass', utm }); }
+    try { out = await A.signup({ first: P.first, last: P.last, email: P.email, industry: P.industry, consent: P.consent, source, stage: S.stage, type: 'simple', landing: doorOf(utm), utm }); }
     catch { return false; }
     S.acct = { email: P.email, state: out.token ? 'yes' : out.existing ? 'existing' : '' };
     save();
@@ -450,7 +458,7 @@
     const gate = document.getElementById('acct-gate');
     if (!gate) return;
     const opener = document.activeElement;
-    (box || (box = import('/account-box.js'))).then((m) => m.open({ gate, opener, stage: null, variant: 'full', landing: 'compass', stay: true,
+    (box || (box = import('/account-box.js'))).then((m) => m.open({ gate, opener, stage: null, variant: 'full', landing: doorOf(), stay: true,
       onExisting: (email) => { S.profile.email = email; S.acct = { email, state: 'existing' }; save(); openSignin(); } }))
       .catch(() => { box = null; });
   }
@@ -482,7 +490,7 @@
     if (!el || !GS || el.dataset.on) return;
     el.dataset.on = '1';
     const fromGate = !!el.closest('#gate-form');
-    GS.mount(el, { landing: 'compass', source: 'compass', onDone: (out) => googleDone(out, fromGate),
+    GS.mount(el, { landing: doorOf(), source: 'compass', onDone: (out) => googleDone(out, fromGate),
       onError: (m) => { if (fromGate) { const t = $('#gate-err'); if (t) t.textContent = m; } else { UI.signin = m; render(); } } });
   }
   function closeGate() {
@@ -1507,7 +1515,7 @@
    * their shape as a constellation, what they lead for, the next summit, and
    * at the bottom the link and their mentor. Downloads as an image, or opens
    * the phone's share sheet. ── */
-  const ARCH = [['The Steady Compass', 'Knows why, and keeps going when it gets hard.'],
+  const ARCH = [['The Steady Hand', 'Knows why, and keeps going when it gets hard.'],
     ['The Trusted Captain', 'People follow, because they are trusted to lead.'],
     ['The Quiet Builder', 'Builds what lasts, one honest number at a time.'],
     ['The Voice People Find', 'Speaks so clearly the right people come looking.']];
