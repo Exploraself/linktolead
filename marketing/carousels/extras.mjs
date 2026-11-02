@@ -27,9 +27,9 @@ export const PIECES = [
   { n: '24', t: 'History and maths carousels', where: 'This page, second section', state: 'In progress', note: 'c01–c05 ready (AI multiplies, the 1935 checklist, discount maths, Kodak 1975, the Wright brothers). The rest are being written and appear here when ready. Every fact has a source in facts.md.' },
   { n: '25', t: 'LinkedIn and YouTube ideas', where: 'This page, third and fourth sections', state: 'Ready to check', note: '8 LinkedIn formats, 6 YouTube formats, each with its hook, why it works and what we need from you. New angles: none repeats pieces 03, 12 or 13.' },
   { n: '26', t: 'Carousel template you can edit', where: 'https://claude.ai/artifact/WRq8w2saht8jz3x23ZLF66', state: 'Ready', note: 'Four slide types on a canvas: retype the words in place, change the gold, or Share › Export › Send to Canva.' },
-  { n: '27', t: 'The Founder’s Blueprint, finished for review', where: 'https://github.com/Exploraself/linktolead/pull/109', state: 'Waiting for Merge', note: 'One question at a time, 48 action plans, Sunday check-ins, readings, build pages, My Blueprint, three session cards, the mentor’s session brief. Screens: https://d14c8b51.linktolead.pages.dev/preview/blueprint/screens' },
-  { n: '28', t: 'The three manuals, rebuilt from the programme', where: 'https://github.com/Exploraself/linktolead/pull/111', state: 'Waiting for Merge', note: 'Building, Growing, Scaling: 76 pages each, in the Library. https://efb3b2e1.linktolead.pages.dev/library/blueprint-building.pdf' },
-  { n: '29', t: 'Test fix', where: 'https://github.com/Exploraself/linktolead/pull/112', state: 'Waiting for Merge', note: 'A letters test that failed on some dates. Merge first.' },
+  { n: '27', t: 'The Founder’s Blueprint, finished for review', where: 'https://github.com/Exploraself/linktolead/pull/109', state: 'Merged, live', note: 'One question at a time, 48 action plans, Sunday check-ins, readings, build pages, My Blueprint, three session cards, the mentor’s session brief. Screens: https://d14c8b51.linktolead.pages.dev/preview/blueprint/screens' },
+  { n: '28', t: 'The three manuals, rebuilt from the programme', where: 'https://github.com/Exploraself/linktolead/pull/111', state: 'Merged, live', note: 'Building, Growing, Scaling: 76 pages each, live in the Library. https://linktolead.exploraself.com/library/blueprint-building.pdf' },
+  { n: '29', t: 'This list', where: 'https://claude.ai/artifact/PrBzcdEmUUKNp1YevEKoQp', state: 'Ready', note: 'Everything from this session. (The test fix, PR #112, was closed: #109 carried the same fix.)' },
 ];
 
 export const DECISIONS = [
@@ -38,7 +38,7 @@ export const DECISIONS = [
   { q: 'Spelling for social posts', o: 'UK English (your voice, as now) or US English (the audience).' },
   { q: 'The photos in p01, p02 and p04', o: 'Made in Canva for these posts: keep, or replace with your own photos. Canva’s image credits ran out tonight.' },
   { q: 'Which page the Instagram bio links to', o: 'The Leader’s North Star (free) or the Unshakeable assessment ($9.99). Every slide 10 names one of the two.' },
-  { q: 'Merge order on linktolead', o: '#112, then #109, then #111. Nothing is live until you tap Merge.' },
+  { q: '/road1/ page counts', o: '/road1/ still says 79, 77 and 80 pages; the manuals now have 76 each. The road session should change it.' },
   { q: 'Book titles (D8)', o: 'The real titles of built-to-lead.pdf and worth-building.pdf. Until then, no quotes from them.' },
   { q: 'Session 3 in the programme', o: 'Keep three sessions (as the site sells them) or go back to two.' },
   { q: 'YouTube series to start with', o: 'The Hardest Decision (documentary) or AI vs the Founder (experiment).' },
