@@ -200,22 +200,46 @@ counted with them: `/api/plans` ("x of 32"), the count `/api/plans/tick`
 returns and /mentor's "Plan steps done" stay the plans' own. No Mailchimp
 tags.
 
-## The founder's toolkit (2 Nov 2026)
+## The Growth Toolkit (2 Nov 2026)
 
-Free tools for a full free account, listed by the four domains at
-`/tools/`. One entry per tool in `public/tools/catalog.js`; a new tool is one
-entry there, a page of its own, and its key in `functions/_tools.js`.
+Free tools in two lists, **Personal leadership** (Lead yourself, Lead your
+people) and **Business** (Lead your business, Lead the market), at `/tools/`.
+One entry per tool in `public/tools/catalog.js`; a new tool is one entry
+there, a page of its own, and its key in `functions/_tools.js`.
 
 | Address | What |
 | --- | --- |
-| `/tools/` | Every tool, by domain; signed in, the last result of each |
+| `/tools/` | Every tool in its list; signed in, the last result of each |
 | `/runway/`, `/bottleneck/`, `/off-switch/` | Cover → the way in → one question per screen → the reading → The Leader's North Star |
-| `/12-days/` | 12 Days to Start Winning: letters sent by the site (`functions/_course.js`), the welcome at once, then one a morning from 8:00 the founder's time, Day 1 to 12 and a last "what next" |
+| `/teleprompter/` | The teleprompter (Business), scripts kept on the device |
+| `/12-days/` | 12 Days to Start Winning: letters sent by the site (`functions/_course.js`), the welcome at once, then one a morning from 8:00 the founder's time, Day 1 to 12 and a last "what next". Needs an account |
 | `/toolkit/` | The page for ads and links: one offer, one button |
 
-The way in (`public/tools/gate.js`): signed out, the full account form one
-field at a time; details missing, only those, once; a full account, one tap.
-Mailchimp tag `TOOLS` the first time each tool is opened. `/mentor` shows which
-tools each founder opened and their day in the 12 days. The 12-day letters need
+The way in (`public/tools/gate.js`): an account opens it at once. Without one,
+the visitor asks for a code (`/api/toolkit`), gets their own six digits by
+email, types them in, and keeps a pass in the browser. Addresses in
+`TOOLKIT_EMAILS` (Cloudflare settings, comma separated) and the team skip the
+code. Mailchimp tag `Growth Toolkit` (it replaced `TOOLS`) the first time an
+account opens each tool. The welcome, "Welcome to the Growth Toolkit", goes
+once per address the first time an account opens the toolkit, new or
+existing, with their yes to letters (`toolkit_welcome` table); its P.S. is one
+free assessment or article on exploraself.com, matched by the tool they
+opened, or on the Tools page by what they want most (`TOOLKIT_BY_TOOL`,
+`TOOLKIT_BY_INTEREST` in `functions/_letters.js`). A code holder's welcome is
+the code letter itself.
+`/mentor` shows which tools each founder opened and their day in the 12 days.
+The North Star has the Growth Toolkit in its left bar. The 12-day letters need
 the hourly cron in `wrangler.toml` (`[triggers]`), which runs `JOBS` in
 `worker.js`.
+
+## The email journey map (2 Nov 2026)
+
+`node scripts/email-map.mjs out.html --exploraself ../exploraself` draws
+every letter a founder can get, in journey order (they find us → they open a
+door → they use it → we stay close → their account stays safe → the team
+hears), rendered by the real letter builders for a sample founder, Sam. With
+the exploraself repo, the assessment results letters of exploraself.com are
+drawn too (bundled with esbuild from that repo; set `ESBUILD=` to its path if
+it is not in that repo's node_modules). The page lives in /internal,
+Promotion. AGENTS.md rule 14 keeps it current; tests/email-map.test.mjs
+fails when a letter is missing.

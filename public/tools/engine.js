@@ -1,5 +1,6 @@
-/* One free tool on its own page (/runway/, /bottleneck/, /off-switch/):
- * the cover → the way in (a full free account, public/tools/gate.js) → one
+/* One free tool of the Growth Toolkit on its own page (/runway/,
+ * /bottleneck/, /off-switch/): the cover → the way in (an account, or a code
+ * by email, public/tools/gate.js) → one
  * question per screen → the first number → the full reading, with one button
  * to The Leader's North Star.
  *
@@ -7,6 +8,7 @@
  * reload or a dropped connection loses nothing. The reading and the answers
  * are copied to the account once, when the founder reaches the reading
  * (/api/tools), so Alexandru and the team can read them before a session.
+ * With a code's pass (no account) the answers stay on the device only.
  * The tool's words, sums and readings are in tools-data.js. */
 import { byKey, RM, esc, money, MONEY_STEPS, NS_URL, DAYS, dayLong, FOUR, drawCard, loadFonts } from '/tools/tools-data.js';
 import { byKey as coverOf, coverHTML } from '/tools/catalog.js';
@@ -29,7 +31,8 @@ const visibleQs = (a) => t.qs.filter((q) => !q.cond || q.cond(a));
 const keysOf = () => ['cover', ...visibleQs(st.a).map((q) => 'q:' + q.id), 'insight', 'result'];
 const val = (x, a) => (typeof x === 'function' ? x(a) : x);
 const done = () => visibleQs(st.a).every((q) => q.optional || st.a[q.id] !== undefined);
-const api = (path, payload) => fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: A.token(), tool: KEY, ...payload }) }).catch(() => null);
+const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; } })();
+const api = (path, payload) => fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: A.token(), tool: KEY, tz: TZ, ...payload }) }).catch(() => null);
 
 function go(dir) {
   const ks = keysOf(), i = ks.indexOf(st.key);
@@ -52,10 +55,8 @@ function render() {
 }
 
 function openLabel() {
-  if (acct.kind === 'full') return `Open ${esc(cover.name)} <span aria-hidden="true">→</span>`;
-  if (acct.kind === 'missing') return `Open ${esc(cover.name)} <span aria-hidden="true">→</span>`;
-  if (acct.kind === 'checking') return `Open ${esc(cover.name)} <span aria-hidden="true">→</span>`;
-  return 'Open with a free account <span aria-hidden="true">→</span>';
+  if (acct.kind === 'guest') return 'Open it free <span aria-hidden="true">→</span>';
+  return `Open ${esc(cover.name)} <span aria-hidden="true">→</span>`;
 }
 function coverScreen() {
   const s = saved(), back = s && s.done;
@@ -65,7 +66,7 @@ function coverScreen() {
       <p class="lede">${esc(t.intro.p)}</p>
       <div class="okrow" style="margin-top:24px"><button class="btn big" data-act="open" data-primary>${openLabel()}</button><span class="kbd">or press Enter ↵</span></div>
       ${back ? '<p class="alt"><button class="linkbtn" data-act="last">See my last reading</button></p>' : ''}
-      <p class="fine">${esc(t.intro.fine)}${acct.kind === 'full' ? '' : ' One account opens every tool, The Leader’s North Star and The Founder Launchpad.'}</p>
+      <p class="fine">${esc(t.intro.fine)}${acct.kind === 'guest' ? ' With an account it opens at once; without one, we email you your own code.' : ''}</p>
     </div></div>`;
 }
 
@@ -142,7 +143,7 @@ function resultHTML() {
       <a class="btn big" href="${NS_URL}?utm_source=tools&amp;utm_medium=${encodeURIComponent(KEY)}">Open The Leader’s North Star <span aria-hidden="true">→</span></a>
       <p class="fine">Free · No card · Eight plain questions</p></div>
     <p class="honest">${r.honest}</p>
-    <div class="again"><button class="linkbtn" data-act="restart">Start again</button><a class="linkbtn" href="/tools/">All your tools</a></div>`;
+    <div class="again"><button class="linkbtn" data-act="restart">Start again</button><a class="linkbtn" href="/tools/">Your Growth Toolkit</a></div>`;
 }
 
 /** The reading reached: kept on this device, then copied to the account once. */
@@ -170,15 +171,15 @@ function focusScreen() {
 
 /* ── Opening the tool ───────────────────────────────────────── */
 function start(me) {
-  acct = { kind: 'full', me };
+  acct = me ? { kind: 'full', me } : { kind: 'pass', me: null };
   st.name = G.firstOf(me);
-  api('/api/tools', { step: 'open' });
+  if (A.joined()) api('/api/tools', { step: 'open' });
   const first = visibleQs(st.a)[0];
   st.key = 'q:' + first.id; st.acted = true; render();
 }
 async function openTool() {
   if (acct.kind === 'checking' || acct.kind === 'offline') acct = await G.state();
-  if (acct.kind === 'full') return start(acct.me);
+  if (acct.kind === 'full' || acct.kind === 'pass') return start(acct.me);
   st.key = 'gate'; bar.style.width = '0%';
   G.open(body, { name: cover.name, path: cover.href, st: acct, ready: start, cancel: () => { st.key = 'cover'; render(); } });
 }

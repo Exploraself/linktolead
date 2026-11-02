@@ -41,7 +41,7 @@ const TOOLS = {
   cash: {
     id: 'cash', key: 'runway', name: 'Cash runway', pain: 'Cash is tight', domain: 'Lead your business', domColor: '#91B8D5', path: '/runway/',
     hook: 'Your bank balance is already spoken for. How many weeks are really yours?',
-    intro: { eyebrow: 'Lead your business · Free · About 60 seconds', h: 'Your bank balance is already spoken for. How many weeks are really yours?', p: 'Ten quick answers at most. Rough numbers are fine. You will see your runway in weeks, worked out only from what you enter.', btn: 'Count my runway', fine: 'Free with your ExploraSelf account. A self-reflection tool, not financial advice.' },
+    intro: { eyebrow: 'Lead your business · Free · About 60 seconds', h: 'Your bank balance is already spoken for. How many weeks are really yours?', p: 'Ten quick answers at most. Rough numbers are fine. You will see your runway in weeks, worked out only from what you enter.', btn: 'Count my runway', fine: 'Free, in the Growth Toolkit. A self-reflection tool, not financial advice.' },
     qs: [
       { id: 'look', type: 'tap', q: 'When you check your cash, what do you look at?', hint: 'Think of last month. Honest beats impressive.', options: ['I avoid looking', 'Today’s bank balance', 'Money in and money out', 'A weekly page: in, out and what’s left'] },
       { id: 'cash', type: 'money', q: 'Cash in the business account today', hint: 'Open your banking app if it’s close. Rough is fine.', start: 17 },
@@ -141,7 +141,7 @@ const TOOLS = {
   bottleneck: {
     id: 'bottleneck', key: 'bottleneck', name: 'The bottleneck test', pain: 'Team not stepping up', domain: 'Lead your people', domColor: '#9BC0A1', path: '/bottleneck/',
     hook: 'Your team isn’t stuck. They’re waiting for you. How many decisions are on your desk?',
-    intro: { eyebrow: 'Lead your people · Free · About 2 minutes', h: 'Your team isn’t stuck. Are they waiting for you?', p: 'Ten quick answers about last week. You will see how much of the work runs through your desk, and choose one decision to hand over this week.', btn: 'Start the test', fine: 'Free with your ExploraSelf account. Nobody is graded, not even you.' },
+    intro: { eyebrow: 'Lead your people · Free · About 2 minutes', h: 'Your team isn’t stuck. Are they waiting for you?', p: 'Ten quick answers about last week. You will see how much of the work runs through your desk, and choose one decision to hand over this week.', btn: 'Start the test', fine: 'Free, in the Growth Toolkit. Nobody is graded, not even you.' },
     qs: [
       { id: 'people', type: 'tap', q: 'Finish it honestly: “People usually…”', hint: 'The first one that sounds like you.', options: ['let me down', 'do it worse than I would', 'need me to check everything', 'rise when they are trusted'] },
       { id: 'stop', type: 'slide', q: 'If you stepped away for two weeks, how much of the work would stop?', hint: 'Not what should happen. What would.', min: 0, max: 100, step: 10, start: 50, fmt: (v) => v + '%', words: (v) => (v >= 80 ? 'almost all of it' : v > 50 ? 'more than half' : v >= 30 ? 'a good part' : v > 0 ? 'a little' : 'nothing'), ends: ['Nothing', 'All of it'] },
@@ -221,7 +221,7 @@ const TOOLS = {
   offswitch: {
     id: 'offswitch', key: 'off-switch', name: 'The off-switch check', pain: 'I can’t switch off', domain: 'Lead yourself', domColor: '#E0A282', path: '/off-switch/',
     hook: 'Your laptop is closed. Is your head?',
-    intro: { eyebrow: 'Lead yourself · Free · About 90 seconds', h: 'Your laptop is closed. Is your head?', p: 'Ten quick answers about last week’s evenings. You will see what work took home, and choose one evening this week that is fully yours.', btn: 'Check my off-switch', fine: 'Free with your ExploraSelf account. A self-reflection tool, not medical advice.' },
+    intro: { eyebrow: 'Lead yourself · Free · About 90 seconds', h: 'Your laptop is closed. Is your head?', p: 'Ten quick answers about last week’s evenings. You will see what work took home, and choose one evening this week that is fully yours.', btn: 'Check my off-switch', fine: 'Free, in the Growth Toolkit. A self-reflection tool, not medical advice.' },
     qs: [
       { id: 'where', type: 'tap', q: 'Where does work find you most when you’re off?', hint: 'The first one that comes to mind.', options: ['In bed, at night', 'At the dinner table', 'At the weekend', 'First thing in the morning', 'On holiday'] },
       { id: 'off', type: 'slide', q: 'Last week, how many evenings were fully off?', hint: 'No work, no messages, no “quick look”.', min: 0, max: 7, step: 1, start: 3, fmt: (v) => v + ' of 7', words: (v) => (v === 7 ? 'every evening' : v === 1 ? 'evening' : 'evenings'), ends: ['None', 'All seven'] },

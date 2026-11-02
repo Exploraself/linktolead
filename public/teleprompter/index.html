@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Teleprompter · Growth Toolkit · ExploraSelf</title>
+<meta name="description" content="A free teleprompter in the ExploraSelf Growth Toolkit: paste your script, press Start. It scrolls at your pace, mirrors for a glass prompter and keeps time.">
+<link rel="canonical" href="https://linktolead.exploraself.com/teleprompter/">
+<link rel="icon" href="/northstar/assets/favicon.svg" type="image/svg+xml">
+<!-- The Growth Toolkit's teleprompter (Business list, 2 Nov 2026), the same as
+     the one in exploraself.com/internal. Open with an account or a toolkit
+     code (public/tools/gate.js): without either, the Tools page asks first.
+     Scripts and settings stay on this device. -->
+<script type="module">
+  import { mayOpen } from '/tools/gate.js';
+  import * as A from '/account.js';
+  if (!mayOpen()) location.replace('/tools/?open=teleprompter');
+  // With an account: logged as opened, and the toolkit welcome once per address.
+  else if (A.joined()) {
+    let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch {}
+    fetch('/api/tools', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: A.token(), tool: 'teleprompter', step: 'open', tz }) }).catch(() => {});
+  }
+</script>
+<style>
+/* Fonts from this site (SIL Open Font Licence). No third-party requests. */
+@font-face{font-family:Newsreader;font-style:normal;font-weight:200 800;font-display:swap;src:url(/assets/fonts/newsreader.woff2) format('woff2')}
+@font-face{font-family:Inter;font-style:normal;font-weight:100 900;font-display:swap;src:url(/assets/fonts/inter.woff2) format('woff2')}
+:root{--bg:#0E1C2B;--panel:#132538;--panel2:#1A2F45;--ink:#F3EBDD;--ink2:#C9BEA9;--muted:#9A9080;--gold:#D6B36A;--gold2:#B4975F;--line:#2B3F55;--red:#E07A6A;
+  --display:"Newsreader",Georgia,serif;--body:"Inter",system-ui,-apple-system,Arial,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body)}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+/* ---------- Setup screen ---------- */
+.setup{max-width:980px;margin:0 auto;padding:28px max(18px,env(safe-area-inset-left)) 56px;display:grid;gap:18px}
+.eb{font:600 12px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+h1{font:500 clamp(30px,4vw,44px)/1.08 var(--display);margin:4px 0 0}
+h1 i{color:var(--gold);font-weight:400}
+.lede{color:var(--ink2);max-width:62ch;margin:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.row label{color:var(--ink2);font-size:14px}
+input[type=text],select,input[type=number]{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+input[type=text]{flex:1 1 260px}
+textarea{width:100%;min-height:42vh;resize:vertical;background:#0B1724;border:1px solid var(--line);border-radius:12px;padding:16px;line-height:1.6;color:var(--ink)}
+.btn{background:var(--gold);color:#14100B;border:0;border-radius:999px;padding:12px 22px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.small{padding:8px 14px;font-size:14px}
+.stat{color:var(--muted);font-size:14px}
+.keys{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px 16px;color:var(--ink2);font-size:14px}
+kbd{font:600 12px var(--body);background:var(--panel2);border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:2px 6px;color:var(--ink)}
+.timer-set{display:flex;gap:6px;align-items:center}
+.timer-set input{width:64px;text-align:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:9px 14px;color:var(--ink2)}
+.seg button[aria-pressed=true]{background:var(--gold);color:#14100B;font-weight:600}
+
+/* ---------- Prompter screen ---------- */
+.stage{position:fixed;inset:0;background:#000;overflow:hidden;cursor:none}
+.stage.show-ui{cursor:auto}
+.flip{position:absolute;inset:0}
+.scroller{position:absolute;inset:0;overflow:hidden}
+.text{margin:0 auto;padding:45vh 0 90vh;white-space:pre-wrap;word-wrap:break-word;color:#F7F2E8;font-family:var(--body);font-weight:500;line-height:1.38;will-change:transform}
+.text p{margin:0 0 .7em}
+.guide{position:absolute;left:0;right:0;top:33%;height:1.5em;pointer-events:none;border-top:1px solid rgba(214,179,106,.45);border-bottom:1px solid rgba(214,179,106,.45);background:rgba(214,179,106,.07)}
+.guide::before{content:"▶";position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gold);font-size:22px}
+.fade-top,.fade-bot{position:absolute;left:0;right:0;height:22vh;pointer-events:none}
+.fade-top{top:0;background:linear-gradient(#000,rgba(0,0,0,0))}
+.fade-bot{bottom:0;background:linear-gradient(rgba(0,0,0,0),#000)}
+.clock{position:absolute;top:max(14px,env(safe-area-inset-top));right:18px;font:600 clamp(28px,4vw,54px)/1 var(--body);font-variant-numeric:tabular-nums;color:var(--ink);text-shadow:0 2px 12px #000;letter-spacing:.02em}
+.clock.warn{color:var(--gold)}
+.clock.over{color:var(--red)}
+.clock.off{display:none}
+.count{position:absolute;inset:0;display:grid;place-items:center;font:600 30vmin/1 var(--display);color:var(--gold);pointer-events:none}
+.bar{position:absolute;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:8px;align-items:center;
+  background:rgba(14,28,43,.92);border:1px solid var(--line);border-radius:16px;padding:10px 12px;max-width:calc(100vw - 20px);transition:opacity .4s ease}
+.stage:not(.show-ui) .bar{opacity:0;pointer-events:none}
+.bar .grp{display:flex;align-items:center;gap:6px;padding:0 6px;border-right:1px solid var(--line)}
+.bar .grp:last-child{border-right:0}
+.bar button{background:var(--panel2);border:1px solid var(--line);border-radius:10px;min-width:40px;height:40px;padding:0 10px;color:var(--ink)}
+.bar button.play{background:var(--gold);color:#14100B;font-weight:700;min-width:76px}
+.bar button[aria-pressed=true]{border-color:var(--gold);color:var(--gold)}
+.bar .val{min-width:44px;text-align:center;font-variant-numeric:tabular-nums;color:var(--ink2);font-size:14px}
+.bar .eta{color:var(--muted);font-size:13px;padding:0 6px}
+.progress{position:absolute;left:0;top:0;height:3px;background:var(--gold);width:0}
+@media (prefers-reduced-motion: reduce){.bar{transition:none}}
+</style>
+</head>
+<body>
+
+<!-- ===== Setup ===== -->
+<main class="setup" id="setup">
+  <div>
+    <p class="eb"><a href="/tools/" style="color:inherit;text-decoration:none">ExploraSelf · Growth Toolkit</a> · Business</p>
+    <h1>Teleprompter, <i>with a timer.</i></h1>
+    <p class="lede">Paste the script, press Start. It scrolls at your pace, mirrors for a glass prompter, and keeps time: counting down from the length you choose, or counting up from zero. Your scripts and settings stay on this device.</p>
+  </div>
+
+  <section class="card" aria-label="Your script">
+    <div class="row">
+      <input type="text" id="title" placeholder="Script title (for example: Level 01 · SEED)" aria-label="Script title">
+      <select id="saved" aria-label="Saved scripts"><option value="">Saved scripts…</option></select>
+      <button class="btn ghost small" id="save" type="button">Save</button>
+      <button class="btn ghost small" id="del" type="button">Delete</button>
+      <button class="btn ghost small" id="clear" type="button">New</button>
+    </div>
+    <textarea id="script" placeholder="Paste or type your script here. A blank line starts a new paragraph." aria-label="Script text"></textarea>
+    <p class="stat" id="stat">0 words</p>
+  </section>
+
+  <section class="card" aria-label="Timer and start">
+    <div class="row">
+      <span class="stat">Timer</span>
+      <div class="seg" role="group" aria-label="Timer mode">
+        <button type="button" data-mode="off">Off</button>
+        <button type="button" data-mode="down">Count down</button>
+        <button type="button" data-mode="up">Count up</button>
+      </div>
+      <span class="timer-set" id="downSet"><label for="mm">from</label><input id="mm" type="number" min="0" max="180" value="3" aria-label="Minutes"> : <input id="ss" type="number" min="0" max="59" value="0" aria-label="Seconds"></span>
+    </div>
+    <div class="row">
+      <label><input type="checkbox" id="lead"> 3-2-1 before it starts</label>
+      <label><input type="checkbox" id="mirrorStart"> Start mirrored (glass prompter)</label>
+    </div>
+    <div class="row">
+      <button class="btn" id="start" type="button">Start the prompter →</button>
+    </div>
+  </section>
+
+  <section class="card" aria-label="Keys">
+    <p class="eb" style="color:var(--ink2)">Keys while it runs</p>
+    <div class="keys">
+      <span><kbd>Space</kbd> or tap: play · pause</span>
+      <span><kbd>↑</kbd> <kbd>↓</kbd> faster · slower</span>
+      <span><kbd>+</kbd> <kbd>−</kbd> bigger · smaller text</span>
+      <span><kbd>←</kbd> <kbd>→</kbd> back · forward a little</span>
+      <span><kbd>M</kbd> mirror · <kbd>V</kbd> flip upside down</span>
+      <span><kbd>T</kbd> start · pause the timer</span>
+      <span><kbd>R</kbd> back to the top, timer reset</span>
+      <span><kbd>F</kbd> full screen · <kbd>Esc</kbd> back to the script</span>
+    </div>
+  </section>
+</main>
+
+<!-- ===== Prompter ===== -->
+<div class="stage hidden" id="stage" aria-label="Teleprompter">
+  <div class="flip" id="flip">
+    <div class="scroller" id="scroller"><div class="text" id="text"></div></div>
+  </div>
+  <div class="fade-top"></div><div class="fade-bot"></div>
+  <div class="guide" id="guide" aria-hidden="true"></div>
+  <div class="progress" id="progress"></div>
+  <div class="clock off" id="clock" aria-live="off">0:00</div>
+  <div class="count hidden" id="count" aria-hidden="true">3</div>
+  <div class="bar" id="bar" role="toolbar" aria-label="Prompter controls">
+    <div class="grp"><button class="play" id="play" type="button">Play</button><button type="button" id="top" title="Back to the top (R)">⤒</button></div>
+    <div class="grp"><button type="button" id="slow" title="Slower (↓)">−</button><span class="val" id="speedV">5</span><button type="button" id="fast" title="Faster (↑)">+</button><span class="eta" id="eta"></span></div>
+    <div class="grp"><button type="button" id="small" title="Smaller (−)">A−</button><span class="val" id="sizeV">64</span><button type="button" id="big" title="Bigger (+)">A+</button></div>
+    <div class="grp"><button type="button" id="narrow" title="Narrower">⇥⇤</button><button type="button" id="wide" title="Wider">⇤⇥</button></div>
+    <div class="grp"><button type="button" id="mir" aria-pressed="false" title="Mirror (M)">Mirror</button><button type="button" id="vflip" aria-pressed="false" title="Upside down (V)">Flip</button></div>
+    <div class="grp"><button type="button" id="tgo" title="Timer start · pause (T)">⏱</button><button type="button" id="full" title="Full screen (F)">⛶</button><button type="button" id="exit" title="Back to the script (Esc)">✕</button></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('xs-tp-' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem('xs-tp-' + k, JSON.stringify(v)); } catch { /* private mode: nothing kept */ } },
+  };
+
+  // ---------- settings ----------
+  const S = Object.assign({ speed: 5, size: 64, width: 900, mirror: false, vflip: false, mode: 'off', mm: 3, ss: 0, lead: true }, store.get('settings', {}));
+  const keep = () => store.set('settings', S);
+
+  // ---------- setup screen ----------
+  const ta = $('script'), title = $('title');
+  ta.value = store.get('draft', '');
+  title.value = store.get('draftTitle', '');
+  const words = (t) => (t.trim().match(/\S+/g) || []).length;
+  const stat = () => {
+    const w = words(ta.value);
+    const min = w / 140; // a calm speaking pace, about 140 words a minute
+    $('stat').textContent = w ? `${w} words · about ${fmt(Math.round(min * 60))} spoken at a calm pace` : '0 words';
+  };
+  ta.addEventListener('input', () => { store.set('draft', ta.value); stat(); });
+  title.addEventListener('input', () => store.set('draftTitle', title.value));
+
+  function scripts() { return store.get('scripts', {}); }
+  function fillSaved() {
+    const sel = $('saved'), all = scripts();
+    sel.innerHTML = '<option value="">Saved scripts…</option>';
+    Object.keys(all).sort((a, b) => a.localeCompare(b)).forEach((k) => { const o = document.createElement('option'); o.value = k; o.textContent = k; sel.appendChild(o); });
+  }
+  $('save').onclick = () => {
+    const name = title.value.trim() || ('Script ' + new Date().toLocaleString());
+    const all = scripts(); all[name] = ta.value; store.set('scripts', all); title.value = name; store.set('draftTitle', name); fillSaved(); $('saved').value = name;
+  };
+  $('saved').onchange = (e) => { const k = e.target.value; if (!k) return; ta.value = scripts()[k] || ''; title.value = k; store.set('draft', ta.value); store.set('draftTitle', k); stat(); };
+  $('del').onclick = () => { const k = $('saved').value; if (!k) return; const all = scripts(); delete all[k]; store.set('scripts', all); fillSaved(); };
+  $('clear').onclick = () => { ta.value = ''; title.value = ''; store.set('draft', ''); store.set('draftTitle', ''); stat(); ta.focus(); };
+
+  // timer mode buttons
+  const segs = [...document.querySelectorAll('.seg button')];
+  const paintMode = () => { segs.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === S.mode))); $('downSet').classList.toggle('hidden', S.mode !== 'down'); };
+  segs.forEach((b) => b.onclick = () => { S.mode = b.dataset.mode; keep(); paintMode(); });
+  $('mm').value = S.mm; $('ss').value = S.ss; $('lead').checked = S.lead; $('mirrorStart').checked = S.mirror;
+  $('mm').oninput = () => { S.mm = Math.max(0, Math.min(180, +$('mm').value || 0)); keep(); };
+  $('ss').oninput = () => { S.ss = Math.max(0, Math.min(59, +$('ss').value || 0)); keep(); };
+  $('lead').onchange = () => { S.lead = $('lead').checked; keep(); };
+  $('mirrorStart').onchange = () => { S.mirror = $('mirrorStart').checked; keep(); };
+  paintMode(); fillSaved(); stat();
+
+  // ---------- prompter ----------
+  const stage = $('stage'), text = $('text'), scroller = $('scroller'), flip = $('flip');
+  let y = 0, playing = false, last = 0, raf = 0, uiTimer = 0;
+  // timer state
+  let tRun = false, tStart = 0, tAcc = 0;
+  const pxPerSec = () => 12 + (S.speed - 1) * 9; // speed 1–20 → 12–183 px a second
+
+  function fmt(sec) { const neg = sec < 0; sec = Math.abs(Math.round(sec)); const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60; return (neg ? '−' : '') + (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0'); }
+  function render() {
+    text.innerHTML = '';
+    ta.value.replace(/\r/g, '').split(/\n{2,}/).forEach((para) => { const p = document.createElement('p'); p.textContent = para.trim(); if (p.textContent) text.appendChild(p); });
+    style();
+  }
+  function style() {
+    text.style.fontSize = S.size + 'px';
+    text.style.maxWidth = Math.min(S.width, window.innerWidth - 40) + 'px';
+    $('guide').style.height = (S.size * 1.5) + 'px';
+    $('guide').style.top = `calc(33% - ${S.size * 0.25}px)`;
+    flip.style.transform = `scale(${S.mirror ? -1 : 1}, ${S.vflip ? -1 : 1})`;
+    $('mir').setAttribute('aria-pressed', String(S.mirror));
+    $('vflip').setAttribute('aria-pressed', String(S.vflip));
+    $('speedV').textContent = S.speed; $('sizeV').textContent = S.size;
+    eta(); move();
+  }
+  const maxY = () => Math.max(0, text.scrollHeight - window.innerHeight * 0.55);
+  function move() {
+    y = Math.max(0, Math.min(y, maxY()));
+    text.style.transform = `translateY(${-y}px)`;
+    $('progress').style.width = (maxY() ? (y / maxY()) * 100 : 0) + '%';
+  }
+  function eta() { const left = (maxY() - y) / pxPerSec(); $('eta').textContent = left > 1 ? '≈ ' + fmt(left) + ' to the end' : 'at the end'; }
+  function tick(t) {
+    if (!playing) return;
+    const dt = last ? (t - last) / 1000 : 0; last = t;
+    y += pxPerSec() * dt; move();
+    if (y >= maxY()) { pause(); }
+    if (Math.round(t / 500) !== Math.round((t - dt * 1000) / 500)) eta();
+    raf = requestAnimationFrame(tick);
+  }
+  function play() {
+    if (playing) return;
+    const go = () => { playing = true; last = 0; $('play').textContent = 'Pause'; if (S.mode !== 'off' && !tRun) timerGo(); raf = requestAnimationFrame(tick); hideSoon(); };
+    if (S.lead && y === 0) countdown(go); else go();
+  }
+  function pause() { playing = false; cancelAnimationFrame(raf); $('play').textContent = 'Play'; eta(); showUi(); }
+  function toggle() { playing ? pause() : play(); }
+  function countdown(done) {
+    const c = $('count'); let n = 3; c.textContent = n; c.classList.remove('hidden');
+    const step = () => { n -= 1; if (n <= 0) { c.classList.add('hidden'); done(); return; } c.textContent = n; setTimeout(step, 800); };
+    setTimeout(step, 800);
+  }
+
+  // timer
+  const total = () => S.mm * 60 + S.ss;
+  function elapsed() { return tAcc + (tRun ? (Date.now() - tStart) / 1000 : 0); }
+  function timerGo() { if (S.mode === 'off') return; tRun = true; tStart = Date.now(); }
+  function timerStop() { if (!tRun) return; tAcc = elapsed(); tRun = false; }
+  function timerToggle() { tRun ? timerStop() : timerGo(); paintClock(); }
+  function timerReset() { tRun = false; tAcc = 0; paintClock(); }
+  function paintClock() {
+    const c = $('clock');
+    c.classList.toggle('off', S.mode === 'off');
+    if (S.mode === 'off') return;
+    const e = elapsed();
+    if (S.mode === 'up') { c.textContent = fmt(e); c.className = 'clock'; return; }
+    const left = total() - e;
+    c.textContent = fmt(left);
+    c.className = 'clock' + (left < 0 ? ' over' : left <= 10 ? ' warn' : '');
+  }
+  setInterval(() => { if (!stage.classList.contains('hidden')) paintClock(); }, 200);
+
+  // UI show / hide
+  function showUi() { stage.classList.add('show-ui'); clearTimeout(uiTimer); }
+  function hideSoon() { clearTimeout(uiTimer); uiTimer = setTimeout(() => { if (playing) stage.classList.remove('show-ui'); }, 2200); }
+  stage.addEventListener('mousemove', () => { showUi(); hideSoon(); });
+
+  function open() {
+    if (!words(ta.value)) { ta.focus(); return; }
+    $('setup').classList.add('hidden'); stage.classList.remove('hidden');
+    y = 0; timerReset(); render(); showUi(); paintClock();
+  }
+  function close() { pause(); if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); stage.classList.add('hidden'); $('setup').classList.remove('hidden'); }
+
+  // controls
+  const set = (k, v) => { S[k] = v; keep(); style(); };
+  $('start').onclick = open;
+  $('play').onclick = (e) => { e.stopPropagation(); toggle(); };
+  $('top').onclick = (e) => { e.stopPropagation(); y = 0; move(); eta(); };
+  $('fast').onclick = (e) => { e.stopPropagation(); set('speed', Math.min(20, S.speed + 1)); };
+  $('slow').onclick = (e) => { e.stopPropagation(); set('speed', Math.max(1, S.speed - 1)); };
+  $('big').onclick = (e) => { e.stopPropagation(); set('size', Math.min(160, S.size + 6)); };
+  $('small').onclick = (e) => { e.stopPropagation(); set('size', Math.max(24, S.size - 6)); };
+  $('wide').onclick = (e) => { e.stopPropagation(); set('width', Math.min(2000, S.width + 100)); };
+  $('narrow').onclick = (e) => { e.stopPropagation(); set('width', Math.max(400, S.width - 100)); };
+  $('mir').onclick = (e) => { e.stopPropagation(); set('mirror', !S.mirror); };
+  $('vflip').onclick = (e) => { e.stopPropagation(); set('vflip', !S.vflip); };
+  $('tgo').onclick = (e) => { e.stopPropagation(); timerToggle(); };
+  $('full').onclick = (e) => { e.stopPropagation(); fullscreen(); };
+  $('exit').onclick = (e) => { e.stopPropagation(); close(); };
+  $('bar').addEventListener('click', (e) => e.stopPropagation());
+  stage.addEventListener('click', () => toggle());
+  // wheel / swipe nudges the text by hand
+  stage.addEventListener('wheel', (e) => { y += e.deltaY; move(); eta(); }, { passive: true });
+  let ty = null;
+  stage.addEventListener('touchstart', (e) => { ty = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener('touchmove', (e) => { if (ty == null) return; const d = ty - e.touches[0].clientY; ty = e.touches[0].clientY; y += S.vflip ? -d : d; move(); }, { passive: true });
+  function fullscreen() { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); else stage.requestFullscreen?.().catch(() => {}); }
+  window.addEventListener('resize', () => { if (!stage.classList.contains('hidden')) style(); });
+
+  document.addEventListener('keydown', (e) => {
+    if (stage.classList.contains('hidden')) return;
+    const k = e.key;
+    if (k === ' ') { e.preventDefault(); toggle(); }
+    else if (k === 'ArrowUp') { e.preventDefault(); set('speed', Math.min(20, S.speed + 1)); }
+    else if (k === 'ArrowDown') { e.preventDefault(); set('speed', Math.max(1, S.speed - 1)); }
+    else if (k === '+' || k === '=') set('size', Math.min(160, S.size + 6));
+    else if (k === '-' || k === '_') set('size', Math.max(24, S.size - 6));
+    else if (k === 'ArrowLeft') { y -= S.size * 2; move(); eta(); }
+    else if (k === 'ArrowRight') { y += S.size * 2; move(); eta(); }
+    else if (k === 'm' || k === 'M') set('mirror', !S.mirror);
+    else if (k === 'v' || k === 'V') set('vflip', !S.vflip);
+    else if (k === 't' || k === 'T') timerToggle();
+    else if (k === 'r' || k === 'R') { pause(); y = 0; move(); timerReset(); eta(); }
+    else if (k === 'f' || k === 'F') fullscreen();
+    else if (k === 'Escape' && !document.fullscreenElement) close();
+    showUi(); if (playing) hideSoon();
+  });
+
+  // A script can arrive in the address: teleprompter.html#t=<title>&s=<text> (used by the bank's "Open in the teleprompter" buttons)
+  try {
+    const h = new URLSearchParams(location.hash.slice(1));
+    if (h.get('s')) { ta.value = h.get('s'); title.value = h.get('t') || ''; store.set('draft', ta.value); store.set('draftTitle', title.value); stat(); history.replaceState(null, '', location.pathname); }
+  } catch { /* no script in the address */ }
+})();
+</script>
+</body>
+</html>
