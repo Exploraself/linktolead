@@ -725,6 +725,7 @@ function goHTML(st, x) {
       <p class="cw-promise"><b>By Sunday.</b> ${esc(x.promise)}</p>
       <button type="button" class="cta fm-open" data-fmopen>${started ? 'Continue →' : 'Start →'}</button>
       <p class="fm-hint">One question at a time, on the whole screen. Done ✓ or Esc brings you back here.</p>
+      ${started ? beforeHTML() : ''}
     </div>`;
 }
 /** The elephant in the room (Alexandru, 2 Nov 2026): before Levels 01, 04,
@@ -775,6 +776,20 @@ function welcomeHTML(i = 0) {
     ${B.q ? `<blockquote class="wl-q"><small>What a business is</small><p>“${esc(B.q)}”</p></blockquote>` : ''}
     ${i === 3 ? `<div class="wl-have"><h4>By the end, you will have:</h4><ol>${lvs.map((n) => `<li><span>Level ${pad(n)}</span><p>${esc(LEVELS4[n - 1].promise)}</p></li>`).join('')}</ol></div>
     <p class="wl-sign">Alexandru</p>` : ''}
+  </div>`;
+}
+/** One tap back to what opens the level (AGENTS.md 16): the elephant in
+ *  the room, and the founder's version (the door at Level 01, "Still …?" at
+ *  04, 06 and 10). A founder who began the level before these screens
+ *  existed finds them here too. */
+const SIZE_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="3"/><path d="M2.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.3"/><path d="M14.5 15.2a4.5 4.5 0 0 1 7 3.8"/></svg>';
+function beforeHTML() {
+  if (WELCOME_AT[level] == null) return '';
+  const S = steps(), at = (k) => S.findIndex((s) => s[1] === k), size = sizeOf(state.work);
+  const ver = level === 1 ? (size ? at('you') : at('where')) : at('still');
+  return `<div class="fm-more" role="group" aria-label="Before this level">
+    <button type="button" class="fm-link" data-fmopen="${at('welcome')}">${WL_IC[0]}<span>The elephant in the room: ${esc(elephantName().toLowerCase())}</span></button>
+    ${ver >= 0 ? `<button type="button" class="fm-link" data-fmopen="${ver}">${SIZE_IC}<span>${size ? `Your version: ${esc(typeName(size).toLowerCase())} · change it` : 'Your version: not set yet · a few taps'}</span></button>` : ''}
   </div>`;
 }
 /** Where the founder is in the door: [n, of], counting only the questions that apply. */
@@ -1797,7 +1812,7 @@ document.addEventListener('click', (e) => {
   if (b.dataset.qmove) { moveQ(+b.dataset.qmove); return; }
   // Focus mode: open, close, and Done ✓ (at the end of a domain, the next
   // domain is where the founder picks up).
-  if (b.hasAttribute('data-fmopen')) { fmOpen(); return; }
+  if (b.hasAttribute('data-fmopen')) { fmOpen(b.dataset.fmopen ? +b.dataset.fmopen : null); return; }
   if (b.hasAttribute('data-fmclose')) { fmClose(); return; }
   if (b.dataset.fmdone) { if (b.dataset.fmdone === 'next') moveQ(1); fmClose(); return; }
   if (b.dataset.qt || b.dataset.qx) {

@@ -18,10 +18,25 @@
 .mp-eq i{width:3px;height:4px;background:#D4AF5A;border-radius:1px;opacity:.5}
 .mp.playing .mp-eq i{opacity:1;animation:mpEq 1s ease-in-out infinite}
 .mp.playing .mp-eq i:nth-child(2){animation-delay:.25s}.mp.playing .mp-eq i:nth-child(3){animation-delay:.5s}
-.mp-win{position:absolute;right:0;bottom:64px;width:min(340px,calc(100vw - 32px));max-height:calc(100vh - 110px);overflow:auto;padding:20px 20px 16px;border-radius:18px;
+.mp-win{position:absolute;right:0;bottom:64px;width:min(340px,calc(100vw - 32px));max-height:calc(100vh - 110px);max-height:calc(100dvh - 110px);overflow:auto;overscroll-behavior:contain;padding:20px 20px 16px;border-radius:18px;transform-origin:100% 100%;
   background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(255,196,110,.16),transparent 70%),linear-gradient(180deg,#22170D,#120C07);
   border:1px solid rgba(212,175,90,.55);box-shadow:0 30px 60px -24px rgba(0,0,0,.85),inset 0 0 0 5px rgba(18,12,7,.9),inset 0 0 0 6px rgba(212,175,90,.22)}
 .mp-win[hidden]{display:none}
+/* Music & light in one view (Alexandru, 2 Nov 2026): on a wide screen the
+   panel lays out in two columns, so it fits without a scroll of its own; on
+   a phone it is one column, and only the panel scrolls, never the page under
+   it. It rises in and sinks out; nothing moves under reduced motion. */
+.mp-win.mp-in{animation:mpWinIn .24s cubic-bezier(.2,.8,.2,1) both}
+.mp-win.mp-out{animation:mpWinOut .18s ease-in both;pointer-events:none}
+@keyframes mpWinIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes mpWinOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(10px) scale(.97)}}
+@media(min-width:760px){
+  .mp-win{width:min(660px,calc(100vw - 32px));display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:22px;align-items:start;
+    grid-template-areas:"head head" "now sls" "tracks sls" "modes lamp" "fine fine"}
+  .mp-head{grid-area:head}.mp-now{grid-area:now}.mp-tracks{grid-area:tracks}.mp-sls{grid-area:sls}.mp-modes{grid-area:modes;margin:4px 0 8px}
+  .mp-lamp{grid-area:lamp;margin:4px 0 8px;align-self:stretch}.mp-fine{grid-area:fine}
+}
+@media(prefers-reduced-motion:reduce){.mp-win.mp-in,.mp-win.mp-out{animation:none}}
 .mp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
 .mp-k{margin:0;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:#D4AF5A}
 .mp-head h2{margin:2px 0 0;font:500 22px/1.15 Newsreader,Georgia,serif;color:#F7F2E7}
