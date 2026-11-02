@@ -71,8 +71,8 @@ export function stageChanges(events) {
 }
 
 /** Every founder, with what the cockpit needs. levels: how many of the
- *  twelve Blueprint levels hold at least one written answer (level_list:
- *  which ones). crossed: the doors they crossed ('blueprint', 'northstar';
+ *  twelve Blueprint levels hold at least one written answer, earlier or
+ *  Version 4 (level_list: which ones). crossed: the doors they crossed ('blueprint', 'northstar';
  *  functions/api/cross.js). avatar: their profile photo, a small data: URL,
  *  or null. plan_ticks counts the Account Plans only; growth_ticks the
  *  Massive Growth Plan (growth_list: "id|done_at,…"). */
@@ -93,6 +93,8 @@ async function roster(D) {
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'library-download') AS library,
       (SELECT COUNT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS levels,
       (SELECT GROUP_CONCAT(DISTINCT a.level) FROM answer a WHERE a.student_id = s.id AND a.body <> '') AS level_list,
+      (SELECT GROUP_CONCAT(DISTINCT CAST(substr(w.key, 6, instr(substr(w.key, 6), '.') - 1) AS INTEGER)) FROM sheet w
+        WHERE w.student_id = s.id AND w.key GLOB 'w.v4.[0-9]*.*' AND w.key NOT GLOB 'w.v4.[0-9]*.w.*' AND COALESCE(w.value, '') <> '') AS level_list_v4,
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'crossed') AS crossed,
       (SELECT GROUP_CONCAT(DISTINCT e.detail) FROM event e WHERE e.student_id = s.id AND e.kind = 'tool-open') AS tools,
       (SELECT cs.day_sent || '|' || CASE WHEN cs.stopped_at IS NULL THEN '' ELSE 'stopped' END FROM course_sub cs WHERE cs.student_id = s.id AND cs.course = 'win12') AS course,
@@ -106,7 +108,14 @@ async function roster(D) {
       LEFT JOIN student_profile p ON p.student_id = s.id
       LEFT JOIN account_auth au ON au.student_id = s.id
     ORDER BY COALESCE(s.last_seen_at, s.joined_at) DESC LIMIT 2000`).all();
-  return rows.results || [];
+  // A level counts as written with an earlier seven-step answer OR any
+  // Version 4 answer (w.v4.<level>.…, never the welcome page's w.v4.<level>.w.…):
+  // the same rule as levelsWritten in functions/_series.js, so "Launchpad
+  // done" and "Ready for the Boardroom" match the letters (2 Nov 2026).
+  return (rows.results || []).map(({ level_list_v4: v4, ...s }) => {
+    const L = [...new Set([s.level_list, v4].flatMap((x) => String(x || '').split(',')).map((x) => parseInt(x, 10)).filter((n) => n >= 1 && n <= 12))].sort((a, b) => a - b);
+    return { ...s, levels: L.length, level_list: L.join(',') };
+  });
 }
 
 const LANDING_NAMES = { road1: 'Road 1', road2: 'Road 2', road3: 'Road 3', road4: 'Road 4', north1: 'North 1', north2: 'North 2', north3: 'North 3', compass: 'North Star box', summit: 'The Summit' };
