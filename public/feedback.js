@@ -162,7 +162,7 @@ export const RULES = [
   { k: 'l3-type-not-list', lv: 3, dk: 'market', sev: 3,
     when: (s) => count(s, 'b3-market') !== null && count(s, 'b3-market') < 6,
     title: 'You have a type, not a list',
-    say: (s) => `You named ${count(s, 'b3-market')} of ten real people or companies. A type can be thought about indefinitely; a list can only be worked or avoided. Almost every founder who says the market is slow has a type rather than a list, and the two feel identical from the inside.`,
+    say: (s) => `You named ${count(s, 'b3-market')} of ten real people or companies. A type can be thought about indefinitely; a list can only be worked or avoided. If the market feels slow, check which one you have: a type or a list. The two feel identical from the inside.`,
     step: 'Get the list to ten names with a route beside each. Then contact three.',
     where: { lv: 10, dk: 'market' } },
 
