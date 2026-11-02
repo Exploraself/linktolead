@@ -357,9 +357,25 @@ function homeView() {
     ${notesHTML()}
     ${nudgeHTML(st)}
     ${gp ? planHTML(gp, st) : `<section class="gp-wrap gp-two gp-grid">${standHTML(st)}</section>${howItWorks(st)}`}
+    ${workbookHTML()}
     ${accountHTML()}
     ${refundHTML()}
   </div>`;
+}
+
+/** Download your workbook (Alexandru, 3 Nov 2026): "Personal Leadership LAB ·
+ *  The Workbook", only for founders whose step holds it (The LAB, The HUB, The
+ *  Summit; functions/api/workbook.js checks again). It is paid: the file sits
+ *  in a private bucket, never at a public address. */
+const WORKBOOK_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 6c-2.5-2-6-2.5-9-2v14c3-.5 6.5 0 9 2 2.5-2 6-2.5 9-2V4c-3-.5-6.5 0-9 2zM12 6v14"/></svg>';
+const DL_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg>';
+const WORKBOOK_TIERS = ['lab', 'hub', 'premium'];
+function workbookHTML() {
+  if (!WORKBOOK_TIERS.includes(state.tier || 'free')) return '';
+  return `<section class="gp-wrap gp-workbook" aria-labelledby="wb-h">
+    <div class="wb"><span class="rf-ic">${WORKBOOK_IC}</span><span class="wb-t"><b id="wb-h">Your LAB workbook</b><small>Personal Leadership LAB · The Workbook. Thirteen steps on paper, 94 pages to print and write in.</small></span>
+    <a class="cta wb-btn" href="${esc(account.workbookHref())}" download>${DL_IC}Download your workbook</a></div>
+  </section>`;
 }
 
 /** Ask for a refund (Alexandru, 2 Nov 2026): in every founder's Base Camp.

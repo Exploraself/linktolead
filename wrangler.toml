@@ -15,6 +15,11 @@ main = "worker.js"
 # declares no [vars], removes them.
 keep_vars = true
 #
+# The LAB workbook (functions/api/workbook.js): a PRIVATE R2 bucket bound as
+# WORKBOOKS (on the Pages app: Settings → Bindings → R2), holding the object
+# personal-leadership-lab-workbook-2026.pdf. Paid content: never in this repo,
+# never public. Without the binding the button explains it is not ready yet.
+#
 # Mailchimp (functions/_mailchimp.js), all optional, set in the dashboard:
 #   MAILCHIMP_MODE          text    "test" stops every call; each join is only logged
 #   MAILCHIMP_FORM_URL      text    another sign-up form link; empty = Link to Lead form

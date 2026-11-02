@@ -642,6 +642,13 @@ body.inwork .foot{display:none}
 .tdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#E0A282;margin-left:6px;vertical-align:middle}
 .gp-account{padding-block:28px 16px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
 /* Ask for a refund (Alexandru, 2 Nov 2026): in every Base Camp, quiet until opened. */
+.gp-workbook{padding-block:0 24px}
+.wb{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+.wb-t{flex:1 1 260px;min-width:0}
+.wb-t b{display:block;font-weight:600;color:var(--ink)}
+.wb-t small{display:block;font-size:13.5px;color:var(--muted)}
+.wb-btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.wb-btn svg{width:18px;height:18px}
 .gp-refund{padding-block:0 48px}
 .rf{border-top:1px solid var(--line);padding-top:14px}
 .rf summary{display:flex;align-items:center;gap:12px;min-height:48px;cursor:pointer;list-style:none}
