@@ -150,7 +150,7 @@ right after: the email journey map, the emails, the /internal decks, the
 README, the START HERE doc. A change is not finished while a page, letter or
 deck still describes the old way.
 
-The email journey map in exploraself.com/internal (Promotion) shows every
+The email journey map in exploraself.com/internal (Internal → Emails) shows every
 letter a founder can get, in the order they meet them, drawn from the code
 that sends them. When you add or change a letter (functions/_letters.js,
 functions/_course-letters.js, or a new send() call), in the same work:
