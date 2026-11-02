@@ -61,7 +61,11 @@ export function footer(env, { why, unsubUrl }) {
  *  `html` is a full document whose </body> receives the footer. A letter's
  *  `replyTo` (the mentor's address) and `fromName` ("Alexandru at ExploraSelf")
  *  go with it. */
-export async function send(env, { to, subject, html, text, why, unsubUrl, replyTo, fromName, attachments }) {
+export async function send(env, { to, subject, html, text, why, unsubUrl: unsub, replyTo, fromName, attachments, receipt = false }) {
+  // A receipt (a letter answering what the founder just did: functions/_letters.js
+  // RECEIPTS) carries no unsubscribe header or link: the law asks for one on
+  // marketing, not on a receipt, and Gmail reads it as bulk mail (Promotions).
+  const unsubUrl = receipt ? '' : unsub;
   const st = mailState(env);
   if (!st.ready) return { ok: false, why: st.reason };
   const apiKey = await key(env);

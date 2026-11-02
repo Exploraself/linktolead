@@ -118,7 +118,7 @@ export const ENTRIES = [
     who: 'The founder who paid, even with letters turned off: it is about their own payment.',
     from: '/pay/',
     sentBy: 'functions/_stripe.js applyPaid',
-    also: 'What opened, the sessions that come with the step, the booking link, and a button to the first new level. No offer. The step tags go to Mailchimp at the same moment.',
+    also: 'What opened, the sessions that come with the step, the booking link, and a button to the first new level. A receipt: no offer, no assessments, no one-tap questions, the signature in words with the photo, and no unsubscribe header, so Gmail is likelier to keep it out of Promotions. The step tags go to Mailchimp at the same moment.',
     build: () => L.unlockedLetter(BASE, { ...S, step: 'session' }),
   },
   {
@@ -147,7 +147,7 @@ export const ENTRIES = [
     who: 'The account holder. The link works for 30 minutes.',
     from: '/ground-plan/',
     sentBy: 'functions/api/signin.js',
-    also: 'A security letter: its P.S. is always a free gift, never a sale.',
+    also: 'A receipt (it answers what they just did): one button, no P.S., no assessments, no one-tap questions, the signature in words with the photo, and no unsubscribe header, so Gmail is likelier to keep it out of Promotions.',
     build: () => L.signinLetter(BASE, `${BASE}/ground-plan/?signin=…`, S),
   },
   {
@@ -157,7 +157,7 @@ export const ENTRIES = [
     who: 'The account holder. The button works for 30 minutes.',
     from: '/ground-plan/',
     sentBy: 'functions/api/signin.js (reset)',
-    also: 'A security letter: its P.S. is always a free gift, never a sale.',
+    also: 'A receipt (it answers what they just did): one button, no P.S., no assessments, no one-tap questions, the signature in words with the photo, and no unsubscribe header, so Gmail is likelier to keep it out of Promotions.',
     build: () => L.signinLetter(BASE, `${BASE}/ground-plan/?signin=…&reset=1`, { ...S, reset: true }),
   },
   {
@@ -167,7 +167,7 @@ export const ENTRIES = [
     who: 'That address. The page says the same at once, with the same button.',
     from: '/ground-plan/, /northstar/, /pay/',
     sentBy: 'functions/api/signin.js',
-    also: 'A security letter: no offer. The button opens the free account form with their email already in it, and brings them back to the page they were on.',
+    also: 'A receipt (it answers what they just did): one button, no P.S., no assessments, no one-tap questions, the signature in words with the photo, and no unsubscribe header, so Gmail is likelier to keep it out of Promotions The button opens the free account form with their email already in it, and brings them back to the page they were on.',
     build: () => L.noAccountLetter(BASE, `${BASE}/road1/?email=sam%40example.com&next=%2Fpay%2F%3Fstep%3Dsession#join`, { ...S, to: 'sam@example.com' }),
   },
   {
@@ -177,7 +177,7 @@ export const ENTRIES = [
     who: 'The account holder.',
     from: '/ground-plan/',
     sentBy: 'functions/api/password.js',
-    also: 'A security letter: its P.S. is always a free gift, never a sale.',
+    also: 'A receipt (it answers what they just did): one button, no P.S., no assessments, no one-tap questions, the signature in words with the photo, and no unsubscribe header, so Gmail is likelier to keep it out of Promotions.',
     build: () => L.passwordChangedLetter(BASE, S),
   },
   {

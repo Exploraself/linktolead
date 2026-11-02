@@ -79,6 +79,6 @@ ok(src('public/account.js').includes('e.data = data;'), 'the page can read noAcc
 
 // ── The letter on its own ───────────────────────────────────────────────────
 const L = noAccountLetter('https://l.x', 'https://l.x/road1/?email=a%40x.com#join', { to: 'a@x.com' });
-ok(L.subject === 'There’s no ExploraSelf account here yet' && L.html.includes('Make my free account') && L.html.includes('/mail/signature.png'), 'the letter: subject, button, signed');
+ok(L.subject === 'There’s no ExploraSelf account here yet' && L.html.includes('Make my free account') && L.html.includes('/mail/alexandru.jpg') && !L.html.includes('/mail/signature.png') && L.receipt === true, 'the letter: subject, button, signed in words with the photo (a receipt)');
 
 done();

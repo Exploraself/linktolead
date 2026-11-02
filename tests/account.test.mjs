@@ -74,7 +74,7 @@ ok(sent.length === 2 && sent[0].body.to[0] === 'ana@example.com' && sent[1].body
 const link = /https:\/\/linktolead\.exploraself\.com\/ground-plan\/\?signin=([0-9a-f]+)/.exec(sent[0].body.text);
 ok(link, 'the email carries /start?signin=<code>: every sign-in link opens the Base Camp');
 const code = link[1];
-ok(sent[0].body.text.includes('Via Esempio 1') && sent[0].body.html.includes('/api/unsubscribe'), 'sign-in email has the footer');
+ok(sent[0].body.text.includes('Via Esempio 1') && !sent[0].body.html.includes('/api/unsubscribe') && !sent[0].body.headers, 'sign-in email has the footer, as a receipt: no unsubscribe link or header');
 const stored = DB.raw.prepare('SELECT * FROM signin_code').all();
 ok(stored.length === 1 && stored[0].code_hash === await sha256(code) && !JSON.stringify(stored).includes(code), 'code stored hashed, never as sent');
 ok(stored[0].expires_at - Date.now() > TTL - 5000 && stored[0].expires_at - Date.now() <= TTL && TTL === 30 * 60_000, 'valid for 30 minutes');
