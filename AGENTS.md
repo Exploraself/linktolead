@@ -301,3 +301,10 @@ in, for today, 7 days, 30 days or all (pulse in public/mentor/dash.js); the
 amounts only for those with the payments right. A promise on a pay page or in
 a letter names only what the step really opens (rule 6): the library is free
 for everyone, so it is never sold as part of a step.
+
+Refunds (Alexandru, 2 Nov 2026): every Base Camp has "Ask for a refund". The
+founder chooses the programme they paid for and confirms their name and
+email; it lands in /mentor → Refunds, in red, and Alexandru gets in touch
+himself. Refunds are made in Stripe by a person: the code never refunds, and
+never tells a founder a refund was made. "Mark done" needs the payments
+right (functions/_refund.js, tests/refund.test.mjs).
