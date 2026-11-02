@@ -188,7 +188,18 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
   return { html, text, replyTo: M.email, fromName: `${M.first} at ExploraSelf` };
 }
 
-const hi = (first) => (first ? `Hi ${first},` : 'Hi,');
+/** A first name as people write it to a friend (Alexandru, 2 Nov 2026: a
+ *  reset letter said "Hi ALEXANDRU"). A name typed all in capitals or all in
+ *  small letters gets a capital at the start of each part ("ALEXANDRU" →
+ *  "Alexandru", "anne-marie" → "Anne-Marie", "o'neil" → "O'Neil"); a name
+ *  with its own mix of capitals ("McKenzie", "DeShawn") is left exactly as
+ *  typed. Same rule in public/mentor/dash.js nameCase (a test holds them equal). */
+export function nameCase(first) {
+  const s = String(first || '').trim();
+  if (!s || (s !== s.toUpperCase() && s !== s.toLowerCase())) return s;
+  return s.toLowerCase().replace(/(^|[\s'’-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
+}
+const hi = (first) => (first ? `Hi ${nameCase(first)},` : 'Hi,');
 /** The offer for one letter to one address, unless the caller chose one. */
 const offerFor = (kind, to, tier, offer) => (offer !== undefined ? offer : 'unshakeable');
 /** The close of a letter: who it is from, their time, which good word. */

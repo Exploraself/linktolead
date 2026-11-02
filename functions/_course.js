@@ -20,7 +20,7 @@
 // signature, the free assessments) is letter() in functions/_letters.js.
 
 import { now } from './_shared.js';
-import { letter, link, button } from './_letters.js';
+import { letter, link, button, nameCase } from './_letters.js';
 import { COURSE_LETTERS } from './_course-letters.js';
 import { send, mailState } from './_mail.js';
 import { unsubLink } from './_account.js';
@@ -53,7 +53,7 @@ export function localParts(tz, at = new Date()) {
 export function courseLetter(base, day, { first = '', mentor, tz = '', at } = {}) {
   const L = COURSE_LETTERS[day];
   if (!L) return null;
-  const paras = [first ? `Hi ${first},` : 'Hi,', ...L.paras.map((p) => (typeof p === 'string' ? p : button(`${base}${p.path}`, p.button)))];
+  const paras = [first ? `Hi ${nameCase(first)},` : 'Hi,', ...L.paras.map((p) => (typeof p === 'string' ? p : button(`${base}${p.path}`, p.button)))];
   const ps = L.ps.path ? [L.ps.text, link(`${base}${L.ps.path}`)] : L.ps.url ? [L.ps.text, link(L.ps.url)] : [L.ps.text];
   return { subject: L.subject, ...letter(base, paras, { line: () => ps }, { mentor, tz, at, ask: L.ask, seed: L.good, intro: day === 0 }) };
 }

@@ -421,6 +421,10 @@ function mentorsHTML() {
    Addresses with every Blueprint level open, the Growth Toolkit without a
    code, and /mentor with their own account. Added by exact address, once;
    only the mentor key can add or remove. */
+/** What a team member did in /mentor, in words (functions/_team.js DID_WORDS; a test holds them equal). */
+export const TEAM_DID = { message: ['letter', 'letters'], reply: ['answer', 'answers'], tier: ['step change', 'step changes'],
+  'series-hold': ['pause or resume', 'pauses or resumes'], 'signin-link': ['sign-in link', 'sign-in links'], 'reset-link': ['reset link', 'reset links'] };
+const didLine = (did) => Object.entries(did || {}).filter(([a, n]) => TEAM_DID[a] && n).map(([a, n]) => `${n} ${n === 1 ? TEAM_DID[a][0] : TEAM_DID[a][1]}`).join(' · ');
 async function loadTeam(msg = '') {
   const box = $('#team');
   if (!box) return;
@@ -429,7 +433,9 @@ async function loadTeam(msg = '') {
   const T = r.data.team || [], edit = !!r.data.canEdit;
   box.innerHTML = `<h2>Team · ${T.length}</h2>
     <p class="tiny">Add their exact email: they get an invitation with a button to start. They see every Blueprint level, the Growth Toolkit without a code, and this page. Everything they send goes out signed by ${isTeam() ? 'Alexandru' : 'you'}, and replies come back to ${isTeam() ? 'Alexandru' : 'you'}.</p>
-    <ul class="list" style="margin-top:10px">${T.map((m) => `<li><div style="flex:1;min-width:0"><b>${esc(m.email)}</b><span class="em">${esc(m.from)}${m.at ? ' · ' + esc(when(m.at)) : ''}</span></div>${edit && m.removable ? `<button class="ghost" data-team-rm="${esc(m.email)}">Remove</button>` : ''}</li>`).join('')}</ul>
+    <ul class="list" style="margin-top:10px">${T.map((m) => `<li><div style="flex:1;min-width:0"><b>${esc(m.name || m.email)}</b>
+      <span class="em">${m.name ? esc(m.email) + ' · ' : ''}${m.account ? `account ready · last active ${esc(when(m.lastSeen))}` : `<span class="warn">${m.removable ? 'invited, no account yet' : 'no account yet'}</span>`} · ${esc(m.from)}${m.at ? ' ' + esc(when(m.at)) : ''}</span>
+      ${didLine(m.did) ? `<span class="em">In /mentor: ${esc(didLine(m.did))}</span>` : ''}</div>${edit && m.removable ? `<button class="ghost" data-team-rm="${esc(m.email)}">Remove</button>` : ''}</li>`).join('')}</ul>
     ${edit ? `<p style="margin-top:12px;display:flex;gap:6px;max-width:460px;flex-wrap:wrap"><input id="team-new" type="email" placeholder="Their email, exactly" autocomplete="off" style="flex:1 1 220px;min-width:0"><button id="team-add">Add to the team</button></p>`
       : '<p class="tiny" style="margin-top:10px">Only Alexandru can change the team.</p>'}
     ${msg ? `<p class="flash" role="status">${esc(msg)}</p>` : ''}`;
