@@ -9,6 +9,8 @@
 //                  downloads and their "Ask Alexandru" thread
 // GET ?growth=id   one founder's Massive Growth Plan: ticks and what they
 //                  wrote in its blanks, with the date of each change
+// GET ?tags=1      every Mailchimp tag of the audience, sorted Keep / Old /
+//                  Ask (functions/_tag-list.js). The mentor key only
 // POST { action }  reply (an answer in the thread, emailed as a letter) · tier (change step, and its step tags in Mailchimp) ·
 //                  pause · series-hold (pause or resume the letters that
 //                  follow each pain) · delete · signin-link · message · mc-test ·
@@ -27,7 +29,8 @@ import { LIBRARY_ITEMS } from './library.js';
 import { toolNames } from '../_tools.js';
 import { thread } from './thread.js';
 import { profile, unsubLink, deleteFounder } from '../_account.js';
-import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER } from '../_mailchimp.js';
+import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER, readTags, FORGOTTEN } from '../_mailchimp.js';
+import { sortTags } from '../_tag-list.js';
 import { holdLetters } from '../_series.js';
 
 /** Each plan step's domain and title, so ticks can be read by domain. */
@@ -157,6 +160,18 @@ export async function onRequestGet({ request, env }) {
   // The team (functions/_team.js): who has every level, the toolkit without a
   // code, and /mentor with their own account. Only the key may change it.
   if (url.searchParams.get('team')) return json({ ok: true, team: await teamList(D, env), canEdit: access.by === 'key' });
+  // Every tag of the audience, sorted Keep / Old / Ask against the code's own
+  // list (functions/_tag-list.js), so Alexandru deletes from a clear list.
+  // A Mailchimp tool: the key only.
+  if (url.searchParams.get('tags')) {
+    if (access.by !== 'key') return bad('Only the mentor key can read the Mailchimp tags.', 403);
+    const live = await readTags(env);
+    if (!live.ok) return json({ ok: true, read: false, why: live.why });
+    const kept = await D.prepare("SELECT DISTINCT landing_tag AS t FROM student_profile WHERE landing_tag IS NOT NULL AND landing_tag <> ''").all();
+    const mc = mailchimpState(env);
+    const waiting = canTag(env) ? (await stepsBackfillList(D, 5000, mc.mode)).length : 0;
+    return json({ ok: true, read: true, total: live.total, waiting, ...sortTags(live.tags, { kept: (kept.results || []).map((r) => r.t) }) });
+  }
   const one = url.searchParams.get('student');
 
   // The drawer's Growth Plan: ticks and words, nothing else.
@@ -207,6 +222,8 @@ export async function onRequestGet({ request, env }) {
   const mcLog = await D.prepare('SELECT student_id, email, action, mode, status, detail, at FROM mailchimp_log ORDER BY id DESC LIMIT 20').all();
   const waitingJoin = (await backfillList(D, 5000, mc.mode)).length;
   const waitingTags = canTag(env) ? (await stepsBackfillList(D, 5000, mc.mode)).length : 0;
+  // Addresses Mailchimp deleted for good: shown in plain words, never as a failure.
+  const gone = await D.prepare("SELECT DISTINCT email FROM mailchimp_log WHERE status = 'forgotten' OR detail LIKE '%Forgotten Email%'").all();
   // Their own words: the newest Blueprint (Version 4) worksheet answers; the
   // page builds whole sentences from them (theirWords in dash.js).
   const words = await D.prepare(`SELECT w.student_id, w.key, w.value, w.updated_at, s.name, s.email FROM sheet w JOIN student s ON s.id = w.student_id
@@ -214,7 +231,8 @@ export async function onRequestGet({ request, env }) {
   // Who is looking, for the greeting on Today: a team member by name; the key is the default mentor.
   const you = access.by === 'team' && access.me ? { name: access.me.name || '', team: true } : { key: true };
   return json({ ok: true, you, students, words: words.results || [], waiting: waiting.results || [], steps: STEPS, totalSteps: ALL_STEP_IDS.length, totalGrowth: GROWTH_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
-    mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags } });
+    mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags,
+      forgotten: (gone.results || []).map((r) => r.email).filter(Boolean), forgottenWhy: FORGOTTEN } });
 }
 
 export async function onRequestPost({ request, env }) {
