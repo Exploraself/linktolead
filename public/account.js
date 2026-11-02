@@ -91,6 +91,11 @@ if (typeof document !== 'undefined') {
 }
 
 /** A note to the mentor. Never blocks the founder — they carry on either way. */
+/** "Ask for a refund" from Base Camp: the programme paid for, name, email.
+ *  Kept for Alexandru, who gets in touch himself (functions/api/refund.js). */
+export async function refund({ step, name, email }) {
+  return post('/api/refund', { token: token(), step, name, email });
+}
 export async function note({ body, level, domain }) {
   if (!joined()) throw new Error('Join first, so Alexandru and the team know who is asking.');
   return post('/api/note', { token: token(), body, level, domain });
