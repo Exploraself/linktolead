@@ -3,8 +3,9 @@
  * device holds an account. Name and step come from /api/state, kept on the
  * device so the circle draws at once on the next page.
  *
- * Menu: name and step, the Leader’s North Star in its own highlighted row,
- * Your Base Camp, Library, Ask
+ * Menu: name, the email the account was made with (2 Nov 2026, Alexandru:
+ * every user sees which address they are signed in with), and step; the
+ * Leader’s North Star in its own highlighted row, Your Base Camp, Library, Ask
  * Alexandru, Password (full accounts only; simple accounts sign in by email
  * link), "Letters from your mentor: On/Off" (consent, synced to Mailchimp),
  * Sign out, and "Delete my account" (two steps: a plain warning, then the
@@ -53,6 +54,7 @@ const STYLE = `.pm{position:relative;font-family:'Inter',Arial,sans-serif}
 .pm-who{padding:10px 12px;border-bottom:1px solid #D6C9AC;margin-bottom:6px}
 .pm-who b{display:block;font:440 17px/1.3 Newsreader,Georgia,serif}
 .pm-who span{font-size:12px;color:#6E5213;font-weight:520;letter-spacing:.04em}
+.pm-who .pm-mail{display:block;margin:1px 0 3px;font-size:13px;font-weight:440;letter-spacing:0;color:#5F5648;overflow-wrap:anywhere}
 .pm-m a,.pm-m button.pm-i{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;padding:0 12px;border:0;background:none;border-radius:10px;text-decoration:none;color:#14100B;font:440 14px 'Inter',Arial,sans-serif;cursor:pointer;text-align:left;box-sizing:border-box}
 .pm-m a:hover,.pm-m button.pm-i:hover,.pm-m a:focus-visible,.pm-m button.pm-i:focus-visible{background:rgba(180,151,95,.16);outline:none}
 .pm-m svg{width:18px;height:18px;flex:none;stroke:#6E5213;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
@@ -77,6 +79,7 @@ const STYLE = `.pm{position:relative;font-family:'Inter',Arial,sans-serif}
 :root[data-theme="dark"] .pm-who,:root[data-theme="dark"] .pm-sep{border-color:#3A2E1F;background-color:transparent}
 :root[data-theme="dark"] .pm-sep{background:#3A2E1F}
 :root[data-theme="dark"] .pm-who span,:root[data-theme="dark"] .pm-sw{color:#D6BF8F}
+:root[data-theme="dark"] .pm-who .pm-mail{color:#BFB194}
 :root[data-theme="dark"] .pm-m svg{stroke:#D6BF8F}
 :root[data-theme="dark"] .pm-note{color:#BDB094}
 :root[data-theme="dark"] .pm-m .pm-del{color:#F0A08E}:root[data-theme="dark"] .pm-m .pm-del svg{stroke:#F0A08E}
@@ -188,7 +191,7 @@ function draw(root, me) {
   const pic = !!(me && me.avatar);
   root.innerHTML = `<button type="button" class="pm-b${pic ? ' pic' : ''}"${picStyle(me)} aria-haspopup="menu" aria-expanded="false" aria-label="Your profile menu${name ? ', ' + esc(name) : ''}">${esc(initials(name))}</button>
     <div class="pm-m" role="menu" aria-label="Your profile">
-      <div class="pm-who"><span class="pm-av"${picStyle(me)}>${pic ? '' : esc(initials(name))}</span><span class="pm-who-t"><b>${esc(name || 'Your account')}</b><span>Your step: ${esc(step)}</span></span></div>
+      <div class="pm-who"><span class="pm-av"${picStyle(me)}>${pic ? '' : esc(initials(name))}</span><span class="pm-who-t"><b>${esc(name || 'Your account')}</b>${me && me.email ? `<span class="pm-mail">${esc(me.email)}</span>` : ''}<span>Your step: ${esc(step)}${me && me.openAll ? ' · all 12 levels open (team)' : ''}</span></span></div>
       <div class="pm-pic"><button type="button" data-pm="pic">${pic ? 'Change my photo' : 'Add a profile photo'}</button>${pic ? '<button type="button" data-pm="nopic">Remove</button>' : ''}<input type="file" accept="image/*" data-pm-file hidden></div>
       ${picNote ? `<p class="pm-note" role="status">${esc(picNote)}</p>` : ''}
       <a role="menuitem" class="pm-compass" href="/northstar/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 5.5l2 6.5-2 1.2-2-1.2z" fill="currentColor" stroke="none"/><path d="M12 18.5l2-6.5-2-1.2-2 1.2z"/></svg><span><b>Leader’s North Star</b><small>${me && me.northstars ? `Taken ${me.northstars === 1 ? 'once' : me.northstars + ' times'}${me.northstarAt ? ' · last ' + esc(me.northstarAt) : ''}` : 'Your direction in all four domains'}</small></span></a>
@@ -279,7 +282,7 @@ export async function mount(host, { fixed = false, guest = false } = {}) {
     if (r && r.me) {
       const taken = (r.compass && r.compass.taken) || [], last = taken[taken.length - 1];
       let at = ''; try { at = last ? new Date(last).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''; } catch { /* old browser */ }
-      const me = { name: r.me.name, tier: r.me.tier, signupType: r.me.signupType, hasPassword: r.me.hasPassword, letters: r.me.letters, avatar: r.me.avatar || '', northstars: taken.length, northstarAt: at };
+      const me = { name: r.me.name, email: r.me.email || '', openAll: !!r.me.openAll, tier: r.me.tier, signupType: r.me.signupType, hasPassword: r.me.hasPassword, letters: r.me.letters, avatar: r.me.avatar || '', northstars: taken.length, northstarAt: at };
       keep(me); draw(root, me);
     }
   };

@@ -33,6 +33,12 @@ const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* private mode */ } };
 
 let state = Object.assign({ stage: '', answers: {}, work: {}, tier: 'free', me: null }, load());
+/** Team accounts (Alexandru, 2 Nov 2026): every level open, in any order, so
+ *  the team can read and test the whole programme. Only the server says so
+ *  (/api/state me.openAll, from the signed-in account's own email); every
+ *  founder keeps the ladder and the order. */
+const team = () => account.joined() && !!state.openAll;
+const tierNow = () => (team() ? 'premium' : (state.tier || 'free'));
 if (!state.work) state.work = {};
 // A founder who joined through the old entrance (its ten questions, now gone)
 // keeps their stage, answers and work, and opens on their programme.
@@ -317,7 +323,7 @@ function cabinetData(st, gp, first) {
   // The incubator band: FULL accounts only, once the account has been read.
   const full = pulled && signupType !== 'simple';
   const band = full ? { level: lv, title: titleOf(st, lv), done: levelDone(st, lv), total: UNITS,
-    dots: levelDots(lv, (n) => levelDone(st, n), (n) => holds(state.tier || 'free', gateFor(n)), UNITS) } : null;
+    dots: levelDots(lv, (n) => levelDone(st, n), (n) => holds(tierNow(), gateFor(n)), UNITS) } : null;
   return {
     first, name: state.me && state.me.name, tier: state.tier || 'free',
     stageName: STAGES[st] && STAGES[st].n, aimName: null, startHere: gp && gp.weakest ? gp.weakest.name : null,
@@ -371,13 +377,13 @@ function signinView() {
 
 function levelState(st, n) {
   if (levelDone(st, n) === UNITS) return 'done';
-  if (n === 1) return 'open';
+  if (n === 1 || team()) return 'open';
   // A level opens when the one before it is finished. The gate is the work,
   // not the clock — and the tier gate sits on top of it, further down.
   return levelDone(st, n - 1) === UNITS ? 'open' : 'waiting';
 }
 function reachable(st, n) {
-  return holds(state.tier, gateFor(n)) && levelState(st, n) !== 'waiting';
+  return holds(tierNow(), gateFor(n)) && levelState(st, n) !== 'waiting';
 }
 
 /** The library at the top of the rail: four doors into the Library view. */
@@ -409,7 +415,7 @@ function railHTML(st) {
     </div>
     ${libIcons()}
     ${SECTIONS.map((sec) => {
-      const owned = holds(state.tier, sec.k);
+      const owned = holds(tierNow(), sec.k);
       const rung = LADDER.find((r) => r.key === sec.k);
       const tag = sec.k === 'session' ? '1:1' : rung ? rung.price : '';
       return `${sec.k === 'session' ? railStar : ''}<section class="rsec${owned ? '' : ' shut'}">
@@ -454,7 +460,7 @@ const pad = (n) => String(n).padStart(2, '0');
 let qi = null;
 /** Can the founder work in this level now? Owned and open. */
 function writable(st) {
-  return holds(state.tier, gateFor(level)) && levelState(st, level) !== 'waiting' && !!LEVELS4[level - 1];
+  return holds(tierNow(), gateFor(level)) && levelState(st, level) !== 'waiting' && !!LEVELS4[level - 1];
 }
 const steps = () => stepsOf(level);
 const stepAt = (i) => steps()[i] || [-1, 'week'];
@@ -573,7 +579,7 @@ function bookHTML(st) {
   const x = LEVELS4[level - 1];
   const g = gateFor(level);
   let right = '';
-  if (!holds(state.tier, g)) {
+  if (!holds(tierNow(), g)) {
     const rung = LADDER.find((r) => r.key === g);
     right = `<div class="gate">
         <p class="eyebrow">${compass} What opens this</p>
@@ -698,7 +704,7 @@ function buildHTML(st, kind, key, ci) {
     <p class="cw-more"><button type="button" class="cw-copy cw-copyweek" data-copypage>Copy the page</button><button type="button" class="cw-all" data-go="blueprint">See it in your Blueprint</button></p>
     ${sessionCard(level)}
     ${next && LEVELS4[level] ? `<div class="gain"><p class="gaint">${esc(next.n)} · ${esc(next.name)}</p><p class="gainp">${esc(next.about)}</p>
-      <button class="cta" type="button" data-level="${level + 1}">${holds(state.tier, gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button></div>`
+      <button class="cta" type="button" data-level="${level + 1}">${holds(tierNow(), gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button></div>`
       : `<p class="cw-planner">Twelve weeks, written. <button type="button" class="cw-all" data-go="blueprint">Open your Blueprint</button></p>`}`;
 }
 /** The chapter reading, after the Version 4 reading: what was done, how good
@@ -790,7 +796,7 @@ function pageHTML(st, x) {
       ${ci == null ? sessionCard(level) : ''}
       ${ci != null ? `<p class="cw-note">This closes ${esc(CHAPTERS4[ci].name)}. Your chapter reading is next.</p>`
         : next ? `<div class="gain"><p class="eyebrow">${compass} What level ${pad(level + 1)} gives you</p><p class="gaint">${esc(next.word)} · ${esc(next.title)}</p><p class="gainp">${esc(next.promise)}</p>
-          ${levelDone(st, level) === UNITS ? `<button class="cta" type="button" data-level="${level + 1}">${holds(state.tier, gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button>` : `<p class="cw-note">It opens when all ${UNITS} moves here are done: ${UNITS - levelDone(st, level)} to go.</p>`}</div>` : ''}`;
+          ${levelDone(st, level) === UNITS ? `<button class="cta" type="button" data-level="${level + 1}">${holds(tierNow(), gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button>` : `<p class="cw-note">It opens when all ${UNITS} moves here are done: ${UNITS - levelDone(st, level)} to go.</p>`}</div>` : ''}`;
   } else if (kind === 'reading') {
     body = `${readingHTML(ci)}${readingMore(ci)}`;
   } else if (kind === 'carry') {
@@ -805,7 +811,7 @@ function pageHTML(st, x) {
       <h3 class="cw-q" id="cwq">Which day <em>this week?</em></h3>
       ${dayPick('r', 'on', v)}
       ${BUILD4[level] ? `<p class="cw-planner">Next: one page, built from what you wrote. ${esc(BUILD4[level].title)}.</p>` : CHAPTERS4[ci + 1] && LEVELS4[level] ? `<div class="gain"><p class="gaint">${esc(CHAPTERS4[ci + 1].n)} · ${esc(CHAPTERS4[ci + 1].name)}</p><p class="gainp">${esc(CHAPTERS4[ci + 1].about)}</p>
-        <button class="cta" type="button" data-level="${level + 1}">${holds(state.tier, gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button></div>`
+        <button class="cta" type="button" data-level="${level + 1}">${holds(tierNow(), gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button></div>`
         : `<p class="cw-planner">Twelve weeks, written. <button type="button" class="cw-all" data-go="blueprint">Open your Blueprint</button></p>`}`;
   }
   else if (kind === 'bask' || kind === 'bstep' || kind === 'bday' || kind === 'bpage') body = buildHTML(st, kind, key, ci);
@@ -1024,7 +1030,7 @@ function blueprintView() {
 
 function libraryView() {
   const joined = account.joined() || !!state.me;
-  const hasLab = holds(state.tier, 'lab');
+  const hasLab = holds(tierNow(), 'lab');
   const dl = '<svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const manuals = LIBRARY.manuals.map((m) => `<li class="lib-man${m.k === state.stage ? ' lib-yours' : ''}">
       <span class="bk3 bk3-man bk3-${m.k}" aria-hidden="true"><span class="bk3-cover"><small>The Founder’s Blueprint</small><b>${esc(STAGES[m.k].n)}</b></span><i class="bk3-spine"></i></span>
@@ -1158,7 +1164,7 @@ function emphasisName(st, lv) {
 function drawNav() {
   const unread = inbox ? inbox.unread : 0, answers = askUnread();
   $('#tnav').innerHTML = account.joined() && !['signin', 'redirect', 'loading'].includes(view)
-    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Base Camp${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button><button type="button" data-go="ask" ${view === 'ask' ? 'aria-current="page"' : ''}>Ask Alexandru${answers ? `<span class="tdot" aria-label="${answers} new ${answers === 1 ? 'answer' : 'answers'}"></span>` : ''}</button>${holds(state.tier, 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
+    ? `<button type="button" data-go="home" ${view === 'home' ? 'aria-current="page"' : ''}>Your Base Camp${unread ? `<span class="tdot" aria-label="${unread} unread ${unread === 1 ? 'note' : 'notes'}"></span>` : ''}</button><button type="button" data-go="work" ${view === 'work' ? 'aria-current="page"' : ''}>The programme</button><button type="button" data-go="library" ${view === 'library' ? 'aria-current="page"' : ''}>Library</button><button type="button" data-go="ask" ${view === 'ask' ? 'aria-current="page"' : ''}>Ask Alexandru${answers ? `<span class="tdot" aria-label="${answers} new ${answers === 1 ? 'answer' : 'answers'}"></span>` : ''}</button>${holds(tierNow(), 'session') ? '' : `<a class="tbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>`}`
     : '';
 }
 
@@ -1613,6 +1619,7 @@ async function comeHome() {
     if (r.me) {
       state.me = { name: r.me.name, email: r.me.email, thin: r.me.thin || '' };
       if (r.me.tier) state.tier = r.me.tier;
+      state.openAll = !!r.me.openAll;
       hasPassword = !!r.me.hasPassword;
       signupType = r.me.signupType || null;
       missing = Array.isArray(r.me.missing) ? r.me.missing.filter((k) => ['company', 'interest', 'industry', 'password'].includes(k)) : [];
