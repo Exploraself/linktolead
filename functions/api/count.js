@@ -7,7 +7,7 @@
 // The biggest drop between two moments is the next thing to fix
 // (01 START HERE §12).
 
-import { json, bad, db, mentorOk } from '../_shared.js';
+import { json, bad, db, mentorAccess } from '../_shared.js';
 
 export const PAGES = ['road1', 'road3', 'road4'];
 export const MOMENTS = ['view', 's25', 's50', 's75', 's100', 'mirror_start', 'mirror_done', 'mini_done', 'cost_moved', 'cta', 'form_open', 'form_simple', 'form_full', 'pain_match', 'back', 'ba_flip', 'ba_mark', 'ready'];
@@ -34,7 +34,7 @@ export async function onRequestPost({ request, env }) {
 }
 
 export async function onRequestGet({ request, env }) {
-  if (!mentorOk(request, env)) return bad('Not allowed.', 403);
+  if (!(await mentorAccess(request, env, db(env))).ok) return bad('Not allowed.', 403);
   const D = db(env);
   if (!D) return bad('Not configured.', 503);
   await table(D);

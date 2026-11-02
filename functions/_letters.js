@@ -229,11 +229,12 @@ export const toolkitOfferKey = ({ tool = '', interest = '' } = {}) => TOOLKIT_BY
 export const BROADCAST = 'https://broadcast.exploraself.com';
 
 /** "tools-welcome": "Welcome to the Growth Toolkit" (Alexandru, 2 Nov 2026).
- *  Sent once per address, the first time an account opens the toolkit: made
- *  from a toolkit page, or an existing account opening /tools/ or a tool
- *  (functions/_tools.js welcomeOnce). `path` is the tool they came from, or
- *  the Tools page; `tool` and `interest` choose the P.S. */
-export function toolsWelcome(base, { first, to = '', tier, offer, path = '/tools/', tool = '', interest = '', ...o } = {}) {
+ *  Sent once per address: at sign-up from a toolkit page, when an existing
+ *  account taps "Yes, that's me", or when a code lets someone in
+ *  (functions/_tools.js). `path` is the tool they came from, or the Tools
+ *  page; `tool` and `interest` choose the P.S.; `account` false (a code
+ *  holder) asks them to reply rather than use Base Camp. */
+export function toolsWelcome(base, { first, to = '', tier, offer, path = '/tools/', tool = '', interest = '', account = true, ...o } = {}) {
   const home = /^\/[a-z0-9-]+\/$/.test(path) ? path : '/tools/';
   const t = tool || (home !== '/tools/' ? home.slice(1, -1) : '');
   const ps = offer !== undefined ? offer : TOOLKIT_OFFERS[toolkitOfferKey({ tool: t, interest })];
@@ -243,13 +244,15 @@ export function toolsWelcome(base, { first, to = '', tier, offer, path = '/tools
     'Each tool reads your own numbers and gives you one move for this week. Start with the one that brought you here.',
     button(`${base}${home}`, home === '/tools/' ? 'Open my Growth Toolkit →' : 'Open my tool →'),
     ['Every tool is on one page, in two lists, Personal leadership and Business: ', link(`${base}/tools/`)],
-    ['Any question? Ask your mentor at your Base Camp: ', link(`${base}/ground-plan/#ask`, 'Ask Alexandru')],
+    account ? ['Any question? Ask your mentor at your Base Camp: ', link(`${base}/ground-plan/#ask`, 'Ask Alexandru')]
+      : 'Any question? Ask your mentor: reply to this email.',
     ['And when you have a quiet minute, read the Broadcast: ', link(BROADCAST)],
   ], ps, close('launchpad-welcome', { ...o, to })) };
 }
 
 /** "toolkit-code": someone without an account asked to open the Growth
- *  Toolkit. Their own code, the button that opens it, and a look inside.
+ *  Toolkit. The code (one for everybody), the button that opens it, and a
+ *  look inside.
  *  A request letter, so its P.S. is a free gift, never a sale. `tools` is
  *  [[list name, [tool names]], …] from the Tools page. */
 export function toolkitCodeLetter(base, { first, code, url, tools = [], to = '', ...o } = {}) {

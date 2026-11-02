@@ -4,6 +4,7 @@
 // only when the D1 binding exists — so the site keeps serving normally if the
 // database is ever detached.
 
+import { isTeamMember } from './_team.js';
 export const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
     status,
@@ -45,6 +46,18 @@ export function mentorOk(request, env) {
   let diff = 0;
   for (let i = 0; i < key.length; i++) diff |= key.charCodeAt(i) ^ given.charCodeAt(i);
   return diff === 0;
+}
+
+/** /mentor's door (2 Nov 2026): the mentor key, or a signed-in account on the
+ *  team (functions/_team.js), sent as x-account-token. Only the key may
+ *  change who is on the team. */
+export async function mentorAccess(request, env, D) {
+  if (mentorOk(request, env)) return { ok: true, by: 'key' };
+  const token = request.headers.get('x-account-token') || '';
+  if (!D || token.length < 20) return { ok: false };
+  const me = await studentBy(D, token).catch(() => null);
+  if (!me) return { ok: false };
+  return (await isTeamMember(D, me.email, env)) ? { ok: true, by: 'team', me } : { ok: false };
 }
 
 /** SHA-256 as hex. Sign-in codes are stored only this way, never as sent. */

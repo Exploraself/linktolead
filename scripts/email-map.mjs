@@ -30,7 +30,6 @@ import { MENTOR_EMAIL } from '../functions/api/note.js';
 const BASE = 'https://linktolead.exploraself.com';
 const AT = new Date('2026-11-02T09:00:00Z');
 const S = { first: 'Sam', to: 'sam@example.com', tz: 'Europe/London', at: AT };
-const CODE = '123456';
 
 /** The journey, in the order a founder meets it. `icon` names a drawing in
  *  ICONS below (AGENTS.md rule 13: a small picture that tells something). */
@@ -51,19 +50,19 @@ export const ENTRIES = [
   {
     id: 'toolkit-code', stage: 'door', icon: 'key', fn: 'toolkitCodeLetter',
     name: 'Growth Toolkit code',
-    when: 'Someone without an account asks to open the Growth Toolkit (any tool page, or /tools/). Their own 6-digit code, valid 30 days.',
+    when: 'Someone without an account asks to open the Growth Toolkit (any tool page, or /tools/). One 4-digit code for everybody (5689; TOOLKIT_CODE in Cloudflare changes it). Passing it on is fine.',
     who: 'The address they typed. Sent every time they ask (at most 3 an hour).',
     from: '/tools/',
     sentBy: 'functions/api/toolkit.js',
     also: 'Addresses on the TOOLKIT_EMAILS list, and the team, skip the code and get no letter.',
-    build: () => L.toolkitCodeLetter(BASE, { ...S, code: CODE, url: `${BASE}/tools/?email=${encodeURIComponent(S.to)}&code=${CODE}`,
+    build: () => L.toolkitCodeLetter(BASE, { ...S, code: '5689', url: `${BASE}/tools/?email=${encodeURIComponent(S.to)}&code=5689`,
       tools: [['Personal leadership', ['The off-switch check', '12 Days to Start Winning', 'The bottleneck test']], ['Business', ['Cash runway', 'Teleprompter']]] }),
   },
   {
     id: 'tools-welcome', stage: 'door', icon: 'toolkit', fn: 'toolsWelcome',
     name: 'Welcome to the Growth Toolkit',
-    when: 'The first time an account opens the Growth Toolkit: made from a toolkit page, or an existing account opening /tools/ or a tool. Not on starting 12 Days to Start Winning, which has its own welcome.',
-    who: 'Accounts that said yes to letters. Once per address, ever. Code holders get the code letter instead.',
+    when: 'Once per address: an account made from a toolkit page; an existing account tapping "Yes, that\'s me" the first time it opens the toolkit; or someone without an account once the code lets them in. Not on starting 12 Days to Start Winning, which has its own welcome.',
+    who: 'Only with their yes to letters. Without an account, "Ask your mentor" means a reply instead of Base Camp.',
     from: '/tools/',
     sentBy: 'functions/_tools.js welcomeOnce, functions/_account.js sendWelcome (door "tools")',
     also: `The P.S. is one free thing on exploraself.com, matched by the tool they opened (${Object.entries(L.TOOLKIT_BY_TOOL).map(([t, k]) => `${t} → ${L.TOOLKIT_OFFERS[k].name}`).join('; ')}), or on the Tools page by what they want most (${Object.entries(L.TOOLKIT_BY_INTEREST).map(([t, k]) => `${t} → ${L.TOOLKIT_OFFERS[k].name}`).join('; ')}). Invites them to the Broadcast. The first open of each tool adds the Mailchimp tag "Growth Toolkit".`,

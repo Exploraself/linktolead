@@ -13,13 +13,15 @@
      code (public/tools/gate.js): without either, the Tools page asks first.
      Scripts and settings stay on this device. -->
 <script type="module">
-  import { mayOpen } from '/tools/gate.js';
+  import { mayOpen, needsConfirm } from '/tools/gate.js';
   import * as A from '/account.js';
   if (!mayOpen()) location.replace('/tools/?open=teleprompter');
-  // With an account: logged as opened, and the toolkit welcome once per address.
+  // With an account: "Yes, that's me" once on the Tools page, then logged as opened.
   else if (A.joined()) {
-    let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch {}
-    fetch('/api/tools', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: A.token(), tool: 'teleprompter', step: 'open', tz }) }).catch(() => {});
+    needsConfirm().then((n) => {
+      if (n) return location.replace('/tools/?open=teleprompter');
+      fetch('/api/tools', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: A.token(), tool: 'teleprompter', step: 'open' }) }).catch(() => {});
+    });
   }
 </script>
 <style>

@@ -3,8 +3,9 @@
 // linktolead.exploraself.com and is listed on the Tools page (/tools/).
 //
 // Who opens it: anyone with an account, at once. Anyone without one asks for
-// a code, gets their own 6-digit code by email, types it in and gets a pass
-// kept in their browser. Addresses on Alexandru's list skip the code:
+// the code by email, types it in and gets a pass kept in their browser. The
+// code is one 4-digit code for everybody (Alexandru, 2 Nov 2026: passing it
+// on is fine), TOOLKIT_CODE in the Cloudflare settings, 5689 by default. Addresses on Alexandru's list skip the code:
 // TOOLKIT_EMAILS (comma separated, in the Cloudflare settings) and the team.
 //
 // Keys are the page addresses. The same keys and names are in
@@ -17,13 +18,15 @@
 // those rules).
 //
 // The welcome ("Welcome to the Growth Toolkit", functions/_letters.js
-// toolsWelcome): once per address, the first time an account opens the
-// toolkit, new or existing (Alexandru, 2 Nov 2026), and only with their yes
-// to letters. A code holder's welcome is the code letter itself.
+// toolsWelcome): once per address (Alexandru, 2 Nov 2026), and only with
+// their yes to letters. An account made from a toolkit page gets it at
+// sign-up; any other account taps "Yes, that's me" the first time it opens
+// the toolkit (public/tools/gate.js), which also adds the "Growth Toolkit"
+// tag; someone without an account gets it once their code lets them in.
 
 import { now, newToken, sha256 } from './_shared.js';
 import { syncFounder } from './_mailchimp.js';
-import { isTeam } from './_team.js';
+import { isTeamMember } from './_team.js';
 import { send, mailState } from './_mail.js';
 import { toolsWelcome } from './_letters.js';
 import { letterContext } from './_mentor.js';
@@ -56,16 +59,29 @@ export async function opened(env, D, studentId, tool, waitUntil) {
 // ── The welcome, once per address ───────────────────────────────────────────
 export { claimWelcome };
 const WELCOME_WHY = 'You opened the Growth Toolkit at linktolead.exploraself.com with your free ExploraSelf account.';
+const PASS_WHY = 'You opened the Growth Toolkit at linktolead.exploraself.com with your code.';
 
-/** An account opened the toolkit (`tool`, or '' for the Tools page): the
- *  welcome, if this address never had it and said yes to letters. Sent after
- *  the reply when the platform allows it. Returns true when one was sent. */
+/** Has this address opened the toolkit before (confirmed, or welcomed)? */
+export async function toolkitConfirmed(D, email) {
+  await D.prepare('CREATE TABLE IF NOT EXISTS toolkit_welcome (email TEXT PRIMARY KEY, sent_at TEXT NOT NULL, how TEXT)').run();
+  return !!(await D.prepare('SELECT 1 AS x FROM toolkit_welcome WHERE email = ?').bind(norm(email)).first());
+}
+
+/** An account confirmed "Yes, that's me" on the toolkit (Alexandru, 2 Nov
+ *  2026): once per address, the "Growth Toolkit" tag in Mailchimp, and with
+ *  their yes to letters, the welcome letter. `tool` is the tool they came
+ *  for ('' for the Tools page). Sent after the reply when the platform
+ *  allows it. Returns true when this call confirmed them. */
 export async function welcomeOnce(env, D, base, me, { tool = '', tz = '', waitUntil } = {}) {
-  if (!me || !me.email || !mailState(env).ready) return false;
-  const p = await D.prepare('SELECT consent, unsubscribed, unsub_id, interest FROM student_profile WHERE student_id = ?').bind(me.id).first();
-  if (!p || !p.consent || p.unsubscribed) return false;
+  if (!me || !me.email) return false;
   if (!(await claimWelcome(D, me.email, tool ? `tool:${tool}` : 'tools-page'))) return false;
+  const p = await D.prepare('SELECT consent, unsubscribed, unsub_id, interest FROM student_profile WHERE student_id = ?').bind(me.id).first();
   const job = (async () => {
+    await syncFounder(env, D, me.id, 'tag', { tag: TOOLS_TAG }).catch(() => {});
+    if (!p || !p.consent || p.unsubscribed || !mailState(env).ready) {
+      await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(me.id, 'toolkit-confirmed', now(), tool || 'tools').run();
+      return;
+    }
     const ctx = await letterContext(D, me.id, tz);
     const first = String(me.name || '').trim().split(/\s+/)[0] || '';
     const r = await send(env, { to: me.email, ...toolsWelcome(base, { first, to: me.email, tool, interest: p.interest || '', path: tool ? `/${tool}/` : '/tools/', ...ctx }),
@@ -78,28 +94,38 @@ export async function welcomeOnce(env, D, base, me, { tool = '', tz = '', waitUn
   return true;
 }
 
+/** Someone without an account got in with their code (or is on the list):
+ *  the welcome, once per address, if they said yes to letters when they
+ *  asked for the code. No account, so "Ask your mentor" means a reply. */
+export async function passWelcome(env, D, base, email, { tz = '', tool = '', waitUntil } = {}) {
+  const row = await D.prepare('SELECT first, consent FROM toolkit_access WHERE email = ?').bind(norm(email)).first();
+  if (!row || !row.consent || !mailState(env).ready) return false;
+  if (!(await claimWelcome(D, email, 'code'))) return false;
+  const job = (async () => {
+    const r = await send(env, { to: norm(email), ...toolsWelcome(base, { first: row.first || '', to: norm(email), tool: isTool(tool) ? tool : '', path: isTool(tool) ? `/${tool}/` : '/tools/', account: false, tz }),
+      why: PASS_WHY });
+    if (!r.ok) await D.prepare('DELETE FROM toolkit_welcome WHERE email = ?').bind(norm(email)).run();
+  })().catch(() => {});
+  if (typeof waitUntil === 'function') waitUntil(job); else await job;
+  return true;
+}
+
 // ── Access without an account ────────────────────────────────────────────────
 export const TOOLKIT_NAME = 'Growth Toolkit';
-/** A code works for 30 days, and only 5 wrong tries in a row. */
-export const CODE_DAYS = 30;
-export const CODE_TRIES = 5;
+/** One code for everybody (Alexandru, 2 Nov 2026). Change it in Cloudflare
+ *  (TOOLKIT_CODE) without touching the code. */
+export const TOOLKIT_CODE = '5689';
+export const toolkitCode = (env) => String((env && env.TOOLKIT_CODE) || TOOLKIT_CODE).trim();
 const norm = (e) => String(e || '').trim().toLowerCase();
 
-/** On Alexandru's list: no code needed. */
-export function skipsCode(email, env) {
+/** On Alexandru's list, or on the team: no code needed. */
+export async function skipsCode(email, env, D) {
   const e = norm(email);
   if (!e) return false;
   const list = String((env && env.TOOLKIT_EMAILS) || '').split(',').map(norm).filter(Boolean);
-  return list.includes(e) || isTeam(e, env);
+  return list.includes(e) || (await isTeamMember(D, e, env));
 }
 
-/** Six digits, never starting with 0, from crypto randomness. */
-export function newCode() {
-  const b = new Uint32Array(1);
-  crypto.getRandomValues(b);
-  return String(100000 + (b[0] % 900000));
-}
-export const codeHash = (email, code) => sha256(`toolkit|${norm(email)}|${String(code).trim()}`);
 export const passHash = (pass) => sha256(`toolkit-pass|${pass}`);
 
 export async function accessTable(D) {

@@ -2,19 +2,21 @@
 //
 // POST { action: 'request', first, email, consent }
 //   On Alexandru's list (TOOLKIT_EMAILS, or the team): { ok, pass } at once.
-//   Anyone else: their own 6-digit code by email ("toolkit-code" letter, a
-//   look inside the toolkit and a button that opens it), { ok, sent: true }.
+//   Anyone else: the code by email ("toolkit-code" letter, a look inside the
+//   toolkit and a button that opens it), { ok, sent: true }. One 4-digit code
+//   for everybody (TOOLKIT_CODE, 5689 by default; passing it on is fine).
 //   The reply is the same whether or not the address has an account.
-// POST { action: 'check', email, code }   { ok, pass } when the code is right
-//   (30 days, 5 wrong tries, then ask again)
+// POST { action: 'check', email, code }   { ok, pass } when the code is right.
+//   With their yes to letters, the
+//   Growth Toolkit welcome follows, once per address.
 // GET  ?pass=…                            { ok, valid }
 //
 // The pass lives in the browser (public/tools/gate.js); only its hash is kept
-// here, as only the code's hash is. Answers given with a pass stay on the
+// here. Answers given with a pass stay on the
 // device: there is no account to save them to.
 
 import { json, bad, db, now, clean, looksLikeEmail, accountTables } from '../_shared.js';
-import { accessTable, skipsCode, newCode, codeHash, issuePass, passOk, CODE_DAYS, CODE_TRIES } from '../_tools.js';
+import { accessTable, skipsCode, toolkitCode, issuePass, passOk, passWelcome } from '../_tools.js';
 import { allowed, logged, mailState, origin, send, LIMIT_MSG } from '../_mail.js';
 import { toolkitCodeLetter } from '../_letters.js';
 
@@ -49,13 +51,16 @@ export async function onRequestPost({ request, env, waitUntil }) {
     await D.prepare(`INSERT INTO toolkit_access (email, first, consent, created_at) VALUES (?,?,?,?)
         ON CONFLICT(email) DO UPDATE SET first = excluded.first, consent = MAX(toolkit_access.consent, excluded.consent)`)
       .bind(email, first, body.consent === true ? 1 : 0, now()).run();
-    if (skipsCode(email, env)) return json({ ok: true, pass: await issuePass(D, email) });
+    if (await skipsCode(email, env, D)) {
+      const pass = await issuePass(D, email);
+      await passWelcome(env, D, origin(request), email, { tz: clean(body.tz, 60), waitUntil });
+      return json({ ok: true, pass });
+    }
     const st = mailState(env);
     if (!st.ready) return bad('We cannot send codes right now. Write to support@exploraself.com and we will open it for you.', 503);
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
     if (!(await allowed(D, email, ip))) return bad(LIMIT_MSG.replace(', or sign in with your password', ''), 429);
-    const code = newCode();
-    await D.prepare('UPDATE toolkit_access SET code_hash = ?, code_at = ?, tries = 0 WHERE email = ?').bind(await codeHash(email, code), Date.now(), email).run();
+    const code = toolkitCode(env);
     const base = origin(request);
     const url = `${base}/tools/?email=${encodeURIComponent(email)}&code=${code}`;
     const job = (async () => {
@@ -67,15 +72,13 @@ export async function onRequestPost({ request, env, waitUntil }) {
   }
 
   if (body.action === 'check') {
-    const row = await D.prepare('SELECT code_hash, code_at, tries FROM toolkit_access WHERE email = ?').bind(email).first();
-    const fresh = row && row.code_hash && Date.now() - Number(row.code_at || 0) < CODE_DAYS * 86400_000;
-    if (!fresh) return bad('That code has expired, or was never sent. Ask for a new one.', 400);
-    if (row.tries >= CODE_TRIES) return bad('Too many tries. Ask for a new code.', 429);
-    if ((await codeHash(email, clean(body.code, 12))) !== row.code_hash) {
-      await D.prepare('UPDATE toolkit_access SET tries = tries + 1 WHERE email = ?').bind(email).run();
-      return bad('That code does not match. Check the six digits in the email.', 400);
-    }
-    return json({ ok: true, pass: await issuePass(D, email) });
+    if (clean(body.code, 12).replace(/\s+/g, '') !== toolkitCode(env)) return bad('That code does not match. Check the four digits in the email.', 400);
+    // Passed on by a friend is fine: the address is kept, without a yes to letters.
+    await D.prepare('INSERT OR IGNORE INTO toolkit_access (email, first, consent, created_at) VALUES (?,?,?,?)').bind(email, '', 0, now()).run();
+    const pass = await issuePass(D, email);
+    // In with their code: the Growth Toolkit welcome, once (Alexandru, 2 Nov).
+    await passWelcome(env, D, origin(request), email, { tz: clean(body.tz, 60), tool: clean(body.tool, 30), waitUntil });
+    return json({ ok: true, pass });
   }
   return bad('Say request or check.');
 }

@@ -43,6 +43,15 @@ async function arrive() {
     catch (ex) { say(esc(ex.message || 'That code did not work. Ask for a new one below.')); }
     history.replaceState(null, '', '/tools/');
   }
+  // An account here for the first time: "Yes, that's me" once, then on.
+  if (A.joined() && (await G.needsConfirm())) {
+    const panel = $('panel'); panel.hidden = false;
+    const st = await G.state();
+    G.confirmMe($('gate'), { me: st.me || {}, tool: want && !want.soon ? want.key : '',
+      ready: () => { if (want && want.href && !want.soon) location.replace(want.href); else { panel.hidden = true; say('<b>You’re in.</b> Pick a tool.'); } },
+      cancel: () => { panel.hidden = true; } });
+    return;
+  }
   if (want && want.href && !want.soon) {
     if (G.mayOpen()) { location.replace(want.href); return; }
     const panel = $('panel'); panel.hidden = false;
@@ -53,9 +62,6 @@ async function arrive() {
 draw();
 arrive();
 if (A.joined()) {
-  // Opening the toolkit with an account: the welcome letter, once per address.
-  const tz = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; } })();
-  fetch('/api/tools', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: A.token(), step: 'hello', tz }) }).catch(() => {});
   fetch(`/api/tools?t=${encodeURIComponent(A.token())}`).then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.ok) draw(d.used || {}, d.course); }).catch(() => {});
 }
 import('/profile-menu.js').then((m) => m.mount($('pmhost'), { guest: true })).catch(() => {});

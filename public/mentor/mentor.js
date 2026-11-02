@@ -16,14 +16,18 @@ const $ = (s) => document.querySelector(s);
 const KEY = 'ftb-mentor-key';
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 let key = ''; try { key = localStorage.getItem(KEY) || ''; } catch { /* private mode */ }
-const TABS = [['today', 'Today'], ['founders', 'Founders'], ['questions', 'Questions'], ['mailchimp', 'Mailchimp'], ['settings', 'Mentors & comments']];
+/** A team member signed in to their own ExploraSelf account opens /mentor
+ *  without the key (functions/_team.js); the key still works for Alexandru. */
+const acct = () => { try { return localStorage.getItem('ftb-token') || ''; } catch { return ''; } };
+const H = (extra) => Object.assign({ 'x-mentor-key': key, 'x-account-token': acct() }, extra || {});
+const TABS = [['today', 'Today'], ['founders', 'Founders'], ['questions', 'Questions'], ['mailchimp', 'Mailchimp'], ['settings', 'Mentors & team']];
 const NO_FILTER = { group: 'all', step: 'all', act: 'all', need: 'all', more: 'all' };
 let data = null, q = '', flash = '', openId = null;
 let tab = TABS.some(([k]) => '#' + k === location.hash) ? location.hash.slice(1) : 'today';
 let F = { ...NO_FILTER };
 
 const api = async (path, opts) => {
-  const r = await fetch('/api/mentor' + (path || ''), Object.assign({ headers: { 'x-mentor-key': key, 'content-type': 'application/json' } }, opts || {}));
+  const r = await fetch('/api/mentor' + (path || ''), Object.assign({ headers: H({ 'content-type': 'application/json' }) }, opts || {}));
   return { ok: r.ok, status: r.status, data: await r.json().catch(() => ({})) };
 };
 const act = (body) => api('', { method: 'POST', body: JSON.stringify(body) });
@@ -81,7 +85,8 @@ async function loadGrowthWords(id) {
 function gate(msg) {
   $('#q').hidden = true; $('#tb').hidden = true; $('#tabs').hidden = true; closeDrawer();
   $('#main').innerHTML = `<div class="gate"><h2>Sign in</h2>
-    <p>Enter the mentor key. It is set in Cloudflare as <b>MENTOR_KEY</b>.</p>
+    <p><b>On the team?</b> <a href="/ground-plan/#signin">Sign in to your ExploraSelf account</a> with your email and password, then open <b>Mentor</b> in your profile menu. Alexandru adds team addresses in <i>Mentors &amp; team</i>.</p>
+    <p style="margin-top:12px">Or enter the mentor key. It is set in Cloudflare as <b>MENTOR_KEY</b>.</p>
     <p style="margin-top:16px;display:flex;gap:6px;max-width:420px"><input id="k" type="password" placeholder="Mentor key" autocomplete="off" style="flex:1;min-width:0"><button type="button" class="ghost" id="k-eye" aria-label="Show the key" aria-pressed="false" style="width:46px;flex:none;padding:0;display:inline-flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></p>
     <p style="margin-top:12px"><button id="go">Open the cockpit</button></p>
     ${msg ? `<p class="err">${esc(msg)}</p>` : ''}</div>`;
@@ -91,9 +96,9 @@ function gate(msg) {
 }
 
 async function load() {
-  if (!key) return gate('');
+  if (!key && !acct()) return gate('');
   const r = await api('');
-  if (r.status === 401) return gate('That key was not accepted.');
+  if (r.status === 401) return gate(key ? 'That key was not accepted.' : 'This account is not on the team yet. Ask Alexandru to add your address, or enter the mentor key.');
   if (r.status === 503) return gate('The database is not attached to this site yet.');
   if (!r.ok) return gate('Could not reach the roster.');
   data = r.data; draw();
@@ -293,11 +298,44 @@ function mentorsHTML() {
 }
 
 /** Comments founders left under the level videos, newest first; hide or show. */
+/* ── The team (Alexandru, 2 Nov 2026) ─────────────────────────────────────
+   Addresses with every Blueprint level open, the Growth Toolkit without a
+   code, and /mentor with their own account. Added by exact address, once;
+   only the mentor key can add or remove. */
+async function loadTeam(msg = '') {
+  const box = $('#team');
+  if (!box) return;
+  const r = await api('?team=1');
+  if (!r.ok) { box.innerHTML = '<p class="tiny">Could not load the team.</p>'; return; }
+  const T = r.data.team || [], edit = !!r.data.canEdit;
+  box.innerHTML = `<h2>Team · ${T.length}</h2>
+    <p class="tiny">Every Blueprint level open, the Growth Toolkit without a code, and this page with their own account and password. Add the exact address they sign in with.</p>
+    <ul class="list" style="margin-top:10px">${T.map((m) => `<li><div style="flex:1;min-width:0"><b>${esc(m.email)}</b><span class="em">${esc(m.from)}${m.at ? ' · ' + esc(when(m.at)) : ''}</span></div>${edit && m.removable ? `<button class="ghost" data-team-rm="${esc(m.email)}">Remove</button>` : ''}</li>`).join('')}</ul>
+    ${edit ? `<p style="margin-top:12px;display:flex;gap:6px;max-width:460px;flex-wrap:wrap"><input id="team-new" type="email" placeholder="Their email, exactly" autocomplete="off" style="flex:1 1 220px;min-width:0"><button id="team-add">Add to the team</button></p>`
+      : '<p class="tiny" style="margin-top:10px">Only the mentor key can change the team.</p>'}
+    ${msg ? `<p class="flash" role="status">${esc(msg)}</p>` : ''}`;
+  const add = $('#team-add');
+  if (add) {
+    add.onclick = async () => {
+      const email = ($('#team-new').value || '').trim();
+      if (!email) return;
+      const x = await act({ action: 'team-add', email });
+      loadTeam(x.ok ? `${email} is on the team. They sign in with their own account, then open /mentor.` : (x.data.error || 'Could not add that address.'));
+    };
+    $('#team-new').onkeydown = (e) => { if (e.key === 'Enter') add.click(); };
+  }
+  box.querySelectorAll('[data-team-rm]').forEach((b) => { b.onclick = async () => {
+    if (!confirm(`Remove ${b.dataset.teamRm} from the team?`)) return;
+    const x = await act({ action: 'team-remove', email: b.dataset.teamRm });
+    loadTeam(x.ok ? 'Removed.' : (x.data.error || 'Could not remove that address.'));
+  }; });
+}
+
 async function loadComments() {
   const box = $('#vcom');
   if (!box) return;
   let d = {};
-  try { const r = await fetch('/api/comments?all=1', { headers: { 'x-mentor-key': key } }); d = await r.json().catch(() => ({})); } catch { /* offline */ }
+  try { const r = await fetch('/api/comments?all=1', { headers: H() }); d = await r.json().catch(() => ({})); } catch { /* offline */ }
   const items = (d && d.items) || [];
   if (!$('#vcom')) return;
   $('#vcom').innerHTML = `<h2>Video comments</h2>
@@ -403,10 +441,10 @@ function draw() {
   const said = flash ? `<p class="flash" role="status">${esc(flash)}</p>` : '';
   const pane = tab === 'founders' ? foundersHTML() : tab === 'questions' ? questionsHTML()
     : tab === 'mailchimp' ? crossedHTML(S) + mailchimpHTML()
-    : tab === 'settings' ? `${mentorsHTML()}<section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
+    : tab === 'settings' ? `${mentorsHTML()}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section><section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
     : todayHTML(S);
   $('#main').innerHTML = `<div class="stack" role="tabpanel">${said}${pane}</div>`;
-  if (tab === 'settings') loadComments();
+  if (tab === 'settings') { loadComments(); loadTeam(); }
   if (openId) openDrawer(openId); else closeDrawer();
 }
 
@@ -474,7 +512,7 @@ function deleteBox(id) {
 }
 
 async function csv() {
-  const r = await fetch('/api/mentor?csv=1', { headers: { 'x-mentor-key': key } });
+  const r = await fetch('/api/mentor?csv=1', { headers: H() });
   if (!r.ok) { flash = 'The export did not work.'; return draw(); }
   const url = URL.createObjectURL(await r.blob()), a = document.createElement('a');
   a.href = url; a.download = `founders-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
@@ -619,7 +657,7 @@ document.addEventListener('click', async (e) => {
   const vh = e.target.closest('[data-vhide]');
   if (vh) {
     vh.disabled = true;
-    await fetch('/api/comments', { method: 'POST', headers: { 'x-mentor-key': key, 'content-type': 'application/json' }, body: JSON.stringify({ hide: vh.dataset.vhide, hidden: vh.dataset.hidden !== '1' }) }).catch(() => {});
+    await fetch('/api/comments', { method: 'POST', headers: { ...H(), 'content-type': 'application/json' }, body: JSON.stringify({ hide: vh.dataset.vhide, hidden: vh.dataset.hidden !== '1' }) }).catch(() => {});
     loadComments();
     return;
   }

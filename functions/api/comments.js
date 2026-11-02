@@ -11,7 +11,7 @@
 // Each new comment sends Alexandru a plain notice after the reply, at most
 // five per founder an hour; every comment is still saved.
 
-import { json, bad, db, now, newToken, clean, accountTables, studentBy, mentorOk } from '../_shared.js';
+import { json, bad, db, now, newToken, clean, accountTables, studentBy, mentorAccess } from '../_shared.js';
 import { mailState, origin, send } from '../_mail.js';
 import { commentNotice } from '../_letters.js';
 import { MENTOR_EMAIL } from './note.js';
@@ -25,7 +25,7 @@ export async function onRequestGet({ request, env }) {
   await accountTables(D);
   const q = new URL(request.url).searchParams;
   if (q.get('all') === '1') {
-    if (!mentorOk(request, env)) return bad('Not allowed.', 403);
+    if (!(await mentorAccess(request, env, db(env))).ok) return bad('Not allowed.', 403);
     const { results } = await D.prepare(`SELECT c.id, c.stage, c.level, c.body, c.created_at AS at, c.hidden, s.name, s.email
       FROM video_comment c LEFT JOIN student s ON s.id = c.student_id ORDER BY c.created_at DESC LIMIT 200`).all();
     return json({ ok: true, items: results || [] });
@@ -50,7 +50,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   await accountTables(D);
 
   if (body.hide !== undefined) {
-    if (!mentorOk(request, env)) return bad('Not allowed.', 403);
+    if (!(await mentorAccess(request, env, db(env))).ok) return bad('Not allowed.', 403);
     await D.prepare('UPDATE video_comment SET hidden = ? WHERE id = ?').bind(body.hidden === false ? 0 : 1, clean(body.hide, 80)).run();
     return json({ ok: true });
   }
