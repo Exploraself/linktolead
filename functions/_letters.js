@@ -349,6 +349,26 @@ export function answerLetter(base, { first, question, answer, to = '', tier, off
   ], offerFor('mentor', to, tier, offer), close('answer', { ...o, to })) };
 }
 
+/** "team-invite": to a new team member, once, when Alexandru adds their
+ *  address in /mentor (Alexandru, 2 Nov 2026). Everything a team member sends
+ *  goes out signed by Alexandru, and replies come back to him; they see the
+ *  threads in /mentor. With an account: a button that lands them signed in
+ *  (a one-time link, valid 7 days). Without one: make the free account with
+ *  this address first. No offer: it is for the team, not a founder. */
+export function teamInvite(base, { to = '', signinUrl = '', joinUrl = '' } = {}) {
+  return { subject: 'You’re on the ExploraSelf team', ...letter(base, [
+    'Hi,',
+    'Welcome to the ExploraSelf team, and thank you for helping our founders grow.',
+    'In the mentor cockpit you see every founder: where they are, what they wrote and what they asked. You can answer their questions and send them letters. Everything goes out signed by me, and their replies come back to me, so nothing gets lost.',
+    signinUrl ? 'Your first step: tap the button. You arrive signed in. Then open Mentor in the menu under your name.'
+      : `Your first step: make your free account with this address${to ? ` (${to})` : ''}. Then open the mentor cockpit.`,
+    signinUrl ? button(signinUrl, 'Open my account') : button(joinUrl || `${base}/north3/#join`, 'Make my free account'),
+    ['The mentor cockpit, any time: ', link(`${base}/mentor/`)],
+    'Any question at all, just reply to this email. The team and I are here for you.',
+    'See you inside,\nAlexandru',
+  ], null, { sign: false }) };
+}
+
 /** To Alexandru: a founder asked a question. Plain, no offer. */
 /** A plain notice to Alexandru: a founder commented on a level's video. */
 export function commentNotice(base, { name, email, comment, stage, level }) {

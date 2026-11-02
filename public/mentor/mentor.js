@@ -338,7 +338,7 @@ function mentorsHTML() {
     <div style="min-width:0;flex:1 1 200px"><b>${esc(m.name)}</b>${m.isDefault ? ' <span class="pill both">Everyone’s mentor</span>' : ''}<span class="em">${esc(m.title)} · replies to ${esc(m.email)}</span></div>
     <img src="${esc(m.signature)}" alt="" height="28" style="height:28px;width:auto;max-width:40%;background:#fff;padding:2px 6px;border-radius:4px">
     <button class="ghost" data-medit="${esc(m.id)}">Edit</button></li>`;
-  return `<details class="panel mentors" open><summary><h2 style="display:inline">Mentors · ${L.length}</h2> <span class="tiny">Letters come from the founder’s mentor: name, photo and signature.</span></summary>
+  return `<details class="panel mentors"><summary><h2 style="display:inline">Mentors · ${L.length}</h2> <span class="tiny">Only for letters signed by someone other than you (name, photo, signature). The team does not need this.</span></summary>
     <ul class="mlist">${L.map(row).join('')}</ul>
     <form id="mform" class="mform">
       <input type="hidden" id="m-id">
@@ -365,7 +365,7 @@ async function loadTeam(msg = '') {
   if (!r.ok) { box.innerHTML = '<p class="tiny">Could not load the team.</p>'; return; }
   const T = r.data.team || [], edit = !!r.data.canEdit;
   box.innerHTML = `<h2>Team · ${T.length}</h2>
-    <p class="tiny">Every Blueprint level open, the Growth Toolkit without a code, and this page with their own account and password. Add the exact address they sign in with.</p>
+    <p class="tiny">Add their exact email: they get an invitation with a button to start. They see every Blueprint level, the Growth Toolkit without a code, and this page. Everything they send goes out signed by you, and replies come back to you.</p>
     <ul class="list" style="margin-top:10px">${T.map((m) => `<li><div style="flex:1;min-width:0"><b>${esc(m.email)}</b><span class="em">${esc(m.from)}${m.at ? ' · ' + esc(when(m.at)) : ''}</span></div>${edit && m.removable ? `<button class="ghost" data-team-rm="${esc(m.email)}">Remove</button>` : ''}</li>`).join('')}</ul>
     ${edit ? `<p style="margin-top:12px;display:flex;gap:6px;max-width:460px;flex-wrap:wrap"><input id="team-new" type="email" placeholder="Their email, exactly" autocomplete="off" style="flex:1 1 220px;min-width:0"><button id="team-add">Add to the team</button></p>`
       : '<p class="tiny" style="margin-top:10px">Only the mentor key can change the team.</p>'}
@@ -376,7 +376,7 @@ async function loadTeam(msg = '') {
       const email = ($('#team-new').value || '').trim();
       if (!email) return;
       const x = await act({ action: 'team-add', email });
-      loadTeam(x.ok ? `${email} is on the team. They sign in with their own account, then open /mentor.` : (x.data.error || 'Could not add that address.'));
+      loadTeam(!x.ok ? (x.data.error || 'Could not add that address.') : x.data.invited ? `${email} is on the team. An invitation is on its way to them, with the button to start.` : `${email} is on the team, but the invitation did not send (${x.data.inviteWhy || 'email is off'}). They can sign in with their own account, then open /mentor.`);
     };
     $('#team-new').onkeydown = (e) => { if (e.key === 'Enter') add.click(); };
   }
@@ -498,7 +498,7 @@ function draw() {
   const pane = tab === 'founders' ? foundersHTML()
     : tab === 'inbox' ? `${questionsHTML()}<section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
     : tab === 'grow' ? growHTML(S)
-    : tab === 'settings' ? `${mailchimpHTML()}${mentorsHTML()}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>`
+    : tab === 'settings' ? `<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>${mailchimpHTML()}${mentorsHTML()}`
     : todayHTML(S);
   $('#main').innerHTML = `<div class="stack" role="tabpanel">${said}${pane}</div>`;
   if (tab === 'inbox') loadComments();

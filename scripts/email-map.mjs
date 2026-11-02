@@ -41,7 +41,7 @@ export const STAGES = [
   { key: 'follow', icon: 'path', name: 'We follow their answers', sub: 'Letters that follow each pain · approved, not sending yet' },
   { key: 'close', icon: 'chat', name: 'We stay close', sub: 'Letters and answers from Alexandru and the team' },
   { key: 'safe', icon: 'lock', name: 'Their account stays safe', sub: 'Sign-in, new password, password changed' },
-  { key: 'team', icon: 'bell', name: 'The team hears', sub: 'Notices to Alexandru, never to a founder' },
+  { key: 'team', icon: 'bell', name: 'The team hears', sub: 'Notices to Alexandru, and the invitation to a new team member. Never to a founder' },
 ];
 
 const placeholder = (s) => `[${s}]`;
@@ -175,6 +175,15 @@ export const ENTRIES = [
     from: '/ground-plan/',
     sentBy: 'functions/api/comments.js',
     build: () => L.commentNotice(BASE, { name: 'Sam Example', email: S.to, comment: placeholder('The founder’s comment'), stage: 'video', level: 1 }),
+  },
+  {
+    id: 'team-invite', stage: 'team', icon: 'key', fn: 'teamInvite',
+    name: 'You’re on the team',
+    when: 'Alexandru adds an address in /mentor (Settings, Team). Once per add. With an account the button signs them in (a one-time link, 7 days); without one it asks them to make the free account with that address.',
+    who: 'The new team member. Everything they send goes out signed by Alexandru, and replies come back to Alexandru.',
+    from: '/mentor#settings',
+    sentBy: 'functions/api/mentor.js',
+    build: () => L.teamInvite(BASE, { to: 'new.member@example.com', signinUrl: `${BASE}/ground-plan/?signin=${placeholder('one-time code')}` }),
   },
 ];
 
