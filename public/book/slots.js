@@ -24,6 +24,8 @@ export const CHOICES = {
   moved: [['believe', 'What you believe'], ['read', 'How you read it'], ['feel', 'What you feel']],
   side: [['self', 'Lead yourself'], ['people', 'Lead your people'], ['work', 'Lead your business'], ['market', 'Lead the market']],
   tried: [['none', 'Nothing yet'], ['once', 'Tried once, it didn’t hold'], ['few', 'Tried a few times'], ['middle', 'I’m in the middle of it']],
+  income: [['none', 'Nothing yet'], ['u1k', 'Under $1,000'], ['1to5k', '$1,000 to $5,000'], ['5to20k', '$5,000 to $20,000'], ['o20k', 'Over $20,000'], ['private', 'I’d rather not say']],
+  asked: [['0', 'Nobody yet'], ['1to3', '1 to 3'], ['4to10', '4 to 10'], ['o10', 'More than 10']],
 };
 /** The questions of each form, in order (type: 'one' tap one, 'two' exactly
  *  two, 'text' short text of at most `max` characters). */
@@ -35,11 +37,26 @@ export const FORMS = {
     { k: 'note', type: 'text', max: 600, optional: true, q: 'Anything else Alexandru should know?', label: 'Anything else' },
   ],
   boardroom: [
-    { k: 'moved', type: 'one', of: 'moved', q: 'Which of your first three levels moved you most?', label: 'The level that moved you most' },
-    { k: 'side', type: 'one', of: 'side', q: 'Which side is costing you most right now?', label: 'The side costing you most' },
-    { k: 'decision', type: 'text', max: 300, q: 'The one decision you want to bring to the table', label: 'The decision you bring' },
-    { k: 'tried', type: 'one', of: 'tried', q: 'What have you tried so far?', label: 'What you tried so far' },
-    { k: 'worth', type: 'text', max: 300, q: 'What would make this hour worth it for you?', label: 'What makes the hour worth it' },
+    { k: 'moved', type: 'one', of: 'moved', part: 'Where you are', q: 'Which of your first three levels moved you most?', label: 'The level that moved you most' },
+    { k: 'side', type: 'one', of: 'side', part: 'Where you are', q: 'Which side is costing you most right now?', label: 'The side costing you most' },
+    { k: 'stage', type: 'one', of: 'stage', part: 'Where you are', q: 'Where is the business today?', label: 'The business today' },
+    { k: 'line', type: 'text', max: 300, part: 'Lead yourself', q: 'The sentence you wrote in your first three levels that you still think about', label: 'The sentence you still think about' },
+    { k: 'pressure', type: 'text', max: 300, part: 'Lead yourself', q: 'When the pressure hits, what do you do first?', label: 'Under pressure, first' },
+    { k: 'enough', type: 'text', max: 160, part: 'Lead yourself', q: 'What is “enough” for you each month, as a number?', label: 'Enough, each month' },
+    { k: 'avoid', type: 'text', max: 300, part: 'Lead yourself', q: 'What are you avoiding right now that you know you should face?', label: 'What you are avoiding' },
+    { k: 'depends', type: 'text', max: 300, part: 'Lead your people', q: 'Who depends on you most, at work or at home?', label: 'Who depends on you' },
+    { k: 'talk', type: 'text', max: 300, part: 'Lead your people', q: 'Which conversation have you been putting off, and with whom?', label: 'The conversation you put off' },
+    { k: 'handed', type: 'text', max: 300, part: 'Lead your people', q: 'What did you hand over in the last month, and did it stay handed over?', label: 'What you handed over' },
+    { k: 'income', type: 'one', of: 'income', part: 'Lead your business', q: 'Roughly, how much came in last month?', label: 'Last month, in' },
+    { k: 'week', type: 'text', max: 300, part: 'Lead your business', q: 'Where does most of your week really go?', label: 'Where the week goes' },
+    { k: 'number', type: 'text', max: 300, part: 'Lead your business', q: 'Which number do you avoid looking at?', label: 'The number you avoid' },
+    { k: 'best', type: 'text', max: 300, part: 'Lead the market', q: 'Who is your best customer, in one sentence?', label: 'Your best customer' },
+    { k: 'why', type: 'text', max: 300, part: 'Lead the market', q: 'Why do they choose you, in their own words?', label: 'Why they choose you' },
+    { k: 'asked', type: 'one', of: 'asked', part: 'Lead the market', q: 'How many people did you ask to buy in the last 30 days?', label: 'Asked to buy, last 30 days' },
+    { k: 'decision', type: 'text', max: 300, part: 'The hour', q: 'The one decision you want to bring to the table', label: 'The decision you bring' },
+    { k: 'tried', type: 'one', of: 'tried', part: 'The hour', q: 'What have you tried so far?', label: 'What you tried so far' },
+    { k: 'after', type: 'text', max: 300, part: 'The hour', q: 'If this hour works, what will you do differently next week?', label: 'Different next week' },
+    { k: 'worth', type: 'text', max: 300, part: 'The hour', q: 'What would make this hour worth it for you?', label: 'What makes the hour worth it' },
   ],
 };
 export const NAME_MAX = 80;

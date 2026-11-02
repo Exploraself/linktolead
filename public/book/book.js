@@ -60,8 +60,8 @@ function top() {
   return `<div class="top"><div class="pbar" aria-hidden="true"><i style="width:${Math.round(((i + 1) / n) * 100)}%"></i></div>
     <div class="row"><button type="button" class="back" data-back ${i === 0 ? 'disabled' : ''}>← Back</button><span class="where">${label}</span><span></span></div></div>`;
 }
-const eyebrow = () => (KIND === 'boardroom'
-  ? `<p class="eb">${ICON.table}Your 1:1 with Alexandru · 60 minutes</p>`
+const eyebrow = (part = '') => (KIND === 'boardroom'
+  ? `<p class="eb">${ICON.table}Your 1:1 with Alexandru${part ? ` · ${esc(part)}` : ' · 60 minutes'}</p>`
   : `<p class="eb">${ICON.call}A free call with Alexandru · 30 minutes</p>`);
 const goBtn = (label = 'Next', dis = false) => `<div class="act"><button type="button" class="go" data-next ${dis ? 'disabled' : ''}>${esc(label)} ${ICON.arrow}</button><span class="key">or press Enter ↵</span></div>`;
 
@@ -84,17 +84,17 @@ function question(f) {
   const a = S.answers[f.k];
   if (f.type === 'one') {
     const opts = CHOICES[f.of].map(([k, w], i) => `<button type="button" class="slot opt" data-one="${k}" aria-pressed="${a === k}"><b>${esc(w)}</b><small>${i + 1}</small></button>`).join('');
-    return `<section class="q">${eyebrow()}<h1 tabindex="-1">${esc(f.q)}</h1><div class="opts" role="group" aria-label="${esc(f.q)}">${opts}</div>
+    return `<section class="q">${eyebrow(f.part)}<h1 tabindex="-1">${esc(f.q)}</h1><div class="opts" role="group" aria-label="${esc(f.q)}">${opts}</div>
       <p class="under">${ICON.check}Tap one. It moves on by itself.</p></section>`;
   }
   if (f.type === 'two') {
     const picked = Array.isArray(a) ? a : [];
     const opts = CHOICES[f.of].map(([k, w]) => `<button type="button" class="slot opt" data-two="${k}" aria-pressed="${picked.includes(k)}" ${picked.length >= 2 && !picked.includes(k) ? 'aria-disabled="true"' : ''}><b>${esc(w)}</b></button>`).join('');
-    return `<section class="q">${eyebrow()}<h1 tabindex="-1">${esc(f.q.replace(/ Choose two\.$/, ''))}</h1><p class="hint">Choose two. <b>${picked.length} of 2</b> chosen.</p>
+    return `<section class="q">${eyebrow(f.part)}<h1 tabindex="-1">${esc(f.q.replace(/ Choose two\.$/, ''))}</h1><p class="hint">Choose two. <b>${picked.length} of 2</b> chosen.</p>
       <div class="opts" role="group" aria-label="${esc(f.q)}">${opts}</div>${goBtn('Next', picked.length !== 2)}</section>`;
   }
   const v = typeof a === 'string' ? a : '';
-  return `<section class="q">${eyebrow()}<h1 tabindex="-1">${esc(f.q)}</h1>${f.optional ? '<p class="hint">If you like. You can also leave it empty.</p>' : ''}
+  return `<section class="q">${eyebrow(f.part)}<h1 tabindex="-1">${esc(f.q)}</h1>${f.optional ? '<p class="hint">If you like. You can also leave it empty.</p>' : ''}
     <label class="vh" for="f-${f.k}">${esc(f.q)}</label><textarea id="f-${f.k}" class="field" data-text="${f.k}" maxlength="${f.max}" rows="4">${esc(v)}</textarea>
     <p class="count" data-count>${v.length} / ${f.max}</p>${goBtn(f.optional && !v.trim() ? 'Skip' : 'Next', !f.optional && !v.trim())}</section>`;
 }

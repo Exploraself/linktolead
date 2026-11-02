@@ -28,7 +28,7 @@ import { GROWTH_IDS, GROWTH_SQL, GROWTH_BLANK_IDS } from '../_growth.js';
 import { sendLink, signinUrl } from './signin.js';
 import { send, origin, mailState } from '../_mail.js';
 import { mentorLetter, answerLetter, teamInvite, giftLetter, bookingConfirmedLetter } from '../_letters.js';
-import { KINDS as BOOK_KINDS, bookingTables, bookingList, bookingRow, meetLink, meetLinks, setMeetLink } from '../_booking.js';
+import { KINDS as BOOK_KINDS, BOOK_STATUS, BOOK_CLOSED, isOtherTime, bookingTables, bookingList, bookingRow, meetLink, meetLinks, setMeetLink } from '../_booking.js';
 import { letterContext, mentors, saveMentor } from '../_mentor.js';
 import { LIBRARY_ITEMS } from './library.js';
 import { toolNames } from '../_tools.js';
@@ -490,26 +490,63 @@ async function post({ request, env }) {
     const b = await D.prepare('SELECT * FROM booking WHERE id = ?').bind(clean(body.booking, 80)).first();
     if (!b) return bad('Unknown request.', 404);
     const row = bookingRow(b);
-    if (b.status === 'confirmed') return bad('This request is already confirmed. Nothing was sent again.', 409);
-    const time = row.times.find((t) => t === body.time);
-    if (!time) return bad('Choose one of the three times they suggested.');
+    if (b.status === 'confirmed' && !body.again) return bad('This request is already confirmed. Nothing was sent again.', 409);
+    if (BOOK_CLOSED.includes(b.status)) return bad('This request is closed. Reopen it first.', 409);
+    // One of their three times, or (Alexandru, 2 Nov 2026: "full control") a
+    // time he picks himself, which the email then names.
+    const own = !row.times.includes(body.time);
+    const time = own ? (isOtherTime(body.time) ? new Date(body.time).toISOString() : '') : body.time;
+    if (!time) return bad('Choose one of their three times, or a time in the next 60 days.');
     if (Date.parse(time) <= Date.now()) return bad('That time has passed. Reply to them with a new one.');
     const meet = (await meetLinks(D))[b.kind];
     if (!meet) return bad(`Paste the ${BOOK_KINDS[b.kind].setting} first, in Settings → Booking links.`);
     if (!mailState(env).ready) return bad('Email is not switched on yet, so the confirmation cannot go.', 503);
-    const claim = await D.prepare("UPDATE booking SET status = 'sending' WHERE id = ? AND status = 'asked'").bind(b.id).run();
+    const claim = await D.prepare("UPDATE booking SET status = 'sending' WHERE id = ? AND status = ?").bind(b.id, b.status).run();
     if (!claim || !claim.meta || claim.meta.changes !== 1) return bad('This request is being confirmed already. Refresh in a moment.', 409);
     const base = origin(request);
     const r = await send(env, { to: b.email, ...bookingConfirmedLetter(base, { first: String(b.name || '').split(/\s+/)[0], kind: b.kind, time, meet, tz: b.tz, to: b.email }),
       why: b.kind === 'boardroom' ? 'You asked for your 1:1 with Alexandru at linktolead.exploraself.com.' : 'You asked for a free discovery call with Alexandru at linktolead.exploraself.com.' });
     if (!r.ok) {
-      await D.prepare("UPDATE booking SET status = 'asked' WHERE id = ?").bind(b.id).run();
+      await D.prepare('UPDATE booking SET status = ? WHERE id = ?').bind(b.status, b.id).run();
       return bad('The confirmation did not send. Nothing changed; try again in a minute.', 502);
     }
     const by = access.by === 'key' ? 'key' : String((access.me && access.me.email) || 'team');
     await D.prepare("UPDATE booking SET status = 'confirmed', confirmed_time = ?, confirmed_at = ?, confirmed_by = ? WHERE id = ?").bind(time, now(), by, b.id).run();
     if (b.student_id) await log(b.student_id, 'booking-confirmed', JSON.stringify({ kind: b.kind, time })).catch(() => {});
-    return json({ ok: true, time, email: b.email });
+    return json({ ok: true, time, email: b.email, own });
+  }
+
+  if (body.action === 'book-status' || body.action === 'book-note' || body.action === 'book-delete') {
+    // Full control of a request (Alexandru, 2 Nov 2026): file it as held,
+    // no-show, declined or cancelled (no email goes), reopen it, keep a private
+    // note, or delete it. Each one is logged with who did it.
+    await bookingTables(D);
+    const b = await D.prepare('SELECT * FROM booking WHERE id = ?').bind(clean(body.booking, 80)).first();
+    if (!b) return bad('Unknown request.', 404);
+    const by = access.by === 'key' ? 'key' : String((access.me && access.me.email) || 'team');
+    if (body.action === 'book-note') {
+      const note = String(body.note ?? '').replace(/\u0000/g, '').slice(0, 2000);
+      await D.prepare('UPDATE booking SET note = ? WHERE id = ?').bind(note, b.id).run();
+      await log('mentor', 'mentor-book-note', b.id);
+      return json({ ok: true });
+    }
+    if (body.action === 'book-delete') {
+      await D.prepare('DELETE FROM booking WHERE id = ?').bind(b.id).run();
+      await log('mentor', 'mentor-book-delete', b.kind);
+      return json({ ok: true });
+    }
+    const to = String(body.status || '');
+    if (to === 'open') {
+      const back = b.confirmed_time ? 'confirmed' : 'asked';
+      await D.prepare('UPDATE booking SET status = ?, closed_at = NULL, closed_by = NULL WHERE id = ?').bind(back, b.id).run();
+      await log('mentor', 'mentor-book-open', b.id);
+      return json({ ok: true, status: back });
+    }
+    if (!BOOK_CLOSED.includes(to)) return bad(`Say one of: ${BOOK_CLOSED.map((k) => BOOK_STATUS[k]).join(', ')}, or reopen.`);
+    if ((to === 'held' || to === 'noshow') && b.status !== 'confirmed') return bad('Confirm a time first: a call is held or missed only once it has a time.');
+    await D.prepare('UPDATE booking SET status = ?, closed_at = ?, closed_by = ? WHERE id = ?').bind(to, now(), by, b.id).run();
+    if (b.student_id) await log(b.student_id, `booking-${to}`, b.kind).catch(() => {});
+    return json({ ok: true, status: to });
   }
 
   const id = clean(body.student, 80);

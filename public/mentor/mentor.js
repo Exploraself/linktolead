@@ -22,7 +22,7 @@ let key = ''; try { key = localStorage.getItem(KEY) || ''; } catch { /* private 
  *  without the key (functions/_team.js); the key still works for Alexandru. */
 const acct = () => { try { return localStorage.getItem('ftb-token') || ''; } catch { return ''; } };
 const H = (extra) => Object.assign({ 'x-mentor-key': key, 'x-account-token': acct() }, extra || {});
-const TABS = [['today', 'Today'], ['founders', 'Founders'], ['inbox', 'Inbox'], ['refunds', 'Refunds'], ['grow', 'Grow'], ['settings', 'Settings']];
+const TABS = [['today', 'Today'], ['founders', 'Founders'], ['inbox', 'Inbox'], ['calls', '1:1 requests'], ['boardroom1', 'Boardroom 1:1'], ['refunds', 'Refunds'], ['grow', 'Grow'], ['settings', 'Settings']];
 /** Old addresses still land in the right place (#questions, #mailchimp before 2 Nov 2026). */
 const OLD_TABS = { questions: 'inbox', mailchimp: 'settings' };
 /** One small line icon per tab, in the text colour (rule 13); the label carries the meaning. */
@@ -31,6 +31,8 @@ const TAB_ICONS = {
   founders: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5M16 4.5a3.5 3.5 0 010 7M18 15c2 .7 3 2.3 3.5 5"/>',
   inbox: '<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 2h6l1-2h5"/>',
   grow: '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
+  calls: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M8 13.5h3M8 16.5h6"/>',
+  boardroom1: '<rect x="7" y="9" width="10" height="7" rx="1"/><circle cx="4" cy="12.5" r="1.6"/><circle cx="20" cy="12.5" r="1.6"/><path d="M12 4v3M12 18v3"/>',
   refunds: '<path d="M9 7H5V3"/><path d="M5.4 7A8 8 0 1 1 4 12"/><path d="M14.4 9.6c-.4-.8-1.3-1.2-2.3-1.2-1.3 0-2.3.7-2.3 1.7 0 2.4 4.8 1.2 4.8 3.7 0 1-1 1.8-2.5 1.8-1 0-2-.5-2.4-1.3M12 7.2v1.2M12 15.6v1.2"/>',
   settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
 };
@@ -134,9 +136,9 @@ async function load() {
 }
 
 function tabsHTML() {
-  const n = (data.waiting || []).length + toConfirm().length;
+  const n = (data.waiting || []).length;
   const rf = (data.refunds || []).filter((x) => !x.done_at).length;
-  return TABS.map(([k, label]) => `<button type="button" role="tab" aria-selected="${tab === k}" data-tab="${k}"${k === 'refunds' ? ' class="tab-red"' : ''}>${icon(k)}<span>${esc(label)}</span>${k === 'inbox' && n ? `<b>${n}<span class="vh"> waiting</span></b>` : k === 'refunds' && rf ? `<b>${rf}<span class="vh"> open</span></b>` : ''}</button>`).join('');
+  return TABS.map(([k, label]) => `<button type="button" role="tab" aria-selected="${tab === k}" data-tab="${k}"${k === 'refunds' ? ' class="tab-red"' : ''}>${icon(k)}<span>${esc(label)}</span>${k === 'inbox' && n ? `<b>${n}<span class="vh"> waiting</span></b>` : k === 'refunds' && rf ? `<b>${rf}<span class="vh"> open</span></b>` : k === 'calls' && toConfirm('discovery').length ? `<b>${toConfirm('discovery').length}<span class="vh"> to confirm</span></b>` : k === 'boardroom1' && toConfirm('boardroom').length ? `<b>${toConfirm('boardroom').length}<span class="vh"> to confirm</span></b>` : ''}</button>`).join('');
 }
 
 // ── Refunds (Alexandru, 2 Nov 2026) ──────────────────────────────────────────
@@ -393,35 +395,95 @@ function questionsHTML() {
 
 const BOOK_NAMES = { discovery: 'Discovery call · 30 min', boardroom: 'Boardroom 1:1 · 60 min' };
 const BOOK_LINK_NAMES = { discovery: 'Discovery call link', boardroom: 'Boardroom link' };
-const toConfirm = () => ((data && data.bookings) || []).filter((b) => b.status === 'asked');
+const toConfirm = (kind) => ((data && data.bookings) || []).filter((b) => b.status === 'asked' && (!kind || b.kind === kind));
 /** "Tue 10 Nov, 16:00", always Rome time. */
 const romeTime = (iso) => { try { return new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso)); } catch { return String(iso); } };
 const cityOfTz = (tz) => String(tz || '').split('/').pop().replace(/_/g, ' ');
-function bookingsHTML() {
-  const B = data.bookings || [], L = data.bookLinks || {};
-  const missing = Object.keys(BOOK_NAMES).filter((k) => !L[k] && B.some((b) => b.kind === k && b.status === 'asked'));
+/** "2026-11-10T16:00" typed as Rome time → the moment, as ISO. */
+const romeInputToIso = (v) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(String(v || ''));
+  if (!m) return '';
+  const [y, mo, d, h, mi] = m.slice(1).map(Number);
+  const guess = Date.UTC(y, mo - 1, d, h, mi);
+  const off = (t) => { const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(t)).map((x) => [x.type, x.value]));
+    return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute) - t; };
+  let t = guess - off(guess); const again = off(t); if (guess - again !== t) t = guess - again;
+  return new Date(t).toISOString();
+};
+/** 1:1 requests and Boardroom 1:1 (Alexandru, 2 Nov 2026: "two menus …
+ *  any details, so that I can have full control"). Each request: who, their
+ *  account and step, when they asked (Rome and their own time), every answer,
+ *  their three times in Rome and theirs, the room, a private note, and every
+ *  move: confirm one of their times or another time (an email goes), held,
+ *  no-show, declined, cancelled, reopen, write to them, delete. */
+const BK = { discovery: { f: 'open', q: '' }, boardroom: { f: 'open', q: '' } };
+const BK_STATUS = { asked: 'To confirm', confirmed: 'Confirmed', held: 'Held', noshow: 'No-show', declined: 'Declined', cancelled: 'Cancelled', sending: 'Sending…' };
+const BK_PILL = { asked: 'warn', confirmed: 'both', held: 'ok', noshow: 'warn', declined: '', cancelled: '' };
+const BK_FILTERS = [['open', 'To confirm', (b) => b.status === 'asked'], ['coming', 'Confirmed', (b) => b.status === 'confirmed'],
+  ['done', 'Held', (b) => b.status === 'held'], ['closed', 'No-show, declined, cancelled', (b) => ['noshow', 'declined', 'cancelled'].includes(b.status)], ['all', 'All', () => true]];
+const theirTime = (iso, tz) => { try { return new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso)); } catch { return ''; } };
+const bkCsv = (rows) => {
+  const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const head = ['Kind', 'Status', 'Name', 'Email', 'Asked', 'Their time zone', 'Time 1 (Rome)', 'Time 2 (Rome)', 'Time 3 (Rome)', 'Confirmed (Rome)', 'Answers', 'Note'];
+  return [head.map(cell).join(','), ...rows.map((b) => [BOOK_NAMES[b.kind], BK_STATUS[b.status] || b.status, b.name, b.email, b.created_at, b.tz,
+    ...[0, 1, 2].map((i) => (b.times[i] ? romeTime(b.times[i]) : '')), b.confirmed_time ? romeTime(b.confirmed_time) : '',
+    (b.answers || []).map(([l, w]) => `${l}: ${w}`).join(' | '), b.note].map(cell).join(','))].join('\n');
+};
+function requestsHTML(kind) {
+  const all = (data.bookings || []).filter((b) => b.kind === kind), L = data.bookLinks || {}, st = BK[kind];
+  const room = L[kind];
+  const counts = Object.fromEntries(BK_FILTERS.map(([k, , f]) => [k, all.filter(f).length]));
+  const fx = (BK_FILTERS.find(([k]) => k === st.f) || BK_FILTERS[0])[2];
+  const qq = st.q.trim().toLowerCase();
+  const list = all.filter(fx).filter((b) => !qq || `${b.name} ${b.email} ${(b.answers || []).map((x) => x[1]).join(' ')} ${b.note}`.toLowerCase().includes(qq));
+  if (st.f === 'coming') list.sort((a, b) => String(a.confirmed_time).localeCompare(String(b.confirmed_time)));
+  const title = kind === 'boardroom' ? 'Boardroom 1:1 requests' : '1:1 requests · free discovery calls';
+  const page = kind === 'boardroom' ? 'https://linktolead.exploraself.com/book/boardroom/' : 'https://linktolead.exploraself.com/book/discovery/';
   const row = (b) => {
-    const known = b.student_id && data.students.some((x) => x.id === b.student_id);
-    const who = known ? `<button type="button" class="linkish" data-drawer="${esc(b.student_id)}">${esc(b.name || b.email)}</button>` : `<b>${esc(b.name || b.email)}</b>`;
-    const away = b.tz && b.tz !== 'Europe/Rome' ? ` · in ${esc(cityOfTz(b.tz))}` : '';
+    const s = (data.students || []).find((x) => x.id === b.student_id);
+    const who = s ? `<button type="button" class="linkish" data-drawer="${esc(s.id)}">${esc(b.name || b.email)}</button>` : `<b>${esc(b.name || b.email)}</b>`;
+    const zone = b.tz && b.tz !== 'Europe/Rome' ? cityOfTz(b.tz) : '';
     const future = (t) => Date.parse(t) > Date.now();
-    const canConfirm = b.status === 'asked' && can('message') && !!L[b.kind];
-    const times = b.status === 'confirmed'
-      ? `<p class="bk-ok">Confirmed: <b>${esc(romeTime(b.confirmed_time))}</b> Rome time · ${esc(when(b.confirmed_at))}</p>`
-      : `<div class="bk-times" role="group" aria-label="Their three times, Rome time">${b.times.map((t) => canConfirm && future(t)
-          ? `<button class="btn" data-bconf="${esc(b.id)}" data-time="${esc(t)}">Confirm ${esc(romeTime(t))}</button>`
-          : `<span class="pill">${esc(romeTime(t))}${future(t) ? '' : ' · passed'}</span>`).join('')}</div>`;
-    return `<li class="bk"><div>
-      <p class="bk-h"><span class="pill ${b.kind === 'boardroom' ? 'bp' : 'ns'}">${esc(BOOK_NAMES[b.kind] || b.kind)}</span>${b.status === 'confirmed' ? ' <span class="pill both">Confirmed</span>' : b.status === 'asked' ? ' <span class="pill warn">To confirm</span>' : ''}</p>
-      ${who}<span class="em">${esc(b.email)} · asked ${esc(when(b.created_at))}${away}</span>
+    const open = b.status === 'asked' || b.status === 'confirmed';
+    const mayConfirm = open && can('message') && !!room;
+    const timeRow = (t) => {
+      const chosen = b.confirmed_time === t;
+      return `<li class="bk-t${chosen ? ' on' : ''}"><span><b>${esc(romeTime(t))}</b> Rome${zone ? ` <span class="tiny">· ${esc(theirTime(t, b.tz))} in ${esc(zone)}</span>` : ''}${chosen ? ' <span class="pill both">Chosen</span>' : ''}${future(t) ? '' : ' <span class="tiny">· passed</span>'}</span>
+        ${mayConfirm && future(t) && !chosen ? `<button type="button" class="btn" data-bconf="${esc(b.id)}" data-time="${esc(t)}">${b.status === 'confirmed' ? 'Move to this time' : 'Confirm this time'}</button>` : ''}</li>`;
+    };
+    const ownTime = b.confirmed_time && !b.times.includes(b.confirmed_time)
+      ? `<li class="bk-t on"><span><b>${esc(romeTime(b.confirmed_time))}</b> Rome${zone ? ` <span class="tiny">· ${esc(theirTime(b.confirmed_time, b.tz))} in ${esc(zone)}</span>` : ''} <span class="pill both">Chosen · your own time</span></span></li>` : '';
+    const reply = `mailto:${b.email}?subject=${encodeURIComponent(kind === 'boardroom' ? 'Your 1:1 with Alexandru' : 'Our call')}&body=${encodeURIComponent(`Hi ${String(b.name || '').split(/\s+/)[0]},\n\n`)}`;
+    return `<li class="bk${open ? '' : ' closed'}" id="bk-${esc(b.id)}"><div>
+      <p class="bk-h"><span class="pill ${BK_PILL[b.status] || ''}">${esc(BK_STATUS[b.status] || b.status)}</span>${s ? `<span class="pill">${esc(STEP_NAMES[s.tier] || s.tier || 'Free')}</span>` : '<span class="pill">No account</span>'}</p>
+      ${who} <span class="em sel">${esc(b.email)}</span>
+      <p class="tiny">Asked ${esc(when(b.created_at))} · ${esc(day(b.created_at))}${zone ? ` · lives on ${esc(zone)} time` : ' · Rome time'}${b.confirmed_at ? ` · confirmed ${esc(when(b.confirmed_at))}${b.confirmed_by ? ` by ${esc(b.confirmed_by)}` : ''}` : ''}${b.closed_at ? ` · ${esc((BK_STATUS[b.status] || '').toLowerCase())} ${esc(when(b.closed_at))}${b.closed_by ? ` by ${esc(b.closed_by)}` : ''}` : ''}</p>
       ${b.answers && b.answers.length ? `<dl class="dkv bk-a">${b.answers.map(([l, w]) => `<dt>${esc(l)}</dt><dd>${esc(w)}</dd>`).join('')}</dl>` : ''}
-      <p class="lbl" style="margin-top:10px">${b.status === 'confirmed' ? 'The time' : 'Their three times, Rome time'}</p>${times}
-      ${b.status === 'asked' && !L[b.kind] ? `<p class="tiny warn">Paste the ${esc(BOOK_LINK_NAMES[b.kind])} in Settings → Booking links, then confirm here.</p>` : ''}
-      <p class="tiny"><a href="mailto:${esc(b.email)}">Reply to ${esc(b.name || b.email)}</a></p></div></li>`;
+      <p class="lbl" style="margin-top:12px">Their three times</p><ul class="bk-tl">${b.times.map(timeRow).join('')}${ownTime}</ul>
+      ${mayConfirm ? `<details class="bk-own"><summary>Another time…</summary><div class="bk-ownrow"><label class="tiny" for="own-${esc(b.id)}">Day and time, Rome</label>
+        <input type="datetime-local" id="own-${esc(b.id)}" step="900"><button type="button" class="btn" data-bown="${esc(b.id)}">Confirm this time</button></div>
+        <p class="tiny">They get the same email: the time, in their own time too, and the Google Meet room.</p></details>` : ''}
+      ${open && !room && can('message') ? `<p class="tiny warn">Paste the ${esc(BOOK_LINK_NAMES[kind])} in Settings → Booking links before you confirm.</p>` : ''}
+      ${b.status === 'confirmed' && room ? `<p class="tiny">Room: <a href="${esc(room)}" target="_blank" rel="noopener">${esc(room.replace('https://', ''))}</a></p>` : ''}
+      ${can('message') ? `<label class="lbl" for="note-${esc(b.id)}" style="margin-top:12px">Private note (only the team sees it)</label>
+        <textarea id="note-${esc(b.id)}" class="bk-note" rows="2" maxlength="2000">${esc(b.note || '')}</textarea>
+        <div class="bk-acts">
+          <button type="button" class="btn" data-bnote="${esc(b.id)}">Save note</button>
+          <a class="btn" href="${esc(reply)}">Write to them</a>
+          ${b.status === 'confirmed' ? `<button type="button" class="btn" data-bst="${esc(b.id)}" data-v="held">Mark held</button><button type="button" class="btn" data-bst="${esc(b.id)}" data-v="noshow">No-show</button>` : ''}
+          ${open ? `<button type="button" class="btn" data-bst="${esc(b.id)}" data-v="declined">Decline</button><button type="button" class="btn" data-bst="${esc(b.id)}" data-v="cancelled">Cancelled</button>` : `<button type="button" class="btn" data-bst="${esc(b.id)}" data-v="open">Reopen</button>`}
+          ${can('delete') ? `<button type="button" class="btn red" data-bdel="${esc(b.id)}">Delete</button>` : ''}
+        </div>` : ''}
+    </div></li>`;
   };
-  return `<div class="panel" id="bookings"><div><h2>Bookings${toConfirm().length ? ` · ${toConfirm().length} to confirm` : ''}</h2><p class="sub">Requests for a call, newest first. They were told Alexandru writes back within 24 hours. Confirm one of their three times: they get it by email, in their own time and Rome’s, with the Google Meet link.</p></div>
-    ${missing.length && can('message') ? `<p class="flash warn" role="status">No Google Meet link yet for: ${esc(missing.map((k) => BOOK_LINK_NAMES[k]).join(', '))}. <button type="button" class="linkish" data-tab="settings" style="display:inline">Paste it in Settings</button></p>` : ''}
-    ${B.length ? `<ul class="qlist">${B.map(row).join('')}</ul>` : '<p class="hint">No requests yet. They arrive from /book/discovery/ and /book/boardroom/.</p>'}</div>`;
+  return `<section class="panel" id="requests-${kind}"><h2>${esc(title)}</h2>
+    <p class="sub">From <a href="${page}" target="_blank" rel="noopener">${page.replace('https://', '')}</a>. They were told Alexandru writes back within 24 hours. Confirming sends them the time and the Google Meet room; every other button only files the request.${room ? ` Room: <a href="${esc(room)}" target="_blank" rel="noopener">${esc(room.replace('https://', ''))}</a>.` : ''}</p>
+    ${!room && can('message') ? `<p class="flash warn" role="status">No ${esc(BOOK_LINK_NAMES[kind])} yet. <button type="button" class="linkish" data-tab="settings" style="display:inline">Paste it in Settings → Booking links</button>.</p>` : ''}
+    <div class="bk-bar"><div class="chips" role="group" aria-label="Show">${BK_FILTERS.map(([k, label]) => `<button type="button" class="chip" data-bkf="${kind}" data-v="${k}" aria-pressed="${st.f === k}">${esc(label)} <b>${counts[k]}</b></button>`).join('')}</div>
+      <label class="vh" for="bkq-${kind}">Search these requests</label><input id="bkq-${kind}" class="bk-q" data-bkq="${kind}" type="search" placeholder="Search name, email, answers, notes" value="${esc(st.q)}">
+      <button type="button" class="btn" data-bcsv="${kind}">Download CSV</button></div>
+    ${list.length ? `<ul class="qlist">${list.map(row).join('')}</ul>` : `<p class="hint">${all.length ? 'Nothing here with this filter.' : `No requests yet. They arrive from ${page.replace('https://', '')}.`}</p>`}
+  </section>`;
 }
 /** Settings → Booking links: the Google Meet link per kind of call. */
 function bookLinksHTML() {
@@ -764,7 +826,9 @@ function draw() {
   const said = flash ? `<p class="flash" role="status">${esc(flash)}</p>` : '';
   const pane = tab === 'founders' ? foundersHTML()
     : tab === 'refunds' ? refundsHTML()
-    : tab === 'inbox' ? `${questionsHTML()}${bookingsHTML()}<section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
+    : tab === 'calls' ? requestsHTML('discovery')
+    : tab === 'boardroom1' ? requestsHTML('boardroom')
+    : tab === 'inbox' ? `${questionsHTML()}<section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
     : tab === 'grow' ? growHTML(S)
     : tab === 'settings' ? `${isTeam() ? teamCanHTML() : ''}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>${mailchimpHTML()}${can('payments') ? '<section class="panel" id="stripebox"><p class="tiny">Loading the payments…</p></section>' : ''}${can('mailchimp') ? '<section class="panel" id="mctags"></section>' : ''}${bookLinksHTML()}${mentorsHTML()}`
     : todayHTML(S);
@@ -1063,12 +1127,52 @@ document.addEventListener('click', async (e) => {
         + (r.data.left ? ` ${r.data.left} still waiting: press again.` : '');
     return load();
   }
-  if (d.bconf) {
-    const bk = (data.bookings || []).find((x) => x.id === d.bconf);
-    if (!bk || !confirm(`Confirm ${romeTime(d.time)} (Rome time) with ${bk.name || bk.email}? They get an email with this time and the Google Meet link.`)) return;
+  if (d.bkf) { BK[d.bkf].f = d.v; return draw(); }
+  if (d.bcsv) {
+    const rows = (data.bookings || []).filter((x) => x.kind === d.bcsv);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([bkCsv(rows)], { type: 'text/csv;charset=utf-8' }));
+    a.download = `${d.bcsv === 'boardroom' ? 'boardroom-1to1' : 'discovery-calls'}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    return;
+  }
+  if (d.bnote) {
+    b.disabled = true;
+    const r = await act({ action: 'book-note', booking: d.bnote, note: $(`#note-${d.bnote}`).value });
+    flash = r.ok ? 'Note saved.' : (r.data.error || 'The note did not save.');
+    return load();
+  }
+  if (d.bst) {
+    const bk = (data.bookings || []).find((x) => x.id === d.bst);
+    const words = { held: 'Mark this call as held', noshow: 'Mark as a no-show', declined: 'Decline this request', cancelled: 'Mark as cancelled', open: 'Reopen this request' };
+    if (!bk || !confirm(`${words[d.v] || 'Change this request'} (${bk.name || bk.email})? No email goes; write to them yourself if they should know.`)) return;
+    b.disabled = true;
+    const r = await act({ action: 'book-status', booking: d.bst, status: d.v });
+    flash = r.ok ? `${bk.name || bk.email}: ${(BK_STATUS[r.data.status] || r.data.status || '').toLowerCase()}.` : (r.data.error || 'That did not change.');
+    return load();
+  }
+  if (d.bdel) {
+    const bk = (data.bookings || []).find((x) => x.id === d.bdel);
+    if (!bk || !confirm(`Delete the request from ${bk.name || bk.email}? It cannot be undone. No email goes.`)) return;
+    b.disabled = true;
+    const r = await act({ action: 'book-delete', booking: d.bdel });
+    flash = r.ok ? 'Request deleted.' : (r.data.error || 'It was not deleted.');
+    return load();
+  }
+  let bconf = d.bconf, btime = d.time;
+  if (d.bown) {
+    const v = $(`#own-${d.bown}`).value;
+    if (!v) { flash = 'Pick a day and a time first.'; return draw(); }
+    btime = romeInputToIso(v);
+    if (!btime) { flash = 'That day and time could not be read.'; return draw(); }
+    bconf = d.bown;
+  }
+  if (bconf) {
+    const bk = (data.bookings || []).find((x) => x.id === bconf);
+    if (!bk || !confirm(`${bk.status === 'confirmed' ? 'Move the call to' : 'Confirm'} ${romeTime(btime)} (Rome time) with ${bk.name || bk.email}? They get an email with this time and the Google Meet link.`)) return;
     b.disabled = true; b.textContent = 'Sending…';
-    const r = await act({ action: 'book-confirm', booking: d.bconf, time: d.time });
-    flash = r.ok ? `Confirmed with ${bk.email}: ${romeTime(d.time)} Rome time. The email with the Google Meet link is on its way.` : (r.data.error || 'The confirmation did not send.');
+    const r = await act({ action: 'book-confirm', booking: bconf, time: btime, again: bk.status === 'confirmed' });
+    flash = r.ok ? `Confirmed with ${bk.email}: ${romeTime(btime)} Rome time. The email with the Google Meet link is on its way.` : (r.data.error || 'The confirmation did not send.');
     return load();
   }
   if (b.id === 'bl-save') {
@@ -1130,6 +1234,15 @@ document.addEventListener('keydown', (e) => {
   if (row) { e.preventDefault(); openDrawer(row.dataset.drawer, true); }
 });
 // The search is in the header: it shows the Founders tab, filtered as you type.
+document.addEventListener('input', (e) => {
+  const k = e.target && e.target.dataset && e.target.dataset.bkq;
+  if (!k) return;
+  BK[k].q = e.target.value;
+  const at = e.target.selectionStart;
+  draw();
+  const back = document.getElementById(`bkq-${k}`);
+  if (back) { back.focus(); try { back.setSelectionRange(at, at); } catch { /* fine */ } }
+});
 $('#q').addEventListener('input', (e) => {
   q = e.target.value; flash = '';
   // From another tab the search starts fresh, over everyone; on Founders it

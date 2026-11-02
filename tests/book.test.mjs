@@ -35,9 +35,11 @@ ok(good.ok && !('note' in good.answers), 'discovery: a full set reads; an empty 
 ok(!S.readAnswers('discovery', { stage: 'solo', struggles: ['clients'], goals: ['clients', 'runs'] }).ok, 'discovery: exactly two struggles');
 ok(!S.readAnswers('discovery', { stage: 'solo', struggles: ['clients', 'clients'], goals: ['clients', 'runs'] }).ok, 'discovery: two different ones');
 ok(!S.readAnswers('discovery', { stage: 'boss', struggles: ['clients', 'time'], goals: ['clients', 'runs'] }).ok, 'discovery: only the words the form offers');
-ok(S.readAnswers('boardroom', { moved: 'feel', side: 'work', decision: 'Raise my prices', tried: 'once', worth: 'A clear yes or no' }).ok, 'boardroom: a full set reads');
-ok(!S.readAnswers('boardroom', { moved: 'feel', side: 'work', decision: '', tried: 'once', worth: 'x' }).ok, 'boardroom: the decision is required');
-ok(!S.readAnswers('boardroom', { moved: 'feel', side: 'work', decision: 'x'.repeat(301), tried: 'once', worth: 'x' }).ok, 'boardroom: short answers stay short');
+const full = Object.fromEntries(S.FORMS.boardroom.map((f) => [f.k, f.type === 'one' ? S.CHOICES[f.of][0][0] : 'An honest answer']));
+ok(S.FORMS.boardroom.length === 20 && S.readAnswers('boardroom', full).ok, 'boardroom: twenty deep questions, a full set reads');
+ok(S.FORMS.boardroom.every((f) => f.part) && new Set(S.FORMS.boardroom.map((f) => f.part)).size === 6, 'boardroom: six parts, the four domains between where you are and the hour');
+ok(!S.readAnswers('boardroom', { ...full, decision: '' }).ok, 'boardroom: the decision is required');
+ok(!S.readAnswers('boardroom', { ...full, decision: 'x'.repeat(301) }).ok, 'boardroom: short answers stay short');
 ok(S.BOOK_TAGS.discovery === 'linktolead-book-discovery' && S.BOOK_TAGS.boardroom === 'linktolead-book-boardroom', 'the two approved tag names');
 
 // The pages and the Google Form.

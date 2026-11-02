@@ -92,7 +92,7 @@ export const ACTION_RIGHT = { reply: 'reply', message: 'message', 'signin-link':
   'refund-done': 'payments',
   // A request for a call (functions/_booking.js): confirming a time sends a
   // letter, and the Google Meet links are what those letters carry.
-  'book-confirm': 'message', 'book-links': 'message' };
+  'book-confirm': 'message', 'book-links': 'message', 'book-status': 'message', 'book-note': 'message', 'book-delete': 'delete' };
 
 async function rightsTable(D) {
   await D.prepare('CREATE TABLE IF NOT EXISTS team_right (email TEXT PRIMARY KEY, can TEXT NOT NULL, at TEXT)').run();
