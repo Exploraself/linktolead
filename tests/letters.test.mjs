@@ -29,7 +29,7 @@ ok(L.subject === 'Welcome to The Founder Launchpad', 'welcome: subject');
 ok(JSON.stringify(paras(L.text).slice(0, 5)) === JSON.stringify(['Hi Maria,', OPENER, 'You’re in. Welcome to The Founder Launchpad. I’m really glad you’re here.',
   'Start with Level 01 today. In about an hour you’ll have your business on paper, not only in your head.',
   'Alexandru and the team read every word you write in there, and we’re cheering you on.']), 'welcome: the greeting, the personal first line, then the three paragraphs');
-ok(L.text.includes('\n\nAlexandru\nAlexandru Cojocari · ExploraSelf\n\nP.S. Want to look at your answers together? Book a 1:1 with me in The Boardroom: ' + BOOKING), 'welcome: signed, then the Boardroom P.S. with the booking link');
+ok(L.text.includes('\n\nAlexandru\nAlexandru Cojocari · ExploraSelf\n\nP.S. Want to look at your answers together? The Boardroom is one 1:1 with me, $27: https://linktolead.exploraself.com/boardroom/'), 'welcome: signed, then the Boardroom P.S. with its page');
 ok(LETTER_BOOKING === BOOKING, 'the booking link is the one in content.js');
 
 L = resultsLetter(B, { first: 'Maria', weakest: 'Lead your people', offer: 'unshakeable' });

@@ -88,7 +88,7 @@ ok(W.subject === 'Welcome. Your 12 days start tomorrow' && W.text.startsWith('Hi
 ok(W.text.includes('P.S. The whole book behind these letters') && W.text.includes(B + '/ground-plan/#library'), 'welcome: its own P.S. with the library link');
 let D1 = courseLetter(B, 1, { first: 'Sam' });
 ok(D1.html.includes('Open Level 01 · Enough →') && D1.html.includes(`href="${B}/ground-plan/#programme"`) && D1.text.includes('My Day 1 answer'), 'day 1: the button to the move and the one-tap reply');
-ok(courseLetter(B, 12, {}).text.includes('Book a 1:1 with me in The Boardroom') && !courseLetter(B, 13, {}).text.includes('Unshakeable assessment. It shows'), 'day 12 carries the one paid mention; day 13 its own P.S.');
+ok(courseLetter(B, 12, {}).text.includes('The Boardroom is one 1:1 with me, $27') && !courseLetter(B, 13, {}).text.includes('Unshakeable assessment. It shows'), 'day 12 carries the one paid mention; day 13 its own P.S.');
 ok(courseLetter(B, 14) === null, 'nothing after day 13');
 
 const at = (iso) => new Date(iso);
