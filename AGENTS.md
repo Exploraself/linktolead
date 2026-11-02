@@ -91,3 +91,28 @@ human has to own.
 - The hard parts of this programme are the human ones: saying no, naming the
   cost, having the conversation, holding the standard on a bad week. The
   numbers exist to make those unavoidable, and for nothing else.
+
+## 10. Practical first, outside in (Alexandru, 2 Nov 2026)
+
+A founder coming in from outside meets the practical first, then the detail,
+then the how. On every surface they see before they are deep inside a level
+(sales pages, Base Camp, the level list, My Blueprint), a level is named by
+what it is about in plain words: "What you believe", never "SEED". Framework
+words (the level words, chapter names, P.A.C.E., tool names) appear only
+inside a level, and more of them the deeper the founder goes.
+
+My Blueprint goes the other way: it brings the founder back up to the
+practical. The work is done inside; here is your playbook, print it, and do
+exactly this.
+
+Every action is a practical business step the founder can do and check this
+week, tied to their mission, their vision, their goals and their mini-goals.
+"Take a walk" or "breathe first" is not an action. If a founder could follow
+it without moving their business, rewrite it.
+
+## 11. Easy on the eye (Alexandru, 2 Nov 2026)
+
+The Founder's Blueprint and My Blueprint are light and white, in one
+easy-to-read font, with few colours, one thing at a time: the way Google's
+sign-in asks for one field per screen. A number that scares is left out:
+show this level's twenty actions, never "240 actions".
