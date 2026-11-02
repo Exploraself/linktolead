@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Boardroom · one hour with Alexandru Cojocari · ExploraSelf</title>
+<meta name="description" content="One hour, one to one, online, with Alexandru Cojocari. What you write is read before you meet. $27, with 14 days to change your mind.">
+<link rel="icon" href="/northstar/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts.css">
+<style>
+/* /road5/: The Boardroom for people who arrive from an ad (Alexandru,
+   2 Nov 2026: "a sales page using the concept and principles of the
+   Boardroom, but with a serious design"). Same principles as /boardroom/
+   (introspection, the founder's own answers read back, future projection,
+   value, honest urgency), in the quiet luxury of the new exploraself.com:
+   ink, bone and gold used only as fine lines, Newsreader and Inter.
+   One offer, no links out. Every button: /pay/?step=session&from=road5.
+   Rule 6: no invented counts, quotes or scarcity. */
+:root{--ink:#15110C;--esp:#1B140E;--bone:#F3EDE2;--paper:#FAF7F1;--navy:#0E1C2B;--gold:#B4975F;--gl:#D6BF8F;--gi:#7A5C16;
+  --mut:#5F5548;--mutd:#CDBFA8;--line:rgba(21,17,12,.16);--lined:rgba(214,191,143,.24);
+  --serif:Newsreader,Georgia,'Times New Roman',serif;--sans:Inter,system-ui,-apple-system,'Segoe UI',Arial,sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16.5px/1.65 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,p,figure,blockquote,ol{margin:0}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(20px,5vw,64px)}
+.band{padding:clamp(72px,10vw,132px) 0}
+.dark{background:var(--ink);color:var(--bone)}
+.esp{background:var(--esp);color:var(--bone)}
+.bone{background:var(--bone)}
+.navy{background:var(--navy);color:#EEF2F6}
+.lab{font:500 11.5px/1.4 var(--sans);letter-spacing:.28em;text-transform:uppercase;color:var(--gi)}
+.dark .lab,.esp .lab,.navy .lab{color:var(--gl)}
+h1{font:300 clamp(40px,6.2vw,84px)/1.02 var(--serif);letter-spacing:-.02em}
+h2{font:300 clamp(34px,4.4vw,58px)/1.06 var(--serif);letter-spacing:-.015em}
+h1 i,h2 i{font-style:italic}
+.dark h1 i,.dark h2 i,.esp h2 i,.navy h2 i{color:var(--gl)}
+.lede{font-size:clamp(17px,1.4vw,19px);line-height:1.7;color:var(--mut);max-width:36em}
+.dark .lede,.esp .lede{color:var(--mutd)}
+.navy .lede{color:#B9C6D4}
+.head{display:flex;flex-direction:column;gap:18px;max-width:780px;margin-bottom:clamp(40px,5vw,60px)}
+/* top */
+.top{background:var(--ink);border-bottom:1px solid var(--lined)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:72px}
+.mark{display:flex;align-items:center;gap:12px;font:600 12px/1 var(--sans);letter-spacing:.32em;color:var(--bone)}
+.mark svg{width:22px;height:22px}
+.top small{font-size:12.5px;letter-spacing:.06em;color:#A99C86}
+/* hero */
+.hero .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:56px 72px;padding-top:clamp(48px,8vw,108px);padding-bottom:clamp(64px,9vw,116px)}
+.hero .txt{flex:1 1 520px;min-width:0;display:flex;flex-direction:column;gap:26px}
+.hero figure{flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:14px}
+.ph{position:relative;aspect-ratio:4/5;overflow:hidden;background:#0B0907}
+.ph img{width:100%;height:100%;object-fit:cover;object-position:52% 20%;display:block}
+.ph::after{content:"";position:absolute;inset:14px;border:1px solid rgba(214,191,143,.35);pointer-events:none}
+.hero figcaption{display:flex;justify-content:space-between;gap:12px;font-size:12px;letter-spacing:.18em;color:#A99C86}
+.go{display:inline-flex;align-items:center;justify-content:center;gap:14px;min-height:58px;padding:0 32px;background:var(--bone);color:var(--ink);font:500 16px/1.2 var(--sans);text-decoration:none;transition:background .3s}
+.go:hover{background:#fff}
+.go span{transition:transform .3s}.go:hover span{transform:translateX(5px)}
+.go.ink{background:var(--ink);color:var(--bone)}.go.ink:hover{background:#2A2117}
+.meta{font-size:13.5px;color:#A99C86;line-height:1.7}
+.gift{display:inline-flex;align-items:center;gap:10px;font-size:14px;color:var(--gl)}
+.gift svg{width:18px;height:18px;flex:none}
+/* questions */
+.qs{display:grid;gap:clamp(36px,4vw,48px);max-width:880px}
+.q{display:flex;flex-direction:column;gap:16px;padding-top:28px;border-top:1px solid var(--line)}
+.q h3{font:400 clamp(22px,2.2vw,28px)/1.25 var(--serif)}
+.q h3 em{font:italic 300 15px/1 var(--serif);color:var(--gi);margin-right:12px}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chips button{min-height:46px;padding:0 18px;border:1px solid rgba(21,17,12,.24);background:transparent;color:var(--ink);font:400 15px/1.2 var(--sans);cursor:pointer;transition:background .25s,color .25s,border-color .25s}
+.chips button:hover{border-color:var(--ink)}
+.chips button[aria-pressed="true"]{background:var(--ink);color:var(--bone);border-color:var(--ink)}
+.slide{display:flex;align-items:center;gap:20px}
+.slide input{flex:1;accent-color:var(--ink);height:44px}
+.slide output{font:300 clamp(28px,3vw,38px)/1 var(--serif);min-width:4.4em;text-align:right}
+.reading{background:var(--ink);color:var(--bone);padding:clamp(26px,4vw,44px);display:flex;flex-direction:column;gap:14px}
+.reading p:first-child{font:300 clamp(22px,2.4vw,30px)/1.35 var(--serif)}
+.reading p+p{color:var(--mutd)}
+.reading[hidden]{display:none}
+/* steps */
+.steps{list-style:none;padding:0;display:flex;flex-wrap:wrap;border-top:1px solid var(--line)}
+.steps li{flex:1 1 230px;min-width:0;padding:28px 28px 0 0;display:flex;flex-direction:column;gap:10px}
+.steps em{font:italic 300 30px/1 var(--serif);color:var(--gi)}
+.steps b{font:400 23px/1.25 var(--serif)}
+.steps span{font-size:15.5px;color:var(--mut)}
+/* future */
+.time{display:grid;gap:0;border-left:1px solid var(--lined);margin-left:6px}
+.tp{position:relative;padding:0 0 38px 34px;display:flex;flex-direction:column;gap:6px}
+.tp::before{content:"";position:absolute;left:-6px;top:6px;width:11px;height:11px;border-radius:50%;background:var(--navy);border:1px solid var(--gl)}
+.tp.last::before{background:var(--gl)}
+.tp small{font:500 11.5px/1.4 var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--gl)}
+.tp p{font:300 clamp(20px,2vw,26px)/1.4 var(--serif);max-width:34em}
+/* ledger */
+.ledger{border-top:1px solid var(--line)}
+.lr{display:flex;align-items:baseline;gap:14px;padding:20px 0;border-bottom:1px solid var(--line)}
+.lr span{flex:0 1 auto;min-width:0}
+.lr i{flex:1 1 24px;border-bottom:1px dotted rgba(21,17,12,.32);transform:translateY(-4px);min-width:24px}
+.lr b{flex:none;font:italic 400 17px/1 var(--serif);color:var(--gi)}
+.lr.tot{border-bottom:0;padding-top:30px}
+.lr.tot span{font:400 clamp(24px,2.6vw,32px)/1.2 var(--serif)}
+.lr.tot b{font:300 clamp(40px,4.4vw,56px)/1 var(--serif);font-style:normal;color:var(--ink)}
+.note{margin-top:18px;font-size:15px;color:var(--mut);max-width:40em}
+/* Alexandru */
+.alx{display:flex;flex-wrap:wrap;gap:48px 88px}
+.alx .facts{flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.alx .facts p{font-size:15px;line-height:1.85;color:var(--mutd)}
+.alx .say{flex:2 1 540px;min-width:0;display:flex;flex-direction:column;gap:28px}
+blockquote{font:300 clamp(26px,3vw,40px)/1.28 var(--serif);letter-spacing:-.01em}
+blockquote i{color:var(--gl)}
+/* fit */
+.fit{display:flex;flex-wrap:wrap;gap:40px 72px}
+.fit div{flex:1 1 380px;min-width:0}
+.fit h3{font:400 26px/1.2 var(--serif);padding-bottom:16px;border-bottom:1px solid var(--line)}
+.fit ul{list-style:none;margin:0;padding:0}
+.fit li{padding:16px 0 16px 30px;border-bottom:1px solid var(--line);position:relative;color:var(--mut)}
+.fit li::before{position:absolute;left:2px;top:15px;font:400 18px/1 var(--serif);color:var(--gi)}
+.fit .yes li::before{content:"—"}
+.fit .no li::before{content:"×"}
+/* why now */
+.why{display:flex;flex-wrap:wrap;border-top:1px solid var(--line)}
+.why div{flex:1 1 280px;min-width:0;padding:28px 28px 0 0;display:flex;flex-direction:column;gap:10px}
+.why b{font:400 23px/1.25 var(--serif)}
+.why p{font-size:15.5px;color:var(--mut)}
+/* faq */
+.faq{border-top:1px solid var(--line);max-width:880px}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:20px;padding:22px 0;font:400 clamp(19px,1.8vw,22px)/1.35 var(--serif)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font:300 26px/1 var(--serif);color:var(--gi);transition:transform .3s}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq details p{padding:0 0 22px;color:var(--mut);max-width:42em}
+/* end */
+.end .wrap{display:flex;flex-direction:column;align-items:center;text-align:center;gap:24px}
+.end .rule{width:1px;height:56px;background:rgba(214,191,143,.5)}
+.foot{background:#0F0C08;color:#A99C86;border-top:1px solid rgba(214,191,143,.14);font-size:13px}
+.foot .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px 32px;padding-top:36px;padding-bottom:36px}
+.foot nav{display:flex;gap:22px}
+.foot a{text-decoration:none}.foot a:hover{color:var(--bone)}
+/* pay bar on phones */
+.stick{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(21,17,12,.96);border-top:1px solid var(--lined);transform:translateY(110%);transition:transform .35s ease}
+.stick.on{transform:none}
+.stick .go{width:100%;min-height:52px}
+@media(min-width:900px){.stick{display:none}}
+/* quiet motion */
+.js .rv{opacity:0;transform:translateY(18px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+.js .rv.in{opacity:1;transform:none}
+.hero .ph img{animation:settle 1.6s ease both}
+@keyframes settle{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.js .rv{opacity:1;transform:none;transition:none}.hero .ph img{animation:none}.stick,.go,.go span{transition:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#D6BF8F" stroke-width="1.3" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12Z"/><path d="m12 6.5 1.6 3.9 3.9 1.6-3.9 1.6L12 17.5l-1.6-3.9L6.5 12l3.9-1.6Z" fill="#D6BF8F" stroke="none"/></svg>EXPLORASELF</span>
+  <small>14 days money back</small>
+</div></header>
+<main>
+
+<section class="dark hero" aria-labelledby="h-top"><div class="wrap">
+  <div class="txt">
+    <p class="lab">The Boardroom · one hour with Alexandru Cojocari</p>
+    <h1 id="h-top">The decisions that shape your business deserve <i>a second mind at the table.</i></h1>
+    <p class="lede">One hour, one to one, online. Before you meet, Alexandru and the team read what you wrote, so the hour starts on your business, not on introductions.</p>
+    <div><a class="go" href="/pay/?step=session&amp;from=road5" data-pay>Take your seat · $27 <span aria-hidden="true">→</span></a></div>
+    <p class="meta">Online · Tuesday to Thursday afternoons, Rome time · 14 days to change your mind</p>
+    <p class="gift"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4.5" rx="1"/><path d="M5 13v7.5h14V13M12 8.5v12"/><path d="M12 8.5C10.4 4.8 6.4 4.3 6.4 6.8c0 1.7 3.2 1.7 5.6 1.7Zm0 0c1.6-3.7 5.6-4.2 5.6-1.7 0 1.7-3.2 1.7-5.6 1.7Z"/></svg>And a gift from Alexandru, given to you in the call.</p>
+  </div>
+  <figure>
+    <div class="ph"><img src="/cabinet/alexandru.jpg" alt="Alexandru Cojocari" width="640" height="512" decoding="async" fetchpriority="high"></div>
+    <figcaption><span>ALEXANDRU COJOCARI</span><span>ROME</span></figcaption>
+  </figure>
+</div></section>
+
+<section class="bone band" aria-labelledby="h-qs"><div class="wrap">
+  <div class="head rv">
+    <p class="lab">Three honest questions</p>
+    <h2 id="h-qs">Before anything else, <i>look at it straight.</i></h2>
+    <p class="lede">Twenty seconds. Nothing is sent: your answers stay on this page.</p>
+  </div>
+  <div class="qs">
+    <div class="q rv">
+      <h3><em>i.</em>What has been on your mind the longest?</h3>
+      <div class="chips" role="group" aria-label="What has been on your mind the longest?" data-pains>
+        <button type="button" data-p="alone">I carry every decision alone</button>
+        <button type="button" data-p="time">No time left for me</button>
+        <button type="button" data-p="clients">I need more clients</button>
+        <button type="button" data-p="price">My prices feel too low</button>
+        <button type="button" data-p="direction">My direction is unclear</button>
+        <button type="button" data-p="cash">Cash is tight</button>
+        <button type="button" data-p="team">My team isn’t stepping up</button>
+        <button type="button" data-p="off">I can’t switch off</button>
+      </div>
+    </div>
+    <div class="q rv">
+      <h3><em>ii.</em><label for="weeks">For how many weeks, unsolved?</label></h3>
+      <div class="slide"><input id="weeks" type="range" min="1" max="52" value="8" data-weeks aria-describedby="weeks-out"><output id="weeks-out" data-weeks-out>8 weeks</output></div>
+    </div>
+    <div class="q rv">
+      <h3><em>iii.</em>If nothing changes, where are you in ninety days?</h3>
+      <div class="chips" role="group" aria-label="If nothing changes, where are you in ninety days?" data-ninety>
+        <button type="button" data-n="0">In the same place</button>
+        <button type="button" data-n="1">Further behind</button>
+        <button type="button" data-n="2">Honestly, I don’t know</button>
+      </div>
+    </div>
+    <div class="reading" data-reading role="status" hidden>
+      <p data-read1></p>
+      <p data-read2></p>
+      <div><a class="go" href="/pay/?step=session&amp;from=road5" data-pay>Take your seat · $27 <span aria-hidden="true">→</span></a></div>
+    </div>
+  </div>
+</div></section>
+
+<section class="band" aria-labelledby="h-how"><div class="wrap">
+  <div class="head rv">
+    <p class="lab">How it works</p>
+    <h2 id="h-how">Four steps. <i>Nothing to wait for.</i></h2>
+  </div>
+  <ol class="steps rv">
+    <li><em>i</em><b>You take your seat.</b><span>$27. Your account opens with Levels 01 to 05.</span></li>
+    <li><em>ii</em><b>You write first.</b><span>Three short levels at your own pace: what you believe, how you read it, what you feel.</span></li>
+    <li><em>iii</em><b>Alexandru and the team read it.</b><span>Before you meet, so the hour is spent on you.</span></li>
+    <li><em>iv</em><b>Your hour at the table.</b><span>Online, on a Tuesday, Wednesday or Thursday afternoon. You leave with one road, chosen together.</span></li>
+  </ol>
+</div></section>
+
+<section class="navy band" aria-labelledby="h-future"><div class="wrap">
+  <div class="head rv">
+    <p class="lab">Picture it</p>
+    <h2 id="h-future">Five weeks from now, <i>things have happened.</i></h2>
+    <p class="lede">Each level ends with a promise you can check on Sunday. These are the first five, word for word.</p>
+  </div>
+  <div class="time rv">
+    <div class="tp"><small>Weeks 1 to 3 · free</small><p>One old rule tested, one task handed over, your enough as a number, three people asked to buy.</p></div>
+    <div class="tp"><small>Week 4</small><p>One if–then plan kept, one clear ask with a date, your hour priced, a weekly selling hour booked.</p></div>
+    <div class="tp"><small>Week 5</small><p>One dated proof of who you are becoming, one person thanked specifically, one number read, three clients asked for their words.</p></div>
+    <div class="tp last"><small>And your hour with Alexandru</small><p>Somewhere in those weeks, at a time you choose: the one decision behind it all, named, and one road out.</p></div>
+  </div>
+</div></section>
+
+<section class="band" aria-labelledby="h-value"><div class="wrap">
+  <div class="head rv">
+    <p class="lab">What $27 holds</p>
+    <h2 id="h-value">The hour that sits <i>inside The Summit.</i></h2>
+  </div>
+  <div class="ledger rv">
+    <div class="lr"><span>Levels 01 to 03: what you believe, how you read it, what you feel</span><i></i><b>Free, always</b></div>
+    <div class="lr"><span>Levels 04 and 05, open at once: forty practical actions</span><i></i><b>Included</b></div>
+    <div class="lr"><span>What you write, read by Alexandru and the team before you meet</span><i></i><b>Included</b></div>
+    <div class="lr"><span>One hour, one to one, with Alexandru, online</span><i></i><b>Included</b></div>
+    <div class="lr"><span>A gift from Alexandru, given in the call</span><i></i><b>Included</b></div>
+    <div class="lr"><span>14 days to change your mind</span><i></i><b>Money back</b></div>
+    <div class="lr tot"><span>Your seat at the table</span><i></i><b>$27</b></div>
+  </div>
+  <p class="note rv">The weekly hour with Alexandru is the heart of The Summit, at $1,989. Here you take the first one.</p>
+</div></section>
+
+<section class="esp band" aria-labelledby="h-alx"><div class="wrap">
+  <div class="alx rv">
+    <div class="facts">
+      <p class="lab" id="h-alx">Across the table</p>
+      <p>Alexandru Cojocari.<br>Born in Moldova. Lives and works in Rome.<br>Degree in business and management.<br>Master’s in political science.<br>Founder of ExploraSelf.</p>
+    </div>
+    <div class="say">
+      <blockquote>“In my late teens I built made-to-measure kitchens and wardrobes. I loved it. I also did everything myself, and I didn’t watch the money. <i>The business closed.</i>”</blockquote>
+      <p class="lede">Today I mentor founders. The Blueprint is what I wish someone had put in front of me then: the right things to look at, one week at a time, and someone to read them with me.</p>
+    </div>
+  </div>
+</div></section>
+
+<section class="bone band" aria-labelledby="h-fit"><div class="wrap">
+  <div class="head rv">
+    <p class="lab">Is it for you</p>
+    <h2 id="h-fit">An honest <i>yes or no.</i></h2>
+  </div>
+  <div class="fit rv">
+    <div class="yes"><h3>It fits if</h3><ul>
+      <li>You have an idea or your first clients, and want to see clearly before you spend more.</li>
+      <li>You carry the decisions alone, and you are tired of guessing.</li>
+      <li>You will write honestly before you talk.</li>
+    </ul></div>
+    <div class="no"><h3>It is not for you if</h3><ul>
+      <li>You want someone to do the work for you.</li>
+      <li>You want a course to watch, not a question to answer.</li>
+      <li>You are not ready to look at what is really happening.</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<section class="band" aria-labelledby="h-now"><div class="wrap">
+  <div class="head rv">
+    <p class="lab">Why this week</p>
+    <h2 id="h-now">Three honest reasons <i>not to wait.</i></h2>
+  </div>
+  <div class="why rv">
+    <div><b>The question is fresh now.</b><p>The longer it waits, the more it becomes the way things are.</p></div>
+    <div><b>The hours are few.</b><p>Alexandru takes Boardroom calls on three afternoons a week: Tuesday, Wednesday and Thursday.</p></div>
+    <div><b>Waiting has a price.</b><p data-cost>Every week the same question stays open is a week your business pays for it.</p></div>
+  </div>
+  <div class="rv" style="margin-top:44px"><a class="go ink" href="/pay/?step=session&amp;from=road5" data-pay>Take your seat · $27 <span aria-hidden="true">→</span></a></div>
+</div></section>
+
+<section class="band bone" aria-labelledby="h-faq"><div class="wrap">
+  <div class="head rv">
+    <p class="lab">Before you decide</p>
+    <h2 id="h-faq">Plain answers.</h2>
+  </div>
+  <div class="faq rv">
+    <details><summary>What happens right after I pay?</summary><p>Your free account opens with Levels 01 to 05. You also get an email that says so, with your receipt.</p></details>
+    <details><summary>When is the hour?</summary><p>Online, on a Tuesday, Wednesday or Thursday afternoon, Rome time. You choose the time after you pay.</p></details>
+    <details><summary>Do I have to finish the first three levels first?</summary><p>That is the best way: the hour is built on what you wrote. Take your time; the seat is yours.</p></details>
+    <details><summary>What is the gift?</summary><p>Alexandru gives it to you in the call.</p></details>
+    <details><summary>Can I go further later?</summary><p>Yes, any time, from your Base Camp. Each step includes the ones below.</p></details>
+    <details><summary>What if it isn’t for me?</summary><p>Write to us within 14 days and you get your $27 back.</p></details>
+  </div>
+</div></section>
+
+<section class="dark band end" aria-labelledby="h-end"><div class="wrap">
+  <span class="rule" aria-hidden="true"></span>
+  <h2 id="h-end">Take your seat.</h2>
+  <p class="lede">One hour. One decision named. One road chosen together.</p>
+  <a class="go" href="/pay/?step=session&amp;from=road5" data-pay>Take your seat · $27 <span aria-hidden="true">→</span></a>
+  <p class="meta">14 days to change your mind · a gift inside</p>
+</div></section>
+
+</main>
+<footer class="foot"><div class="wrap">
+  <span>© ExploraSelf · Rome</span>
+  <nav aria-label="Legal"><a href="https://exploraself.com/privacy">Privacy</a><a href="https://exploraself.com/terms">Terms</a></nav>
+</div></footer>
+<div class="stick" data-stick aria-hidden="true"><a class="go" href="/pay/?step=session&amp;from=road5" tabindex="-1">Take your seat · $27 <span aria-hidden="true">→</span></a></div>
+
+<script>
+// /road5/: the three questions read back in one paragraph, built only from
+// the visitor's own taps (nothing is sent); the ad's own pain is picked first
+// (utm_content …-alone / -time / -clients / -price / -direction / -cash /
+// -team / -off); the utm tags ride along to the pay page; quiet reveals.
+(() => {
+  const $ = (s) => document.querySelector(s), $$ = (s) => [...document.querySelectorAll(s)];
+  document.documentElement.classList.add('js');
+  const q = new URLSearchParams(location.search);
+  // Keep the ad's tags on every pay button.
+  const keep = [...q].filter(([k]) => k.startsWith('utm_')).map(([k, v]) => `&${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('');
+  if (keep) $$('[data-pay], .stick .go').forEach((a) => { a.href += keep; });
+
+  const PAIN = { alone: 'Carrying every decision alone', time: 'No time left for you', clients: 'Not enough clients', price: 'Prices that feel too low',
+    direction: 'A direction that feels unclear', cash: 'Cash that is tight', team: 'A team that isn’t stepping up', off: 'Not being able to switch off' };
+  const NINETY = ['in the same place', 'further behind', 'not sure where'];
+  let pain = '', n = -1;
+  const ad = String(q.get('utm_content') || '').toLowerCase();
+  const fromAd = Object.keys(PAIN).find((k) => ad.endsWith('-' + k) || ad === k);
+  const weeks = $('[data-weeks]'), out = $('[data-weeks-out]');
+  const w = () => Number(weeks.value);
+  const read = () => {
+    out.textContent = w() >= 52 ? '52+ weeks' : `${w()} ${w() === 1 ? 'week' : 'weeks'}`;
+    const total = w() + 13;
+    $('[data-cost]').textContent = `Every week the same question stays open is a week your business pays for it. By your own answer, it has been ${w() >= 52 ? 'a year or more' : `${w()} ${w() === 1 ? 'week' : 'weeks'}`} already.`;
+    if (!pain || n < 0) { $('[data-reading]').hidden = true; return; }
+    $('[data-read1]').textContent = `${PAIN[pain]}, for ${w() >= 52 ? 'a year or more' : `${w()} ${w() === 1 ? 'week' : 'weeks'}`}. If nothing changes, in ninety days that is ${w() >= 52 ? 'well over a year' : `${total} weeks`} on one question, and by your own answer you will be ${NINETY[n]}.`;
+    $('[data-read2]').textContent = 'One hour is enough to name the decision behind it and choose one road. That is what The Boardroom is for.';
+    $('[data-reading]').hidden = false;
+  };
+  const press = (group, el) => { $$(group + ' button').forEach((b) => b.setAttribute('aria-pressed', String(b === el))); };
+  $$('[data-pains] button').forEach((b) => { b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => { pain = b.dataset.p; press('[data-pains]', b); read(); }); });
+  $$('[data-ninety] button').forEach((b) => { b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => { n = Number(b.dataset.n); press('[data-ninety]', b); read(); }); });
+  weeks.addEventListener('input', read);
+  if (fromAd) { pain = fromAd; press('[data-pains]', $(`[data-p="${fromAd}"]`)); }
+  read();
+
+  const rv = $$('.rv');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    rv.forEach((el) => io.observe(el));
+    const bar = $('[data-stick]'), first = $('.hero .go'), last = $('.end');
+    let past = false, end = false;
+    const show = () => bar.classList.toggle('on', past && !end);
+    new IntersectionObserver(([e]) => { past = !e.isIntersecting && e.boundingClientRect.top < 0; show(); }).observe(first);
+    new IntersectionObserver(([e]) => { end = e.isIntersecting; show(); }, { threshold: 0.05 }).observe(last);
+  } else rv.forEach((el) => el.classList.add('in'));
+})();
+</script>
+</body>
+</html>
