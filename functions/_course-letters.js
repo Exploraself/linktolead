@@ -338,8 +338,8 @@ export const COURSE_LETTERS = [
    "My Day 12 answer"
   ],
   "ps": {
-   "text": "Want to look at your answers together? Book a 1:1 with me in The Boardroom: ",
-   "url": "https://forms.gle/opnxfhFTJJg69Qy77"
+   "text": "Want to look at your answers together? The Boardroom is one 1:1 with me, $27: ",
+   "url": "https://linktolead.exploraself.com/boardroom/"
   }
  },
  {

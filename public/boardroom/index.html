@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>The Boardroom · The Founder’s Blueprint · ExploraSelf</title>
+<meta name="description" content="Levels 04 and 05 and one 1:1 with Alexandru, after Alexandru and the team have read your first three levels. $27, with 14 days to change your mind.">
+<link rel="icon" href="/northstar/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/assets/fonts/atkinson-hyperlegible-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts.css">
+<style>
+/* The Boardroom, for founders who finished the free levels (Alexandru,
+   2 Nov 2026: "where is the Boardroom sales page for those who come for
+   free … incentivise them to go higher … in a psychological manner").
+   Light and white, Atkinson Hyperlegible, one thing at a time (AGENTS.md
+   11). Every promise here is what the step really opens (rules 6 and 19):
+   Levels 04–05 at once, one 1:1, the 14-day money back. No invented
+   counts, quotes or scarcity. One button, repeated: /pay/?step=session. */
+:root{--bg:#FFFFFF;--soft:#F6F4EF;--ink:#16130E;--muted:#5E574C;--line:#E7E1D6;--gold:#B4975F;--gold-ink:#6E5213;--deep:#2A2117;
+  --f:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--f);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,p{margin:0}
+a{color:var(--gold-ink)}
+:focus-visible{outline:2.5px solid var(--gold);outline-offset:3px;border-radius:6px}
+.bar{border-bottom:1px solid var(--line)}
+.bar .in{max-width:720px;margin:0 auto;padding:0 18px;min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:9px;font-size:12.5px;letter-spacing:.16em;font-weight:700;color:var(--ink);text-decoration:none}
+.brand svg{width:22px;height:22px;color:var(--gold-ink)}
+.back{font-size:15px;font-weight:700;text-decoration:none}
+main{max-width:720px;margin:0 auto;padding:34px 18px 80px}
+section{margin-top:46px}
+section:first-child{margin-top:0}
+.eb{display:flex;align-items:center;gap:8px;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--gold-ink)}
+.eb svg{width:18px;height:18px;flex:none}
+h1{margin-top:10px;font-size:clamp(31px,7vw,46px);line-height:1.12;font-weight:700;letter-spacing:-.01em}
+h2{font-size:clamp(24px,5vw,31px);line-height:1.2;font-weight:700;margin-top:8px}
+.lede{margin-top:14px;font-size:19px;color:var(--muted);max-width:58ch}
+.go{display:flex;align-items:center;justify-content:center;gap:10px;min-height:58px;padding:0 24px;border-radius:14px;background:var(--ink);color:#fff;font:700 18px/1.2 var(--f);text-decoration:none;width:100%;max-width:420px}
+.go:hover{background:#2B251C}
+.go svg{width:20px;height:20px}
+.under{margin-top:10px;font-size:14.5px;color:var(--muted)}
+.cta{margin-top:24px}
+.quote{margin-top:22px;border-left:3px solid var(--gold);padding:4px 0 4px 18px;font-size:19px;line-height:1.55}
+.quote cite{display:block;margin-top:8px;font-size:14px;font-style:normal;color:var(--muted)}
+.pains{margin-top:16px;display:grid;gap:10px}
+.pain{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding:14px 16px;background:var(--soft);border-radius:14px}
+.pain svg{width:22px;height:22px;color:var(--gold-ink);margin-top:2px}
+.steps{margin-top:18px;display:grid;gap:0;counter-reset:s;border-left:2px solid var(--line);padding-left:22px}
+.st{position:relative;padding:0 0 20px}
+.st::before{counter-increment:s;content:counter(s);position:absolute;left:-36px;top:-1px;width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-size:14px;font-weight:700;display:grid;place-items:center}
+.st b{display:block}
+.st p{color:var(--muted);font-size:16px}
+.have{margin-top:16px;display:grid;gap:12px}
+.lvl{border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.lvl small{display:block;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--gold-ink)}
+.lvl b{display:block;font-size:19px;margin-top:2px}
+.lvl p{margin-top:6px}
+.lvl .by{font-size:14px;color:var(--muted);margin-top:8px}
+.price{margin-top:16px;display:grid;grid-template-columns:auto 1fr;gap:6px 18px;align-items:center;padding:20px;border-radius:18px;background:var(--deep);color:#F5EFE3}
+.price .n{font-size:46px;font-weight:700;line-height:1}
+.price p{color:#D9CDB6}
+.price .g{grid-column:1/-1;display:flex;gap:10px;align-items:flex-start;border-top:1px solid #4A3C2B;padding-top:14px;margin-top:6px}
+.price .g svg{width:22px;height:22px;flex:none;color:#D9B45E;margin-top:2px}
+.ladder{margin-top:16px;display:grid;gap:10px}
+.rung{display:grid;grid-template-columns:1fr auto;gap:4px 14px;border:1px solid var(--line);border-radius:16px;padding:14px 16px;align-items:start}
+.rung b{font-size:17px}
+.rung .p{font-weight:700;font-size:17px;white-space:nowrap}
+.rung p{grid-column:1/-1;font-size:15.5px;color:var(--muted)}
+.rung .fit{grid-column:1/-1;font-size:14.5px;color:var(--ink)}
+.rung.here{border:2px solid var(--gold);background:#FBF7EE}
+.rung.here .tag{display:inline-block;margin-left:8px;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--gold-ink)}
+.rung a{grid-column:1/-1;font-weight:700;font-size:15.5px}
+.told{margin-top:16px;display:grid;gap:10px}
+.tc{border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;padding:12px 16px}
+.tc small{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--gold-ink)}
+.tc b{display:block;font-size:18px;margin-top:2px}
+.tc span{display:block;font-size:14.5px;color:var(--muted);margin-top:2px}
+.ask{margin-top:16px;padding:18px;border-radius:16px;background:var(--soft);display:grid;gap:12px}
+.slide{display:flex;align-items:center;gap:14px}
+.slide input{flex:1;accent-color:var(--gold-ink);height:32px}
+.slide output{min-width:84px;text-align:right;font-weight:700;font-size:18px}
+.taps{display:flex;flex-wrap:wrap;gap:8px}
+.taps button{appearance:none;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:10px 16px;font:700 15.5px var(--f);color:var(--ink);cursor:pointer;min-height:44px}
+.taps button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff}
+.mirror{font-size:18px;line-height:1.5;min-height:1em}
+.mirror b{color:var(--gold-ink)}
+.future{margin-top:14px;display:grid;gap:12px;font-size:18px;line-height:1.6;padding:20px;border-radius:16px;background:linear-gradient(180deg,#FBF7EE,#fff);border:1px solid var(--line)}
+.future .far{border-top:1px solid var(--line);padding-top:12px}
+.stack{margin-top:14px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.stack div{display:grid;grid-template-columns:1fr auto;gap:14px;padding:12px 16px;border-bottom:1px solid var(--line);align-items:center}
+.stack div b{color:var(--gold-ink)}
+.stack .tot{background:var(--deep);color:#F5EFE3;border-bottom:0}
+.stack .tot b{color:#F5EFE3;font-size:26px}
+.faq{margin-top:12px;border-top:1px solid var(--line)}
+.faq details{border-bottom:1px solid var(--line);padding:14px 2px}
+.faq summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.faq summary::after{content:"+";color:var(--gold-ink);font-size:22px;line-height:1}
+.faq details[open] summary::after{content:"−"}
+.faq p{margin-top:8px;color:var(--muted)}
+.end{margin-top:52px;padding:26px 22px;border-radius:20px;background:var(--soft);text-align:left}
+.end h2{margin-top:0}
+.end .cta{margin-top:18px}
+@media (prefers-reduced-motion:no-preference){.go{transition:background .2s ease}}
+</style>
+</head>
+<body>
+<header class="bar"><div class="in">
+  <a class="brand" href="/ground-plan/#home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2.5 21.5 12 12 21.5 2.5 12Z"/><path d="m12 5.7 2 4.3 4.3 2-4.3 2-2 4.3-2-4.3-4.3-2 4.3-2Z" fill="currentColor" stroke="none"/></svg>EXPLORASELF</a>
+  <a class="back" href="/ground-plan/#home">← My Base Camp</a>
+</div></header>
+<main>
+
+<section aria-labelledby="h-top">
+  <p class="eb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="11" rx="2"/><path d="M7 9V6a5 5 0 0 1 10 0v3"/></svg>The Boardroom · Levels 04 and 05</p>
+  <h1 id="h-top" data-h>The future you is already in this room.</h1>
+  <p class="lede">You have done the free part, and you have seen things. Now comes the part a page cannot do alone: Alexandru and the team read what you wrote, and you sit down with Alexandru. One hour that turns what you saw into what you do.</p>
+  <div class="cta"><a class="go" href="/pay/?step=session">Unlock The Boardroom · $27 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    <p class="under">Levels 04 and 05 open the moment you pay · one hour 1:1 with Alexandru · 14 days money back</p></div>
+</section>
+
+<!-- Triangulation: three things the founder already told us, read from their
+     own account (never invented). Shown only when there is something to show. -->
+<section aria-labelledby="h-told" data-told hidden>
+  <p class="eb">What you told us</p>
+  <h2 id="h-told">Your own answers. One direction.</h2>
+  <div class="told" data-cards></div>
+  <p class="lede" style="font-size:17px" data-read></p>
+</section>
+
+<section aria-labelledby="h-look">
+  <p class="eb">Twenty honest seconds</p>
+  <h2 id="h-look">Look at it straight.</h2>
+  <div class="ask">
+    <label for="weeks"><b>How many weeks has the same thing been on your mind, unsolved?</b></label>
+    <div class="slide"><input id="weeks" type="range" min="1" max="52" value="8" data-weeks aria-describedby="weeks-out"><output id="weeks-out" data-weeks-out>8 weeks</output></div>
+    <p class="q2"><b>If nothing changes, where are you in 90 days?</b></p>
+    <div class="taps" role="group" aria-label="If nothing changes, where are you in 90 days?">
+      <button type="button" data-pick="0">In the same place</button>
+      <button type="button" data-pick="1">Further behind</button>
+      <button type="button" data-pick="2">I honestly don’t know</button>
+    </div>
+    <p class="mirror" data-mirror role="status"></p>
+  </div>
+</section>
+
+<section aria-labelledby="h-why">
+  <p class="eb">The elephant in the room</p>
+  <h2 id="h-why">Knowing is not yet doing.</h2>
+  <div class="pains">
+    <div class="pain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><p>Under pressure, the old habit comes back first.</p></div>
+    <div class="pain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg><p>A plan that lives only in your head is gone by Tuesday afternoon.</p></div>
+    <div class="pain"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/></svg><p>A page cannot see what you cannot see about yourself. A mentor can, and holds you to your word.</p></div>
+  </div>
+  <blockquote class="quote">“The person who decides calmly, asks plainly and keeps their word is not someone else. It is you, a few weeks of practice from here.”<cite>Alexandru Cojocari, from the welcome to Level 04</cite></blockquote>
+</section>
+
+<section aria-labelledby="h-future">
+  <p class="eb">Picture it</p>
+  <h2 id="h-future">It is <span data-sun1>Sunday, two weeks from now</span>.</h2>
+  <div class="future">
+    <p>You kept one if–then plan all week, even on the bad day. You asked one person for something clearly, with a date. You know what your hour is worth, and a selling hour sits in your calendar every week.</p>
+    <p>A week later, you hold a dated proof of who you are becoming, one number you read without flinching, and three clients telling you, in their own words, why they buy.</p>
+    <p class="far">And on <b data-sun12>the Sunday twelve weeks from now</b>, you check the one thing that tells you it worked<span data-win></span>.</p>
+  </div>
+  <p class="under">These are the promises of Levels 04 and 05, word for word, written as things that happened.</p>
+</section>
+
+<section aria-labelledby="h-how">
+  <p class="eb">What happens when you join</p>
+  <h2 id="h-how">Four steps, nothing to wait for.</h2>
+  <div class="steps">
+    <div class="st"><b>You pay $27.</b><p>Levels 04 and 05 open at once, in your Base Camp.</p></div>
+    <div class="st"><b>Alexandru and the team read your first three levels.</b><p>Before you speak, so the hour is spent on you, not on catching up.</p></div>
+    <div class="st"><b>You choose a time for your 1:1.</b><p>Online, one hour, on a Tuesday, Wednesday or Thursday afternoon.</p></div>
+    <div class="st"><b>You leave knowing which of the four areas is costing you most, and why.</b><p>With Levels 04 and 05 opened and walked through, not handed over cold.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-value">
+  <p class="eb">What $27 holds</p>
+  <h2 id="h-value">The same hour sits inside The Summit.</h2>
+  <div class="stack">
+    <div><span>Your first three levels, read by Alexandru and the team before you speak</span><b>✓</b></div>
+    <div><span>One hour, 1:1, with Alexandru</span><b>✓</b></div>
+    <div><span>Level 04 and Level 05, open at once: forty practical actions, twenty a level</span><b>✓</b></div>
+    <div><span>A reading of your first five weeks, at the end of Level 05</span><b>✓</b></div>
+    <div><span>14 days to change your mind, money back</span><b>✓</b></div>
+    <div class="tot"><span>The weekly 1:1 with Alexandru is the heart of The Summit, at $1,989. Here you get the first hour.</span><b>$27</b></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-now">
+  <p class="eb">Why this week</p>
+  <h2 id="h-now">Three honest reasons not to wait.</h2>
+  <div class="have">
+    <div class="lvl"><small>Your answers are fresh</small><p>What you wrote in the first three levels is still alive in you. The longer the gap, the more the old habit takes the week back.</p></div>
+    <div class="lvl"><small>The hours are few</small><p>Alexandru takes Boardroom calls on three afternoons a week: Tuesday, Wednesday and Thursday. Join this week, speak next week.</p></div>
+    <div class="lvl"><small>The cost of waiting is yours</small><p data-cost>Every week the same thing stays unsolved is a week your business pays for it. The Boardroom is one hour and $27.</p></div>
+  </div>
+  <div class="cta"><a class="go" href="/pay/?step=session">Unlock The Boardroom · $27 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    <p class="under">If The Boardroom isn’t for you, write to us within 14 days and you get your $27 back.</p></div>
+</section>
+
+<section aria-labelledby="h-climb">
+  <p class="eb">The whole climb</p>
+  <h2 id="h-climb">Start here, or start higher.</h2>
+  <p class="lede" style="font-size:17px">Each step includes every step below it. Pick the one that fits the size of your business today.</p>
+  <div class="ladder">
+    <div class="rung here"><b>The Boardroom<span class="tag">You are here</span></b><span class="p">$27</span><p>Levels 04–05, open at once · one hour 1:1 with Alexandru</p><p class="fit">Fits if you have an idea or your first clients, and want to see clearly before you spend more.</p></div>
+    <div class="rung"><b>Personal Leadership LAB</b><span class="p">$97</span><p>Up to Level 09, in your own time · two 1:1 sessions in total</p><p class="fit">Fits if you sell alone and everything still runs through you.</p><a href="/pay/?step=lab">Start with the LAB · $97 →</a></div>
+    <div class="rung"><b>Business Growth HUB</b><span class="p">$750</span><p>All 12 levels, open at once · three 1:1 sessions in total</p><p class="fit">Fits if you have a team, a payroll, and decisions that move other people’s salaries.</p><a href="/pay/?step=hub">Go to the HUB · $750 →</a></div>
+    <div class="rung"><b>The Summit</b><span class="p">$1,989</span><p>All 12 levels, open at once · Alexandru every week, 45 minutes, online</p><p class="fit">Fits if you want a mentor at your side every week while you build.</p><a href="/northstar/summit/">See The Summit →</a></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-faq">
+  <p class="eb">Before you decide</p>
+  <h2 id="h-faq">Plain answers.</h2>
+  <div class="faq">
+    <details><summary>Do I lose my answers from the free levels?</summary><p>No. Everything you wrote stays in your account. That is what Alexandru and the team read before your 1:1.</p></details>
+    <details><summary>When do Levels 04 and 05 open?</summary><p>The moment Stripe confirms your payment. You also get an email that says so, with your receipt.</p></details>
+    <details><summary>How does the 1:1 work?</summary><p>Online, one hour, with Alexandru, on a Tuesday, Wednesday or Thursday afternoon (Rome time). You choose the time after you pay.</p></details>
+    <details><summary>What if I haven’t finished the free levels?</summary><p>Finish them first: the hour is built on what you wrote. You can join now and take your time.</p></details>
+    <details><summary>Can I go higher later?</summary><p>Yes, any time, from your Base Camp. Each step includes the ones below.</p></details>
+    <details><summary>What if it isn’t for me?</summary><p>Write to us within 14 days and you get your $27 back.</p></details>
+  </div>
+</section>
+
+<section class="end" aria-labelledby="h-end">
+  <h2 id="h-end" data-end>You started this. Let’s finish the first chapter together.</h2>
+  <div class="cta"><a class="go" href="/pay/?step=session">Unlock The Boardroom · $27 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    <p class="under">Alexandru and the team are here for you. Questions first? <a href="/ground-plan/#ask">Ask Alexandru</a>.</p></div>
+</section>
+
+</main>
+<script type="module">
+  // Everything here is read from the founder's own account and their taps on
+  // this page. Nothing is sent. Without an account the page stays general.
+  import * as A from '/account.js';
+  import { WELCOME4, WHERE4, whereOf } from '/levels-v4.js';
+  import { DOMAINS } from '/content.js';
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const sunday = (weeks) => { const d = new Date(); d.setDate(d.getDate() + ((7 - d.getDay()) % 7 || 7) + (weeks - 1) * 7); return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }); };
+  $('[data-sun1]').textContent = sunday(2);
+  $('[data-sun12]').textContent = sunday(12);
+  let stop = '', first = '';
+  const asks = (WELCOME4[0] && WELCOME4[0].asks) || [];
+  const STOPS = (asks.find((q) => q.k === 'stops') || {}).o || [];
+  const WALK = (asks.find((q) => q.k === 'walk') || {}).o || [];
+  const WIN = (WHERE4.find((q) => q.k === 'win') || {}).o || [];
+  // The mirror: their weeks and their 90 days, said back plainly.
+  let weeks = 8, pick = -1;
+  function mirror() {
+    const w = `${weeks} ${weeks === 1 ? 'week' : 'weeks'}`;
+    $('[data-weeks-out]').textContent = w;
+    if (pick < 0) { $('[data-mirror]').innerHTML = ''; return; }
+    const tail = ['the same place, with the same thing still on your mind', 'further behind, with the same thing still on your mind', 'somewhere you can’t see from here: that is the problem a mentor solves'][pick];
+    $('[data-mirror]').innerHTML = `<b>${esc(w)}</b> already${stop ? `, mostly “${esc(stop.toLowerCase())}”` : ''}. If nothing changes, in 90 days you are in ${tail}. One hour this week can change the next ninety days.`;
+    $('[data-cost]').textContent = `You said ${w}. Every week the same thing stays unsolved is a week your business pays for it. The Boardroom is one hour and $27.`;
+  }
+  $('[data-weeks]').addEventListener('input', (e) => { weeks = Number(e.target.value); mirror(); });
+  document.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
+    pick = Number(b.dataset.pick); document.querySelectorAll('[data-pick]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); mirror();
+  }));
+  if (A.joined()) A.pull().then((r) => {
+    if (!r || !r.me) return;
+    first = String(r.me.name || '').trim().split(/\s+/)[0];
+    if (first) { $('[data-h]').textContent = `${first}, the future you is already in this room.`; $('[data-end]').textContent = `${first}, you started this. Let’s finish the first chapter together.`; }
+    const work = r.work || {}, where = whereOf(work);
+    const v = (k) => work[`w.v4.1.w.${k}`];
+    const cards = [];
+    if (v('stops') != null && STOPS[Number(v('stops'))]) { stop = STOPS[Number(v('stops'))]; cards.push(['In Level 01', 'What stops you most', stop]); }
+    if (v('use') != null && v('use') !== '') { const u = Number(v('use')); cards.push(['In Level 01', 'What you use of this business today', `About ${u}%`, `${100 - u}% is still in the room, unused.`]); }
+    const thin = DOMAINS.find((d) => d.k === r.me.thin);
+    if (thin) cards.push(['In your North Star', 'The area that holds you back most', thin.n, thin.line]);
+    if (v('walk') != null && WALK[Number(v('walk'))]) cards.push(['In Level 01', 'Who walks the path with you', WALK[Number(v('walk'))]]);
+    if (typeof where.win === 'number' && WIN[where.win]) $('[data-win]').textContent = `, the one you chose yourself: “${WIN[where.win].toLowerCase()}”`;
+    if (cards.length >= 2) {
+      $('[data-cards]').innerHTML = cards.slice(0, 4).map(([w, l, b, s]) => `<div class="tc"><small>${esc(w)} · ${esc(l)}</small><b>${esc(b)}</b>${s ? `<span>${esc(s)}</span>` : ''}</div>`).join('');
+      $('[data-read]').textContent = 'Put side by side, your own answers point one way: you have done the seeing. What is missing is someone who reads them with you, at the size of your business, and holds you to your word. That is The Boardroom.';
+      $('[data-told]').hidden = false;
+    }
+    mirror();
+  }).catch(() => {});
+</script>
+</body>
+</html>

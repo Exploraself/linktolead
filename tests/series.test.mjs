@@ -46,8 +46,8 @@ for (const L of SERIES_LETTERS) {
 const P = Object.fromEntries(PARSED.map((p) => [p.id, p]));
 ok(P['alone-1'].paras.filter((x) => typeof x !== 'string').length === 1 && P['alone-1'].paras.find((x) => x.button).button === 'Open Level 01 →' && P['alone-1'].paras.find((x) => x.button).path === '/ground-plan/#programme', 'the button: label and a path on this site');
 ok(P['alone-1'].ask.join('|') === 'My task and my person|I’m stuck on this step. Can you help?', 'the one-tap questions');
-ok(P['level3-1'].paras.some((x) => typeof x !== 'string' && x.url === 'https://forms.gle/opnxfhFTJJg69Qy77'), 'a button off this site keeps its address');
-ok(P['alone-4'].ps.some((x) => x.url === 'https://forms.gle/opnxfhFTJJg69Qy77') && typeof P['alone-4'].ps.at(-1) === 'string' && P['alone-4'].ps.at(-1).startsWith(' If now isn’t the time'), 'the $27 P.S.: text, the booking link, text after it');
+ok(P['level3-1'].paras.some((x) => typeof x !== 'string' && x.button === 'See what the hour holds →' && x.path === '/boardroom/'), 'the Boardroom button: a path on this site');
+ok(P['alone-4'].ps.some((x) => x.path === '/boardroom/') && typeof P['alone-4'].ps.at(-1) === 'string' && P['alone-4'].ps.at(-1).startsWith(' If now isn’t the time'), 'the $27 P.S.: text, the Boardroom page, text after it');
 ok(PARSED.filter((p) => p.paid).map((p) => p.id).every((id) => /-4$/.test(id)) && PARSED.filter((p) => p.paid).length === 8, 'the paid Boardroom only in each pain’s letter 4');
 ok(PARSED.every((p) => GOOD_WORDS[p.seed]), 'each letter keeps its good word and its three free assessments');
 ok(PARSED.filter((p) => p.exact).map((p) => p.id).sort().join() === ['alone-2', 'never-1', ...SERIES_GROUPS.filter((g) => g.kind === 'pain').map((g) => `${g.id}-4`)].sort().join(), 'the letters that count the days: every letter 4, alone-2, never-1');
