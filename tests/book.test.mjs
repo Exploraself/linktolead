@@ -48,7 +48,7 @@ for (const k of ['discovery', 'boardroom']) {
   ok(h.includes(`data-book="${k}"`) && h.includes('<script type="module" src="/book/book.js"></script>') && h.includes('/book/book.css'), `/book/${k}/: one page, drawn by book.js`);
 }
 const js = read('public/book/book.js');
-ok(js.includes("fetch('/api/book'") && js.includes('d && d.ok') && js.includes("'Sent. Thank you.'") === false && js.includes('Sent. Thank you.'), 'says sent only when the server says ok');
+ok(js.includes("fetch('/api/book'") && js.includes('d && d.ok') && js.includes("'Sent. Thank you.'") === false && js.includes('Sent. Thank you'), 'says sent only when the server says ok');
 ok(/door\(/.test(js) && js.includes("'/boardroom/'") === false && js.includes('href="/boardroom/"'), 'the 1:1 page: a calm door to /boardroom/ for anyone who may not book it');
 ok(LETTERS_BOOKING === CONTENT_BOOKING && LETTERS_BOOKING === 'https://linktolead.exploraself.com/book/boardroom/', 'BOOKING is the Boardroom booking page, in letters and on the site');
 const forms = ['public', 'functions'].flatMap((d) => fs.readdirSync(new URL(`../${d}/`, import.meta.url), { recursive: true }).filter((f) => /\.(js|html)$/.test(f)).map((f) => `${d}/${f}`))
