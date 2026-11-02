@@ -11,7 +11,7 @@ import { fakeD1, fakeResend, post, get, tally } from './_d1.mjs';
 const { ok, done } = tally('team');
 
 // ── The rule ─────────────────────────────────────────────────────────────────
-ok(TEAM.includes('alex@exploraself.com'), 'Alexandru’s address is on the team');
+ok(TEAM.includes('alex@exploraself.com') && TEAM.includes('sales@exploraself.com'), 'Alexandru’s two addresses are on the team');
 ok(isTeam('Alex@ExploraSelf.com ', {}), 'matched without case or spaces');
 ok(!isTeam('', {}) && !isTeam(null, {}) && !isTeam('someone@example.com', {}), 'no email, or anyone else: not the team');
 ok(isTeam('test@example.com', { TEAM_EMAILS: 'a@b.co, Test@Example.com' }) && !isTeam('test@example.com', {}), 'more addresses from TEAM_EMAILS in the Pages settings');
