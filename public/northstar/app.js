@@ -1516,10 +1516,12 @@
    * their shape as a constellation, what they lead for, the next summit, and
    * at the bottom the link and their mentor. Downloads as an image, or opens
    * the phone's share sheet. ── */
-  const ARCH = [['The Steady Compass', 'Knows why, and keeps going when it gets hard.'],
-    ['The Trusted Captain', 'People follow, because they are trusted to lead.'],
-    ['The Quiet Builder', 'Builds what lasts, one honest number at a time.'],
-    ['The Voice People Find', 'Speaks so clearly the right people come looking.']];
+  // The card takes the name of the founder's strongest domain: one practical
+  // star per domain (Alexandru, 2 Nov 2026). The line under it stays.
+  const ARCH = [['The Steady Star', 'Knows why, and keeps going when it gets hard.'],
+    ['The Team Star', 'People follow, because they are trusted to lead.'],
+    ['The Numbers Star', 'Builds what lasts, one honest number at a time.'],
+    ['The Market Star', 'Speaks so clearly the right people come looking.']];
   let LOGO = '';
   try { fetch('/northstar/assets/logo.webp').then((r) => (r.ok ? r.blob() : null)).then((b) => b && new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); }))
     .then((d) => { if (d) { LOGO = d; cache['s-save'] = null; if (typeof render === 'function') render(); } }).catch(() => {}); } catch { /* no logo: the card still works */ }
