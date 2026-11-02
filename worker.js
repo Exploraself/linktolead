@@ -29,6 +29,7 @@ import * as login from './functions/api/login.js';
 import * as password from './functions/api/password.js';
 import * as messages from './functions/api/messages.js';
 import * as library from './functions/api/library.js';
+import * as workbook from './functions/api/workbook.js';
 import * as stage from './functions/api/stage.js';
 import * as thread from './functions/api/thread.js';
 import * as letters from './functions/api/letters.js';
@@ -68,6 +69,7 @@ export const ROUTES = {
   '/api/password': password,
   '/api/messages': messages,
   '/api/library': library,
+  '/api/workbook': workbook,
   '/api/stage': stage,
   '/api/thread': thread,
   '/api/letters': letters,

@@ -223,3 +223,5 @@ export const threadRead = () => post('/api/thread', { token: token() });
 
 /** A library download, through the account so it is counted. */
 export const libraryHref = (item) => `/api/library?item=${encodeURIComponent(item)}&t=${encodeURIComponent(token())}`;
+/** The LAB workbook (functions/api/workbook.js): only for The LAB, The HUB and The Summit. */
+export const workbookHref = () => `/api/workbook?t=${encodeURIComponent(token())}`;

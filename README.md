@@ -151,6 +151,12 @@ Library downloads go through `/api/library?item=<key>`: signed-in only, logged,
 and tagged once per book in Mailchimp as `Library - <book>` (API mode). `/mentor`
 lists them per founder, filters the roster by them and puts them in the CSV.
 
+The LAB workbook goes through `/api/workbook`: only for The LAB, The HUB and
+The Summit (anyone else is sent to `/pay/?step=lab`), logged as
+`workbook-download`, served from the private R2 bucket bound as `WORKBOOKS`.
+The PDF is paid content and never sits in this public repo. Base Camp shows
+“Download your workbook” only on those steps.
+
 ### Mailchimp, in three modes
 
 - **Test** (`MAILCHIMP_MODE` = `test`): nothing leaves; `/mentor` shows what would have been sent.
