@@ -79,7 +79,10 @@ ok(V.stepsOf(1).filter((s) => s[1] === 'day').every((s) => ['day', 'when', 'on']
 ok(V.firstOf({}, 1) === 0 && V.firstOf({}, 2) === 0, 'a new level opens on its first question');
 const full = { ...w };
 for (const x of L) for (let d = 0; d < 4; d++) { full[V.wkey(x.n, d, 'sure')] = '70'; full[V.wkey(x.n, d, 'got')] = '0'; }
-for (const n of [5, 9, 12]) { full[V.wkey(n, 'r', 'carry')] = '1.0'; full[V.wkey(n, 'r', 'on')] = 'Monday'; full[V.wkey(n, 'b', 'day')] = 'Friday'; }
+for (const n of [5, 9, 12]) { full[V.wkey(n, 'r', 'carry')] = '1.0'; full[V.wkey(n, 'r', 'on')] = 'Monday'; full[V.wkey(n, 'r', 'dir')] = 'kept 2026-11-02'; full[V.wkey(n, 'b', 'day')] = 'Friday'; }
+// Your direction, again (Alexandru, 2 Nov 2026): after each chapter reading, before Build it.
+ok([5, 9, 12].every((n) => { const S = V.stepsOf(n).map((s) => s[1]); return S.indexOf('dirlook') === S.indexOf('carryday') + 1 && S.indexOf('dirlook') < S.indexOf('bpage'); }) && !V.stepsOf(4).some((s) => s[1] === 'dirlook'), 'the direction, read again after Levels 05, 09 and 12, and only there');
+ok(!V.stepDone({}, 5, [-1, 'dirlook']) && V.stepDone({ [V.wkey(5, 'r', 'dir')]: 'kept 2026-11-02' }, 5, [-1, 'dirlook']), 'done once the founder says it holds or opens it');
 for (const [k, v] of Object.entries({ task: 'invoices', when: 'Friday', s1: 'a', s2: 'b', s3: 'c', who: 'Marta' })) full[V.wkey(5, 'b', k)] = v;
 full[V.wkey(9, 'b', 'who')] = 'Marta'; full[V.wkey(12, 'b', 'no')] = 'new projects'; full[V.wkey(12, 'b', 'life')] = 'Sunday afternoons';
 ok(L.every((x) => V.stepsOf(x.n)[V.firstOf(full, x.n)][1] === 'week'), 'a level fully answered opens on its week');

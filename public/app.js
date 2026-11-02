@@ -696,7 +696,7 @@ function fmWhere(d, kind) {
     const mine = steps().map((s, i) => [s, i]).filter(([s]) => s[0] === d && s[1] !== 'got');
     return `${esc(LEAD[DOMS[d]])} · ${mine.findIndex(([, i]) => i === qi) + 1} of ${mine.length}`;
   }
-  return kind === 'week' ? 'Your week' : kind[0] === 'b' ? 'Build it' : 'Your chapter reading';
+  return kind === 'week' ? 'Your week' : kind === 'dirlook' ? 'Your direction, again' : kind[0] === 'b' ? 'Build it' : 'Your chapter reading';
 }
 /** Everything behind the layer is set aside, so Tab stays inside it. */
 const FM_BEHIND = ['body > .top', 'body > .skip', 'body > .foot', '.leaf-l', '#under', '.cw-drawer', '.cw-dveil', '#crown', '.crown-wrap', '#cban', '#libban', '.mp'];
@@ -740,7 +740,7 @@ function fmAuto() {
 function goHTML(st, x) {
   const [d, kind] = stepAt(qi), done = levelDone(st, level), started = done > 0 || qi > 0;
   const at = kind === 'welcome' || kind === 'wask' ? `The elephant in the room: ${elephantName().toLowerCase()}` : kind === 'where' || kind === 'still' || kind === 'you' ? 'Where you are now' : kind === 'got' ? 'Last week’s four actions'
-    : d >= 0 ? LEAD[DOMS[d]] : kind === 'week' ? 'Your week' : kind[0] === 'b' ? 'Build it' : 'Your chapter reading';
+    : d >= 0 ? LEAD[DOMS[d]] : kind === 'week' ? 'Your week' : kind === 'dirlook' ? 'Your direction, again' : kind[0] === 'b' ? 'Build it' : 'Your chapter reading';
   return `<button type="button" class="cw-phone" data-crown="steps" aria-label="Show the four domains of this level">
       <span><i aria-hidden="true"></i>Level ${pad(level)} · ${done} of ${UNITS} done</span><span aria-hidden="true">Domains ▾</span></button>
     <div class="fm-go">
@@ -881,7 +881,7 @@ function keepWhere(k, v) {
  *  with how sure, four lines back; the week as four actions; last week's four
  *  first; the chapter reading and one action carried forward. */
 const KIND = { welcome: 'The elephant in the room', wask: 'The elephant in the room', where: 'Where you are now', you: 'Your version', still: 'Where you are now', got: 'Last week', idea: 'The idea', tap: 'Tap', slide: 'Slide', blank: 'Write once', day: 'The day', done: 'Done when',
-  lines: 'Your four lines', week: 'Your week', reading: 'Chapter reading', carry: 'Carry one forward', carryday: 'Its day',
+  lines: 'Your four lines', week: 'Your week', reading: 'Chapter reading', carry: 'Carry one forward', carryday: 'Its day', dirlook: 'Your direction, again',
   bask: 'Build it', bstep: 'Build it', bday: 'Its day', bpage: 'Your page' };
 /** Inform → Reform → Transform (2 Nov 2026): the replies and checks, drawn
  *  on the screen and again as the founder slides or types. */
@@ -968,6 +968,26 @@ function buildHTML(st, kind, key, ci) {
       <button class="cta" type="button" data-level="${level + 1}">${holds(tierNow(), gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button></div>`
       : `<p class="cw-planner">Twelve weeks, written. <button type="button" class="cw-all" data-go="blueprint">Open your Blueprint</button></p>`}`;
 }
+/** Your direction, again (Alexandru, 2 Nov 2026): after each chapter reading
+ *  (Levels 05, 09, 12) the founder reads My direction with what the chapter
+ *  taught them, and says it still holds or opens it to sharpen it. The
+ *  values stay locked unless changed on purpose; where unsure, ask a
+ *  customer (rule 15). Kept as w.v4.<lv>.r.dir = "kept|edit <date>". */
+const DIR_LOOK = ['mission', 'vision', 'values', 'goalBiz', 'goalLead'];
+function dirLookHTML() {
+  const w = state.work, D = directionOf(w), said = String(w[wkey(level, 'r', 'dir')] || ''), any = DIRECTION4.some((F) => D[F.k]);
+  const head = level === 12 ? 'Twelve levels. <em>Your direction for the next twelve weeks.</em>' : `${level === 5 ? 'Five' : 'Nine'} levels in. <em>Read your direction again.</em>`;
+  const rows = DIR_LOOK.map((k) => DIRECTION4.find((F) => F.k === k)).filter(Boolean).map((F) => `<div><dt>${esc(F.label)}${F.lock ? ' <small>locked in: changed only on purpose</small>' : ''}</dt><dd>${D[F.k] ? esc(D[F.k]) : '<span class="cw-dl-none">Not written yet</span>'}</dd></div>`).join('');
+  return `<h3 class="cw-q" id="cwq">${head}</h3>
+    <p class="cw-hint">${any ? 'Read each line with what you know now. If a customer would not recognise it, sharpen it. Not sure? Ask a customer, not yourself.' : 'Your direction is not written yet. Write it now, with what these levels taught you: who you serve, and what changes for them.'}</p>
+    ${any ? `<dl class="cw-dirl">${rows}</dl>` : ''}
+    <div class="cw-opts" role="group" aria-labelledby="cwq">
+      ${any ? `<button type="button" class="cw-o" data-dirlook="keep" aria-pressed="${said.startsWith('kept')}"><kbd aria-hidden="true">1</kbd><span>It still holds</span></button>` : ''}
+      <button type="button" class="cw-o" data-dirlook="edit" aria-pressed="${said.startsWith('edit')}"><kbd aria-hidden="true">${any ? 2 : 1}</kbd><span>${any ? 'Sharpen it in My direction' : 'Write my direction'}</span></button>
+    </div>
+    ${said ? `<p class="cw-said">${said.startsWith('kept') ? 'You read it again and it still holds' : 'You opened it to sharpen it'}, ${esc(dayOf(said.split(' ')[1] || ''))}.</p>` : ''}`;
+}
+
 /** The chapter reading, after the Version 4 reading: what was done, how good
  *  the estimates were, the beliefs, where the founder began, his words. */
 function readingMore(ci) {
@@ -1124,6 +1144,7 @@ function pageHTML(st, x) {
         <button class="cta" type="button" data-level="${level + 1}">${holds(tierNow(), gateFor(level + 1)) ? `Open level ${pad(level + 1)}` : 'See what opens it'}</button></div>`
         : `<p class="cw-planner">Twelve weeks, written. <button type="button" class="cw-all" data-go="blueprint">Open your Blueprint</button></p>`}`;
   }
+  else if (kind === 'dirlook') body = dirLookHTML();
   else if (kind === 'bask' || kind === 'bstep' || kind === 'bday' || kind === 'bpage') body = buildHTML(st, kind, key, ci);
   const last = qi >= lastStep(), domainEnd = kind === 'lines' && d < 3;
   const nextLabel = kind === 'welcome' ? (key === 3 ? 'Begin →' : 'Next →') : kind === 'you' ? 'That’s me →' : kind === 'lines' ? 'See my week →' : kind === 'week' && ci != null ? 'My chapter reading →' : 'Next ↵';
@@ -1402,8 +1423,10 @@ function dirPane() {
     </form>`;
   }
   const left = DIRECTION4.findIndex((F) => !D[F.k]);
+  const looked = [12, 9, 5].map((lv) => [lv, String(state.work[wkey(lv, 'r', 'dir')] || '')]).find(([, v]) => v);
   return `<h2 class="mb-h2" tabindex="-1">My direction</h2>
     <p class="mb-lead">Written once, in your words, about you and your customers. Every action in This week serves one of your two goals.</p>
+    ${looked ? `<p class="mb-sub">Read again after Level ${pad(looked[0])}, ${esc(dayOf(looked[1].split(' ')[1] || ''))}: ${looked[1].startsWith('kept') ? 'it still held' : 'you opened it to sharpen it'}.</p>` : ''}
     ${left >= 0 ? `<p class="mb-next"><button type="button" class="mb-btn" data-dirat="${left}">${DIRECTION4.some((F) => D[F.k]) ? 'Continue' : 'Start'}: ${esc(DIRECTION4[left].label.toLowerCase())}</button></p>` : ''}
     <dl class="mb-dir">${DIRECTION4.map((F, i) => `<div><dt>${esc(F.label)}${F.lock && D[F.k] ? ` <span class="mb-locked">${MB_LOCK}locked in</span>` : ''}</dt>
       <dd>${D[F.k] ? esc(D[F.k]) : '<span class="mb-not">Not written yet</span>'}</dd>
@@ -2048,6 +2071,17 @@ document.addEventListener('click', (e) => {
     render(); mbFocus(); return;
   }
   if (b.dataset.bptab) { bpTab = b.dataset.bptab; bpDoc = false; bpExample = null; dirAt = null; dirBack = false; render(); mbFocus(`#mb-t-${bpTab}`); return; }
+  // Your direction, again: it still holds (saved, and on), or sharpen it in My direction.
+  if (b.dataset.dirlook) {
+    const edit = b.dataset.dirlook === 'edit';
+    keep4('r', 'dir', `${edit ? 'edit' : 'kept'} ${isoToday()}`);
+    if (!edit) { drawBook(false); const x = document.querySelector('[data-dirlook="keep"]'); if (x) x.focus({ preventScroll: true }); fmAuto(); return; }
+    fmShut();
+    bpDoc = false; bpExample = null; bpTab = 'dir'; dirBack = false;
+    dirAt = DIRECTION4.some((F) => directionOf(state.work)[F.k]) ? -1 : 0;
+    view = 'blueprint'; render(); remember(); window.scrollTo({ top: 0, behavior: 'instant' }); mbFocus();
+    return;
+  }
   if (b.dataset.bpex) {
     if (b.dataset.bpex === '0') { bpExample = null; render(); mbFocus('.mb-h2'); return; }
     import('./blueprint-example.js').then((m) => { bpExample = m.EXAMPLE; bpExampleWho = m.EXAMPLE_WHO; bpTab = 'book'; render(); mbFocus('.bpx-ex'); }).catch(() => {});
@@ -2148,7 +2182,7 @@ document.addEventListener('keydown', (e) => {
   const inPage = t.closest('.leaf-r') || t === document.body;
   if (!inPage || t.closest('.cw-foot, .gain, .gate, .wait')) return;
   // Number keys choose on a tap.
-  if (/^[1-9]$/.test(e.key) && ['wask', 'where', 'you', 'still', 'tap', 'got', 'day', 'carry', 'carryday', 'bday'].includes(stepAt(qi)[1]) && !slideAt(level, stepAt(qi)) && t.tagName !== 'INPUT') {
+  if (/^[1-9]$/.test(e.key) && ['wask', 'where', 'you', 'still', 'tap', 'got', 'day', 'carry', 'carryday', 'dirlook', 'bday'].includes(stepAt(qi)[1]) && !slideAt(level, stepAt(qi)) && t.tagName !== 'INPUT') {
     const b = document.querySelectorAll('.leaf-r .cw-o')[Number(e.key) - 1];
     if (b) { e.preventDefault(); b.click(); }
     return;
