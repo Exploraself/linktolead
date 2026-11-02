@@ -137,7 +137,7 @@ const mailto = (to, q) => `mailto:${to}?subject=${encodeURIComponent(q)}`;
  *   sign    false leaves out the whole close (the notice to the mentor)
  * Returns { html, text, replyTo, fromName } for send().
  */
-export function letter(base, paras, offer = null, { sign = true, mentor, tz = '', at, ask = 'start', seed = 0, intro = false, security = false, founder = true } = {}) {
+export function letter(base, paras, offer = null, { sign = true, mentor, tz = '', at, ask = 'start', seed = 0, intro = false, security = false, founder = true, receipt = false } = {}) {
   const M = asMentor(mentor);
   const pic = (u) => (/^https:\/\//.test(u) ? u : `${base}${u}`);
   const P = paras.map(parts);
@@ -157,10 +157,17 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
   // founder: false (a letter to the team) keeps the signature, the reply
   // line and the farewell, but not the founder's encouragement line or the
   // free assessments.
-  const tests = sign && founder ? threeAssessments(seed) : [];
-  const ps = own ? parts(['P.S. ', ...own.line(base)]) : use && OFFERS[use] ? parts(['P.S. ', ...OFFERS[use].line(base)]) : null;
+  // receipt: true (Alexandru, 2 Nov 2026: "It's unlocked" landed in Gmail's
+  // Promotions tab). The letters that answer something the founder just did
+  // (It's unlocked, sign-in link, reset, password changed, no account yet)
+  // read as a receipt: no assessments, no P.S. offer, no one-tap questions,
+  // the signature in words rather than a picture, the photo kept, and no
+  // unsubscribe header (functions/_mail.js send()). The encouragement line
+  // stays: every letter encourages (his rule), and plain words are not a promotion.
+  const tests = sign && founder && !receipt ? threeAssessments(seed) : [];
+  const ps = receipt ? null : own ? parts(['P.S. ', ...own.line(base)]) : use && OFFERS[use] ? parts(['P.S. ', ...OFFERS[use].line(base)]) : null;
   const good = sign && founder ? GOOD_WORDS[seed % GOOD_WORDS.length] : '';
-  const qs = !sign || ask === null ? [] : Array.isArray(ask) ? ask : (SHORTCUTS[ask] || SHORTCUTS.start);
+  const qs = !sign || ask === null || receipt ? [] : Array.isArray(ask) ? ask : (SHORTCUTS[ask] || SHORTCUTS.start);
   const bye = sign ? farewell(tz, at) : '';
   const replyLine = 'Any question at all, big or small? Just reply to this email. It comes straight to me, and I read every one.';
   const html = `<!doctype html><html><body style="margin:0;background:${PAPER}"><div style="max-width:560px;margin:0 auto;padding:32px 22px;background:${PAPER};font:16px/1.7 Georgia,'Times New Roman',serif;color:${INK}">
@@ -174,7 +181,7 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
     ${bye ? `<p style="margin:0 0 6px">${esc(bye)}</p>` : ''}
     ${sign ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 22px"><tr>
       <td style="vertical-align:middle;padding-right:14px"><img src="${esc(pic(M.photo))}" width="64" height="64" alt="${esc(M.name)}" style="display:block;width:64px;height:64px;border-radius:50%;border:2px solid #B4975F"></td>
-      <td style="vertical-align:middle"><img src="${esc(pic(M.signature))}" width="190" height="53" alt="${esc(M.first)}" style="display:block;margin:0 0 2px;border:0;width:190px;height:auto">
+      <td style="vertical-align:middle">${receipt ? `<p style="margin:0 0 2px;font:italic 22px/1.2 Georgia,'Times New Roman',serif;color:${INK}">${esc(M.first)}</p>` : `<img src="${esc(pic(M.signature))}" width="190" height="53" alt="${esc(M.first)}" style="display:block;margin:0 0 2px;border:0;width:190px;height:auto">`}
       <p style="margin:0;font:13px/1.5 Arial,sans-serif;color:${MUTED}">${esc(M.name)} · ${esc(M.title)}</p></td></tr></table>` : ''}
     ${ps ? `<p style="margin:0;padding-top:14px;border-top:1px dashed #D6C9AC;font-style:italic">${ps.html}</p>` : ''}
     ${tests.length ? `<p style="margin:14px 0 0;font:14px/1.6 Arial,sans-serif;color:${MUTED}">Free assessments, when you want to look deeper: ${tests.map((t) => `<a href="${esc(t.u)}" style="color:${GOLD_INK};text-decoration:underline">${esc(t.n)}</a>`).join(' · ')}</p>` : ''}
@@ -188,7 +195,7 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
     ps ? ps.text : '',
     tests.length ? 'Free assessments, when you want to look deeper:\n' + tests.map((t) => `· ${t.n}: ${t.u}`).join('\n') : '',
   ].filter(Boolean).join('\n\n');
-  return { html, text, replyTo: M.email, fromName: `${M.first} at ExploraSelf` };
+  return { html, text, replyTo: M.email, fromName: `${M.first} at ExploraSelf`, ...(receipt ? { receipt: true } : {}) };
 }
 
 /** A first name as people write it to a friend (Alexandru, 2 Nov 2026: a
@@ -210,6 +217,11 @@ const offerFor = (kind, to, tier, offer) => (offer !== undefined ? offer : 'unsh
 const INTRO = ['launchpad-welcome', 'results'];
 const close = (kind, { mentor, tz, at, to = '' } = {}, ask = 'start') => ({ mentor, tz, at, ask, intro: INTRO.includes(kind), security: ask === 'security',
   seed: seedOf(`${kind}|${to}|${new Date(at || Date.now()).toISOString().slice(0, 10)}`) });
+/** The same close, as a receipt (see letter(): receipt). */
+const asReceipt = (c) => ({ ...c, receipt: true });
+/** Which letters are receipts: they answer something the founder just did.
+ *  The welcomes and every other letter stay as they are. */
+export const RECEIPTS = ['unlocked', 'signin', 'reset', 'password', 'no-account'];
 
 /** "launchpad-welcome": sent once, when the account is made. */
 export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {}) {
@@ -324,14 +336,14 @@ export function signinLetter(base, url, { first, to = '', offer, reset = false, 
     button(url, 'Choose my new password →'),
     'The button works for the next 30 minutes, on your phone or your computer, until you save the new password. If you didn’t ask for this, you can simply ignore it.',
     'Thank you for keeping your account safe.',
-  ], offerFor('signin', to, 'free', offer), close('signin', { ...o, to }, 'security')) };
+  ], offerFor('signin', to, 'free', offer), asReceipt(close('signin', { ...o, to }, 'security'))) };
   return { subject: 'Your link to get back in', ...letter(base, [
     hi(first),
     'Good to see you again. Everything you wrote is right where you left it.',
     button(url, 'Sign me back in →'),
     'The button works for the next 30 minutes, on your phone or your computer.',
     'Thank you for coming back.',
-  ], offerFor('signin', to, 'free', offer), close('signin', { ...o, to }, 'security')) };
+  ], offerFor('signin', to, 'free', offer), asReceipt(close('signin', { ...o, to }, 'security'))) };
 }
 
 /** Someone asked for a sign-in or reset link for an address with no account
@@ -345,7 +357,7 @@ export function noAccountLetter(base, url, { reset = false, to = '', ...o } = {}
     'Making one is free and takes a minute. Your first three levels open straight away.',
     button(url, 'Make my free account →'),
     'If you used another email before, try that one. The team and I are here for you.',
-  ], null, close('no-account', { ...o, to }, 'security')) };
+  ], null, asReceipt(close('no-account', { ...o, to }, 'security'))) };
 }
 
 /** After a password is set, changed or reset. A security letter. */
@@ -355,7 +367,7 @@ export function passwordChangedLetter(base, { first, to = '', offer, ...o } = {}
     'Your password was just changed. If that was you, all is well and there’s nothing else to do.',
     'If it wasn’t, just reply to this email and we’ll lock the account straight away. Your work is safe with us.',
     'Thank you for keeping your account safe.',
-  ], offerFor('password', to, 'free', offer), close('password', { ...o, to }, 'security')) };
+  ], offerFor('password', to, 'free', offer), asReceipt(close('password', { ...o, to }, 'security'))) };
 }
 
 /** A letter from the mentor: their own words, one paragraph per blank line. */
@@ -405,7 +417,7 @@ export function unlockedLetter(base, { first, step, from = 'free', to = '', ...o
     `Now we move forward. Level ${pad2(a)} is waiting for you in your Base Camp.`,
     button(`${base}/ground-plan/#programme-${a}`, `Open Level ${pad2(a)}`),
     'You chose to invest in yourself and your business. That decision is already a step. The team and I are here for you.',
-  ], null, close('unlocked', { ...o, to }, ['How do I book my session?', 'Where should I start?', 'Can I have an invoice?'])) };
+  ], null, asReceipt(close('unlocked', { ...o, to }, ['How do I book my session?', 'Where should I start?', 'Can I have an invoice?']))) };
 }
 
 /** "team-invite": to a new team member, once, when Alexandru adds their
