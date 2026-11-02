@@ -11,7 +11,7 @@
 // "Open their work" is the one-founder view, one(id).
 
 import { STEP_KEYS, STEP_NAMES, STEP_SHORT, GROUPS, LANDING_SHORT, summary, filter, byLanding, groupOf, nextAction, funnel, today, levelSet, levelCount, launchpadDone, crossedOf,
-  told, toldTally, theirWords, SIDES, PAIN_NAMES, WANT_NAMES, VALUE_NAMES, TEAM_NAMES, growthDone, growthGroups, growthWritten, stuckOnSunday, DRAFT_KINDS, KIND_OF, draftLetter, newestWord, topThree } from './dash.js';
+  told, toldTally, theirWords, SIDES, PAIN_NAMES, WANT_NAMES, VALUE_NAMES, TEAM_NAMES, growthDone, growthGroups, growthWritten, stuckOnSunday, DRAFT_KINDS, KIND_OF, draftLetter, newestWord, topThree, seriesInfo } from './dash.js';
 import { LEVELS4, wordOf, briefOf, GOT } from '/levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
@@ -444,6 +444,7 @@ function drawerHTML(s) {
       <dt>Mailchimp</dt><dd>${mcState(s)}</dd>
       <dt>Library</dt><dd>${books ? plural(books, 'book', 'books') + ' taken' : '—'}</dd>
       <dt>Tools</dt><dd>${esc(toolsOf(s)) || '—'}</dd>
+      ${(() => { const L = seriesInfo(s); return L ? `<dt>Pain letters</dt><dd>${esc(L.line)}${L.active || L.held ? ` <button class="ghost" data-hold="${id}" data-v="${L.held ? 0 : 1}">${L.held ? 'Resume letters' : 'Pause letters'}</button>` : ''}</dd>` : ''; })()}
     </dl>
     <div><p class="lbl">Their path</p><ul class="tl" style="margin-top:8px">
       <li>Signed up${land ? ' on ' + esc(land) : ''} <span>· ${esc(day(s.joined_at))}</span></li>
@@ -780,6 +781,12 @@ document.addEventListener('click', async (e) => {
     const r = await act({ action: d.link ? 'signin-link' : 'reset-link', student: id });
     flash = r.ok ? `${d.link ? 'Sign-in' : 'Password reset'} link sent to ${person(id).email}.` : (r.data.error || 'It did not send.');
     return draw();
+  }
+  if (d.hold) {
+    b.disabled = true;
+    const r = await act({ action: 'series-hold', student: d.hold, hold: d.v === '1' });
+    flash = r.ok ? `Letters ${d.v === '1' ? 'paused' : 'resumed'} for ${person(d.hold).email}.` : (r.data.error || 'That did not work.');
+    return load();
   }
   if (d.pause) {
     b.disabled = true;

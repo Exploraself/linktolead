@@ -7,6 +7,7 @@ import { mentorFor, keepTz } from '../_mentor.js';
 import { originOf } from '../_mailchimp.js';
 import { missingOf } from '../_profile.js';
 import { isTeamMember } from '../_team.js';
+import { seriesMode, levelsIn, afterAnswers } from '../_series.js';
 
 async function student(D, token) {
   if (!token || token.length < 20) return null;
@@ -68,7 +69,7 @@ export async function onRequestGet({ request, env }) {
     answers: a, work: w, compass: compass || null });
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   const D = db(env);
   if (!D) return bad('Not configured.', 503);
   let body;
@@ -95,5 +96,14 @@ export async function onRequestPost({ request, env }) {
   }
   stmts.push(D.prepare('UPDATE student SET last_seen_at=? WHERE id=?').bind(stamp, me.id));
   if (stmts.length) await D.batch(stmts);
+  // The letters that follow each pain (functions/_series.js), after the
+  // reply: writing in Level 01 ends the never-started letters; Levels 01–03
+  // all written start the Level 03 ones. The answers are already saved, so
+  // nothing here can cost the founder their work.
+  const levels = seriesMode(env) === 'off' ? null : levelsIn(body.answers, body.work);
+  if (levels && levels.size) {
+    const go = (async () => { await accountTables(D); await afterAnswers(env, D, me.id, levels); })().catch(() => {});
+    if (typeof waitUntil === 'function') waitUntil(go); else await go;
+  }
   return json({ ok: true, saved: stmts.length - 1 });
 }

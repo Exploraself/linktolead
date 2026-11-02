@@ -16,6 +16,7 @@
 
 import { json, bad, db, now, newToken, clean, accountTables } from '../_shared.js';
 import { profile, sendWelcome, SOURCES } from '../_account.js';
+import { afterAccount } from '../_series.js';
 import { keepTz } from '../_mentor.js';
 import { allowed, logged, mailState, origin } from '../_mail.js';
 import { syncFounder } from '../_mailchimp.js';
@@ -82,7 +83,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
     if (typeof waitUntil === 'function') waitUntil(go); else await go;
   }
   if (consent && !p.unsubscribed) {
-    const job = syncFounder(env, D, id, 'join').catch(() => {});
+    // Into the audience, then the letters for a founder who has not started
+    // Level 01 yet (functions/_series.js).
+    const job = (async () => { await syncFounder(env, D, id, 'join').catch(() => {}); await afterAccount(env, D, id, { tz: body.tz }); })().catch(() => {});
     if (typeof waitUntil === 'function') waitUntil(job); else await job;
   }
   return json({ ok: true, token: id, existing: false, me: { first: who.first, last: who.last, email: who.email }, missing: await missingFor(D, id) });

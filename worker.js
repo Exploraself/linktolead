@@ -40,6 +40,7 @@ import * as tools from './functions/api/tools.js';
 import * as course from './functions/api/course.js';
 import * as toolkit from './functions/api/toolkit.js';
 import { sendDue } from './functions/_course.js';
+import { sendDue as sendSeries } from './functions/_series.js';
 import { json, db, accountTables } from './functions/_shared.js';
 
 /** One line per route. A new file in functions/api/ needs its line here. */
@@ -74,10 +75,14 @@ export const ROUTES = {
   '/api/toolkit': toolkit,
 };
 
-/** The jobs the hourly cron runs (wrangler.toml [triggers]). One line per
- *  job; each gets (env, D) and must never throw. Today: the 12-day letters
- *  (functions/_course.js). */
+/** The jobs the hourly cron runs (wrangler.toml [triggers]), in this order.
+ *  One line per job; each gets (env, D) and must never throw. The letters
+ *  that follow each pain (functions/_series.js; nothing while SERIES_MODE is
+ *  off) go first: they keep their own day, and a founder gets at most one
+ *  automatic letter a day, so 12 Days (functions/_course.js), which shifts by
+ *  a day when one is missed, waits for tomorrow. */
 export const JOBS = {
+  'series-letters': (env, D) => sendSeries(env, D),
   'course-letters': (env, D) => sendDue(env, D),
 };
 

@@ -102,6 +102,13 @@ export async function accountTables(D) {
     D.prepare(`CREATE TABLE IF NOT EXISTS course_sub (student_id TEXT NOT NULL, course TEXT NOT NULL, started_at TEXT NOT NULL,
       tz TEXT, day_sent INTEGER NOT NULL DEFAULT -1, last_local TEXT, last_sent_at TEXT, stopped_at TEXT,
       PRIMARY KEY (student_id, course))`),
+    // The letters that follow each pain (functions/_series.js): one row per
+    // series a founder started. step: the next letter's index; last_n and
+    // last_local: the last letter that went; test: enrolled in SERIES_MODE test.
+    D.prepare(`CREATE TABLE IF NOT EXISTS series_sub (student_id TEXT NOT NULL, series TEXT NOT NULL, grp TEXT NOT NULL,
+      started_at TEXT NOT NULL, start_local TEXT NOT NULL, tz TEXT, test INTEGER NOT NULL DEFAULT 0,
+      step INTEGER NOT NULL DEFAULT 0, sent INTEGER NOT NULL DEFAULT 0, last_n INTEGER NOT NULL DEFAULT 0,
+      last_local TEXT, last_sent_at TEXT, stopped_at TEXT, stop_why TEXT, PRIMARY KEY (student_id, series))`),
   ]);
   // The last Mailchimp sync, the step whose tags it carried, and what the
   // sign-up form asked (functions/_profile.js), on the profile. SQLite cannot add a column "if not exists", so an error here only
@@ -117,7 +124,10 @@ export async function accountTables(D) {
       'landing_tag TEXT',
       // When the founder last signed in with Google (functions/api/google.js):
       // Google is their way in, so a full account needs no password.
-      'google_at TEXT']) {
+      'google_at TEXT',
+      // The letters that follow each pain, paused (functions/_series.js):
+      // 'question' (they asked in Ask Alexandru) or 'mentor', until resumed.
+      'series_hold TEXT', 'series_hold_at TEXT']) {
     try { await D.prepare(`ALTER TABLE student_profile ADD COLUMN ${col}`).run(); } catch { /* already there */ }
   }
   // An answer in "Ask Alexandru" is a message that points at the question
@@ -167,4 +177,4 @@ export async function studentBy(D, token) {
 }
 
 /** Every table that holds a row for a student, for a full delete. */
-export const STUDENT_TABLES = ['answer', 'sheet', 'compass', 'note', 'event', 'student_profile', 'signin_code', 'plan_tick', 'growth_word', 'account_auth', 'message', 'mailchimp_log', 'video_comment', 'tool_run', 'course_sub'];
+export const STUDENT_TABLES = ['answer', 'sheet', 'compass', 'note', 'event', 'student_profile', 'signin_code', 'plan_tick', 'growth_word', 'account_auth', 'message', 'mailchimp_log', 'video_comment', 'tool_run', 'course_sub', 'series_sub'];
