@@ -6,6 +6,7 @@
 // seen). Icons tell before the words do (rule 13); the words carry the meaning.
 
 import { token } from '/account.js';
+import { LEVELS4 } from '/levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -16,7 +17,25 @@ const ICON = {
   people: svg('<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c.6-3.3 2.8-5.2 5.5-5.2s4.9 1.9 5.5 5.2"/><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M17.5 14.6c1.6.8 2.6 2.4 3 4.9"/>'),
   lock: svg('<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.8a3.5 3.5 0 0 1 7 0v2.7"/>'),
   check: svg('<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16.5 9.5"/>'),
+  invoice: svg('<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 11h7M9 14.5h7M9 18h4"/>'),
+  refund: svg('<path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/>'),
 };
+/** What a step is, in one line, and the highest level it opens (Alexandru,
+ *  2 Nov 2026: "make it salable and professional"). The levels listed are
+ *  the ones the founder does not have yet, each named in plain words with
+ *  its own promise (AGENTS.md rules 3 and 10). Only what the step really
+ *  opens (rule 19). */
+const SELL = {
+  session: { top: 5, pitch: 'One hour with Alexandru, and the next two levels of your Blueprint.',
+    with: ['One hour with Alexandru, one to one, online', 'Before you meet, Alexandru and the team read your North Star and your first three levels, so the hour starts on your business, not on introductions. You leave with one road, chosen together.'] },
+  lab: { top: 9, pitch: 'Four levels on running the business itself, and your second 1:1 with Alexandru.' },
+  hub: { top: 12, also: 'The LAB is included.', pitch: 'Every level up to Level 12, and three 1:1s with Alexandru in all.' },
+  premium: { top: 12, also: 'The LAB, the HUB and every resource are included.', pitch: 'All twelve levels, and Alexandru with you every week.',
+    with: ['Alexandru with you every week', 'One session for each level: 45 minutes, on Google Meet.'] },
+};
+/** The highest level each step already has open. */
+const HAS = { free: 3, session: 5, lab: 9, hub: 12, premium: 12 };
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const ORDER = ['free', 'session', 'lab', 'hub', 'premium'];
 const pad = (n) => String(n).padStart(2, '0');
 const q = new URLSearchParams(location.search);
@@ -31,17 +50,35 @@ const H = () => ({ 'x-account-token': token(), 'content-type': 'application/json
 
 function draw(html) { $('#pay').innerHTML = html; }
 
-function card(S, step, test) {
+function card(S, step, test, tier) {
+  const X = SELL[step] || {};
+  const from = (HAS[tier] ?? 3) + 1, to = X.top || from;
+  const lv = LEVELS4.filter((L) => L.n >= from && L.n <= to);
+  const full = lv.length <= 4; // a short list carries each level's promise
+  const levels = lv.length ? `<ol class="lv${full ? '' : ' short'}">${lv.map((L) => `<li><span class="n">${pad(L.n)}</span><p><b>${esc(L.title)}</b>${full ? `<small>You come out with: ${esc(L.promise.charAt(0).toLowerCase() + L.promise.slice(1))}</small>` : ''}</p></li>`).join('')}</ol>`
+    : `<p>${esc(cap(S.opens))}.</p>`;
+  const [wh, wt] = X.with || [cap(S.sessions), ''];
   return `<p class="eb">${ICON.open}Unlock your next step</p>
     <h1>${esc(S.name)}</h1>
+    ${X.pitch ? `<p class="pitch">${esc(X.pitch)}</p>` : ''}
     <p class="price">${esc(S.price)}<small>one payment</small></p>
-    <div class="card">
-      <div class="row">${ICON.levels}<p><b>What opens</b>${esc(S.opens.charAt(0).toUpperCase() + S.opens.slice(1))}.</p></div>
-      <div class="row">${ICON.people}<p><b>With it</b>${esc(S.sessions.charAt(0).toUpperCase() + S.sessions.slice(1))}.</p></div>
-    </div>
+    <section class="card">
+      <h2>${ICON.people}With it</h2>
+      <p class="with"><b>${esc(wh)}</b>${wt ? esc(wt) : ''}</p>
+    </section>
+    <section class="card">
+      <h2>${ICON.levels}What opens${lv.length ? ` · ${lv.length === 1 ? 'one level' : `${lv.length} levels`}` : ''}</h2>
+      ${levels}
+      ${X.also ? `<p class="also">${esc(X.also)}</p>` : ''}
+    </section>
     ${test ? '<p class="test"><b>Test mode.</b> No real money moves. On Stripe’s page use the card 4242 4242 4242 4242, any future date and any three numbers.</p>' : ''}
     <button class="go" type="button" id="go" data-step="${esc(step)}">${ICON.lock}Pay ${esc(S.price)} securely</button>
-    <p class="note">You pay on Stripe’s own secure page. Your step opens the moment the payment goes through, and we email you what opened and how to book your session. An invoice comes with every payment. Buying for your business? Tick “I’m purchasing as a business” on Stripe’s page to add the business name and VAT number.</p>
+    <ul class="trust">
+      <li>${ICON.lock}Paid on Stripe’s own secure page</li>
+      <li>${ICON.invoice}An invoice comes with every payment</li>
+      <li>${ICON.refund}Ask for a refund from your Base Camp</li>
+    </ul>
+    <p class="note">Your step opens the moment the payment goes through, and we email you what opened and how to book your session. Buying for your business? Tick “I’m purchasing as a business” on Stripe’s page to add the business name and VAT number.</p>
     <p class="err" id="err" role="alert" hidden></p>`;
 }
 
@@ -85,7 +122,7 @@ async function start() {
       <p class="muted">Nothing to pay. It is waiting in your Base Camp.</p>
       <a class="go" href="/ground-plan/#programme-${S.first}">Open Level ${pad(S.first)}</a>`);
   }
-  draw((q.get('cancelled') ? '<p class="err">No payment was made. When you are ready, it is one tap away.</p>' : '') + card(S, step, info.test));
+  draw((q.get('cancelled') ? '<p class="err">No payment was made. When you are ready, it is one tap away.</p>' : '') + card(S, step, info.test, info.tier || 'free'));
   $('#go').onclick = async (e) => {
     const b = e.currentTarget, err = $('#err');
     b.disabled = true; err.hidden = true;
