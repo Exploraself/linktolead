@@ -1100,7 +1100,7 @@ export const WELCOME4 = [
       ['It is possible', 'Seeing it was the hardest part, and you have done it. From here, what you saw turns into what you do.'],
       ['The puzzle', 'Knowing is not yet doing. Under pressure the old habit comes back first, and a plan that lives only in your head is gone by Tuesday afternoon.'],
       ['Here you are', 'Two levels: what you do, and what it makes of you. The same rhythm: taps, one sentence, four actions. Level 05 closes Start with you with a reading of your first five weeks. Answer every question fully.']] },
-  { lv: [6, 9], where: 'Levels 06 to 09 of 12', h: 'Welcome to Run the business{, first}.', sub: 'The LAB: four levels about the inside of your business, two sessions with Alexandru, and the library.',
+  { lv: [6, 9], where: 'Levels 06 to 09 of 12', h: 'Welcome to Run the business{, first}.', sub: 'The LAB: four levels about the inside of your business, and two sessions with Alexandru.',
     summit: { sub: 'Four levels about the inside of your business, with Alexandru every week.' },
     beats: [
       ['We understand you', 'Too much of your business still waits for you: the conversation you keep postponing, a week that belongs to everyone else, a price you are not sure of, work that stops when you stop.'],
