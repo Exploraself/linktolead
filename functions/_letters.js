@@ -207,19 +207,35 @@ export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {
   ], offerFor('launchpad-welcome', to, tier, offer), close('launchpad-welcome', { ...o, to })) };
 }
 
-/** "tools-welcome": sent once, when the account is made from a free tool
- *  (/runway/, /bottleneck/, /off-switch/, /12-days/, /toolkit/, /tools/).
- *  They came for a tool, so the letter opens the toolkit, not the Launchpad.
- *  `path` is the tool they came from, or the Tools page. */
+/** "tools-welcome": sent once, when the account is made from the Growth
+ *  Toolkit (/runway/, /bottleneck/, /off-switch/, /12-days/, /toolkit/,
+ *  /tools/). They came for a tool, so the letter opens the toolkit, not the
+ *  Launchpad. `path` is the tool they came from, or the Tools page. */
 export function toolsWelcome(base, { first, to = '', tier, offer, path = '/tools/', ...o } = {}) {
   const home = /^\/[a-z0-9-]+\/$/.test(path) ? path : '/tools/';
-  return { subject: 'Your toolkit is open', ...letter(base, [
+  return { subject: 'Your Growth Toolkit is open', ...letter(base, [
     hi(first),
-    'You’re in. Your free toolkit is open, and I’m really glad you’re here.',
+    'You’re in. Your free Growth Toolkit is open, and I’m really glad you’re here.',
     'Each tool reads your own numbers and gives you one move for this week. Start with the one that brought you here.',
-    button(`${base}${home}`, home === '/tools/' ? 'Open my toolkit →' : 'Open my tool →'),
-    ['Every tool is on one page, by the four domains: ', link(`${base}/tools/`), '. When you want the whole picture, The Leader’s North Star is free with the same account.'],
+    button(`${base}${home}`, home === '/tools/' ? 'Open my Growth Toolkit →' : 'Open my tool →'),
+    ['Every tool is on one page, in two lists, Personal leadership and Business: ', link(`${base}/tools/`), '. When you want the whole picture, The Leader’s North Star is free with the same account.'],
   ], offerFor('launchpad-welcome', to, tier, offer), close('launchpad-welcome', { ...o, to })) };
+}
+
+/** "toolkit-code": someone without an account asked to open the Growth
+ *  Toolkit. Their own code, the button that opens it, and a look inside.
+ *  A request letter, so its P.S. is a free gift, never a sale. `tools` is
+ *  [[list name, [tool names]], …] from the Tools page. */
+export function toolkitCodeLetter(base, { first, code, url, tools = [], to = '', ...o } = {}) {
+  return { subject: `Your Growth Toolkit code: ${code}`, ...letter(base, [
+    hi(first),
+    'Of course, no problem. Thank you for asking. Here is your code for the Growth Toolkit:',
+    String(code),
+    button(url, 'Open my Growth Toolkit →'),
+    'The button opens it with your code already in. Or go to the Tools page and type the code when it asks.',
+    ...tools.map(([name, list]) => `${name}: ${list.join(' · ')}.`),
+    'Each tool reads your own numbers and gives you one move for this week. Alexandru and the team are right here if you want help with any of it.',
+  ], 'play', close('signin', { ...o, to }, 'security')) };
 }
 
 /** Sign-ups from a North Star page (/north1/, /north2/, /north3/, the North

@@ -241,6 +241,16 @@ details[data-step] summary::-webkit-details-marker{display:none}
 .incub-link i{font-style:normal;color:#D6BF8F}
 /* The Blueprint keeps its own colours (antique gold) inside the North Star (steel blue). */
 @media (max-width:860px){.incub-link{margin:8px 0 10px;padding:10px 12px}}
+/* The Growth Toolkit, in the North Star's own steel blue (2 Nov 2026). */
+.tk-link{display:flex;align-items:center;gap:10px;margin:10px 0 0;padding:12px;border-radius:10px;text-decoration:none;color:#EEF2F7;background:#132538;border:1px solid rgba(169,192,217,.45)}
+.tk-link:hover{border-color:#A9C0D9}
+.tk-link:focus-visible{outline:2px solid #A9C0D9;outline-offset:3px}
+.tk-link svg{width:24px;height:24px;flex:none;color:#A9C0D9}
+.tk-link span{flex:1;min-width:0;line-height:1.25}
+.tk-link small{display:block;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#A9C0D9;font-weight:520}
+.tk-link b{display:block;font:440 14.5px/1.25 Newsreader,Georgia,serif}
+.tk-link i{font-style:normal;color:#A9C0D9}
+@media (max-width:860px){.tk-link{margin:0 0 10px;padding:10px 12px}}
 
 /* The top bar stays at the top while you scroll (30 Oct). */
 .topwrap{position:sticky;top:20px;z-index:25}

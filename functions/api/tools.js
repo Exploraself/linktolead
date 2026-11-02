@@ -21,6 +21,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (!me) return bad('Sign in first.', 401);
   const tool = clean(body.tool, 30);
   if (!isTool(tool) || tool === '12-days') return bad('There is no such tool.', 404);
+  if (tool === 'teleprompter' && body.step !== 'open') return bad('The teleprompter keeps your scripts on your device.');
   if (body.step === 'open') {
     await opened(env, D, me.id, tool, waitUntil);
     return json({ ok: true });

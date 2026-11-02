@@ -1,4 +1,5 @@
-/* /12-days/: start "12 Days to Start Winning" with a full free account
+/* /12-days/: start "12 Days to Start Winning" with a free account (the
+ * letters need one; a toolkit code alone is not enough)
  * (public/tools/gate.js), see which day you are on, or stop the letters.
  * The letters themselves are sent by the site (functions/_course.js). */
 import { byKey, coverHTML } from '/tools/catalog.js';
@@ -54,7 +55,7 @@ go.addEventListener('click', async () => {
   if (st.kind === 'full') return begin(st.me);
   if (st.kind === 'offline') { state.textContent = 'We could not reach your account just now. Try again in a minute.'; return; }
   const panel = $('panel'); panel.hidden = false;
-  G.open($('gate'), { name: '12 Days to Start Winning', path: '/12-days/', st, ready: begin, cancel: () => { panel.hidden = true; go.focus(); } });
+  G.open($('gate'), { name: '12 Days to Start Winning', path: '/12-days/', st, needAccount: true, ready: begin, cancel: () => { panel.hidden = true; go.focus(); } });
   panel.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 });
 state.addEventListener('click', async (e) => {
