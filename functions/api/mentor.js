@@ -18,7 +18,7 @@
 //                  mc-backfill. Every action is logged as an event; every
 //                  Mailchimp call also in mailchimp_log.
 
-import { teamList, teamAdd, teamRemove } from '../_team.js';
+import { teamList, teamAdd, teamRemove, teamDetails } from '../_team.js';
 import { json, bad, db, now, mentorAccess, clean, looksLikeEmail, accountTables, newToken } from '../_shared.js';
 import { DOMAIN_STEPS, WHATIF_STEPS, ALL_STEP_IDS } from '../_plans.js';
 import { GROWTH_IDS, GROWTH_SQL, GROWTH_BLANK_IDS } from '../_growth.js';
@@ -179,7 +179,7 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   // The team (functions/_team.js): who has every level, the toolkit without a
   // code, and /mentor with their own account. Only the key may change it.
-  if (url.searchParams.get('team')) return json({ ok: true, team: await teamList(D, env), canEdit: access.by === 'key' });
+  if (url.searchParams.get('team')) return json({ ok: true, team: await teamDetails(D, await teamList(D, env)), canEdit: access.by === 'key' });
   // Every tag of the audience, sorted Keep / Old / Ask against the code's own
   // list (functions/_tag-list.js), so Alexandru deletes from a clear list.
   // A Mailchimp tool: the key only.
@@ -255,7 +255,25 @@ export async function onRequestGet({ request, env }) {
       forgotten: (gone.results || []).map((r) => r.email).filter(Boolean), forgottenWhy: FORGOTTEN } });
 }
 
-export async function onRequestPost({ request, env }) {
+/** Every action a team member made, once it succeeded, logged on their own
+ *  account ('team-did'), so the Team box shows who did what. */
+export async function onRequestPost(ctx) {
+  const copy = ctx.request.clone();
+  const res = await post(ctx);
+  if (res.status !== 200) return res;
+  try {
+    const D = db(ctx.env), access = await mentorAccess(copy, ctx.env, D);
+    if (access.ok && access.by === 'team' && access.me) {
+      const b = await copy.json().catch(() => ({}));
+      if (TEAM_CAN.includes(b.action)) {
+        await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(access.me.id, 'team-did', now(), JSON.stringify({ action: b.action, student: clean(b.student, 80) || null })).run();
+      }
+    }
+  } catch { /* the action itself already succeeded */ }
+  return res;
+}
+
+async function post({ request, env }) {
   const D = db(env);
   if (!D) return bad('Not configured.', 503);
   const access = await mentorAccess(request, env, D);

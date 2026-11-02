@@ -388,7 +388,13 @@ export const BOARDROOM_PRICE = '$27';
 /** Which letter each "next action" and "Needs you today" row opens. */
 export const KIND_OF = { quiet: 'checkin', ready: 'boardroom', new: 'welcome', none: 'welcome', ns: 'blueprint', bp: 'northstar', ok: 'note', paused: 'note', question: 'note' };
 
-const firstOf = (s) => String((s && s.name) || '').trim().split(/\s+/)[0] || '';
+/** A first name as people write it (same rule as nameCase in functions/_letters.js). */
+export function nameCase(first) {
+  const s = String(first || '').trim();
+  if (!s || (s !== s.toUpperCase() && s !== s.toLowerCase())) return s;
+  return s.toLowerCase().replace(/(^|[\s'’-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
+}
+const firstOf = (s) => nameCase(String((s && s.name) || '').trim().split(/\s+/)[0] || '');
 const lv2 = (n) => `Level ${String(n).padStart(2, '0')}`;
 
 /** The founder's newest finished sentence in the Blueprint, from theirWords() rows. */
