@@ -243,8 +243,8 @@ const env2 = { DB: fakeD1(), RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraS
 sent = fakeResend();
 [st, j] = await jsonOf(await kitPost({ request: post('/api/toolkit', { action: 'request', first: 'Lea', email: 'lea@example.com', consent: false }), env: env2 }));
 ok(st === 200 && j.sent && !j.pass, 'request: a code is sent, no pass yet');
-ok(sent.length === 1 && sent[0].body.subject === 'Your Growth Toolkit code: 8989', 'the code letter: one 4-digit code for everybody, 8989');
-const code = '8989';
+ok(sent.length === 1 && sent[0].body.subject === 'Your Growth Toolkit code: 5689', 'the code letter: one 4-digit code for everybody, 5689');
+const code = '5689';
 const L1 = sent[0].body;
 ok(L1.text.includes('Of course, no problem.') && L1.text.includes(`/tools/?email=lea%40example.com&code=${code}`) && L1.text.includes('Personal leadership: The off-switch check') && L1.text.includes('Business: Cash runway · Teleprompter'), 'the code letter: “of course”, the button with the code in, a look inside');
 ok(!/Unshakeable assessment\. It shows/.test(L1.text) && L1.text.includes('P.S.'), 'the code letter is a request: its P.S. is free, never a sale');
@@ -267,7 +267,7 @@ ok(st === 200 && j.pass, 'TOOLKIT_CODE in Cloudflare changes the code without a 
 // With a yes to letters: the welcome once the code lets them in, once.
 sent = fakeResend();
 await kitPost({ request: post('/api/toolkit', { action: 'request', first: 'Mia', email: 'mia@example.com', consent: true }), env: env2 });
-ok(sent.length === 1 && sent[0].body.subject === 'Your Growth Toolkit code: 8989', 'Mia asks with a yes to letters: the code letter');
+ok(sent.length === 1 && sent[0].body.subject === 'Your Growth Toolkit code: 5689', 'Mia asks with a yes to letters: the code letter');
 sent = fakeResend();
 await kitPost({ request: post('/api/toolkit', { action: 'check', email: 'mia@example.com', code, tool: 'bottleneck' }), env: env2 });
 ok(sent.length === 1 && sent[0].body.subject === 'Welcome to the Growth Toolkit' && sent[0].body.text.includes('Hi Mia,'), 'in with the code: the Growth Toolkit welcome');

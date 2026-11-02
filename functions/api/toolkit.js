@@ -4,7 +4,7 @@
 //   On Alexandru's list (TOOLKIT_EMAILS, or the team): { ok, pass } at once.
 //   Anyone else: the code by email ("toolkit-code" letter, a look inside the
 //   toolkit and a button that opens it), { ok, sent: true }. One 4-digit code
-//   for everybody (TOOLKIT_CODE, 8989 by default; passing it on is fine).
+//   for everybody (TOOLKIT_CODE, 5689 by default; passing it on is fine).
 //   The reply is the same whether or not the address has an account.
 // POST { action: 'check', email, code }   { ok, pass } when the code is right.
 //   With their yes to letters, the

@@ -5,7 +5,7 @@
 // Who opens it: anyone with an account, at once. Anyone without one asks for
 // the code by email, types it in and gets a pass kept in their browser. The
 // code is one 4-digit code for everybody (Alexandru, 2 Nov 2026: passing it
-// on is fine), TOOLKIT_CODE in the Cloudflare settings, 8989 by default. Addresses on Alexandru's list skip the code:
+// on is fine), TOOLKIT_CODE in the Cloudflare settings, 5689 by default. Addresses on Alexandru's list skip the code:
 // TOOLKIT_EMAILS (comma separated, in the Cloudflare settings) and the team.
 //
 // Keys are the page addresses. The same keys and names are in
@@ -114,7 +114,7 @@ export async function passWelcome(env, D, base, email, { tz = '', tool = '', wai
 export const TOOLKIT_NAME = 'Growth Toolkit';
 /** One code for everybody (Alexandru, 2 Nov 2026). Change it in Cloudflare
  *  (TOOLKIT_CODE) without touching the code. */
-export const TOOLKIT_CODE = '8989';
+export const TOOLKIT_CODE = '5689';
 export const toolkitCode = (env) => String((env && env.TOOLKIT_CODE) || TOOLKIT_CODE).trim();
 const norm = (e) => String(e || '').trim().toLowerCase();
 

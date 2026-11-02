@@ -50,12 +50,12 @@ export const ENTRIES = [
   {
     id: 'toolkit-code', stage: 'door', icon: 'key', fn: 'toolkitCodeLetter',
     name: 'Growth Toolkit code',
-    when: 'Someone without an account asks to open the Growth Toolkit (any tool page, or /tools/). One 4-digit code for everybody (8989; TOOLKIT_CODE in Cloudflare changes it). Passing it on is fine.',
+    when: 'Someone without an account asks to open the Growth Toolkit (any tool page, or /tools/). One 4-digit code for everybody (5689; TOOLKIT_CODE in Cloudflare changes it). Passing it on is fine.',
     who: 'The address they typed. Sent every time they ask (at most 3 an hour).',
     from: '/tools/',
     sentBy: 'functions/api/toolkit.js',
     also: 'Addresses on the TOOLKIT_EMAILS list, and the team, skip the code and get no letter.',
-    build: () => L.toolkitCodeLetter(BASE, { ...S, code: '8989', url: `${BASE}/tools/?email=${encodeURIComponent(S.to)}&code=8989`,
+    build: () => L.toolkitCodeLetter(BASE, { ...S, code: '5689', url: `${BASE}/tools/?email=${encodeURIComponent(S.to)}&code=5689`,
       tools: [['Personal leadership', ['The off-switch check', '12 Days to Start Winning', 'The bottleneck test']], ['Business', ['Cash runway', 'Teleprompter']]] }),
   },
   {
