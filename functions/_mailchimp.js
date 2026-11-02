@@ -379,6 +379,31 @@ export async function readTags(env = {}) {
   }
 }
 
+/** Find an audience tag by its exact name, or make it (Mailchimp's tags are
+ *  static segments; a form's `tags` number is the segment's id). Only for
+ *  names already on the tag list (functions/_tag-list.js, rule 17): never a
+ *  new name. Needs the API key in api mode. Never throws. */
+export async function tagNumber(env = {}, name) {
+  const st = mailchimpState(env);
+  if (!(st.mode === 'api' && st.ready) || !env.MAILCHIMP_API_KEY) return { ok: false, why: 'Mailchimp is not in API mode here.' };
+  const live = await readTags(env);
+  if (!live.ok) return live;
+  const found = live.tags.find((t) => t.name === name);
+  if (found) return { ok: true, id: found.id, name, made: false };
+  const key = await apiKey(env);
+  const audience = st.audience || text(env.MAILCHIMP_AUDIENCE_ID) || (st.form && st.form.id) || '';
+  try {
+    const r = await fetch(`https://${apiServer(key, st)}.api.mailchimp.com/3.0/lists/${audience}/segments`, { method: 'POST',
+      headers: { authorization: 'Basic ' + btoa('linktolead:' + key), 'content-type': 'application/json', 'user-agent': 'exploraself-linktolead' },
+      body: JSON.stringify({ name, static_segment: [] }) });
+    if (!r.ok) return { ok: false, why: `Mailchimp API said no (HTTP ${r.status}).` };
+    const j = await r.json();
+    return { ok: true, id: j.id, name, made: true };
+  } catch (e) {
+    return { ok: false, why: `Could not reach Mailchimp: ${String((e && e.message) || e).slice(0, 160)}` };
+  }
+}
+
 /** The mentor's test join, for an address Alexandru types himself. */
 export async function testJoin(env, D, { email, first, last }) {
   const st = mailchimpState(env);

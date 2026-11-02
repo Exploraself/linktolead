@@ -165,7 +165,17 @@ tests/email-map.test.mjs fails when a letter builder is missing from the map.
 
 ## 15. My direction, and what the first five levels are for (Alexandru, 2 Nov 2026)
 
-My Blueprint opens on **My direction**, written once, one field per screen:
+**My Blueprint opens on the Blueprint itself** (Alexandru, 2 Nov 2026: "the
+Blueprint is not fillable; it is filled while they do the work"). From the
+first day the founder sees all twelve levels, in their three chapters, with
+their titles and their four parts. A part fills only with what the founder
+wrote and did; an empty part says what fills it; a locked level shows what
+opens it. At the top, the plan (four squares a level) and "Your next square"
+with one button; a finished level gets one quiet line, once. "See a finished
+Blueprint" shows Rosa, always marked as an example. "Print my Blueprint" is
+a plan worth keeping: the name, the date, the squares, a chapter a page.
+
+The tab **My direction** is the one thing written there on purpose, once, one field per screen:
 the mission, the vision, the values (locked in: changed only on purpose), two
 goals for the twelve weeks (one for the business, one for the founder as a
 leader) and two mini-goals for the week (one for the work, one personal).
@@ -301,3 +311,10 @@ in, for today, 7 days, 30 days or all (pulse in public/mentor/dash.js); the
 amounts only for those with the payments right. A promise on a pay page or in
 a letter names only what the step really opens (rule 6): the library is free
 for everyone, so it is never sold as part of a step.
+
+Refunds (Alexandru, 2 Nov 2026): every Base Camp has "Ask for a refund". The
+founder chooses the programme they paid for and confirms their name and
+email; it lands in /mentor → Refunds, in red, and Alexandru gets in touch
+himself. Refunds are made in Stripe by a person: the code never refunds, and
+never tells a founder a refund was made. "Mark done" needs the payments
+right (functions/_refund.js, tests/refund.test.mjs).

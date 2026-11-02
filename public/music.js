@@ -349,9 +349,9 @@ export function playerHTML(s = S, playing = false, open = false) {
     <fieldset class="mp-tracks"><legend>Choose the music</legend>
       ${Object.entries(TRACKS).map(([k, v]) => `<label><input type="radio" name="mp-track" value="${k}"${k === s.track ? ' checked' : ''}><span>${esc(v.n)}</span></label>`).join('')}
     </fieldset>
-    <label class="mp-sl"><span class="mp-sk">Light</span><span class="mp-ends"><em>Dimmer</em><input type="range" id="mp-light" min="0" max="100" step="1" value="${s.light}" aria-label="Light: dimmer to brighter"><em>Brighter</em></span></label>
+    <div class="mp-sls"><label class="mp-sl"><span class="mp-sk">Light</span><span class="mp-ends"><em>Dimmer</em><input type="range" id="mp-light" min="0" max="100" step="1" value="${s.light}" aria-label="Light: dimmer to brighter"><em>Brighter</em></span></label>
     <label class="mp-sl"><span class="mp-sk">Energy</span><span class="mp-ends"><em>Calmer</em><input type="range" id="mp-energy" min="0" max="100" step="1" value="${s.energy}" aria-label="Energy: calmer to more energy"><em>More energy</em></span></label>
-    <label class="mp-sl mp-vol"><span class="mp-sk">Volume</span><span class="mp-ends"><em></em><input type="range" id="mp-vol" min="0" max="100" step="1" value="${s.vol}" aria-label="Volume"><em></em></span></label>
+    <label class="mp-sl mp-vol"><span class="mp-sk">Volume</span><span class="mp-ends"><em></em><input type="range" id="mp-vol" min="0" max="100" step="1" value="${s.vol}" aria-label="Volume"><em></em></span></label></div>
     <label class="mp-lamp"><input type="checkbox" id="mp-lamp"${s.lamp ? ' checked' : ''}><span><b>The Lamp</b><small>A pool of light on the question you’re writing. Each answer you finish plays a chord and lights a candle.</small></span></label>
     <div class="mp-modes" role="group" aria-label="Modes">
       ${Object.entries(MODES).map(([k, v]) => `<button type="button" class="mp-mode" data-mp-mode="${k}" aria-pressed="${s.mode === k}"><b>${esc(v.n)}</b><small>${esc(v.d)}</small></button>`).join('')}
@@ -360,7 +360,20 @@ export function playerHTML(s = S, playing = false, open = false) {
   </div>`;
 }
 
-let mounted = false, open = false;
+let mounted = false, open = false, closing = false, opening = false;
+const still = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+/** Open the panel: it rises and fades in (2 Nov 2026), once, not on every repaint. */
+function showWin() { closing = false; opening = !open; open = true; paintPlayer(); }
+/** Close it: it sinks and fades out, then is hidden. Nothing moves under reduced motion. */
+function hideWin(then) {
+  const w = document.querySelector('#mp .mp-win');
+  const done = () => { if (!closing) return; closing = false; open = false; paintPlayer(); if (then) then(); };
+  if (!open || closing) return;
+  if (!w || w.hidden || still()) { closing = true; done(); return; }
+  closing = true; w.classList.add('mp-out');
+  w.addEventListener('animationend', done, { once: true });
+  setTimeout(done, 260);
+}
 function paintPlayer() {
   const root = document.getElementById('mp');
   if (!root) return;
@@ -368,13 +381,17 @@ function paintPlayer() {
   root.classList.toggle('playing', isOn());
   root.hidden = !here;
   root.innerHTML = playerHTML(S, isOn(), open);
+  const w = root.querySelector('.mp-win');
+  if (w && closing) w.classList.add('mp-out');
+  else if (w && opening && !still()) { w.classList.add('mp-in'); w.addEventListener('animationend', () => w.classList.remove('mp-in'), { once: true }); }
+  opening = false;
   if (focusIn) { const f = root.querySelector(`#${CSS.escape(focusIn)}, [data-mp="${focusIn}"], [data-mp-mode="${focusIn}"]`); if (f) f.focus({ preventScroll: true }); }
 }
 /** Open the player from elsewhere (the Crown's Music and Light). With an id,
  *  that control takes the focus, e.g. 'mp-light' for the light slider. */
 export function openPlayer(focusId) {
   if (typeof document === 'undefined') return;
-  mount(); open = true; paintPlayer();
+  mount(); showWin();
   const root = document.getElementById('mp'); if (!root) return;
   const f = (focusId && root.querySelector(`#${CSS.escape(focusId)}`)) || root.querySelector('.mp-play');
   if (f) f.focus({ preventScroll: true });
@@ -388,8 +405,8 @@ function mount() {
   onChange(paintPlayer);
   root.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.mp === 'open') { open = !open; paintPlayer(); if (open) { const p = root.querySelector('.mp-play'); if (p) p.focus({ preventScroll: true }); } return; }
-    if (b.dataset.mp === 'close') { open = false; paintPlayer(); const p = root.querySelector('.mp-pill'); if (p) p.focus({ preventScroll: true }); return; }
+    if (b.dataset.mp === 'open') { if (open) hideWin(); else { showWin(); const p = root.querySelector('.mp-play'); if (p) p.focus({ preventScroll: true }); } return; }
+    if (b.dataset.mp === 'close') { hideWin(() => { const p = root.querySelector('.mp-pill'); if (p) p.focus({ preventScroll: true }); }); return; }
     if (b.dataset.mp === 'play') { toggle(); return; }
     if (b.dataset.mpMode) { mode(b.dataset.mpMode); return; }
   });
@@ -406,12 +423,12 @@ function mount() {
     else if (t.id === 'mp-lamp') set({ lamp: t.checked });
     else if (/^mp-(light|energy|vol)$/.test(t.id)) tell();
   });
-  root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) { open = false; paintPlayer(); const p = root.querySelector('.mp-pill'); if (p) p.focus(); } });
+  root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) hideWin(() => { const p = root.querySelector('.mp-pill'); if (p) p.focus(); }); });
   // A click anywhere outside the open player closes it (31 Oct). Not the
   // Crown's own buttons: they open it.
   document.addEventListener('pointerdown', (e) => {
     if (!open || !e.target.closest || e.target.closest('#mp, .crown-wrap, .cw-wrap, [data-mp]')) return;
-    open = false; paintPlayer();
+    hideWin();
   });
   // The Lamp follows the question being written.
   document.addEventListener('focusin', (e) => { const f = e.target.closest && e.target.closest('textarea, input.wcell'); if (f) { target = f.closest('.step, .cw-write') || f; reAim(); } });
@@ -478,7 +495,7 @@ export function enter(opts = {}) {
 export function leave() {
   here = false;
   if (isOn()) { resume = true; pause(); }
-  open = false;
+  open = false; closing = false;
   dim(); paintPlayer();
   const a = document.getElementById('mp-ask'); if (a) a.remove();
 }

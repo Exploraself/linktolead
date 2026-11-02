@@ -358,7 +358,32 @@ function homeView() {
     ${nudgeHTML(st)}
     ${gp ? planHTML(gp, st) : `<section class="gp-wrap gp-two gp-grid">${standHTML(st)}</section>${howItWorks(st)}`}
     ${accountHTML()}
+    ${refundHTML()}
   </div>`;
+}
+
+/** Ask for a refund (Alexandru, 2 Nov 2026): in every founder's Base Camp.
+ *  They choose the programme they paid for and confirm their name and email;
+ *  the request goes to /mentor → Refunds and Alexandru gets in touch himself.
+ *  It never says a refund was made (AGENTS.md 6). */
+const REFUND_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M14.5 9.2c-.5-.9-1.5-1.4-2.6-1.4-1.5 0-2.6.8-2.6 2 0 2.7 5.4 1.4 5.4 4.2 0 1.2-1.2 2.1-2.8 2.1-1.2 0-2.3-.6-2.8-1.5M12 6.2v1.6M12 16.1v1.6"/></svg>';
+let refundSent = '';
+function refundHTML() {
+  const me = state.me || {}, rungs = ['session', 'lab', 'hub', 'premium'].map((k) => [k, LADDER.find((r) => r.key === k)]).filter(([, r]) => r);
+  const NAMES = { session: 'The Boardroom', lab: 'The LAB', hub: 'The HUB', premium: 'The Summit' };
+  return `<section class="gp-wrap gp-refund" aria-labelledby="rf-h">
+    <details class="rf"${refundSent ? ' open' : ''}><summary><span class="rf-ic">${REFUND_IC}</span><span><b id="rf-h">Ask for a refund</b><small>Not right for you? Alexandru gets in touch with you personally.</small></span></summary>
+    ${refundSent ? `<p class="rf-sent" role="status" tabindex="-1"><b>Sent.</b> Alexandru gets in touch with you personally, at ${esc(refundSent)}.</p>`
+    : `<form id="refundform" class="rf-form" novalidate>
+      <fieldset class="rf-steps"><legend>Which programme did you pay for?</legend>
+        ${rungs.map(([k, r]) => `<label><input type="radio" name="rf-step" value="${k}"><span>${esc(NAMES[k])} · ${esc(r.price)}</span></label>`).join('')}
+      </fieldset>
+      <label class="rf-l"><span>Your name</span><input id="rf-name" autocomplete="name" value="${esc(me.name || '')}"></label>
+      <label class="rf-l"><span>The email you paid with</span><input id="rf-email" type="email" autocomplete="email" value="${esc(me.email || '')}"></label>
+      <button class="cta" type="submit">Send my request</button>
+      <p class="joinerr" id="rf-msg" role="status"></p>
+    </form>`}</details>
+  </section>`;
 }
 
 /** Signing in on this device: email and password, or a one-time email link. */
@@ -725,6 +750,7 @@ function goHTML(st, x) {
       <p class="cw-promise"><b>By Sunday.</b> ${esc(x.promise)}</p>
       <button type="button" class="cta fm-open" data-fmopen>${started ? 'Continue →' : 'Start →'}</button>
       <p class="fm-hint">One question at a time, on the whole screen. Done ✓ or Esc brings you back here.</p>
+      ${started ? beforeHTML() : ''}
     </div>`;
 }
 /** The elephant in the room (Alexandru, 2 Nov 2026): before Levels 01, 04,
@@ -775,6 +801,20 @@ function welcomeHTML(i = 0) {
     ${B.q ? `<blockquote class="wl-q"><small>What a business is</small><p>“${esc(B.q)}”</p></blockquote>` : ''}
     ${i === 3 ? `<div class="wl-have"><h4>By the end, you will have:</h4><ol>${lvs.map((n) => `<li><span>Level ${pad(n)}</span><p>${esc(LEVELS4[n - 1].promise)}</p></li>`).join('')}</ol></div>
     <p class="wl-sign">Alexandru</p>` : ''}
+  </div>`;
+}
+/** One tap back to what opens the level (AGENTS.md 16): the elephant in
+ *  the room, and the founder's version (the door at Level 01, "Still …?" at
+ *  04, 06 and 10). A founder who began the level before these screens
+ *  existed finds them here too. */
+const SIZE_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="3"/><path d="M2.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.3"/><path d="M14.5 15.2a4.5 4.5 0 0 1 7 3.8"/></svg>';
+function beforeHTML() {
+  if (WELCOME_AT[level] == null) return '';
+  const S = steps(), at = (k) => S.findIndex((s) => s[1] === k), size = sizeOf(state.work);
+  const ver = level === 1 ? (size ? at('you') : at('where')) : at('still');
+  return `<div class="fm-more" role="group" aria-label="Before this level">
+    <button type="button" class="fm-link" data-fmopen="${at('welcome')}">${WL_IC[0]}<span>The elephant in the room: ${esc(elephantName().toLowerCase())}</span></button>
+    ${ver >= 0 ? `<button type="button" class="fm-link" data-fmopen="${ver}">${SIZE_IC}<span>${size ? `Your version: ${esc(typeName(size).toLowerCase())} · change it` : 'Your version: not set yet · a few taps'}</span></button>` : ''}
   </div>`;
 }
 /** Where the founder is in the door: [n, of], counting only the questions that apply. */
@@ -1316,12 +1356,12 @@ function blueprintDoc() {
 // light and white, one thing at a time. Five tabs: My direction (written once,
 // one field per screen), This week (four actions), My playbook (every level),
 // Strengths and My journey. Built only from the founder's own answers.
-let bpTab = 'dir', dirAt = null, dirBack = false, bpDoc = false;
+let bpTab = 'book', dirAt = null, dirBack = false, bpDoc = false;
 const mbI = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${d}</svg>`;
 const MB_TABS = [
-  ['dir', 'My direction', mbI('<circle cx="12" cy="12" r="9"/><path d="m15.6 8.4-2.2 5-5 2.2 2.2-5z"/>')],
+  ['book', 'My Blueprint', mbI('<path d="M12 6.6C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.6 2-1.6 5-2.1 8-1.6V5c-3-.5-6 0-8 1.6z"/><path d="M12 6.6v13"/>')],
   ['week', 'This week', mbI('<rect x="3.5" y="5" width="17" height="15" rx="2.2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M9 14.6l2 2 4-4"/>')],
-  ['book', 'My playbook', mbI('<path d="M12 6.6C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.6 2-1.6 5-2.1 8-1.6V5c-3-.5-6 0-8 1.6z"/><path d="M12 6.6v13"/>')],
+  ['dir', 'My direction', mbI('<circle cx="12" cy="12" r="9"/><path d="m15.6 8.4-2.2 5-5 2.2 2.2-5z"/>')],
   ['strong', 'Strengths', mbI('<path d="m12 3.6 2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/>')],
   ['path', 'My journey', mbI('<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h5a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h5"/>')]];
 const MB_LOCK = mbI('<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>');
@@ -1434,45 +1474,113 @@ function weekPane() {
     <p class="mb-row no-print"><button type="button" class="mb-btn" data-print>Print my week</button></p>`;
 }
 
-function bookPane() {
-  const w = state.work, st = state.stage || 'build', now = weekLevel();
-  const levelBox = (L) => {
-    const n = L.n, rung = LADDER.find((r) => r.key === gateFor(n)), open = holds(tierNow(), gateFor(n)), ls = levelState(st, n), on = levelBegun(n);
-    const t = tally(w, [n]);
+/** The Blueprint (Alexandru, 2 Nov 2026): "the Blueprint is not fillable. It
+ *  is filled while they do the work. Before they do the work they can see
+ *  the Blueprint, all twelve modules with the chapters and titles, filled only
+ *  with what they have accomplished, so it pulls them forward." My Blueprint
+ *  opens here. At the top, the plan: twelve levels in three chapters, four
+ *  squares each, coloured only when the founder has written that part (and
+ *  marked once Sunday says it was done). Under it, every level with its title
+ *  and its four parts: the founder's own sentence and result where it is done,
+ *  an empty frame that says what fills it where it is not, and the gate where
+ *  the level is not open. Nothing here asks a question. */
+const AREA_C = ['#8C5A3C', '#4C6B55', '#3E5C78', '#8A6A1F'];
+function planGrid(w, now, o = {}) {
+  return `<div class="bpx-plan" aria-hidden="true">${CHAPTERS4.map((C) => `<div class="bpx-chp"><p>${esc(C.name)}</p><div class="bpx-lvs">${C.lv.map((i) => {
+    const n = i + 1, open = o.example || holds(tierNow(), gateFor(n));
+    return `<span class="bpx-l${open ? '' : ' lock'}${n === now ? ' now' : ''}${n === o.fresh ? ' fresh' : ''}"><b>${pad(n)}</b><span class="bpx-q">${[0, 1, 2, 3].map((d) => `<i class="${begun(n, d) ? 'on' : ''}${gotOf(w, n, d) === 0 ? ' did' : ''}" style="--c:${AREA_C[d]}"></i>`).join('')}</span></span>`;
+  }).join('')}</div></div>`).join('')}</div>`;
+}
+/** Your next square (Alexandru, 2 Nov 2026): the first part not yet written,
+ *  in order, so the founder always sees exactly what to fill next. */
+function nextSquare(st) {
+  for (let n = 1; n <= 12; n++) for (let d = 0; d < 4; d++) if (LEVELS4[n - 1] && !begun(n, d)) return { n, d, open: holds(tierNow(), gateFor(n)), waiting: levelState(st, n) === 'waiting' };
+  return null;
+}
+function nextHTML(st) {
+  const x = nextSquare(st);
+  if (!x) return `<div class="bpx-next all"><span class="bpx-nsq all" aria-hidden="true"></span><p><small>Every square is filled</small><b>Twelve levels, in your own words.</b> Print it, and bring it to your next session.</p></div>`;
+  const p = planOf(x.n, x.d), rung = LADDER.find((r) => r.key === gateFor(x.n));
+  const btn = !x.open ? `<a class="mb-btn mb-gold" href="${esc(payHref(gateFor(x.n)))}">${MB_LOCK}Open it · ${esc(rung.price)}</a>`
+    : x.waiting ? `<button type="button" class="mb-btn mb-gold" data-level="${x.n - 1}">Finish Level ${pad(x.n - 1)} →</button>`
+    : `<button type="button" class="mb-btn mb-gold" data-level="${x.n}">Fill it →</button>`;
+  return `<div class="bpx-next"><span class="bpx-nsq" style="--c:${AREA_C[x.d]}" aria-hidden="true"></span>
+    <p><small>Your next square</small><b>Level ${pad(x.n)} · ${esc(DOM_LEAD[x.d])}</b>${p ? ` ${esc(p.topic)}` : ''}</p><span class="no-print">${btn}</span></div>`;
+}
+/** A small moment when a level is finished (Alexandru, 2 Nov 2026): its four
+ *  squares are filled, and one quiet line says so, once (w.v4.<lv>.w.inbp,
+ *  kept beside the welcome's marks, never counted as an answer). */
+let bpFresh = 0;
+function freshLevel() {
+  if (bpFresh) return bpFresh;
+  for (let n = 12; n >= 1; n--) {
+    if (![0, 1, 2, 3].every((d) => begun(n, d))) continue;
+    const key = wkey(n, 'w', 'inbp');
+    if (state.work[key]) return 0;
+    state.work[key] = '1'; save(); account.touch('work', key, '1');
+    bpFresh = n; return n;
+  }
+  return 0;
+}
+/** See a finished Blueprint (Alexandru, 2 Nov 2026): Rosa, marked as an
+ *  example (AGENTS.md 12), drawn by the same code from her saved answers. */
+let bpExample = null, bpExampleWho = '';
+function examplePane() {
+  const real = state.work;
+  state.work = bpExample;
+  try {
+    return `<div class="bpx-ex" tabindex="-1"><p><b>An example, not a real founder.</b> ${esc(bpExampleWho)} This is her Blueprint after twelve levels: every square filled from her own answers. Yours fills the same way.</p>
+      <button type="button" class="mb-btn" data-bpex="0">← Back to my Blueprint</button></div>${bookPane({ example: true })}`;
+  } finally { state.work = real; }
+}
+function bookPane(o = {}) {
+  const w = state.work, st = state.stage || 'build', now = weekLevel() || 1, isOpen = (n) => !!o.example || holds(tierNow(), gateFor(n));
+  const fresh = o.example ? 0 : freshLevel();
+  const parts = LEVELS4.reduce((n, L) => n + [0, 1, 2, 3].filter((d) => begun(L.n, d)).length, 0);
+  const levelCard = (L) => {
+    const n = L.n, rung = LADDER.find((r) => r.key === gateFor(n)), open = isOpen(n), ls = o.example ? 'done' : levelState(st, n), on = levelBegun(n);
     const tag = !open ? `<span class="mb-tag">${MB_LOCK}${esc(rung.price)}</span>`
-      : n === now && ls !== 'done' ? '<span class="mb-tag mb-now">This week</span>'
-      : ls === 'done' ? '<span class="mb-tag mb-done">Written</span>'
-      : on ? '<span class="mb-tag">Started</span>' : '<span class="mb-tag">Open</span>';
-    const twenty = !!ACTIONS4[`${n}.0`];
-    const small = twenty ? (on ? `${actsDone(n)} of 20 actions done` : '20 actions, five in each area')
-      : t.n ? `${t.done} of 4 actions done${t.part ? `, ${t.part} partly` : ''}` : on ? `${[0, 1, 2, 3].filter((d) => begun(n, d)).length} of 4 actions written` : '4 actions, one in each area';
-    let body;
-    if (!open) body = `<p class="mb-have"><b>After this level you will have:</b> ${esc(L.promise)}</p>
-      <p class="mb-sub">Opens with ${esc(rung.n)} · ${esc(rung.price)}</p>
-      <p class="no-print"><a class="mb-btn mb-gold" href="${esc(payHref(gateFor(n)))}">${MB_LOCK}Unlock · ${esc(rung.price)}</a>${rung.url ? ` <a class="mb-btn" href="${esc(rung.url)}" target="_blank" rel="noopener">See what opens it ↗</a>` : ''}</p>`;
-    else if (!on) body = `<p class="mb-have"><b>After this level you will have:</b> ${esc(L.promise)}</p>
-      ${ls === 'waiting' ? `<p class="mb-sub">Opens when Level ${pad(n - 1)} is written.</p>` : `<p class="no-print"><button type="button" class="mb-btn" data-level="${n}">Open Level ${pad(n)} →</button></p>`}`;
-    else body = L.d.map((D, d) => {
-      const p = planOf(n, d), g = gotOf(w, n, d), tk = begun(n, d) ? takeOf(w, n, d) : null;
-      if (twenty) {
-        const A = actionsAt(n, d, mbSize());
-        return `<div class="mb-dom"><h4>${esc(DOM_LEAD[d])}${p ? `: ${esc(p.topic)}` : ''}</h4>
-          <ol class="mb-five">${DO_FIRST.map((i) => { const own = i === 2 && begun(n, d), at = mbv(n, d, `a${i}`);
-            return `<li class="${actOn(n, d, i) ? 'mb-on' : ''}"><b>${A[i].step}</b> ${own ? fill(D.fb[3], w, n, d) : esc(A[i].t)}${actOn(n, d, i) ? ` <span class="mb-when">Done${at ? ` ${esc(dayOf(at))}` : ''}</span>` : ''}</li>`; }).join('')}</ol>
-          ${tk ? `<details class="mb-take"><summary>${esc(tk.title)}</summary><ol>${tk.lines.map((l) => `<li>${l}</li>`).join('')}</ol></details>` : ''}</div>`;
+      : ls === 'done' ? '<span class="mb-tag mb-done">Written ✓</span>'
+      : n === now && on ? '<span class="mb-tag mb-now">This week</span>'
+      : on ? '<span class="mb-tag">Started</span>' : '';
+    const areas = L.d.map((D, d) => {
+      const p = planOf(n, d), g = gotOf(w, n, d), mine = begun(n, d), tk = mine ? takeOf(w, n, d) : null;
+      const head = `<p class="bpx-ak"><span>${esc(DOM_LEAD[d])}</span>${p ? ` · ${esc(p.topic)}` : ''}</p>`;
+      if (!mine) {
+        const why = !open ? `Opens with ${({ session: 'The Boardroom', lab: 'The LAB', hub: 'The HUB', premium: 'The Summit' })[gateFor(n)] || 'the next step'}` : ls === 'waiting' ? `Fills in at Level ${pad(n)}, after Level ${pad(n - 1)}` : `Fills in when you write it in Level ${pad(n)}`;
+        return `<li class="bpx-a empty" style="--c:${AREA_C[d]}">${head}<p class="bpx-wait">${why}</p></li>`;
       }
-      return `<div class="mb-dom"><h4>${esc(DOM_LEAD[d])}${p ? `: ${esc(p.topic)}` : ''}</h4>
-        ${begun(n, d) ? `<p><b>Do:</b> ${fill(D.fb[3], w, n, d)}</p><p><b>Done when:</b> ${doneOf(w, n, d)}</p>${g != null ? `<p class="mb-sub">Sunday: ${GOT[g]}</p>` : ''}
-          ${tk ? `<details class="mb-take"><summary>${esc(tk.title)}</summary><ol>${tk.lines.map((l) => `<li>${l}</li>`).join('')}</ol></details>` : ''}`
-        : `<p class="mb-sub">Not written yet. <button type="button" class="mb-text no-print" data-level="${n}">Write it</button></p>`}</div>`;
-    }).join('') + (BUILD4[n] && buildStarted(w, n) ? `<details class="mb-take"><summary>The page you built: ${esc(BUILD4[n].title)}</summary><dl>${buildPage(w, n).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl></details>` : '');
-    return `<details class="mb-lv"${n === now ? ' open' : ''}><summary><span class="mb-lvt"><b>Level ${pad(n)} · ${esc(L.title)}</b><small>${small}</small></span>${tag}</summary><div class="mb-lvb">${body}</div></details>`;
+      const twenty = ACTIONS4[`${n}.${d}`] ? [0, 1, 2, 3, 4].filter((i) => actOn(n, d, i)).length : null;
+      return `<li class="bpx-a on" style="--c:${AREA_C[d]}">${head}
+        <p class="bpx-do">${fill(D.fb[3], w, n, d)}</p>
+        <p class="bpx-dw"><b>Done when</b> ${doneOf(w, n, d)}</p>
+        <p class="bpx-res">${g === 0 ? '<span class="bpx-did">Done ✓</span>' : g === 1 ? '<span class="bpx-part">Partly</span>' : g === 2 ? '<span class="bpx-not">Not yet</span>' : '<span class="bpx-wk">This week</span>'}${twenty != null ? ` <span class="bpx-n5">${twenty} of 5 actions done</span>` : ''}</p>
+        ${tk ? `<details class="bpx-take"><summary>${esc(tk.title)}</summary><ol>${tk.lines.map((l) => `<li>${l}</li>`).join('')}</ol></details>` : ''}
+        ${twenty != null ? `<details class="bpx-take bpx-acts"><summary>Its five actions · ${twenty} done</summary><ol class="mb-five">${DO_FIRST.map((i) => { const A = actionsAt(n, d, mbSize())[i], own = i === 2;
+          return `<li class="${actOn(n, d, i) ? 'mb-on' : ''}"><b>${A.step}</b> ${own ? fill(D.fb[3], w, n, d) : esc(A.t)}${actOn(n, d, i) ? ' <span class="mb-when">Done ✓</span>' : ''}</li>`; }).join('')}</ol></details>` : ''}</li>`;
+    }).join('');
+    const foot = !open ? `<p class="no-print bpx-go"><a class="mb-btn mb-gold" href="${esc(payHref(gateFor(n)))}">${MB_LOCK}Open it · ${esc(rung.price)}</a></p>`
+      : !on && ls !== 'waiting' ? `<p class="no-print bpx-go"><button type="button" class="mb-btn" data-level="${n}">Open Level ${pad(n)} →</button></p>` : '';
+    const built = BUILD4[n] && buildStarted(w, n) ? `<details class="bpx-take bpx-built"><summary>The page you built: ${esc(BUILD4[n].title)}</summary><dl>${buildPage(w, n).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl></details>` : '';
+    return `<article class="bpx-lv${on ? ' on' : ''}${open ? '' : ' lock'}${n === now && !o.example ? ' now' : ''}" aria-labelledby="bpx-${n}">
+      <header><p class="bpx-num">Level ${pad(n)}</p><h3 id="bpx-${n}">${esc(L.title)}</h3>${tag}</header>
+      ${on ? '' : `<p class="bpx-promise"><b>By the end:</b> ${esc(L.promise)}</p>`}
+      <ol class="bpx-areas">${areas}</ol>${built}${foot}</article>`;
   };
-  return `<h2 class="mb-h2" tabindex="-1">My playbook</h2>
-    <p class="mb-lead">Everything you work out inside the programme, as things to do: twenty actions a level, five in each area of your business, written for your size.</p>
-    ${CHAPTERS4.map((C) => `<h3 class="mb-ch">${esc(C.name)} <small>Levels ${pad(C.lv[0] + 1)}–${pad(C.lv[C.lv.length - 1] + 1)}</small></h3>
-      ${C.lv.map((i) => levelBox(LEVELS4[i])).join('')}`).join('')}
-    <p class="mb-row no-print"><button type="button" class="mb-btn" data-print>Print my playbook</button><button type="button" class="mb-text" data-bpdoc="1">Every answer, in eight parts</button></p>`;
+  const who = (state.me && state.me.name) || '';
+  let today = ''; try { today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { /* old browser */ }
+  return `${o.example ? '' : `<div class="bpx-ph" aria-hidden="true"><p>The Founder’s Blueprint</p><h2>${esc(who || 'My Blueprint')}</h2><p>Drawn on ${esc(today)}, only from ${who ? esc(who.split(' ')[0]) + '’s' : 'my'} own answers · ${parts ? `Level ${pad(now)} of 12` : 'Level 01 of 12'}</p></div>`}
+    <h2 class="mb-h2" tabindex="-1">${o.example ? 'Rosa’s Blueprint' : 'Your Blueprint'}</h2>
+    <p class="mb-lead">All twelve levels, from the first day. It fills in only with what ${o.example ? 'she has' : 'you have'} written and done: nothing here is a form.</p>
+    ${fresh ? `<p class="bpx-fresh" role="status"><span aria-hidden="true">✓</span> Level ${pad(fresh)} is in your Blueprint.</p>` : ''}
+    ${planGrid(w, now, { example: o.example, fresh })}
+    ${o.example ? '' : nextHTML(st)}
+    <p class="bpx-sum">${o.example ? 'Every square filled, from her own answers.' : parts ? `Every coloured square is a part of your business you have worked out, in your own words.` : 'Every square fills with colour when you write that part in its level. The first four are in Level 01.'}
+      ${o.example ? '' : '<button type="button" class="mb-text no-print" data-bpex="1">See a finished Blueprint (an example) →</button>'}</p>
+    ${CHAPTERS4.map((C, ci) => `<section class="bpx-ch" aria-labelledby="bpx-c${ci}"><header class="bpx-chh"><p>${esc(C.n)} · Levels ${pad(C.lv[0] + 1)}–${pad(C.lv[C.lv.length - 1] + 1)}</p><h3 id="bpx-c${ci}">${esc(C.name)}</h3><p class="bpx-about">${esc(C.about)}</p></header>
+      ${C.lv.map((i) => levelCard(LEVELS4[i])).join('')}</section>`).join('')}
+    ${o.example ? '<p class="mb-row no-print"><button type="button" class="mb-btn" data-bpex="0">← Back to my Blueprint</button></p>' : `<p class="mb-row no-print"><button type="button" class="mb-btn" data-print>Print my Blueprint</button><button type="button" class="mb-text" data-bpdoc="1">Every answer, in eight parts</button></p>
+    <p class="bpx-tb" aria-hidden="true"><span>The Founder’s Blueprint</span><span>${esc(who)}</span><span>${esc(today)}</span><span>ExploraSelf · Alexandru Cojocari</span></p>`}`;
 }
 
 function strongPane() {
@@ -1533,7 +1641,7 @@ function pathPane() {
 function blueprintView() {
   if (bpDoc) return blueprintDoc();
   const name = (state.me && state.me.name) || '', lv = weekLevel();
-  const pane = bpTab === 'week' ? weekPane() : bpTab === 'book' ? bookPane() : bpTab === 'strong' ? strongPane() : bpTab === 'path' ? pathPane() : dirPane();
+  const pane = bpExample && bpTab === 'book' ? examplePane() : bpTab === 'week' ? weekPane() : bpTab === 'dir' ? dirPane() : bpTab === 'strong' ? strongPane() : bpTab === 'path' ? pathPane() : bookPane();
   return `<section class="mb" aria-labelledby="mb-h"><div class="mb-in">
     <header class="mb-who"><p class="mb-k">My Blueprint</p><h1 id="mb-h">${name ? esc(name) : 'My Blueprint'}</h1>
       <p>${lv ? `Level ${pad(lv)} of 12 · ${esc(LEVELS4[lv - 1].title)} · ${ACTIONS4[`${lv}.0`] ? `${actsDone(lv)} of 20` : `${doneThisWeek(lv)} of 4`} done this week` : 'Twelve levels · it fills in as you go'}</p></header>
@@ -1797,7 +1905,7 @@ document.addEventListener('click', (e) => {
   if (b.dataset.qmove) { moveQ(+b.dataset.qmove); return; }
   // Focus mode: open, close, and Done ✓ (at the end of a domain, the next
   // domain is where the founder picks up).
-  if (b.hasAttribute('data-fmopen')) { fmOpen(); return; }
+  if (b.hasAttribute('data-fmopen')) { fmOpen(b.dataset.fmopen ? +b.dataset.fmopen : null); return; }
   if (b.hasAttribute('data-fmclose')) { fmClose(); return; }
   if (b.dataset.fmdone) { if (b.dataset.fmdone === 'next') moveQ(1); fmClose(); return; }
   if (b.dataset.qt || b.dataset.qx) {
@@ -1939,7 +2047,12 @@ document.addEventListener('click', (e) => {
     dirAt = nx < 0 ? -1 : nx; dirBack = false;
     render(); mbFocus(); return;
   }
-  if (b.dataset.bptab) { bpTab = b.dataset.bptab; bpDoc = false; dirAt = null; dirBack = false; render(); mbFocus(`#mb-t-${bpTab}`); return; }
+  if (b.dataset.bptab) { bpTab = b.dataset.bptab; bpDoc = false; bpExample = null; dirAt = null; dirBack = false; render(); mbFocus(`#mb-t-${bpTab}`); return; }
+  if (b.dataset.bpex) {
+    if (b.dataset.bpex === '0') { bpExample = null; render(); mbFocus('.mb-h2'); return; }
+    import('./blueprint-example.js').then((m) => { bpExample = m.EXAMPLE; bpExampleWho = m.EXAMPLE_WHO; bpTab = 'book'; render(); mbFocus('.bpx-ex'); }).catch(() => {});
+    return;
+  }
   if (b.dataset.bpdoc) { bpDoc = b.dataset.bpdoc === '1'; render(); window.scrollTo({ top: 0, behavior: 'instant' }); return; }
   if (b.dataset.mbact) {
     const [lv, d, i] = b.dataset.mbact.split(':').map(Number), on = actOn(lv, d, i);
@@ -1958,7 +2071,7 @@ document.addEventListener('click', (e) => {
     keep4(d, 'got', gotOf(state.work, lv, d) === 0 ? '' : 0, lv);
     render(); mbFocus(`[data-mbgot="${lv}:${d}"]`); return;
   }
-  if (b.dataset.go === 'blueprint') { bpDoc = false; dirAt = null; dirBack = false; if (b.dataset.bpto) bpTab = b.dataset.bpto; }
+  if (b.dataset.go === 'blueprint') { bpDoc = false; bpExample = null; dirAt = null; dirBack = false; if (b.dataset.bpto) bpTab = b.dataset.bpto; }
   if (b.dataset.go === 'library') bannerDone();
   if (b.dataset.go) {
     view = b.dataset.go; document.body.classList.remove('railopen'); render(); remember();
@@ -2149,6 +2262,18 @@ document.addEventListener('submit', async (e) => {
       if (ex && ex.data && ex.data.noAccount) return noAccountHere(email, ex.message);
       say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'We could not reach the account service just now.');
     }
+    return;
+  }
+  if (f.id === 'refundform') {
+    e.preventDefault();
+    const msg = $('#rf-msg'), pick = f.querySelector('input[name="rf-step"]:checked'), name = $('#rf-name').value.trim(), email = $('#rf-email').value.trim();
+    const say = (t) => { msg.textContent = t; };
+    if (!pick) return say('Choose the programme you paid for.');
+    if (!name) return say('Write your name.');
+    if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return say('Write the email you paid with.');
+    const go = f.querySelector('button[type="submit"]'); go.disabled = true; say('Sending…');
+    try { await account.refund({ step: pick.value, name, email }); refundSent = email; render(); const s = document.querySelector('.rf-sent'); if (s) s.focus({ preventScroll: false }); }
+    catch (ex) { go.disabled = false; say(ex && ex.message && !/fetch|network|load failed/i.test(ex.message) ? ex.message : 'It did not send. Try again in a minute.'); }
     return;
   }
   if (f.id === 'pwform') {

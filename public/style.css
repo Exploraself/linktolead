@@ -640,7 +640,28 @@ body.inwork .foot{display:none}
 .note-reply textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--line);background:var(--field)}
 .note-reply .cta{margin-top:0;align-self:flex-start}
 .tdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#E0A282;margin-left:6px;vertical-align:middle}
-.gp-account{padding-block:28px 48px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.gp-account{padding-block:28px 16px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+/* Ask for a refund (Alexandru, 2 Nov 2026): in every Base Camp, quiet until opened. */
+.gp-refund{padding-block:0 48px}
+.rf{border-top:1px solid var(--line);padding-top:14px}
+.rf summary{display:flex;align-items:center;gap:12px;min-height:48px;cursor:pointer;list-style:none}
+.rf summary::-webkit-details-marker{display:none}
+.rf summary b{display:block;font-weight:600;color:var(--ink)}
+.rf summary small{display:block;font-size:13.5px;color:var(--muted)}
+.rf-ic{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--cream);color:var(--gold-ink)}
+.rf-ic svg{width:20px;height:20px}
+.rf-form{display:flex;flex-direction:column;gap:14px;max-width:460px;padding-top:12px}
+.rf-form .cta{margin-top:0;align-self:flex-start}
+.rf-steps{border:0;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.rf-steps legend{width:100%;margin-bottom:8px;font-size:13px;font-weight:600}
+.rf-steps label{position:relative;cursor:pointer}
+.rf-steps input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.rf-steps span{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line);font-size:14.5px;color:var(--ink)}
+.rf-steps input:checked+span{border-color:var(--gold);background:var(--cream);font-weight:600}
+.rf-steps input:focus-visible+span{outline:2px solid var(--gold);outline-offset:2px}
+.rf-l{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:520}
+.rf-l input{font:inherit;font-size:16px;min-height:46px;padding:0 12px;border:1px solid var(--line);background:var(--field);color:var(--ink)}
+.rf-sent{margin:12px 0 0;padding:12px 14px;border-radius:10px;background:var(--cream);font-size:15.5px}
 .pw-box summary{cursor:pointer;font-weight:520;color:var(--gold-ink);min-height:44px;display:flex;align-items:center}
 .pwform{display:flex;flex-direction:column;gap:12px;max-width:420px;padding-top:8px}
 .pwform .cta{margin-top:0;align-self:flex-start}
