@@ -164,6 +164,38 @@ blockquote i{color:var(--gl)}
 .js .rv.in{opacity:1;transform:none}
 @keyframes settle{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.top-plan .draw{animation:none;stroke-dashoffset:0}.top-plan .lbl,.top-plan .fill{animation:none;opacity:1}.js .rv .draw{stroke-dashoffset:0;transition:none}.js .rv .lbl,.js .rv .fill{opacity:1;transition:none}html{scroll-behavior:auto}.js .rv{opacity:1;transform:none;transition:none}.stick,.go,.go span{transition:none}}
+
+/* ── The tally (3 Nov 2026, Offer Master run): the first screen asks one
+   question and draws the weeks the visitor says it has sat unsolved, plus
+   the next thirteen if nothing changes. Their numbers only (rule 6). ── */
+.tally-hero .wrap{display:flex;flex-direction:column;align-items:flex-start;gap:26px;min-height:min(92svh,980px);justify-content:center;padding-top:clamp(40px,7vw,96px);padding-bottom:clamp(48px,8vw,104px)}
+.tally-hero h1{max-width:15em}
+.chips.dk button{border-color:rgba(243,237,226,.28);color:var(--bone)}
+.chips.dk button:hover{border-color:var(--gl)}
+.chips.dk button[aria-pressed="true"]{background:var(--gl);border-color:var(--gl);color:var(--ink)}
+.chips.dk.picked button[aria-pressed="false"]{display:none}
+.chips.dk .chg{border:0 !important;min-height:46px;padding:0 6px;background:none;color:var(--gl) !important;text-decoration:underline;text-underline-offset:5px}
+.chips.dk .chg[hidden]{display:none}
+.weeks{display:flex;flex-direction:column;gap:10px;width:100%;max-width:760px}
+.weeks[hidden]{display:none}
+.weeks label{font:400 clamp(20px,2vw,24px)/1.3 var(--serif);color:var(--bone)}
+.weeks .slide input{accent-color:var(--gl)}
+.weeks .slide output{color:var(--gl)}
+.tally{width:100%;height:auto;display:block;overflow:visible}
+.tally .t{stroke:var(--gl);stroke-width:3;stroke-linecap:round}
+.tally .f{stroke:rgba(214,191,143,.32);stroke-width:2;stroke-linecap:round;stroke-dasharray:4 5}
+.js .tally .t{stroke-dasharray:60;stroke-dashoffset:60;animation:tl .5s ease forwards}
+@keyframes tl{to{stroke-dashoffset:0}}
+.tl-key{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;font-size:13px;color:#A99C86}
+.tl-key span{display:inline-block;width:18px;height:3px;border-radius:2px;vertical-align:middle;margin-right:-8px}
+.tl-key .k1{background:var(--gl)}.tl-key .k2{background:transparent;border-top:2px dashed rgba(214,191,143,.5);height:0}
+.tally-hero .reading{background:transparent;padding:0;border-left:2px solid var(--gl);padding-left:20px;max-width:760px}
+.tally-hero .reading p:first-child{color:var(--bone)}
+.cta-row{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.private{font-size:12.5px;color:#8E826F}
+.proof .promise{display:flex;flex-direction:column;gap:18px;max-width:820px;margin-bottom:clamp(48px,6vw,80px)}
+.how-plan{max-width:520px;margin:0 0 clamp(32px,4vw,48px)}
+@media(prefers-reduced-motion:reduce){.js .tally .t{animation:none;stroke-dashoffset:0}}
 </style>
 </head>
 <body>
@@ -173,17 +205,54 @@ blockquote i{color:var(--gl)}
 </div></header>
 <main>
 
-<section class="dark hero" aria-labelledby="h-top"><div class="wrap">
-  <div class="txt">
-    <p class="lab">The Boardroom · one hour with Alexandru Cojocari</p>
-    <h1 id="h-top">The decisions that shape your business deserve <i>a second mind at the table.</i></h1>
-    <p class="lede">One hour, one to one, online. Before you meet, Alexandru and the team read what you wrote, so the hour starts on your business, not on introductions.</p>
-    <div><a class="go" href="/pay/?step=session&amp;from=road5" data-pay>Take your seat · $27 <span aria-hidden="true">→</span></a></div>
-    <p class="meta">Online · Tuesday, Wednesday or Thursday afternoon, Rome time</p>
-    <p class="gift"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4.5" rx="1"/><path d="M5 13v7.5h14V13M12 8.5v12"/><path d="M12 8.5C10.4 4.8 6.4 4.3 6.4 6.8c0 1.7 3.2 1.7 5.6 1.7Zm0 0c1.6-3.7 5.6-4.2 5.6-1.7 0 1.7-3.2 1.7-5.6 1.7Z"/></svg>And a gift from Alexandru, given to you in the call.</p>
+<section class="dark hero tally-hero" aria-labelledby="h-top"><div class="wrap">
+  <p class="lab">The Boardroom · one hour with Alexandru Cojocari</p>
+  <h1 id="h-top" data-h1>Which decision has been sitting on your desk <i>the longest?</i></h1>
+  <div class="chips dk" role="group" aria-label="Which decision has been sitting on your desk the longest?" data-pains><button type="button" data-p="alone">I carry every decision alone</button><button type="button" data-p="time">No time left for me</button><button type="button" data-p="clients">I need more clients</button><button type="button" data-p="price">My prices feel too low</button><button type="button" data-p="direction">My direction is unclear</button><button type="button" data-p="cash">Cash is tight</button><button type="button" data-p="team">My team isn’t stepping up</button><button type="button" data-p="off">I can’t switch off</button><button type="button" class="chg" data-chg hidden>Change</button></div>
+  <div class="weeks" data-weeksbox hidden>
+    <label for="weeks">For how many weeks, unsolved?</label>
+    <div class="slide"><input id="weeks" type="range" min="1" max="52" value="8" data-weeks aria-describedby="weeks-out"><output id="weeks-out" data-weeks-out>8 weeks</output></div>
+    <svg class="tally" data-tally viewBox="0 0 680 120" role="img" aria-label="Your weeks, drawn as tally marks"></svg>
+    <p class="tl-key"><span class="k1"></span>Weeks so far <span class="k2"></span>The next thirteen, if nothing changes</p>
   </div>
-  <div class="top-plan">
-    <svg class="ill plan" viewBox="30 10 580 290" role="img" aria-label="A plan of the Boardroom: one table, your seat at one end, Alexandru at the other.">
+  <div class="reading" data-reading role="status" hidden>
+    <p data-read1></p>
+    <p data-read2>One hour with Alexandru. You leave with the decision behind it named, and one road you chose.</p>
+  </div>
+  <div class="cta-row">
+    <a class="go" href="/pay/?step=session&amp;from=road5" data-pay>Name it in one hour · $27 <span aria-hidden="true">→</span></a>
+    <p class="meta">Online · Tuesday, Wednesday or Thursday afternoon, Rome time. What you write is read before you meet.</p>
+  </div>
+  <p class="gift"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4.5" rx="1"/><path d="M5 13v7.5h14V13M12 8.5v12"/><path d="M12 8.5C10.4 4.8 6.4 4.3 6.4 6.8c0 1.7 3.2 1.7 5.6 1.7Zm0 0c1.6-3.7 5.6-4.2 5.6-1.7 0 1.7-3.2 1.7-5.6 1.7Z"/></svg>And a gift from Alexandru, given to you in the call.</p>
+  <p class="private">Nothing you tap here is sent anywhere: it stays on this page.</p>
+</div></section>
+
+<section class="esp band proof" aria-labelledby="h-alx"><div class="wrap">
+  <div class="promise rv">
+    <p class="lab">What you leave with</p>
+    <h2>One decision named. <i>One road, chosen by you.</i></h2>
+    <p class="lede">The minute you pay, Levels 04 and 05 open and you start writing. Before the hour, Alexandru and the team read every word, so the hour starts on your business, not on introductions.</p>
+  </div>
+  <div class="alx rv">
+    <div class="facts">
+      <figure class="alx-ph"><div class="ph"><img src="/cabinet/alexandru.jpg" alt="Alexandru Cojocari" width="640" height="512" loading="lazy" decoding="async"></div></figure>
+      <p class="lab" id="h-alx">Across the table</p>
+      <p>Alexandru Cojocari.<br>Born in Moldova. Lives and works in Rome.<br>Degree in business and management.<br>Master’s in political science.<br>Founder of ExploraSelf.</p>
+    </div>
+    <div class="say">
+      <blockquote>“In my late teens I built made-to-measure kitchens and wardrobes. I loved it. I also did everything myself, and I didn’t watch the money. <i>The business closed.</i>”</blockquote>
+      <p class="lede">Today I mentor founders. The Blueprint is what I wish someone had put in front of me then: the right things to look at, one week at a time, and someone to read them with me.</p>
+    </div>
+  </div>
+
+</div></section>
+
+<section class="band" aria-labelledby="h-how"><div class="wrap">
+  <div class="head rv">
+    <p class="lab">How it works</p>
+    <h2 id="h-how">Four steps. <i>Nothing to wait for.</i></h2>
+  </div>
+  <svg class="ill plan how-plan rv" viewBox="30 10 580 290" role="img" aria-label="A plan of the Boardroom: one table, your seat at one end, Alexandru at the other.">
     <path class="draw" pathLength="1" d="M40 30H250M390 30H600V270H140M80 270H40V30" stroke="rgba(214,191,143,.5)" stroke-width="1.2" fill="none"/>
     <path class="draw" pathLength="1" d="M250 30a70 70 0 0 0 140 0" stroke="rgba(214,191,143,.35)" stroke-width="1" fill="none"/>
     <path class="draw" pathLength="1" d="M80 270a60 60 0 0 1 60-60" stroke="rgba(214,191,143,.35)" stroke-width="1" fill="none"/>
@@ -196,54 +265,6 @@ blockquote i{color:var(--gl)}
     <text class="lbl" x="490" y="104" text-anchor="middle">ALEXANDRU</text>
     <text class="lbl" x="320" y="256" text-anchor="middle">ONE HOUR</text>
   </svg>
-  </div>
-</div></section>
-
-<section class="bone band" aria-labelledby="h-qs"><div class="wrap">
-  <div class="head rv">
-    <p class="lab">Three honest questions</p>
-    <h2 id="h-qs">Before anything else, <i>look at it straight.</i></h2>
-    <p class="lede">Twenty seconds. Nothing is sent: your answers stay on this page.</p>
-  </div>
-  <div class="qs">
-    <div class="q rv">
-      <h3><em>i.</em>What has been on your mind the longest?</h3>
-      <div class="chips" role="group" aria-label="What has been on your mind the longest?" data-pains>
-        <button type="button" data-p="alone">I carry every decision alone</button>
-        <button type="button" data-p="time">No time left for me</button>
-        <button type="button" data-p="clients">I need more clients</button>
-        <button type="button" data-p="price">My prices feel too low</button>
-        <button type="button" data-p="direction">My direction is unclear</button>
-        <button type="button" data-p="cash">Cash is tight</button>
-        <button type="button" data-p="team">My team isn’t stepping up</button>
-        <button type="button" data-p="off">I can’t switch off</button>
-      </div>
-    </div>
-    <div class="q rv">
-      <h3><em>ii.</em><label for="weeks">For how many weeks, unsolved?</label></h3>
-      <div class="slide"><input id="weeks" type="range" min="1" max="52" value="8" data-weeks aria-describedby="weeks-out"><output id="weeks-out" data-weeks-out>8 weeks</output></div>
-    </div>
-    <div class="q rv">
-      <h3><em>iii.</em>If nothing changes, where are you in ninety days?</h3>
-      <div class="chips" role="group" aria-label="If nothing changes, where are you in ninety days?" data-ninety>
-        <button type="button" data-n="0">In the same place</button>
-        <button type="button" data-n="1">Further behind</button>
-        <button type="button" data-n="2">Honestly, I don’t know</button>
-      </div>
-    </div>
-    <div class="reading" data-reading role="status" hidden>
-      <p data-read1></p>
-      <p data-read2></p>
-      <div><a class="go" href="/pay/?step=session&amp;from=road5" data-pay>Take your seat · $27 <span aria-hidden="true">→</span></a></div>
-    </div>
-  </div>
-</div></section>
-
-<section class="band" aria-labelledby="h-how"><div class="wrap">
-  <div class="head rv">
-    <p class="lab">How it works</p>
-    <h2 id="h-how">Four steps. <i>Nothing to wait for.</i></h2>
-  </div>
   <ol class="steps rv">
     <li><svg class="ic" viewBox="0 0 52 52" fill="none" stroke="#7A5C16" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="draw" pathLength="1" d="M16 8v36M16 28h20v16M16 28V8c4-2 8-2 12 0"/><path class="draw" pathLength="1" d="M12 44h28"/></svg><em>i</em><b>You take your seat.</b><span>$27. Your account opens with Levels 01 to 05.</span></li>
     <li><svg class="ic" viewBox="0 0 52 52" fill="none" stroke="#7A5C16" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="draw" pathLength="1" d="M14 38l20-20 5 5-20 20-7 2z"/><path class="draw" pathLength="1" d="M30 22l5 5M8 46h36"/></svg><em>ii</em><b>You write first.</b><span>Three short levels at your own pace: what you believe, how you read it, what you feel.</span></li>
@@ -288,21 +309,10 @@ blockquote i{color:var(--gl)}
     <div class="lr tot"><span>Your seat at the table</span><i></i><b>$27</b></div>
   </div>
   <p class="note rv">The weekly hour with Alexandru is the heart of The Summit, at $1,989. Here you take the first one.</p>
+  <p class="rv" style="margin-top:28px"><a class="go ink" href="/pay/?step=session&amp;from=road5" data-pay>Name it in one hour · $27 <span aria-hidden="true">→</span></a></p>
 </div></section>
 
-<section class="esp band" aria-labelledby="h-alx"><div class="wrap">
-  <div class="alx rv">
-    <div class="facts">
-      <figure class="alx-ph"><div class="ph"><img src="/cabinet/alexandru.jpg" alt="Alexandru Cojocari" width="640" height="512" loading="lazy" decoding="async"></div></figure>
-      <p class="lab" id="h-alx">Across the table</p>
-      <p>Alexandru Cojocari.<br>Born in Moldova. Lives and works in Rome.<br>Degree in business and management.<br>Master’s in political science.<br>Founder of ExploraSelf.</p>
-    </div>
-    <div class="say">
-      <blockquote>“In my late teens I built made-to-measure kitchens and wardrobes. I loved it. I also did everything myself, and I didn’t watch the money. <i>The business closed.</i>”</blockquote>
-      <p class="lede">Today I mentor founders. The Blueprint is what I wish someone had put in front of me then: the right things to look at, one week at a time, and someone to read them with me.</p>
-    </div>
-  </div>
-</div></section>
+
 
 <section class="bone band" aria-labelledby="h-fit"><div class="wrap">
   <div class="head rv">
@@ -341,8 +351,8 @@ blockquote i{color:var(--gl)}
 <section class="dark band end" aria-labelledby="h-end"><div class="wrap">
   <span class="rule" aria-hidden="true"></span>
   <h2 id="h-end">Take your seat.</h2>
-  <p class="lede">One hour. One decision named. One road chosen together.</p>
-  <a class="go" href="/pay/?step=session&amp;from=road5" data-pay>Take your seat · $27 <span aria-hidden="true">→</span></a>
+  <p class="lede">One hour. One decision named. One road, chosen by you.</p>
+  <a class="go" href="/pay/?step=session&amp;from=road5" data-pay>Name it in one hour · $27 <span aria-hidden="true">→</span></a>
   <p class="meta">And a gift from Alexandru, given in the call</p>
 </div></section>
 
@@ -353,53 +363,75 @@ blockquote i{color:var(--gl)}
 </div></footer>
 <div class="stick" data-stick aria-hidden="true"><a class="go" href="/pay/?step=session&amp;from=road5" tabindex="-1">Take your seat · $27 <span aria-hidden="true">→</span></a></div>
 
-<script>
-// /road5/: the three questions read back in one paragraph, built only from
-// the visitor's own taps (nothing is sent); the ad's own pain is picked first
-// (utm_content …-alone / -time / -clients / -price / -direction / -cash /
-// -team / -off); the utm tags ride along to the pay page; quiet reveals.
-(() => {
-  const $ = (s) => document.querySelector(s), $$ = (s) => [...document.querySelectorAll(s)];
-  document.documentElement.classList.add('js');
-  const q = new URLSearchParams(location.search);
-  // Keep the ad's tags on every pay button.
-  const keep = [...q].filter(([k]) => k.startsWith('utm_')).map(([k, v]) => `&${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('');
-  if (keep) $$('[data-pay], .stick .go').forEach((a) => { a.href += keep; });
+<script type="module">
+// /road5/ (3 Nov 2026, after an Offer Master run): one question on the first
+// screen; the weeks the visitor says it has sat unsolved, drawn as tally
+// marks, with the next thirteen (ninety days) drawn faint; then one sentence
+// in their own words and one button. Their taps never leave the page. Only
+// anonymous moments are counted (functions/api/count.js: page and moment,
+// nothing about the person), so the test can be read in /mentor.
+import { count, trackScroll } from '/road-kit.js';
+const $ = (x) => document.querySelector(x), $$ = (x) => [...document.querySelectorAll(x)];
+document.documentElement.classList.add('js');
+const q = new URLSearchParams(location.search);
+// Keep the ad's tags on every pay button.
+const keep = [...q].filter(([k]) => k.startsWith('utm_')).map(([k, v]) => `&${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('');
+if (keep) $$('[data-pay], .stick .go').forEach((a) => { a.href += keep; });
+$$('[data-pay], .stick .go').forEach((a) => a.addEventListener('click', () => count('road5', 'cta')));
 
-  const PAIN = { alone: 'Carrying every decision alone', time: 'No time left for you', clients: 'Not enough clients', price: 'Prices that feel too low',
-    direction: 'A direction that feels unclear', cash: 'Cash that is tight', team: 'A team that isn’t stepping up', off: 'Not being able to switch off' };
-  const NINETY = ['in the same place', 'further behind', 'not sure where'];
-  let pain = '', n = -1;
-  const ad = String(q.get('utm_content') || '').toLowerCase();
-  const fromAd = Object.keys(PAIN).find((k) => ad.endsWith('-' + k) || ad === k);
-  const weeks = $('[data-weeks]'), out = $('[data-weeks-out]');
-  const w = () => Number(weeks.value);
-  const read = () => {
-    out.textContent = w() >= 52 ? '52+ weeks' : `${w()} ${w() === 1 ? 'week' : 'weeks'}`;
-    const total = w() + 13;
-    if (!pain || n < 0) { $('[data-reading]').hidden = true; return; }
-    $('[data-read1]').textContent = `${PAIN[pain]}, for ${w() >= 52 ? 'a year or more' : `${w()} ${w() === 1 ? 'week' : 'weeks'}`}. If nothing changes, in ninety days that is ${w() >= 52 ? 'well over a year' : `${total} weeks`} on one question, and by your own answer you will be ${NINETY[n]}.`;
-    $('[data-read2]').textContent = 'One hour is enough to name the decision behind it and choose one road. That is what The Boardroom is for.';
-    $('[data-reading]').hidden = false;
-  };
-  const press = (group, el) => { $$(group + ' button').forEach((b) => b.setAttribute('aria-pressed', String(b === el))); };
-  $$('[data-pains] button').forEach((b) => { b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => { pain = b.dataset.p; press('[data-pains]', b); read(); }); });
-  $$('[data-ninety] button').forEach((b) => { b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => { n = Number(b.dataset.n); press('[data-ninety]', b); read(); }); });
-  weeks.addEventListener('input', read);
-  if (fromAd) { pain = fromAd; press('[data-pains]', $(`[data-p="${fromAd}"]`)); }
-  read();
+const SAY = { alone: 'I carry every decision alone', time: 'No time left for me', clients: 'I need more clients', price: 'My prices feel too low',
+  direction: 'My direction is unclear', cash: 'Cash is tight', team: 'My team isn’t stepping up', off: 'I can’t switch off' };
+let pain = '';
+const weeks = $('[data-weeks]'), out = $('[data-weeks-out]'), tally = $('[data-tally]');
+const w = () => Number(weeks.value);
+const wk = (n) => `${n} ${n === 1 ? 'week' : 'weeks'}`;
+/** Tally marks: four strokes and a fifth across. The weeks so far in gold,
+ *  the next thirteen faint and dashed. A new row after 30 marks. */
+function draw() {
+  const done = w(), all = done + 13, per = 30, gap = 22, grp = 14;
+  let x = 6, y = 10, marks = '';
+  tally.setAttribute('viewBox', `0 0 680 ${Math.ceil(all / per) * 64 + 4}`);
+  for (let n = 1; n <= all; n++) {
+    const cls = n <= done ? 't' : 'f', d = n <= done ? ` style="animation-delay:${Math.min(n, 30) * 18}ms"` : '';
+    if (n % 5 === 0) { marks += `<line class="${cls}"${d} x1="${x - 4 * gap - 6}" y1="${y + 38}" x2="${x - gap + 6}" y2="${y + 4}"/>`; x += grp; }
+    else { marks += `<line class="${cls}"${d} x1="${x}" y1="${y}" x2="${x}" y2="${y + 44}"/>`; x += gap; }
+    if (n % per === 0) { x = 6; y += 64; }
+  }
+  tally.innerHTML = marks;
+}
+function read() {
+  out.textContent = w() >= 52 ? '52+ weeks' : wk(w());
+  draw();
+  if (!pain) { $('[data-reading]').hidden = true; return; }
+  $('[data-h1]').innerHTML = `“${SAY[pain]}.” <i>${w() >= 52 ? 'A year or more' : wk(w())} so far.</i>`;
+  $('[data-read1]').textContent = `If nothing changes, in ninety days that is ${w() >= 52 ? 'well over a year' : wk(w() + 13)} on one question.`;
+  $('[data-reading]').hidden = false;
+}
+const box = $('[data-pains]'), chg = $('[data-chg]');
+const press = (el) => { $$('[data-pains] button[data-p]').forEach((b) => b.setAttribute('aria-pressed', String(b === el))); box.classList.toggle('picked', !!el); chg.hidden = !el; };
+chg.addEventListener('click', () => { box.classList.remove('picked'); chg.hidden = true; const b = $('[data-pains] button[aria-pressed="true"]'); if (b) b.focus(); });
+$$('[data-pains] button[data-p]').forEach((b) => {
+  b.setAttribute('aria-pressed', 'false');
+  b.addEventListener('click', () => { pain = b.dataset.p; press(b); $('[data-weeksbox]').hidden = false; read(); count('road5', 'pain_match'); });
+});
+weeks.addEventListener('input', () => { read(); count('road5', 'cost_moved'); });
+// The ad's own pain is picked first (utm_content …-alone / -cash / …).
+const ad = String(q.get('utm_content') || '').toLowerCase();
+const fromAd = Object.keys(SAY).find((k) => ad.endsWith('-' + k) || ad === k);
+if (fromAd) { pain = fromAd; press($(`[data-p="${fromAd}"]`)); $('[data-weeksbox]').hidden = false; }
+read();
+trackScroll('road5');
 
-  const rv = $$('.rv');
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
-    rv.forEach((el) => io.observe(el));
-    const bar = $('[data-stick]'), first = $('.hero .go'), last = $('.end');
-    let past = false, end = false;
-    const show = () => bar.classList.toggle('on', past && !end);
-    new IntersectionObserver(([e]) => { past = !e.isIntersecting && e.boundingClientRect.top < 0; show(); }).observe(first);
-    new IntersectionObserver(([e]) => { end = e.isIntersecting; show(); }, { threshold: 0.05 }).observe(last);
-  } else rv.forEach((el) => el.classList.add('in'));
-})();
+const rv = $$('.rv');
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+  rv.forEach((el) => io.observe(el));
+  const bar = $('[data-stick]'), first = $('.hero .go'), last = $('.end');
+  let past = false, end = false;
+  const show = () => bar.classList.toggle('on', past && !end);
+  new IntersectionObserver(([e]) => { past = !e.isIntersecting && e.boundingClientRect.top < 0; show(); }).observe(first);
+  new IntersectionObserver(([e]) => { end = e.isIntersecting; show(); }, { threshold: 0.05 }).observe(last);
+} else rv.forEach((el) => el.classList.add('in'));
 </script>
 </body>
 </html>
