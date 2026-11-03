@@ -740,3 +740,98 @@ body:not(.ns-p1done) .mbar{display:none !important}
 .gp-saved{margin:-4px 0 0;min-height:1.2em;font-size:12px;color:var(--muted);opacity:0;transition:opacity .4s ease}
 .gp-saved.on{opacity:1}
 @media (prefers-reduced-motion:reduce){.gp-step,.gp-tick,.gp-bar i,.gp-in,.gp-saved{transition:none}}
+
+/* ── Simplicity and comfort (Alexandru, 3 Nov 2026) ─────────────────────
+   "Four parts" said once: the step bar says it; the extra cards and the
+   "Four domains" block leave the page. */
+#s-overview > div:has(#stepcards),#s-method{display:none !important}
+/* Show only what's earned: a part still locked is its title and one quiet
+   line ("Opens after Part 1 · 3 of 11 done"), not a greyed-out page. */
+.nslocked>*:not(.nslocknote){display:none !important}
+.nslocked{cursor:default}
+/* The share card and the action plan wait until Part 1 is done. */
+body:not(.ns-p1done) #s-save,body:not(.ns-p1done) #s-plan{display:none !important}
+/* The Massive Growth Plan: the next five steps; the rest behind one button. */
+.gp-later{display:none !important}
+.gp-allp{margin:18px 0 0;text-align:center}
+.gp-allb{min-height:46px;padding:0 20px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:600 14.5px/1 inherit;cursor:pointer}
+.gp-allb:hover{border-color:var(--goldink)}
+
+/* Before you start, one at a time, with Back beside Next. */
+#s-clear[data-bys] #s-journey{gap:0 !important}
+#s-clear[data-bys="r1"] #s-journey>section:not(:nth-of-type(1)),#s-clear[data-bys="r1"] #modes,#s-clear[data-bys="r1"] #s-strengths,
+#s-clear[data-bys="r2"] #s-journey>section:not(:nth-of-type(2)),#s-clear[data-bys="r2"] #modes,#s-clear[data-bys="r2"] #s-strengths,
+#s-clear[data-bys="modes"] #s-journey,#s-clear[data-bys="modes"] #s-strengths,
+#s-clear[data-bys="str"] #s-journey,#s-clear[data-bys="str"] #modes{display:none !important}
+.bys-nav{display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);padding-top:16px}
+.bys-at{margin:0;font-size:14px;color:var(--muted)}
+.bys-btns{display:flex;gap:12px}
+.bys-back,.bys-next{min-height:50px;padding:0 24px;border-radius:999px;font:600 16px/1 inherit;cursor:pointer}
+.bys-back{border:1.5px solid var(--line);background:var(--paper);color:var(--ink)}
+.bys-next{border:0;background:var(--deep,#0E1C2B);color:#EEF2F7}
+@media (max-width:860px){.bys-next{flex:1}}
+
+/* 12 Days to Start Winning: the card in the side and at the end. */
+.days-link{display:flex;align-items:center;gap:12px;width:100%;margin:10px 0 0;padding:12px;border:1px dashed rgba(169,192,217,.45);border-radius:10px;background:rgba(238,242,247,.04);color:#EEF2F7;text-align:left;cursor:pointer;font:inherit}
+.days-link:hover{border-color:#A9C0D9}
+.days-link svg{flex:none;width:22px;height:22px;color:#D6BF8F}
+.days-link small{display:block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#B8C6D6}
+.days-link b{display:block;font-size:13.5px;font-weight:600}
+.days-link em{display:block;font-style:normal;font-size:12px;color:#D6BF8F;margin-top:2px}
+.days-end{margin-top:18px}
+.days-wide{max-width:420px;margin:0 auto}
+/* The pop-up: one screen, in place. */
+.dbox,.nsmenu{font-family:'Inter',system-ui,-apple-system,'Segoe UI',Arial,sans-serif}
+.dbox{position:fixed;inset:0;z-index:200;background:rgba(10,21,34,.62);display:flex;align-items:center;justify-content:center;padding:20px 16px}
+.dbox[hidden]{display:none}
+.dcard{width:100%;max-width:440px;background:#FFFFFF;color:#1F1F1F;border-radius:18px;padding:28px 24px;display:flex;flex-direction:column;gap:12px}
+.dcard>svg{width:26px;height:26px;color:#B4975F}
+.dcard h2{margin:0;font:700 24px/1.25 inherit;color:#1F1F1F}
+.dcard p{margin:0;font-size:16.5px;line-height:1.55;color:#5F6368}
+.dcard .dk{font-size:12.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#6E5213}
+.dcard .dsm{font-size:13.5px}
+.dyes{display:flex;align-items:center;justify-content:center;min-height:52px;margin-top:6px;border:0;border-radius:999px;background:#0E1C2B;color:#FFFFFF;font:700 16px/1 inherit;text-decoration:none;cursor:pointer}
+.dyes[disabled]{opacity:.6}
+.dnot{min-height:44px;border:0;background:none;color:#5F6368;font:600 15px inherit;cursor:pointer}
+.derr{color:#8A3B12 !important;font-size:14px !important}
+.derr:empty{display:none}
+
+/* The phone's one menu. */
+.nsmenu-btn{display:none}
+.nsmenu{position:fixed;inset:0;z-index:190;background:rgba(10,21,34,.55);display:flex;align-items:flex-start;justify-content:flex-end;padding:12px}
+.nsmenu[hidden]{display:none}
+.nsmenu-card{width:100%;max-width:360px;background:var(--panel,#fff);color:var(--ink);border-radius:16px;padding:8px 8px 12px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.nsmenu-top{display:flex;align-items:center;justify-content:space-between;padding:6px 8px 6px 12px}
+.nsmenu-top b{font-size:16px}
+.nsmenu-x{width:44px;height:44px;border:0;background:none;color:var(--ink);font-size:26px;line-height:1;cursor:pointer}
+.nsmenu ul{list-style:none;margin:0;padding:0}
+.nsmenu li a,.nsmenu li button{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:8px 12px;border:0;border-radius:10px;background:none;color:var(--ink);text-align:left;text-decoration:none;font:inherit;cursor:pointer}
+.nsmenu li a:hover,.nsmenu li button:hover{background:var(--cream,#F2F4F7)}
+.nsmenu-ic{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--cream,#F2F4F7);color:var(--goldink,#6E5213)}
+.nsmenu-ic svg{width:20px;height:20px}
+.nsmenu li b{display:block;font-size:15.5px;font-weight:600}
+.nsmenu li small{display:block;font-size:13px;color:var(--muted)}
+@media (max-width:860px){
+  /* One slim bar: the step bar, a Menu button and the account. */
+  .side .incub-link,.side .tk-link,.side .days-link{display:none !important}
+  .topbar>span:first-child{display:none}
+  #top-tools>#how-btn,#top-tools>[data-act="download"],#top-tools>[data-fs],#top-tools>[data-theme-switch]{display:none !important}
+  .nsmenu-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink);font:600 14.5px/1 inherit;cursor:pointer}
+  .nsmenu-btn svg{width:18px;height:18px}
+  .topbar{min-height:56px !important;justify-content:flex-end !important}
+  /* The floating arrows covered the page: the questions have their own Back and Next. */
+  .cw-pb{display:none !important}
+}
+@media (prefers-reduced-motion:reduce){.gp-allb,.days-link{transition:none}}
+
+/* Back sits beside Next (Alexandru, 3 Nov 2026), on a computer and a phone;
+   on a phone both sit at the bottom, where the thumb is. */
+.nsb-foot{justify-content:flex-start;gap:12px}
+.nsb-back,.nsb-next{min-height:50px;padding:0 24px;font-size:15.5px;font-weight:600}
+@media (max-width:860px){
+  .nsb-foot{display:flex !important;margin-top:16px;padding-top:14px}
+  body.nsq-full .nsb-foot{position:fixed;left:0;right:0;bottom:0;z-index:97;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--rt,#fff);border-top:1px solid var(--rule)}
+  .nsb-next{flex:1}
+  .nsb-back[disabled]{display:none}
+  body.nsq-full .crown-wrap{--cb:calc(96px + env(safe-area-inset-bottom,0px))}
+}

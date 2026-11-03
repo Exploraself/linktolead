@@ -73,18 +73,22 @@
 
   function html(plan, st) {
     const done = (st && st.done) || {}, lib = (st && st.lib) || null, write = !!(st && st.write), all = ids(plan), count = all.filter((id) => done[id]).length;
+    // This week first (3 Nov 2026): with st.week, only the next steps not yet done show,
+    // unless st.all; the rest wait behind one button. Never a scary count up front.
+    const wk = st && st.week ? all.filter((id) => !done[id]).slice(0, st.week) : null, short = !!(wk && !(st && st.all));
+    const hide = (id) => (short && !wk.includes(id) ? ' gp-later' : '');
     const lines = (s) => { let k = 0; return s.lines.map((l) => `<li>${write ? lineIn(l, s.id, () => ++k) : line(l)}</li>`).join(''); };
     let n = 0;
-    const steps = plan.domains.map((d) => `<div class="gp-dom" style="--c:${esc(d.col)}" data-k="${esc(d.k)}">
+    const steps = plan.domains.map((d) => `<div class="gp-dom${short && !d.steps.some((s) => wk.includes(s.id)) ? ' gp-later' : ''}" style="--c:${esc(d.col)}" data-k="${esc(d.k)}">
       <div class="gp-dh"><h3 class="sf">${esc(d.name)}</h3><span class="gp-ds">${esc(d.sub)}</span></div>
-      <ol class="gp-steps">${d.steps.map((s) => { n += 1; return `<li class="gp-step${done[s.id] ? ' on' : ''}" id="gp-step-${esc(s.id)}">
+      <ol class="gp-steps">${d.steps.map((s) => { n += 1; return `<li class="gp-step${done[s.id] ? ' on' : ''}${hide(s.id)}" id="gp-step-${esc(s.id)}">
         ${top(n, s)}
         <ul class="gp-lines">${lines(s)}</ul>
         ${write ? `<p class="gp-saved" data-saved="${esc(s.id)}" aria-live="polite"></p>` : ''}
         ${foot(plan, s, done[s.id])}</li>`; }).join('')}</ol></div>`).join('');
     const P = plan.plus;
-    const plus = `<div class="gp-dom gp-plus">
-      <ol class="gp-steps"><li class="gp-step${done[P.id] ? ' on' : ''}" id="gp-step-${esc(P.id)}">
+    const plus = `<div class="gp-dom gp-plus${hide(P.id)}">
+      <ol class="gp-steps"><li class="gp-step${done[P.id] ? ' on' : ''}${hide(P.id)}" id="gp-step-${esc(P.id)}">
         ${top(n + 1, P)}
         <ul class="gp-voices">${P.voices.map((v) => `<li><b class="sf">${esc(v.name)}</b><span>${esc(v.q)}</span></li>`).join('')}</ul>
         ${foot(plan, P, done[P.id])}
@@ -98,13 +102,14 @@
       <p class="gp-tag">${plan.tagline}</p>
       <p class="gp-lead sf">${esc(plan.lead)}</p>
       <ol class="gp-moves">${plan.moves.map((m) => `<li>${esc(m)}</li>`).join('')}</ol>
-      <div class="gp-prog" role="status"><span><b>${count}</b> of ${all.length} done</span><span class="gp-bar" aria-hidden="true"><i style="width:${Math.round((count / all.length) * 100)}%"></i></span></div>
+      <div class="gp-prog" role="status">${wk ? `<span>Your next ${wk.length} steps${count ? ` · ${count} done so far` : ''}</span>` : `<span><b>${count}</b> of ${all.length} done</span>`}<span class="gp-bar" aria-hidden="true"><i style="width:${Math.round((count / all.length) * 100)}%"></i></span></div>
     </div>
     <div class="gp-own">
       <p class="gp-priv">Only you, and Alexandru and the team, can read what you write here.</p>
       ${write ? '' : '<button type="button" class="gp-complete no-print" data-act="gp-complete" data-f="gp-complete">Complete your account to write here</button>'}
     </div>
-    ${steps}${plus}`;
+    ${steps}${plus}
+    ${wk ? `<p class="gp-allp no-print"><button type="button" class="gp-allb" data-act="gp-all" data-f="gp-all">${short ? `See all ${all.length} steps` : `Show only my next ${wk.length}`}</button></p>` : ''}`;
   }
 
   root.GrowthView = { html, line, ids, blankIds };

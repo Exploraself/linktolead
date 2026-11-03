@@ -9,6 +9,10 @@ pages beside it. Plain HTML, CSS and JavaScript; no build, no dependencies.
 | `/northstar/summit` | The Summit, the top of Link to Lead ($1,989). |
 | `/north3/` | Road 2, the North Star sales page: “Your business, on paper. Not in your head.” `/compass/welcome` and `/compass/welcome-a` redirect there. |
 
+## Simpler (3 Nov 2026)
+
+`clarity.js` holds three things beside `app.js`: on a phone, one Menu button for the Founder’s Blueprint, the Growth Toolkit, 12 Days, How to use this, Download, Full screen and Light and dark; Before you start one question at a time (“Before you start · 2 of 4”, Back beside Next); and the 12 Days to Start Winning bonus (a card in the side and at the end, a pop-up in place, `POST /api/course`). In `crown.css`: “four parts” said once, a locked part is one quiet line (the What-if lab waits for Part 3), the Growth Plan shows the next five steps with “See all 21 steps”, and the questions have Back beside Next, at the bottom on a phone.
+
 ## Where the intelligence lives
 
 - `engine.js`: the logic from “00 Leader’s North Star · The Intelligence” (Drive). Domain scores (0–6) and bands (Needs you now / Taking shape / A strength), the twelve feedback versions, pains and goals, the compass reading, the sixteen launchpad pieces, what each group of numbers already tells you, and the What-if lab. Tested in `tests/compass.test.mjs`.

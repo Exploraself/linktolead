@@ -3,7 +3,7 @@
  * the menu fills with how far through the page they are. Clicking still jumps
  * as before (app.js). Under reduced motion the light moves without gliding. */
 (function () {
-  var ORDER = [['overview', 's-overview'], ['clear', 's-clear'], ['people', 's-people'], ['numbers', 's-numbers'], ['plan', 's-whatif'], ['method', 's-method']];
+  var ORDER = [['overview', 's-overview'], ['clear', 's-clear'], ['people', 's-people'], ['numbers', 's-numbers'], ['plan', 's-whatif']];
   var nav = document.getElementById('nav');
   if (!nav) return;
   var glow = document.createElement('span'); glow.className = 'nl-glow'; glow.setAttribute('aria-hidden', 'true');
