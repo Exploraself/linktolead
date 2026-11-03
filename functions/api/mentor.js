@@ -17,7 +17,7 @@
 //                  reply (an answer in the thread, emailed as a letter) · tier (change step, and its step tags in Mailchimp) ·
 //                  pause · series-hold (pause or resume the letters that
 //                  follow each pain) · delete · signin-link · message · mc-test ·
-//                  mc-backfill · book-confirm (one of the three times of a
+//                  mc-backfill · book-confirm (one of the times of a
 //                  request for a call: the person gets it with the Google
 //                  Meet link) · book-links (the Meet link per kind of call).
 //                  Every action is logged as an event; every
@@ -489,7 +489,7 @@ async function post({ request, env }) {
   }
 
   if (body.action === 'book-confirm') {
-    // One of the three times a person suggested (functions/api/book.js). The
+    // One of the times a person suggested (functions/api/book.js). The
     // confirmation leaves first; only then is the request marked confirmed
     // (AGENTS.md rule 6). A request is confirmed once: a second tap sends nothing.
     await bookingTables(D);
@@ -498,11 +498,11 @@ async function post({ request, env }) {
     const row = bookingRow(b);
     if (b.status === 'confirmed' && !body.again) return bad('This request is already confirmed. Nothing was sent again.', 409);
     if (BOOK_CLOSED.includes(b.status)) return bad('This request is closed. Reopen it first.', 409);
-    // One of their three times, or (Alexandru, 2 Nov 2026: "full control") a
+    // One of their times, or (Alexandru, 2 Nov 2026: "full control") a
     // time he picks himself, which the email then names.
     const own = !row.times.includes(body.time);
     const time = own ? (isOtherTime(body.time) ? new Date(body.time).toISOString() : '') : body.time;
-    if (!time) return bad('Choose one of their three times, or a time in the next 60 days.');
+    if (!time) return bad('Choose one of their times, or a time in the next 60 days.');
     if (Date.parse(time) <= Date.now()) return bad('That time has passed. Reply to them with a new one.');
     const meet = (await meetLinks(D))[b.kind];
     if (!meet) return bad(`Paste the ${BOOK_KINDS[b.kind].setting} first, in Settings → Booking links.`);

@@ -48,7 +48,7 @@ export async function emailTrail(D, env, raw, { money = false } = {}) {
   if (!looksLikeEmail(email)) return { email, bad: true };
   await Promise.all([bookingTables(D).catch(() => {}), refundTable(D).catch(() => {})]);
 
-  const people = await rows(D, 'SELECT id, name, email, tier, joined_at, last_seen_at FROM student WHERE lower(email) = ? ORDER BY joined_at LIMIT 5', email);
+  const people = await rows(D, 'SELECT id, name, email, phone, tier, joined_at, last_seen_at FROM student WHERE lower(email) = ? ORDER BY joined_at LIMIT 5', email);
   const accounts = [];
   for (const s of people) {
     const [prof, events, pays, notes, msgs, compass, course, series, tools, sheet] = await Promise.all([
@@ -74,7 +74,7 @@ export async function emailTrail(D, env, raw, { money = false } = {}) {
     });
   }
   const [bookings, refunds, mailchimp] = await Promise.all([
-    rows(D, 'SELECT id, kind, status, created_at, confirmed_time, student_id FROM booking WHERE lower(email) = ? ORDER BY created_at DESC', email),
+    rows(D, 'SELECT id, kind, status, created_at, confirmed_time, student_id, phone FROM booking WHERE lower(email) = ? ORDER BY created_at DESC', email),
     rows(D, 'SELECT step, asked_at, done_at FROM refund_ask WHERE lower(email) = ? ORDER BY asked_at DESC', email),
     rows(D, 'SELECT action, status, mode, detail, at FROM mailchimp_log WHERE lower(email) = ? ORDER BY id DESC LIMIT 100', email),
   ]);

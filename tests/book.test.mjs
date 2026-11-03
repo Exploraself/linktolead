@@ -2,7 +2,8 @@
 // the same rules and questions; every answer and time is checked; the pages
 // replace the Google Form everywhere it was.
 import fs from 'node:fs';
-import { tally } from './_d1.mjs';
+import { tally, fakeD1, fakeResend, post } from './_d1.mjs';
+import { onRequestPost as book } from '../functions/api/book.js';
 import * as P from '../public/book/slots.js';
 import * as S from '../functions/_booking.js';
 import { BOOKING as LETTERS_BOOKING } from '../functions/_letters.js';
@@ -14,7 +15,7 @@ const read = (f) => fs.readFileSync(new URL('../' + f, import.meta.url), 'utf8')
 ok(JSON.stringify(P.RULES) === JSON.stringify(S.RULES), 'the same rules on the page and the server');
 ok(JSON.stringify(P.CHOICES) === JSON.stringify(S.CHOICES) && JSON.stringify(P.FORMS) === JSON.stringify(S.FORMS), 'the same questions and answers');
 ok(P.KINDS.discovery.minutes === 30 && P.KINDS.boardroom.minutes === 60 && S.KINDS.discovery.minutes === 30 && S.KINDS.boardroom.minutes === 60, '30 minutes free, 60 for the 1:1');
-ok(S.RULES.days.join() === '2,3,4' && S.RULES.from === 15 && S.RULES.to === 20 && S.RULES.pick === 3, 'Tuesday to Thursday, 15:00–20:00 Rome, three times');
+ok(S.RULES.days.join() === '2,3,4' && S.RULES.from === 15 && S.RULES.to === 20 && S.RULES.min === 1 && S.RULES.pick === 3, 'Tuesday to Thursday, 15:00–20:00 Rome; one time is enough, up to three (Alexandru, 3 Nov 2026)');
 
 // Slots: a fixed Monday noon in Rome, 2 November 2026.
 const at = new Date('2026-11-02T11:00:00Z');
@@ -54,4 +55,35 @@ ok(LETTERS_BOOKING === CONTENT_BOOKING && LETTERS_BOOKING === 'https://linktolea
 const forms = ['public', 'functions'].flatMap((d) => fs.readdirSync(new URL(`../${d}/`, import.meta.url), { recursive: true }).filter((f) => /\.(js|html)$/.test(f)).map((f) => `${d}/${f}`))
   .filter((f) => read(f).includes('forms.gle/opnxfhFTJJg69Qy77'));
 ok(forms.length === 0, `no Google Form left (${forms.join(', ') || 'none'})`);
+// One time is enough, up to three; a phone for WhatsApp on both (Alexandru, 3 Nov 2026).
+for (const [v, want] of [['+39 333 123 4567', '+393331234567'], ['0039 (333) 123-4567', '+393331234567'], ['+1 555 555 0100', '+15555550100'], ['333 123 4567', ''], ['+0 1234567', ''], ['+39 12', ''], ['+39 333 123 4567 89012345', '']]) {
+  ok(P.phoneOf(v) === want && S.phoneOf(v) === want, `phone "${v}" → "${want}" on the page and the server`);
+}
+ok(P.codeFor('Europe/Rome') === '+39' && P.codeFor('America/New_York') === '+1' && P.codeFor('Mars/Base') === '+', 'the phone field starts from the time zone’s country code');
+{
+  const sent = fakeResend();
+  const env = { DB: fakeD1(), RESEND_API_KEY: 're_test', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Rome' };
+  const slots = S.slotsFor('discovery');
+  const ask = async (extra, ip) => { const r = await book({ request: post('/api/book', { kind: 'discovery', answers: { stage: 'solo', struggles: ['clients', 'time'], goals: ['clients', 'runs'] }, name: 'Sam Example', email: 'sam@example.com', tz: 'Europe/Rome', ...extra }, ip), env }); return { status: r.status, j: await r.json() }; };
+  let r = await ask({ times: [slots[0]], phone: '+39 333 123 4567' }, '1.1.1.1');
+  ok(r.status === 200 && r.j.ok && r.j.times.length === 1, 'one time is enough to send');
+  r = await ask({ times: [slots[0], slots[1], slots[2]], phone: '+39 333 123 4567' }, '1.1.1.2');
+  ok(r.status === 200 && r.j.ok && r.j.times.length === 3, 'three still go');
+  r = await ask({ times: [], phone: '+39 333 123 4567' }, '1.1.1.3');
+  ok(r.status === 400, 'no time: not sent');
+  r = await ask({ times: slots.slice(0, 4), phone: '+39 333 123 4567' }, '1.1.1.4');
+  ok(r.status === 400, 'four times: not sent');
+  r = await ask({ times: [slots[0], slots[0]], phone: '+39 333 123 4567' }, '1.1.1.5');
+  ok(r.status === 400, 'the same time twice: not sent');
+  r = await ask({ times: [slots[0]], phone: '333 123' }, '1.1.1.6');
+  ok(r.status === 400 && /country code/.test(r.j.error || ''), 'no phone with its country code: not sent, and it says why');
+  const row = env.DB.raw.prepare('SELECT phone FROM booking ORDER BY created_at LIMIT 1').get();
+  ok(row && row.phone === '+393331234567', 'the phone is kept with the request, in the international form');
+  const notice = sent.find((m) => /request from Sam Example/.test(m.body.subject || ''));
+  ok(notice && notice.body.html.includes('https://wa.me/393331234567') && notice.body.text.includes('+393331234567'), 'Alexandru’s notice carries the phone and a one-tap WhatsApp link');
+  const copy = sent.find((m) => m.body.to === 'sam@example.com' || (Array.isArray(m.body.to) && m.body.to.includes('sam@example.com')));
+  ok(copy && /Your time for our call/.test(copy.body.subject) && /Here is the time you suggested/.test(copy.body.text) && copy.body.text.includes('+393331234567'), 'one time: the copy says “your time”, and shows their phone');
+}
+const pageJs = read('public/book/book.js');
+ok(pageJs.includes("if (st.kind === 'times') return S.times.length >= RULES.min") && pageJs.includes("kind: 'phone'") && pageJs.includes('Your phone number, for WhatsApp'), 'the page moves on with one time and asks the phone on both forms');
 done();

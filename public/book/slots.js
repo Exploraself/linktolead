@@ -1,6 +1,7 @@
 // The rules and the questions of the two booking pages (Alexandru, 2 Nov
 // 2026): Tuesday, Wednesday and Thursday, 15:00–20:00 Rome time, from
-// tomorrow up to 14 days ahead, three times picked, one confirmed within 24
+// tomorrow up to 14 days ahead, one time picked (up to three: Alexandru,
+// 3 Nov 2026, "1 is enough, 2 or 3 are options"), one confirmed within 24
 // hours. Discovery calls start every 30 minutes, the 1:1 every 60 (the last
 // one ends by 20:00). The same rules and questions are in
 // functions/_booking.js, which checks everything the page sends
@@ -8,7 +9,7 @@
 // (public/book/book.js) draws them, in the visitor's own time zone.
 
 export const ZONE = 'Europe/Rome';
-export const RULES = { zone: ZONE, days: [2, 3, 4], from: 15, to: 20, ahead: 14, pick: 3, confirmHours: 24, where: 'Google Meet' };
+export const RULES = { zone: ZONE, days: [2, 3, 4], from: 15, to: 20, ahead: 14, min: 1, pick: 3, confirmHours: 24, where: 'Google Meet' };
 export const KINDS = {
   discovery: { minutes: 30, every: 30 },
   boardroom: { minutes: 60, every: 60 },
@@ -60,6 +61,27 @@ export const FORMS = {
   ],
 };
 export const NAME_MAX = 80;
+/** A phone number as the booking pages take it (Alexandru, 3 Nov 2026: "their
+ *  phone number must be collected too, for both"): spaces, dots, dashes and
+ *  brackets dropped, 00 read as +, then + and 7 to 15 digits (the
+ *  international form WhatsApp uses). '' when it is not one. The same rule
+ *  is in functions/_booking.js (tests/book.test.mjs holds both equal). */
+export const PHONE_MAX = 24;
+export function phoneOf(v) {
+  let s = String(v ?? '').trim().replace(/[\s().\-\u00a0]/g, '');
+  if (s.startsWith('00')) s = '+' + s.slice(2);
+  return /^\+[1-9]\d{6,14}$/.test(s) ? s : '';
+}
+
+/** The country code to start the phone field with, from the visitor's time
+ *  zone; '+' when the zone says nothing sure. Only a starting point: they
+ *  change it freely. */
+const CODES = { 'Europe/Rome': '+39', 'Europe/Vatican': '+39', 'Europe/San_Marino': '+378', 'Europe/Paris': '+33', 'Europe/London': '+44', 'Europe/Dublin': '+353',
+  'Europe/Berlin': '+49', 'Europe/Madrid': '+34', 'Europe/Lisbon': '+351', 'Europe/Amsterdam': '+31', 'Europe/Brussels': '+32', 'Europe/Zurich': '+41',
+  'Europe/Vienna': '+43', 'Europe/Chisinau': '+373', 'Europe/Bucharest': '+40', 'Europe/Kiev': '+380', 'Europe/Kyiv': '+380', 'Europe/Warsaw': '+48',
+  'Europe/Athens': '+30', 'Europe/Stockholm': '+46', 'Europe/Oslo': '+47', 'Europe/Copenhagen': '+45', 'Europe/Helsinki': '+358', 'Europe/Prague': '+420',
+  'Australia/Sydney': '+61', 'Australia/Melbourne': '+61', 'Asia/Dubai': '+971', 'Asia/Kolkata': '+91', 'Asia/Singapore': '+65', 'Africa/Lagos': '+234', 'Africa/Johannesburg': '+27' };
+export const codeFor = (tz) => CODES[tz] || (/^America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Detroit|Toronto|Vancouver|Edmonton|Winnipeg|Halifax|Anchorage)$/.test(String(tz || '')) || String(tz || '').startsWith('US/') ? '+1' : '+');
 
 const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const FMT = new Map();

@@ -389,7 +389,7 @@ function questionsHTML() {
 // ── Bookings (Alexandru, 2 Nov 2026) ───────────────────────────────────────
 // Requests for a call from /book/discovery/ and /book/boardroom/
 // (functions/_booking.js), newest first: who, which call, what they answered,
-// their three times in Rome time. Confirm sends the chosen time, in their
+// their times (one to three) in Rome time. Confirm sends the chosen time, in their
 // zone and Rome's, with the Google Meet link pasted in Settings → Booking
 // links; the server checks the right (ACTION_RIGHT: 'message').
 
@@ -413,7 +413,7 @@ const romeInputToIso = (v) => {
 /** 1:1 requests and Boardroom 1:1 (Alexandru, 2 Nov 2026: "two menus …
  *  any details, so that I can have full control"). Each request: who, their
  *  account and step, when they asked (Rome and their own time), every answer,
- *  their three times in Rome and theirs, the room, a private note, and every
+ *  their times in Rome and theirs, the room, a private note, and every
  *  move: confirm one of their times or another time (an email goes), held,
  *  no-show, declined, cancelled, reopen, write to them, delete. */
 const BK = { discovery: { f: 'open', q: '' }, boardroom: { f: 'open', q: '' } };
@@ -456,10 +456,10 @@ function requestsHTML(kind) {
     const reply = `mailto:${b.email}?subject=${encodeURIComponent(kind === 'boardroom' ? 'Your 1:1 with Alexandru' : 'Our call')}&body=${encodeURIComponent(`Hi ${String(b.name || '').split(/\s+/)[0]},\n\n`)}`;
     return `<li class="bk${open ? '' : ' closed'}" id="bk-${esc(b.id)}"><div>
       <p class="bk-h"><span class="pill ${BK_PILL[b.status] || ''}">${esc(BK_STATUS[b.status] || b.status)}</span>${s ? `<span class="pill">${esc(STEP_NAMES[s.tier] || s.tier || 'Free')}</span>` : '<span class="pill">No account</span>'}</p>
-      ${who} <span class="em">${emailBtn(b.email)}</span>
+      ${who} <span class="em">${emailBtn(b.email)}${b.phone ? ` · ${waLink(b.phone)}` : ''}</span>
       <p class="tiny">Asked ${esc(when(b.created_at))} · ${esc(day(b.created_at))}${zone ? ` · lives on ${esc(zone)} time` : ' · Rome time'}${b.confirmed_at ? ` · confirmed ${esc(when(b.confirmed_at))}${b.confirmed_by ? ` by ${esc(b.confirmed_by)}` : ''}` : ''}${b.closed_at ? ` · ${esc((BK_STATUS[b.status] || '').toLowerCase())} ${esc(when(b.closed_at))}${b.closed_by ? ` by ${esc(b.closed_by)}` : ''}` : ''}</p>
       ${b.answers && b.answers.length ? `<dl class="dkv bk-a">${b.answers.map(([l, w]) => `<dt>${esc(l)}</dt><dd>${esc(w)}</dd>`).join('')}</dl>` : ''}
-      <p class="lbl" style="margin-top:12px">Their three times</p><ul class="bk-tl">${b.times.map(timeRow).join('')}${ownTime}</ul>
+      <p class="lbl" style="margin-top:12px">${b.times.length === 1 ? 'Their time' : `Their ${b.times.length === 2 ? 'two' : 'three'} times`}</p><ul class="bk-tl">${b.times.map(timeRow).join('')}${ownTime}</ul>
       ${mayConfirm ? `<details class="bk-own"><summary>Another time…</summary><div class="bk-ownrow"><label class="tiny" for="own-${esc(b.id)}">Day and time, Rome</label>
         <input type="datetime-local" id="own-${esc(b.id)}" step="900"><button type="button" class="btn" data-bown="${esc(b.id)}">Confirm this time</button></div>
         <p class="tiny">They get the same email: the time, in their own time too, and the Google Meet room.</p></details>` : ''}
@@ -743,6 +743,8 @@ const TOOL_PATH = { 'runway': '/runway/', 'bottleneck': '/bottleneck/', 'off-swi
 const BOOK_PATH = { discovery: '/book/discovery/', boardroom: '/book/boardroom/' };
 const CROSS_NAME = { northstar: 'The Leader’s North Star', blueprint: 'The Founder’s Blueprint' };
 const DOMAIN_NAME = { self: 'Lead yourself', people: 'Lead your people', work: 'Lead your business', market: 'Lead the market' };
+/** A phone as a one-tap WhatsApp link (3 Nov 2026). */
+const waLink = (p) => (p ? `<a class="wa" href="https://wa.me/${esc(String(p).replace(/\D/g, ''))}" target="_blank" rel="noopener" title="Write on WhatsApp">${esc(p)} · WhatsApp</a>` : '');
 const emailBtn = (email, cls = '') => (email ? `<button type="button" class="emailbtn${cls ? ' ' + cls : ''}" data-email="${esc(email)}" title="Everything for this email">${esc(email)}</button>` : '');
 const link = (path) => `<a href="${esc(SITE + path)}" target="_blank" rel="noopener">${esc(SITE + path)}</a>`;
 /** "3 Nov 2026, 00:12", Rome time. */
@@ -790,7 +792,7 @@ export function trailRows(t) {
     for (const p of a.payments || []) add(p.at, 'pay', `Paid for ${esc(STEP_NAMES[p.step] || p.step)} · ${p.mode === 'live' ? 'live' : '<b class="warn">test</b>'}${p.amount != null ? ` · ${(p.amount / 100).toLocaleString('en-US', { style: 'currency', currency: String(p.currency || 'usd').toUpperCase() })}` : ''}`);
     for (const e of a.events || []) { const w = eventWords(e); if (w) add(e.at, w[0], esc(w[1])); }
   }
-  for (const b of t.bookings || []) add(b.created_at, 'call', `Asked for ${b.kind === 'boardroom' ? 'the Boardroom 1:1' : 'a free discovery call'} on ${link(BOOK_PATH[b.kind] || '/book/discovery/')} · ${esc(b.status)}${b.confirmed_time ? ' · ' + esc(stamp(b.confirmed_time)) + ' Rome' : ''}`);
+  for (const b of t.bookings || []) add(b.created_at, 'call', `Asked for ${b.kind === 'boardroom' ? 'the Boardroom 1:1' : 'a free discovery call'} on ${link(BOOK_PATH[b.kind] || '/book/discovery/')}${b.phone ? ` · ${waLink(b.phone)}` : ''} · ${esc(b.status)}${b.confirmed_time ? ' · ' + esc(stamp(b.confirmed_time)) + ' Rome' : ''}`);
   for (const r of t.refunds || []) add(r.asked_at, 'refund', `Asked for a refund · ${esc(STEP_NAMES[r.step] || r.step)} · ${r.done_at ? 'done' : '<b class="warn">open</b>'}`);
   // Two events of the same kind at the same moment (a page and its API) count once.
   const seen = new Set();
@@ -840,6 +842,7 @@ async function trail(email) {
   $('#main').innerHTML = `<div class="stack trail"><div class="bar"><button class="ghost" id="back">← Back to the cockpit</button>${a ? `<button class="ghost" data-msg="${esc(a.id)}">Send a message</button>` : ''}</div>
     <div class="panel"><p class="lbl">${ti('mail')} Everything for this email</p>
       <h2 class="trail-mail">${esc(t.email)}</h2>
+      ${(() => { const P = [...new Set([...A.map((x) => x.phone), ...(t.bookings || []).map((b) => b.phone)].filter(Boolean))]; return P.length ? `<p class="tiny">${P.map(waLink).join(' · ')}</p>` : ''; })()}
       <p class="tiny">${a ? `${esc(a.name || '—')} · ${esc(STEP_NAMES[a.tier || 'free'] || a.tier)} · joined ${esc(day(a.joined_at))} · last seen ${esc(when(a.last_seen_at || a.joined_at))}` : 'No account has this address. What it did without one is below.'}${t.team ? ' · <b>on the team</b>' : ''}</p>
       <div class="acts" style="margin-top:10px">${chips.map(([w, c]) => `<span class="pill${c ? ' ' + c : ''}">${esc(w)}</span>`).join(' ')}</div>
       <div class="acts" style="margin-top:12px">${a ? `<button class="btn gold" data-open="${esc(a.id)}">Open their work</button><button class="btn" data-drawer="${esc(a.id)}">Their account</button>` : ''}<button class="btn" data-copy="${esc(t.email)}">Copy the email</button></div>

@@ -11,7 +11,7 @@ import { seriesMode, levelsIn, afterAnswers } from '../_series.js';
 
 async function student(D, token) {
   if (!token || token.length < 20) return null;
-  return D.prepare('SELECT id,email,name,stage,tier,thin_domain FROM student WHERE id = ?').bind(token).first();
+  return D.prepare('SELECT id,email,name,phone,stage,tier,thin_domain FROM student WHERE id = ?').bind(token).first();
 }
 
 export async function onRequestGet({ request, env }) {
@@ -51,7 +51,7 @@ export async function onRequestGet({ request, env }) {
   // stageChosen: the founder picked this stage on /start ("Change where I
   // stand"), so it wins over the North Star's on every device. signupType:
   // 'simple' founders never have a password, so /start offers none.
-  return json({ ok: true, me: { name: me.name, email: me.email, stage: me.stage, stageChosen: !!chose, tier: me.tier, thin: me.thin_domain,
+  return json({ ok: true, me: { name: me.name, email: me.email, phone: me.phone || '', stage: me.stage, stageChosen: !!chose, tier: me.tier, thin: me.thin_domain,
     // Team accounts see every Blueprint level open (functions/_team.js).
     openAll: await isTeamMember(D, me.email, env), hasPassword: !!(auth && auth.pass_hash),
     signupType: (prof && prof.signup_type) || null,
