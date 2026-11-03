@@ -109,7 +109,7 @@ export const ENTRIES = [
   {
     id: 'course', stage: 'use', icon: 'sun', fn: 'courseLetter', course: true,
     name: COURSE_NAME,
-    when: `They tap Start on /12-days/. The welcome leaves at once; then one letter a day from ${SEND_HOUR}:00 their time (never after ${LATEST_HOUR}:00), Day 1 to Day 12, then "What next".`,
+    when: `They tap Start on /12-days/, or "Yes, send them to me" on the 12 Days bonus card in Base Camp's left menu (since 3 Nov 2026). The welcome leaves at once; then one letter a day from ${SEND_HOUR}:00 their time (never after ${LATEST_HOUR}:00), Day 1 to Day 12, then "What next".`,
     who: 'Signed-in founders who started it. Stop and start again any time, on /12-days/ or with the unsubscribe link.',
     from: '/12-days/',
     sentBy: 'functions/_course.js (the hourly job in worker.js)',

@@ -33,7 +33,8 @@ ok(V.WHERE4.map((q) => q.k).join() === 'cust,sales,team,offer,reach,yes,back,mar
 ok(V.WHERE4.every((Q) => Array.isArray(Q.o) || Q.s), 'only taps and sliders: nothing to write');
 ok(['yes', 'back', 'margin'].every((k) => V.WHERE4.find((Q) => Q.k === k).x.length) && V.WHERE4[0].o[0] === 'None yet', 'every number has its “not yet” or “I don’t know”');
 const s1 = V.stepsOf(1), s4 = V.stepsOf(4), s6 = V.stepsOf(6), s10 = V.stepsOf(10);
-ok(s1.slice(0, 4).every((s, i) => s[1] === 'welcome' && s[2] === i) && s1.slice(4, 7).every((s) => s[1] === 'wask') && s1.slice(7, 16).map((s) => s[2]).join() === 'cust,sales,team,offer,reach,yes,back,margin,win' && s1[16][1] === 'you' && s1[17][1] === 'idea', 'Level 01: four screens, three taps, the door, your version, then the first idea');
+ok(s1.slice(0, 4).every((s, i) => s[1] === 'welcome' && s[2] === i) && s1.slice(4, 7).every((s) => s[1] === 'wask') && s1.slice(7, 16).map((s) => s[2]).join() === 'cust,sales,team,offer,reach,yes,back,margin,win' && s1[16][1] === 'you' && s1[17][1] === 'begin' && s1[18][1] === 'idea', 'Level 01: four screens, three taps, the door, your version, “Level 01 begins”, then the first idea');
+ok([s4, s6, s10].every((S) => { const b = S.findIndex((s) => s[1] === 'begin'); return b > 0 && S[b - 1][1] === 'got' && S[b + 1][0] === 0; }) && !V.stepsOf(2).some((s) => s[1] === 'begin'), '04, 06 and 10: “Level NN begins” after last week, right before the first part; other levels have no intro, so no such screen');
 ok([s4, s6, s10].every((S) => S.slice(0, 4).every((s) => s[1] === 'welcome') && S.slice(4, 7).every((s) => s[1] === 'wask') && S[7][1] === 'still' && S[8][1] === 'got'), '04, 06 and 10: four screens, three taps, “Still …?”, then last week');
 ok(V.stepsOf(2)[0][1] === 'got' && V.stepsOf(5)[0][1] === 'got', 'other levels open as before');
 const at = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [`w.v4.where.${k}`, String(v)]));
@@ -58,7 +59,7 @@ ok(app.includes('In Level 01 you said: “'), 'the twelve-week answer is the fir
 // Focus mode.
 ok(app.includes('function fmOpen(at)') && app.includes('function fmClose()') && app.includes('role="dialog" aria-modal="true"'), 'one full-screen layer');
 ok(app.includes("inFm ? pageHTML(st, x) : goHTML(st, x)"), 'the only way to answer: the page shows the way in, the layer the questions');
-ok(app.includes('class="fm-bar"') && app.includes('${esc(LEAD[DOMS[d]])} · ${mine.findIndex(([, i]) => i === qi) + 1} of ${mine.length}') && app.includes('class="fm-back" data-qmove="-1"'), 'the top line: progress bar, “Lead yourself · 3 of 5”, Back');
+ok(app.includes('class="fm-bar"') && app.includes('${esc(LEAD[DOMS[d]])} · ${mine.findIndex(([, i]) => i === qi) + 1} of ${mine.length}') && !app.includes('class="fm-back"') && app.includes("${qi > 0 ? '<button type=\"button\" class=\"cw-back\" data-qmove=\"-1\">← Back</button>' : ''}"), 'the top line: progress bar and “Lead yourself · 3 of 5”; Back sits beside Next (3 Nov 2026), not on the first screen');
 ok(app.includes('data-fmdone="${domainEnd ? \'next\' : \'end\'}">Done ✓</button>'), 'Done ✓ at the end of a domain and of the level');
 ok(app.includes("if (fm) { e.preventDefault(); fmClose(); return; }"), 'Esc closes the layer');
 ok(app.includes('#programme-${level}-q') && app.includes('history.pushState(null, \'\', url)') && app.includes('if (fm && !q) { fmShut();') && entry({ joined: true, old: false, hash: '#programme-3-q' }) === 'work', 'opening it is a history step; Back closes it');

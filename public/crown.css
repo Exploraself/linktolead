@@ -164,10 +164,10 @@ body.crownopen .jw{opacity:1;visibility:visible;pointer-events:auto;transform:tr
   .book.shut .cw-sx{display:none}
   .cw-sx{display:block;position:absolute;top:10px;right:12px;width:44px;height:44px;border-radius:50%;font-size:26px;line-height:1;color:var(--qink)}
   .cw-t{font-size:30px}
-  .cw-phone{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:6px 0;text-align:left;font-size:12px;color:var(--soft)}
+  .cw-phone{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;min-height:48px;padding:8px 14px;margin-top:4px;border:1px solid var(--edge);border-radius:12px;background:var(--leaf2);text-align:left;font-size:15px;color:var(--qink)}
   .cw-phone span:first-child{display:flex;align-items:center;gap:8px;min-width:0}
   .cw-phone i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--gold)}
-  .cw-phone span:last-child{color:var(--gold-ink);white-space:nowrap}
+  .cw-phone span:last-child{color:var(--gold-ink);font-weight:600;white-space:nowrap}
   .cw-seg{display:flex;gap:4px;margin-top:-8px}
   .cw-seg i{flex:1;height:2px;background:var(--rule)}
   .cw-seg i.done{background:var(--gold)}
@@ -180,13 +180,14 @@ body.crownopen .jw{opacity:1;visibility:visible;pointer-events:auto;transform:tr
   .cw-note{margin-top:12px;font-size:20px;transform:rotate(-1.5deg)}
   .cw-foot{display:none}
   .cw-under{margin:32px 18px 0}
-  .cw-pb{display:flex}
-  .cw-pk{display:block;position:absolute;left:0;right:0;bottom:max(4px,env(safe-area-inset-bottom,0px));margin:0;text-align:center;font-size:11px;color:var(--soft);pointer-events:none}
+  .cw-pb{display:none}
+  .cw-pk{display:none;position:absolute;left:0;right:0;bottom:max(4px,env(safe-area-inset-bottom,0px));margin:0;text-align:center;font-size:11px;color:var(--soft);pointer-events:none}
   body.cw-shut .cw-pk,body.crownopen .cw-pk{visibility:hidden}
   .crown-arc{--r:140px}
   .jw{width:70px;left:-35px}
   .crown-hint{bottom:calc(var(--cb) + 236px)}
   body.inwork .mp-win{bottom:96px}
+  body.inwork .mp{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
   body.crownopen .cw-pb{visibility:hidden}
 }
 /* At 110% (wide screens, style.css) the screen is 1/1.1 as tall in page units. */
@@ -427,3 +428,20 @@ mark{background:none;color:inherit}
   body.inwork .crown-wrap{--crx:calc(50% + 150px + 210px)}
   body.inwork .cw-all[data-go="rail"]{display:none}
 }
+
+/* "Before you start" (3 Nov 2026): the intro is the first row, drawn apart
+   from the four parts: a dashed gold outline, an icon, a small Intro tag. */
+.cw-intro{border:1.5px dashed var(--gold);margin-bottom:6px}
+.cw-intro.now{border-style:solid}
+.cw-il{background:transparent;color:var(--gold-ink,var(--goldink));border:1.5px solid var(--gold)}
+.cw-il svg{width:16px;height:16px}
+.cw-itag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:var(--gold);color:#120D08;font:700 10px/1.6 var(--body);letter-spacing:.08em;text-transform:uppercase;vertical-align:2px}
+.cw-intro.done .cw-il{background:var(--gold);color:#120D08}
+/* Twelve squares, three for each part: each opens its own move. */
+.sqs{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.sq-g{display:flex;gap:4px}
+.sq{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--c);background:transparent;cursor:pointer;padding:0}
+.sq.on{background:var(--c)}
+.sq:hover{transform:translateY(-1px)}
+@media(prefers-reduced-motion:reduce){.sq:hover{transform:none}}
+.leaf-l .lvcount{font-size:12px}

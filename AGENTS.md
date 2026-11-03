@@ -235,12 +235,19 @@ the week, "Still …?" and My Blueprint say so and offer the version that fits;
 
 **Focus mode** is the only way to answer: one full-screen layer, the same on
 a computer and a phone. One question in one centred column, the answer right
-under it, Next right under the answer. The top line shows a thin progress
-bar, where the founder is ("Lead yourself · 3 of 5") and Back. Keys 1–9
+under it, Next right under the answer, and Back beside Next (at the bottom
+on a phone; none on the first screen). The top line shows a thin progress
+bar, where the founder is ("Lead yourself · 3 of 5") and Close. Keys 1–9
 choose, the arrows move a slider, Enter is Next, Esc closes. A tap moves on
 by itself after a short pause, unless it shows a reply to read. Done ✓ at
 the end of a domain or a level closes the layer, back at the levels with the
 new tick. Opening it is a step in the browser's history, so Back closes it.
+
+**A level's list** (Alexandru, 3 Nov 2026): where a level opens with the
+elephant, the first row is "Before you start" (the elephant and the founder's
+version), drawn as an intro, never as a part. The right page has one way in.
+Twelve squares, three per part, open any move. After the intro, one screen
+says "Level NN begins" with its four parts, then the first part.
 
 ## 17. Every Mailchimp tag is on the tag page (Alexandru, 2 Nov 2026)
 
