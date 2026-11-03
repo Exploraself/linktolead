@@ -93,6 +93,14 @@ let S = { answers: {}, name: '', email: '', phone: '', times: [], step: 0 };
 try { const saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (saved && typeof saved === 'object') S = { ...S, ...saved, step: 0 }; } catch { /* private mode */ }
 const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* private mode */ } };
 const forget = () => { try { localStorage.removeItem(KEY); } catch { /* private mode */ } };
+/** Where they came from in Base Camp (?back=/ground-plan/#programme-4): the
+ *  way out goes back there, to the exact place they were studying
+ *  (Alexandru, 3 Nov 2026). Only Base Camp addresses are kept. */
+const BACK = (() => { const b = new URLSearchParams(location.search).get('back') || ''; return /^\/ground-plan\/[\w#\-./?=&]*$/.test(b) ? b : ''; })();
+/** What the call is about, from the link that sent them (?about=hub, or the
+ *  utm_medium most links already carry). The server keeps only known words. */
+const ABOUT_KEY = (() => { const q = new URLSearchParams(location.search); return String(q.get('about') || q.get('utm_medium') || '').toLowerCase().slice(0, 40); })();
+const backLabel = () => (/#programme-\d+/.test(BACK) ? '← Back to my level' : '← Back to my Base Camp');
 
 let me = null; // the signed-in founder, if any
 let starAt = ''; // when they last took The Leader’s North Star, if they did
@@ -152,7 +160,8 @@ function hello() {
     <blockquote class="word"><p>“${esc(H.quote)}”</p><footer><img src="/mail/signature.png" alt="Alexandru Cojocari" width="190" height="53" loading="lazy"></footer></blockquote>
     <h2 class="how">How it works</h2>
     <ol class="steps">${steps}</ol>
-    <div class="act"><button type="button" class="go" data-start>${started ? 'Carry on where I left off' : esc(H.go)} ${ICON.arrow}</button><span class="key">or press Enter ↵</span></div>
+    <div class="act"><button type="button" class="go" data-start>${started ? (KIND === 'boardroom' ? 'Continue my 1:1 booking' : 'Continue my booking') : esc(H.go)} ${ICON.arrow}</button><span class="key">or press Enter ↵</span></div>
+    ${started ? '<p class="under"><button type="button" class="linkish" data-restart>Start the booking again</button></p>' : ''}
     <p class="under">${ICON.shield}${esc(H.under)}</p></section>`;
 }
 const looksLikeEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(e || '').trim());
@@ -309,7 +318,7 @@ function doneScreen(email, copy, sent = {}) {
       <div class="picks">${cards.map(pickCard).join('')}</div>
       <p class="mh">Or another free test</p><ul class="more">${more}</ul>
       <p class="all"><a href="${EXP}/assessments?utm_source=linktolead&utm_medium=booking&utm_campaign=${KIND}">See every assessment</a></p></div>
-    <p class="leave">${me ? '<a href="/ground-plan/#home">Back to my Base Camp</a>' : `<a href="${EXP}/">Back to exploraself.com</a>`}</p></section>`;
+    <p class="leave">${me ? `<a href="${esc(BACK || '/ground-plan/#home')}">${BACK ? backLabel().slice(2) : 'Back to my Base Camp'}</a>` : `<a href="${EXP}/">Back to exploraself.com</a>`}</p></section>`;
 }
 
 /** The calm door for anyone who may not book the 1:1 yet. */
@@ -359,6 +368,7 @@ root.addEventListener('click', (e) => {
   if (!t || busy) return;
   if (t.matches('[data-back]')) return go(S.step - 1);
   if (t.matches('[data-start]')) return go(firstOpen());
+  if (t.matches('[data-restart]')) { S.answers = {}; S.times = []; keep(); return go(firstOpen()); }
   if (t.matches('[data-next]')) return next();
   if (t.matches('[data-goto]')) return go(Number(t.dataset.goto));
   if (t.matches('[data-send]')) return send();
@@ -418,7 +428,7 @@ async function send() {
   const btn = root.querySelector('[data-send]');
   busy = true; btn.disabled = true; btn.firstChild.textContent = 'Sending… ';
   err.innerHTML = '';
-  const body = { kind: KIND, answers: S.answers, times: S.times, tz: TZ, hp: root.querySelector('[data-hp]')?.value || '', token: A.token() || undefined };
+  const body = { kind: KIND, answers: S.answers, times: S.times, tz: TZ, hp: root.querySelector('[data-hp]')?.value || '', token: A.token() || undefined, about: ABOUT_KEY || undefined };
   body.phone = phoneOf(S.phone);
   if (KIND === 'discovery') { body.name = S.name.trim(); body.email = S.email.trim(); }
   let d = null;
@@ -442,7 +452,9 @@ async function send() {
 
 // ── Start ───────────────────────────────────────────────────────────────────
 (async () => {
-  root.innerHTML = '<p class="muted loading">One moment…</p>';
+  root.innerHTML = '<p class="muted loading">Opening your booking…</p>';
+  // The way out goes back to where they were (see BACK).
+  if (BACK) document.querySelectorAll('a.home, a.brand').forEach((a) => { a.href = BACK; if (a.classList.contains('home')) a.textContent = backLabel(); });
   const [st, wa] = await Promise.all([A.joined() ? A.pull() : null, fetch('/api/book').then((r) => (r.ok ? r.json() : null)).catch(() => null)]);
   waTo = wa && /^\d{7,15}$/.test(String(wa.waTo || '')) ? String(wa.waTo) : '';
   me = st && st.ok && st.me ? st.me : null;

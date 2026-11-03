@@ -30,7 +30,7 @@ import { okTz } from '../_mentor.js';
 import { mailState, origin, send } from '../_mail.js';
 import { bookingLetter, bookingNotice } from '../_letters.js';
 import { MENTOR_EMAIL } from './note.js';
-import { KINDS, RULES, BOOK_TAGS, NAME_MAX, EMAIL_MAX, isKind, isSlot, readAnswers, bookingTables, bookingAllowed, bookingLogged, phoneOf, waNumber, waDigits } from '../_booking.js';
+import { ABOUT, aboutOf, KINDS, RULES, BOOK_TAGS, NAME_MAX, EMAIL_MAX, isKind, isSlot, readAnswers, bookingTables, bookingAllowed, bookingLogged, phoneOf, waNumber, waDigits } from '../_booking.js';
 
 export const LIMIT = 'You have sent three requests today. Alexandru and the team will write back. If it is urgent, write to support@exploraself.com.';
 const HELP = 'Write to support@exploraself.com and we will find a time with you.';
@@ -103,12 +103,13 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const owner = me || (await D.prepare('SELECT id, email, name, tier FROM student WHERE email = ?').bind(email).first().catch(() => null));
   const id = newToken();
   const stamp = now();
-  await D.prepare('INSERT INTO booking (id, kind, email, name, phone, answers, times, created_at, status, tz, student_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
-    .bind(id, kind, email, name, phone, JSON.stringify(read.answers), JSON.stringify(sorted), stamp, 'asked', tz, owner ? owner.id : null).run();
+  const about = aboutOf(body.about);
+  await D.prepare('INSERT INTO booking (id, kind, email, name, phone, answers, times, created_at, status, tz, student_id, about) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(id, kind, email, name, phone, JSON.stringify(read.answers), JSON.stringify(sorted), stamp, 'asked', tz, owner ? owner.id : null, about || null).run();
 
   const base = origin(request);
   const to = (typeof env.MENTOR_EMAIL === 'string' && env.MENTOR_EMAIL.trim()) || MENTOR_EMAIL;
-  const told = await send(env, { to, ...bookingNotice(base, { name, email, phone, kind, times: sorted, answers: read.answers, tz, account: !!owner,
+  const told = await send(env, { to, ...bookingNotice(base, { name, email, phone, kind, times: sorted, answers: read.answers, tz, account: !!owner, about: about ? ABOUT[about] : '',
     step: kind === 'boardroom' && me ? stepName(me.tier) : '' }), why: `${name} asked for ${KINDS[kind].name} at linktolead.exploraself.com.` });
   if (!told.ok) {
     // Nobody heard of it: keep nothing, and say so.

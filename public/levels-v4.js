@@ -1482,7 +1482,8 @@ export const dayKeyOf = (lv, d) => { const p = planOf(lv, d); return p && p.on ?
 const DAYISH = ['day', 'when', 'on'];
 /** Every screen of a level, in order: [domain, kind, key]. Domain -1: the
  *  whole level. Kinds: welcome (four, one per step), wask (its taps and
- *  sliders), where (the door, Level 01), you (the version), still (04, 06,
+ *  sliders), door (the bridge into the door, Level 01), where (the door,
+ *  Level 01), you (the version), still (04, 06,
  *  10), got, idea, tap, slide, blank, day, done, lines, week, reading, carry,
  *  carryday, and Build it's bask, bstep, bday, bpage. */
 export function stepsOf(lv) {
@@ -1492,7 +1493,7 @@ export function stepsOf(lv) {
   if (WELCOME_AT[lv] != null) {
     for (let i = 0; i < 4; i++) out.push([-1, 'welcome', i]);
     for (const A of welcomeOf(lv).asks) out.push([-1, 'wask', A.k]);
-    if (lv === 1) { for (const Q of WHERE4) out.push([-1, 'where', Q.k]); out.push([-1, 'you']); } else out.push([-1, 'still']);
+    if (lv === 1) { out.push([-1, 'door']); for (const Q of WHERE4) out.push([-1, 'where', Q.k]); out.push([-1, 'you']); } else out.push([-1, 'still']);
   }
   if (lv > 1) for (let d = 0; d < 4; d++) out.push([d, 'got']);
   // The level begins (Alexandru, 3 Nov 2026): after the intro, one screen that
