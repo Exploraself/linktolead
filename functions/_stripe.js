@@ -19,7 +19,7 @@
 
 import { now, newToken } from './_shared.js';
 import { send, mailState } from './_mail.js';
-import { unlockedLetter, productLetter, FIRST_NEW } from './_letters.js';
+import { unlockedLetter, productLetter, paymentNotice, FIRST_NEW } from './_letters.js';
 import { syncFounder } from './_mailchimp.js';
 import { unsubLink, profile } from './_account.js';
 import { landingOf } from './_profile.js';
@@ -214,6 +214,17 @@ async function productCheckout(env, D, base, me, step) {
   return r.ok ? { ok: true, url: r.data.url, id: r.data.id } : { ok: false, why: r.why };
 }
 
+/** Alexandru hears about every payment, once, the moment it is recorded. */
+async function tellAlexandru(env, D, base, s, me, what, amount) {
+  if (!mailState(env).ready) return;
+  const to = (typeof env.MENTOR_EMAIL === 'string' && env.MENTOR_EMAIL.trim()) || 'alex@exploraself.com';
+  const fresh = guestOf(s) && !!(await D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'signup' AND detail = ?").bind(me.id, `stripe · ${s.id}`).first());
+  const land = await D.prepare('SELECT landing FROM student_profile WHERE student_id = ?').bind(me.id).first().catch(() => null);
+  const r = await send(env, { to, ...paymentNotice(base, { name: me.name, email: me.email, what, amount: dollars(amount), test: !s.livemode, fresh, from: land && land.landing === 'exploraself' ? 'exploraself.com' : land && land.landing ? `/${land.landing}/` : '' }),
+    why: 'Someone paid on linktolead.exploraself.com.' }).catch((e) => ({ ok: false, why: String(e) }));
+  await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(me.id, r.ok ? 'payment-notice' : 'payment-notice-failed', now(), s.id).run().catch(() => null);
+}
+
 /** A paid product (PRODUCTS): recorded once, an event on the founder, and the
  *  letter with their access link. The founder's step is not touched. */
 async function applyProduct(env, D, base, s, step, id) {
@@ -226,6 +237,7 @@ async function applyProduct(env, D, base, s, step, id) {
     .bind(s.id, me.id, step, P.amount, 'usd', s.livemode ? 'live' : 'test', me.tier || 'free', now()).run();
   if (!put.meta || !put.meta.changes) return { ok: true, already: true, step, product: true };
   await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(me.id, 'paid', now(), JSON.stringify({ step, amount: P.amount, session: s.id })).run();
+  await tellAlexandru(env, D, base, s, me, P.name, P.amount);
   if (mailState(env).ready) {
     const p = await D.prepare('SELECT unsub_id FROM student_profile WHERE student_id = ?').bind(me.id).first();
     const first = String(me.name || '').trim().split(/\s+/)[0] || '';
@@ -296,6 +308,7 @@ export async function applyPaid(env, D, base, s) {
     await syncFounder(env, D, me.id, 'tags').catch(() => null);
   }
   await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(me.id, 'paid', now(), JSON.stringify({ step, amount: S.amount, session: s.id })).run();
+  await tellAlexandru(env, D, base, s, me, S.name, S.amount);
   if (mailState(env).ready) {
     const p = await D.prepare('SELECT unsub_id FROM student_profile WHERE student_id = ?').bind(me.id).first();
     const ctx = await letterContext(D, me.id);

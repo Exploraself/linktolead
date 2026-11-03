@@ -224,7 +224,7 @@ const close = (kind, { mentor, tz, at, to = '' } = {}, ask = 'start') => ({ ment
 const asReceipt = (c) => ({ ...c, receipt: true });
 /** Which letters are receipts: they answer something the founder just did.
  *  The welcomes and every other letter stay as they are. */
-export const RECEIPTS = ['unlocked', 'product', 'signin', 'reset', 'password', 'no-account', 'booking', 'booking-confirmed'];
+export const RECEIPTS = ['unlocked', 'product', 'refund', 'signin', 'reset', 'password', 'no-account', 'booking', 'booking-confirmed'];
 
 /** "launchpad-welcome": sent once, when the account is made. */
 export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {}) {
@@ -515,6 +515,39 @@ export function questionNotice(base, { name, email, question, level, domain }) {
     String(question || ''),
     ['Answer it in /mentor: ', link(`${base}/mentor`), '.'],
   ], null, { sign: false }) };
+}
+
+/** To Alexandru: someone paid (functions/_stripe.js, Alexandru 3 Nov 2026:
+ *  "everybody gets an answer … everybody's taken care of"). Sent once per
+ *  payment, only after Stripe said paid. Plain, no offer. */
+export function paymentNotice(base, { name, email, what, amount, test = false, fresh = false, from = '' } = {}) {
+  return { subject: `${test ? '[Test] ' : ''}New payment: ${what}, ${amount}`, ...letter(base, [
+    `${name || 'Someone'} (${email}) paid ${amount} for ${what}${test ? ', in Stripe test mode (no real money)' : ''}.`,
+    fresh ? 'They paid before making an account: the account was made from their name and email, and they choose their password next.' : 'It is on their existing account.',
+    ...(from ? [`They came from ${from}.`] : []),
+    'They already have the letter with what opened and, for a step, the booking link for their 1:1.',
+    ['See them in /mentor: ', link(`${base}/mentor`), '.'],
+  ], null, { sign: false }) };
+}
+
+/** To Alexandru: a refund request from Base Camp (functions/api/refund.js). */
+export function refundNotice(base, { name, email, what } = {}) {
+  return { subject: `Refund request: ${what}, from ${name || email}`, ...letter(base, [
+    `${name || 'Someone'} (${email}) asked for a refund of ${what}, from their Base Camp.`,
+    'They were told you will get in touch with them personally. Nothing has been refunded yet: refunds are made in Stripe.',
+    ['It is in /mentor → Refunds: ', link(`${base}/mentor`), '.'],
+  ], null, { sign: false }) };
+}
+
+/** "refund": the person's copy of their refund request. A receipt: it says
+ *  the request arrived, never that money was refunded (AGENTS.md rule 6). */
+export function refundReceipt(base, { first, what, to = '', ...o } = {}) {
+  return { subject: 'We have your refund request', ...letter(base, [
+    hi(first),
+    `Thank you for telling me. Your request for a refund of ${what} has reached me.`,
+    'I will get in touch with you personally, by email, to sort it out with you.',
+    'If there is anything you want to tell me first, just reply to this email.',
+  ], null, asReceipt(close('refund', { ...o, to }, null))) };
 }
 
 // ── Booking a call (functions/api/book.js; Alexandru, 2 Nov 2026) ───────────
