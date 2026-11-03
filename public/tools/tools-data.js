@@ -291,9 +291,101 @@ const TOOLS = {
         : { head: 'I chose an evening that is fully mine.', sub: 'Phone asleep. Me, present.', visual: (x, X, Y, W, H) => cardMoons(x, X, Y, W, H, 1, false) };
     },
   },
+  /* ═════ 4. The offer check · Not enough clients · Lead the market (3 Nov 2026) ═════
+     Built on the four levers of Offer Master (MIT, Liam Johnston): what you
+     promise, how sure they are, how soon they feel it, how much they must do.
+     Shown in plain words, never by name (AGENTS.md 4). Every rate is the
+     founder's own numbers divided; no benchmark anywhere (AGENTS.md 9). */
+  offer: {
+    id: 'offer', key: 'offer-check', name: 'The offer check', pain: 'Not enough clients', domain: 'Lead the market', domColor: '#D6BF8F', path: '/offer-check/',
+    hook: 'People see your offer and don’t buy. Is it the offer, or too few people seeing it?',
+    intro: { eyebrow: 'Lead the market · Free · About 2 minutes', h: 'People see your offer and don’t buy. Find out why.', p: 'Ten quick answers about last month. You will see where people drop off, in your own numbers, and the one thing to fix first.', btn: 'Check my offer', fine: 'Free, in the Growth Toolkit. A self-reflection tool.' },
+    qs: [
+      { id: 'line', type: 'tap', q: 'When someone asks what you sell, what do you say first?', hint: 'The first sentence, as you really say it.', options: ['What I do: my service or product', 'Who I help', 'The result they get', 'The result, for whom, and by when'] },
+      { id: 'seen', type: 'slide', q: 'How many people saw your offer last month?', hint: 'Your page, your posts with a price, the people you told. A rough count is fine.', min: 0, max: 1000, step: 10, start: 20, fmt: (v) => String(v), words: (v) => (v === 1 ? 'person' : 'people'), ends: ['0', '1,000'] },
+      { id: 'asked', type: 'slide', q: 'Of them, how many asked for more, booked a call or wrote back?', hint: 'Anyone who took one step towards buying.', min: 0, max: (a) => Math.max(1, a.seen), step: 1, start: 5, fmt: (v) => String(v), words: (v) => (v === 1 ? 'person' : 'people'), ends: ['0', 'all of them'] },
+      { id: 'bought', type: 'slide', q: 'And how many bought?', hint: 'Last month only.', min: 0, max: (a) => Math.max(1, a.asked), step: 1, start: 1, fmt: (v) => String(v), words: (v) => (v === 1 ? 'person' : 'people'), ends: ['0', 'all of them'] },
+      { id: 'need', type: 'slide', q: 'How many sales a month would make this offer work for you?', hint: 'Your enough, not the dream.', min: 1, max: 100, step: 1, start: 10, fmt: (v) => String(v), words: (v) => (v === 1 ? 'sale' : 'sales'), ends: ['1', '100'] },
+      { id: 'say', type: 'tap', q: 'When people don’t buy, what do they say most?', hint: 'Their words, as close as you remember.', options: ['“I’ll think about it”', '“It’s too expensive”', '“I can do it myself”', '“Not now”', '“I need to ask someone first”', 'I don’t know: I never asked'] },
+      { id: 'proof', type: 'tap', q: 'Before they decide, what proof do they see?', hint: 'What is in front of them, not what you could show.', options: ['None yet', 'My own story or my credentials', 'Results from past customers, without names', 'Named results from people like them'] },
+      { id: 'first', type: 'tap', q: 'How soon does a new customer feel the first win?', hint: 'Something they can see or use.', options: ['Only at the end', 'After a few weeks', 'In the first week', 'In the first days'] },
+      { id: 'effort', type: 'tap', q: 'How much does the customer have to work out alone?', hint: 'Think of your last customer.', options: ['Almost everything', 'Most of it, with some guidance', 'We do it with them, step by step', 'We do it for them'] },
+      { id: 'day', type: 'day', q: 'Which day this week will you make the change?', hint: 'Twenty minutes is enough for the first one.' },
+    ],
+    calc(a) {
+      const SC = [2, 5, 7, 9];
+      const L = [
+        { k: 'result', n: 'What you promise', s: SC[a.line] },
+        { k: 'belief', n: 'How sure they are', s: SC[a.proof] },
+        { k: 'speed', n: 'How soon they feel it', s: SC[a.first] },
+        { k: 'ease', n: 'How little they must do', s: SC[a.effort] },
+      ];
+      // The objection points at a lever first (the most-heard "no" at the leak); else the lowest score.
+      const POINT = ['belief', 'result', 'ease', 'speed', 'belief', null][a.say];
+      const low = [...L].sort((x, y) => x.s - y.s)[0];
+      const fix = (POINT && L.find((x) => x.k === POINT)) || low;
+      const r1 = a.seen > 0 ? a.asked / a.seen : 0, r2 = a.asked > 0 ? a.bought / a.asked : 0;
+      // The traffic test: if every step after the first doubled, would it reach the sales you need?
+      const doubled = a.seen * Math.min(1, r1 * 2) * Math.min(1, r2 * 2);
+      const traffic = doubled < a.need;
+      const leak = a.seen === 0 ? 'seen' : a.asked === 0 ? 'ask' : a.bought === 0 ? 'buy' : r1 < r2 ? 'ask' : 'buy';
+      return { L, fix, r1, r2, doubled, traffic, leak };
+    },
+    insight(a) {
+      const c = this.calc(a), pct = (x) => Math.round(x * 100) + '%';
+      const where = c.leak === 'seen' ? 'Nobody saw it last month.' : c.leak === 'ask' ? `Most people stop before they take a first step: ${a.asked} of ${a.seen} did (${pct(c.r1)}).` : `People take a step, then stop before buying: ${a.bought} of ${a.asked} bought (${pct(c.r2)}).`;
+      const line = `${where} ${c.traffic ? 'Even if every step after the first worked twice as well, it would not reach the ' + a.need + ' sales you need: too few people see it. ' : ''}Fix first: ${c.fix.n.toLowerCase()}.`;
+      const calcline = `${a.seen} saw it → ${a.asked} took a step → ${a.bought} bought. Twice as good after the first step: about ${Math.round(c.doubled)} sales, against the ${a.need} you need.`;
+      return { big: c.fix.n, bigIsLabel: true, line, calcline, vis: levers(c.L, c.fix.k), tease: ['what your “no” really means', 'your four levers, scored from your answers', 'your offer in one line, ready to test', 'your one change for ' + (a.day === 0 ? 'today' : dayLong(dayOf(a)))] };
+    },
+    result(a, st) {
+      const c = this.calc(a), pct = (x) => Math.round(x * 100) + '%';
+      const nm = st.name ? esc(st.name) + ', f' : 'F';
+      const h = `${nm}ix first: ${c.fix.n.toLowerCase()}.`;
+      const rows = [
+        ['Saw your offer last month', String(a.seen)],
+        ['Took a first step', String(a.asked), a.seen > 0 ? pct(c.r1) + ' of those who saw it' : ''],
+        ['Bought', String(a.bought), a.asked > 0 ? pct(c.r2) + ' of those who took a step' : ''],
+      ];
+      const total = ['If every step after the first worked twice as well', 'about ' + Math.round(c.doubled) + (Math.round(c.doubled) === 1 ? ' sale' : ' sales'), c.traffic ? `Under the ${a.need} you need: more people must see it, too.` : `That reaches the ${a.need} you need.`];
+      const MEAN = [
+        ['“I’ll think about it”', 'I’m not sure it works for someone like me, and if it doesn’t, I lose.'],
+        ['“It’s too expensive”', 'I can’t see yet what I get for the price.'],
+        ['“I can do it myself”', 'I think I’m buying information, and information is free.'],
+        ['“Not now”', 'Waiting costs me nothing. Or so it feels.'],
+        ['“I need to ask someone first”', 'I can’t explain it simply to the person I ask.'],
+        ['You never asked', 'You don’t know yet. Ask three people who didn’t buy, this week.'],
+      ][a.say];
+      const others = [[a.say === 5 ? 'What they say when they don’t buy' : `When they say ${MEAN[0]}`, '', a.say === 5 ? MEAN[1] : `It often means: “${MEAN[1]}”`], ...c.L.map((x) => [x.n, x.s + ' of 10', x.k === c.fix.k ? 'Fix this first.' : ''])];
+      const MOVE = {
+        result: ['Your offer is described by what you do, not by what changes for the buyer.', 'Write one line: “I help [who] get [result] in [time].” Say it to three people this week and ask them to repeat it back.'],
+        belief: ['The buyer can’t see proof from someone like them.', 'Ask three past customers for one sentence each, in their own words, with their first name. Put the best one at the top, before the price.'],
+        speed: ['The buyer feels nothing for a long time.', 'Design one win by day 7: something they can see or use in the first week. Write it on your page in one line.'],
+        ease: ['The buyer has to work too much out alone.', 'Take one decision off them: do the first step with them, or give them a ready template. Say so on your page.'],
+      }[c.fix.k];
+      const admit = `${a.seen} people saw your offer last month, ${a.asked} took a step and ${a.bought} bought.`;
+      const struggle = a.say === 5 ? 'You don’t know yet why people say no. Don’t fight the silence. Ask three of them.' : `When they say ${MEAN[0]}, they mean: “${MEAN[1]}” Don’t argue with it. Change the offer.`;
+      const best = [...c.L].sort((x, y) => y.s - x.s)[0];
+      const shine = best.s >= 7 ? `${best.n} is already strong (${best.s} of 10). Keep it exactly as it is.` : 'You counted it. Your offer is numbers now, not a feeling.';
+      const exactly = `${onDay(a)}: ${MOVE[1]}`;
+      const ask = c.traffic ? `Too few people see it. Who are ten people who should hear your offer this week, and what will you say first?` : `If your best customer described your offer to a friend, which words would they use? Are those the words on your page?`;
+      return {
+        h, sub: 'Worked out only from your answers. A machine can divide the numbers; deciding what to change is yours.',
+        rows, total, others, lines: [admit, struggle, shine, exactly], ask, action: `${MOVE[0]} ${MOVE[1]}`, when: dayTitle(a),
+        quote: { t: 'People don’t buy what you do. They buy what changes for them.', src: 'The offer check' },
+        bridge: 'Your offer is one side of one domain. The Leader’s North Star reads all four: Lead yourself, Lead your people, Lead your business and Lead the market, and ends with a plan you can tick off.',
+        honest: '<strong>Honest note.</strong> A self-reflection tool. It uses only the numbers you entered and simple division, with no industry averages.',
+        caption: 'I checked my offer in two minutes. Now I know the one thing to fix first.',
+      };
+    },
+    card(a) {
+      const c = this.calc(a);
+      return { head: `Fix first: ${c.fix.n.toLowerCase()}.`, sub: 'I checked my offer in two minutes. This week I change one thing.', visual: (x, X, Y, W, H) => cardLevers(x, X, Y, W, H, c.L, c.fix.k) };
+    },
+  },
 };
-const ORDER = ['cash', 'bottleneck', 'offswitch'];
-/** A tool by its page address key (runway, bottleneck, off-switch). */
+const ORDER = ['cash', 'bottleneck', 'offswitch', 'offer'];
+/** A tool by its page address key (runway, bottleneck, off-switch, offer-check). */
 const byKey = (k) => ORDER.map((id) => TOOLS[id]).find((t) => t.key === k) || null;
 
 /* ── In-page visuals (SVG, theme colours) ──────────────────── */
@@ -362,6 +454,28 @@ function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 
 function wrapText(c, text, maxW) { const words = text.split(' '), lines = []; let line = ''; for (const w of words) { const t = line ? line + ' ' + w : w; if (c.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t; } if (line) lines.push(line); return lines; }
 const spacing = (c, v) => { if ('letterSpacing' in c) c.letterSpacing = v; };
 function markC(c, x, y, s, col) { const k = s / 24; c.save(); c.translate(x, y); c.scale(k, k); c.strokeStyle = col; c.lineWidth = 1.5; c.beginPath(); c.moveTo(12, 2.5); c.lineTo(21.5, 12); c.lineTo(12, 21.5); c.lineTo(2.5, 12); c.closePath(); c.stroke(); c.fillStyle = col; c.beginPath(); c.moveTo(12, 5.7); c.lineTo(14, 10); c.lineTo(18.3, 12); c.lineTo(14, 14); c.lineTo(12, 18.3); c.lineTo(10, 14); c.lineTo(5.7, 12); c.lineTo(10, 10); c.closePath(); c.fill(); c.restore(); }
+/** The offer check: four levers as bars, the one to fix first in the accent. */
+function levers(L, fix) {
+  const rows = L.map((x, i) => {
+    const y = 14 + i * 40, w = Math.round(x.s / 10 * 300), on = x.k === fix;
+    return `<text x="0" y="${y + 12}" font-size="13" fill="var(--ink)">${esc(x.n)}</text>
+      <rect x="0" y="${y + 18}" width="300" height="10" rx="5" fill="var(--steel-soft)"/>
+      <rect x="0" y="${y + 18}" width="${w}" height="10" rx="5" fill="${on ? 'var(--acc)' : 'var(--muted)'}" opacity="${on ? 1 : 0.55}"/>
+      <text x="310" y="${y + 28}" font-size="12" fill="var(--muted)">${x.s} of 10${on ? ' · fix first' : ''}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 420 176" role="img" aria-label="Four levers scored from your answers; ${esc((L.find((x) => x.k === fix) || {}).n || '')} is the one to fix first.">${rows}</svg>`;
+}
+function cardLevers(c, X, Y, W, H, L, fix) {
+  markC(c, X + W / 2 - 22, Y + 20, 44, '#E8D9B5');
+  const x0 = X + 90, bw = W - 180;
+  L.forEach((l, i) => {
+    const y = Y + 110 + i * 62;
+    c.textAlign = 'left'; c.fillStyle = '#DCE6F1'; c.font = '500 20px Inter, Arial, sans-serif'; c.fillText(l.n, x0, y);
+    c.fillStyle = 'rgba(169,192,217,.18)'; c.fillRect(x0, y + 12, bw, 14);
+    c.fillStyle = l.k === fix ? '#D6BF8F' : 'rgba(169,192,217,.6)'; c.fillRect(x0, y + 12, bw * l.s / 10, 14);
+  });
+}
+
 function cardStrip(c, X, Y, W, H, A, show) {
   const cols = 13, rows = 4, s = 22, g = 8, gw = cols * (s + g) - g, x0 = X + (W - gw) / 2, y0 = Y + 120;
   markC(c, X + W / 2 - 22, Y + 20, 44, '#E8D9B5');

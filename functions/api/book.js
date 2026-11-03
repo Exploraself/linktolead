@@ -1,4 +1,4 @@
-// A call with Alexandru: a few answers and three times suggested, one
+// A call with Alexandru: a few answers and one to three times suggested, one
 // confirmed by email within 24 hours (Alexandru, 2 Nov 2026; the rules and
 // the questions in functions/_booking.js).
 //
@@ -28,7 +28,7 @@ import { okTz } from '../_mentor.js';
 import { mailState, origin, send } from '../_mail.js';
 import { bookingLetter, bookingNotice } from '../_letters.js';
 import { MENTOR_EMAIL } from './note.js';
-import { KINDS, RULES, BOOK_TAGS, NAME_MAX, EMAIL_MAX, isKind, isSlot, readAnswers, bookingTables, bookingAllowed, bookingLogged } from '../_booking.js';
+import { KINDS, RULES, BOOK_TAGS, NAME_MAX, EMAIL_MAX, isKind, isSlot, readAnswers, bookingTables, bookingAllowed, bookingLogged, phoneOf } from '../_booking.js';
 
 export const LIMIT = 'You have sent three requests today. Alexandru and the team will write back. If it is urgent, write to support@exploraself.com.';
 const HELP = 'Write to support@exploraself.com and we will find a time with you.';
@@ -55,11 +55,14 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (!read.ok) return bad(read.error);
 
   const times = Array.isArray(body.times) ? body.times : [];
-  if (times.length !== RULES.pick || !times.every((t) => typeof t === 'string')) return bad(`Pick exactly ${RULES.pick} times.`);
-  if (new Set(times.map((t) => Date.parse(t))).size !== RULES.pick) return bad(`Pick ${RULES.pick} different times.`);
+  if (times.length < RULES.min || times.length > RULES.pick || !times.every((t) => typeof t === 'string')) return bad(`Pick one time, or up to ${RULES.pick}.`);
+  if (new Set(times.map((t) => Date.parse(t))).size !== times.length) return bad('Pick different times.');
   const at = Date.now();
   if (!times.every((t) => isSlot(kind, t, at))) return bad('One of those times is no longer open. Go back and pick again.');
   const sorted = times.map((t) => new Date(t).toISOString()).sort();
+  // Their phone, for both calls (Alexandru, 3 Nov 2026), in the international form.
+  const phone = phoneOf(body.phone);
+  if (!phone) return bad('Your phone number, with your country code (it starts with +).');
   const tz = okTz(body.tz) || RULES.zone;
 
   // Who is asking: the signed-in account, if any. The 1:1 is theirs only.
@@ -89,12 +92,12 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const owner = me || (await D.prepare('SELECT id, email, name, tier FROM student WHERE email = ?').bind(email).first().catch(() => null));
   const id = newToken();
   const stamp = now();
-  await D.prepare('INSERT INTO booking (id, kind, email, name, answers, times, created_at, status, tz, student_id) VALUES (?,?,?,?,?,?,?,?,?,?)')
-    .bind(id, kind, email, name, JSON.stringify(read.answers), JSON.stringify(sorted), stamp, 'asked', tz, owner ? owner.id : null).run();
+  await D.prepare('INSERT INTO booking (id, kind, email, name, phone, answers, times, created_at, status, tz, student_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(id, kind, email, name, phone, JSON.stringify(read.answers), JSON.stringify(sorted), stamp, 'asked', tz, owner ? owner.id : null).run();
 
   const base = origin(request);
   const to = (typeof env.MENTOR_EMAIL === 'string' && env.MENTOR_EMAIL.trim()) || MENTOR_EMAIL;
-  const told = await send(env, { to, ...bookingNotice(base, { name, email, kind, times: sorted, answers: read.answers, tz, account: !!owner,
+  const told = await send(env, { to, ...bookingNotice(base, { name, email, phone, kind, times: sorted, answers: read.answers, tz, account: !!owner,
     step: kind === 'boardroom' && me ? stepName(me.tier) : '' }), why: `${name} asked for ${KINDS[kind].name} at linktolead.exploraself.com.` });
   if (!told.ok) {
     // Nobody heard of it: keep nothing, and say so.
@@ -104,7 +107,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   await bookingLogged(D, email, ip);
 
   const first = name.split(/\s+/)[0];
-  const copy = await send(env, { to: email, ...bookingLetter(base, { first, kind, times: sorted, answers: read.answers, tz, to: email }), why: WHY[kind] });
+  const copy = await send(env, { to: email, ...bookingLetter(base, { first, phone, kind, times: sorted, answers: read.answers, tz, to: email }), why: WHY[kind] });
   // The tag goes only to the signed-in account (a typed address proves
   // nothing), and syncFounder sends it only with their yes to letters.
   if (me) {

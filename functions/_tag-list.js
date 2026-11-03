@@ -96,10 +96,10 @@ export const TAG_LIST = [
     from: `${LTL}/ground-plan/`, fromName: 'Base Camp (The Founder’s Blueprint)', when: `Their series starts: Level 03 written. Only when the letters are switched on, never in test. ${CONSENT}`, by: 'functions/_series.js' },
   { name: BOOK_TAGS.discovery, group: 'booking', what: 'Asked for a free 30-minute discovery call with Alexandru, signed in to their account.',
     from: `${LTL}/book/discovery/`, fromName: '/book/discovery/ (from Base Camp’s menu, exploraself.com and the letters)',
-    when: `They send their three times, signed in. Someone without an account, or not signed in, gets no tag: a typed address proves nothing. ${CONSENT}`, by: 'functions/api/book.js' },
+    when: `They send the request with their time (one, or up to three), signed in. Someone without an account, or not signed in, gets no tag: a typed address proves nothing. ${CONSENT}`, by: 'functions/api/book.js' },
   { name: BOOK_TAGS.boardroom, group: 'booking', what: 'Asked for their 1:1 with Alexandru, the one that comes with The Boardroom (or a higher step).',
     from: `${LTL}/book/boardroom/`, fromName: '/book/boardroom/ (from Base Camp, the “It’s unlocked” letter and the gift letter)',
-    when: `They send their three times. Only founders whose step holds the 1:1 can. ${CONSENT}`, by: 'functions/api/book.js' },
+    when: `They send the request with their time (one, or up to three). Only founders whose step holds the 1:1 can. ${CONSENT}`, by: 'functions/api/book.js' },
 ];
 
 /** The tags exploraself.com's forms add, by the number in the form. Never
