@@ -514,13 +514,14 @@ function boardroomCta(cls) {
 /** The Leader’s North Star, always in the rail, at the top under the
  *  Blueprint button (Alexandru, 2 Nov 2026: "move it up"), with its premium
  *  line (3 Nov 2026: "wow, I need it right now"; honest: no price, no
- *  scarcity, the same claim as his approved booking-gift words). */
-const railStar = `<a class="rstar" href="/northstar/" aria-label="Open your Leader’s North Star: where you stand in all four domains. The reading Alexandru and the team use with businesses of every size, yours free">
+ *  scarcity, the same claim as his approved booking-gift words), in his own
+ *  voice and signed ("make them as from me"). */
+const railStar = `<a class="rstar" href="/northstar/" aria-label="Open your Leader’s North Star: where you stand in all four domains. By the way: this is the reading my team and I use to see a business clearly. Here it’s yours, free. Alexandru">
   <svg class="rstar-i" width="40" height="40" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="#B4975F" stroke-width="1.6"/><circle cx="32" cy="32" r="23" fill="none" stroke="#3B4C70"/>
     <g stroke="#B4975F" stroke-width="1.4"><line x1="32" y1="3" x2="32" y2="9"/><line x1="32" y1="55" x2="32" y2="61"/><line x1="3" y1="32" x2="9" y2="32"/><line x1="55" y1="32" x2="61" y2="32"/></g>
     <circle cx="32" cy="11" r="2.6" fill="#A8623A"/><circle cx="53" cy="32" r="2.6" fill="#4C7355"/><circle cx="32" cy="53" r="2.6" fill="#36607F"/><circle cx="11" cy="32" r="2.6" fill="#9A7418"/>
     <g class="cban-needle"><path d="M32 14 L36 32 L32 35 L28 32Z" fill="#D6BF8F"/><path d="M32 50 L36 32 L32 29 L28 32Z" fill="#3B4C70"/></g><circle cx="32" cy="32" r="3" fill="#B4975F"/></svg>
-  <span><small>The Leader’s North Star</small><b>Where you stand, in all four domains</b><i class="rstar-p">By the way: this is the reading Alexandru and the team use to see a business clearly, from solo founders to large companies. Here it’s yours, free.</i><em>Open my North Star →</em></span></a>`;
+  <span><small>The Leader’s North Star</small><b>Where you stand, in all four domains</b><i class="rstar-p">By the way: this is the reading my team and I use to see a business clearly, from solo founders to large companies. Here it’s yours, free. <span class="rstar-by">Alexandru</span></i><em>Open my North Star →</em></span></a>`;
 /** The Boardroom's own page, just above Levels 04–05 while they are shut,
  *  with a small gift: Alexandru gives it in the 1:1 (2 Nov 2026). */
 const GIFT_ICON = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4.5" rx="1"/><path d="M5 13v7.5h14V13M12 8.5v12"/><path d="M12 8.5C10.4 4.8 6.4 4.3 6.4 6.8c0 1.7 3.2 1.7 5.6 1.7Zm0 0c1.6-3.7 5.6-4.2 5.6-1.7 0 1.7-3.2 1.7-5.6 1.7Z"/></svg>';
@@ -1819,7 +1820,7 @@ function blueprintView() {
     <div class="mb-tabs no-print" role="tablist" aria-label="My Blueprint">${MB_TABS.map(([k, n, ic]) => `<button type="button" role="tab" id="mb-t-${k}" aria-controls="mb-p" aria-selected="${bpTab === k}" tabindex="${bpTab === k ? 0 : -1}" data-bptab="${k}">${ic}<span>${n}</span></button>`).join('')}</div>
     <section class="mb-pane" id="mb-p" role="tabpanel" aria-labelledby="mb-t-${bpTab}">${pane}</section>
     <nav class="mb-links no-print" aria-label="More">
-      <a class="mb-ns" href="/northstar/">The Leader’s North Star <span>The reading Alexandru and the team use with businesses of every size. Here it’s yours, free.</span></a>
+      <a class="mb-ns" href="/northstar/">The Leader’s North Star <span>The reading my team and I use with businesses of every size. Here it’s yours, free. — Alexandru</span></a>
       <button type="button" data-go="work">The programme <span>Level ${pad(lv || 1)}</span></button>
     </nav>
   </div></section>`;
