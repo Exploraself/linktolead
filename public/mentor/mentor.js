@@ -506,6 +506,14 @@ function requestsHTML(kind) {
     ${list.length ? `<ul class="qlist">${list.map(row).join('')}</ul>` : `<p class="hint">${all.length ? 'Nothing here with this filter.' : `No requests yet. They arrive from ${page.replace('https://', '')}.`}</p>`}
   </section>`;
 }
+/** Settings opens with one row of jumps, in the order of the page
+ *  (Alexandru, 3 Nov 2026: "all this important stuff should be at the top"). */
+function settingsJump() {
+  const J = [[!!bookLinksHTML(), 'booklinks', 'Booking links'], [true, 'team', 'Team'], [can('payments'), 'stripebox', 'Payments'], [can('mailchimp'), 'mctags', 'Mailchimp tags'],
+    [!!data.mailchimp && can('mailchimp'), 'mc', 'Mailchimp'], [can('mentors'), 'mentors', 'Mentors'], [!!data.mailchimp && can('mailchimp'), 'mclog', 'Latest sends']].filter(([on]) => on);
+  return `<nav class="sjump" aria-label="In Settings">${J.map(([, id, w]) => `<button type="button" data-jump="${id}">${esc(w)}</button>`).join('')}</nav>`;
+}
+
 /** Settings → Booking links: the Google Meet link per kind of call. */
 function bookLinksHTML() {
   if (!can('message')) return '';
@@ -544,17 +552,26 @@ function mailchimpHTML() {
   const lastFail = last && last.status === 'failed' && !gone(last.email) ? `<p class="flash warn" role="status"><b>Last call failed:</b> ${esc(last.detail)}</p>` : '';
   const G = M.forgotten || [];
   const goneNote = G.length ? `<p class="tiny">${G.length === 1 ? `${esc(G[0])} was` : `${G.length} addresses were`} deleted for good in Mailchimp. ${esc(M.forgottenWhy || '')}</p>` : '';
-  return `<div class="panel mc"><h2>Mailchimp · ${esc(MC_MODE[M.mode] || M.mode)}</h2>
+  return `<div class="panel mc" id="mc"><h2>Mailchimp · ${esc(MC_MODE[M.mode] || M.mode)}</h2>
     <p class="tiny">${esc(M.reason)}</p>${lastFail}${goneNote}
     <div class="bar"><input id="mc-email" type="email" placeholder="Email for a test join" autocomplete="off" style="max-width:280px">
       <button class="ghost" id="mc-test">Send a test join</button><span style="flex:1"></span>
       <button class="ghost" id="mc-backfill"${M.waiting ? '' : ' disabled'}>Send everyone with consent (${M.waiting} waiting)</button></div>
     ${M.waitingTags ? `<p class="tiny">${M.waitingTags} of them ${M.waitingTags === 1 ? 'is' : 'are'} already in Mailchimp and only need${M.waitingTags === 1 ? 's' : ''} their step tags.</p>` : ''}
+    <p class="tiny">The latest Mailchimp sends are at the bottom of Settings.</p>
+  </div>`;
+}
+/** The latest Mailchimp sends, folded, at the very bottom of Settings
+ *  (Alexandru, 3 Nov 2026: the list of people goes last, the settings first). */
+function mailchimpLogHTML() {
+  const M = data.mailchimp;
+  if (!M || !can('mailchimp')) return '';
+  return `<section class="panel" id="mclog"><details><summary><h2 style="display:inline">Latest Mailchimp sends · ${(M.log || []).length}</h2></summary>
     ${(M.log || []).length ? `<div class="tscroll"><table class="mclog"><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Mode</th><th>Status</th><th>Detail</th></tr></thead><tbody>
       ${M.log.map((r) => `<tr><td class="tiny">${when(r.at)}</td><td class="tiny">${esc(r.email || (r.student_id === 'mentor' ? 'mentor' : '—'))}</td><td class="tiny">${esc(r.action)}</td><td class="tiny">${esc(r.mode)}</td>
         <td>${gone(r.email) && r.status !== 'ok' ? 'deleted in Mailchimp' : r.status === 'failed' ? '<b class="warn">failed</b>' : esc(r.status)}</td><td class="tiny">${esc(gone(r.email) && r.status !== 'ok' ? M.forgottenWhy : r.detail || '')}</td></tr>`).join('')}</tbody></table></div>`
       : '<p class="tiny">No Mailchimp calls yet.</p>'}
-  </div>`;
+  </details></section>`;
 }
 
 /* ── Mailchimp tags (Alexandru, 2 Nov 2026) ───────────────────────────────
@@ -657,7 +674,7 @@ function mentorsHTML() {
     <div style="min-width:0;flex:1 1 200px"><b>${esc(m.name)}</b>${m.isDefault ? ' <span class="pill both">Everyone’s mentor</span>' : ''}<span class="em">${esc(m.title)} · replies to ${esc(m.email)}</span></div>
     <img src="${esc(m.signature)}" alt="" height="28" style="height:28px;width:auto;max-width:40%;background:#fff;padding:2px 6px;border-radius:4px">
     <button class="ghost" data-medit="${esc(m.id)}">Edit</button></li>`;
-  return `<details class="panel mentors"><summary><h2 style="display:inline">Mentors · ${L.length}</h2> <span class="tiny">Only for letters signed by someone other than you (name, photo, signature). The team does not need this.</span></summary>
+  return `<details class="panel mentors" id="mentors"><summary><h2 style="display:inline">Mentors · ${L.length}</h2> <span class="tiny">Only for letters signed by someone other than you (name, photo, signature). The team does not need this.</span></summary>
     <ul class="mlist">${L.map(row).join('')}</ul>
     <form id="mform" class="mform">
       <input type="hidden" id="m-id">
@@ -984,7 +1001,7 @@ function draw() {
     : tab === 'boardroom1' ? requestsHTML('boardroom')
     : tab === 'inbox' ? `${questionsHTML()}<section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
     : tab === 'grow' ? growHTML(S)
-    : tab === 'settings' ? `${isTeam() ? teamCanHTML() : ''}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>${mailchimpHTML()}${can('payments') ? '<section class="panel" id="stripebox"><p class="tiny">Loading the payments…</p></section>' : ''}${can('mailchimp') ? '<section class="panel" id="mctags"></section>' : ''}${bookLinksHTML()}${mentorsHTML()}`
+    : tab === 'settings' ? `${settingsJump()}${isTeam() ? teamCanHTML() : ''}${bookLinksHTML()}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>${can('payments') ? '<section class="panel" id="stripebox"><p class="tiny">Loading the payments…</p></section>' : ''}${can('mailchimp') ? '<section class="panel" id="mctags"></section>' : ''}${mailchimpHTML()}${mentorsHTML()}${mailchimpLogHTML()}`
     : todayHTML(S);
   $('#main').innerHTML = `<div class="stack" role="tabpanel">${said}${pane}</div>`;
   if (tab === 'inbox') loadComments();
@@ -1251,6 +1268,7 @@ document.addEventListener('click', async (e) => {
   if ('fclear' in d) { F = { ...NO_FILTER }; q = ''; $('#q').value = ''; flash = ''; return draw(); }
   if (d.drawer) return openDrawer(d.drawer, true);
   if ('xdrawer' in d) return closeDrawer();
+  if (d.jump) { const t = document.getElementById(d.jump); if (t) { t.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); const h = t.querySelector('h2'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } } return; }
   if (d.email) return trail(d.email);
   if (d.copy) { try { await navigator.clipboard.writeText(d.copy); b.textContent = 'Copied'; } catch { b.textContent = d.copy; } return; }
   if (d.open) { closeDrawer(); return one(d.open, d.at); }
