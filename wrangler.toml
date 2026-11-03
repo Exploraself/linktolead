@@ -15,13 +15,12 @@ main = "worker.js"
 # declares no [vars], removes them.
 keep_vars = true
 #
-# The LAB workbook (functions/api/workbook.js): a PRIVATE R2 bucket,
-# exploraself-workbooks, bound as WORKBOOKS by an [[r2_buckets]] block in this
-# file, added only once the bucket exists (a binding to a bucket that does not
-# exist stops the deploy). It holds the workbook PDF:
-# personal-leadership-lab-workbook-2026.pdf, or the one PDF under any name.
-# Paid content: never in this repo, never public. Without the binding the
-# button explains it is not ready yet.
+# The LAB workbook (functions/api/workbook.js): the PRIVATE R2 bucket
+# exploraself-workbooks, bound as WORKBOOKS on the PAGES app (Settings →
+# Bindings → R2 bucket, then Deployments → Retry deployment). It holds the
+# workbook PDF: personal-leadership-lab-workbook-2026.pdf, or the one PDF
+# under any name (as it comes from Drive). Paid content: never in this repo,
+# never public. Without the binding the button explains it is not ready yet.
 #
 # Mailchimp (functions/_mailchimp.js), all optional, set in the dashboard:
 #   MAILCHIMP_MODE          text    "test" stops every call; each join is only logged
