@@ -114,6 +114,23 @@ ok(P.codeFor('Europe/Rome') === '+39' && P.codeFor('America/New_York') === '+1' 
   ok(j2.ok && j2.wa === false, 'a failed WhatsApp never stops the request, and the page does not claim it went');
   ok(/^failed: GREEN-API answered 466/.test(env.DB.raw.prepare("SELECT wa FROM booking WHERE email = 'rae@example.com'").get().wa), 'and the request says why it failed');
 }
+// "Send it on WhatsApp" (3 Nov 2026, the free way): the business number is set
+// once in /mentor → Settings; the booking reply carries it, digits only.
+{
+  const { onRequestPost: mentorPost } = await import('../functions/api/mentor.js');
+  fakeResend();
+  const env = { DB: fakeD1(), RESEND_API_KEY: 're_test', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Rome', MENTOR_KEY: 'k'.repeat(24) };
+  const M = (body) => new Request('https://linktolead.exploraself.com/api/mentor', { method: 'POST', headers: { 'content-type': 'application/json', 'x-mentor-key': env.MENTOR_KEY }, body: JSON.stringify(body) });
+  let m = await (await mentorPost({ request: M({ action: 'book-links', whatsapp: '333 12' }), env })).json();
+  ok(!m.ok && /country code/.test(m.error || ''), 'a business number without its country code is refused');
+  m = await (await mentorPost({ request: M({ action: 'book-links', whatsapp: '+39 351 000 0000' }), env })).json();
+  ok(m.ok && m.links.whatsapp === '+393510000000', 'the business WhatsApp number is saved in the international form');
+  const slots = S.slotsFor('discovery');
+  const r = await (await book({ request: post('/api/book', { kind: 'discovery', answers: { stage: 'solo', struggles: ['clients', 'time'], goals: ['clients', 'runs'] }, name: 'Lee Example', email: 'lee@example.com', phone: '+39 333 000 1111', tz: 'Europe/Rome', times: [slots[3]] }, '3.3.3.3'), env })).json();
+  ok(r.ok && r.waTo === '393510000000', 'the booking reply carries the business number for the button');
+}
+ok(pageJs_wa(), 'the last screen shows “Send it on WhatsApp” only with the number, its text already written');
+function pageJs_wa() { const j = read('public/book/book.js'); return j.includes("if (!sent.waTo) return '';") && j.includes('https://wa.me/${esc(sent.waTo)}?text=${encodeURIComponent(waText(sent))}') && j.includes('Hi Alexandru, I just asked for a free discovery call.'); }
 const pageJs = read('public/book/book.js');
 ok(pageJs.includes("if (st.kind === 'times') return S.times.length >= RULES.min") && pageJs.includes("kind: 'phone'") && pageJs.includes('Your phone number, for WhatsApp'), 'the page moves on with one time and asks the phone on both forms');
 done();

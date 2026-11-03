@@ -492,6 +492,8 @@ function bookLinksHTML() {
   return `<section class="panel" id="booklinks"><h2>Booking links</h2>
     <p class="tiny">The Google Meet link for each kind of call. Paste it once: every confirmation from Inbox → Bookings carries it. Only links that start with https://meet.google.com/.</p>
     <div class="mform">${Object.keys(BOOK_LINK_NAMES).map((k) => `<label>${esc(BOOK_LINK_NAMES[k])}<input id="bl-${k}" type="url" inputmode="url" placeholder="https://meet.google.com/…" value="${esc(L[k] || '')}" autocomplete="off"></label>`).join('')}
+      <label>Business WhatsApp number<input id="bl-wa" type="tel" inputmode="tel" placeholder="+39 …" value="${esc(L.whatsapp || '')}" autocomplete="off"></label>
+      <p class="tiny">After booking, people see “Send it on WhatsApp”: one tap opens this number with their request written in. The WhatsApp Business app’s greeting message answers them. Empty: no button.</p>
       <button type="button" id="bl-save">Save the links</button></div></section>`;
 }
 
@@ -1311,8 +1313,8 @@ document.addEventListener('click', async (e) => {
   }
   if (b.id === 'bl-save') {
     b.disabled = true;
-    const r = await act({ action: 'book-links', discovery: $('#bl-discovery').value, boardroom: $('#bl-boardroom').value });
-    flash = r.ok ? 'Booking links saved. Every confirmation carries them.' : (r.data.error || 'The links did not save.');
+    const r = await act({ action: 'book-links', discovery: $('#bl-discovery').value, boardroom: $('#bl-boardroom').value, whatsapp: $('#bl-wa').value });
+    flash = r.ok ? 'Booking links saved. Every confirmation carries them, and the booking pages show the WhatsApp button when the number is set.' : (r.data.error || 'The links did not save.');
     return load();
   }
   if (d.link || d.reset) {

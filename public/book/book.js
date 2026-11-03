@@ -39,6 +39,7 @@ const ICON = {
   rise: I('<path d="M3.5 19.5 9 13l4 3.5 7.5-9"/><path d="M15 7.5h5.5V13"/>'),
   pulse: I('<path d="M3 12.5h4l2-5 4 10 2.5-5H21"/>'),
   shield: I('<path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/>'),
+  phonechat: I('<path d="M4.5 19.5l1.2-3.6A8 8 0 1 1 8.6 19z"/><path d="M9.2 9.3c.3 2 1.6 3.7 3.6 4.6l1-1 1.6.7-.3 1.4c-3.4.2-6.4-2.8-6.2-6.2l1.4-.3.7 1.6z"/>'),
 };
 
 // ── Where to go next (Alexandru, 2 Nov 2026: "something sweet" after the
@@ -254,6 +255,26 @@ function pickCard([id, why], i) {
     <a class="${i === 0 ? 'go' : 'ghost'}" href="${pickHref(id)}">${again ? 'Open my North Star' : i === 0 ? 'Start it now' : 'Start it'} ${ICON.arrow}</a></article>`;
 }
 
+/** "Send it on WhatsApp" (Alexandru, 3 Nov 2026: the free way): one tap
+ *  opens the business WhatsApp with their request written in; the WhatsApp
+ *  Business app's greeting message answers them. Shown only when the number
+ *  is set in /mentor → Settings → Booking links. */
+function waText(sent) {
+  const a = sent.answers || {};
+  const t = (sent.iso || []).map((iso) => { const o = oneTime(iso, TZ); return `${o.day}, ${o.time}${o.rome ? ` (${o.rome})` : ''}`; });
+  const lines = [KIND === 'boardroom' ? 'Hi Alexandru, I just booked my Boardroom 1:1.' : 'Hi Alexandru, I just asked for a free discovery call.',
+    `${t.length > 1 ? 'My times' : 'My time'}: ${t.join(' · ')}`, `Name: ${sent.name || ''}`, `Email: ${sent.email || ''}`];
+  if (KIND === 'discovery' && Array.isArray(a.struggles) && a.struggles.length) lines.push(`What I struggle with: ${a.struggles.map((k) => words('struggles', k)).join(' · ')}`);
+  return lines.join('\n');
+}
+function waCard(sent) {
+  if (!sent.waTo) return '';
+  return `<div class="wacard"><p class="eb">${ICON.phonechat}One last tap</p>
+    <h2 class="serif">Send it to Alexandru on WhatsApp</h2>
+    <p>Your request goes straight to Alexandru’s WhatsApp, already written. Then you can talk there too.</p>
+    <a class="go wago" href="https://wa.me/${esc(sent.waTo)}?text=${encodeURIComponent(waText(sent))}" target="_blank" rel="noopener">${ICON.phonechat}Send it on WhatsApp</a></div>`;
+}
+
 function doneScreen(email, copy, sent = {}) {
   const one = KIND === 'boardroom';
   const name = firstName(me ? me.name : sent.name);
@@ -265,6 +286,7 @@ function doneScreen(email, copy, sent = {}) {
   return `<section class="q done"><div class="tick">${ICON.check}</div>
     <h1 tabindex="-1" class="serif">Sent. Thank you${name ? `, ${esc(name)}` : ''}.</h1>
     <p class="lede">${one ? 'Your request is with Alexandru, with all twenty of your answers.' : 'Your request is with Alexandru. We look forward to meeting you.'}</p>
+    ${waCard(sent)}
     <div class="wait"><p class="wh">What happens now</p><ol class="tl2">
       <li><span class="dot" aria-hidden="true">${ICON.mail}</span><div><b>Now</b><p>${copy ? `A copy of your request is on its way to <b>${esc(email)}</b>.` : 'Keep an eye on your inbox.'}${sent.wa ? ' A WhatsApp with your time is on your phone too.' : ''}</p></div></li>
       <li><span class="dot" aria-hidden="true">${ICON.clock}</span><div><b>Within 24 hours</b><p>Alexandru confirms ${sent.times > 1 ? 'one of your times' : 'your time'}, by email, with the Google Meet link.</p></div></li>
@@ -395,7 +417,7 @@ async function send() {
   } catch { d = null; }
   busy = false;
   if (d && d.ok) {
-    const sent = { answers: { ...S.answers }, name: S.name, times: S.times.length, wa: !!d.wa };
+    const sent = { answers: { ...S.answers }, name: me ? me.name : S.name, email: d.email || body.email || (me && me.email) || '', times: S.times.length, iso: [...(d.times || S.times)], wa: !!d.wa, waTo: /^\d{7,15}$/.test(String(d.waTo || '')) ? String(d.waTo) : '' };
     forget();
     root.innerHTML = doneScreen(d.email || body.email || (me && me.email) || '', !!d.copy, sent);
     root.querySelector('h1').focus(); window.scrollTo(0, 0);

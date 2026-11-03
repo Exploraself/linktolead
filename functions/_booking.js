@@ -289,6 +289,21 @@ export async function setMeetLink(D, kind, link, at) {
   else await D.prepare('INSERT OR REPLACE INTO booking_setting (k, v, at) VALUES (?,?,?)').bind(`meet.${kind}`, link, at).run();
 }
 
+/** The business WhatsApp number the booking pages' "Send it on WhatsApp"
+ *  button opens (Alexandru, 3 Nov 2026: the free way, with the WhatsApp
+ *  Business app's own greeting message). Pasted once in /mentor → Settings,
+ *  never in this public repo. '' when not set. */
+export async function waNumber(D) {
+  await bookingTables(D);
+  const r = await D.prepare("SELECT v FROM booking_setting WHERE k = 'wa.to'").first();
+  return phoneOf(r && r.v);
+}
+export async function setWaNumber(D, phone, at) {
+  await bookingTables(D);
+  if (!phone) await D.prepare("DELETE FROM booking_setting WHERE k = 'wa.to'").run();
+  else await D.prepare("INSERT OR REPLACE INTO booking_setting (k, v, at) VALUES ('wa.to',?,?)").bind(phone, at).run();
+}
+
 /** One stored request, read for /mentor: the answers in words, the times as
  *  ISO strings. */
 export function bookingRow(r) {

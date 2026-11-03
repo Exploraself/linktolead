@@ -29,7 +29,7 @@ import { mailState, origin, send } from '../_mail.js';
 import { bookingLetter, bookingNotice } from '../_letters.js';
 import { waState, waSend, bookingWhatsApp, bookingAlert } from '../_whatsapp.js';
 import { MENTOR_EMAIL } from './note.js';
-import { KINDS, RULES, BOOK_TAGS, NAME_MAX, EMAIL_MAX, isKind, isSlot, readAnswers, bookingTables, bookingAllowed, bookingLogged, phoneOf } from '../_booking.js';
+import { KINDS, RULES, BOOK_TAGS, NAME_MAX, EMAIL_MAX, isKind, isSlot, readAnswers, bookingTables, bookingAllowed, bookingLogged, phoneOf, waNumber, waDigits } from '../_booking.js';
 
 export const LIMIT = 'You have sent three requests today. Alexandru and the team will write back. If it is urgent, write to support@exploraself.com.';
 const HELP = 'Write to support@exploraself.com and we will find a time with you.';
@@ -130,5 +130,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const job = syncFounder(env, D, me.id, 'tag', { tag: BOOK_TAGS[kind] }).catch(() => {});
     if (typeof waitUntil === 'function') waitUntil(job); else await job;
   }
-  return json({ ok: true, id, times: sorted, copy: !!copy.ok, email, wa });
+  // The business WhatsApp number, for the done screen's "Send it on WhatsApp".
+  const waTo = waDigits(await waNumber(D).catch(() => ''));
+  return json({ ok: true, id, times: sorted, copy: !!copy.ok, email, wa, ...(waTo ? { waTo } : {}) });
 }
