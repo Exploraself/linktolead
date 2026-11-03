@@ -87,8 +87,6 @@ ok((await workbookFile(bucket(['Manual Personal-Leadership-LAB-Workbook.pdf'])))
 ok((await workbookFile(bucket(['notes.txt']))) === null && (await workbookFile(undefined)) === null, 'no PDF, or no bucket: nothing (the "not ready yet" page)');
 const r = await workbookGet({ request: new Request(`${B}/api/workbook?t=${a.token}`), env: { ...env, WORKBOOKS: bucket(['Manual Personal-Leadership-LAB-Workbook.pdf']) } });
 ok(r.status === 200 && r.headers.get('content-type') === 'application/pdf' && /Personal-Leadership-LAB-Workbook\.pdf/.test(r.headers.get('content-disposition')), 'a LAB founder downloads it, under the workbook’s own name');
-const toml = read('wrangler.toml');
-ok(!/^\[\[r2_buckets\]\]/m.test(toml), 'no bucket binding in this change: it goes in only once the bucket exists, or the deploy stops');
 
 // ── 6. The menu on the toolkit pages ─────────────────────────────────────────
 for (const p of ['public/tools/hub.js', 'public/12-days/days.js', 'public/tools/engine.js']) {
