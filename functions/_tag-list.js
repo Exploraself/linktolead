@@ -52,7 +52,7 @@ const LANDING_PAGES = {
   north1: ['The Leader’s North Star sales page, North 1', '/north1/'], north2: ['The Leader’s North Star sales page, North 2', '/north2/'],
   north3: ['The Leader’s North Star sales page, North 3', '/north3/'], compass: ['The North Star box (The Leader’s North Star, with no sales page before it)', '/northstar/'],
   summit: ['The Summit sales page', '/northstar/summit/'],
-  exploraself: ['exploraself.com: a buy button there (the LAB, the HUB or the Unshakeable Assessment)', '/pay/?from=exploraself'],
+  exploraself: ['exploraself.com, through one of its buy buttons (the LAB, the HUB or the Unshakeable Assessment)', '/pay/?from=exploraself'],
 };
 /** Doors whose account can also be made on the pay page (Alexandru, 2 Nov
  *  2026): not signed in, /pay/ makes the free account in place, with the
