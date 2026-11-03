@@ -4,7 +4,14 @@
 #   (MENTOR_KEY, MAILCHIMP_API_KEY, RESEND_API_KEY, STRIPE_SECRET_KEY …) live
 #   in that app; after changing one, Deployments → Retry deployment.
 # - this WORKER "linktolead" (this file, `npx wrangler deploy`) runs the hourly
-#   letters ([triggers] below; SERIES_MODE is set on the Worker). It also
+#   letters (# The LAB workbook (functions/api/workbook.js): the PRIVATE R2 bucket
+# exploraself-workbooks, holding the workbook PDF. Merged only once the bucket
+# exists in Cloudflare (a binding to a missing bucket stops the deploy).
+[[r2_buckets]]
+binding = "WORKBOOKS"
+bucket_name = "exploraself-workbooks"
+
+[triggers] below; SERIES_MODE is set on the Worker). It also
 #   bundles worker.js, which hands /api/* to functions/api/, so it can serve
 #   the same site at its workers.dev address. No build step for either.
 name = "linktolead"
