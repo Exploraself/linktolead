@@ -26,6 +26,7 @@ import * as L from '../functions/_letters.js';
 import { courseLetter, COURSE_NAME, SEND_HOUR, LATEST_HOUR } from '../functions/_course.js';
 import { COURSE_LETTERS } from '../functions/_course-letters.js';
 import { MENTOR_EMAIL } from '../functions/api/note.js';
+import { TOOLKIT_PREVIEW } from '../functions/api/toolkit.js';
 import { SERIES_GROUPS, SERIES_TAGS } from '../functions/_series-letters.js';
 import { SERIES_STATUS, SERIES, PARSED, LATE_DAYS, seriesLetter, seriesOf, addDays, byDay, weekday, lettersOf } from '../functions/_series.js';
 
@@ -66,7 +67,7 @@ export const ENTRIES = [
     sentBy: 'functions/api/toolkit.js',
     also: 'Addresses on the TOOLKIT_EMAILS list, and the team, skip the code and get no letter.',
     build: () => L.toolkitCodeLetter(BASE, { ...S, code: '5689', url: `${BASE}/tools/?email=${encodeURIComponent(S.to)}&code=5689`,
-      tools: [['Personal leadership', ['The off-switch check', '12 Days to Start Winning', 'The bottleneck test']], ['Business', ['Cash runway', 'Teleprompter']]] }),
+      tools: TOOLKIT_PREVIEW }),
   },
   {
     id: 'tools-welcome', stage: 'door', icon: 'toolkit', fn: 'toolsWelcome',
@@ -126,6 +127,16 @@ export const ENTRIES = [
     sentBy: 'functions/_stripe.js applyPaid',
     also: 'What opened, the sessions that come with the step, the booking link, and a button to the first new level. A receipt: no offer, no assessments, no one-tap questions, the signature in words with the photo, and no unsubscribe header, so Gmail is likelier to keep it out of Promotions. The step tags go to Mailchimp at the same moment.',
     build: () => L.unlockedLetter(BASE, { ...S, step: 'session' }),
+  },
+  {
+    id: 'product', stage: 'pay', icon: 'key', fn: 'productLetter',
+    name: 'It’s yours (a product)',
+    when: 'Stripe confirms a payment for a one-off product bought from exploraself.com: today the Unshakeable Assessment, $9.99. Since 3 Nov 2026. Sent once per payment (through the webhook, or when exploraself.com asks /api/access).',
+    who: 'The buyer, even with letters turned off: it is about their own payment.',
+    from: 'exploraself.com/unshakeable → /pay/?step=unshakeable&from=exploraself',
+    sentBy: 'functions/_stripe.js applyProduct',
+    also: 'The button is the buyer’s own access link (exploraself.com/unshakeable?access=…), so it opens on any device. A receipt: no offer, no assessments, no unsubscribe header. Their step on the ladder does not change.',
+    build: () => L.productLetter(BASE, { ...S, product: 'unshakeable', url: 'https://exploraself.com/unshakeable?access=cs_live_example' }),
   },
   {
     id: 'gift', stage: 'pay', icon: 'key', fn: 'giftLetter',

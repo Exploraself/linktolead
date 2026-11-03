@@ -3,6 +3,8 @@
 // GET                 what /pay/ needs: is Stripe on, the steps and prices,
 //                     and (signed in) the founder's step now
 // POST { step }       a Stripe Checkout page for the signed-in founder → { url }
+// A product (PRODUCTS, from exploraself.com) is paid the same way; Stripe sends
+// the buyer back to exploraself.com, which asks /api/access.
 // GET ?cs=…           back from Stripe: asks Stripe about that exact session
 //                     and, when Stripe says paid, opens the step (the same
 //                     path as the webhook, recorded once)
@@ -10,10 +12,14 @@
 
 import { json, bad, db, accountTables, studentBy, clean } from '../_shared.js';
 import { origin } from '../_mail.js';
-import { checkout, stripe, applyPaid, STEPS, stripeMode, dollars } from '../_stripe.js';
+import { checkout, stripe, applyPaid, STEPS, PRODUCTS, stripeMode, dollars } from '../_stripe.js';
 
 const tokenOf = (request, body) => (body && body.token) || request.headers.get('x-account-token') || new URL(request.url).searchParams.get('t') || '';
-const steps = () => Object.fromEntries(Object.entries(STEPS).map(([k, s]) => [k, { name: s.name, price: dollars(s.amount), opens: s.opens, sessions: s.sessions, first: s.first }]));
+const steps = () => ({
+  ...Object.fromEntries(Object.entries(STEPS).map(([k, s]) => [k, { name: s.name, price: dollars(s.amount), opens: s.opens, sessions: s.sessions, first: s.first }])),
+  // One-off products from exploraself.com (3 Nov 2026): no level, no step.
+  ...Object.fromEntries(Object.entries(PRODUCTS).map(([k, p]) => [k, { name: p.name, price: dollars(p.amount), opens: p.opens, product: true }])),
+});
 
 export async function onRequestGet({ request, env }) {
   const D = db(env);

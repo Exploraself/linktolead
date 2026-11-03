@@ -6,7 +6,7 @@
 // his photo kept, no unsubscribe header or link. Every other letter, the
 // welcome first, stays exactly as it was. Run: node tests/receipts.test.mjs
 
-import { unlockedLetter, signinLetter, passwordChangedLetter, noAccountLetter, launchpadWelcome, northStarWelcome, bookingLetter, bookingConfirmedLetter, GOOD_WORDS, RECEIPTS, BOOKING } from '../functions/_letters.js';
+import { unlockedLetter, productLetter, signinLetter, passwordChangedLetter, noAccountLetter, launchpadWelcome, northStarWelcome, bookingLetter, bookingConfirmedLetter, GOOD_WORDS, RECEIPTS, BOOKING } from '../functions/_letters.js';
 import { send } from '../functions/_mail.js';
 import { fakeResend, tally } from './_d1.mjs';
 
@@ -24,9 +24,10 @@ const receipts = {
   // A request for a call, and its confirmation (Alexandru, 2 Nov 2026).
   booking: bookingLetter(B, { first: 'Maya', kind: 'discovery', times: ['2026-11-10T15:00:00.000Z', '2026-11-11T15:00:00.000Z', '2026-11-12T15:00:00.000Z'],
     answers: { stage: 'solo', struggles: ['clients', 'cash'], goals: ['clients', 'cash'] }, tz: 'Europe/London', to: 'maya@example.com' }),
+  product: productLetter(B, { first: 'Maya', product: 'unshakeable', url: 'https://exploraself.com/unshakeable?access=cs_test_abc', to: 'maya@example.com' }),
   'booking-confirmed': bookingConfirmedLetter(B, { first: 'Maya', kind: 'boardroom', time: '2026-11-10T15:00:00.000Z', meet: 'https://meet.google.com/abc-defg-hij', tz: 'Europe/London', to: 'maya@example.com' }),
 };
-ok(Object.keys(receipts).every((k) => RECEIPTS.includes(k)) && RECEIPTS.length === Object.keys(receipts).length, 'seven receipts, named in one list');
+ok(Object.keys(receipts).every((k) => RECEIPTS.includes(k)) && RECEIPTS.length === Object.keys(receipts).length, 'eight receipts, named in one list');
 for (const [name, L] of Object.entries(receipts)) {
   ok(L.receipt === true, `${name}: marked as a receipt`);
   ok(!/Free assessments/.test(L.text) && !L.html.includes('exploraself.com/first-100-clients') && !L.html.includes('exploraself.com/eq'), `${name}: no assessments`);

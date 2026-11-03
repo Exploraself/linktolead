@@ -42,9 +42,10 @@ const q = new URLSearchParams(location.search);
 const want = q.get('step');
 /** Where the founder came from, for the free account's landing (and so its
  *  Mailchimp tag): a sales page that sends to /pay/ names itself with
- *  ?from=… (/northstar/summit/ → summit, /road5/ → road5); anything else is
+ *  ?from=… (/northstar/summit/ → summit, /road5/ → road5, exploraself.com →
+ *  exploraself, since 3 Nov 2026); anything else is
  *  /road1/'s, as before. */
-const FROM = { summit: 'summit', road5: 'road5' };
+const FROM = { summit: 'summit', road5: 'road5', exploraself: 'exploraself' };
 const landing = FROM[q.get('from')] || 'road1';
 const H = () => ({ 'x-account-token': token(), 'content-type': 'application/json' });
 
@@ -79,6 +80,25 @@ function card(S, step, test, tier) {
       <li>${ICON.refund}Ask for a refund from your Base Camp</li>
     </ul>
     <p class="note">Your step opens the moment the payment goes through, and we email you what opened and how to book your session. Buying for your business? Tick “I’m purchasing as a business” on Stripe’s page to add the business name and VAT number.</p>
+    <p class="err" id="err" role="alert" hidden></p>`;
+}
+
+/** A one-off product from exploraself.com (3 Nov 2026): no levels, no step.
+ *  Stripe brings the buyer straight back to it on exploraself.com. */
+const PITCH = { unshakeable: 'The full Personal Leadership Audit, with your results and a printable certificate, on exploraself.com.' };
+function productCard(S, step, test) {
+  return `<p class="eb">${ICON.open}From exploraself.com</p>
+    <h1>${esc(S.name)}</h1>
+    ${PITCH[step] ? `<p class="pitch">${esc(PITCH[step])}</p>` : ''}
+    <p class="price">${esc(S.price)}<small>one payment</small></p>
+    ${test ? '<p class="test"><b>Test mode.</b> No real money moves. On Stripe’s page use the card 4242 4242 4242 4242, any future date and any three numbers.</p>' : ''}
+    <button class="go" type="button" id="go" data-step="${esc(step)}">${ICON.lock}Pay ${esc(S.price)} securely</button>
+    <ul class="trust">
+      <li>${ICON.lock}Paid on Stripe’s own secure page</li>
+      <li>${ICON.invoice}An invoice comes with every payment</li>
+      <li>${ICON.refund}Ask for a refund from your Base Camp</li>
+    </ul>
+    <p class="note">After paying, Stripe brings you straight back to it on exploraself.com, and we email you your own access link, so it opens on any device.</p>
     <p class="err" id="err" role="alert" hidden></p>`;
 }
 
@@ -117,12 +137,12 @@ async function start() {
       <a class="ghost" href="/ground-plan/#home">Back to my Base Camp</a>`);
   }
   if (!info.signedIn) return makeAccount(S);
-  if (ORDER.indexOf(step) <= ORDER.indexOf(info.tier || 'free')) {
+  if (!S.product && ORDER.indexOf(step) <= ORDER.indexOf(info.tier || 'free')) {
     return draw(`<p class="eb">${ICON.check}Already yours</p><h1>${esc(S.name)} is open for you</h1>
       <p class="muted">Nothing to pay. It is waiting in your Base Camp.</p>
       <a class="go" href="/ground-plan/#programme-${S.first}">Open Level ${pad(S.first)}</a>`);
   }
-  draw((q.get('cancelled') ? '<p class="err">No payment was made. When you are ready, it is one tap away.</p>' : '') + card(S, step, info.test, info.tier || 'free'));
+  draw((q.get('cancelled') ? '<p class="err">No payment was made. When you are ready, it is one tap away.</p>' : '') + (S.product ? productCard(S, step, info.test) : card(S, step, info.test, info.tier || 'free')));
   $('#go').onclick = async (e) => {
     const b = e.currentTarget, err = $('#err');
     b.disabled = true; err.hidden = true;
