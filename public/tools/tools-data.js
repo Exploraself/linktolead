@@ -299,7 +299,7 @@ const TOOLS = {
   offer: {
     id: 'offer', key: 'offer-check', name: 'The offer check', pain: 'Not enough clients', domain: 'Lead the market', domColor: '#D6BF8F', path: '/offer-check/',
     hook: 'People see your offer and don’t buy. Is it the offer, or too few people seeing it?',
-    intro: { eyebrow: 'Lead the market · Free · About 2 minutes', h: 'People see your offer and don’t buy. Find out why.', p: 'Ten quick answers about last month. You will see where people drop off, in your own numbers, and the one thing to fix first.', btn: 'Check my offer', fine: 'Free, in the Growth Toolkit. A self-reflection tool. Built on Offer Master by Liam Johnston (MIT).' },
+    intro: { eyebrow: 'Lead the market · Free · About 2 minutes', h: 'People see your offer and don’t buy. Find out why.', p: 'Ten quick answers about last month. You will see where people drop off, in your own numbers, and the one thing to fix first.', btn: 'Check my offer', fine: 'Free, in the Growth Toolkit. A self-reflection tool.' },
     qs: [
       { id: 'line', type: 'tap', q: 'When someone asks what you sell, what do you say first?', hint: 'The first sentence, as you really say it.', options: ['What I do: my service or product', 'Who I help', 'The result they get', 'The result, for whom, and by when'] },
       { id: 'seen', type: 'slide', q: 'How many people saw your offer last month?', hint: 'Your page, your posts with a price, the people you told. A rough count is fine.', min: 0, max: 1000, step: 10, start: 20, fmt: (v) => String(v), words: (v) => (v === 1 ? 'person' : 'people'), ends: ['0', '1,000'] },
@@ -374,7 +374,7 @@ const TOOLS = {
         rows, total, others, lines: [admit, struggle, shine, exactly], ask, action: `${MOVE[0]} ${MOVE[1]}`, when: dayTitle(a),
         quote: { t: 'People don’t buy what you do. They buy what changes for them.', src: 'The offer check' },
         bridge: 'Your offer is one side of one domain. The Leader’s North Star reads all four: Lead yourself, Lead your people, Lead your business and Lead the market, and ends with a plan you can tick off.',
-        honest: '<strong>Honest note.</strong> A self-reflection tool. It uses only the numbers you entered and simple division, with no industry averages. Built on Offer Master by Liam Johnston (MIT licence).',
+        honest: '<strong>Honest note.</strong> A self-reflection tool. It uses only the numbers you entered and simple division, with no industry averages.',
         caption: 'I checked my offer in two minutes. Now I know the one thing to fix first.',
       };
     },
