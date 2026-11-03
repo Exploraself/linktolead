@@ -15,10 +15,13 @@
 // and only until a password is set. An email that already has an account is
 // never signed in this way: the step opens on it, and they sign in as usual.
 // The founder's token comes in the x-account-token header (or `token`).
+// Already theirs (3 Nov 2026, the whole check): a guest whose email has an
+// account that already holds the step (or a higher one) is not sent to pay
+// again: { ok: false, signin: true } and the page offers the sign-in.
 
 import { json, bad, db, accountTables, studentBy, clean, looksLikeEmail } from '../_shared.js';
 import { origin } from '../_mail.js';
-import { checkout, stripe, applyPaid, guestOf, STEPS, PRODUCTS, stripeMode, dollars } from '../_stripe.js';
+import { checkout, stripe, applyPaid, guestOf, STEPS, PRODUCTS, stripeMode, dollars, above } from '../_stripe.js';
 
 const tokenOf = (request, body) => (body && body.token) || request.headers.get('x-account-token') || new URL(request.url).searchParams.get('t') || '';
 const steps = () => ({
@@ -70,6 +73,13 @@ export async function onRequestPost({ request, env }) {
     const email = clean(body.email, 200).toLowerCase(), first = clean(body.first, 60);
     if (!first) return bad('Your first name, please.');
     if (!looksLikeEmail(email)) return bad('That email does not look complete.');
+    const step = clean(body.step, 20);
+    if (STEPS[step]) {
+      const has = await D.prepare('SELECT tier FROM student WHERE lower(email) = ?').bind(email).first();
+      if (has && !above(step, has.tier)) {
+        return json({ ok: false, signin: true, error: `${STEPS[step].name} is already yours on ${email}. Sign in and it is waiting for you: no need to pay again.` }, 409);
+      }
+    }
     me = { id: '', email, tier: 'free', guest: { first, consent: body.consent === true, landing: clean(body.landing, 20) } };
   }
   const r = await checkout(env, D, origin(request), me, clean(body.step, 20));

@@ -8,6 +8,7 @@
  * the way in first (?open=teleprompter), the way in opens here, then the tool. */
 import { CATEGORIES, CATALOG, coverHTML, byKey } from '/tools/catalog.js';
 import * as G from '/tools/gate.js';
+import { mountDoor } from '/tools/door.js';
 import * as A from '/account.js';
 import { ICONS } from '/tools/icons.js';
 
@@ -65,3 +66,4 @@ if (A.joined()) {
   fetch(`/api/tools?t=${encodeURIComponent(A.token())}`).then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.ok) draw(d.used || {}, d.course); }).catch(() => {});
 }
 import('/profile-menu.js').then((m) => m.mount($('pmhost'), { guest: true })).catch(() => {});
+mountDoor(); // the menu's Sign in / Create my free account (public/tools/door.js)

@@ -141,10 +141,14 @@ const Q = {
  *   ready        called with the founder (or null, with a pass)
  *   cancel       called by "← Back" on the first step
  */
-export function open(host, { name = 'Growth Toolkit', path = '/tools/', st = { kind: 'guest' }, needAccount = false, ready, cancel } = {}) {
+export function open(host, { name = 'Growth Toolkit', path = '/tools/', st = { kind: 'guest' }, needAccount = false, start = '', ready, cancel } = {}) {
   const v = { first: '', last: '', email: '', company: '', noCompany: false, interest: '', industry: '', password: '', confirm: '', consent: false, code: '' };
-  let mode = needAccount ? 'signup' : 'code';
-  let steps = needAccount ? SIGNUP : CODE;
+  // start: 'signin' opens on the sign-in (the profile menu's "Sign in",
+  // public/tools/door.js); Back from there closes it.
+  const home = start === 'signin' ? 'signin' : needAccount ? 'signup' : 'code';
+  const listOf = (m) => (m === 'signin' ? SIGNIN : m === 'signup' ? SIGNUP : CODE);
+  let mode = home;
+  let steps = listOf(home);
   let i = 0, note = '', busy = false;
   const into = (m, list, at = 0, msg = '') => { mode = m; steps = list; i = at; note = msg; draw(); };
 
@@ -263,7 +267,7 @@ export function open(host, { name = 'Growth Toolkit', path = '/tools/', st = { k
     if (act === 'back') {
       if (i > 0) { i--; return draw(); }
       if (mode === 'enter') return into('code', CODE, 2);
-      if (mode !== (needAccount ? 'signup' : 'code')) return into(needAccount ? 'signup' : 'code', needAccount ? SIGNUP : CODE);
+      if (mode !== home) return into(home, listOf(home));
       return cancel && cancel();
     }
     if (act === 'pick') { const k = steps[i]; v[k] = b.dataset.v; host.querySelectorAll('.opt').forEach((o) => o.setAttribute('aria-pressed', String(o === b))); setTimeout(next, RM.matches ? 40 : 200); return; }

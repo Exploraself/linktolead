@@ -85,10 +85,8 @@ ok(st === 200 && j.token === ana, 'unpaused: signs in again, password kept');
 const P = (token, password, confirm) => setPw({ request: post('/api/password', { token, password, confirm }), env });
 [st] = await J(await P('x'.repeat(48), 'whatever long one', 'whatever long one'));
 ok(st === 401, 'setting a password needs to be signed in');
-[st, j] = await J(await P(bo, 'first password', 'first password'));
-ok(st === 403 && /link we email you/.test(j.error), 'simple form: no password, ever');
-// An account from before the two forms (no signup_type) can still set one.
-DB.raw.prepare('UPDATE student_profile SET signup_type = NULL WHERE student_id = ?').run(bo);
+// A link-only account (simple form) may choose a password too (3 Nov 2026:
+// "Forgot your password?" led them to this box and it refused).
 [st, j] = await J(await P(bo, 'first password', 'first passwrod'));
 ok(st === 400 && j.error === 'The two passwords are different.', 'set: confirmation must match');
 [st, j] = await J(await P(bo, 'short', 'short'));

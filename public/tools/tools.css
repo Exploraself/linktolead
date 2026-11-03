@@ -259,3 +259,16 @@ input[type=range]{width:100%;margin:14px 0 4px;height:34px;accent-color:var(--ac
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
 }
+
+/* The profile menu's Sign in / Create my free account, over the page
+   (public/tools/door.js, 3 Nov 2026). */
+html.tk-door-on{overflow:hidden}
+.tk-door{position:fixed;inset:0;z-index:60;background:rgba(9,16,26,.55);display:grid;place-items:start center;overflow-y:auto;padding:max(16px,4vh) 12px 24px}
+.tk-door.enter .tk-door-in{animation:rise .28s ease both}
+.tk-door-in{position:relative;width:100%;max-width:640px;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:22px 22px 26px;box-shadow:0 24px 60px rgba(9,16,26,.28)}
+.tk-door-x{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:22px;line-height:1;cursor:pointer}
+.tk-door .scr{margin-top:8px}
+.tk-in{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:55;width:min(560px,calc(100% - 24px));background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:16px;padding:16px 46px 16px 18px;box-shadow:0 14px 40px rgba(9,16,26,.22)}
+.tk-in p{margin:0 0 12px;font-size:15px;line-height:1.5}
+.tk-in .btn{min-height:44px;padding:0 20px;font-size:14px}
+.tk-in-x{position:absolute;top:8px;right:8px;width:34px;height:34px;border:0;background:none;color:var(--muted);font-size:22px;cursor:pointer}

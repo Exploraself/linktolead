@@ -5,6 +5,7 @@
 import { byKey, coverHTML } from '/tools/catalog.js';
 import * as G from '/tools/gate.js';
 import * as A from '/account.js';
+import { mountDoor } from '/tools/door.js';
 
 /** The twelve subjects, as the letters carry them (functions/_course-letters.js;
  *  a test holds them equal). */
@@ -68,3 +69,10 @@ if (A.joined()) {
   fetch(`/api/course?t=${encodeURIComponent(A.token())}`).then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.ok) { sub = d.sub; paint(); } }).catch(() => {});
 }
 import('/profile-menu.js').then((m) => m.mount($('pmhost'), { guest: true })).catch(() => {});
+mountDoor(); // the menu's Sign in / Create my free account (public/tools/door.js)
+// Signed in from the menu: show where they are in the 12 days, no reload.
+window.addEventListener('ftb:signedin', () => {
+  if (!A.joined()) return;
+  G.state().then((s) => { if (s.me) me = s.me; });
+  fetch(`/api/course?t=${encodeURIComponent(A.token())}`).then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.ok) { sub = d.sub; paint(); } }).catch(() => {});
+});
