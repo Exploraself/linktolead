@@ -218,3 +218,6 @@ h2.serif{font-size:clamp(25px,6vw,31px);line-height:1.15;margin:0}
 .go.wago{background:#1F6B3A;max-width:none}
 .go.wago:hover{background:#185730}
 .go.wago svg{width:22px;height:22px}
+
+/* "Start the booking again" (3 Nov 2026): a quiet text button under the main one. */
+.linkish{appearance:none;background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}

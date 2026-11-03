@@ -506,7 +506,7 @@ const bookIcon = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="t
 /** The Boardroom's button: pay first while it is locked (/pay/, Stripe), then
  *  book the 1:1 (Alexandru, 2 Nov 2026). */
 function boardroomCta(cls) {
-  if (holds(tierNow(), 'session')) return `<a class="${cls}" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book my 1:1 with Alexandru ↗</a>`;
+  if (holds(tierNow(), 'session')) return `<a class="${cls}" href="${esc(bookHref())}">Book my 1:1 with Alexandru →</a>`;
   const r = LADDER.find((x) => x.key === 'session');
   return `<a class="${cls}" href="${esc(payHref('session'))}">Unlock The Boardroom · ${esc(r ? r.price : '')} →</a>`;
 }
@@ -562,7 +562,7 @@ function railHTML(st) {
           </button></li>`;
         }).join('')}</ul>
         <p class="rnote">${esc(sec.note)}</p>
-        ${!owned && rung ? `<a class="rbook" href="${esc(payHref(sec.k))}">${MB_LOCK}Unlock · ${esc(rung.price)}</a>` : sec.k === 'session' ? `<a class="rbook" href="${esc(BOOKING)}" target="_blank" rel="noopener">${bookIcon}Book my 1:1 with Alexandru</a>` : ''}
+        ${!owned && rung ? `<a class="rbook" href="${esc(payHref(sec.k))}">${MB_LOCK}Unlock · ${esc(rung.price)}</a>` : sec.k === 'session' ? `<a class="rbook" href="${esc(bookHref())}">${bookIcon}Book my 1:1 with Alexandru</a>` : ''}
       </section>`;
     }).join('')}
     <a class="rsummit" href="/northstar/summit">
@@ -735,7 +735,7 @@ function bookHTML(st) {
 /** "Before you start" (Alexandru, 3 Nov 2026): the elephant in the room and
  *  the founder's version are the first row of the list, drawn as an intro so
  *  they never look like a part of the level. One tap opens them. */
-const INTRO = ['welcome', 'wask', 'where', 'you', 'still'];
+const INTRO = ['welcome', 'wask', 'door', 'where', 'you', 'still'];
 const introIdx = () => steps().map((s, i) => [s, i]).filter(([s]) => INTRO.includes(s[1])).map(([, i]) => i);
 function introRowHTML() {
   const ix = introIdx();
@@ -799,7 +799,7 @@ function fmWhere(d, kind) {
   if (kind === 'welcome') return `${esc(elephantName())} · ${stepAt(qi)[2] + 1} of 4`;
   if (kind === 'wask') { const A = welcomeOf(level).asks; return `${esc(elephantName())} · question ${A.findIndex((a) => a.k === stepAt(qi)[2]) + 1} of ${A.length}`; }
   if (kind === 'where') { const [n, of] = doorAt(); return `Where you are now · ${n} of ${of}`; }
-  if (kind === 'still' || kind === 'you') return 'Where you are now';
+  if (kind === 'still' || kind === 'you' || kind === 'door') return 'Where you are now';
   if (kind === 'begin') return `Level ${pad(level)} begins`;
   if (kind === 'got') return `Last week · ${d + 1} of 4`;
   if (d >= 0) {
@@ -849,7 +849,7 @@ function fmAuto() {
 /** The right page, when the layer is closed: where the founder is, and the way in. */
 function goHTML(st, x) {
   const [d, kind] = stepAt(qi), done = levelDone(st, level), started = done > 0 || qi > 0;
-  const at = kind === 'welcome' || kind === 'wask' ? `Before you start · the elephant in the room` : kind === 'where' || kind === 'still' || kind === 'you' ? 'Before you start · your version' : kind === 'begin' ? `Level ${pad(level)} begins` : kind === 'got' ? 'Last week’s four actions'
+  const at = kind === 'welcome' || kind === 'wask' ? `Before you start · the elephant in the room` : kind === 'door' || kind === 'where' || kind === 'still' || kind === 'you' ? 'Before you start · your version' : kind === 'begin' ? `Level ${pad(level)} begins` : kind === 'got' ? 'Last week’s four actions'
     : d >= 0 ? LEAD[DOMS[d]] : kind === 'week' ? 'Your week' : kind === 'dirlook' ? 'Your direction, again' : kind[0] === 'b' ? 'Build it' : 'Your chapter reading';
   return `<button type="button" class="cw-phone" data-crown="steps" aria-label="Show every step of this level">
       <span><i aria-hidden="true"></i>Level ${pad(level)} · ${done} of ${UNITS} done</span><span aria-hidden="true">All steps ▾</span></button>
@@ -857,16 +857,50 @@ function goHTML(st, x) {
       <p class="eyebrow">Level ${pad(level)} · ${esc(x.title)}</p>
       <h3 class="cw-q">${started ? (done === UNITS && kind === 'week' ? 'Your week is written.' : 'Pick up where you left off.') : `Start Level ${pad(level)}.`}</h3>
       <p class="fm-at">Next: <b>${esc(at)}</b></p>
+      ${introSavedHTML()}
       <p class="cw-promise"><b>By Sunday.</b> ${esc(x.promise)}</p>
       <button type="button" class="cta fm-open" data-fmopen>${started ? 'Continue →' : 'Start →'}</button>
       <p class="fm-hint">One question at a time, on the whole screen. Done ✓ or Esc brings you back here.</p>
     </div>`;
+}
+/** The 1:1 booking opens in the same tab and knows the way back (Alexandru,
+ *  3 Nov 2026: "I was in the program, take me there, not to Base Camp"). */
+const bookHref = () => `${BOOKING}${BOOKING.includes('?') ? '&' : '?'}back=${encodeURIComponent(location.pathname + location.hash)}`;
+/** Closed in the middle of "Before you start" (Alexandru, 3 Nov 2026: "it
+ *  tells me 8 of 12 done; it seems it hasn't recorded my work"): the twelve
+ *  count only the four parts, so the intro says itself what is kept. */
+function introSavedHTML() {
+  const ix = introIdx(), S = steps();
+  const asks = ix.filter((i) => ['wask', 'where', 'you', 'still'].includes(S[i][1]) && !skipsStep(state.work, S[i]));
+  const got = asks.filter((i) => stepDone(state.work, level, S[i])).length;
+  if (!got || got === asks.length) return '';
+  return `<p class="fm-saved" role="status">✓ Saved: ${got} of ${asks.length} answers in Before you start. The 12 squares count only the four parts that come after it.</p>`;
 }
 /** The elephant in the room (Alexandru, 2 Nov 2026): before Levels 01, 04,
  *  06 and 10, four screens one at a time (we understand you, it is possible,
  *  the puzzle, here you are), in Alexandru's own voice, then three taps or
  *  sliders. Personal: the first name, and from Level 04 on, the founder's
  *  own answers. A Summit founder has Greatness at Level 01. */
+/** The elephant, walking in (Alexandru, 3 Nov 2026: "a huge elephant making
+ *  a step, and here we are … focus, let's go"). A line drawing in the gold
+ *  accent; it walks once, and stands still for anyone who asked for less
+ *  motion (focus.css). Decorative: the words say it all. */
+const ELEPHANT = `<svg class="ele" viewBox="0 0 230 132" aria-hidden="true" focusable="false">
+  <path class="ele-ground" d="M6 122h218" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="2 7"/>
+  <g class="ele-walk" fill="currentColor">
+    <rect class="lg lg2" x="70" y="80" width="15" height="40" rx="7" opacity=".72"/>
+    <rect class="lg lg4" x="128" y="80" width="15" height="40" rx="7" opacity=".72"/>
+    <path d="M38 52c-6 6-8 14-6 22" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+    <ellipse cx="96" cy="64" rx="58" ry="36"/>
+    <rect class="lg lg1" x="52" y="82" width="16" height="40" rx="7.5"/>
+    <rect class="lg lg3" x="112" y="82" width="16" height="40" rx="7.5"/>
+    <circle cx="160" cy="54" r="27"/>
+    <path d="M178 66c8 10 10 26 6 40-1 5 3 8 8 7" fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+    <ellipse cx="146" cy="58" rx="15" ry="21" fill="none" stroke="#FFFFFF" stroke-width="2.6" opacity=".85"/>
+    <circle cx="171" cy="47" r="2.6" fill="#FFFFFF"/>
+    <path d="M182 70l8 6" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>
+  </g>
+</svg>`;
 const WL_IC = [
   '<path d="M4 5.5h11v8H8.5L4 17z"/><path d="M15 9h5v8l-3-2.5h-6V13.5"/>',
   '<path d="M3 19.5 9.5 8l3.5 6 2-3 6 8.5z"/><path d="M9.5 8V3.5l4 1.5-4 1.5"/>',
@@ -975,7 +1009,7 @@ function keepWhere(k, v) {
  *  skeleton). Tap, slide, one blank at a time, the day as a tap, "Done when"
  *  with how sure, four lines back; the week as four actions; last week's four
  *  first; the chapter reading and one action carried forward. */
-const KIND = { begin: 'The level begins', welcome: 'The elephant in the room', wask: 'The elephant in the room', where: 'Where you are now', you: 'Your version', still: 'Where you are now', got: 'Last week', idea: 'The idea', tap: 'Tap', slide: 'Slide', blank: 'Write once', day: 'The day', done: 'Done when',
+const KIND = { begin: 'The level begins', door: 'Where you are now', welcome: 'The elephant in the room', wask: 'The elephant in the room', where: 'Where you are now', you: 'Your version', still: 'Where you are now', got: 'Last week', idea: 'The idea', tap: 'Tap', slide: 'Slide', blank: 'Write once', day: 'The day', done: 'Done when',
   lines: 'Your four lines', week: 'Your week', reading: 'Chapter reading', carry: 'Carry one forward', carryday: 'Its day', dirlook: 'Your direction, again',
   bask: 'Build it', bstep: 'Build it', bday: 'Its day', bpage: 'Your page' };
 /** Inform → Reform → Transform (2 Nov 2026): the replies and checks, drawn
@@ -1028,7 +1062,7 @@ function sessionCard(lv) {
   if (!S) return '';
   return `<div class="cw-sess"><p class="eyebrow">${compass} Next · 1:1 with Alexandru and the team</p>
     <p class="gaint">Session ${S.n} · ${esc(S.name)}</p><p class="gainp"><b>Bring:</b> ${esc(S.bring)}</p>
-    <a class="cta" href="${esc(BOOKING)}" target="_blank" rel="noopener">Book Session ${S.n} ↗</a></div>`;
+    <a class="cta" href="${esc(bookHref())}">Book Session ${S.n} →</a></div>`;
 }
 /** Build it: one page after each chapter reading, mostly from answers
  *  already given (BUILD4). One field on screen, then the page. */
@@ -1112,10 +1146,21 @@ function pageHTML(st, x) {
   void seg;
   let body = '';
   if (kind === 'welcome') body = welcomeHTML(key);
+  else if (kind === 'door') {
+    // The bridge from the elephant to the door (Alexandru, 3 Nov 2026: "I
+    // transition without understanding what's happening").
+    const of = steps().filter((s) => s[1] === 'where' && !skipsStep(state.work, s)).length;
+    body = `<p class="wl-eb">The elephant in the room · named ✓</p>
+      <h3 class="cw-q" id="cwq">Now, <em>where you are today.</em></h3>
+      <p class="wl-p">${of} quick taps and sliders about your business as it is today: customers, sales, time and team. From them, the course picks your version, so every example and every action fits you.</p>
+      <p class="wl-p">No right answers. The honest number is the useful one.</p>`;
+  }
   else if (kind === 'begin') {
-    body = `<p class="wl-eb">Before you start · done ✓</p>
-      <h3 class="cw-q" id="cwq">You’re ready. Level ${pad(level)} begins: <em>${esc(x.title)}.</em></h3>
-      <p class="wl-p">Four parts, three moves each: tap the line that sounds like you, slide to the honest number, write one sentence. Then your week.</p>
+    body = `<div class="bg-scene" aria-hidden="true">${ELEPHANT}</div>
+      <p class="wl-eb">Before you start · done ✓</p>
+      <h3 class="cw-q bg-h" id="cwq">Here you are. <em>Level ${pad(level)} begins.</em></h3>
+      <p class="bg-title">${esc(x.title)}</p>
+      <p class="wl-p">Focus now: one question at a time. Tap the line that sounds like you, slide to the honest number, write one sentence. Ten minutes is enough for today.</p>
       <ol class="bg-parts">${x.d.map((D, i) => `<li><span class="cw-letter" style="background:var(--${DOMS[i]})">${esc(D.l)}</span><span><small>Part ${i + 1} of 4 · ${esc(LEAD[DOMS[i]])}</small><b>${esc(D.name)}</b></span></li>`).join('')}</ol>
       <p class="cw-promise"><b>By Sunday.</b> ${esc(x.promise)}</p>`;
   }
@@ -1248,7 +1293,8 @@ function pageHTML(st, x) {
   else if (kind === 'dirlook') body = dirLookHTML();
   else if (kind === 'bask' || kind === 'bstep' || kind === 'bday' || kind === 'bpage') body = buildHTML(st, kind, key, ci);
   const last = qi >= lastStep(), domainEnd = kind === 'lines' && d < 3;
-  const nextLabel = kind === 'begin' ? `Begin Level ${pad(level)} →` : kind === 'welcome' ? (key === 3 ? 'Begin →' : 'Next →') : kind === 'you' ? 'That’s me →' : kind === 'lines' ? 'See my week →' : kind === 'week' && ci != null ? 'My chapter reading →' : 'Next ↵';
+  const asksN = kind === 'welcome' && key === 3 ? welcomeOf(level).asks.length : 0;
+  const nextLabel = kind === 'begin' ? 'Let’s go →' : kind === 'door' ? 'Start →' : kind === 'welcome' ? (key === 3 ? (asksN ? `${asksN === 1 ? 'One quick question' : `${asksN} quick questions`} →` : 'Next →') : 'Next →') : kind === 'you' ? 'That’s me →' : kind === 'lines' ? 'See my week →' : kind === 'week' && ci != null ? 'My chapter reading →' : 'Next ↵';
   return `${top}${body}
     <footer class="cw-foot">
       ${qi > 0 ? '<button type="button" class="cw-back" data-qmove="-1">← Back</button>' : ''}
@@ -1311,7 +1357,7 @@ function crownHTML() {
     const a = Math.PI - (i * Math.PI) / 6;
     const pos = `style="--cx:${Math.cos(a).toFixed(3)};--cy:${(-Math.sin(a)).toFixed(3)}"`;
     const ico = `<span class="jw-i"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${svg}</svg></span>${esc(n)}`;
-    if (k === 'book') return holds(tierNow(), 'session') ? `<a class="jw" ${pos} href="${esc(BOOKING)}" target="_blank" rel="noopener">${ico}</a>` : `<a class="jw" ${pos} href="${esc(payHref('session'))}">${ico}</a>`;
+    if (k === 'book') return holds(tierNow(), 'session') ? `<a class="jw" ${pos} href="${esc(bookHref())}">${ico}</a>` : `<a class="jw" ${pos} href="${esc(payHref('session'))}">${ico}</a>`;
     if (k === 'library' || k === 'ask' || k === 'rail') return `<button type="button" class="jw" ${pos} data-go="${k}">${ico}</button>`;
     return `<button type="button" class="jw" ${pos} data-crown="${k}"${k === 'focus' ? ' aria-pressed="false"' : ''}>${ico}</button>`;
   };

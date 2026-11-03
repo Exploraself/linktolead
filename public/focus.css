@@ -128,3 +128,19 @@ body.fmopen .leaf-r .cw-tk{padding-right:64px}
 /* From a level to its twenty actions in My Blueprint. */
 .cw-five{margin:0;padding:12px 14px;border-radius:10px;background:var(--fm-soft,var(--leaf));font-size:15.5px;line-height:1.5}
 .cw-five .cw-all{margin-left:6px}
+
+/* The level begins (Alexandru, 3 Nov 2026): the elephant walks in, then the words. */
+.bg-scene{color:#B4975F;margin:0 0 6px;max-width:300px}
+.bg-scene .ele{display:block;width:100%;height:auto}
+.bg-h{font-size:clamp(30px,5vw,44px)!important}
+.bg-title{margin:4px 0 12px;font:600 19px/1.3 var(--fm-font);color:var(--fm-ink)}
+@media (prefers-reduced-motion:no-preference){
+  .bg-scene .ele-walk{animation:eleIn 1.8s cubic-bezier(.3,.7,.3,1) both}
+  .bg-scene .lg{transform-box:fill-box;transform-origin:50% 8%;animation:eleStep .45s ease-in-out 4 alternate}
+  .bg-scene .lg2,.bg-scene .lg4{animation-delay:.22s}
+  .bg-h,.bg-title{animation:eleWords .6s ease-out 1.2s both}
+}
+@keyframes eleIn{from{transform:translateX(-46px);opacity:0}25%{opacity:1}to{transform:none;opacity:1}}
+@keyframes eleStep{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
+@keyframes eleWords{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fm-saved{margin:6px 0 10px;font-size:15px;color:#2F6B4A;font-weight:600}
