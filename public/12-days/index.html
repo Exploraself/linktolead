@@ -22,6 +22,28 @@
 <link rel="preload" href="/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/fonts.css">
 <link rel="stylesheet" href="/tools/tools.css">
+<style>
+/* "Take care of your neighbor" (public/12-days/neighbor.js). */
+.nb{margin-top:56px;max-width:720px;background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:28px 28px 30px;position:relative;overflow:hidden}
+.nb::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--market)}
+.nb-top{display:flex;gap:16px;align-items:flex-start}
+.nb-ic{flex:none;width:52px;height:52px;border-radius:15px;display:grid;place-items:center;color:var(--market);background:color-mix(in srgb,var(--market) 12%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--market) 30%,transparent)}
+.nb-ic svg{width:28px;height:28px}
+.nb .eyebrow{color:var(--market)}
+.nb h2{margin-top:6px}
+.nb-sub{margin-top:6px;font:italic 400 19px/1.4 var(--display);color:var(--ink)}
+.nb-lede{margin-top:18px;font-size:16px;line-height:1.55;color:var(--muted);max-width:56ch}
+#nbbody .scr{margin:22px 0 0;max-width:none}
+#nbbody .qh{font-size:clamp(22px,3vw,27px)}
+.nb-qic{color:var(--market);background:color-mix(in srgb,var(--market) 10%,transparent)}
+.nb-count{margin-top:8px;font-size:12.5px;color:var(--muted)}
+.nb-note{font-size:18px;line-height:1.5;resize:vertical;min-height:4.8em}
+#nb-q:focus{outline:none}
+.nb-mail{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--bg);font-size:15px;line-height:1.5}
+.nb-mail p{margin:0 0 8px}
+.nb-mail .nb-k{margin:0;font:600 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+@media (max-width:520px){.nb{padding:22px 18px 24px}.nb-ic{width:44px;height:44px;border-radius:13px}.nb-ic svg{width:24px;height:24px}}
+</style>
 </head>
 <body>
 <header class="tk-bar"><div class="in">
@@ -50,7 +72,21 @@
   <section class="panel tool" id="panel" data-tool="12-days" hidden aria-label="Your free account"><div class="body" id="gate"></div></section>
   <h2 class="qh" style="margin-top:48px">What each morning brings</h2>
   <ol class="days12" id="days"></ol>
+  <!-- "Take care of your neighbor" (Alexandru, 3 Nov 2026): one invitation to a
+       friend, from a signed-in founder (public/12-days/neighbor.js). -->
+  <section class="nb" id="nb" aria-labelledby="nb-h">
+    <div class="nb-top">
+      <div class="nb-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M3.5 11 12 4l8.5 7v8.5a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1Z"/><path d="M12 17.6s-3.3-1.9-3.3-4.1a1.8 1.8 0 0 1 3.3-1 1.8 1.8 0 0 1 3.3 1c0 2.2-3.3 4.1-3.3 4.1Z" fill="currentColor" stroke="none"/></svg></div>
+      <div>
+        <p class="eyebrow">Pass it on · free</p>
+        <h2 class="qh" id="nb-h">Take care of your neighbor</h2>
+        <p class="nb-sub">Give them a hand and a ton of inspiration :)</p>
+      </div>
+    </div>
+    <div id="nbbody"></div>
+  </section>
 </main>
 <script type="module" src="/12-days/days.js"></script>
+<script type="module" src="/12-days/neighbor.js"></script>
 </body>
 </html>

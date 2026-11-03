@@ -23,7 +23,7 @@ import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import * as L from '../functions/_letters.js';
-import { courseLetter, COURSE_NAME, SEND_HOUR, LATEST_HOUR } from '../functions/_course.js';
+import { courseLetter, COURSE_NAME, SEND_HOUR, LATEST_HOUR, inviteLetter, INVITE_PER_DAY, INVITE_GAP_DAYS, INVITE_NOTE_MAX } from '../functions/_course.js';
 import { COURSE_LETTERS } from '../functions/_course-letters.js';
 import { MENTOR_EMAIL } from '../functions/api/note.js';
 import { TOOLKIT_PREVIEW } from '../functions/api/toolkit.js';
@@ -37,7 +37,7 @@ const S = { first: 'Sam', to: 'sam@example.com', tz: 'Europe/London', at: AT };
 /** The journey, in the order a founder meets it. `icon` names a drawing in
  *  ICONS below (AGENTS.md rule 13: a small picture that tells something). */
 export const STAGES = [
-  { key: 'find', icon: 'search', name: 'They find us', sub: 'A free assessment on exploraself.com' },
+  { key: 'find', icon: 'search', name: 'They find us', sub: 'A free assessment on exploraself.com, or a friend’s invitation' },
   { key: 'door', icon: 'door', name: 'They open a door', sub: 'An account, or a code for the Growth Toolkit' },
   { key: 'use', icon: 'spark', name: 'They use it', sub: 'Their North Star, and 12 Days to Start Winning' },
   { key: 'follow', icon: 'path', name: 'We follow their answers', sub: `Letters that follow each pain · ${SERIES_STATUS}` },
@@ -58,6 +58,16 @@ const BOARDROOM_SAMPLE = { moved: 'read', side: 'work', decision: placeholder('T
 /** Every linktolead letter. `build` returns what send() gets; `fn` names the
  *  builder in functions/_letters.js (the test checks none is missing). */
 export const ENTRIES = [
+  {
+    id: 'course-invite', stage: 'find', icon: 'house', fn: 'inviteLetter',
+    name: 'A friend’s invitation to 12 Days',
+    when: `A signed-in founder fills in "Take care of your neighbor" on /12-days/ (since 3 Nov 2026): their friend's first name, email and a line of their own (optional, up to ${INVITE_NOTE_MAX} characters, no links).`,
+    who: `The friend's address, once. At most ${INVITE_PER_DAY} a day from one founder; one invitation to an address in ${INVITE_GAP_DAYS} days, from anybody. Never to an address that said no to letters or to invitations.`,
+    from: '/12-days/',
+    sentBy: 'functions/api/course.js (action "invite"), functions/_course.js inviteLetter',
+    also: 'The friend goes on no list and gets no tag; their address is kept only as a hash, for the limits. They start only by tapping Start themselves. The footer link means no more invitations, from anybody. In /mentor the founder\'s trail shows "Invited a friend to 12 Days". The button carries utm_source=friend.',
+    build: () => inviteLetter(BASE, { first: 'Alex', from: S.first, fromEmail: S.to, note: placeholder('A line from Sam (optional)'), tz: S.tz, at: AT }),
+  },
   {
     id: 'toolkit-code', stage: 'door', icon: 'key', fn: 'toolkitCodeLetter',
     name: 'Growth Toolkit code',
@@ -367,6 +377,7 @@ export function samples(at: Date) {
 /* Line icons, 24 by 24, in the text colour, hidden from screen readers. */
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${d}</svg>`;
 export const ICONS = {
+  house: svg('<path d="M3.5 11 12 4l8.5 7v8.5a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1Z"/><path d="M12 17.6s-3.3-1.9-3.3-4.1a1.8 1.8 0 0 1 3.3-1 1.8 1.8 0 0 1 3.3 1c0 2.2-3.3 4.1-3.3 4.1Z" fill="currentColor" stroke="none"/>'),
   search: svg('<circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/>'),
   door: svg('<path d="M6 20.5V4.8c0-.7.5-1.3 1.2-1.3h9.6c.7 0 1.2.6 1.2 1.3v15.7"/><path d="M3.5 20.5h17"/><circle cx="14.5" cy="12.5" r=".9" fill="currentColor"/>'),
   spark: svg('<path d="M12 3.5v4M12 16.5v4M3.5 12h4M16.5 12h4M6 6l2.6 2.6M15.4 15.4 18 18M18 6l-2.6 2.6M8.6 15.4 6 18"/>'),
@@ -505,6 +516,7 @@ export function page({ letters, withExploraself }, { date = '2 Nov 2026' } = {})
     return `<section class="stage" id="st-${s.key}" aria-labelledby="h-${s.key}">
       <h2 id="h-${s.key}"><span class="n">${si + 1}</span><span class="sic">${ICONS[s.icon]}</span><span>${esc(s.name)}<small>${esc(s.sub)}</small></span></h2>
       ${list.length ? `<div class="cards">${list.map(card).join('')}</div>` : ''}
+      ${s.key === 'find' && !list.some((l) => l.site === 'exploraself.com') ? '<p class="note">The results letters of exploraself.com were not drawn this time. Run the map with <code>--exploraself</code> to add them.</p>' : ''}
       ${days.length ? `<div class="course">
         <div class="ch"><span class="ic">${ICONS.sun}</span><div><b>${esc(COURSE_NAME)}</b><p>${esc(days[0].when)}</p><p class="mut">${esc(days[0].who)}</p></div></div>
         <ol class="days">${days.map((d) => `<li><button type="button" data-open="${esc(d.id)}"><span class="dn">${esc(d.name)}</span><span class="ds">${esc(d.subject.replace(/^Day \d+ · /, ''))}</span></button></li>`).join('')}</ol>
