@@ -29,7 +29,7 @@ import { DOMAIN_STEPS, WHATIF_STEPS, ALL_STEP_IDS } from '../_plans.js';
 import { GROWTH_IDS, GROWTH_SQL, GROWTH_BLANK_IDS } from '../_growth.js';
 import { sendLink, signinUrl } from './signin.js';
 import { send, origin, mailState } from '../_mail.js';
-import { mentorLetter, answerLetter, teamInvite, giftLetter, bookingConfirmedLetter } from '../_letters.js';
+import { mentorLetter, answerLetter, messageNotice, teamInvite, giftLetter, bookingConfirmedLetter } from '../_letters.js';
 import { KINDS as BOOK_KINDS, BOOK_STATUS, BOOK_CLOSED, isOtherTime, bookingTables, bookingList, bookingRow, meetLink, meetLinks, setMeetLink } from '../_booking.js';
 import { letterContext, mentors, saveMentor } from '../_mentor.js';
 import { LIBRARY_ITEMS } from './library.js';
@@ -413,7 +413,7 @@ async function post({ request, env }) {
     // An answer in "Ask Alexandru": kept on the question, added to the
     // founder's thread as a message, and emailed as a letter (Base Camp
     // only for a founder who unsubscribed, or when email is off).
-    const n = await D.prepare('SELECT n.id, n.student_id, n.body, s.email, s.name, s.tier FROM note n JOIN student s ON s.id = n.student_id WHERE n.id = ?').bind(clean(body.note, 80)).first();
+    const n = await D.prepare('SELECT n.id, n.student_id, n.body, n.domain, s.email, s.name, s.tier FROM note n JOIN student s ON s.id = n.student_id WHERE n.id = ?').bind(clean(body.note, 80)).first();
     const answer = clean(body.reply, 3000);
     if (!n) return bad('Unknown question.', 404);
     if (!answer) return bad('Write the answer first.');
@@ -421,7 +421,15 @@ async function post({ request, env }) {
     await D.prepare('UPDATE note SET reply=?, status=?, answered_at=? WHERE id=?').bind(answer, 'answered', stamp, n.id).run();
     const p = await profile(D, n.student_id);
     let emailed = false;
-    if (!p.unsubscribed && mailState(env).ready) {
+    // A refund conversation (Alexandru, 3 Nov 2026): the email is only a
+    // notification from "your mentor at ExploraSelf", sent even after an
+    // unsubscribe (it is about their own payment); the words stay in Base Camp.
+    if (n.domain === 'refund' && mailState(env).ready) {
+      const base = origin(request);
+      const r = await send(env, { to: n.email, ...messageNotice(base, { first: String(n.name || '').split(' ')[0], url: `${base}/ground-plan/#ask` }),
+        why: 'You asked for a refund on linktolead.exploraself.com, and there is an answer in your conversation.', unsubUrl: '' });
+      emailed = r.ok;
+    } else if (!p.unsubscribed && mailState(env).ready) {
       const base = origin(request);
       const ctx = await letterContext(D, n.student_id);
       const r = await send(env, { to: n.email, ...answerLetter(base, { first: String(n.name || '').split(' ')[0], question: n.body, answer, to: n.email, tier: n.tier, ...ctx }),

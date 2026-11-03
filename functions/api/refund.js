@@ -35,11 +35,19 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const who = me || await D.prepare('SELECT id FROM student WHERE email = ?').bind(email).first();
   await D.prepare('INSERT INTO refund_ask (id, student_id, name, email, step, ip, asked_at) VALUES (?,?,?,?,?,?,?)')
     .bind(newToken(), who ? who.id : null, name, email, step, ip || null, now()).run();
+  const what = REFUND_NAMES[step] || step;
+  // A paid founder always has an account, so the request also opens their
+  // conversation (Ask, in Base Camp): it waits in /mentor → Inbox like a
+  // question, and the answer from /mentor reaches them there and by email.
+  if (who) {
+    await D.prepare('INSERT INTO note (id,student_id,level,domain,body,status,created_at) VALUES (?,?,?,?,?,?,?)')
+      .bind(newToken(), who.id, null, 'refund', `Refund request: ${what}. Name: ${name}. Email: ${email}.`, 'new', now()).run();
+  }
   if (mailState(env).ready) {
-    const base = origin(request), what = REFUND_NAMES[step] || step, first = name.split(/\s+/)[0];
+    const base = origin(request), first = name.split(/\s+/)[0];
     const job = Promise.all([
       send(env, { to: (typeof env.MENTOR_EMAIL === 'string' && env.MENTOR_EMAIL.trim()) || MENTOR_EMAIL, ...refundNotice(base, { name, email, what }), why: 'A refund request from Base Camp on linktolead.exploraself.com.' }),
-      send(env, { to: email, ...refundReceipt(base, { first, what, to: email }), why: 'You asked for a refund on linktolead.exploraself.com.' }),
+      send(env, { to: email, ...refundReceipt(base, { first, what, url: who ? `${base}/ground-plan/#ask` : '' }), why: 'You asked for a refund on linktolead.exploraself.com.', unsubUrl: '' }),
     ]).catch(() => {});
     if (typeof waitUntil === 'function') waitUntil(job); else await job;
   }

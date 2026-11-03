@@ -224,7 +224,7 @@ const close = (kind, { mentor, tz, at, to = '' } = {}, ask = 'start') => ({ ment
 const asReceipt = (c) => ({ ...c, receipt: true });
 /** Which letters are receipts: they answer something the founder just did.
  *  The welcomes and every other letter stay as they are. */
-export const RECEIPTS = ['unlocked', 'product', 'refund', 'signin', 'reset', 'password', 'no-account', 'booking', 'booking-confirmed'];
+export const RECEIPTS = ['unlocked', 'product', 'signin', 'reset', 'password', 'no-account', 'booking', 'booking-confirmed'];
 
 /** "launchpad-welcome": sent once, when the account is made. */
 export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {}) {
@@ -539,15 +539,33 @@ export function refundNotice(base, { name, email, what } = {}) {
   ], null, { sign: false }) };
 }
 
-/** "refund": the person's copy of their refund request. A receipt: it says
- *  the request arrived, never that money was refunded (AGENTS.md rule 6). */
-export function refundReceipt(base, { first, what, to = '', ...o } = {}) {
-  return { subject: 'We have your refund request', ...letter(base, [
+/** "refund": the person's copy of their refund request (Alexandru, 3 Nov
+ *  2026: "we received your message, we're sorry, but we're happy we can help
+ *  … here is the conversation … you'll be taken care of ASAP"). Signed by
+ *  their mentor at ExploraSelf, never by Alexandru by name (he is the founder,
+ *  teaching). It says the request arrived, never that money was refunded
+ *  (AGENTS.md rule 6). `url` is their conversation in Base Camp. */
+export function refundReceipt(base, { first, what, url = '' } = {}) {
+  return { subject: 'We have your message about a refund', ...letter(base, [
     hi(first),
-    `Thank you for telling me. Your request for a refund of ${what} has reached me.`,
-    'I will get in touch with you personally, by email, to sort it out with you.',
-    'If there is anything you want to tell me first, just reply to this email.',
-  ], null, asReceipt(close('refund', { ...o, to }, null))) };
+    `Thank you for writing to us. We received your request for a refund of ${what}.`,
+    'We are sorry it is not right for you, and we are glad we can help.',
+    ...(url ? ['Here is your conversation with ExploraSelf. We will take care of you there as soon as possible, and you will get an email each time there is a new message for you.', button(url, 'Open my conversation')]
+      : ['We will take care of you as soon as possible, by email. If there is anything you want to tell us first, just reply to this email.']),
+    'Your mentor at ExploraSelf',
+  ], null, { sign: false }) };
+}
+
+/** "mentor-message": a new message in their conversation, from /mentor
+ *  (Alexandru, 3 Nov 2026: "just a notification. Hey, there's a message for
+ *  you from your mentor at ExploraSelf"). The words stay in Base Camp. */
+export function messageNotice(base, { first, url = '' } = {}) {
+  return { subject: 'There is a message for you from your mentor at ExploraSelf', ...letter(base, [
+    hi(first),
+    'There is a new message for you from your mentor at ExploraSelf.',
+    button(url || `${base}/ground-plan/#ask`, 'Read my message'),
+    'Your mentor at ExploraSelf',
+  ], null, { sign: false }) };
 }
 
 // ── Booking a call (functions/api/book.js; Alexandru, 2 Nov 2026) ───────────
