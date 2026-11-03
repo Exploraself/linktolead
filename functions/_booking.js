@@ -254,6 +254,8 @@ export async function bookingTables(D) {
   ]);
   // Their phone (3 Nov 2026), added to a table that may already hold requests.
   try { await D.prepare('ALTER TABLE booking ADD COLUMN phone TEXT').run(); } catch { /* already there */ }
+  // What a discovery call is about (3 Nov 2026), from the link that sent them.
+  try { await D.prepare('ALTER TABLE booking ADD COLUMN about TEXT').run(); } catch { /* already there */ }
   READY.add(D);
 }
 
@@ -347,3 +349,15 @@ export async function bookingList(D, limit = 100) {
   const rows = (await D.prepare('SELECT * FROM booking ORDER BY created_at DESC LIMIT ?').bind(limit).all()).results || [];
   return rows.map(bookingRow);
 }
+
+/** What a discovery call is about (Alexandru, 3 Nov 2026: "in /mentor I have
+ *  to see what this discovery is connected to: the LAB, the HUB, the Summit
+ *  or wherever else"). From the link that sent them: ?about=… or, for the
+ *  links that already carry it, utm_medium. Unknown words are kept as ''. */
+export const ABOUT = {
+  lab: 'The LAB', hub: 'The HUB', summit: 'The Summit', home: 'exploraself.com, the home page',
+  eq: 'The EQ assessment', rise: 'Allow Yourself to Rise (assessment)', 'two-week-test': 'The Two-Week Test',
+  'first-100-clients': 'First 100 Clients (assessment)', 'results-email': 'An assessment results email',
+  leadionaire: 'Leadionaire', unbound: 'Unbound (assessment)', northstar: 'The Leader’s North Star',
+};
+export const aboutOf = (k) => (Object.hasOwn(ABOUT, String(k || '')) ? String(k) : '');

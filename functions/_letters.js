@@ -631,7 +631,7 @@ export function bookingConfirmedLetter(base, { first, kind = 'discovery', time =
  *  in Rome time (and theirs), everything they answered, where to confirm one
  *  (/mentor: the confirmation carries the Google Meet link), and a reply link.
  *  Plain, no offer. Replies go straight to the person. */
-export function bookingNotice(base, { name, email, phone = '', kind = 'discovery', times = [], answers = {}, tz = '', step = '', account = false } = {}) {
+export function bookingNotice(base, { name, email, phone = '', kind = 'discovery', times = [], answers = {}, tz = '', step = '', account = false, about = '' } = {}) {
   const one = kind === 'boardroom';
   const zone = tz || RULES.zone;
   const away = zone !== RULES.zone;
@@ -639,6 +639,7 @@ export function bookingNotice(base, { name, email, phone = '', kind = 'discovery
   return { subject: `New ${one ? 'Boardroom 1:1' : 'discovery call'} request from ${name || email}`, ...letter(base, [
     `${name || 'Someone'} (${email}${phone ? `, ${phone}` : ''}) asked for ${one ? `their Boardroom 1:1 (60 minutes, paid${step ? `: ${step}` : ''})` : 'a free discovery call (30 minutes)'}, ${account ? 'with an account' : 'without an account'}.`,
     `${times.length > 1 ? `Their ${times.length === 2 ? 'two' : 'three'} times` : 'Their time'}, in Rome time${away ? ` (they are in ${cityOf(zone)})` : ''}:\n` + times.map((iso) => { const w = whenText(iso, zone); return `· ${w.rome}${w.same ? '' : ` (${w.mineShort})`}`; }).join('\n'),
+    about ? `About: ${about} (the page that sent them).` : '',
     all ? `What they told us:\n${all}` : '',
     `Confirm ${times.length > 1 ? 'one' : 'it'} in /mentor, Inbox, Bookings: they get the time and the Google Meet link by email.`,
     button(`${base}/mentor/#inbox`, 'Confirm a time →'),

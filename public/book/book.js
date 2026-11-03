@@ -97,6 +97,9 @@ const forget = () => { try { localStorage.removeItem(KEY); } catch { /* private 
  *  way out goes back there, to the exact place they were studying
  *  (Alexandru, 3 Nov 2026). Only Base Camp addresses are kept. */
 const BACK = (() => { const b = new URLSearchParams(location.search).get('back') || ''; return /^\/ground-plan\/[\w#\-./?=&]*$/.test(b) ? b : ''; })();
+/** What the call is about, from the link that sent them (?about=hub, or the
+ *  utm_medium most links already carry). The server keeps only known words. */
+const ABOUT_KEY = (() => { const q = new URLSearchParams(location.search); return String(q.get('about') || q.get('utm_medium') || '').toLowerCase().slice(0, 40); })();
 const backLabel = () => (/#programme-\d+/.test(BACK) ? '← Back to my level' : '← Back to my Base Camp');
 
 let me = null; // the signed-in founder, if any
@@ -425,7 +428,7 @@ async function send() {
   const btn = root.querySelector('[data-send]');
   busy = true; btn.disabled = true; btn.firstChild.textContent = 'Sending… ';
   err.innerHTML = '';
-  const body = { kind: KIND, answers: S.answers, times: S.times, tz: TZ, hp: root.querySelector('[data-hp]')?.value || '', token: A.token() || undefined };
+  const body = { kind: KIND, answers: S.answers, times: S.times, tz: TZ, hp: root.querySelector('[data-hp]')?.value || '', token: A.token() || undefined, about: ABOUT_KEY || undefined };
   body.phone = phoneOf(S.phone);
   if (KIND === 'discovery') { body.name = S.name.trim(); body.email = S.email.trim(); }
   let d = null;

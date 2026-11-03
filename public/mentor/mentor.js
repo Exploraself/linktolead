@@ -431,6 +431,22 @@ const romeInputToIso = (v) => {
   let t = guess - off(guess); const again = off(t); if (guess - again !== t) t = guess - again;
   return new Date(t).toISOString();
 };
+/** Who is asking, at a glance (Alexandru, 3 Nov 2026: a question in Ask
+ *  Alexandru comes with its context, a booking must too): a discovery call
+ *  says what it is about; with an account, their step, levels, company,
+ *  interest and the side that needs them first. */
+const ABOUT_NAME = { lab: 'The LAB', hub: 'The HUB', summit: 'The Summit', home: 'exploraself.com, the home page', eq: 'The EQ assessment', rise: 'Allow Yourself to Rise', 'two-week-test': 'The Two-Week Test', 'first-100-clients': 'First 100 Clients', 'results-email': 'An assessment results email', leadionaire: 'Leadionaire', unbound: 'Unbound', northstar: 'The Leader’s North Star' };
+function bookAboutHTML(b, s) {
+  const bits = [];
+  if (b.kind !== 'boardroom') bits.push(`<b>About:</b> ${esc(ABOUT_NAME[b.about] || 'not said (a direct link)')}`);
+  if (s) {
+    bits.push(`${esc(STEP_SHORT[s.tier || 'free'] || 'Launchpad')} · ${s.levels ? `${plural(s.levels, 'level', 'levels')} done` : 'no level done yet'}`);
+    if (s.company) bits.push(esc(s.company));
+    if (s.interest) bits.push(`Wants: ${esc(s.interest)}`);
+    if (s.thin_domain) bits.push(`Needs first: ${esc(DOMAIN_NAME[s.thin_domain] || s.thin_domain)}`);
+  } else bits.push('No account yet');
+  return `<p class="bk-about">${bits.join(' · ')}</p>`;
+}
 /** 1:1 requests and Boardroom 1:1 (Alexandru, 2 Nov 2026: "two menus …
  *  any details, so that I can have full control"). Each request: who, their
  *  account and step, when they asked (Rome and their own time), every answer,
@@ -478,6 +494,7 @@ function requestsHTML(kind) {
     return `<li class="bk${open ? '' : ' closed'}" id="bk-${esc(b.id)}"><div>
       <p class="bk-h"><span class="pill ${BK_PILL[b.status] || ''}">${esc(BK_STATUS[b.status] || b.status)}</span>${s ? `<span class="pill">${esc(STEP_NAMES[s.tier] || s.tier || 'Free')}</span>` : '<span class="pill">No account</span>'}</p>
       ${who} <span class="em">${emailBtn(b.email)}${b.phone ? ` · ${waLink(b.phone)}` : ''}</span>
+      ${bookAboutHTML(b, s)}
       <p class="tiny">Asked ${esc(when(b.created_at))} · ${esc(day(b.created_at))}${zone ? ` · lives on ${esc(zone)} time` : ' · Rome time'}${b.confirmed_at ? ` · confirmed ${esc(when(b.confirmed_at))}${b.confirmed_by ? ` by ${esc(b.confirmed_by)}` : ''}` : ''}${b.closed_at ? ` · ${esc((BK_STATUS[b.status] || '').toLowerCase())} ${esc(when(b.closed_at))}${b.closed_by ? ` by ${esc(b.closed_by)}` : ''}` : ''}</p>
       ${b.answers && b.answers.length ? `<dl class="dkv bk-a">${b.answers.map(([l, w]) => `<dt>${esc(l)}</dt><dd>${esc(w)}</dd>`).join('')}</dl>` : ''}
       <p class="lbl" style="margin-top:12px">${b.times.length === 1 ? 'Their time' : `Their ${b.times.length === 2 ? 'two' : 'three'} times`}</p><ul class="bk-tl">${b.times.map(timeRow).join('')}${ownTime}</ul>
