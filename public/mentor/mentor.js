@@ -145,7 +145,7 @@ function tabsHTML() {
 // Founders who tapped "Ask for a refund" in their Base Camp: the programme they
 // name, their name and email, and what Stripe holds for them. Alexandru gets
 // in touch himself; "Mark done" only files the request (the payments right).
-const STEP_PRICE = { session: '$27', lab: '$97', hub: '$750', premium: '$1,989' };
+const STEP_PRICE = { session: '$27', lab: '$97', hub: '$750', premium: '$1,989', unshakeable: '$9.99' };
 function refundsHTML() {
   const money = (c) => `$${(Number(c) / 100).toLocaleString('en-US')}`;
   const list = data.refunds || [], open = list.filter((x) => !x.done_at), done = list.filter((x) => x.done_at);
@@ -158,11 +158,12 @@ function refundsHTML() {
       <div class="rf-who"><b>${esc(x.name)}</b>${emailBtn(x.email, 'tiny')}${s ? `<button type="button" class="linkish tiny" data-drawer="${esc(s.id)}">Open their account</button>` : ''}</div>
       <div class="rf-what"><span class="rf-step">${esc(STEP_NAMES[x.step] || x.step)} · ${esc(STEP_PRICE[x.step] || '')}</span><span class="tiny">Asked ${esc(when(x.asked_at))} · ${esc(day(x.asked_at))}</span><span class="tiny">${paidLine}</span></div>
       <div class="rf-act">${x.done_at ? `<span class="tiny">Done ${esc(day(x.done_at))}${x.done_by ? ` · ${esc(x.done_by)}` : ''}</span>` : ''}
+        ${s ? `<button type="button" class="btn gold" data-open="${esc(s.id)}" data-at="ask">Answer in their conversation</button>` : ''}
         ${can('payments') ? `<button type="button" class="btn${x.done_at ? '' : ' red'}" data-rfdone="${esc(x.id)}" data-v="${x.done_at ? '0' : '1'}">${x.done_at ? 'Open again' : 'Mark done'}</button>` : ''}</div>
     </li>`;
   };
   return `<section class="panel rf-panel" aria-labelledby="rf-h"><h2 id="rf-h">Refunds</h2>
-    <p class="sub">Founders who tapped “Ask for a refund” in their Base Camp. Get in touch with each one yourself; nothing is refunded from here. Refunds are made in Stripe.</p>
+    <p class="sub">Founders who tapped “Ask for a refund” in their Base Camp. Each request is also in their conversation: answer there, and they get an email that a message from their mentor at ExploraSelf is waiting. Nothing is refunded from here. Refunds are made in Stripe.</p>
     ${open.length ? `<ul class="rf-list">${open.map(row).join('')}</ul>` : '<p class="tiny">No open requests.</p>'}
     ${done.length ? `<details class="more"><summary>Done (${done.length})</summary><ul class="rf-list">${done.map(row).join('')}</ul></details>` : ''}
   </section>`;
@@ -254,7 +255,7 @@ function threeHTML() {
   const who = whoFirst();
   const job = (x) => {
     const nm = esc(x.s.name || x.s.email || '—');
-    const [what, why] = x.kind === 'question' ? [`${nm} asked ${x.count > 1 ? `${x.count} questions` : 'a question'}`, `Asked ${when(x.waitingSince)}: “${esc(String(x.text || '').slice(0, 120))}${String(x.text || '').length > 120 ? '…' : ''}”`]
+    const [what, why] = x.kind === 'question' ? [/^Refund request:/.test(String(x.text || '')) ? `${nm} asked for a refund` : `${nm} asked ${x.count > 1 ? `${x.count} questions` : 'a question'}`, `Asked ${when(x.waitingSince)}: “${esc(String(x.text || '').slice(0, 120))}${String(x.text || '').length > 120 ? '…' : ''}”`]
       : x.kind === 'quiet' ? [`${nm} has been quiet for ${x.days} days`, esc(toldBrief(x.s))]
       : x.kind === 'ready' ? [`${nm} finished Levels 01, 02 and 03`, 'Ready for the Boardroom']
       : [`${nm} is new`, `Joined ${x.days === 0 ? 'today' : x.days === 1 ? 'yesterday' : x.days + ' days ago'}${toldBrief(x.s) ? ' · ' + esc(toldBrief(x.s)) : ''}`];
@@ -275,8 +276,28 @@ function toldBrief(s) {
   return bits.join(' · ');
 }
 
+/** First on Today (Alexandru, 3 Nov 2026: "payments, refunds, questions come
+ *  first"): the last seven days' payments, the open refunds and the questions
+ *  waiting, each with a tap to where it is handled. */
+function firstHTML() {
+  const week = Date.now() - 7 * 864e5, byId = Object.fromEntries((data.students || []).map((s) => [s.id, s]));
+  const pays = (data.paid || []).filter((p) => Date.parse(p.at) >= week).sort((a, b) => String(b.at).localeCompare(String(a.at)));
+  const refunds = (data.refunds || []).filter((x) => !x.done_at), qs = (data.waiting || []).filter((n) => n.domain !== 'refund');
+  const money = (c) => `$${(Number(c) / 100).toLocaleString('en-US', { minimumFractionDigits: Number(c) % 100 ? 2 : 0 })}`;
+  const who = (id, fb) => { const s = byId[id]; return s ? `<button type="button" class="linkish" data-drawer="${esc(s.id)}">${esc(s.name || s.email)}</button>` : esc(fb || '—'); };
+  const payRows = pays.slice(0, 5).map((p) => `<li>${who(p.student_id)} · ${esc(STEP_NAMES[p.step] || p.step)}${can('payments') && p.amount != null ? ` · ${esc(money(p.amount))}` : ''}${p.mode === 'live' ? '' : ' · test'} · ${esc(when(p.at))}</li>`).join('');
+  const box = (title, n, color, body, tab, label) => `<div class="g" style="--c:var(--${color})"><span class="n">${n}</span><span class="t">${title}</span>${body ? `<ul class="tiny" style="margin:6px 0 0;padding-left:18px">${body}</ul>` : ''}<button type="button" class="linkish" data-tab="${tab}" style="margin-top:8px">${label} →</button></div>`;
+  return `<div class="panel"><div><h2>First</h2><p class="sub">Payments, refunds and questions, before everything else.</p></div>
+    <div class="groups" style="margin-top:12px">
+      ${box('Paid in the last 7 days', pays.length, 'both', payRows, 'grow', 'See all payments')}
+      ${box('Refund requests open', refunds.length, refunds.length ? 'warn' : 'line', refunds.slice(0, 5).map((x) => `<li>${who(x.student_id, x.name)} · ${esc(STEP_NAMES[x.step] || x.step)} · ${esc(when(x.asked_at))}</li>`).join(''), 'refunds', 'Open Refunds')}
+      ${box('Questions waiting', qs.length, qs.length ? 'warn' : 'line', qs.slice(0, 5).map((n) => `<li>${who(n.student_id, n.name)} · ${esc(when(n.created_at))}</li>`).join(''), 'inbox', 'Open Inbox')}
+    </div></div>`;
+}
+
 function todayHTML(S) {
-  return `${threeHTML()}
+  return `${firstHTML()}
+    ${threeHTML()}
     ${stuckHTML()}
     <div><h2>Where your founders are</h2><p class="sub">Tap a group to see who is in it. Each group has the one thing that moves them on.</p></div>
     ${groupsHTML(S)}`;
@@ -742,7 +763,7 @@ export const LANDING_PATH = { road1: '/road1/', road2: '/road2/', road3: '/road3
 const TOOL_PATH = { 'runway': '/runway/', 'bottleneck': '/bottleneck/', 'off-switch': '/off-switch/', '12-days': '/12-days/', 'teleprompter': '/teleprompter/' };
 const BOOK_PATH = { discovery: '/book/discovery/', boardroom: '/book/boardroom/' };
 const CROSS_NAME = { northstar: 'The Leader’s North Star', blueprint: 'The Founder’s Blueprint' };
-const DOMAIN_NAME = { self: 'Lead yourself', people: 'Lead your people', work: 'Lead your business', market: 'Lead the market' };
+const DOMAIN_NAME = { self: 'Lead yourself', people: 'Lead your people', work: 'Lead your business', market: 'Lead the market', refund: 'Refund request' };
 /** A phone as a one-tap WhatsApp link (3 Nov 2026). */
 const waLink = (p) => (p ? `<a class="wa" href="https://wa.me/${esc(String(p).replace(/\D/g, ''))}" target="_blank" rel="noopener" title="Write on WhatsApp">${esc(p)} · WhatsApp</a>` : '');
 const emailBtn = (email, cls = '') => (email ? `<button type="button" class="emailbtn${cls ? ' ' + cls : ''}" data-email="${esc(email)}" title="Everything for this email">${esc(email)}</button>` : '');
@@ -1120,7 +1141,7 @@ async function one(id, at = '') {
   NSE = r.data && r.data.compass ? await engine() : null;
   const d = r.data, s = d.student, A = d.answers || [], C = d.compass, P = d.profile || {}, T = d.ticks || [], M = d.messages || [], K = d.climb || [];
   const SC = d.stages || [], LB = d.library || [], TH = d.thread || [];
-  const LEADN = { self: 'Lead yourself', people: 'Lead your people', work: 'Lead your business', market: 'Lead the market' };
+  const LEADN = { self: 'Lead yourself', people: 'Lead your people', work: 'Lead your business', market: 'Lead the market', refund: 'Refund request' };
   const answered = new Set(TH.filter((x) => x.from === 'mentor').map((x) => x.note));
   const DOMS = [['self', 'Lead yourself'], ['people', 'Lead your people'], ['work', 'Lead your business'], ['market', 'Lead the market']];
   const byLevel = {};
