@@ -385,11 +385,11 @@ function workbookHTML() {
 const REFUND_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"/><path d="M14.5 9.2c-.5-.9-1.5-1.4-2.6-1.4-1.5 0-2.6.8-2.6 2 0 2.7 5.4 1.4 5.4 4.2 0 1.2-1.2 2.1-2.8 2.1-1.2 0-2.3-.6-2.8-1.5M12 6.2v1.6M12 16.1v1.6"/></svg>';
 let refundSent = '';
 function refundHTML() {
-  const me = state.me || {}, rungs = ['session', 'lab', 'hub', 'premium'].map((k) => [k, LADDER.find((r) => r.key === k)]).filter(([, r]) => r);
-  const NAMES = { session: 'The Boardroom', lab: 'The LAB', hub: 'The HUB', premium: 'The Summit' };
+  const me = state.me || {}, rungs = [...['session', 'lab', 'hub', 'premium'].map((k) => [k, LADDER.find((r) => r.key === k)]), ['unshakeable', { price: '$9.99' }]].filter(([, r]) => r);
+  const NAMES = { session: 'The Boardroom', lab: 'The LAB', hub: 'The HUB', premium: 'The Summit', unshakeable: 'The Unshakeable Assessment' };
   return `<section class="gp-wrap gp-refund" aria-labelledby="rf-h">
     <details class="rf"${refundSent ? ' open' : ''}><summary><span class="rf-ic">${REFUND_IC}</span><span><b id="rf-h">Ask for a refund</b><small>Not right for you? Alexandru gets in touch with you personally.</small></span></summary>
-    ${refundSent ? `<p class="rf-sent" role="status" tabindex="-1"><b>Sent.</b> Alexandru gets in touch with you personally, at ${esc(refundSent)}.</p>`
+    ${refundSent ? `<p class="rf-sent" role="status" tabindex="-1"><b>Sent.</b> Alexandru gets in touch with you personally, at ${esc(refundSent)}. A copy of your request is on its way to that address.</p>`
     : `<form id="refundform" class="rf-form" novalidate>
       <fieldset class="rf-steps"><legend>Which programme did you pay for?</legend>
         ${rungs.map(([k, r]) => `<label><input type="radio" name="rf-step" value="${k}"><span>${esc(NAMES[k])} · ${esc(r.price)}</span></label>`).join('')}

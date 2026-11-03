@@ -5,7 +5,9 @@
 // and nothing ever tells a founder a refund was made (AGENTS.md 6).
 
 /** The programmes a founder can name: every paid step. */
-export const REFUND_STEPS = ['session', 'lab', 'hub', 'premium'];
+export const REFUND_STEPS = ['session', 'lab', 'hub', 'premium', 'unshakeable'];
+/** How each one is named in the letters. */
+export const REFUND_NAMES = { session: 'The Boardroom', lab: 'The LAB', hub: 'The HUB', premium: 'The Summit', unshakeable: 'The Unshakeable Assessment' };
 /** At most this many requests from one address (IP) in a day. */
 export const REFUND_PER_DAY = 5;
 

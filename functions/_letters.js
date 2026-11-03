@@ -517,6 +517,57 @@ export function questionNotice(base, { name, email, question, level, domain }) {
   ], null, { sign: false }) };
 }
 
+/** To Alexandru: someone paid (functions/_stripe.js, Alexandru 3 Nov 2026:
+ *  "everybody gets an answer … everybody's taken care of"). Sent once per
+ *  payment, only after Stripe said paid. Plain, no offer. */
+export function paymentNotice(base, { name, email, what, amount, test = false, fresh = false, from = '' } = {}) {
+  return { subject: `${test ? '[Test] ' : ''}New payment: ${what}, ${amount}`, ...letter(base, [
+    `${name || 'Someone'} (${email}) paid ${amount} for ${what}${test ? ', in Stripe test mode (no real money)' : ''}.`,
+    fresh ? 'They paid before making an account: the account was made from their name and email, and they choose their password next.' : 'It is on their existing account.',
+    ...(from ? [`They came from ${from}.`] : []),
+    'They already have the letter with what opened and, for a step, the booking link for their 1:1.',
+    ['See them in /mentor: ', link(`${base}/mentor`), '.'],
+  ], null, { sign: false }) };
+}
+
+/** To Alexandru: a refund request from Base Camp (functions/api/refund.js). */
+export function refundNotice(base, { name, email, what } = {}) {
+  return { subject: `Refund request: ${what}, from ${name || email}`, ...letter(base, [
+    `${name || 'Someone'} (${email}) asked for a refund of ${what}, from their Base Camp.`,
+    'They were told you will get in touch with them personally. Nothing has been refunded yet: refunds are made in Stripe.',
+    ['It is in /mentor → Refunds: ', link(`${base}/mentor`), '.'],
+  ], null, { sign: false }) };
+}
+
+/** "refund": the person's copy of their refund request (Alexandru, 3 Nov
+ *  2026: "we received your message, we're sorry, but we're happy we can help
+ *  … here is the conversation … you'll be taken care of ASAP"). Signed by
+ *  their mentor at ExploraSelf, never by Alexandru by name (he is the founder,
+ *  teaching). It says the request arrived, never that money was refunded
+ *  (AGENTS.md rule 6). `url` is their conversation in Base Camp. */
+export function refundReceipt(base, { first, what, url = '' } = {}) {
+  return { subject: 'We have your message about a refund', ...letter(base, [
+    hi(first),
+    `Thank you for writing to us. We received your request for a refund of ${what}.`,
+    'We are sorry it is not right for you, and we are glad we can help.',
+    ...(url ? ['Here is your conversation with ExploraSelf. We will take care of you there as soon as possible, and you will get an email each time there is a new message for you.', button(url, 'Open my conversation')]
+      : ['We will take care of you as soon as possible, by email. If there is anything you want to tell us first, just reply to this email.']),
+    'Your mentor at ExploraSelf',
+  ], null, { sign: false }) };
+}
+
+/** "mentor-message": a new message in their conversation, from /mentor
+ *  (Alexandru, 3 Nov 2026: "just a notification. Hey, there's a message for
+ *  you from your mentor at ExploraSelf"). The words stay in Base Camp. */
+export function messageNotice(base, { first, url = '' } = {}) {
+  return { subject: 'There is a message for you from your mentor at ExploraSelf', ...letter(base, [
+    hi(first),
+    'There is a new message for you from your mentor at ExploraSelf.',
+    button(url || `${base}/ground-plan/#ask`, 'Read my message'),
+    'Your mentor at ExploraSelf',
+  ], null, { sign: false }) };
+}
+
 // ── Booking a call (functions/api/book.js; Alexandru, 2 Nov 2026) ───────────
 // Three letters: the person's copy of their request, the notice to
 // Alexandru, and the confirmation with the Google Meet link, sent from
