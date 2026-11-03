@@ -363,7 +363,20 @@ export function noAccountLetter(base, url, { reset = false, to = '', ...o } = {}
   ], null, asReceipt(close('no-account', { ...o, to }, 'security'))) };
 }
 
-/** After a password is set, changed or reset. A security letter. */
+/** After a founder's FIRST password (Alexandru, 3 Nov 2026: a new buyer
+ *  chose a password after paying and was told it "was changed"). A security
+ *  letter: no offer, one useful place to go. */
+export function passwordSetLetter(base, { first, to = '', offer, ...o } = {}) {
+  return { subject: 'Your password is set', ...letter(base, [
+    hi(first),
+    'Welcome in, and thank you. Your password is set: from now on you sign in with your email and this password, on any device.',
+    'Your Base Camp is ready whenever you are, and the team and I are here for you on the way.',
+    button(`${base}/ground-plan/#home`, 'Open my Base Camp'),
+    'If you did not choose a password on ExploraSelf, just reply to this email and we’ll lock the account straight away.',
+  ], offerFor('password', to, 'free', offer), asReceipt(close('password', { ...o, to }, 'security'))) };
+}
+
+/** After a password is changed or reset (one was there before). A security letter. */
 export function passwordChangedLetter(base, { first, to = '', offer, ...o } = {}) {
   return { subject: 'Your password was changed', ...letter(base, [
     hi(first),

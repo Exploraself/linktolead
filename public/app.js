@@ -1863,7 +1863,11 @@ function libraryView() {
     <h2 class="lib-h">The books</h2>
     <ul class="lib-books">${books}</ul>
     <div class="lib-lab"><div><span class="lib-kick">With the LAB</span><b>${esc(L.n)}</b><small>${esc(L.sub)} · ${L.pages} pages</small></div>
-      <a class="lib-btn" href="${esc(L.url)}" target="_blank" rel="noopener">${hasLab ? 'Open in the LAB ↗' : 'See the LAB ↗'}</a></div>
+      ${hasLab
+        // Theirs with their step (3 Nov 2026, the whole check): the download
+        // itself (functions/api/workbook.js), not the page that sells the LAB.
+        ? `<a class="lib-btn" href="${esc(account.workbookHref())}" download>Download your workbook</a>`
+        : `<a class="lib-btn" href="${esc(L.url)}" target="_blank" rel="noopener">See the LAB ↗</a>`}</div>
   </div></section>`;
 }
 

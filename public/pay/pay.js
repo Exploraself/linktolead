@@ -201,6 +201,11 @@ async function start() {
       const r = await fetch('/api/checkout', { method: 'POST', headers: H(), body: JSON.stringify(body) });
       const d = await r.json().catch(() => ({}));
       if (d.ok && d.url) { location.href = d.url; return; }
+      // Already theirs: no second payment, the way in instead.
+      if (d.signin) {
+        err.innerHTML = `${esc(d.error)} <a href="/ground-plan/?next=${encodeURIComponent('/ground-plan/#home')}#signin">Sign in to my Base Camp →</a>`;
+        err.hidden = false; b.disabled = false; return;
+      }
       err.textContent = d.error || 'Stripe did not answer. Try again in a minute.';
     } catch { err.textContent = 'We could not reach Stripe. Check your connection and try again.'; }
     err.hidden = false; b.disabled = false;

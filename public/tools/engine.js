@@ -13,6 +13,7 @@
 import { byKey, RM, esc, money, MONEY_STEPS, NS_URL, DAYS, dayLong, FOUR, drawCard, loadFonts } from '/tools/tools-data.js';
 import { byKey as coverOf, coverHTML } from '/tools/catalog.js';
 import * as G from '/tools/gate.js';
+import { mountDoor } from '/tools/door.js';
 import * as A from '/account.js';
 
 const root = document.getElementById('tool');
@@ -295,3 +296,4 @@ G.state().then((s) => {
   if (st.key === 'cover') render();
 });
 import('/profile-menu.js').then((m) => m.mount(document.getElementById('pmhost'), { guest: true })).catch(() => {});
+mountDoor(); // the menu's Sign in / Create my free account (public/tools/door.js)

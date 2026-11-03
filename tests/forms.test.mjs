@@ -91,11 +91,14 @@ ok(D2.raw.prepare('SELECT landing FROM student_profile ORDER BY student_id').all
 [st, out] = await S({ first: 'Nia', last: 'None', email: 'nia@example.com', consent: false, type: 'simple', landing: 'nowhere' });
 ok(st === 200 && out.token && mcLog(out.token) === '' && prof(out.token).landing === null, 'no consent: the account is made, nothing goes to Mailchimp; an unknown landing is not stored');
 
-// Simple founders never have a password; full founders sign in with one.
-const r1 = await password({ request: post('/api/password', { token: sam, password: 'a-long-password', confirm: 'a-long-password' }), env });
-ok(r1.status === 403 && /link we email you/.test((await r1.json()).error) && !hasPw(sam), 'simple: no password can be set later either');
+// Simple founders sign in by email link; full founders with a password.
 const me = (await (await stateGet({ request: get('/api/state?t=' + sam), env })).json()).me;
 ok(me.signupType === 'simple' && me.hasPassword === false && !('needs' in me), 'state: the form type, so /start offers simple founders no password');
+// A simple founder may still choose one ("Forgot your password?", 3 Nov 2026).
+const r1 = await password({ request: post('/api/password', { token: sam, password: 'a-long-password', confirm: 'a-long-password' }), env });
+ok(r1.status === 200 && hasPw(sam), 'simple: a password can be chosen later, and is kept');
+const me2 = (await (await stateGet({ request: get('/api/state?t=' + sam), env })).json()).me;
+ok(me2.signupType === 'simple' && me2.hasPassword === true, 'state: still a simple form, now with a password (its other details are asked once in the Blueprint)');
 let lr = await login({ request: post('/api/login', { email: 'fay@example.com', password: 'a-long-password' }), env });
 ok(lr.status === 200 && (await lr.json()).token === fay, 'full: sign-in with email and password');
 lr = await login({ request: post('/api/login', { email: 'fay@example.com', password: 'wrong-password-x' }), env });
