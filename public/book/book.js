@@ -9,7 +9,7 @@
 // until Send (AGENTS.md rule 8); Send posts them once to /api/book, and the
 // page says "sent" only when the server says so (rule 6).
 
-import { FORMS, CHOICES, RULES, KINDS, NAME_MAX, slotsFor, byDay, oneTime, myZone, cityOf } from './slots.js';
+import { FORMS, CHOICES, RULES, KINDS, NAME_MAX, PHONE_MAX, phoneOf, codeFor, slotsFor, byDay, oneTime, myZone, cityOf } from './slots.js';
 import * as A from '/account.js';
 
 const root = document.querySelector('[data-book]');
@@ -68,9 +68,9 @@ const HELLO = {
     eb: 'A free call with Alexandru · 30 minutes', face: 'Your call is with Alexandru Cojocari',
     lede: 'Thank you for taking this step. These thirty minutes are yours: where you are, what weighs on you, and what you want next. Free, online, one to one.',
     quote: 'For a decade and a half I have built teams, developed leaders and helped each person grow into the best version of themselves.',
-    steps: [['note', 'Four short questions', 'Where you are, two struggles, two goals, and anything else. Mostly taps.'],
-      ['clock', 'Three times that suit you', 'Tuesday to Thursday afternoons, shown in your own time.'],
-      ['meet', 'Alexandru confirms one', 'Within 24 hours, by email, with the Google Meet link. Your answers reach Alexandru before the call.']],
+    steps: [['note', 'Four short questions', 'Where you are, two struggles, two goals, and anything else. Mostly taps. Then your name, email and phone.'],
+      ['clock', 'A time that suits you', 'One is enough. Tuesday to Thursday afternoons, shown in your own time; add up to two more if you like.'],
+      ['meet', 'Alexandru confirms it', 'Within 24 hours, by email, with the Google Meet link. Your answers reach Alexandru before the call.']],
     go: 'Let’s begin',
     under: 'Private. Your answers stay on this device until you press Send.',
   },
@@ -78,9 +78,9 @@ const HELLO = {
     eb: 'Your 1:1 with Alexandru · 60 minutes', face: 'Your hour is with Alexandru Cojocari',
     lede: 'You hold The Boardroom, and one hour one to one with Alexandru comes with it. A few questions first, so the whole hour is spent on you, not on catching up.',
     quote: 'The person who decides calmly, asks plainly and keeps their word is not someone else. It is you, a few weeks of practice from here.',
-    steps: [['note', 'Twenty questions, in six parts', 'Where you are, the four sides of your business, and the hour itself. Most take one sentence.'],
-      ['clock', 'Three times that suit you', 'Tuesday to Thursday afternoons, shown in your own time.'],
-      ['meet', 'Alexandru confirms one', 'Within 24 hours, by email, with the Google Meet link. Your answers reach Alexandru before the hour.']],
+    steps: [['note', 'Twenty questions, in six parts', 'Where you are, the four sides of your business, and the hour itself. Most take one sentence. Then your phone, for WhatsApp.'],
+      ['clock', 'A time that suits you', 'One is enough. Tuesday to Thursday afternoons, shown in your own time; add up to two more if you like.'],
+      ['meet', 'Alexandru confirms it', 'Within 24 hours, by email, with the Google Meet link. Your answers reach Alexandru before the hour.']],
     go: 'Let’s prepare my hour',
     under: 'Take your time. It saves on this device as you go, and you can change any answer before you send.',
   },
@@ -88,7 +88,7 @@ const HELLO = {
 const firstName = (n) => String(n || '').trim().split(/\s+/)[0] || '';
 
 // ── State, kept on this device ─────────────────────────────────────────────
-let S = { answers: {}, name: '', email: '', times: [], step: 0 };
+let S = { answers: {}, name: '', email: '', phone: '', times: [], step: 0 };
 try { const saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (saved && typeof saved === 'object') S = { ...S, ...saved, step: 0 }; } catch { /* private mode */ }
 const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* private mode */ } };
 const forget = () => { try { localStorage.removeItem(KEY); } catch { /* private mode */ } };
@@ -100,11 +100,12 @@ let slots = [];
 let busy = false;
 
 /** The screens, in order: the welcome, the form's questions, then
- *  (discovery) name and email, then three times, then check and send. */
+ *  (discovery) name and email, then the phone (both), the time (one, or up
+ *  to three), then check and send. */
 function buildSteps() {
   STEPS = [{ id: 'hello', kind: 'hello' }, ...FORMS[KIND].map((f) => ({ id: f.k, kind: 'q', f }))];
   if (KIND === 'discovery') STEPS.push({ id: 'name', kind: 'name' }, { id: 'email', kind: 'email' });
-  STEPS.push({ id: 'times', kind: 'times' }, { id: 'check', kind: 'check' });
+  STEPS.push({ id: 'phone', kind: 'phone' }, { id: 'times', kind: 'times' }, { id: 'check', kind: 'check' });
 }
 
 // ── Drawing ─────────────────────────────────────────────────────────────────
@@ -131,6 +132,7 @@ function screen() {
     <p class="hint">Alexandru writes back here to confirm a time.</p>
     <label class="vh" for="f-email">Your email</label><input id="f-email" class="field" data-field="email" type="email" inputmode="email" autocomplete="email" maxlength="200" value="${esc(S.email)}">
     ${goBtn('Next', !looksLikeEmail(S.email))}</section>`;
+  if (st.kind === 'phone') return phoneScreen();
   if (st.kind === 'times') return timesScreen();
   return checkScreen();
 }
@@ -172,6 +174,18 @@ function question(f) {
     <p class="count" data-count>${v.length} / ${f.max}</p>${goBtn(f.optional && !v.trim() ? 'Skip' : 'Next', !f.optional && !v.trim())}</section>`;
 }
 
+/** Their phone, for both calls (Alexandru, 3 Nov 2026): with the country
+ *  code, started from their time zone's when the field is empty. */
+const phoneSay = (v) => (phoneOf(v) ? 'Thank you.' : String(v || '').replace(/[^\d]/g, '').length >= 4 ? 'Start with + and your country code, then your number.' : '');
+function phoneScreen() {
+  if (!String(S.phone || '').trim()) { const c = codeFor(TZ); S.phone = c === '+' ? '' : c + ' '; }
+  return `<section class="q">${eyebrow()}<h1 tabindex="-1">Your phone number, for WhatsApp</h1>
+    <p class="hint">With your country code. Alexandru may write to you on WhatsApp about this ${KIND === 'boardroom' ? 'hour' : 'call'}, for example to agree on a time.</p>
+    <label class="vh" for="f-phone">Your phone number, with your country code</label><input id="f-phone" class="field" data-field="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="${PHONE_MAX}" value="${esc(S.phone)}">
+    <p class="count" data-phone-say aria-live="polite">${esc(phoneSay(S.phone))}</p>
+    ${goBtn('Next', !phoneOf(S.phone))}</section>`;
+}
+
 function timesScreen() {
   slots = slotsFor(KIND);
   S.times = S.times.filter((t) => slots.includes(t));
@@ -181,10 +195,11 @@ function timesScreen() {
   }).join('')}</div></div>`).join('');
   const n = S.times.length;
   const zone = TZ === RULES.zone ? 'Rome time.' : `Your time (${esc(cityOf(TZ))}), with Rome’s beside it.`;
-  return `<section class="q">${eyebrow()}<h1 tabindex="-1">Pick three times that suit you</h1>
-    <p class="hint">Tuesday, Wednesday or Thursday afternoon, online on ${RULES.where}. ${KINDS[KIND].minutes} minutes. ${zone} Alexandru confirms one within 24 hours.</p>
+  return `<section class="q">${eyebrow()}<h1 tabindex="-1">Pick a time that suits you</h1>
+    <p class="hint"><b>One is enough.</b> Add one or two more if you like: it helps Alexandru find a time faster.</p>
+    <p class="hint">Tuesday to Thursday afternoons · ${KINDS[KIND].minutes} minutes on ${RULES.where} · ${zone} Confirmed within 24 hours.</p>
     <div class="days">${days}</div>
-    <div class="dock"><p class="picked">${n} of 3 picked<span>${n < 3 ? `Pick ${3 - n} more.` : 'Ready.'}</span></p><button type="button" class="go" data-next ${n !== 3 ? 'disabled' : ''}>Next ${ICON.arrow}</button></div></section>`;
+    <div class="dock"><p class="picked">${n ? `${n} picked${n > 1 ? ', thank you' : ''}` : 'Pick a time'}<span>${!n ? 'One is enough.' : n < RULES.pick ? `Ready. You can add ${RULES.pick - n === 1 ? 'one more' : 'up to two more'}, if you like.` : 'Ready. That is the most you can pick.'}</span></p><button type="button" class="go" data-next ${n < RULES.min ? 'disabled' : ''}>Next ${ICON.arrow}</button></div></section>`;
 }
 
 function checkScreen() {
@@ -196,10 +211,12 @@ function checkScreen() {
   const who = me ? `${esc(me.name || '')} · ${esc(me.email || '')}` : `${esc(S.name)} · ${esc(S.email)}`;
   const whoStep = KIND === 'discovery' ? STEPS.findIndex((s) => s.kind === 'name') : -1;
   items.push(`<div class="it"><div class="ih">${ICON.person}<b>You</b>${whoStep >= 0 ? `<button type="button" class="chg" data-goto="${whoStep}">Change</button>` : ''}</div><p class="said">${who}</p></div>`);
+  const phoneStep = STEPS.findIndex((s) => s.kind === 'phone');
+  items.push(`<div class="it"><div class="ih">${ICON.call}<b>Your phone, for WhatsApp</b><button type="button" class="chg" data-goto="${phoneStep}">Change</button></div><p class="said">${esc(String(S.phone || "").trim())}</p></div>`);
   const tl = [...S.times].sort().map((t) => { const o = oneTime(t, TZ); return `<li><span>${esc(o.day)}, <b>${esc(o.time)}</b></span>${o.rome ? `<small>${esc(o.rome)}</small>` : ''}</li>`; }).join('');
-  items.push(`<div class="it"><div class="ih">${ICON.clock}<b>Your three times</b><button type="button" class="chg" data-goto="${STEPS.findIndex((s) => s.kind === 'times')}">Change</button></div><ul class="tl">${tl}</ul></div>`);
+  items.push(`<div class="it"><div class="ih">${ICON.clock}<b>${S.times.length === 1 ? 'Your time' : 'Your times'}</b><button type="button" class="chg" data-goto="${STEPS.findIndex((s) => s.kind === 'times')}">Change</button></div><ul class="tl">${tl}</ul></div>`);
   return `<section class="q">${eyebrow()}<h1 tabindex="-1">Check, then send</h1><div class="sum">${items.join('')}</div>
-    <p class="note">${ICON.meet}<span>Online, on Google Meet. Alexandru writes back within 24 hours to confirm one of your times, with the link to the call.</span></p>
+    <p class="note">${ICON.meet}<span>Online, on Google Meet. Alexandru writes back within 24 hours to confirm ${S.times.length > 1 ? 'one of your times' : 'your time'}, with the link to the call.</span></p>
     <div class="hp" aria-hidden="true"><label for="f-hp">Leave this empty</label><input id="f-hp" data-hp tabindex="-1" autocomplete="off"></div>
     <div data-err></div>
     <div class="act"><button type="button" class="go" data-send>${KIND === 'boardroom' ? 'Send my request' : 'Send my request'} ${ICON.arrow}</button></div></section>`;
@@ -250,7 +267,7 @@ function doneScreen(email, copy, sent = {}) {
     <p class="lede">${one ? 'Your request is with Alexandru, with all twenty of your answers.' : 'Your request is with Alexandru. We look forward to meeting you.'}</p>
     <div class="wait"><p class="wh">What happens now</p><ol class="tl2">
       <li><span class="dot" aria-hidden="true">${ICON.mail}</span><div><b>Now</b><p>${copy ? `A copy of your request is on its way to <b>${esc(email)}</b>.` : 'Keep an eye on your inbox.'}</p></div></li>
-      <li><span class="dot" aria-hidden="true">${ICON.clock}</span><div><b>Within 24 hours</b><p>Alexandru confirms one of your three times, by email, with the Google Meet link.</p></div></li>
+      <li><span class="dot" aria-hidden="true">${ICON.clock}</span><div><b>Within 24 hours</b><p>Alexandru confirms ${sent.times > 1 ? 'one of your times' : 'your time'}, by email, with the Google Meet link.</p></div></li>
       <li><span class="dot" aria-hidden="true">${ICON.meet}</span><div><b>${one ? 'Your hour' : 'The call'}</b><p>${one ? '60 minutes, one to one. Your answers reach Alexandru before it, and you bring the decision you named.' : `30 minutes, one to one${told ? `, about what you told us: ${esc(told)}` : ''}.`}</p></div></li>
     </ol></div>
     <div class="gifts"><p class="eb">${ICON.gift}${one ? 'Before your hour' : 'While you wait'}</p>
@@ -298,7 +315,8 @@ function canNext() {
   }
   if (st.kind === 'name') return !!S.name.trim();
   if (st.kind === 'email') return looksLikeEmail(S.email);
-  if (st.kind === 'times') return S.times.length === RULES.pick;
+  if (st.kind === 'phone') return !!phoneOf(S.phone);
+  if (st.kind === 'times') return S.times.length >= RULES.min && S.times.length <= RULES.pick;
   return false;
 }
 
@@ -342,6 +360,7 @@ root.addEventListener('input', (e) => {
     const c = root.querySelector('[data-count]'); if (c) c.textContent = `${el.value.length} / ${st.f.max}`;
   } else if (el.dataset.field === 'name') S.name = el.value.slice(0, NAME_MAX);
   else if (el.dataset.field === 'email') S.email = el.value.trim();
+  else if (el.dataset.field === 'phone') { S.phone = el.value.slice(0, PHONE_MAX); const say = root.querySelector('[data-phone-say]'); if (say) say.textContent = phoneSay(S.phone); }
   else return;
   keep();
   const b = root.querySelector('[data-next]');
@@ -367,6 +386,7 @@ async function send() {
   busy = true; btn.disabled = true; btn.firstChild.textContent = 'Sending… ';
   err.innerHTML = '';
   const body = { kind: KIND, answers: S.answers, times: S.times, tz: TZ, hp: root.querySelector('[data-hp]')?.value || '', token: A.token() || undefined };
+  body.phone = phoneOf(S.phone);
   if (KIND === 'discovery') { body.name = S.name.trim(); body.email = S.email.trim(); }
   let d = null;
   try {
@@ -375,7 +395,7 @@ async function send() {
   } catch { d = null; }
   busy = false;
   if (d && d.ok) {
-    const sent = { answers: { ...S.answers }, name: S.name };
+    const sent = { answers: { ...S.answers }, name: S.name, times: S.times.length };
     forget();
     root.innerHTML = doneScreen(d.email || body.email || (me && me.email) || '', !!d.copy, sent);
     root.querySelector('h1').focus(); window.scrollTo(0, 0);
@@ -400,6 +420,7 @@ async function send() {
     if (!holds) return door(!!me);
   }
   if (me && KIND === 'discovery') { if (!S.name) S.name = me.name || ''; if (!S.email) S.email = me.email || ''; }
+  if (me && !phoneOf(S.phone) && phoneOf(me.phone)) S.phone = phoneOf(me.phone);
   buildSteps();
   render();
 })();

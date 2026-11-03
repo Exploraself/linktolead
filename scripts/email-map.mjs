@@ -41,7 +41,7 @@ export const STAGES = [
   { key: 'use', icon: 'spark', name: 'They use it', sub: 'Their North Star, and 12 Days to Start Winning' },
   { key: 'follow', icon: 'path', name: 'We follow their answers', sub: `Letters that follow each pain · ${SERIES_STATUS}` },
   { key: 'pay', icon: 'key', name: 'They take the next step', sub: 'A payment opens their step at once (Stripe)' },
-  { key: 'book', icon: 'calendar', name: 'They ask for a call', sub: 'A free discovery call, or the 1:1 in The Boardroom: three times, one confirmed within 24 hours' },
+  { key: 'book', icon: 'calendar', name: 'They ask for a call', sub: 'A free discovery call, or the 1:1 in The Boardroom: one time (or up to three), confirmed within 24 hours' },
   { key: 'close', icon: 'chat', name: 'We stay close', sub: 'Letters and answers from Alexandru and the team' },
   { key: 'safe', icon: 'lock', name: 'Their account stays safe', sub: 'Sign-in, new password, password changed' },
   { key: 'team', icon: 'bell', name: 'The team hears', sub: 'Notices to Alexandru, and the invitation to a new team member. Never to a founder' },
@@ -49,6 +49,7 @@ export const STAGES = [
 
 const placeholder = (s) => `[${s}]`;
 /** Sam's sample answers on the two booking pages (labelled samples). */
+const BOOK_PHONE = '+15555550100'; // an example number (555-01xx is kept for fiction)
 const BOOK_TIMES = ['2026-11-10T15:00:00.000Z', '2026-11-11T16:30:00.000Z', '2026-11-12T14:00:00.000Z'];
 const DISCOVERY_SAMPLE = { stage: 'solo', struggles: ['clients', 'alone'], goals: ['clients', 'runs'], note: placeholder('Anything else they wrote (optional)') };
 const BOARDROOM_SAMPLE = { moved: 'read', side: 'work', decision: placeholder('The one decision they bring'), tried: 'once', worth: placeholder('What would make the hour worth it') };
@@ -138,28 +139,28 @@ export const ENTRIES = [
   },
   {
     id: 'booking-discovery', stage: 'book', icon: 'calendar', fn: 'bookingLetter',
-    name: 'Your three times for our call',
-    when: 'Someone sends the free discovery call form on /book/discovery/ (since 2 Nov 2026; it replaced the Google Form): where they are, two struggles, two goals for 90 days, anything else, name and email, then three times (Tuesday, Wednesday or Thursday, 15:00–20:00 Rome time, from tomorrow up to 14 days ahead). Sent right after the notice to Alexandru has left.',
+    name: 'Your time (or times) for our call',
+    when: 'Someone sends the free discovery call form on /book/discovery/ (since 2 Nov 2026; it replaced the Google Form): where they are, two struggles, two goals for 90 days, anything else, name, email and phone (for WhatsApp, since 3 Nov 2026), then one time, or up to three (Tuesday, Wednesday or Thursday, 15:00–20:00 Rome time, from tomorrow up to 14 days ahead). Sent right after the notice to Alexandru has left.',
     who: 'The address they typed, with or without an account. At most 3 requests a day per address and per connection.',
     from: '/book/discovery/',
     sentBy: 'functions/api/book.js',
-    also: 'A receipt: their three times in their own time zone with Rome beside it, what they told us, “I’ll confirm one within 24 hours”, Google Meet. No offer, no P.S. A signed-in founder also gets the Mailchimp tag linktolead-book-discovery (with their yes to letters).',
-    build: () => L.bookingLetter(BASE, { ...S, kind: 'discovery', times: BOOK_TIMES, answers: DISCOVERY_SAMPLE }),
+    also: 'A receipt: their time (or times) in their own time zone with Rome beside it, what they told us, their phone for WhatsApp, “I’ll confirm within 24 hours”, Google Meet. No offer, no P.S. A signed-in founder also gets the Mailchimp tag linktolead-book-discovery (with their yes to letters).',
+    build: () => L.bookingLetter(BASE, { ...S, kind: 'discovery', phone: BOOK_PHONE, times: BOOK_TIMES, answers: DISCOVERY_SAMPLE }),
   },
   {
     id: 'booking-boardroom', stage: 'book', icon: 'calendar', fn: 'bookingLetter',
-    name: 'Your three times for your 1:1',
-    when: 'A founder whose step holds the 1:1 (The Boardroom or higher, or the team) sends /book/boardroom/: the level that moved them most, the side costing them most, the one decision, what they tried, what makes the hour worth it, then three times. The booking link in “It’s unlocked”, the gift letter and Base Camp goes there since 2 Nov 2026.',
+    name: 'Your time (or times) for your 1:1',
+    when: 'A founder whose step holds the 1:1 (The Boardroom or higher, or the team) sends /book/boardroom/: the level that moved them most, the side costing them most, the one decision, what they tried, what makes the hour worth it, then their phone (for WhatsApp, since 3 Nov 2026) and one time, or up to three. The booking link in “It’s unlocked”, the gift letter and Base Camp goes there since 2 Nov 2026.',
     who: 'The founder, at the address of their account. At most 3 requests a day.',
     from: '/book/boardroom/',
     sentBy: 'functions/api/book.js',
     also: 'A receipt, like the discovery one, for 60 minutes, and it points to their first three levels in Base Camp. Adds the Mailchimp tag linktolead-book-boardroom (with their yes to letters).',
-    build: () => L.bookingLetter(BASE, { ...S, kind: 'boardroom', times: BOOK_TIMES.map((t) => t.replace(':30:', ':00:')), answers: BOARDROOM_SAMPLE }),
+    build: () => L.bookingLetter(BASE, { ...S, kind: 'boardroom', phone: BOOK_PHONE, times: BOOK_TIMES.map((t) => t.replace(':30:', ':00:')), answers: BOARDROOM_SAMPLE }),
   },
   {
     id: 'booking-confirmed', stage: 'book', icon: 'calendar', fn: 'bookingConfirmedLetter',
     name: 'Confirmed: our call',
-    when: 'Alexandru and the team tap Confirm on one of the three times in /mentor → Inbox → Bookings. Once per request.',
+    when: 'Alexandru and the team tap Confirm on one of their times in /mentor → Inbox → Bookings. Once per request.',
     who: 'The person who asked, discovery call or 1:1. A member needs the right “Write letters and notes to founders”.',
     from: '/mentor#inbox',
     sentBy: 'functions/api/mentor.js (book-confirm)',
@@ -250,8 +251,8 @@ export const ENTRIES = [
     who: `${MENTOR_EMAIL} (or MENTOR_EMAIL in Cloudflare). Replying goes straight to the person.`,
     from: '/book/discovery/, /book/boardroom/',
     sentBy: 'functions/api/book.js',
-    also: 'Who, which call, with or without an account, their three times in Rome time (and theirs), everything they answered, and a button to /mentor → Inbox → Bookings, where one tap confirms a time.',
-    build: () => L.bookingNotice(BASE, { name: 'Sam Example', email: S.to, kind: 'discovery', times: BOOK_TIMES, answers: DISCOVERY_SAMPLE, tz: S.tz }),
+    also: 'Who, which call, with or without an account, their phone with a one-tap WhatsApp link, their time (or times) in Rome time (and theirs), everything they answered, and a button to /mentor → Inbox → Bookings, where one tap confirms a time.',
+    build: () => L.bookingNotice(BASE, { name: 'Sam Example', email: S.to, phone: BOOK_PHONE, kind: 'discovery', times: BOOK_TIMES, answers: DISCOVERY_SAMPLE, tz: S.tz }),
   },
   {
     id: 'team-invite', stage: 'team', icon: 'key', fn: 'teamInvite',

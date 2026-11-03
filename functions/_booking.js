@@ -6,7 +6,8 @@
 //   /book/boardroom/  the 60-minute 1:1 for founders whose step holds
 //                     'session' (The Boardroom or higher)
 //
-// The person answers a few taps, then suggests three times; Alexandru
+// The person answers a few taps, then suggests one time, or up to three
+// (Alexandru, 3 Nov 2026: "1 is enough, 2 or 3 are options"); Alexandru
 // confirms one within 24 hours, by email, from /mentor (Inbox → Bookings),
 // and the confirmation carries the Google Meet link. Only Tuesday, Wednesday
 // and Thursday, 15:00–20:00 Rome time, online, from tomorrow up to 14 days
@@ -22,7 +23,7 @@ import { okTz } from './_mentor.js';
 
 export const ZONE = 'Europe/Rome';
 /** Tuesday, Wednesday, Thursday (Date#getUTCDay numbers), 15:00 to 20:00. */
-export const RULES = { zone: ZONE, days: [2, 3, 4], from: 15, to: 20, ahead: 14, pick: 3, confirmHours: 24, where: 'Google Meet' };
+export const RULES = { zone: ZONE, days: [2, 3, 4], from: 15, to: 20, ahead: 14, min: 1, pick: 3, confirmHours: 24, where: 'Google Meet' };
 export const KINDS = {
   discovery: { minutes: 30, every: 30, name: 'a free discovery call', short: 'Discovery call', setting: 'Discovery call link' },
   boardroom: { minutes: 60, every: 60, name: 'their Boardroom 1:1', short: 'Boardroom 1:1', setting: 'Boardroom link' },
@@ -220,7 +221,7 @@ export const timeLine = (iso, tz) => { const w = whenText(iso, tz); return w.sam
 // ── Where it is kept ──────────────────────────────────────────────────────────
 /** The booking tables, made the first time a request needs them (the same
  *  way as stripe_setting in functions/_stripe.js). `booking` keeps each
- *  request: the answers as JSON, the three times (ISO, sorted), the status
+ *  request: the answers as JSON, the times (one to three, ISO, sorted), the status
  *  ('asked', then 'confirmed' with the time Alexandru chose). `booking_log`
  *  counts requests per address and connection for a day, then forgets them
  *  (like mail_log). `booking_setting` holds the Google Meet link per kind,
@@ -235,8 +236,24 @@ export async function bookingTables(D) {
     D.prepare('CREATE TABLE IF NOT EXISTS booking_log (email TEXT, ip TEXT, at INTEGER)'),
     D.prepare('CREATE TABLE IF NOT EXISTS booking_setting (k TEXT PRIMARY KEY, v TEXT NOT NULL, at TEXT NOT NULL)'),
   ]);
+  // Their phone (3 Nov 2026), added to a table that may already hold requests.
+  try { await D.prepare('ALTER TABLE booking ADD COLUMN phone TEXT').run(); } catch { /* already there */ }
   READY.add(D);
 }
+
+/** A phone number as the booking pages take it (Alexandru, 3 Nov 2026: "their
+ *  phone number must be collected too, for both"): spaces, dots, dashes and
+ *  brackets dropped, 00 read as +, then + and 7 to 15 digits (the
+ *  international form WhatsApp uses). '' when it is not one. The same rule
+ *  is in functions/_booking.js (tests/book.test.mjs holds both equal). */
+export const PHONE_MAX = 24;
+export function phoneOf(v) {
+  let s = String(v ?? '').trim().replace(/[\s().\-\u00a0]/g, '');
+  if (s.startsWith('00')) s = '+' + s.slice(2);
+  return /^\+[1-9]\d{6,14}$/.test(s) ? s : '';
+}
+/** The phone as WhatsApp's link wants it: digits only. */
+export const waDigits = (p) => String(p || '').replace(/\D/g, '');
 
 /** May this address and this connection ask again today? */
 export async function bookingAllowed(D, email, ip) {
@@ -277,7 +294,7 @@ export function bookingRow(r) {
   try { answers = JSON.parse(r.answers) || {}; } catch { answers = {}; }
   try { times = JSON.parse(r.times) || []; } catch { times = []; }
   return { id: r.id, kind: r.kind, name: r.name, email: r.email, created_at: r.created_at, status: r.status, tz: r.tz || ZONE,
-    student_id: r.student_id || null, times, answers: answersText(r.kind, answers), confirmed_time: r.confirmed_time || null, confirmed_at: r.confirmed_at || null,
+    student_id: r.student_id || null, phone: r.phone || '', times, answers: answersText(r.kind, answers), confirmed_time: r.confirmed_time || null, confirmed_at: r.confirmed_at || null,
     confirmed_by: r.confirmed_by || null, note: r.note || '', closed_at: r.closed_at || null, closed_by: r.closed_by || null };
 }
 /** What a request can be, in /mentor (Alexandru, 2 Nov 2026: "full control"):
@@ -286,7 +303,7 @@ export function bookingRow(r) {
  *  the request. Reopen puts it back to asked (or confirmed, when it had a time). */
 export const BOOK_STATUS = { asked: 'To confirm', confirmed: 'Confirmed', held: 'Held', noshow: 'No-show', declined: 'Declined', cancelled: 'Cancelled' };
 export const BOOK_CLOSED = ['held', 'noshow', 'declined', 'cancelled'];
-/** A time Alexandru picks himself, other than their three: any start in the
+/** A time Alexandru picks himself, other than theirs: any start in the
  *  future, within 60 days, on the minute. */
 export function isOtherTime(iso, at = Date.now()) {
   if (typeof iso !== 'string' || !ISO.test(iso)) return false;
