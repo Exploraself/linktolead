@@ -94,7 +94,7 @@ ok(/\/pay\/\?step=session&cs=\{CHECKOUT_SESSION_ID\}$/.test(made.get('success_ur
 ok(calls.some((c) => c.url.includes('webhook_endpoints/we_old') && c.method === 'DELETE') && calls.some((c) => c.url.endsWith('/webhook_endpoints') && c.method === 'POST' && c.body.get('url') === `${B}/api/stripe-webhook` && c.body.get('enabled_events[0]') === 'checkout.session.completed'), 'the webhook connects itself, replacing an older one for the same address');
 ok(calls.every((c) => c.auth === 'Bearer rk_test_51abc'), 'the key only ever goes to Stripe');
 [st, j] = await jsonOf(await payPost({ request: req('/api/checkout', { method: 'POST', body: { step: 'session' } }), env }));
-ok(st === 401, 'not signed in: no payment page');
+ok(st === 400 && /first name/.test(j.error), 'not signed in and no name or email: asked for them (pay first, 3 Nov 2026)');
 [st, j] = await jsonOf(await payPost({ request: req('/api/checkout', { method: 'POST', token: maya, body: { step: 'nothing' } }), env }));
 ok(st >= 400, 'an unknown step: refused');
 [st, j] = await jsonOf(await payPost({ request: req('/api/checkout', { method: 'POST', token: maya, body: { step: 'session' } }), env: { DB } }));
