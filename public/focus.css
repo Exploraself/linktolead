@@ -34,7 +34,7 @@ body.fmopen .crown-wrap,body.fmopen .mp,body.fmopen .cw-pb,body.fmopen .cw-pk,bo
 .fm-bar i{display:block;height:100%;background:var(--fm-gold);transition:width .25s ease}
 .fm-row{max-width:680px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;
   padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
-.fm-where{font-size:14.5px;color:var(--fm-muted);text-align:center;min-width:0}
+.fm-where{font-size:14.5px;color:var(--fm-muted);text-align:left;min-width:0}
 .fm-back,.fm-x{min-height:44px;padding:0 8px;border:0;background:none;color:var(--fm-ink);font:400 15.5px var(--fm-font);cursor:pointer;white-space:nowrap}
 .fm-back[disabled]{visibility:hidden}
 
@@ -51,6 +51,19 @@ body.fmopen .leaf-r .cw-in{font-family:var(--fm-font);font-size:18px}
 body.fmopen .leaf-r .cw-keys{font-size:13.5px;color:var(--fm-muted)}
 body.fmopen .leaf-r mark{color:var(--fm-ink);font-style:normal;font-weight:700}
 body.fmopen .leaf-r .cw-foot{display:flex;justify-content:flex-start;gap:12px;margin-top:2px;padding-top:0;border-top:0}
+/* Back sits beside Next (Alexandru, 3 Nov 2026): a quiet outline, the same height. */
+body.fmopen .leaf-r .cw-back{min-height:50px;padding:0 22px;border-radius:999px;border:1.5px solid var(--fm-line);background:#FFFFFF;color:var(--fm-ink);font:600 16px var(--fm-font);cursor:pointer}
+body.fmopen .leaf-r .cw-back:hover{border-color:var(--fm-ink)}
+/* On a phone, Back and Next sit at the bottom, where the thumb is. */
+@media (max-width:720px){
+  body.fmopen .leaf-r .cw-foot{position:sticky;bottom:0;z-index:2;margin:auto -18px 0;padding:12px 18px calc(12px + env(safe-area-inset-bottom,0px));background:#FFFFFF;border-top:1px solid var(--fm-line)}
+  body.fmopen .leaf-r .cw-next{flex:1;justify-content:center}
+}
+/* The level begins: its four parts, in order. */
+.bg-parts{list-style:none;margin:16px 0 4px;padding:0;display:grid;gap:10px;max-width:560px}
+.bg-parts li{display:flex;align-items:center;gap:12px}
+.bg-parts small{display:block;font-size:13px;color:var(--fm-muted)}
+.bg-parts b{font:600 16.5px/1.3 var(--fm-font);color:var(--fm-ink)}
 body.fmopen .leaf-r .cw-next{min-height:50px;padding:0 26px;border-radius:999px;background:var(--fm-ink);color:#FFFFFF;font:700 16.5px var(--fm-font)}
 body.fmopen .leaf-r .cw-next[disabled]{background:#C4C7C5;color:#FFFFFF;cursor:default;filter:none}
 body.fmopen .leaf-r button:focus-visible,body.fmopen .leaf-r input:focus-visible,body.fmopen .leaf-r summary:focus-visible{outline:2px solid var(--fm-ink);outline-offset:2px}

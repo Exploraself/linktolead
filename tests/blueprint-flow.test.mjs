@@ -60,7 +60,7 @@ ok(empty.every((s) => s.items.every((i) => !i.started)) && bp.every((s) => s.ite
 
 // ── The flow: one field on screen ─────────────────────────────────────────
 const s1 = V.stepsOf(1), s2 = V.stepsOf(2), s5 = V.stepsOf(5);
-ok(s1[0].join() === '-1,welcome,0' && s1.slice(7, 16).every((s) => s[1] === 'where') && s1[16].join() === '-1,you' && s1[17].join() === '0,idea' && s1[18].join() === '0,tap' && s2.slice(0, 4).every((s, i) => s[0] === i && s[1] === 'got') && s2[4].join() === '0,idea' && s2[5].join() === '0,tap', 'Level 01 opens on the elephant in the room and the door, then its first concept and tap; Level 02 on last week’s four actions, then its first concept');
+ok(s1[0].join() === '-1,welcome,0' && s1.slice(7, 16).every((s) => s[1] === 'where') && s1[16].join() === '-1,you' && s1[17].join() === '-1,begin' && s1[18].join() === '0,idea' && s1[19].join() === '0,tap' && s2.slice(0, 4).every((s, i) => s[0] === i && s[1] === 'got') && s2[4].join() === '0,idea' && s2[5].join() === '0,tap', 'Level 01 opens on the elephant in the room and the door, then “Level 01 begins”, then its first concept and tap; Level 02 on last week’s four actions, then its first concept');
 { const k5 = s5.map((s) => s[1]), at = k5.indexOf('week');
   ok(k5.slice(at, at + 4).join() === 'week,reading,carry,carryday' && k5[k5.length - 1] === 'bpage' && V.stepsOf(4).slice(-1)[0][1] === 'week',
     'the week ends a level; after 05, 09 and 12, the reading, one action carried forward, and one page to build'); }

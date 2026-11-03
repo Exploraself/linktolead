@@ -1495,6 +1495,9 @@ export function stepsOf(lv) {
     if (lv === 1) { for (const Q of WHERE4) out.push([-1, 'where', Q.k]); out.push([-1, 'you']); } else out.push([-1, 'still']);
   }
   if (lv > 1) for (let d = 0; d < 4; d++) out.push([d, 'got']);
+  // The level begins (Alexandru, 3 Nov 2026): after the intro, one screen that
+  // says the course starts now, so the move from the intro to the four parts is clear.
+  if (WELCOME_AT[lv] != null) out.push([-1, 'begin']);
   L.d.forEach((D, d) => {
     const dk = dayKeyOf(lv, d), p = planOf(lv, d);
     if (p && p.idea) out.push([d, 'idea']);

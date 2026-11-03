@@ -440,15 +440,68 @@ function reachable(st, n) {
   return holds(tierNow(), gateFor(n)) && levelState(st, n) !== 'waiting';
 }
 
-/** The library at the top of the rail: four doors into the Library view. */
-const LIB_ICONS = [
-  ['3 manuals', 'The three manuals', '<path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/>'],
-  ['99 tools', 'Built to Lead, 99 tools', '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-.5-.5-2.5z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/>'],
-  ['32 frameworks', 'Worth Building, 32 frameworks', '<rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/><rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/><rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="#B4975F" stroke-width="1.6"/>'],
-  ['12 principles', 'A New Way of Winning, 12 principles', '<circle cx="12" cy="12" r="9" fill="none" stroke="#B4975F" stroke-width="1.6"/><path d="M12 6l2 6-2 1.5-2-1.5z" fill="#B4975F"/>'],
-];
-const libIcons = () => `<div class="rlib"><p class="eyebrow">Your library · now open</p><div class="rlibrow">${LIB_ICONS.map(([t, label, svg]) =>
-  `<button type="button" class="libi${t === 'Soon' ? ' soon' : ''}" data-go="library" aria-label="${esc(label)}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">${svg}</svg>${esc(t)}</button>`).join('')}</div></div>`;
+/** The library in the rail (Alexandru, 3 Nov 2026): one clear door, no
+ *  counts. The books, the manuals and the planners are all inside. */
+const railLib = `<button type="button" class="rlibdoor" data-go="library">
+  <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/></svg>
+  <span><small>Your library</small><b>The manuals and books, free with your account</b><em>Open my library →</em></span></button>`;
+
+/** 12 Days to Start Winning, as a bonus in the rail (the Decisions chat's
+ *  spec, 2 Nov 2026): a pop-up in place, POST /api/course start, and "Done.
+ *  Wait for the surprises: check your email." Already on: the day it is on. */
+let daysSub = null, daysAsked = false, daysStep = 'ask';
+function daysLoad() {
+  if (daysAsked || !account.joined()) return;
+  daysAsked = true;
+  fetch(`/api/course?t=${encodeURIComponent(account.token())}`).then((r) => (r.ok ? r.json() : null))
+    .then((d) => { if (d && d.ok) { daysSub = d.sub; refreshRail(); } }).catch(() => {});
+}
+const SUN_IC = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>';
+function railDays() {
+  if (!account.joined()) return `<a class="rdays" href="/12-days/">${SUN_IC}<span><small>A bonus for you</small><b>12 Days to Start Winning</b><em>See the 12 mornings →</em></span></a>`;
+  daysLoad();
+  const on = daysSub && !daysSub.stopped;
+  if (on) {
+    const d = daysSub.day;
+    const line = d >= 13 ? 'All 12 days are done' : d >= 1 ? `Day ${d} of 12` : 'Day 1 comes tomorrow from 8:00, your time';
+    return `<a class="rdays on" href="/12-days/">${SUN_IC}<span><small>Your 12 days are on</small><b>12 Days to Start Winning</b><em>${esc(line)}</em></span></a>`;
+  }
+  return `<button type="button" class="rdays" data-days="open">${SUN_IC}<span><small>A bonus for you</small><b>12 Days to Start Winning</b><em>${daysSub && daysSub.stopped ? 'Start again →' : 'Start free →'}</em></span></button>`;
+}
+function daysBoxHTML() {
+  const body = daysStep === 'done'
+    ? `<h2 id="dbh">Done. Wait for the surprises: check your email.</h2>
+       <p>The first letter is on its way now. Day 1 comes tomorrow from 8:00, your time. Nothing within the hour? Look in your spam folder.</p>
+       <button type="button" class="cta" data-days="close">Back to my Blueprint</button>`
+    : `<p class="dk">A bonus for you</p><h2 id="dbh">12 Days to Start Winning</h2>
+       <p>12 mornings. One principle and one ten-minute move in your inbox before the day starts. Free.</p>
+       <button type="button" class="cta" data-days="yes"${daysStep === 'sending' ? ' disabled' : ''}>${daysStep === 'sending' ? 'Sending…' : 'Yes, send them to me'}</button>
+       <button type="button" class="dnot" data-days="close">Not now</button>
+       <p class="joinerr" id="dmsg" role="status"></p>`;
+  return `<div class="dcard">${SUN_IC}${body}</div>`;
+}
+function daysOpen() {
+  daysStep = 'ask';
+  let box = document.getElementById('daysbox');
+  if (!box) { box = document.createElement('div'); box.id = 'daysbox'; box.className = 'dbox'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'dbh'); document.body.appendChild(box); }
+  box.innerHTML = daysBoxHTML(); box.hidden = false;
+  const y = box.querySelector('[data-days="yes"]'); if (y) y.focus();
+}
+function daysShut() { const box = document.getElementById('daysbox'); if (box) box.hidden = true; const b = document.querySelector('.rdays'); if (b) b.focus({ preventScroll: true }); }
+async function daysYes() {
+  const box = document.getElementById('daysbox');
+  daysStep = 'sending'; box.innerHTML = daysBoxHTML();
+  try {
+    const r = await fetch('/api/course', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: account.token(), action: 'start', tz: Intl.DateTimeFormat().resolvedOptions().timeZone || '' }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.ok) throw new Error(d.error || 'That did not go through. Try again in a minute.');
+    daysSub = d.sub; daysStep = 'done'; box.innerHTML = daysBoxHTML(); refreshRail();
+    const c = box.querySelector('[data-days="close"]'); if (c) c.focus();
+  } catch (ex) {
+    daysStep = 'ask'; box.innerHTML = daysBoxHTML();
+    const m = box.querySelector('#dmsg'); if (m) m.textContent = ex.message || 'We could not reach the letters just now. Try again in a minute.';
+  }
+}
 const bookIcon = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 /** The Boardroom's button: pay first while it is locked (/pay/, Stripe), then
  *  book the 1:1 (Alexandru, 2 Nov 2026). */
@@ -482,7 +535,8 @@ function railHTML(st) {
       <button type="button" class="rbp" data-go="blueprint">Open my Blueprint: everything you have written →</button>
     </div>
     ${railStar}
-    ${libIcons()}
+    ${railLib}
+    ${railDays()}
     ${SECTIONS.map((sec) => {
       const owned = holds(tierNow(), sec.k);
       const rung = LADDER.find((r) => r.key === sec.k);
@@ -676,6 +730,34 @@ function bookHTML(st) {
   </div>`;
 }
 
+/** "Before you start" (Alexandru, 3 Nov 2026): the elephant in the room and
+ *  the founder's version are the first row of the list, drawn as an intro so
+ *  they never look like a part of the level. One tap opens them. */
+const INTRO = ['welcome', 'wask', 'where', 'you', 'still'];
+const introIdx = () => steps().map((s, i) => [s, i]).filter(([s]) => INTRO.includes(s[1])).map(([, i]) => i);
+function introRowHTML() {
+  const ix = introIdx();
+  if (!ix.length) return '';
+  const S = steps(), done = ix.every((i) => stepDone(state.work, level, S[i]) || skipsStep(state.work, S[i]));
+  const now = qi != null && ix.includes(qi);
+  return `<li><button type="button" class="cw-s cw-intro${done ? ' done' : ''}${now ? ' now' : ''}" data-intro="${ix[0]}"${now ? ' aria-current="step"' : ''}>
+      <span class="cw-n cw-letter cw-il">${WL_IC[0]}</span>
+      <span class="cw-st"><b>Before you start <span class="cw-itag">Intro</span></b><i>${esc(elephantName())} · your version · ${done ? 'done ✓' : 'about 2 min'}</i></span></button></li>`;
+}
+/** Twelve squares, three for each part: each one opens its own move, so any
+ *  question is one tap away (Alexandru, 3 Nov 2026: "go back to the first"). */
+const MOVE = ['tap', 'slide', 'blank'];
+function squaresHTML() {
+  const S = steps(), sq = [0, 1, 2, 3].map((d) => {
+    const u = domainUnits(state.work, level, d), name = LEAD[DOMS[d]];
+    return `<span class="sq-g">${[0, 1, 2].map((j) => {
+      const at = S.findIndex((s) => s[0] === d && (j < 2 ? s[1] === MOVE[j] : s[1] === 'blank' || s[1] === 'day'));
+      return `<button type="button" class="sq${j < u ? ' on' : ''}" style="--c:var(--${DOMS[d]})" data-sq="${at}" aria-label="${esc(name)}, move ${j + 1} of 3${j < u ? ', done' : ''}"></button>`;
+    }).join('')}</span>`;
+  }).join('');
+  return `<div class="sqs" role="group" aria-label="The twelve moves of this level">${sq}</div>`;
+}
+
 /** The left page: the level, its floor, the belief it changes, its promise,
  *  and the four domains with how far each has come. */
 function leftHTML(st, x, open) {
@@ -687,7 +769,8 @@ function leftHTML(st, x, open) {
     <h2 class="cw-t">${esc(x.word)}. <em>${esc(x.title)}.</em></h2>
     <p class="cw-floor">${esc(x.floor)}</p>
     <div class="lvtrack"><i style="width:${done / UNITS * 100}%"></i></div>
-    <p class="lvcount" id="lvcount">${done} of ${UNITS} done</p>`;
+    <p class="lvcount" id="lvcount">${done} of ${UNITS} done</p>
+    ${open ? squaresHTML() : ''}`;
   const all = `<button type="button" class="cw-all" data-go="rail">☰ All twelve levels</button>`;
   if (!open) return `${head}${all}`;
   const doms = x.d.map((D, d) => {
@@ -698,7 +781,7 @@ function leftHTML(st, x, open) {
   }).join('');
   return `${head}
     <p class="cw-belief">From <b>“${esc(x.old)}”</b><br>to <b>“${esc(x.neu)}”</b></p>
-    <ol class="cw-steps cw-doms4">${doms}</ol>
+    <ol class="cw-steps cw-doms4">${introRowHTML()}${doms}</ol>
     <p class="cw-promise"><b>By Sunday.</b> ${esc(x.promise)}</p>
     ${CLOSES[level] != null ? `<p class="cw-chapnote">This level closes ${esc(CHAPTERS4[CLOSES[level]].name)}. Your chapter reading comes after it.</p>` : ''}
     <p class="cw-more"><a href="#cw-video">▶ This level’s teaching</a><button type="button" class="cw-all" data-go="blueprint">My Blueprint</button>${all}</p>`;
@@ -715,6 +798,7 @@ function fmWhere(d, kind) {
   if (kind === 'wask') { const A = welcomeOf(level).asks; return `${esc(elephantName())} · question ${A.findIndex((a) => a.k === stepAt(qi)[2]) + 1} of ${A.length}`; }
   if (kind === 'where') { const [n, of] = doorAt(); return `Where you are now · ${n} of ${of}`; }
   if (kind === 'still' || kind === 'you') return 'Where you are now';
+  if (kind === 'begin') return `Level ${pad(level)} begins`;
   if (kind === 'got') return `Last week · ${d + 1} of 4`;
   if (d >= 0) {
     const mine = steps().map((s, i) => [s, i]).filter(([s]) => s[0] === d && s[1] !== 'got');
@@ -763,10 +847,10 @@ function fmAuto() {
 /** The right page, when the layer is closed: where the founder is, and the way in. */
 function goHTML(st, x) {
   const [d, kind] = stepAt(qi), done = levelDone(st, level), started = done > 0 || qi > 0;
-  const at = kind === 'welcome' || kind === 'wask' ? `The elephant in the room: ${elephantName().toLowerCase()}` : kind === 'where' || kind === 'still' || kind === 'you' ? 'Where you are now' : kind === 'got' ? 'Last week’s four actions'
+  const at = kind === 'welcome' || kind === 'wask' ? `Before you start · the elephant in the room` : kind === 'where' || kind === 'still' || kind === 'you' ? 'Before you start · your version' : kind === 'begin' ? `Level ${pad(level)} begins` : kind === 'got' ? 'Last week’s four actions'
     : d >= 0 ? LEAD[DOMS[d]] : kind === 'week' ? 'Your week' : kind === 'dirlook' ? 'Your direction, again' : kind[0] === 'b' ? 'Build it' : 'Your chapter reading';
-  return `<button type="button" class="cw-phone" data-crown="steps" aria-label="Show the four domains of this level">
-      <span><i aria-hidden="true"></i>Level ${pad(level)} · ${done} of ${UNITS} done</span><span aria-hidden="true">Domains ▾</span></button>
+  return `<button type="button" class="cw-phone" data-crown="steps" aria-label="Show every step of this level">
+      <span><i aria-hidden="true"></i>Level ${pad(level)} · ${done} of ${UNITS} done</span><span aria-hidden="true">All steps ▾</span></button>
     <div class="fm-go">
       <p class="eyebrow">Level ${pad(level)} · ${esc(x.title)}</p>
       <h3 class="cw-q">${started ? (done === UNITS && kind === 'week' ? 'Your week is written.' : 'Pick up where you left off.') : `Start Level ${pad(level)}.`}</h3>
@@ -774,7 +858,6 @@ function goHTML(st, x) {
       <p class="cw-promise"><b>By Sunday.</b> ${esc(x.promise)}</p>
       <button type="button" class="cta fm-open" data-fmopen>${started ? 'Continue →' : 'Start →'}</button>
       <p class="fm-hint">One question at a time, on the whole screen. Done ✓ or Esc brings you back here.</p>
-      ${started ? beforeHTML() : ''}
     </div>`;
 }
 /** The elephant in the room (Alexandru, 2 Nov 2026): before Levels 01, 04,
@@ -825,20 +908,6 @@ function welcomeHTML(i = 0) {
     ${B.q ? `<blockquote class="wl-q"><small>What a business is</small><p>“${esc(B.q)}”</p></blockquote>` : ''}
     ${i === 3 ? `<div class="wl-have"><h4>By the end, you will have:</h4><ol>${lvs.map((n) => `<li><span>Level ${pad(n)}</span><p>${esc(LEVELS4[n - 1].promise)}</p></li>`).join('')}</ol></div>
     <p class="wl-sign">Alexandru</p>` : ''}
-  </div>`;
-}
-/** One tap back to what opens the level (AGENTS.md 16): the elephant in
- *  the room, and the founder's version (the door at Level 01, "Still …?" at
- *  04, 06 and 10). A founder who began the level before these screens
- *  existed finds them here too. */
-const SIZE_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="3"/><path d="M2.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.3"/><path d="M14.5 15.2a4.5 4.5 0 0 1 7 3.8"/></svg>';
-function beforeHTML() {
-  if (WELCOME_AT[level] == null) return '';
-  const S = steps(), at = (k) => S.findIndex((s) => s[1] === k), size = sizeOf(state.work);
-  const ver = level === 1 ? (size ? at('you') : at('where')) : at('still');
-  return `<div class="fm-more" role="group" aria-label="Before this level">
-    <button type="button" class="fm-link" data-fmopen="${at('welcome')}">${WL_IC[0]}<span>The elephant in the room: ${esc(elephantName().toLowerCase())}</span></button>
-    ${ver >= 0 ? `<button type="button" class="fm-link" data-fmopen="${ver}">${SIZE_IC}<span>${size ? `Your version: ${esc(typeName(size).toLowerCase())} · change it` : 'Your version: not set yet · a few taps'}</span></button>` : ''}
   </div>`;
 }
 /** Where the founder is in the door: [n, of], counting only the questions that apply. */
@@ -904,7 +973,7 @@ function keepWhere(k, v) {
  *  skeleton). Tap, slide, one blank at a time, the day as a tap, "Done when"
  *  with how sure, four lines back; the week as four actions; last week's four
  *  first; the chapter reading and one action carried forward. */
-const KIND = { welcome: 'The elephant in the room', wask: 'The elephant in the room', where: 'Where you are now', you: 'Your version', still: 'Where you are now', got: 'Last week', idea: 'The idea', tap: 'Tap', slide: 'Slide', blank: 'Write once', day: 'The day', done: 'Done when',
+const KIND = { begin: 'The level begins', welcome: 'The elephant in the room', wask: 'The elephant in the room', where: 'Where you are now', you: 'Your version', still: 'Where you are now', got: 'Last week', idea: 'The idea', tap: 'Tap', slide: 'Slide', blank: 'Write once', day: 'The day', done: 'Done when',
   lines: 'Your four lines', week: 'Your week', reading: 'Chapter reading', carry: 'Carry one forward', carryday: 'Its day', dirlook: 'Your direction, again',
   bask: 'Build it', bstep: 'Build it', bday: 'Its day', bpage: 'Your page' };
 /** Inform → Reform → Transform (2 Nov 2026): the replies and checks, drawn
@@ -1035,13 +1104,19 @@ function pageHTML(st, x) {
   // Focus mode (Alexandru, 2 Nov 2026): the top line is a thin progress bar,
   // where the founder is ("Lead yourself · 3 of 5") and Back.
   const top = `<div class="fm-top"><div class="fm-bar" aria-hidden="true"><i style="width:${Math.round(qi / Math.max(1, total - 1) * 100)}%"></i></div>
-    <div class="fm-row"><button type="button" class="fm-back" data-qmove="-1"${qi === 0 ? ' disabled' : ''}>← Back</button>
-    <span class="fm-where">${fmWhere(d, kind)}${d >= 0 && kind !== 'got' && d === startHere() ? ' · ★ Start here' : ''}</span>
+    <div class="fm-row"><span class="fm-where">${fmWhere(d, kind)}${d >= 0 && kind !== 'got' && d === startHere() ? ' · ★ Start here' : ''}</span>
     <button type="button" class="fm-x" data-fmclose aria-label="Close, and go back to the levels">Close ✕</button></div></div>
     <p class="cw-lab vh">${label} · ${KIND[kind]}</p>`;
   void seg;
   let body = '';
   if (kind === 'welcome') body = welcomeHTML(key);
+  else if (kind === 'begin') {
+    body = `<p class="wl-eb">Before you start · done ✓</p>
+      <h3 class="cw-q" id="cwq">You’re ready. Level ${pad(level)} begins: <em>${esc(x.title)}.</em></h3>
+      <p class="wl-p">Four parts, three moves each: tap the line that sounds like you, slide to the honest number, write one sentence. Then your week.</p>
+      <ol class="bg-parts">${x.d.map((D, i) => `<li><span class="cw-letter" style="background:var(--${DOMS[i]})">${esc(D.l)}</span><span><small>Part ${i + 1} of 4 · ${esc(LEAD[DOMS[i]])}</small><b>${esc(D.name)}</b></span></li>`).join('')}</ol>
+      <p class="cw-promise"><b>By Sunday.</b> ${esc(x.promise)}</p>`;
+  }
   else if (kind === 'wask') {
     const A = askOf(level, key), raw = w[wkey(level, 'w', key)], v = raw == null || raw === '' ? null : /^x\d$/.test(raw) ? raw : Number(raw);
     const topic = `<p class="wl-eb">The elephant in the room · ${esc(elephantName())}</p>`;
@@ -1171,9 +1246,10 @@ function pageHTML(st, x) {
   else if (kind === 'dirlook') body = dirLookHTML();
   else if (kind === 'bask' || kind === 'bstep' || kind === 'bday' || kind === 'bpage') body = buildHTML(st, kind, key, ci);
   const last = qi >= lastStep(), domainEnd = kind === 'lines' && d < 3;
-  const nextLabel = kind === 'welcome' ? (key === 3 ? 'Begin →' : 'Next →') : kind === 'you' ? 'That’s me →' : kind === 'lines' ? 'See my week →' : kind === 'week' && ci != null ? 'My chapter reading →' : 'Next ↵';
+  const nextLabel = kind === 'begin' ? `Begin Level ${pad(level)} →` : kind === 'welcome' ? (key === 3 ? 'Begin →' : 'Next →') : kind === 'you' ? 'That’s me →' : kind === 'lines' ? 'See my week →' : kind === 'week' && ci != null ? 'My chapter reading →' : 'Next ↵';
   return `${top}${body}
     <footer class="cw-foot">
+      ${qi > 0 ? '<button type="button" class="cw-back" data-qmove="-1">← Back</button>' : ''}
       ${last || domainEnd ? `<button type="button" class="cw-next" data-fmdone="${domainEnd ? 'next' : 'end'}">Done ✓</button>`
         : `<button type="button" class="cw-next" data-qmove="1"${ready(qi) ? '' : ' disabled'}>${nextLabel}</button>`}
     </footer>`;
@@ -1746,8 +1822,11 @@ function libraryView() {
 const BANNER_KEY = 'ftb-library-banner';
 const bannerSeen = () => { try { return localStorage.getItem(BANNER_KEY) === 'seen'; } catch { return true; } };
 const bannerDone = () => { try { localStorage.setItem(BANNER_KEY, 'seen'); } catch { /* private mode */ } };
+/** Shown once (Alexandru, 3 Nov 2026): the first time, for this visit only. */
+let libThisVisit = false;
 function libBanner() {
-  if (bannerSeen() || !(state.me || account.joined())) return '';
+  if (!(state.me || account.joined())) return '';
+  if (!libThisVisit) { if (bannerSeen()) return ''; libThisVisit = true; bannerDone(); }
   return `<div class="libban" role="status">
     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/></svg>
     <div><b>Your library just got fuller.</b><p>With your free account: the North Star’s Massive Growth Plan, The Leader’s Growth Planner 2027, the three Founder’s Blueprint manuals, Built to Lead (99 practical tools), Worth Building (32 leadership frameworks) and A New Way of Winning (12 principles).</p></div>
@@ -1759,7 +1838,7 @@ function libBanner() {
 /** The North Star, inside the programme: for the founder's first five visits to
  *  the programme, a banner that sends them back to the North Star for feedback
  *  and material. Closing it ends it early. Counted once per page load. */
-const CB_KEY = 'ftb-compass-banner', CB_TIMES = 5;
+const CB_KEY = 'ftb-compass-banner', CB_TIMES = 1;
 const cbSeen = () => { try { return Number(localStorage.getItem(CB_KEY) || 0); } catch { return CB_TIMES; } };
 const cbSet = (n) => { try { localStorage.setItem(CB_KEY, String(n)); } catch { /* private mode */ } };
 let cbCounted = false;
@@ -1987,6 +2066,10 @@ document.addEventListener('click', (e) => {
     const li = b.closest('.lpo-a'); if (li) li.classList.toggle('on', on);
     return;
   }
+  if (b.dataset.days === 'open') { daysOpen(); return; }
+  if (b.dataset.days === 'yes') { daysYes(); return; }
+  if (b.dataset.days === 'close') { daysShut(); return; }
+  if (b.dataset.intro != null || b.dataset.sq != null) { const at = +(b.dataset.intro ?? b.dataset.sq); if (at >= 0) { document.body.classList.remove('stepsopen'); fmOpen(at); } return; }
   if (b.dataset.qd) { document.body.classList.remove('stepsopen'); fmOpen(steps().findIndex((x) => x[0] === +b.dataset.qd && x[1] !== 'got')); return; }
   // Every answer waits for a complete account first (the account box), then lands.
   const ans = ['v4t', 'got', 'v4day', 'carry'].find((k) => b.dataset[k] != null);
@@ -2172,6 +2255,11 @@ document.addEventListener('click', (e) => {
 });
 
 /* My Blueprint's tabs: the arrow keys, Home and End move between them. */
+// The 12 Days pop-up: Esc closes it.
+document.addEventListener('keydown', (e) => {
+  const box = document.getElementById('daysbox');
+  if (e.key === 'Escape' && box && !box.hidden) { e.stopImmediatePropagation(); daysShut(); }
+}, true);
 document.addEventListener('keydown', (e) => {
   const t = e.target && e.target.closest && e.target.closest('.mb-tabs [role="tab"]');
   if (!t || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
