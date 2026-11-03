@@ -31,7 +31,8 @@ function paint() {
   }
   go.hidden = true;
   const where = sub.day >= 13 ? 'All 12 days are done. Thank you for walking them.' : sub.day >= 1 ? `You are on day ${sub.day} of 12. The next letter comes tomorrow from 8:00, your time.` : `You’re in. Your welcome letter goes to ${esc(me && me.email || 'your email')} now, and Day 1 comes tomorrow from 8:00, your time. Nothing within the hour? Check your spam folder.`;
-  state.innerHTML = `${where}${sub.day < 13 ? ' <button type="button" class="linkbtn" id="stop">Stop the letters</button>' : ''}`;
+  // Someone who started is the best one to pass it on (Alexandru, 3 Nov 2026).
+  state.innerHTML = `${where}${sub.day < 13 ? ' <button type="button" class="linkbtn" id="stop">Stop the letters</button>' : ''}<br><a class="linkbtn" href="#nb">Know someone who would love this? Invite a friend ↓</a>`;
 }
 
 async function call(action) {

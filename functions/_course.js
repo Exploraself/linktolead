@@ -113,3 +113,56 @@ export async function sendDue(env, D, base = SITE, at = new Date()) {
   }
   return { sent, failed };
 }
+
+// "Take care of your neighbor" (Alexandru, 3 Nov 2026): a signed-in founder
+// sends one friend one invitation to the 12 days, from /12-days/
+// (functions/api/course.js, action "invite"). The friend is put on no list,
+// gets no tag and no letter after it: they start only if they tap Start
+// themselves. Their address is kept only as a hash, for the limits below and
+// for "no more invitations" (the footer link, functions/api/unsubscribe.js ?i=).
+// The sender is kept as a hash too, so these rows hold nobody's details and
+// outlive a deleted account (the limits still hold). The founder's own
+// "Invited a friend" line is an event, deleted with their account.
+
+/** At most this many invitations a day from one founder. */
+export const INVITE_PER_DAY = 3;
+/** One invitation to an address in this many days, from anybody. */
+export const INVITE_GAP_DAYS = 30;
+/** The longest note a founder can add, in characters. */
+export const INVITE_NOTE_MAX = 200;
+/** Where the button goes: the 12 Days page, marked as a friend's invitation. */
+export const INVITE_PATH = '/12-days/?utm_source=friend&utm_medium=email&utm_campaign=12days-invite';
+/** The footer line: why this one letter came. */
+export const inviteWhy = (who) => `You got this one letter because ${who} asked us to send it to you from linktolead.exploraself.com. You are on no list, and nothing more comes unless you start.`;
+
+/** The invitation itself, in Alexandru's words. `from` is the founder's
+ *  first name, `fromEmail` their address (the friend sees who it is). */
+export function inviteLetter(base, { first = '', from = '', fromEmail = '', note = '', tz = '', at } = {}) {
+  const who = nameCase(from) || 'A friend';
+  const by = fromEmail ? `${who} (${fromEmail})` : who;
+  const paras = [
+    first ? `Hi ${nameCase(first)},` : 'Hi,',
+    `${by} thought of you and asked me to send you this.`,
+    ...(note ? [`A note from ${who}: “${note}”`] : []),
+    `It is ${COURSE_NAME}: twelve mornings, twelve principles from my book A New Way of Winning. Each day leaves you with one thing done, not one more thing to read. It is free.`,
+    'Nothing starts unless you want it. If you do, tap the button and make your free account. Your welcome letter comes at once, and Day 1 the next morning.',
+    button(`${base}${INVITE_PATH}`, 'Start my 12 days'),
+    'Not for you? There is nothing to do. This is the only letter you get from us because of it.',
+  ];
+  return { subject: `${who} thought of you: ${COURSE_NAME}`, why: inviteWhy(by),
+    ...letter(base, paras, null, { founder: false, tz, at, ask: ['What is in the 12 days?', 'Is it really free?'] }) };
+}
+
+/** The two small tables the invitations need. */
+export async function inviteTables(D) {
+  await D.batch([
+    D.prepare('CREATE TABLE IF NOT EXISTS course_invite (id TEXT PRIMARY KEY, sender TEXT NOT NULL, friend TEXT NOT NULL, at INTEGER NOT NULL)'),
+    D.prepare('CREATE TABLE IF NOT EXISTS invite_block (friend TEXT PRIMARY KEY, at TEXT NOT NULL)'),
+  ]);
+}
+
+const sha = async (s) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].map((x) => x.toString(16).padStart(2, '0')).join('');
+/** An address as a hash: enough to count and to block, never to write to. */
+export const friendHash = (email) => sha(`win12-invite|${String(email || '').trim().toLowerCase()}`);
+/** The sender as a hash: enough to count their invitations today. */
+export const senderHash = (id) => sha(`win12-sender|${id}`);

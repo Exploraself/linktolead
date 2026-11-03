@@ -821,7 +821,7 @@ function eventWords(e) {
   const W = {
     signup: ['door', 'Made an account'], completed: ['door', 'Completed their account details'], unsubscribed: ['mail', 'Said no to letters (unsubscribed)'],
     crossed: ['door', `Crossed to ${CROSS_NAME[d] || d}, confirmed name and email`], 'tool-open': ['tool', `Opened ${TOOL_NAMES[d] || d}`], 'tool-done': ['tool', `Finished ${TOOL_NAMES[d] || d}`],
-    'course-start': ['mail', 'Started 12 Days to Start Winning'], 'course-stop': ['mail', 'Stopped 12 Days to Start Winning'], 'library-download': ['book', `Took ${d} from the library`],
+    'course-start': ['mail', 'Started 12 Days to Start Winning'], 'course-stop': ['mail', 'Stopped 12 Days to Start Winning'], 'course-invite': ['mail', `Invited a friend to 12 Days${d ? ': ' + d : ''}`], 'library-download': ['book', `Took ${d} from the library`],
     paid: ['pay', `Paid${d ? ': ' + (STEP_NAMES[d] || d) : ''}`], 'unlocked-letter': ['mail', 'Got the “It’s unlocked” letter'], 'unlocked-letter-failed': ['mail', 'The “It’s unlocked” letter did not send'],
     'toolkit-welcome': ['mail', 'Got “Welcome to the Growth Toolkit”'], 'toolkit-welcome-failed': ['mail', 'The Growth Toolkit welcome did not send'], 'toolkit-confirmed': ['tool', 'Opened the Growth Toolkit (“Yes, that’s me”)'],
     'stage-change': ['level', `Changed where they stand${d ? ': ' + d : ''}`], 'mentor-step': ['key', `Step changed in /mentor${d ? ': ' + d : ''}`], booking: ['call', 'Asked for a call'],

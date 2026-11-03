@@ -6,6 +6,7 @@
 
 import { db, now, clean, accountTables } from '../_shared.js';
 import { syncFounder } from '../_mailchimp.js';
+import { inviteTables } from '../_course.js';
 
 const page = (title, line) => new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>${title} · ExploraSelf</title>
 <style>body{margin:0;background:#FFFDF8;color:#14100B;font:16px/1.6 'Inter',Arial,sans-serif}main{max-width:560px;margin:0 auto;padding:56px 20px}h1{font:500 30px/1.2 Newsreader,Georgia,serif;margin:0 0 12px}a{color:#6E5213}
@@ -16,6 +17,15 @@ const page = (title, line) => new Response(`<!doctype html><html lang="en"><head
 async function out(request, env, waitUntil) {
   const D = db(env);
   if (!D) return page('Not available right now', 'We could not reach the list just now. Try the link again in a few minutes.');
+  // ?i= is the footer of a friend's invitation to 12 Days (functions/_course.js):
+  // no more invitations to that address, from anybody.
+  const i = clean(new URL(request.url).searchParams.get('i'), 80);
+  if (i.length >= 20) {
+    await inviteTables(D);
+    const row = await D.prepare('SELECT friend FROM course_invite WHERE id = ?').bind(i).first();
+    if (row) await D.prepare('INSERT OR IGNORE INTO invite_block (friend, at) VALUES (?,?)').bind(row.friend, now()).run();
+    return page('No more invitations', 'Nobody can send you an invitation from ExploraSelf again. You are on no list, so there is nothing else to stop.');
+  }
   const u = clean(new URL(request.url).searchParams.get('u'), 80);
   if (u.length >= 20) {
     await accountTables(D);
