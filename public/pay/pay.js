@@ -124,18 +124,32 @@ const signinLink = () => `<a class="ghost gf-in" href="/ground-plan/?next=${enco
 function finishAccount(d, S) {
   try { localStorage.setItem('ftb-token', d.token); } catch { /* private mode */ }
   const first = d.first || S.first || 4, open = `/ground-plan/#programme-${first}`;
+  // On a phone the password shows as it is typed, so it can be checked and
+  // copied (Alexandru, 3 Nov 2026); one tap hides it.
+  const shown = matchMedia('(max-width: 600px)').matches;
   draw(`<p class="eb">${ICON.check}Thank you</p><h1>${esc(S.name || 'Your step')} is yours</h1>
     <p class="ok">Your payment went through. One last step: choose your password, and your Base Camp opens.</p>
     <form class="card gf" id="fin">
       <p class="gf-who"><b>${esc(d.name || '')}</b>${esc(d.email || '')}</p>
       <label for="f-pw">Choose a password (at least 10 characters)</label>
-      <input id="f-pw" type="password" autocomplete="new-password" minlength="10" required>
+      <input id="f-pw" type="${shown ? 'text' : 'password'}" autocomplete="new-password" autocapitalize="off" spellcheck="false" minlength="10" required>
       <label for="f-pw2">The same password again</label>
-      <input id="f-pw2" type="password" autocomplete="new-password" minlength="10" required>
+      <input id="f-pw2" type="${shown ? 'text' : 'password'}" autocomplete="new-password" autocapitalize="off" spellcheck="false" minlength="10" required>
+      <div class="gf-tools">
+        <button type="button" class="gf-tool" id="f-show" aria-pressed="${shown}">${shown ? 'Hide password' : 'Show password'}</button>
+        <button type="button" class="gf-tool" id="f-copy">Copy it into the second box</button>
+      </div>
       <button class="go" type="submit">${ICON.open}Open my Base Camp</button>
       <p class="err" id="err" role="alert" hidden></p>
     </form>
     <a class="ghost" href="${open}">Later: open Level ${pad(first)} now</a>`);
+  $('#f-show').onclick = (e) => {
+    const on = $('#f-pw').type === 'password';
+    for (const id of ['#f-pw', '#f-pw2']) $(id).type = on ? 'text' : 'password';
+    e.currentTarget.textContent = on ? 'Hide password' : 'Show password';
+    e.currentTarget.setAttribute('aria-pressed', String(on));
+  };
+  $('#f-copy').onclick = () => { $('#f-pw2').value = $('#f-pw').value; $('#f-pw2').focus(); };
   $('#fin').onsubmit = async (e) => {
     e.preventDefault();
     const err = $('#err'); err.hidden = true;
