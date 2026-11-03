@@ -23,6 +23,7 @@ import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import * as L from '../functions/_letters.js';
+import * as W from '../functions/_whatsapp.js';
 import { courseLetter, COURSE_NAME, SEND_HOUR, LATEST_HOUR } from '../functions/_course.js';
 import { COURSE_LETTERS } from '../functions/_course-letters.js';
 import { MENTOR_EMAIL } from '../functions/api/note.js';
@@ -49,6 +50,9 @@ export const STAGES = [
 
 const placeholder = (s) => `[${s}]`;
 /** Sam's sample answers on the two booking pages (labelled samples). */
+/** A WhatsApp message drawn like a letter on the map: the text in a bubble. */
+const whatsapp = (text, subject) => ({ subject, text, fromLine: 'ExploraSelf business WhatsApp · through GREEN-API',
+  html: `<!doctype html><html><body style="margin:0;padding:24px;background:#ECE5DD;font:15px/1.45 system-ui,sans-serif"><div style="max-width:420px;background:#DCF8C6;border-radius:10px;padding:10px 12px;white-space:pre-wrap;color:#111">${String(text).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])).replace(/\*([^*\n]+)\*/g, '<b>$1</b>')}</div></body></html>` });
 const BOOK_PHONE = '+15555550100'; // an example number (555-01xx is kept for fiction)
 const BOOK_TIMES = ['2026-11-10T15:00:00.000Z', '2026-11-11T16:30:00.000Z', '2026-11-12T14:00:00.000Z'];
 const DISCOVERY_SAMPLE = { stage: 'solo', struggles: ['clients', 'alone'], goals: ['clients', 'runs'], note: placeholder('Anything else they wrote (optional)') };
@@ -156,6 +160,26 @@ export const ENTRIES = [
     sentBy: 'functions/api/book.js',
     also: 'A receipt, like the discovery one, for 60 minutes, and it points to their first three levels in Base Camp. Adds the Mailchimp tag linktolead-book-boardroom (with their yes to letters).',
     build: () => L.bookingLetter(BASE, { ...S, kind: 'boardroom', phone: BOOK_PHONE, times: BOOK_TIMES.map((t) => t.replace(':30:', ':00:')), answers: BOARDROOM_SAMPLE }),
+  },
+  {
+    id: 'whatsapp-booking', stage: 'book', icon: 'chat', fn: 'bookingWhatsApp',
+    name: 'WhatsApp: your time for our call',
+    when: 'Right after the email copy, when someone sends /book/discovery/ or /book/boardroom/ (since 3 Nov 2026). Only once WhatsApp is set up in Cloudflare (WA_API_URL, WA_INSTANCE, WA_TOKEN); until then nothing goes.',
+    who: 'The phone they typed on the form, from the ExploraSelf business WhatsApp number (through GREEN-API). The request in /mentor says whether it went.',
+    from: '/book/discovery/, /book/boardroom/',
+    sentBy: 'functions/api/book.js → functions/_whatsapp.js',
+    also: 'A WhatsApp message, not an email: thanks, their time (or times), “I’ll confirm within 24 hours by email”, “just reply here”. Replies land in the business WhatsApp app. The page says “A WhatsApp with your time is on your phone too” only when it went.',
+    build: () => whatsapp(W.bookingWhatsApp({ first: S.first, kind: 'discovery', times: BOOK_TIMES.slice(0, 1), tz: S.tz }), 'WhatsApp · your time for our call'),
+  },
+  {
+    id: 'whatsapp-alert', stage: 'book', icon: 'chat', fn: 'bookingAlert',
+    name: 'WhatsApp to Alexandru: a new booking',
+    when: 'At the same moment as the WhatsApp to the person, when WhatsApp is set up and WA_ALERT_TO (Alexandru’s own number) is set in Cloudflare.',
+    who: 'Alexandru’s own WhatsApp, from the ExploraSelf business number. A failed alert is logged as whatsapp-alert-failed; the email notice still goes.',
+    from: '/book/discovery/, /book/boardroom/',
+    sentBy: 'functions/api/book.js → functions/_whatsapp.js',
+    also: 'Everything they gave: name, email, phone with a one-tap WhatsApp link, account or not, their time in Rome time, every answer, and the /mentor link to confirm.',
+    build: () => whatsapp(W.bookingAlert(BASE, { name: 'Sam Example', email: S.to, phone: BOOK_PHONE, kind: 'discovery', times: BOOK_TIMES, answers: DISCOVERY_SAMPLE, tz: S.tz }), 'WhatsApp · New free discovery call'),
   },
   {
     id: 'booking-confirmed', stage: 'book', icon: 'calendar', fn: 'bookingConfirmedLetter',
@@ -363,7 +387,7 @@ export async function collect({ exploraself } = {}) {
     }
     const r = e.build();
     out.push({ id: e.id, stage: e.stage, icon: e.icon, site: 'linktolead', name: e.name, when: e.when, who: e.who, from: e.from, sentBy: e.sentBy, also: e.also || '',
-      fromLine: r.fromName ? `${r.fromName} · support@exploraself.com` : 'ExploraSelf · support@exploraself.com', replyTo: r.replyTo || '',
+      fromLine: r.fromLine || (r.fromName ? `${r.fromName} · support@exploraself.com` : 'ExploraSelf · support@exploraself.com'), replyTo: r.replyTo || '',
       attach: (r.attachments || []).map((a) => a.filename), sample: /\[/.test(r.text) ? 'The words in [brackets] are written each time.' : '',
       subject: r.subject, html: r.html, text: r.text, ps: psOf(r.text), preview: previewOf(r.text) });
   }

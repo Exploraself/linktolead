@@ -84,6 +84,36 @@ ok(P.codeFor('Europe/Rome') === '+39' && P.codeFor('America/New_York') === '+1' 
   const copy = sent.find((m) => m.body.to === 'sam@example.com' || (Array.isArray(m.body.to) && m.body.to.includes('sam@example.com')));
   ok(copy && /Your time for our call/.test(copy.body.subject) && /Here is the time you suggested/.test(copy.body.text) && copy.body.text.includes('+393331234567'), 'one time: the copy says “your time”, and shows their phone');
 }
+// WhatsApp from the business number (3 Nov 2026): off until set up; then the
+// person gets their time and Alexandru gets everything; a failure is written
+// on the request and never stops it.
+{
+  const { waState, chatIdOf, bookingWhatsApp } = await import('../functions/_whatsapp.js');
+  ok(!waState({}).ready && !waState({ WA_API_URL: 'https://1103.api.green-api.com', WA_INSTANCE: '1103', WA_TOKEN: '' }).ready, 'WhatsApp is off until the URL, instance and token are set');
+  ok(chatIdOf('+39 333 123 4567') === '393331234567@c.us' && chatIdOf('') === '', 'a phone becomes a WhatsApp chat id');
+  ok(/I’ll confirm it within 24 hours/.test(bookingWhatsApp({ first: 'Sam', times: ['2026-11-10T15:00:00.000Z'], tz: 'Europe/Rome' })), 'one time: “I’ll confirm it”');
+  const calls = [];
+  const mails = [];
+  globalThis.fetch = async (url, opts = {}) => {
+    if (String(url).includes('api.resend.com')) { mails.push(JSON.parse(opts.body)); return { ok: true }; }
+    if (String(url).includes('green-api.com')) { const b = JSON.parse(opts.body); calls.push({ url: String(url), ...b }); return { ok: true, status: 200, json: async () => ({ idMessage: 'X' + calls.length }) }; }
+    return { ok: false, status: 503, headers: new Headers(), text: async () => 'offline' };
+  };
+  const env = { DB: fakeD1(), RESEND_API_KEY: 're_test', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Rome', WA_API_URL: 'https://1103.api.green-api.com', WA_INSTANCE: '1103000001', WA_TOKEN: 'tok', WA_ALERT_TO: '+39 300 000 0000' };
+  const slots = S.slotsFor('discovery');
+  const r = await book({ request: post('/api/book', { kind: 'discovery', answers: { stage: 'solo', struggles: ['clients', 'time'], goals: ['clients', 'runs'] }, name: 'Sam Example', email: 'sam@example.com', phone: '+39 333 123 4567', tz: 'Europe/Rome', times: [slots[0]] }, '2.2.2.2'), env });
+  const j = await r.json();
+  ok(j.ok && j.wa === true, 'the page hears that the WhatsApp went');
+  const them = calls.find((c) => c.chatId === '393331234567@c.us'), him = calls.find((c) => c.chatId === '393000000000@c.us');
+  ok(them && them.url === 'https://1103.api.green-api.com/waInstance1103000001/sendMessage/tok' && /Hi Sam/.test(them.message) && /just reply here/.test(them.message), 'the person gets their time on WhatsApp, from the business number');
+  ok(him && /New free discovery call/.test(him.message) && him.message.includes('sam@example.com') && him.message.includes('https://wa.me/393331234567') && /Not enough clients/.test(him.message), 'Alexandru gets every detail on his own WhatsApp');
+  ok(env.DB.raw.prepare('SELECT wa FROM booking LIMIT 1').get().wa === 'sent', 'the request says the WhatsApp went');
+  globalThis.fetch = async (url, opts = {}) => (String(url).includes('api.resend.com') ? { ok: true } : { ok: false, status: 466, json: async () => ({ message: 'quota' }) });
+  const r2 = await book({ request: post('/api/book', { kind: 'discovery', answers: { stage: 'solo', struggles: ['clients', 'time'], goals: ['clients', 'runs'] }, name: 'Rae Example', email: 'rae@example.com', phone: '+39 333 765 4321', tz: 'Europe/Rome', times: [slots[1]] }, '2.2.2.3'), env });
+  const j2 = await r2.json();
+  ok(j2.ok && j2.wa === false, 'a failed WhatsApp never stops the request, and the page does not claim it went');
+  ok(/^failed: GREEN-API answered 466/.test(env.DB.raw.prepare("SELECT wa FROM booking WHERE email = 'rae@example.com'").get().wa), 'and the request says why it failed');
+}
 const pageJs = read('public/book/book.js');
 ok(pageJs.includes("if (st.kind === 'times') return S.times.length >= RULES.min") && pageJs.includes("kind: 'phone'") && pageJs.includes('Your phone number, for WhatsApp'), 'the page moves on with one time and asks the phone on both forms');
 done();

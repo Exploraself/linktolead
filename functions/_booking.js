@@ -238,6 +238,8 @@ export async function bookingTables(D) {
   ]);
   // Their phone (3 Nov 2026), added to a table that may already hold requests.
   try { await D.prepare('ALTER TABLE booking ADD COLUMN phone TEXT').run(); } catch { /* already there */ }
+  // What the WhatsApp to them did (3 Nov 2026): 'sent', or 'failed: why'.
+  try { await D.prepare('ALTER TABLE booking ADD COLUMN wa TEXT').run(); } catch { /* already there */ }
   READY.add(D);
 }
 
@@ -294,7 +296,7 @@ export function bookingRow(r) {
   try { answers = JSON.parse(r.answers) || {}; } catch { answers = {}; }
   try { times = JSON.parse(r.times) || []; } catch { times = []; }
   return { id: r.id, kind: r.kind, name: r.name, email: r.email, created_at: r.created_at, status: r.status, tz: r.tz || ZONE,
-    student_id: r.student_id || null, phone: r.phone || '', times, answers: answersText(r.kind, answers), confirmed_time: r.confirmed_time || null, confirmed_at: r.confirmed_at || null,
+    student_id: r.student_id || null, phone: r.phone || '', wa: r.wa || '', times, answers: answersText(r.kind, answers), confirmed_time: r.confirmed_time || null, confirmed_at: r.confirmed_at || null,
     confirmed_by: r.confirmed_by || null, note: r.note || '', closed_at: r.closed_at || null, closed_by: r.closed_by || null };
 }
 /** What a request can be, in /mentor (Alexandru, 2 Nov 2026: "full control"):
