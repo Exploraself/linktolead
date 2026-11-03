@@ -59,6 +59,14 @@ export const CATALOG = [
     art: `<svg viewBox="0 0 260 120" aria-hidden="true"><rect x="6" y="40" width="248" height="44" rx="8" fill="#1A2F45" stroke="#2B3F55"/><rect x="6" y="40" width="74" height="44" rx="8" fill="#5A4632"/><text x="43" y="67" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="11" font-weight="700" fill="#F3EBDD">TAX</text><rect x="82" y="40" width="64" height="44" fill="#4A3B2C"/><text x="114" y="67" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="11" font-weight="700" fill="#F3EBDD">SUPPLIER</text><rect x="148" y="40" width="58" height="44" fill="#3E3226"/><text x="177" y="67" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="11" font-weight="700" fill="#F3EBDD">PAYROLL</text><rect x="208" y="40" width="46" height="44" rx="8" fill="#91B8D5"/><text x="231" y="67" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="11" font-weight="700" fill="#0E1C2B">YOURS</text><text x="6" y="26" font-family="Newsreader,Georgia,serif" font-style="italic" font-size="15" fill="#D6BF8F">Today’s balance</text><path d="M231 92v14" stroke="#91B8D5" stroke-width="2"/><text x="231" y="118" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="11" fill="#91B8D5">? weeks</text></svg>`,
   },
   {
+    key: 'offer-check', name: 'The offer check', domain: 'market', category: 'business', href: '/offer-check/',
+    kicker: 'Lead the market · The offer check',
+    head: 'They see your offer. <em>Why don’t they buy?</em>', headText: 'They see your offer. Why don’t they buy?',
+    sub: 'Is it the offer, or too few people seeing it? Find the one thing to fix first, from your own numbers.',
+    strip: ['Free · 2 minutes', 'The one thing to fix first'],
+    art: `<svg viewBox="0 0 260 120" aria-hidden="true"><g font-family="Inter, Arial, sans-serif" font-size="11" fill="#CDBFA8"><text x="14" y="24">What you promise</text><text x="14" y="50">How sure they are</text><text x="14" y="76">How soon they feel it</text><text x="14" y="102">How little they must do</text></g><g fill="#2B3F55"><rect x="140" y="16" width="106" height="9" rx="4.5"/><rect x="140" y="42" width="106" height="9" rx="4.5"/><rect x="140" y="68" width="106" height="9" rx="4.5"/><rect x="140" y="94" width="106" height="9" rx="4.5"/></g><g fill="#A9B6C6" opacity=".7"><rect x="140" y="16" width="74" height="9" rx="4.5"/><rect x="140" y="68" width="52" height="9" rx="4.5"/><rect x="140" y="94" width="84" height="9" rx="4.5"/></g><rect x="140" y="42" width="26" height="9" rx="4.5" fill="#D6BF8F"/></svg>`,
+  },
+  {
     key: 'teleprompter', name: 'Teleprompter', domain: 'market', category: 'business', href: '/teleprompter/',
     kicker: 'Lead the market · Teleprompter',
     head: 'Look at the lens, <em>not at your notes.</em>', headText: 'Look at the lens, not at your notes.',

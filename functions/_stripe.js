@@ -17,11 +17,12 @@
 // records the session once, so a step never opens twice and a letter never
 // goes twice (AGENTS.md rule 6: never claim a payment we have not seen).
 
-import { now } from './_shared.js';
+import { now, newToken } from './_shared.js';
 import { send, mailState } from './_mail.js';
-import { unlockedLetter, FIRST_NEW } from './_letters.js';
+import { unlockedLetter, productLetter, FIRST_NEW } from './_letters.js';
 import { syncFounder } from './_mailchimp.js';
-import { unsubLink } from './_account.js';
+import { unsubLink, profile } from './_account.js';
+import { landingOf } from './_profile.js';
 import { letterContext } from './_mentor.js';
 
 /** What each step costs (cents, USD) and what it opens. Prices = LADDER in
@@ -36,6 +37,17 @@ export const STEPS = {
   premium: { amount: 198900, name: 'The Summit', product: 'The Summit · everything, and Alexandru every week', opens: 'all twelve levels, the LAB, the HUB and every resource', first: 4,
     sessions: 'Alexandru mentoring you every week' },
 };
+/** One-off products, sold from exploraself.com (Alexandru, 3 Nov 2026:
+ *  "everything to Stripe from exploraself, unless they go to Amazon or
+ *  Etsy"). A product opens no level and never changes a founder's step: Stripe
+ *  sends the buyer back to the page that sells it with ?access=<session>, and
+ *  that page asks /api/access whether Stripe said paid. The letter carries the
+ *  same link, so it opens on any device. */
+export const PRODUCTS = {
+  unshakeable: { amount: 999, name: 'The Unshakeable Assessment', product: 'The Unshakeable Assessment · Personal Leadership Audit',
+    opens: 'the Unshakeable Assessment on exploraself.com', back: 'https://exploraself.com/unshakeable' },
+};
+export const accessUrl = (P, session) => `${P.back}?access=${encodeURIComponent(session)}`;
 /** The ladder's order (functions/_mailchimp.js TIER_ORDER). */
 export const ORDER = ['free', 'session', 'lab', 'hub', 'premium'];
 export const above = (step, tier) => ORDER.indexOf(step) > ORDER.indexOf(tier || 'free');
@@ -122,8 +134,40 @@ export async function ensureWebhook(env, D, base) {
   return { ok: true, ...v };
 }
 
-/** A Stripe Checkout page for one founder and one step. */
+/** Pay first, the account after (Alexandru, 3 Nov 2026: "send them to pay,
+ *  then the account … use the information they pre-fill"). A visitor who is
+ *  not signed in gives a first name and an email; those ride on the Stripe
+ *  session (metadata, never trusted for money) and the account is made from
+ *  them only when Stripe says paid (guestAccount). `me.guest` holds them. */
+const meta = (me, step) => (me.id ? { student: me.id, step }
+  : { step, guest: '1', email: me.email, first: me.guest.first, landing: me.guest.landing || '', consent: me.guest.consent ? '1' : '0' });
+export const guestOf = (s) => !!(s && s.metadata && s.metadata.guest === '1' && s.metadata.email);
+
+/** The account for a guest who paid: the one with that email, or a new one
+ *  made from the first name and email they gave before Stripe. Recorded as a
+ *  "signup" event naming the session, so the return from Stripe can tell this
+ *  payment made it (functions/api/checkout.js). Returns { id, made }. */
+export async function guestAccount(env, D, s) {
+  const m = s.metadata || {}, email = String(m.email || '').trim().toLowerCase();
+  const found = await D.prepare('SELECT id FROM student WHERE email = ? ORDER BY joined_at LIMIT 1').bind(email).first();
+  if (found) return { id: found.id, made: false };
+  const id = newToken(), first = String(m.first || '').trim().slice(0, 60);
+  await D.prepare(`INSERT INTO student (id,email,name,phone,company,stage,tier,joined_at,last_seen_at) VALUES (?,?,?,?,?,?,?,?,?)`)
+    .bind(id, email, first, '', '', null, 'free', now(), now()).run();
+  // Two calls at once (the webhook and the return): keep the first record.
+  const first1 = await D.prepare('SELECT id FROM student WHERE email = ? ORDER BY joined_at, id LIMIT 1').bind(email).first();
+  if (first1 && first1.id !== id) { await D.prepare('DELETE FROM student WHERE id = ?').bind(id).run(); return { id: first1.id, made: false }; }
+  const consent = m.consent === '1';
+  await profile(D, id, { consent, source: 'sales-page' });
+  await D.prepare("UPDATE student_profile SET signup_type = 'full', landing = ? WHERE student_id = ?").bind(landingOf(m.landing) || 'road1', id).run();
+  await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(id, 'signup', now(), `stripe · ${s.id}`).run();
+  if (consent) await syncFounder(env, D, id, 'join').catch(() => null);
+  return { id, made: true };
+}
+
+/** A Stripe Checkout page for one founder (or a guest: me.id '') and one step. */
 export async function checkout(env, D, base, me, step) {
+  if (PRODUCTS[step]) return productCheckout(env, D, base, me, step);
   const S = STEPS[step];
   if (!S) return { ok: false, why: 'There is no such step.' };
   if (!above(step, me.tier)) return { ok: false, why: `${S.name} is already open for you.`, open: true };
@@ -132,9 +176,9 @@ export async function checkout(env, D, base, me, step) {
     mode: 'payment',
     line_items: [{ quantity: 1, price_data: { currency: 'usd', unit_amount: S.amount, product_data: { name: S.product, description: `Opens ${S.opens}. Includes ${S.sessions}.` } } }],
     customer_email: me.email,
-    client_reference_id: me.id,
-    metadata: { student: me.id, step },
-    payment_intent_data: { metadata: { student: me.id, step } },
+    client_reference_id: me.id || undefined,
+    metadata: meta(me, step),
+    payment_intent_data: { metadata: meta(me, step) },
     success_url: `${base}/pay/?step=${step}&cs={CHECKOUT_SESSION_ID}`,
     cancel_url: `${base}/pay/?step=${step}&cancelled=1`,
   };
@@ -150,6 +194,48 @@ export async function checkout(env, D, base, me, step) {
   return r.ok ? { ok: true, url: r.data.url, id: r.data.id } : { ok: false, why: r.why };
 }
 
+/** A Stripe Checkout page for one product (PRODUCTS): back to the page that
+ *  sells it, with the session as the buyer's access. */
+async function productCheckout(env, D, base, me, step) {
+  const P = PRODUCTS[step];
+  await ensureWebhook(env, D, base).catch(() => null);
+  const plain = {
+    mode: 'payment',
+    line_items: [{ quantity: 1, price_data: { currency: 'usd', unit_amount: P.amount, product_data: { name: P.product } } }],
+    customer_email: me.email,
+    client_reference_id: me.id || undefined,
+    metadata: meta(me, step),
+    payment_intent_data: { metadata: meta(me, step) },
+    success_url: `${P.back}?access={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${base}/pay/?step=${step}&from=exploraself&cancelled=1`,
+  };
+  let r = await stripe(env, 'POST', 'checkout/sessions', { ...plain, ...INVOICE(P, me, step) });
+  if (!r.ok && r.status >= 400 && r.status < 500) r = await stripe(env, 'POST', 'checkout/sessions', plain);
+  return r.ok ? { ok: true, url: r.data.url, id: r.data.id } : { ok: false, why: r.why };
+}
+
+/** A paid product (PRODUCTS): recorded once, an event on the founder, and the
+ *  letter with their access link. The founder's step is not touched. */
+async function applyProduct(env, D, base, s, step, id) {
+  const P = PRODUCTS[step];
+  if (Number(s.amount_total) !== P.amount || String(s.currency).toLowerCase() !== 'usd') return { ok: false, why: 'The amount does not match the product.' };
+  await tables(D);
+  const me = await D.prepare('SELECT id, email, name, tier FROM student WHERE id = ?').bind(id).first();
+  if (!me) return { ok: false, why: 'No such founder.' };
+  const put = await D.prepare('INSERT OR IGNORE INTO payment (session, student_id, step, amount, currency, mode, from_tier, at) VALUES (?,?,?,?,?,?,?,?)')
+    .bind(s.id, me.id, step, P.amount, 'usd', s.livemode ? 'live' : 'test', me.tier || 'free', now()).run();
+  if (!put.meta || !put.meta.changes) return { ok: true, already: true, step, product: true };
+  await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(me.id, 'paid', now(), JSON.stringify({ step, amount: P.amount, session: s.id })).run();
+  if (mailState(env).ready) {
+    const p = await D.prepare('SELECT unsub_id FROM student_profile WHERE student_id = ?').bind(me.id).first();
+    const first = String(me.name || '').trim().split(/\s+/)[0] || '';
+    const r = await send(env, { to: me.email, ...productLetter(base, { first, to: me.email, product: step, url: accessUrl(P, s.id) }),
+      why: `You bought ${P.name} from ExploraSelf.`, unsubUrl: unsubLink(base, p) });
+    await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(me.id, r.ok ? 'product-letter' : 'product-letter-failed', now(), r.ok ? step : (r.why || step)).run();
+  }
+  return { ok: true, step, product: true };
+}
+
 /** Alexandru, 2 Nov 2026: an invoice for every payment, and a "purchasing as
  *  a business" box for the business name and VAT number. Stripe makes the
  *  invoice after the payment (0.4% of the total, at most $2 each) and emails
@@ -160,7 +246,7 @@ export const INVOICE = (S, me, step) => ({
   invoice_creation: { enabled: true, invoice_data: {
     description: `${S.product}. Opens ${S.opens}.`,
     footer: 'ExploraSelf · Thank you for investing in yourself and your business.',
-    metadata: { student: me.id, step },
+    metadata: { student: me.id || 'guest', step },
   } },
 });
 
@@ -186,7 +272,10 @@ export async function verifySignature(payload, header, secret, at = Date.now(), 
  */
 export async function applyPaid(env, D, base, s) {
   if (!s || s.object !== 'checkout.session' || s.payment_status !== 'paid') return { ok: false, why: 'Not paid yet.' };
-  const step = s.metadata && s.metadata.step, id = (s.metadata && s.metadata.student) || s.client_reference_id;
+  const step = s.metadata && s.metadata.step;
+  let id = (s.metadata && s.metadata.student) || s.client_reference_id;
+  if (!id && guestOf(s) && (STEPS[step] || PRODUCTS[step])) { await tables(D); id = (await guestAccount(env, D, s)).id; }
+  if (PRODUCTS[step] && id) return applyProduct(env, D, base, s, step, id);
   const S = STEPS[step];
   if (!S || !id) return { ok: false, why: 'This payment is not for a step.' };
   if (Number(s.amount_total) !== S.amount || String(s.currency).toLowerCase() !== 'usd') return { ok: false, why: 'The amount does not match the step.' };

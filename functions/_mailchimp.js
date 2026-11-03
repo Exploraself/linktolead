@@ -109,7 +109,7 @@ export const CROSS_TAGS = { blueprint: 'linktolead-crossed-blueprint', northstar
  *  pages) or the Blueprint (the road pages, The Summit). */
 export const NORTH_STAR_DOORS = ['compass', 'north1', 'north2', 'north3'];
 export const originOf = ({ landing, source } = {}) => (NORTH_STAR_DOORS.includes(landing) || (!landing && source === 'compass') ? 'northstar' : 'blueprint');
-export const LANDING_TAGS = { road1: 'linktolead-road1', road2: 'linktolead-road2', road3: 'linktolead-road3', road4: 'linktolead-road4', road5: 'linktolead-road5', north1: 'linktolead-north1', north2: 'linktolead-north2', north3: 'linktolead-north3', compass: 'linktolead-northstar', summit: 'linktolead-summit' };
+export const LANDING_TAGS = { road1: 'linktolead-road1', road2: 'linktolead-road2', road3: 'linktolead-road3', road4: 'linktolead-road4', road5: 'linktolead-road5', north1: 'linktolead-north1', north2: 'linktolead-north2', north3: 'linktolead-north3', compass: 'linktolead-northstar', summit: 'linktolead-summit', exploraself: 'linktolead-exploraself' };
 
 /** The tags for one founder. In API mode each stage and domain tag is sent as
  *  active or inactive, so a founder who moves on loses the old one. Step tags

@@ -740,7 +740,7 @@ async function loadComments() {
 // GET ?email= (functions/_trail.js).
 const SITE = 'https://linktolead.exploraself.com';
 /** The page each landing key is, as a full link (functions/_profile.js LANDINGS). */
-export const LANDING_PATH = { road1: '/road1/', road2: '/road2/', road3: '/road3/', road4: '/road4/', road5: '/road5/', north1: '/north1/', north2: '/north2/', north3: '/north3/', compass: '/northstar/', summit: '/northstar/summit/' };
+export const LANDING_PATH = { road1: '/road1/', road2: '/road2/', road3: '/road3/', road4: '/road4/', road5: '/road5/', north1: '/north1/', north2: '/north2/', north3: '/north3/', compass: '/northstar/', summit: '/northstar/summit/', exploraself: 'https://exploraself.com/' };
 const TOOL_PATH = { 'runway': '/runway/', 'bottleneck': '/bottleneck/', 'off-switch': '/off-switch/', '12-days': '/12-days/', 'teleprompter': '/teleprompter/' };
 const BOOK_PATH = { discovery: '/book/discovery/', boardroom: '/book/boardroom/' };
 const CROSS_NAME = { northstar: 'The Leader’s North Star', blueprint: 'The Founder’s Blueprint' };
@@ -868,7 +868,7 @@ async function trail(email) {
 /** The free tools a founder opened, and where they are in the 12 days
  *  (functions/_tools.js TOOL_LIST, functions/api/mentor.js courseLine; a test
  *  holds the names equal). */
-export const TOOL_NAMES = { 'runway': 'Cash runway', 'bottleneck': 'The bottleneck test', 'off-switch': 'The off-switch check', '12-days': '12 Days to Start Winning', 'teleprompter': 'Teleprompter' };
+export const TOOL_NAMES = { 'runway': 'Cash runway', 'bottleneck': 'The bottleneck test', 'off-switch': 'The off-switch check', '12-days': '12 Days to Start Winning', 'teleprompter': 'Teleprompter', 'offer-check': 'The offer check' };
 function toolsOf(s) {
   const used = String(s.tools || '').split(',').filter((k) => TOOL_NAMES[k]).map((k) => TOOL_NAMES[k]);
   const [d, st] = String(s.course || '').split('|'), n = Number(d);

@@ -40,7 +40,7 @@ for (const k of ['runway', 'bottleneck', 'off-switch']) {
 ok(TOOLS_TAG === 'Growth Toolkit', 'the Mailchimp tag is Alexandru’s own name: Growth Toolkit (it replaced TOOLS)');
 ok(CATEGORIES.map((g) => g.name).join() === 'Personal leadership,Business', 'two lists: Personal leadership and Business');
 ok(CATALOG.filter((c) => c.category === 'personal').map((c) => c.key).join() === 'off-switch,12-days,bottleneck', 'Personal leadership: the off-switch check, the 12 days, the bottleneck test');
-ok(CATALOG.filter((c) => c.category === 'business').map((c) => c.key).join() === 'runway,teleprompter,reel-structure,branding-structure', 'Business: cash runway, the teleprompter, then Reel and branding structure');
+ok(CATALOG.filter((c) => c.category === 'business').map((c) => c.key).join() === 'runway,offer-check,teleprompter,reel-structure,branding-structure', 'Business: cash runway, the offer check, the teleprompter, then Reel and branding structure');
 ok(CATALOG.filter((c) => c.soon).every((c) => !c.href && /Being built\.$/.test(c.sub)), 'what is not written yet says “Being built”, with no link');
 ok(JSON.stringify(TOOLKIT_PREVIEW) === JSON.stringify(CATEGORIES.map((g) => [g.name, CATALOG.filter((c) => c.category === g.key && !c.soon).map((c) => c.name)])), 'the code letter’s look inside = the Tools page');
 const covers = read('public/tools/catalog.js');
@@ -246,7 +246,7 @@ ok(st === 200 && j.sent && !j.pass, 'request: a code is sent, no pass yet');
 ok(sent.length === 1 && sent[0].body.subject === 'Your Growth Toolkit code: 5689', 'the code letter: one 4-digit code for everybody, 5689');
 const code = '5689';
 const L1 = sent[0].body;
-ok(L1.text.includes('Of course, no problem.') && L1.text.includes(`/tools/?email=lea%40example.com&code=${code}`) && L1.text.includes('Personal leadership: The off-switch check') && L1.text.includes('Business: Cash runway · Teleprompter'), 'the code letter: “of course”, the button with the code in, a look inside');
+ok(L1.text.includes('Of course, no problem.') && L1.text.includes(`/tools/?email=lea%40example.com&code=${code}`) && L1.text.includes('Personal leadership: The off-switch check') && L1.text.includes('Business: Cash runway · The offer check · Teleprompter'), 'the code letter: “of course”, the button with the code in, a look inside');
 ok(!/Unshakeable assessment\. It shows/.test(L1.text) && L1.text.includes('P.S.'), 'the code letter is a request: its P.S. is free, never a sale');
 [st, j] = await jsonOf(await kitPost({ request: post('/api/toolkit', { action: 'check', email: 'lea@example.com', code: '1234' }), env: env2 }));
 ok(st === 400 && !j.pass, 'a wrong code: refused');
