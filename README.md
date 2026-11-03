@@ -157,6 +157,15 @@ The Summit (anyone else is sent to `/pay/?step=lab`), logged as
 The PDF is paid content and never sits in this public repo. Base Camp shows
 “Download your workbook” only on those steps.
 
+The booking pages (`/book/discovery/`, `/book/boardroom/`) ask for the phone
+because of a gift (3 Nov 2026): The Leader’s North Star for the discovery call,
+the Massive Growth Plan for the Boardroom 1:1 (`GIFTS` in `functions/_booking.js`
+and `public/book/slots.js`). The email copy carries it. When the business
+WhatsApp number is set in `/mentor` → Settings → Booking links (never in this
+repo), the last screen shows “Get my gift on WhatsApp”: a free `wa.me` link with
+the request and “Please send me my gift” written in, answered by the WhatsApp
+Business app’s own greeting message. This site sends no WhatsApp itself.
+
 ### Mailchimp, in three modes
 
 - **Test** (`MAILCHIMP_MODE` = `test`): nothing leaves; `/mentor` shows what would have been sent.

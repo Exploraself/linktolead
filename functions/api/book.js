@@ -2,7 +2,9 @@
 // confirmed by email within 24 hours (Alexandru, 2 Nov 2026; the rules and
 // the questions in functions/_booking.js).
 //
-// POST { kind, answers, name, email, times: [ISO, ISO, ISO], hp, token?, tz? }
+// GET                          → { ok, waTo? }: the business WhatsApp number, digits
+//                                 (for "Get my gift on WhatsApp"), when it is set
+// POST { kind, answers, name, email, phone, times: [ISO, …], hp, token?, tz? }
 //   kind 'discovery'  the free 30-minute call; anyone, no account needed;
 //                     name and email come from the page
 //   kind 'boardroom'  the 60-minute 1:1; a signed-in founder whose step holds
@@ -28,7 +30,7 @@ import { okTz } from '../_mentor.js';
 import { mailState, origin, send } from '../_mail.js';
 import { bookingLetter, bookingNotice } from '../_letters.js';
 import { MENTOR_EMAIL } from './note.js';
-import { KINDS, RULES, BOOK_TAGS, NAME_MAX, EMAIL_MAX, isKind, isSlot, readAnswers, bookingTables, bookingAllowed, bookingLogged, phoneOf } from '../_booking.js';
+import { KINDS, RULES, BOOK_TAGS, NAME_MAX, EMAIL_MAX, isKind, isSlot, readAnswers, bookingTables, bookingAllowed, bookingLogged, phoneOf, waNumber, waDigits } from '../_booking.js';
 
 export const LIMIT = 'You have sent three requests today. Alexandru and the team will write back. If it is urgent, write to support@exploraself.com.';
 const HELP = 'Write to support@exploraself.com and we will find a time with you.';
@@ -39,6 +41,15 @@ const WHY = {
 
 /** Holds The Boardroom's session: the step itself or any step above it. */
 export const holdsSession = (tier) => ORDER.indexOf(tier || 'free') >= ORDER.indexOf('session');
+
+/** GET: the business WhatsApp number (digits), so the phone screen promises
+ *  the gift on WhatsApp only when the button will be there (rule 6). The
+ *  number is public anyway: every wa.me link shows it. */
+export async function onRequestGet({ env }) {
+  const D = db(env);
+  const waTo = D ? waDigits(await waNumber(D).catch(() => '')) : '';
+  return json({ ok: true, ...(waTo ? { waTo } : {}) });
+}
 
 export async function onRequestPost({ request, env, waitUntil }) {
   const D = db(env);
@@ -115,5 +126,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const job = syncFounder(env, D, me.id, 'tag', { tag: BOOK_TAGS[kind] }).catch(() => {});
     if (typeof waitUntil === 'function') waitUntil(job); else await job;
   }
-  return json({ ok: true, id, times: sorted, copy: !!copy.ok, email });
+  // The business WhatsApp number, for the done screen's "Get my gift on WhatsApp".
+  const waTo = waDigits(await waNumber(D).catch(() => ''));
+  return json({ ok: true, id, times: sorted, copy: !!copy.ok, email, ...(waTo ? { waTo } : {}) });
 }

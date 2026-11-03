@@ -29,6 +29,22 @@ export const KINDS = {
   boardroom: { minutes: 60, every: 60, name: 'their Boardroom 1:1', short: 'Boardroom 1:1', setting: 'Boardroom link' },
 };
 export const isKind = (k) => typeof k === 'string' && Object.hasOwn(KINDS, k);
+/** The gift that comes with each call (Alexandru, 3 Nov 2026: "incentivize
+ *  them always … make the experience premium"). The discovery words are his,
+ *  approved word for word; the plan's line is its own subtitle (growth-plan.js,
+ *  approved 31 Oct 2026). No price, nothing invented. It reaches them on
+ *  WhatsApp (the "Get my gift on WhatsApp" button, answered by the WhatsApp
+ *  Business greeting message) and in their email copy. The same words are in
+ *  public/book/slots.js (tests/book.test.mjs holds both equal). */
+export const GIFTS = {
+  discovery: { name: 'The Leader’s North Star', path: '/northstar/', hash: '',
+    line: 'The reading Alexandru and the team use to see a business clearly, for solo founders, small businesses and large companies. Free for you, because you’re now part of ExploraSelf.' },
+  boardroom: { name: 'The Massive Growth Plan', path: '/northstar/', hash: '#growth-plan',
+    line: '20 + 1 steps to accelerate your growth and win with grace. Download the PDF, or fill it in online.' },
+};
+/** Where a gift opens, with where the click came from (utm_source: email,
+ *  whatsapp, linktolead); the hash stays last. */
+export const giftHref = (kind, source, base = '') => `${base}${GIFTS[kind].path}?utm_source=${encodeURIComponent(source)}&utm_medium=gift&utm_campaign=${kind}${GIFTS[kind].hash}`;
 /** The Mailchimp tags (AGENTS.md rule 17; on the tag list in
  *  functions/_tag-list.js), one per kind, names approved by Alexandru. */
 export const BOOK_TAGS = { discovery: 'linktolead-book-discovery', boardroom: 'linktolead-book-boardroom' };
@@ -285,6 +301,21 @@ export async function setMeetLink(D, kind, link, at) {
   await bookingTables(D);
   if (!link) await D.prepare('DELETE FROM booking_setting WHERE k = ?').bind(`meet.${kind}`).run();
   else await D.prepare('INSERT OR REPLACE INTO booking_setting (k, v, at) VALUES (?,?,?)').bind(`meet.${kind}`, link, at).run();
+}
+
+/** The business WhatsApp number the booking pages' "Get my gift on
+ *  WhatsApp" button opens (Alexandru, 3 Nov 2026: the free way, answered by
+ *  the WhatsApp Business app's own greeting message). Pasted once in /mentor
+ *  → Settings, never in this public repo. '' when not set. */
+export async function waNumber(D) {
+  await bookingTables(D);
+  const r = await D.prepare("SELECT v FROM booking_setting WHERE k = 'wa.to'").first();
+  return phoneOf(r && r.v);
+}
+export async function setWaNumber(D, phone, at) {
+  await bookingTables(D);
+  if (!phone) await D.prepare("DELETE FROM booking_setting WHERE k = 'wa.to'").run();
+  else await D.prepare("INSERT OR REPLACE INTO booking_setting (k, v, at) VALUES ('wa.to',?,?)").bind(phone, at).run();
 }
 
 /** One stored request, read for /mentor: the answers in words, the times as

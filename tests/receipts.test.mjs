@@ -43,7 +43,9 @@ const U = links(receipts.unlocked.html);
 ok(U.length === 2 && U.some((u) => u.includes('/ground-plan/#programme-4')) && U.some((u) => u === BOOKING) && BOOKING === `${B}/book/boardroom/`, 'It’s unlocked: one button and the booking link (/book/boardroom/), nothing else');
 for (const name of ['signin', 'reset', 'password', 'no-account']) ok(links(receipts[name].html).length <= 1, `${name}: one button at most`);
 // The booking letters: the copy has no button at all; the confirmation one, the Google Meet link.
-ok(links(receipts.booking.html).length === 0, 'booking: no button, no link to sell anything');
+// The gift link (Alexandru, 3 Nov 2026: approved): one button, the gift, and nothing to sell.
+const BK = links(receipts.booking.html);
+ok(BK.length === 1 && BK[0] === `${B}/northstar/?utm_source=email&amp;utm_medium=gift&amp;utm_campaign=discovery`, 'booking: one button, the gift (The Leader’s North Star), nothing to sell');
 const C = links(receipts['booking-confirmed'].html);
 ok(C.length === 2 && C[0] === 'https://meet.google.com/abc-defg-hij' && C[1].endsWith('/ground-plan/#home'), 'booking-confirmed: the Google Meet button, and the way to their first three levels');
 

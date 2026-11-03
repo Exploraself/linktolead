@@ -30,7 +30,7 @@ import { GROWTH_IDS, GROWTH_SQL, GROWTH_BLANK_IDS } from '../_growth.js';
 import { sendLink, signinUrl } from './signin.js';
 import { send, origin, mailState } from '../_mail.js';
 import { mentorLetter, answerLetter, messageNotice, teamInvite, giftLetter, bookingConfirmedLetter } from '../_letters.js';
-import { KINDS as BOOK_KINDS, BOOK_STATUS, BOOK_CLOSED, isOtherTime, bookingTables, bookingList, bookingRow, meetLink, meetLinks, setMeetLink } from '../_booking.js';
+import { KINDS as BOOK_KINDS, BOOK_STATUS, BOOK_CLOSED, isOtherTime, bookingTables, bookingList, bookingRow, meetLink, meetLinks, setMeetLink, phoneOf, waNumber, setWaNumber } from '../_booking.js';
 import { letterContext, mentors, saveMentor } from '../_mentor.js';
 import { LIBRARY_ITEMS } from './library.js';
 import { toolNames } from '../_tools.js';
@@ -286,7 +286,7 @@ export async function onRequestGet({ request, env }) {
   // Requests for a call (functions/_booking.js), newest first, and the Google
   // Meet link per kind: Inbox → Bookings, and Settings → Booking links.
   const bookings = await bookingList(D, 100);
-  const bookLinks = await meetLinks(D);
+  const bookLinks = { ...(await meetLinks(D)), whatsapp: await waNumber(D) };
   return json({ ok: true, you, students, paid, refunds, words: words.results || [], waiting: waiting.results || [], bookings, bookLinks, steps: STEPS, totalSteps: ALL_STEP_IDS.length, totalGrowth: GROWTH_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
     mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags,
       forgotten: (gone.results || []).map((r) => r.email).filter(Boolean), forgottenWhy: FORGOTTEN } });
@@ -491,9 +491,17 @@ async function post({ request, env }) {
       if (raw && !link) return bad(`The ${BOOK_KINDS[k].setting} must be a Google Meet link: it starts with https://meet.google.com/`);
       want[k] = link;
     }
+    // The business WhatsApp number for "Get my gift on WhatsApp" (3 Nov 2026).
+    let wa;
+    if (body.whatsapp !== undefined) {
+      const raw = String(body.whatsapp ?? '').trim();
+      wa = phoneOf(raw);
+      if (raw && !wa) return bad('The business WhatsApp number must start with + and the country code, for example +39 …');
+    }
     for (const [k, link] of Object.entries(want)) await setMeetLink(D, k, link, now());
-    await log('mentor', 'mentor-book-links', Object.keys(want).join(',') || null);
-    return json({ ok: true, links: await meetLinks(D) });
+    if (wa !== undefined) await setWaNumber(D, wa, now());
+    await log('mentor', 'mentor-book-links', [...Object.keys(want), ...(wa !== undefined ? ['whatsapp'] : [])].join(',') || null);
+    return json({ ok: true, links: { ...(await meetLinks(D)), whatsapp: await waNumber(D) } });
   }
 
   if (body.action === 'book-confirm') {

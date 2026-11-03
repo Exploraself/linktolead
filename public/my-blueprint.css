@@ -149,6 +149,9 @@ details.mb-take dd{margin:0}
 .mb-links a,.mb-links button{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:52px;padding:12px 14px;border:0;border-bottom:1px solid var(--mb-line);background:none;color:var(--mb-ink);text-decoration:none;font-size:16px;text-align:left;cursor:pointer;width:100%}
 .mb-links > :last-child{border-bottom:0}
 .mb-links span{color:var(--mb-muted);font-size:14px;text-align:right}
+/* The North Star's line is a sentence (3 Nov 2026): under its name, never squeezing it. */
+.mb-links a.mb-ns{flex-direction:column;align-items:flex-start;gap:2px}
+.mb-links a.mb-ns span{text-align:left}
 
 @media (min-width:700px){.mb-in{max-width:680px;padding:28px 28px}.mb-tabs{margin:0 -28px;padding:0 20px}}
 @media (max-width:420px){

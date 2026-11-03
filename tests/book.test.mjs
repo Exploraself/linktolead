@@ -55,7 +55,7 @@ ok(LETTERS_BOOKING === CONTENT_BOOKING && LETTERS_BOOKING === 'https://linktolea
 const forms = ['public', 'functions'].flatMap((d) => fs.readdirSync(new URL(`../${d}/`, import.meta.url), { recursive: true }).filter((f) => /\.(js|html)$/.test(f)).map((f) => `${d}/${f}`))
   .filter((f) => read(f).includes('forms.gle/opnxfhFTJJg69Qy77'));
 ok(forms.length === 0, `no Google Form left (${forms.join(', ') || 'none'})`);
-// One time is enough, up to three; a phone for WhatsApp on both (Alexandru, 3 Nov 2026).
+// One time is enough, up to three; a phone on both (Alexandru, 3 Nov 2026).
 for (const [v, want] of [['+39 333 123 4567', '+393331234567'], ['0039 (333) 123-4567', '+393331234567'], ['+1 555 555 0100', '+15555550100'], ['333 123 4567', ''], ['+0 1234567', ''], ['+39 12', ''], ['+39 333 123 4567 89012345', '']]) {
   ok(P.phoneOf(v) === want && S.phoneOf(v) === want, `phone "${v}" → "${want}" on the page and the server`);
 }
@@ -84,6 +84,41 @@ ok(P.codeFor('Europe/Rome') === '+39' && P.codeFor('America/New_York') === '+1' 
   const copy = sent.find((m) => m.body.to === 'sam@example.com' || (Array.isArray(m.body.to) && m.body.to.includes('sam@example.com')));
   ok(copy && /Your time for our call/.test(copy.body.subject) && /Here is the time you suggested/.test(copy.body.text) && copy.body.text.includes('+393331234567'), 'one time: the copy says “your time”, and shows their phone');
 }
+// "Get my gift on WhatsApp" (3 Nov 2026, the free way, no GREEN-API): the
+// business number is set once in /mentor → Settings; the page reads it
+// (GET /api/book) and the booking reply carries it, digits only.
+{
+  const { onRequestPost: mentorPost } = await import('../functions/api/mentor.js');
+  const { onRequestGet: bookGet } = await import('../functions/api/book.js');
+  const sent = fakeResend();
+  const env = { DB: fakeD1(), RESEND_API_KEY: 're_test', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Rome', MENTOR_KEY: 'k'.repeat(24) };
+  let g = await (await bookGet({ request: new Request('https://linktolead.exploraself.com/api/book'), env })).json();
+  ok(g.ok && !('waTo' in g), 'no business number yet: the page hears none, so it promises the gift by email only');
+  const M = (body) => new Request('https://linktolead.exploraself.com/api/mentor', { method: 'POST', headers: { 'content-type': 'application/json', 'x-mentor-key': env.MENTOR_KEY }, body: JSON.stringify(body) });
+  let m = await (await mentorPost({ request: M({ action: 'book-links', whatsapp: '333 12' }), env })).json();
+  ok(!m.ok && /country code/.test(m.error || ''), 'a business number without its country code is refused');
+  m = await (await mentorPost({ request: M({ action: 'book-links', whatsapp: '+39 351 000 0000' }), env })).json();
+  ok(m.ok && m.links.whatsapp === '+393510000000', 'the business WhatsApp number is saved in the international form');
+  g = await (await bookGet({ request: new Request('https://linktolead.exploraself.com/api/book'), env })).json();
+  ok(g.ok && g.waTo === '393510000000', 'GET /api/book: the page reads the business number, digits only');
+  const slots = S.slotsFor('discovery');
+  const r = await (await book({ request: post('/api/book', { kind: 'discovery', answers: { stage: 'solo', struggles: ['clients', 'time'], goals: ['clients', 'runs'] }, name: 'Lee Example', email: 'lee@example.com', phone: '+39 333 000 1111', tz: 'Europe/Rome', times: [slots[3]] }, '3.3.3.3'), env })).json();
+  ok(r.ok && r.waTo === '393510000000' && !('wa' in r), 'the booking reply carries the business number for the button, and nothing is sent from a server');
+  const copy = sent.find((x) => [].concat(x.body.to).includes('lee@example.com'));
+  ok(copy && copy.body.text.includes(`Your gift: The Leader’s North Star. ${S.GIFTS.discovery.line}`) && copy.body.html.includes('https://linktolead.exploraself.com/northstar/?utm_source=email&amp;utm_medium=gift&amp;utm_campaign=discovery'), 'the email copy carries the gift, its approved words and its link');
+}
+// The gift (Alexandru, 3 Nov 2026): his approved words, the same on the page and the server.
+ok(JSON.stringify(P.GIFTS) === JSON.stringify(S.GIFTS) && P.giftHref('boardroom', 'whatsapp') === S.giftHref('boardroom', 'whatsapp'), 'the same gifts on the page and the server');
+ok(S.GIFTS.discovery.name === 'The Leader’s North Star' && S.GIFTS.discovery.line === 'The reading Alexandru and the team use to see a business clearly, for solo founders, small businesses and large companies. Free for you, because you’re now part of ExploraSelf.', 'discovery: The Leader’s North Star, in his approved words');
+ok(S.GIFTS.boardroom.name === 'The Massive Growth Plan' && S.GIFTS.boardroom.line.startsWith('20 + 1 steps to accelerate your growth and win with grace') && S.giftHref('boardroom', 'email', 'https://x') === 'https://x/northstar/?utm_source=email&utm_medium=gift&utm_campaign=boardroom#growth-plan', 'boardroom: the Massive Growth Plan, opened on the plan itself (download or fill in)');
+ok(!/\$\d|price|only \d|left|hurry/i.test(S.GIFTS.discovery.line + S.GIFTS.boardroom.line), 'no price, no scarcity in the gift words');
 const pageJs = read('public/book/book.js');
-ok(pageJs.includes("if (st.kind === 'times') return S.times.length >= RULES.min") && pageJs.includes("kind: 'phone'") && pageJs.includes('Your phone number, for WhatsApp'), 'the page moves on with one time and asks the phone on both forms');
+ok(pageJs.includes('Get my gift on WhatsApp') && pageJs.includes('https://wa.me/${esc(sent.waTo)}?text=${encodeURIComponent(waText(sent))}') && pageJs.includes('Please send me my gift: ${GIFTS[KIND].name}.') && pageJs.includes('if (sent.waTo) {'), 'the last screen: “Get my gift on WhatsApp” only with the number, “Please send me my gift” already written');
+ok(pageJs.includes('Open my gift') && pageJs.includes("giftHref(KIND, 'linktolead')"), 'without the number, the gift opens on the page');
+ok(pageJs.includes("if (st.kind === 'times') return S.times.length >= RULES.min") && pageJs.includes("kind: 'phone'") && pageJs.includes('Your phone number, for your gift') && pageJs.includes('${eyebrow()}${giftCard()}'), 'the page moves on with one time and asks the phone, for the gift, on both forms');
+ok(!/for WhatsApp</.test(pageJs) && !pageJs.includes('sent.wa ?'), 'the phone is never asked “for WhatsApp”, and the page never says a server WhatsApp went');
+ok(!fs.existsSync(new URL('../functions/_whatsapp.js', import.meta.url)) && !/green-?api|WA_TOKEN|WA_INSTANCE/i.test(read('README.md') + read('functions/api/book.js') + read('scripts/email-map.mjs')), 'GREEN-API is gone: no _whatsapp.js, no keys, no map entries');
+ok(read('public/northstar/index.html').includes(`<span>${S.GIFTS.discovery.line.replace('Free for you', '<b>Free for you')}</b></span>`), 'the North Star page carries the premium line near the hero, word for word');
+const app = read('public/app.js');
+ok(/rstar-p">By the way: this is the reading Alexandru and the team use/.test(app) && app.includes('Here it’s yours, free.'), 'Base Camp: the North Star card in the rail says what it is, and that it is theirs, free');
 done();

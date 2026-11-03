@@ -15,6 +15,22 @@ export const KINDS = {
   boardroom: { minutes: 60, every: 60 },
 };
 
+/** The gift that comes with each call (Alexandru, 3 Nov 2026: "incentivize
+ *  them always … make the experience premium"). The discovery words are his,
+ *  approved word for word; the plan's line is its own subtitle (growth-plan.js,
+ *  approved 31 Oct 2026). No price, nothing invented. It reaches them on
+ *  WhatsApp (the "Get my gift on WhatsApp" button, answered by the WhatsApp
+ *  Business greeting message) and in their email copy. The same words are in
+ *  functions/_booking.js (tests/book.test.mjs holds both equal). */
+export const GIFTS = {
+  discovery: { name: 'The Leader’s North Star', path: '/northstar/', hash: '',
+    line: 'The reading Alexandru and the team use to see a business clearly, for solo founders, small businesses and large companies. Free for you, because you’re now part of ExploraSelf.' },
+  boardroom: { name: 'The Massive Growth Plan', path: '/northstar/', hash: '#growth-plan',
+    line: '20 + 1 steps to accelerate your growth and win with grace. Download the PDF, or fill it in online.' },
+};
+/** Where a gift opens, with where the click came from (utm_source: email,
+ *  whatsapp, linktolead); the hash stays last. */
+export const giftHref = (kind, source, base = '') => `${base}${GIFTS[kind].path}?utm_source=${encodeURIComponent(source)}&utm_medium=gift&utm_campaign=${kind}${GIFTS[kind].hash}`;
 /** Every answer a tap can give, by list: [key, words]. */
 export const CHOICES = {
   stage: [['start', 'Before my first sale'], ['solo', 'Selling alone'], ['team', 'A team with payroll'], ['company', '16 people or more']],
