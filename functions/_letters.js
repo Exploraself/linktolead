@@ -17,7 +17,7 @@
 
 import { esc } from './_mail.js';
 import { asMentor } from './_mentor.js';
-import { whenText, timeLine, cityOf, answersText, RULES, KINDS, waDigits } from './_booking.js';
+import { whenText, timeLine, cityOf, answersText, RULES, KINDS, GIFTS, giftHref, waDigits } from './_booking.js';
 
 /** The same link as BOOKING in public/content.js (a test holds them equal):
  *  the page where a founder who paid picks a time (or up to three) for their 1:1
@@ -549,8 +549,11 @@ export function bookingLetter(base, { first, phone = '', kind = 'discovery', tim
     `${many ? `Here are the ${times.length === 2 ? 'two' : 'three'} times you suggested` : 'Here is the time you suggested'} for ${one ? 'your 1:1' : 'our call'} (${KINDS[kind].minutes} minutes, online):`,
     timeLines(times, tz),
     `I’ll write back within ${RULES.confirmHours} hours to confirm ${many ? 'one of them' : 'it'}. We meet on ${RULES.where}: the link comes with my confirmation.`,
+    // The gift (3 Nov 2026): its name and his approved words, one button.
+    `Your gift: ${GIFTS[kind].name}. ${GIFTS[kind].line}`,
+    button(giftHref(kind, 'email', base), 'Open my gift →'),
     told ? `What you told us:\n${told}` : '',
-    phone ? `Your phone, for WhatsApp: ${phone}. If it is not right, just reply with the right one.` : '',
+    phone ? `Your phone: ${phone}. If it is not right, just reply with the right one.` : '',
     beforeWeSpeak(base, kind),
     `Plans change: if ${many ? 'none of these times works' : 'this time no longer works'} any more, just reply with ${many ? 'new ones' : 'another'}. The team and I are here for you.`,
   ].filter(Boolean), null, asReceipt(close('booking', { tz, at, to }, null))) };

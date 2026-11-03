@@ -2,7 +2,9 @@
 // confirmed by email within 24 hours (Alexandru, 2 Nov 2026; the rules and
 // the questions in functions/_booking.js).
 //
-// POST { kind, answers, name, email, times: [ISO, ISO, ISO], hp, token?, tz? }
+// GET                          → { ok, waTo? }: the business WhatsApp number, digits
+//                                 (for "Get my gift on WhatsApp"), when it is set
+// POST { kind, answers, name, email, phone, times: [ISO, …], hp, token?, tz? }
 //   kind 'discovery'  the free 30-minute call; anyone, no account needed;
 //                     name and email come from the page
 //   kind 'boardroom'  the 60-minute 1:1; a signed-in founder whose step holds
@@ -27,7 +29,6 @@ import { ORDER } from '../_stripe.js';
 import { okTz } from '../_mentor.js';
 import { mailState, origin, send } from '../_mail.js';
 import { bookingLetter, bookingNotice } from '../_letters.js';
-import { waState, waSend, bookingWhatsApp, bookingAlert } from '../_whatsapp.js';
 import { MENTOR_EMAIL } from './note.js';
 import { KINDS, RULES, BOOK_TAGS, NAME_MAX, EMAIL_MAX, isKind, isSlot, readAnswers, bookingTables, bookingAllowed, bookingLogged, phoneOf, waNumber, waDigits } from '../_booking.js';
 
@@ -40,6 +41,15 @@ const WHY = {
 
 /** Holds The Boardroom's session: the step itself or any step above it. */
 export const holdsSession = (tier) => ORDER.indexOf(tier || 'free') >= ORDER.indexOf('session');
+
+/** GET: the business WhatsApp number (digits), so the phone screen promises
+ *  the gift on WhatsApp only when the button will be there (rule 6). The
+ *  number is public anyway: every wa.me link shows it. */
+export async function onRequestGet({ env }) {
+  const D = db(env);
+  const waTo = D ? waDigits(await waNumber(D).catch(() => '')) : '';
+  return json({ ok: true, ...(waTo ? { waTo } : {}) });
+}
 
 export async function onRequestPost({ request, env, waitUntil }) {
   const D = db(env);
@@ -109,20 +119,6 @@ export async function onRequestPost({ request, env, waitUntil }) {
 
   const first = name.split(/\s+/)[0];
   const copy = await send(env, { to: email, ...bookingLetter(base, { first, phone, kind, times: sorted, answers: read.answers, tz, to: email }), why: WHY[kind] });
-  // WhatsApp from the business number (Alexandru, 3 Nov 2026), when it is set
-  // up: the person gets their time, Alexandru gets everything. A failed send
-  // is written on the request and never stops it.
-  let wa = false;
-  const W = waState(env);
-  if (W.ready) {
-    const [them, him] = await Promise.all([
-      waSend(env, phone, bookingWhatsApp({ first, kind, times: sorted, tz })),
-      W.alert ? waSend(env, env.WA_ALERT_TO, bookingAlert(base, { name, email, phone, kind, times: sorted, answers: read.answers, tz, account: !!owner, step: kind === 'boardroom' && me ? stepName(me.tier) : '' })) : Promise.resolve(null),
-    ]);
-    wa = them.ok;
-    await D.prepare('UPDATE booking SET wa = ? WHERE id = ?').bind(them.ok ? 'sent' : `failed: ${them.why}`.slice(0, 200), id).run().catch(() => {});
-    if (him && !him.ok) await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind('mentor', 'whatsapp-alert-failed', stamp, `${id} · ${him.why}`.slice(0, 200)).run().catch(() => {});
-  }
   // The tag goes only to the signed-in account (a typed address proves
   // nothing), and syncFounder sends it only with their yes to letters.
   if (me) {
@@ -130,7 +126,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const job = syncFounder(env, D, me.id, 'tag', { tag: BOOK_TAGS[kind] }).catch(() => {});
     if (typeof waitUntil === 'function') waitUntil(job); else await job;
   }
-  // The business WhatsApp number, for the done screen's "Send it on WhatsApp".
+  // The business WhatsApp number, for the done screen's "Get my gift on WhatsApp".
   const waTo = waDigits(await waNumber(D).catch(() => ''));
-  return json({ ok: true, id, times: sorted, copy: !!copy.ok, email, wa, ...(waTo ? { waTo } : {}) });
+  return json({ ok: true, id, times: sorted, copy: !!copy.ok, email, ...(waTo ? { waTo } : {}) });
 }

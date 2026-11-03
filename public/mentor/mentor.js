@@ -456,7 +456,7 @@ function requestsHTML(kind) {
     const reply = `mailto:${b.email}?subject=${encodeURIComponent(kind === 'boardroom' ? 'Your 1:1 with Alexandru' : 'Our call')}&body=${encodeURIComponent(`Hi ${String(b.name || '').split(/\s+/)[0]},\n\n`)}`;
     return `<li class="bk${open ? '' : ' closed'}" id="bk-${esc(b.id)}"><div>
       <p class="bk-h"><span class="pill ${BK_PILL[b.status] || ''}">${esc(BK_STATUS[b.status] || b.status)}</span>${s ? `<span class="pill">${esc(STEP_NAMES[s.tier] || s.tier || 'Free')}</span>` : '<span class="pill">No account</span>'}</p>
-      ${who} <span class="em">${emailBtn(b.email)}${b.phone ? ` · ${waLink(b.phone)}` : ''}${b.wa ? ` · ${b.wa === 'sent' ? 'our WhatsApp to them: sent' : `<b class="warn">our WhatsApp to them ${esc(b.wa)}</b>`}` : ''}</span>
+      ${who} <span class="em">${emailBtn(b.email)}${b.phone ? ` · ${waLink(b.phone)}` : ''}</span>
       <p class="tiny">Asked ${esc(when(b.created_at))} · ${esc(day(b.created_at))}${zone ? ` · lives on ${esc(zone)} time` : ' · Rome time'}${b.confirmed_at ? ` · confirmed ${esc(when(b.confirmed_at))}${b.confirmed_by ? ` by ${esc(b.confirmed_by)}` : ''}` : ''}${b.closed_at ? ` · ${esc((BK_STATUS[b.status] || '').toLowerCase())} ${esc(when(b.closed_at))}${b.closed_by ? ` by ${esc(b.closed_by)}` : ''}` : ''}</p>
       ${b.answers && b.answers.length ? `<dl class="dkv bk-a">${b.answers.map(([l, w]) => `<dt>${esc(l)}</dt><dd>${esc(w)}</dd>`).join('')}</dl>` : ''}
       <p class="lbl" style="margin-top:12px">${b.times.length === 1 ? 'Their time' : `Their ${b.times.length === 2 ? 'two' : 'three'} times`}</p><ul class="bk-tl">${b.times.map(timeRow).join('')}${ownTime}</ul>
@@ -493,7 +493,7 @@ function bookLinksHTML() {
     <p class="tiny">The Google Meet link for each kind of call. Paste it once: every confirmation from Inbox → Bookings carries it. Only links that start with https://meet.google.com/.</p>
     <div class="mform">${Object.keys(BOOK_LINK_NAMES).map((k) => `<label>${esc(BOOK_LINK_NAMES[k])}<input id="bl-${k}" type="url" inputmode="url" placeholder="https://meet.google.com/…" value="${esc(L[k] || '')}" autocomplete="off"></label>`).join('')}
       <label>Business WhatsApp number<input id="bl-wa" type="tel" inputmode="tel" placeholder="+39 …" value="${esc(L.whatsapp || '')}" autocomplete="off"></label>
-      <p class="tiny">After booking, people see “Send it on WhatsApp”: one tap opens this number with their request written in. The WhatsApp Business app’s greeting message answers them. Empty: no button.</p>
+      <p class="tiny">After booking, people see “Get my gift on WhatsApp”: one tap opens this number with their request and “Please send me my gift” written in. Your WhatsApp Business greeting message answers with the gift’s link, but only on a first message or after 14 days of silence: for anyone else, use the /gift quick reply. Empty: no button, and the gift opens on the page. The email copy always carries it.</p>
       <button type="button" id="bl-save">Save the links</button></div></section>`;
 }
 
@@ -1314,7 +1314,7 @@ document.addEventListener('click', async (e) => {
   if (b.id === 'bl-save') {
     b.disabled = true;
     const r = await act({ action: 'book-links', discovery: $('#bl-discovery').value, boardroom: $('#bl-boardroom').value, whatsapp: $('#bl-wa').value });
-    flash = r.ok ? 'Booking links saved. Every confirmation carries them, and the booking pages show the WhatsApp button when the number is set.' : (r.data.error || 'The links did not save.');
+    flash = r.ok ? 'Booking links saved. Every confirmation carries them, and the booking pages show “Get my gift on WhatsApp” when the number is set.' : (r.data.error || 'The links did not save.');
     return load();
   }
   if (d.link || d.reset) {

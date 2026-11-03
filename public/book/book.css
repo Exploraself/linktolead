@@ -206,10 +206,15 @@ h2.serif{font-size:clamp(25px,6vw,31px);line-height:1.15;margin:0}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes nod{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-9deg)}90%{transform:rotate(7deg)}95%{transform:rotate(-4deg)}}
 
-/* "Send it on WhatsApp" (3 Nov 2026): the one green thing on the page. */
-.wacard{border:1px solid #BFDCC8;background:linear-gradient(180deg,#F2FAF4,#fff 70%);border-radius:18px;padding:18px;display:grid;gap:10px}
-.wacard .eb{color:#1F6B3A}
-.wacard p{color:var(--muted)}
+/* The gift (3 Nov 2026): why the phone is asked for, on the phone screen,
+   and on the last screen with "Get my gift on WhatsApp", the one green thing. */
+.gift{border:1px solid #E2CF9F;background:linear-gradient(160deg,#FBF4E2,#fff 68%);border-radius:18px;padding:16px 18px;display:grid;gap:6px;min-width:0}
+.gift h2{font-size:clamp(21px,5.2vw,25px);line-height:1.2;margin:0}
+.gift p:not(.eb){color:var(--muted);font-size:16px;line-height:1.5}
+.gift .eb svg{width:20px;height:20px}
+.done-gift{gap:10px;padding:18px}
+.done-gift .go{margin-top:4px}
+.tiny{font-size:14.5px;color:var(--muted)}
 .go.wago{background:#1F6B3A;max-width:none}
 .go.wago:hover{background:#185730}
 .go.wago svg{width:22px;height:22px}

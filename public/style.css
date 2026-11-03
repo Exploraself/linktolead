@@ -818,6 +818,7 @@ body.inwork .foot{display:none}
 .rstar small{display:block;font:600 9.5px/1.2 var(--body);letter-spacing:1.8px;text-transform:uppercase;color:#D6BF8F}
 .rstar b{display:block;font-family:var(--display);font-weight:440;font-size:16px;line-height:1.2;margin-top:4px}
 .rstar em{display:block;font-style:normal;font:520 12px/1 var(--body);color:#B4975F;margin-top:7px}
+.rstar .rstar-p{display:block;font:400 12.5px/1.45 var(--body);font-style:normal;color:#D9CFBC;margin-top:6px}
 .rstar .cban-needle{transform-origin:32px 32px;animation:rstarNeedle 7s ease-in-out infinite}
 @keyframes rstarNeedle{0%,100%{transform:rotate(-18deg)}50%{transform:rotate(24deg)}}
 @media(prefers-reduced-motion:reduce){.rstar .cban-needle{animation:none}.rstar:hover{transform:none}}

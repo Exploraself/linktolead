@@ -84,10 +84,6 @@ so a deploy never removes them.
 | `MAILCHIMP_API_KEY` | **Secret** | Switches Mailchimp to API mode: tags, updates and unsubscribes, and no form fields to satisfy. |
 | `MAILCHIMP_DOUBLE_OPTIN` | Text, optional | `yes` makes Mailchimp send its own confirmation email before someone joins (API mode). |
 | `SERIES_MODE` | Text, optional | The letters that follow each pain (`functions/_series.js`). Empty or `off` (the default): nobody is enrolled and nothing is sent. `test`: founders are enrolled and each letter that would go is logged (event `series-test`); nothing goes to founders and no Mailchimp tag is sent. `on`: the letters go, and each founder gets the series tag in Mailchimp. |
-| `WA_API_URL` | Text, optional | WhatsApp from the ExploraSelf business number (`functions/_whatsapp.js`, through GREEN-API): the apiUrl its console shows, e.g. `https://1103.api.green-api.com`. WhatsApp stays off until this, `WA_INSTANCE` and `WA_TOKEN` are set. |
-| `WA_INSTANCE` | Text, optional | The idInstance from the GREEN-API console. |
-| `WA_TOKEN` | **Secret** | The apiTokenInstance from the GREEN-API console. |
-| `WA_ALERT_TO` | Text, optional | Alexandru's own WhatsApp number (`+39 …`) for "a new booking" alerts. Never in this repo. Empty: no alert; the person still gets theirs. |
 | `TOOLKIT_CODE` | Text, optional | The one 4-digit code that opens the Growth Toolkit for people without an account. Empty means `5689`. |
 
 ### Three roads, two forms, one account
@@ -160,6 +156,15 @@ The Summit (anyone else is sent to `/pay/?step=lab`), logged as
 `workbook-download`, served from the private R2 bucket bound as `WORKBOOKS`.
 The PDF is paid content and never sits in this public repo. Base Camp shows
 “Download your workbook” only on those steps.
+
+The booking pages (`/book/discovery/`, `/book/boardroom/`) ask for the phone
+because of a gift (3 Nov 2026): The Leader’s North Star for the discovery call,
+the Massive Growth Plan for the Boardroom 1:1 (`GIFTS` in `functions/_booking.js`
+and `public/book/slots.js`). The email copy carries it. When the business
+WhatsApp number is set in `/mentor` → Settings → Booking links (never in this
+repo), the last screen shows “Get my gift on WhatsApp”: a free `wa.me` link with
+the request and “Please send me my gift” written in, answered by the WhatsApp
+Business app’s own greeting message. This site sends no WhatsApp itself.
 
 ### Mailchimp, in three modes
 

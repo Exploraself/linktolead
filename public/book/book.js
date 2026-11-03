@@ -9,7 +9,7 @@
 // until Send (AGENTS.md rule 8); Send posts them once to /api/book, and the
 // page says "sent" only when the server says so (rule 6).
 
-import { FORMS, CHOICES, RULES, KINDS, NAME_MAX, PHONE_MAX, phoneOf, codeFor, slotsFor, byDay, oneTime, myZone, cityOf } from './slots.js';
+import { FORMS, CHOICES, RULES, KINDS, GIFTS, NAME_MAX, PHONE_MAX, phoneOf, codeFor, slotsFor, byDay, oneTime, myZone, cityOf, giftHref } from './slots.js';
 import * as A from '/account.js';
 
 const root = document.querySelector('[data-book]');
@@ -39,7 +39,7 @@ const ICON = {
   rise: I('<path d="M3.5 19.5 9 13l4 3.5 7.5-9"/><path d="M15 7.5h5.5V13"/>'),
   pulse: I('<path d="M3 12.5h4l2-5 4 10 2.5-5H21"/>'),
   shield: I('<path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/>'),
-  phonechat: I('<path d="M4.5 19.5l1.2-3.6A8 8 0 1 1 8.6 19z"/><path d="M9.2 9.3c.3 2 1.6 3.7 3.6 4.6l1-1 1.6.7-.3 1.4c-3.4.2-6.4-2.8-6.2-6.2l1.4-.3.7 1.6z"/>'),
+  whatsapp: I('<path d="M4.2 19.8l1.1-3.9A8.3 8.3 0 1 1 8.3 18.8z"/><path d="M9.3 8.6c-.4 2.5 2.6 5.8 5.3 5.6l.9-1.3-1.7-.9-.8.8c-1-.5-1.8-1.3-2.2-2.3l.7-.8-.8-1.8z"/>'),
 };
 
 // ── Where to go next (Alexandru, 2 Nov 2026: "something sweet" after the
@@ -69,7 +69,7 @@ const HELLO = {
     eb: 'A free call with Alexandru · 30 minutes', face: 'Your call is with Alexandru Cojocari',
     lede: 'Thank you for taking this step. These thirty minutes are yours: where you are, what weighs on you, and what you want next. Free, online, one to one.',
     quote: 'For a decade and a half I have built teams, developed leaders and helped each person grow into the best version of themselves.',
-    steps: [['note', 'Four short questions', 'Where you are, two struggles, two goals, and anything else. Mostly taps. Then your name, email and phone.'],
+    steps: [['note', 'Four short questions', 'Where you are, two struggles, two goals, and anything else. Mostly taps. Then your name, email and phone, for your gift.'],
       ['clock', 'A time that suits you', 'One is enough. Tuesday to Thursday afternoons, shown in your own time; add up to two more if you like.'],
       ['meet', 'Alexandru confirms it', 'Within 24 hours, by email, with the Google Meet link. Your answers reach Alexandru before the call.']],
     go: 'Let’s begin',
@@ -79,7 +79,7 @@ const HELLO = {
     eb: 'Your 1:1 with Alexandru · 60 minutes', face: 'Your hour is with Alexandru Cojocari',
     lede: 'You hold The Boardroom, and one hour one to one with Alexandru comes with it. A few questions first, so the whole hour is spent on you, not on catching up.',
     quote: 'The person who decides calmly, asks plainly and keeps their word is not someone else. It is you, a few weeks of practice from here.',
-    steps: [['note', 'Twenty questions, in six parts', 'Where you are, the four sides of your business, and the hour itself. Most take one sentence. Then your phone, for WhatsApp.'],
+    steps: [['note', 'Twenty questions, in six parts', 'Where you are, the four sides of your business, and the hour itself. Most take one sentence. Then your phone, for your gift.'],
       ['clock', 'A time that suits you', 'One is enough. Tuesday to Thursday afternoons, shown in your own time; add up to two more if you like.'],
       ['meet', 'Alexandru confirms it', 'Within 24 hours, by email, with the Google Meet link. Your answers reach Alexandru before the hour.']],
     go: 'Let’s prepare my hour',
@@ -99,6 +99,7 @@ let starAt = ''; // when they last took The Leader’s North Star, if they did
 let STEPS = [];
 let slots = [];
 let busy = false;
+let waTo = ''; // the business WhatsApp number (digits), when it is set in /mentor
 
 /** The screens, in order: the welcome, the form's questions, then
  *  (discovery) name and email, then the phone (both), the time (one, or up
@@ -175,13 +176,20 @@ function question(f) {
     <p class="count" data-count>${v.length} / ${f.max}</p>${goBtn(f.optional && !v.trim() ? 'Skip' : 'Next', !f.optional && !v.trim())}</section>`;
 }
 
-/** Their phone, for both calls (Alexandru, 3 Nov 2026): with the country
- *  code, started from their time zone's when the field is empty. */
+/** The gift that comes with the call (Alexandru, 3 Nov 2026: the phone is
+ *  asked for because of a gift, "make the experience premium"): its name and
+ *  his approved words, the same on this page, the last screen and the email. */
+const giftInner = (eb) => `<p class="eb">${ICON.gift}${esc(eb)}</p><h2 class="serif">${esc(GIFTS[KIND].name)}</h2><p>${esc(GIFTS[KIND].line)}</p>`;
+const giftCard = () => `<div class="gift">${giftInner(KIND === 'boardroom' ? 'A gift, with your hour' : 'A gift, with your call')}</div>`;
+/** Their phone, for both calls (3 Nov 2026): with the country code, started
+ *  from their time zone's when the field is empty. It says WhatsApp only when
+ *  the business number is set, so the button will be there (rule 6). */
 const phoneSay = (v) => (phoneOf(v) ? 'Thank you.' : String(v || '').replace(/[^\d]/g, '').length >= 4 ? 'Start with + and your country code, then your number.' : '');
 function phoneScreen() {
   if (!String(S.phone || '').trim()) { const c = codeFor(TZ); S.phone = c === '+' ? '' : c + ' '; }
-  return `<section class="q">${eyebrow()}<h1 tabindex="-1">Your phone number, for WhatsApp</h1>
-    <p class="hint">With your country code. Alexandru may write to you on WhatsApp about this ${KIND === 'boardroom' ? 'hour' : 'call'}, for example to agree on a time.</p>
+  return `<section class="q">${eyebrow()}${giftCard()}<h1 tabindex="-1">Your phone number, for your gift</h1>
+    <p class="hint">${waTo ? 'Your WhatsApp number, with your country code. After you send, one tap brings your gift to WhatsApp. It is in your email copy too.'
+      : `With your country code. Your gift comes in your email copy, and Alexandru can reach you here about this ${KIND === 'boardroom' ? 'hour' : 'call'}.`}</p>
     <label class="vh" for="f-phone">Your phone number, with your country code</label><input id="f-phone" class="field" data-field="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="${PHONE_MAX}" value="${esc(S.phone)}">
     <p class="count" data-phone-say aria-live="polite">${esc(phoneSay(S.phone))}</p>
     ${goBtn('Next', !phoneOf(S.phone))}</section>`;
@@ -213,7 +221,7 @@ function checkScreen() {
   const whoStep = KIND === 'discovery' ? STEPS.findIndex((s) => s.kind === 'name') : -1;
   items.push(`<div class="it"><div class="ih">${ICON.person}<b>You</b>${whoStep >= 0 ? `<button type="button" class="chg" data-goto="${whoStep}">Change</button>` : ''}</div><p class="said">${who}</p></div>`);
   const phoneStep = STEPS.findIndex((s) => s.kind === 'phone');
-  items.push(`<div class="it"><div class="ih">${ICON.call}<b>Your phone, for WhatsApp</b><button type="button" class="chg" data-goto="${phoneStep}">Change</button></div><p class="said">${esc(String(S.phone || "").trim())}</p></div>`);
+  items.push(`<div class="it"><div class="ih">${ICON.call}<b>Your phone</b><button type="button" class="chg" data-goto="${phoneStep}">Change</button></div><p class="said">${esc(String(S.phone || "").trim())}</p></div>`);
   const tl = [...S.times].sort().map((t) => { const o = oneTime(t, TZ); return `<li><span>${esc(o.day)}, <b>${esc(o.time)}</b></span>${o.rome ? `<small>${esc(o.rome)}</small>` : ''}</li>`; }).join('');
   items.push(`<div class="it"><div class="ih">${ICON.clock}<b>${S.times.length === 1 ? 'Your time' : 'Your times'}</b><button type="button" class="chg" data-goto="${STEPS.findIndex((s) => s.kind === 'times')}">Change</button></div><ul class="tl">${tl}</ul></div>`);
   return `<section class="q">${eyebrow()}<h1 tabindex="-1">Check, then send</h1><div class="sum">${items.join('')}</div>
@@ -232,15 +240,12 @@ function nextPicks(sent) {
     return [['northstar', starAt ? 'Read it again before your hour' : 'Start here'],
       side ? [side, `Because you said “${words('side', a.side)}” costs you most`] : ['unbound', 'For the decision you bring']];
   }
+  // The North Star is their gift, in its own card above: these are two others.
   const s = Array.isArray(a.struggles) ? a.struggles : [];
-  const first = BY_STRUGGLE[s[0]] || 'northstar';
-  const cards = [[first, s[0] ? `Picked for you · you chose “${words('struggles', s[0])}”` : 'Picked for you']];
-  if (first !== 'northstar') cards.push(['northstar', 'The full picture']);
-  else {
-    const two = BY_STRUGGLE[s[1]];
-    cards.push(two && two !== 'northstar' ? [two, `And for “${words('struggles', s[1])}”`] : ['twoweek', 'Can it run without you?']);
-  }
-  return cards;
+  const cards = [];
+  s.forEach((k, i) => { const id = BY_STRUGGLE[k]; if (id && id !== 'northstar' && !cards.some(([c]) => c === id)) cards.push([id, i === 0 || !cards.length ? `Picked for you · you chose “${words('struggles', k)}”` : `And for “${words('struggles', k)}”`]); });
+  for (const [id, why] of [['twoweek', 'Can it run without you?'], ['first100', 'Where your next clients come from']]) if (cards.length < 2 && !cards.some(([c]) => c === id)) cards.push([id, why]);
+  return cards.slice(0, 2);
 }
 
 function pickCard([id, why], i) {
@@ -255,24 +260,30 @@ function pickCard([id, why], i) {
     <a class="${i === 0 ? 'go' : 'ghost'}" href="${pickHref(id)}">${again ? 'Open my North Star' : i === 0 ? 'Start it now' : 'Start it'} ${ICON.arrow}</a></article>`;
 }
 
-/** "Send it on WhatsApp" (Alexandru, 3 Nov 2026: the free way): one tap
- *  opens the business WhatsApp with their request written in; the WhatsApp
- *  Business app's greeting message answers them. Shown only when the number
- *  is set in /mentor → Settings → Booking links. */
+/** "Get my gift on WhatsApp" (Alexandru, 3 Nov 2026: the free way, no
+ *  paid service): one tap opens the business WhatsApp with their request and
+ *  "Please send me my gift" written in; they send it, and the WhatsApp
+ *  Business app's greeting message (or the team's /gift quick reply) answers
+ *  with the gift's link. Without the number (set in /mentor → Settings →
+ *  Booking links), the card opens the gift here instead. */
 function waText(sent) {
   const a = sent.answers || {};
   const t = (sent.iso || []).map((iso) => { const o = oneTime(iso, TZ); return `${o.day}, ${o.time}${o.rome ? ` (${o.rome})` : ''}`; });
   const lines = [KIND === 'boardroom' ? 'Hi Alexandru, I just booked my Boardroom 1:1.' : 'Hi Alexandru, I just asked for a free discovery call.',
+    `Please send me my gift: ${GIFTS[KIND].name}.`,
     `${t.length > 1 ? 'My times' : 'My time'}: ${t.join(' · ')}`, `Name: ${sent.name || ''}`, `Email: ${sent.email || ''}`];
   if (KIND === 'discovery' && Array.isArray(a.struggles) && a.struggles.length) lines.push(`What I struggle with: ${a.struggles.map((k) => words('struggles', k)).join(' · ')}`);
   return lines.join('\n');
 }
-function waCard(sent) {
-  if (!sent.waTo) return '';
-  return `<div class="wacard"><p class="eb">${ICON.phonechat}One last tap</p>
-    <h2 class="serif">Send it to Alexandru on WhatsApp</h2>
-    <p>Your request goes straight to Alexandru’s WhatsApp, already written. Then you can talk there too.</p>
-    <a class="go wago" href="https://wa.me/${esc(sent.waTo)}?text=${encodeURIComponent(waText(sent))}" target="_blank" rel="noopener">${ICON.phonechat}Send it on WhatsApp</a></div>`;
+function giftDone(sent, copy) {
+  const also = copy ? 'It is in your email copy too.' : '';
+  if (sent.waTo) {
+    return `<div class="gift done-gift">${giftInner('Your gift')}
+    <a class="go wago" href="https://wa.me/${esc(sent.waTo)}?text=${encodeURIComponent(waText(sent))}" target="_blank" rel="noopener">${ICON.whatsapp}Get my gift on WhatsApp</a>
+    <p class="tiny">One tap opens WhatsApp with your message written. Send it, and your gift comes back to you there. ${also}</p></div>`;
+  }
+  return `<div class="gift done-gift">${giftInner('Your gift')}
+    <a class="go" href="${giftHref(KIND, 'linktolead')}">Open my gift ${ICON.arrow}</a>${also ? `<p class="tiny">${also}</p>` : ''}</div>`;
 }
 
 function doneScreen(email, copy, sent = {}) {
@@ -281,20 +292,20 @@ function doneScreen(email, copy, sent = {}) {
   const a = sent.answers || {};
   const told = !one && Array.isArray(a.struggles) && a.struggles.length ? a.struggles.map((k) => words('struggles', k)).join(' · ') : '';
   const cards = nextPicks(sent);
-  const shown = new Set(cards.map(([id]) => id));
+  const shown = new Set([...cards.map(([id]) => id), ...(one ? [] : ['northstar'])]);
   const more = Object.keys(PICKS).filter((id) => !shown.has(id)).map((id) => `<li><a href="${pickHref(id)}"><span class="pi" aria-hidden="true">${ICON[PICKS[id].icon]}</span><span><b>${esc(PICKS[id].name)}</b><small>${esc(PICKS[id].meta)}</small></span>${ICON.arrow}</a></li>`).join('');
   return `<section class="q done"><div class="tick">${ICON.check}</div>
     <h1 tabindex="-1" class="serif">Sent. Thank you${name ? `, ${esc(name)}` : ''}.</h1>
     <p class="lede">${one ? 'Your request is with Alexandru, with all twenty of your answers.' : 'Your request is with Alexandru. We look forward to meeting you.'}</p>
-    ${waCard(sent)}
+    ${giftDone(sent, copy)}
     <div class="wait"><p class="wh">What happens now</p><ol class="tl2">
-      <li><span class="dot" aria-hidden="true">${ICON.mail}</span><div><b>Now</b><p>${copy ? `A copy of your request is on its way to <b>${esc(email)}</b>.` : 'Keep an eye on your inbox.'}${sent.wa ? ' A WhatsApp with your time is on your phone too.' : ''}</p></div></li>
+      <li><span class="dot" aria-hidden="true">${ICON.mail}</span><div><b>Now</b><p>${copy ? `A copy of your request is on its way to <b>${esc(email)}</b>, with your gift.` : 'Keep an eye on your inbox.'}</p></div></li>
       <li><span class="dot" aria-hidden="true">${ICON.clock}</span><div><b>Within 24 hours</b><p>Alexandru confirms ${sent.times > 1 ? 'one of your times' : 'your time'}, by email, with the Google Meet link.</p></div></li>
       <li><span class="dot" aria-hidden="true">${ICON.meet}</span><div><b>${one ? 'Your hour' : 'The call'}</b><p>${one ? '60 minutes, one to one. Your answers reach Alexandru before it, and you bring the decision you named.' : `30 minutes, one to one${told ? `, about what you told us: ${esc(told)}` : ''}.`}</p></div></li>
     </ol></div>
     <div class="gifts"><p class="eb">${ICON.gift}${one ? 'Before your hour' : 'While you wait'}</p>
-      <h2 class="serif">${one ? 'Two things that make the hour go further' : 'Something for you before the call'}</h2>
-      <p class="hint">${one ? 'Take one, and bring what you find to the table.' : 'Take it before the call and bring your result: your thirty minutes go further.'}</p>
+      <h2 class="serif">${one ? 'Two things that make the hour go further' : 'Two more things, before the call'}</h2>
+      <p class="hint">${one ? 'Take one, and bring what you find to the table.' : 'Take one before the call and bring your result: your thirty minutes go further.'}</p>
       <div class="picks">${cards.map(pickCard).join('')}</div>
       <p class="mh">Or another free test</p><ul class="more">${more}</ul>
       <p class="all"><a href="${EXP}/assessments?utm_source=linktolead&utm_medium=booking&utm_campaign=${KIND}">See every assessment</a></p></div>
@@ -417,7 +428,7 @@ async function send() {
   } catch { d = null; }
   busy = false;
   if (d && d.ok) {
-    const sent = { answers: { ...S.answers }, name: me ? me.name : S.name, email: d.email || body.email || (me && me.email) || '', times: S.times.length, iso: [...(d.times || S.times)], wa: !!d.wa, waTo: /^\d{7,15}$/.test(String(d.waTo || '')) ? String(d.waTo) : '' };
+    const sent = { answers: { ...S.answers }, name: me ? me.name : S.name, email: d.email || body.email || (me && me.email) || '', times: S.times.length, iso: [...(d.times || S.times)], waTo: /^\d{7,15}$/.test(String(d.waTo || '')) ? String(d.waTo) : '' };
     forget();
     root.innerHTML = doneScreen(d.email || body.email || (me && me.email) || '', !!d.copy, sent);
     root.querySelector('h1').focus(); window.scrollTo(0, 0);
@@ -432,7 +443,8 @@ async function send() {
 // ── Start ───────────────────────────────────────────────────────────────────
 (async () => {
   root.innerHTML = '<p class="muted loading">One moment…</p>';
-  const st = A.joined() ? await A.pull() : null;
+  const [st, wa] = await Promise.all([A.joined() ? A.pull() : null, fetch('/api/book').then((r) => (r.ok ? r.json() : null)).catch(() => null)]);
+  waTo = wa && /^\d{7,15}$/.test(String(wa.waTo || '')) ? String(wa.waTo) : '';
   me = st && st.ok && st.me ? st.me : null;
   const taken = st && st.ok && st.compass && Array.isArray(st.compass.taken) ? st.compass.taken : [];
   starAt = taken.length && !Number.isNaN(Date.parse(taken[taken.length - 1])) ? taken[taken.length - 1] : '';

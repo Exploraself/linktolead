@@ -483,7 +483,7 @@ async function post({ request, env }) {
       if (raw && !link) return bad(`The ${BOOK_KINDS[k].setting} must be a Google Meet link: it starts with https://meet.google.com/`);
       want[k] = link;
     }
-    // The business WhatsApp number for "Send it on WhatsApp" (3 Nov 2026).
+    // The business WhatsApp number for "Get my gift on WhatsApp" (3 Nov 2026).
     let wa;
     if (body.whatsapp !== undefined) {
       const raw = String(body.whatsapp ?? '').trim();
