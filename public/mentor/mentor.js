@@ -738,7 +738,7 @@ async function loadComments() {
 // GET ?email= (functions/_trail.js).
 const SITE = 'https://linktolead.exploraself.com';
 /** The page each landing key is, as a full link (functions/_profile.js LANDINGS). */
-export const LANDING_PATH = { road1: '/road1/', road2: '/road2/', road3: '/road3/', road4: '/road4/', road5: '/road5/', north1: '/north1/', north2: '/north2/', north3: '/north3/', compass: '/northstar/', summit: '/northstar/summit/' };
+export const LANDING_PATH = { road1: '/road1/', road2: '/road2/', road3: '/road3/', road4: '/road4/', road5: '/road5/', north1: '/north1/', north2: '/north2/', north3: '/north3/', compass: '/northstar/', summit: '/northstar/summit/', exploraself: 'https://exploraself.com/' };
 const TOOL_PATH = { 'runway': '/runway/', 'bottleneck': '/bottleneck/', 'off-switch': '/off-switch/', '12-days': '/12-days/', 'teleprompter': '/teleprompter/' };
 const BOOK_PATH = { discovery: '/book/discovery/', boardroom: '/book/boardroom/' };
 const CROSS_NAME = { northstar: 'The Leader’s North Star', blueprint: 'The Founder’s Blueprint' };

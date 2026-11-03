@@ -224,7 +224,7 @@ const close = (kind, { mentor, tz, at, to = '' } = {}, ask = 'start') => ({ ment
 const asReceipt = (c) => ({ ...c, receipt: true });
 /** Which letters are receipts: they answer something the founder just did.
  *  The welcomes and every other letter stay as they are. */
-export const RECEIPTS = ['unlocked', 'signin', 'reset', 'password', 'no-account', 'booking', 'booking-confirmed'];
+export const RECEIPTS = ['unlocked', 'product', 'signin', 'reset', 'password', 'no-account', 'booking', 'booking-confirmed'];
 
 /** "launchpad-welcome": sent once, when the account is made. */
 export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {}) {
@@ -421,6 +421,25 @@ export function unlockedLetter(base, { first, step, from = 'free', to = '', ...o
     button(`${base}/ground-plan/#programme-${a}`, `Open Level ${pad2(a)}`),
     'You chose to invest in yourself and your business. That decision is already a step. The team and I are here for you.',
   ], null, asReceipt(close('unlocked', { ...o, to }, ['How do I book my session?', 'Where should I start?', 'Can I have an invoice?']))) };
+}
+
+/** "product": a one-off product bought on Stripe from exploraself.com
+ *  (functions/_stripe.js PRODUCTS, Alexandru 3 Nov 2026). Sent once, only
+ *  after Stripe itself said "paid" (AGENTS.md rule 6). The button is the
+ *  buyer's own access link: it opens the product on any phone or computer. */
+export const PRODUCT_WORDS = {
+  unshakeable: { name: 'The Unshakeable Assessment', what: 'The full Personal Leadership Audit, with your results and a printable certificate, on exploraself.com.', btn: 'Open my assessment' },
+};
+export function productLetter(base, { first, product, url = '', to = '', ...o } = {}) {
+  const P = PRODUCT_WORDS[product] || PRODUCT_WORDS.unshakeable;
+  return { subject: `It’s yours: ${P.name}`, ...letter(base, [
+    hi(first),
+    `Thank you. Your payment went through, and ${P.name} is yours.`,
+    P.what,
+    'The button below is your own access link. It opens it on any phone or computer, so keep this email.',
+    button(url, P.btn),
+    'Take your time with it, one question at a time. The team and I are here for you.',
+  ], null, asReceipt(close('product', { ...o, to }, ['The button doesn’t work', 'Can I have an invoice?']))) };
 }
 
 /** "gift": Alexandru invites a founder from /mentor (Alexandru, 2 Nov 2026:

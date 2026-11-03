@@ -127,6 +127,16 @@ export const ENTRIES = [
     build: () => L.unlockedLetter(BASE, { ...S, step: 'session' }),
   },
   {
+    id: 'product', stage: 'pay', icon: 'key', fn: 'productLetter',
+    name: 'It’s yours (a product)',
+    when: 'Stripe confirms a payment for a one-off product bought from exploraself.com: today the Unshakeable Assessment, $9.99. Since 3 Nov 2026. Sent once per payment (through the webhook, or when exploraself.com asks /api/access).',
+    who: 'The buyer, even with letters turned off: it is about their own payment.',
+    from: 'exploraself.com/unshakeable → /pay/?step=unshakeable&from=exploraself',
+    sentBy: 'functions/_stripe.js applyProduct',
+    also: 'The button is the buyer’s own access link (exploraself.com/unshakeable?access=…), so it opens on any device. A receipt: no offer, no assessments, no unsubscribe header. Their step on the ladder does not change.',
+    build: () => L.productLetter(BASE, { ...S, product: 'unshakeable', url: 'https://exploraself.com/unshakeable?access=cs_live_example' }),
+  },
+  {
     id: 'gift', stage: 'pay', icon: 'key', fn: 'giftLetter',
     name: 'A gift from Alexandru',
     when: 'Alexandru and the team (a member needs the right “Invite a founder at any step, free”) invite someone by email in /mentor → Founders → Invite a founder, choosing the step: free, The Boardroom, the LAB, the HUB or The Summit. Since 2 Nov 2026. The step opens at once, with nothing to pay; the letter leaves at the same moment.',

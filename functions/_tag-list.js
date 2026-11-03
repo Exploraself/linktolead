@@ -52,6 +52,7 @@ const LANDING_PAGES = {
   north1: ['The Leader’s North Star sales page, North 1', '/north1/'], north2: ['The Leader’s North Star sales page, North 2', '/north2/'],
   north3: ['The Leader’s North Star sales page, North 3', '/north3/'], compass: ['The North Star box (The Leader’s North Star, with no sales page before it)', '/northstar/'],
   summit: ['The Summit sales page', '/northstar/summit/'],
+  exploraself: ['exploraself.com: a buy button there (the LAB, the HUB or the Unshakeable Assessment)', '/pay/?from=exploraself'],
 };
 /** Doors whose account can also be made on the pay page (Alexandru, 2 Nov
  *  2026): not signed in, /pay/ makes the free account in place, with the
@@ -59,6 +60,7 @@ const LANDING_PAGES = {
 const VIA_PAY = {
   road1: ' Also on the pay page (/pay/), when someone not signed in taps Unlock.',
   road5: ' Its only button goes to the pay page for The Boardroom (/pay/?step=session&from=road5), and the account is made there.',
+  exploraself: ' Since 3 Nov 2026 every buy button on exploraself.com goes to the pay page here (/pay/?step=…&from=exploraself), so everything is paid through Stripe, and the account is made there.',
   summit: ' Since 2 Nov 2026 “Claim my place” goes to the pay page for The Summit (/pay/?step=premium&from=summit), and the account is made there.',
 };
 const STAGE_WORDS = { build: 'Building', grow: 'Growing', scale: 'Scaling' };
