@@ -18,18 +18,24 @@ const host = $('shelves'), note = $('hubnote');
 const day = (iso) => { try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); } catch { return ''; } };
 
 function draw(used = {}, course = null) {
+  // Two lists, each with its name large enough to read at a glance and its
+  // tools in one even row of three (Alexandru, 3 Nov 2026: "it's not clear
+  // what's what … the category should be more visible"). What is being built
+  // is one line under its list, never a half-empty row. exploraself.com/tools
+  // draws the same, from public/tools/catalog.json.
   host.innerHTML = CATEGORIES.map((g) => {
-    const items = CATALOG.filter((c) => c.category === g.key);
+    const items = CATALOG.filter((c) => c.category === g.key && !c.soon);
+    const next = CATALOG.filter((c) => c.category === g.key && c.soon);
     return `<section class="dom" style="--c:${g.color}" aria-labelledby="g-${g.key}">
-      <h2 id="g-${g.key}"><i aria-hidden="true">${ICONS[g.key] || ''}</i>${esc(g.name)}<small>&nbsp;· ${esc(g.sub)}</small></h2>
+      <header class="dom-h"><i aria-hidden="true">${ICONS[g.key] || ''}</i><div><h2 id="g-${g.key}">${esc(g.name)}</h2><p>${esc(g.sub)}</p></div><span class="dom-n">${items.length} free tools</span></header>
       <div class="shelf">${items.map((c) => {
-        if (c.soon) return `<div class="soon"><i aria-hidden="true">${ICONS.soon}</i><b>${esc(c.name)}</b><span>${esc(c.sub)}</span></div>`;
         const u = used[c.key];
         const line = c.key === '12-days' && course
           ? (course.stopped ? 'Your letters are stopped. You can start them again.' : course.day >= 13 ? 'All 12 days done.' : course.day > 0 ? `You are on day ${course.day} of 12.` : 'Your welcome letter is on its way.')
           : u ? `Last time (${esc(day(u.at))}): <b>${esc(u.summary)}</b>` : '';
         return `<div class="slot">${coverHTML(c, { tag: 'a' })}${line ? `<p class="used">${line}</p>` : ''}</div>`;
       }).join('')}</div>
+      ${next.length ? `<p class="dom-next"><i aria-hidden="true">${ICONS.soon}</i><span><b>Being built next:</b> ${next.map((c) => esc(c.name)).join(' · ')}</span></p>` : ''}
     </section>`;
   }).join('');
 }

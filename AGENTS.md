@@ -325,3 +325,17 @@ email; it lands in /mentor → Refunds, in red, and Alexandru gets in touch
 himself. Refunds are made in Stripe by a person: the code never refunds, and
 never tells a founder a refund was made. "Mark done" needs the payments
 right (functions/_refund.js, tests/refund.test.mjs).
+
+## 20. One Growth Toolkit, two front doors (Alexandru, 3 Nov 2026)
+
+"The Growth Toolkit and the tools … have to have the same name and be the
+same thing … and when we add it …". The toolkit has one list,
+`public/tools/catalog.js`, and one name, Growth Toolkit, on both sites. The
+tools run here (linktolead.exploraself.com/tools/, where the accounts are);
+exploraself.com/tools is the front door and shows the same lists and covers,
+read live from `public/tools/catalog.json`, and so do the Growth Toolkit
+groups in exploraself.com/internal (External). A tool added, renamed or moved
+in catalog.js is followed by `node scripts/toolkit-json.mjs` in the same work;
+tests/toolkit-sync.test.mjs fails until it is. Nothing changes in exploraself
+for a new tool. Each list shows its name large, its live tools in whole rows
+of three, and what is being built as one line beneath.
