@@ -6,6 +6,7 @@
 // seen). Icons tell before the words do (rule 13); the words carry the meaning.
 
 import { token } from '/account.js';
+import { CONSENT, utm } from '/forms.js';
 import { LEVELS4 } from '/levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
@@ -102,22 +103,50 @@ function productCard(S, step, test) {
     <p class="err" id="err" role="alert" hidden></p>`;
 }
 
-/** Not signed in (Alexandru, 2 Nov 2026): the free account is made right
- *  here, with the same form as /road1/ (landing "road1"), and the founder
- *  comes straight back to this page, signed in, to pay. Never sent away. */
-function makeAccount(S) {
-  const back = location.pathname + location.search;
-  draw(`<p class="eb">${ICON.open}Unlock your next step</p><h1>${esc(S.name)} · ${esc(S.price)}</h1>
-    <p>First, your free account. It takes a minute, and then you come straight back here to pay.</p>
-    <button class="go" type="button" id="make">Make my free account</button>
-    <a class="ghost" href="/ground-plan/?next=${encodeURIComponent(back)}#signin">Already have an account? Sign in</a>`);
-  let gate = document.getElementById('gate');
-  if (!gate) { gate = document.createElement('div'); gate.id = 'gate'; gate.hidden = true; document.body.appendChild(gate); }
-  const open = () => import('/account-box.js').then((m) => m.open({ gate, opener: $('#make'), stage: null, variant: 'full', landing, next: back,
-    head: ['ONE STEP BEFORE YOU PAY', 'Your free account', `Then you come straight back here to unlock ${S.name}. You sign in with your email and a password.`],
-    label: 'CONTINUE TO PAYMENT →', notNow: 'Not now' })).catch(() => { location.href = `/road1/?next=${encodeURIComponent(back)}#join`; });
-  $('#make').onclick = open;
-  open();
+/** Pay first, then the account (Alexandru, 3 Nov 2026: "name or email,
+ *  payment, boom, let's go. And then account."). Not signed in: a first name
+ *  and an email above the button; Stripe fills the email in on its page; the
+ *  account is made when Stripe says paid, and the password comes after. */
+function guestForm() {
+  return `<div class="gf">
+      <label for="g-first">Your first name</label>
+      <input id="g-first" type="text" autocomplete="given-name" maxlength="60" required>
+      <label for="g-email">Your email</label>
+      <input id="g-email" type="email" autocomplete="email" inputmode="email" maxlength="200" required>
+      <p class="gf-why">Your receipt and your Base Camp go to this address.</p>
+      <label class="gf-yes"><input id="g-consent" type="checkbox"> <span>${esc(CONSENT)}</span></label>
+    </div>`;
+}
+const signinLink = () => `<a class="ghost gf-in" href="/ground-plan/?next=${encodeURIComponent(location.pathname + location.search)}#signin">Already have an account? Sign in</a>`;
+
+/** Back from Stripe as a new founder: the account is made and this browser is
+ *  signed in. One last step, their password; their name and email are there. */
+function finishAccount(d, S) {
+  try { localStorage.setItem('ftb-token', d.token); } catch { /* private mode */ }
+  const first = d.first || S.first || 4, open = `/ground-plan/#programme-${first}`;
+  draw(`<p class="eb">${ICON.check}Thank you</p><h1>${esc(S.name || 'Your step')} is yours</h1>
+    <p class="ok">Your payment went through. One last step: choose your password, and your Base Camp opens.</p>
+    <form class="card gf" id="fin">
+      <p class="gf-who"><b>${esc(d.name || '')}</b>${esc(d.email || '')}</p>
+      <label for="f-pw">Choose a password (at least 10 characters)</label>
+      <input id="f-pw" type="password" autocomplete="new-password" minlength="10" required>
+      <label for="f-pw2">The same password again</label>
+      <input id="f-pw2" type="password" autocomplete="new-password" minlength="10" required>
+      <button class="go" type="submit">${ICON.open}Open my Base Camp</button>
+      <p class="err" id="err" role="alert" hidden></p>
+    </form>
+    <a class="ghost" href="${open}">Later: open Level ${pad(first)} now</a>`);
+  $('#fin').onsubmit = async (e) => {
+    e.preventDefault();
+    const err = $('#err'); err.hidden = true;
+    try {
+      const r = await fetch('/api/password', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: d.token, password: $('#f-pw').value, confirm: $('#f-pw2').value }) });
+      const x = await r.json().catch(() => ({}));
+      if (x.ok) { location.href = open; return; }
+      err.textContent = x.error || 'That did not work. Try again.';
+    } catch { err.textContent = 'We could not reach the site. Check your connection and try again.'; }
+    err.hidden = false;
+  };
 }
 
 async function start() {
@@ -136,18 +165,26 @@ async function start() {
       <p class="muted">Payments open here very soon. Until then, reply to any of our emails and Alexandru and the team will open it for you.</p>
       <a class="ghost" href="/ground-plan/#home">Back to my Base Camp</a>`);
   }
-  if (!info.signedIn) return makeAccount(S);
-  if (!S.product && ORDER.indexOf(step) <= ORDER.indexOf(info.tier || 'free')) {
+  const guest = !info.signedIn;
+  if (!guest && !S.product && ORDER.indexOf(step) <= ORDER.indexOf(info.tier || 'free')) {
     return draw(`<p class="eb">${ICON.check}Already yours</p><h1>${esc(S.name)} is open for you</h1>
       <p class="muted">Nothing to pay. It is waiting in your Base Camp.</p>
       <a class="go" href="/ground-plan/#programme-${S.first}">Open Level ${pad(S.first)}</a>`);
   }
-  draw((q.get('cancelled') ? '<p class="err">No payment was made. When you are ready, it is one tap away.</p>' : '') + (S.product ? productCard(S, step, info.test) : card(S, step, info.test, info.tier || 'free')));
+  let html = S.product ? productCard(S, step, info.test) : card(S, step, info.test, info.tier || 'free');
+  if (guest) html = html.replace('<button class="go"', () => guestForm() + '<button class="go"') + signinLink();
+  draw((q.get('cancelled') ? '<p class="err">No payment was made. When you are ready, it is one tap away.</p>' : '') + html);
   $('#go').onclick = async (e) => {
     const b = e.currentTarget, err = $('#err');
     b.disabled = true; err.hidden = true;
     try {
-      const r = await fetch('/api/checkout', { method: 'POST', headers: H(), body: JSON.stringify({ step }) });
+      const body = { step };
+      if (guest) {
+        Object.assign(body, { first: $('#g-first').value.trim(), email: $('#g-email').value.trim(), consent: $('#g-consent').checked, landing, utm: utm() });
+        if (!body.first) { err.textContent = 'Your first name, please.'; err.hidden = false; b.disabled = false; $('#g-first').focus(); return; }
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body.email)) { err.textContent = 'That email does not look complete.'; err.hidden = false; b.disabled = false; $('#g-email').focus(); return; }
+      }
+      const r = await fetch('/api/checkout', { method: 'POST', headers: H(), body: JSON.stringify(body) });
       const d = await r.json().catch(() => ({}));
       if (d.ok && d.url) { location.href = d.url; return; }
       err.textContent = d.error || 'Stripe did not answer. Try again in a minute.';
@@ -162,6 +199,13 @@ async function confirm(cs, steps) {
   for (let i = 0; i < 8; i++) {
     let d = null;
     try { d = await (await fetch(`/api/checkout?cs=${encodeURIComponent(cs)}`, { headers: H() })).json(); } catch { d = null; }
+    if (d && d.paid && d.fresh && d.token) return finishAccount(d, steps[d.step] || {});
+    if (d && d.paid && d.existing && !token()) {
+      const S = steps[d.step] || {};
+      return draw(`<p class="eb">${ICON.check}Thank you</p><h1>${esc(S.name || 'Your step')} is open</h1>
+        <p class="ok">Your payment went through. It is open on your account (${esc(d.email || '')}). Sign in and it is waiting for you.</p>
+        <a class="go" href="/ground-plan/?next=${encodeURIComponent('/ground-plan/#programme-' + (d.first || 4))}#signin">Sign in to my Base Camp</a>`);
+    }
     if (d && d.paid) {
       const S = steps[d.step] || {};
       try { history.replaceState(null, '', `/pay/?step=${encodeURIComponent(d.step || '')}&paid=1`); } catch { /* old browser */ }
