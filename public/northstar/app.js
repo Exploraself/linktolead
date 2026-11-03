@@ -280,7 +280,7 @@
    * download goes through /api/library with the founder's token (the same
    * link as the Library, A.libraryHref), never the PDF itself. */
   const pGrowth = () => (window.GrowthPlan && window.GrowthView
-    ? window.GrowthView.html(window.GrowthPlan, { done: GP_DONE, lib: signedIn() && A.libraryHref ? (k) => A.libraryHref(k) : null, write: gpWrite() }) : '');
+    ? window.GrowthView.html(window.GrowthPlan, { week: 5, all: !!UI.gpAll, done: GP_DONE, lib: signedIn() && A.libraryHref ? (k) => A.libraryHref(k) : null, write: gpWrite() }) : '');
   /** What the account keeps: this whole state (so another device can carry
    *  on), plus the scores and choices the Account Plans are ordered by. */
   function payload() {
@@ -544,7 +544,7 @@
 
   /* ── Parts ──────────────────────────────────────────────────────────────── */
   const NAV = [['overview', '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><g><polygon points="12,4 14,12 12,13.5 10,12" fill="#6F93B8"/><polygon points="12,20 14,12 12,10.5 10,12" fill="currentColor" opacity=".5"/><animateTransform attributeName="transform" type="rotate" values="20 12 12;34 12 12;20 12 12" dur="7s" repeatCount="indefinite"/></g></svg>', 'Your North Star'],
-    ['clear', '1', 'Yourself'], ['people', '2', 'Your people'], ['numbers', '3', 'Your numbers'], ['plan', '4', 'Your next steps'], ['method', '⌘', 'How it works']];
+    ['clear', '1', 'Yourself'], ['people', '2', 'Your people'], ['numbers', '3', 'Your numbers'], ['plan', '4', 'Your next steps']];
   const navOn = () => (typeof window !== 'undefined' && window.__nsSpy) || UI.page; // spy.js: the section on screen
   const pNav = (c) => NAV.map(([id, ni, t]) => `<button type="button" class="nl ${navOn() === id ? 'on' : ''}" data-go="${id}" data-f="nav-${id}"${navOn() === id ? ' aria-current="true"' : ''}><span class="ni">${ni}</span>${t}${id === 'clear' ? `<small style="margin-left: auto; font-size: 9px">${p1Count(c).done}/${p1Count(c).total}</small>` : ''}</button>`).join('');
 
@@ -1356,8 +1356,9 @@
   /* Later parts wait, visibly, until the one before is done. */
   function lockParts(c) {
     const P = partState(c), [p1, p2, p3] = P.fin;
-    // Part 4 is open to everyone (31 Oct, round 4): the lab itself says what it needs.
-    const locked = { 2: !p1, 3: !p1 || !p2, 4: false };
+    // Part 4 waits for the numbers (Alexandru, 3 Nov 2026, "show only what's earned";
+    // it was open to everyone from 31 Oct): the lab runs on the founder's own month.
+    const locked = { 2: !p1, 3: !p1 || !p2, 4: !p1 || !p2 || !p3 };
     const NAMES = ['', 'Part 1 · Yourself', 'Part 2 · Your people', 'Part 3 · Your numbers'];
     document.querySelectorAll('.nspart').forEach((el) => {
       const n = +el.dataset.part, on = !!locked[n];
@@ -2472,6 +2473,7 @@
       // Signed in, the link downloads; signed out, the sign-in opens instead.
       case 'gp-dl': if (!signedIn()) { e.preventDefault(); menuSignin(); } return;
       case 'gp-complete': gpComplete(); return;
+      case 'gp-all': UI.gpAll = !UI.gpAll; render(); { const h = document.getElementById('gp-h'); if (h && !UI.gpAll) h.scrollIntoView({ block: 'start' }); } return;
       case 'alloptions': { UI.opts = !UI.opts; const o = document.getElementById('s-options'); if (o) o.hidden = !UI.opts; render(); if (UI.opts && o) o.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); return; }
       case 'regate': fullAccount(); return;
       case 'account': {
