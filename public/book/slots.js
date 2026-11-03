@@ -17,14 +17,15 @@ export const KINDS = {
 
 /** The gift that comes with each call (Alexandru, 3 Nov 2026: "incentivize
  *  them always … make the experience premium"). The discovery words are his,
- *  approved word for word; the plan's line is its own subtitle (growth-plan.js,
+ *  approved, in his own voice (3 Nov 2026: "make them as from me"), signed
+ *  on the page with `by` (the email is signed already); the plan's line is its own subtitle (growth-plan.js,
  *  approved 31 Oct 2026). No price, nothing invented. It reaches them on
  *  WhatsApp (the "Get my gift on WhatsApp" button, answered by the WhatsApp
  *  Business greeting message) and in their email copy. The same words are in
  *  functions/_booking.js (tests/book.test.mjs holds both equal). */
 export const GIFTS = {
   discovery: { name: 'The Leader’s North Star', path: '/northstar/', hash: '',
-    line: 'The reading Alexandru and the team use to see a business clearly, for solo founders, small businesses and large companies. Free for you, because you’re now part of ExploraSelf.' },
+    line: 'The reading my team and I use to see a business clearly, for solo founders, small businesses and large companies. Free for you, because you’re now part of ExploraSelf.', by: 'Alexandru' },
   boardroom: { name: 'The Massive Growth Plan', path: '/northstar/', hash: '#growth-plan',
     line: '20 + 1 steps to accelerate your growth and win with grace. Download the PDF, or fill it in online.' },
 };

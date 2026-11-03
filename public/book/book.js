@@ -188,7 +188,7 @@ function question(f) {
 /** The gift that comes with the call (Alexandru, 3 Nov 2026: the phone is
  *  asked for because of a gift, "make the experience premium"): its name and
  *  his approved words, the same on this page, the last screen and the email. */
-const giftInner = (eb) => `<p class="eb">${ICON.gift}${esc(eb)}</p><h2 class="serif">${esc(GIFTS[KIND].name)}</h2><p>${esc(GIFTS[KIND].line)}</p>`;
+const giftInner = (eb) => `<p class="eb">${ICON.gift}${esc(eb)}</p><h2 class="serif">${esc(GIFTS[KIND].name)}</h2><p>${esc(GIFTS[KIND].line)}</p>${GIFTS[KIND].by ? `<p class="by">${esc(GIFTS[KIND].by)}</p>` : ''}`;
 const giftCard = () => `<div class="gift">${giftInner(KIND === 'boardroom' ? 'A gift, with your hour' : 'A gift, with your call')}</div>`;
 /** Their phone, for both calls (3 Nov 2026): with the country code, started
  *  from their time zone's when the field is empty. It says WhatsApp only when

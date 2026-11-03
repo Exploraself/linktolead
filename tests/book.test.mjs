@@ -109,7 +109,7 @@ ok(P.codeFor('Europe/Rome') === '+39' && P.codeFor('America/New_York') === '+1' 
 }
 // The gift (Alexandru, 3 Nov 2026): his approved words, the same on the page and the server.
 ok(JSON.stringify(P.GIFTS) === JSON.stringify(S.GIFTS) && P.giftHref('boardroom', 'whatsapp') === S.giftHref('boardroom', 'whatsapp'), 'the same gifts on the page and the server');
-ok(S.GIFTS.discovery.name === 'The Leader’s North Star' && S.GIFTS.discovery.line === 'The reading Alexandru and the team use to see a business clearly, for solo founders, small businesses and large companies. Free for you, because you’re now part of ExploraSelf.', 'discovery: The Leader’s North Star, in his approved words');
+ok(S.GIFTS.discovery.name === 'The Leader’s North Star' && S.GIFTS.discovery.line === 'The reading my team and I use to see a business clearly, for solo founders, small businesses and large companies. Free for you, because you’re now part of ExploraSelf.' && S.GIFTS.discovery.by === 'Alexandru', 'discovery: The Leader’s North Star, in his approved words, in his own voice and signed (3 Nov 2026)');
 ok(S.GIFTS.boardroom.name === 'The Massive Growth Plan' && S.GIFTS.boardroom.line.startsWith('20 + 1 steps to accelerate your growth and win with grace') && S.giftHref('boardroom', 'email', 'https://x') === 'https://x/northstar/?utm_source=email&utm_medium=gift&utm_campaign=boardroom#growth-plan', 'boardroom: the Massive Growth Plan, opened on the plan itself (download or fill in)');
 ok(!/\$\d|price|only \d|left|hurry/i.test(S.GIFTS.discovery.line + S.GIFTS.boardroom.line), 'no price, no scarcity in the gift words');
 const pageJs = read('public/book/book.js');
@@ -118,7 +118,7 @@ ok(pageJs.includes('Open my gift') && pageJs.includes("giftHref(KIND, 'linktolea
 ok(pageJs.includes("if (st.kind === 'times') return S.times.length >= RULES.min") && pageJs.includes("kind: 'phone'") && pageJs.includes('Your phone number, for your gift') && pageJs.includes('${eyebrow()}${giftCard()}'), 'the page moves on with one time and asks the phone, for the gift, on both forms');
 ok(!/for WhatsApp</.test(pageJs) && !pageJs.includes('sent.wa ?'), 'the phone is never asked “for WhatsApp”, and the page never says a server WhatsApp went');
 ok(!fs.existsSync(new URL('../functions/_whatsapp.js', import.meta.url)) && !/green-?api|WA_TOKEN|WA_INSTANCE/i.test(read('README.md') + read('functions/api/book.js') + read('scripts/email-map.mjs')), 'GREEN-API is gone: no _whatsapp.js, no keys, no map entries');
-ok(read('public/northstar/index.html').includes(`<span>${S.GIFTS.discovery.line.replace('Free for you', '<b>Free for you')}</b></span>`), 'the North Star page carries the premium line near the hero, word for word');
+ok(read('public/northstar/index.html').includes(`<span>${S.GIFTS.discovery.line.replace('Free for you', '<b>Free for you')}</b> <i class="hz-by">Alexandru</i></span>`), 'the North Star page carries the premium line near the hero, word for word, signed');
 const app = read('public/app.js');
-ok(/rstar-p">By the way: this is the reading Alexandru and the team use/.test(app) && app.includes('Here it’s yours, free.'), 'Base Camp: the North Star card in the rail says what it is, and that it is theirs, free');
+ok(/rstar-p">By the way: this is the reading my team and I use/.test(app) && app.includes('Here it’s yours, free. <span class="rstar-by">Alexandru</span>') && !/reading Alexandru and the team use/.test(app), 'Base Camp: the North Star card in the rail, in Alexandru’s own voice and signed');
 done();

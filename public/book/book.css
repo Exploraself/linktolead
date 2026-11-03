@@ -212,6 +212,8 @@ h2.serif{font-size:clamp(25px,6vw,31px);line-height:1.15;margin:0}
 .gift h2{font-size:clamp(21px,5.2vw,25px);line-height:1.2;margin:0}
 .gift p:not(.eb){color:var(--muted);font-size:16px;line-height:1.5}
 .gift .eb svg{width:20px;height:20px}
+.gift p.by{font-family:Newsreader,Georgia,'Times New Roman',serif;font-style:italic;font-size:18px;color:var(--ink);margin-top:-2px}
+.gift p.by::before{content:"— "}
 .done-gift{gap:10px;padding:18px}
 .done-gift .go{margin-top:4px}
 .tiny{font-size:14.5px;color:var(--muted)}
