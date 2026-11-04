@@ -338,9 +338,6 @@ body:not(.ns-p1done) .mbar{display:none !important}
 .climbstops em{font-style:normal;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:#D6BF8F;color:#1C1309;margin-left:6px;vertical-align:2px}
 .climbstops em.cg{background:transparent;border:1px solid #D6BF8F;color:#D6BF8F}
 .climbstops .cfree{border-color:rgba(214,191,143,.6)}
-/* The Blueprint button in the menu, once the founder reaches the twelve weeks. */
-.incub-link.nsbeckon{animation:nsbeckon 1.8s ease-in-out infinite}
-@keyframes nsbeckon{0%,100%{box-shadow:inset 0 0 0 3px #1C1309,inset 0 0 0 4px rgba(214,191,143,.25),0 0 0 0 rgba(214,191,143,0)}50%{box-shadow:inset 0 0 0 3px #1C1309,inset 0 0 0 4px rgba(214,191,143,.6),0 0 22px 4px rgba(214,191,143,.55)}}
 /* The lab: what each lever alone moves, and a pulse on each answer that moved. */
 .wmoves{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
 .wmoves:empty{display:none}
@@ -384,7 +381,7 @@ body:not(.ns-p1done) .mbar{display:none !important}
 .jtick input{width:20px;height:20px;accent-color:#D6BF8F}
 .jny-end{margin:0;font:italic 400 17px/1.4 Newsreader,Georgia,serif;color:#D6BF8F}
 @media(max-width:860px){.jny-road{grid-template-columns:1fr}.jny-road::before,.jny-road::after{left:30px;top:30px;bottom:30px;right:auto;width:3px;height:auto}.jny-road::after{height:calc((100% - 36px) * var(--p));width:3px}.jny-road li{padding:14px 14px 14px 64px}.jny-road .jn{left:12px;top:12px}.wswitch{grid-template-columns:1fr 1fr 1fr}}
-@media(prefers-reduced-motion:reduce){.nsseal,.fbroad li.here .fbn,.wfree,.incub-link.nsbeckon,.wcard.wbump,.jny-road li.next .jn,.nsspark{animation:none}}
+@media(prefers-reduced-motion:reduce){.nsseal,.fbroad li.here .fbn,.wfree,.wcard.wbump,.jny-road li.next .jn,.nsspark{animation:none}}
 
 /* ── 31 Oct, round 4 ─────────────────────────────────────────────────────── */
 /* Handwritten notes, easier to read (Caveat). */

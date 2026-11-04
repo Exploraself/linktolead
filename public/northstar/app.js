@@ -2665,13 +2665,5 @@
   } catch { /* old browser: the banner simply sticks at the top */ }
 })();
 
-/* The Blueprint button in the menu starts to glow once the founder reaches
- * the twelve weeks, and keeps glowing: there it is (31 Oct). */
-(() => {
-  try {
-    const sec = document.getElementById('s-next'), link = document.querySelector('.incub-link');
-    if (!sec || !link || !('IntersectionObserver' in window)) return;
-    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { link.classList.add('nsbeckon'); io.disconnect(); } }, { threshold: 0.25 });
-    io.observe(sec);
-  } catch { /* old browser: no glow */ }
-})();
+/* The Blueprint button in the menu used to glow once the founder reached the
+ * twelve weeks; Alexandru asked for it to stay still (4 Nov 2026). */

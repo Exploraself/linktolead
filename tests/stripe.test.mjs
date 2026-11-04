@@ -42,6 +42,8 @@ ok(/Levels 04 to 09 are open/.test(opened('lab', 'free')) && /#programme-4|Open 
 ok(/Levels 06 to 09 are open/.test(opened('lab', 'session')), 'the LAB after The Boardroom: 06 to 09');
 ok(/Levels 04 to 12 are open[^]*Nothing is held back/.test(opened('hub', 'free')), 'the HUB: everything, 04 to 12');
 ok(/Levels 04 to 12 are open[^]*Everything is yours/.test(opened('premium', 'free')), 'The Summit: everything, at once');
+// The two HUB books are named in the HUB's and The Summit's letter, never below (Alexandru, 4 Nov 2026).
+ok(['hub', 'premium'].every((s) => /Your two HUB books are waiting in your library: Built to Lead and The Founder’s Growth Manual/.test(opened(s, 'free'))) && ['session', 'lab'].every((s) => !/HUB books/.test(opened(s, 'free'))), 'the HUB and The Summit letters name the two HUB books; the Boardroom and the LAB letters do not');
 const { holds } = await import('../public/content.js');
 ok(['session', 'lab', 'hub'].every((g) => holds('hub', g)) && ['session', 'lab', 'hub', 'premium'].every((g) => holds('premium', g)) && holds('lab', 'session'), 'the levels follow: the HUB and The Summit open every level, the LAB includes The Boardroom');
 
