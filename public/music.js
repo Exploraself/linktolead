@@ -7,7 +7,9 @@
  * music-background in two folders, Classic/ and Modern/, and listed and
  * streamed by /api/music. Upload a file to a folder and it appears here:
  * nothing to change in code. The pieces of a category play one after the
- * other, round and round. The six pieces the browser used to play are gone,
+ * other, round and round, each under the name given in NAMES
+ * (functions/api/music.js).
+ * The six pieces the browser used to play are gone,
  * and the Energy slider with them (it only shaped those).
  *
  * Light (dimmer ↔ brighter) lays a warm shade over the whole page. The Lamp

@@ -3,7 +3,7 @@
 // R2 bucket is faked.
 
 import { readFileSync } from 'node:fs';
-import { onRequestGet, catOf, titleOf, catalogue, rangeOf } from '../functions/api/music.js';
+import { onRequestGet, catOf, titleOf, catalogue, rangeOf, NAMES, named } from '../functions/api/music.js';
 import { ROUTES } from '../worker.js';
 import { tally } from './_d1.mjs';
 
@@ -14,6 +14,23 @@ const read = (f) => readFileSync(new URL('../' + f, import.meta.url), 'utf8');
 ok(catOf('Classic/Clair de lune – Debussy.mp3') === 'classic' && catOf('modern/Calm.m4a') === 'modern' && catOf('MODERN/x.ogg') === 'modern', 'the two folders, in any capitals');
 ok(catOf('Classic/cover.jpg') === '' && catOf('Other/x.mp3') === '' && catOf('x.mp3') === '' && catOf('Classic/') === '', 'only audio, only in the two folders');
 ok(titleOf('Classic/Clair de lune – Debussy.mp3') === 'Clair de lune – Debussy' && titleOf('Modern/Night_drive__slow.mp3') === 'Night drive slow', 'the title is the file name');
+
+// The names on the surface (Alexandru, 4 Nov 2026): the files keep their
+// names in the bucket, the founder sees NAMES. These are the eight files
+// uploaded on 4 Nov, as /api/music listed them.
+const LIVE = {
+  classic: ['Classic/1089_1-glen-hoban-by-nc-sa-7b71ae21-6264-40e2-859c-abfc0c3aec2a.mp3', 'Classic/1953_ballade-no-1-in-g-minor-e6a7d761-d26f-49ad-9e0f-e90e02eb5335.mp3', 'Classic/778_bui-nguyen-trieu-tuong-02-adagio-cantabile-de-la-sonate-path__tique-op13-beethoven-f107e37a-ffd9-4a12-a696-56c577692ec9.mp3', 'Classic/Prelude [from cello suite BWV 1007, guitar arr.]-0-Accou - J.S. Bach - Cello Suite No.1 Prelude [BWV 1007]-2045-6889.mp3'],
+  modern: ['Modern/mixkit-driving-ambition-32.mp3', 'Modern/mixkit-latin-lovers-39.mp3', 'Modern/mixkit-sports-highlights-51.mp3', 'Modern/mixkit-tech-house-vibes-130.mp3'],
+};
+const liveBucket = { async list() { return { objects: [...LIVE.classic, ...LIVE.modern].map((key) => ({ key, size: 1 })), truncated: false }; }, async get() { return null; } };
+const live = await catalogue(liveBucket);
+ok(live.classic.map((p) => p.title).join('|') === 'First Light|Clear Head|Steady Hands|The Long View', 'Classic: four names, in their order');
+ok(live.modern.map((p) => p.title).join('|') === 'Countdown|Lift-off|Full Speed|Orbit', 'Modern: a launch, Countdown to Orbit');
+ok([...live.classic, ...live.modern].every((p) => !/[0-9a-f]{8}-|mixkit-|_|\.mp3/i.test(p.title) && Object.keys(p).join() === 'key,title'), 'no file name, code or number shows on the surface; no credit line (Alexandru: no need)');
+ok(NAMES.every((n) => n.source), 'where each piece came from is kept, for us');
+ok(NAMES.length === 8 && new Set(NAMES.map((n) => n.title)).size === 8 && NAMES.every((n) => n.title.split(' ').length <= 3), 'eight different names, three words at most');
+ok(named('CLASSIC/MIXKIT-TECH-HOUSE-VIBES-130.MP3').title === 'Countdown' && named('Classic/other.mp3') === null, 'matched by file name, in any capitals');
+ok(titleOf('Modern/mixkit-calm-waters-12.mp3') === 'Calm waters' && titleOf('Classic/12_nocturne-in-e-flat-0a1b2c3d-1111-2222-3333-444455556666.mp3') === 'Nocturne in e flat', 'a new upload without a name still reads tidy');
 
 // A fake bucket.
 const FILES = {
@@ -76,6 +93,10 @@ M.set({ track: key, cat: 'classic' });
 ok(M.nowTitle() === 'Gymnopédie No 1 – Satie', 'a chosen piece');
 const html = M.playerHTML(M.current(), false, true);
 ok(html.includes('data-mp-cat="classic" aria-pressed="true"') && html.includes('data-mp-cat="modern" aria-pressed="false"') && html.includes('Ballade No 1 – Chopin') && html.includes('Classic · 2 pieces') && !html.includes('Energy'), 'the panel: two tabs, the list, no Energy');
+M._setLibrary(live); M.set({ cat: 'classic', track: '' });
+const lh = M.playerHTML(M.current(), false, true);
+ok(lh.includes('<b>First Light</b>') && !lh.includes('Glen Hoban') && lh.includes('<span>The Long View</span>') && !lh.replace(/value="[^"]*"/g, '').includes('glen-hoban'), 'the panel shows the names, nothing else');
+ok(/l\[\(i \+ 1\) % l\.length\]/.test(mu) && /addEventListener\('ended', \(\) => next\(\)\)/.test(mu), 'on a loop: at the end of a piece the next one plays, and after the last the first');
 M._setLibrary({ classic: [], modern: [] });
 ok(M.nowTitle() === 'No music yet' && M.playerHTML(M.current(), false, true).includes('No music on this shelf yet.'), 'an empty shelf says so');
 done();
