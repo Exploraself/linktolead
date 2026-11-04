@@ -45,7 +45,9 @@ ok(code === 200 && out.ready === false && !out.clientId, 'GET: GOOGLE_CLIENT_ID 
 [code] = await J(await gPost({ request: post('/api/google', { credential: 'tok-new-founder-000000001' }), env: { DB, GOOGLE_CLIENT_ID: '' } }));
 ok(code === 503, 'POST: refused while it is off');
 
-const env = { DB, GOOGLE_CLIENT_ID: CID, RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Via Esempio 1, Rome' };
+// The private bucket holds the plan the North Star welcome attaches (4 Nov 2026).
+const WORKBOOKS = { get: async (k) => (k === 'massive-growth-plan.pdf' ? { arrayBuffer: async () => new TextEncoder().encode('%PDF-1.7 plan').buffer } : null) };
+const env = { DB, GOOGLE_CLIENT_ID: CID, RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Via Esempio 1, Rome', WORKBOOKS };
 [code, out] = await J(gGet({ env }));
 ok(out.ready === true && out.clientId === CID, 'GET: on, with the public client id');
 
@@ -63,7 +65,7 @@ ok(out.missing.join() === 'company,interest,industry', 'new: it says what a full
 const nina = DB.raw.prepare("SELECT s.name, p.signup_type, p.landing, p.utm_source, p.consent FROM student s JOIN student_profile p ON p.student_id = s.id WHERE s.email = 'nina@example.com'").get();
 ok(nina && nina.name === 'Nina Moss' && nina.signup_type === 'simple' && nina.landing === 'north3' && nina.utm_source === 'meta' && nina.consent, 'new: name, landing page, utm and consent kept');
 ok(DB.raw.prepare("SELECT COUNT(*) AS n FROM event WHERE kind = 'signup' AND detail = 'sales-page · google'").get().n === 1, 'new: the sign-up is logged as Google');
-ok(sent.length === 1 && sent[0].to[0] === 'nina@example.com' && Array.isArray(sent[0].attachments), 'new + consent: the North Star welcome, with the plan attached');
+ok(sent.length === 1 && sent[0].to[0] === 'nina@example.com' && Array.isArray(sent[0].attachments) && sent[0].attachments[0].filename === 'North-Star-Massive-Growth-Plan.pdf' && !!sent[0].attachments[0].content, 'new + consent: the North Star welcome, with the plan attached (the file itself, from the bucket)');
 const st = await (await stateGet({ request: get(`/api/state?t=${out.token}`), env })).json();
 ok(st.me.missing.join() === 'company,interest,industry' && st.me.hasPassword === false, 'new: the Blueprint will ask once for the rest, without a password');
 {

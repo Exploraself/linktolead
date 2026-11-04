@@ -325,6 +325,12 @@ Summit. Its file lives only in the private WORKBOOKS bucket
 repo; its free preview and cover stay in public/library/; everyone else gets
 "See what’s inside", its page on exploraself.com, which sells the HUB. No
 page or letter calls it free. Worth Building (32 frameworks) stays free.
+Every full book, free or HUB, lives only in the private WORKBOOKS bucket under
+its lowercase key (`r2` in LIBRARY_ITEMS) and downloads only with an account,
+name and email (Alexandru, 4 Nov 2026): never a full PDF in public/library/,
+only covers and the free first pages. The North Star welcome attaches the
+Massive Growth Plan from the same bucket (functions/_mail.js). A new book:
+Alexandru uploads it to the bucket first, then the code names its key.
 
 Refunds (Alexandru, 2 Nov 2026): every Base Camp has "Ask for a refund". The
 founder chooses the programme they paid for and confirms their name and

@@ -5,15 +5,16 @@
 // comes from the same data. Leading reads Scaling.
 //
 //   node scripts/make-manuals.mjs            the PDFs in manuals/ (not committed) + the sync report
-//   node scripts/make-manuals.mjs --library  also replace public/library/blueprint-*.pdf,
-//                                            the files founders download
+//   node scripts/make-manuals.mjs --library  also set the page counts on the shelves;
+//                                            then upload manuals/*.pdf to the private
+//                                            R2 bucket exploraself-workbooks as
+//                                            blueprint-<stage>.pdf (never public/)
 //
 // Output:
-//   manuals/The-Founders-Blueprint-<Stage>.pdf   (gitignored, to look at)
-//   public/library/blueprint-<stage>.pdf         (with --library)
+//   manuals/The-Founders-Blueprint-<Stage>.pdf   (gitignored)
 //   docs/manuals-sync.md                         (sync report)
 
-import { mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 // Playwright resolves through CommonJS in this environment.
 const { chromium } = createRequire(import.meta.url.replace('/scripts/', '/'))('playwright');
@@ -250,7 +251,7 @@ function sync() {
     '| Actions with a day and a “Done when” | none | 48 of 48 |',
     '| Built from | `levels-build/grow/scale.js` (old) | `levels-v4.js` (the app) |',
     `| Pages (Building · Growing · Scaling) | 79 · 77 · 80 | ${['build', 'grow', 'scale'].map((st) => PAGES[st]).join(' · ')} |`, '',
-    '`node scripts/make-manuals.mjs --library` writes these to `public/library/blueprint-*.pdf`, the files founders download. Run it again whenever `public/levels-v4.js` changes, so the manuals never drift from the app.', '');
+    '`node scripts/make-manuals.mjs --library` sets the page counts on the shelves; upload `manuals/*.pdf` to the private R2 bucket exploraself-workbooks as `blueprint-building.pdf`, `blueprint-growing.pdf`, `blueprint-scaling.pdf` (the files founders download, 4 Nov 2026). Run it again whenever `public/levels-v4.js` changes, so the manuals never drift from the app.', '');
   return lines.join('\n');
 }
 
@@ -273,7 +274,8 @@ for (const stage of ['build', 'grow', 'scale']) {
   await page.close();
   console.log('wrote', file.pathname.replace(root.pathname, ''));
   PAGES[stage] = ((await readFile(file)).toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
-  if (toLibrary) { await copyFile(file, new URL(`public/library/${LIB[stage]}`, root)); console.log('  replaced public/library/' + LIB[stage]); }
+  // The full books live only in the private bucket (4 Nov 2026), never in public/.
+  if (toLibrary) console.log(`  upload it to R2 exploraself-workbooks as ${LIB[stage]}`);
 }
 await browser.close();
 // The library shelf states each manual's page count: keep it true to the files just written.
@@ -282,7 +284,7 @@ if (toLibrary) {
   const contentJs = new URL('public/content.js', root), cabinetJs = new URL('public/cabinet.js', root);
   let c = await readFile(contentJs, 'utf8'), k = await readFile(cabinetJs, 'utf8');
   for (const st of Object.keys(LIB)) {
-    c = c.replace(new RegExp(`pages: \\d+, file: '/library/${LIB[st]}'`), `pages: ${PAGES[st]}, file: '/library/${LIB[st]}'`);
+    c = c.replace(new RegExp(`pages: \\d+, r2: '${LIB[st]}'`), `pages: ${PAGES[st]}, r2: '${LIB[st]}'`);
     k = k.replace(new RegExp(`'Volume ${VOL[st]} · \\d+ pages'`), `'Volume ${VOL[st]} · ${PAGES[st]} pages'`);
   }
   await writeFile(contentJs, c); await writeFile(cabinetJs, k);

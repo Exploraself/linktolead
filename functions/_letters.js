@@ -302,9 +302,10 @@ export function toolkitCodeLetter(base, { first, code, url, tools = [], to = '',
  *  pages (/road1/ … /road5/) and The Summit get the Launchpad welcome. */
 export const NORTH_STAR_LANDINGS = ['compass', 'north1', 'north2', 'north3'];
 /** The Massive Growth Plan, attached to the North Star welcome (Alexandru,
- *  31 Oct 2026). Resend fetches it from the live Library, so the address is
- *  the public one, whatever site sent the letter. */
-export const GROWTH_PLAN_PDF = { filename: 'North-Star-Massive-Growth-Plan.pdf', path: 'https://linktolead.exploraself.com/library/massive-growth-plan.pdf' };
+ *  31 Oct 2026). It is read from the private bucket, the same file as the
+ *  Library's (functions/api/library.js, item mgp): no public address since
+ *  4 Nov 2026. */
+export const GROWTH_PLAN_PDF = { filename: 'North-Star-Massive-Growth-Plan.pdf', r2: 'massive-growth-plan.pdf' };
 
 /** "northstar-welcome": sent once, when an account is made on a North Star page. */
 export function northStarWelcome(base, { first, to = '', tier, offer, ...o } = {}) {
