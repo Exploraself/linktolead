@@ -37,11 +37,14 @@ const mOne = async (env, id) => (await (await mGet({ request: new Request('https
 const events = (env, id, kind) => env.DB.raw.prepare('SELECT detail FROM event WHERE student_id = ? AND kind = ? ORDER BY id').all(id, kind).map((e) => e.detail);
 
 // ── The library ─────────────────────────────────────────────────────────────
-const fromContent = Object.fromEntries([...LIBRARY.manuals, ...LIBRARY.books, ...LIBRARY.growth].filter((b) => b.file || b.hub).map((b) => [b.k, { name: b.n, file: b.file }]));
-ok(JSON.stringify(Object.fromEntries(Object.entries(LIBRARY_ITEMS).map(([k, v]) => [k, { name: v.name, file: v.file }]))) === JSON.stringify(fromContent) && Object.values(LIBRARY_ITEMS).every((v) => /^[a-z-]+$/.test(v.slug)), 'the library items match LIBRARY in content.js, each with a tag slug');
+const fromContent = Object.fromEntries([...LIBRARY.manuals, ...LIBRARY.books, ...LIBRARY.growth].filter((b) => b.r2 || b.hub).map((b) => [b.k, { name: b.n, r2: b.r2 }]));
+ok(JSON.stringify(Object.fromEntries(Object.entries(LIBRARY_ITEMS).map(([k, v]) => [k, { name: v.name, r2: v.free ? v.r2 : undefined }]))) === JSON.stringify(fromContent) && Object.values(LIBRARY_ITEMS).every((v) => /^[a-z-]+$/.test(v.slug)), 'the library items match LIBRARY in content.js, each with a tag slug');
 ok(libraryTag('btl') === 'linktolead-library-built-to-lead', 'the tag: "linktolead-library-<book>"');
 
-let env = fresh({ MAILCHIMP_API_KEY: 'key-us19' });
+// The private bucket, holding every free book under its key (4 Nov 2026).
+const FREE_KEYS = Object.values(LIBRARY_ITEMS).filter((v) => v.free).map((v) => v.r2);
+const BUCKET = { WORKBOOKS: { get: async (k) => (FREE_KEYS.includes(k) ? { body: '%PDF-1.4 ' + k } : null) } };
+let env = fresh({ MAILCHIMP_API_KEY: 'key-us19', ...BUCKET });
 const ana = await join(env, {});
 mc = [];
 let r = await library({ request: get('/api/library?item=nope&t=' + ana), env });
@@ -52,13 +55,11 @@ r = await library({ request: get('/api/library?item=wb&t=not-a-real-token-at-all
 ok(r.status === 302 && r.headers.get('location') === 'https://linktolead.exploraself.com/ground-plan/?next=%2Fground-plan%2F%23library#signin', 'an account the site does not know: sign in again, back to the Library');
 ok(mc.length === 0, 'nothing tagged without an account');
 r = await library({ request: get('/api/library?item=wb&t=' + ana), env });
-ok(r.status === 302 && r.headers.get('location') === 'https://linktolead.exploraself.com/library/worth-building.pdf', 'signed in: on to the file');
+ok(r.status === 200 && r.headers.get('content-type') === 'application/pdf' && r.headers.get('content-disposition') === 'attachment; filename="Worth-Building.pdf"' && r.headers.get('cache-control') === 'private, no-store' && (await r.text()) === '%PDF-1.4 worth-building.pdf', 'signed in: the free book from the private bucket, as a named download');
 ok(JSON.stringify(events(env, ana, 'library-download')) === '["wb"]', "event 'library-download' with the key");
-{ // Where the site's files can be read: the PDF itself, as a named attachment.
-  const assets = { fetch: async (req) => new Response('%PDF-1.4 test', { status: new URL(req.url).pathname === '/library/worth-building.pdf' ? 200 : 404, headers: { 'content-type': 'application/octet-stream' } }) };
-  const f = await library({ request: get('/api/library?item=wb&t=' + ana), env: { ...env, ASSETS: assets } });
-  ok(f.status === 200 && f.headers.get('content-type') === 'application/pdf' && f.headers.get('content-disposition') === 'attachment; filename="worth-building.pdf"' && (await f.text()).startsWith('%PDF'), 'the PDF comes back as a named download');
-  env.DB.raw.prepare('DELETE FROM event WHERE id = (SELECT MAX(id) FROM event)').run(); // keep the counts below as they were
+{ // Not in the bucket (yet): a plain page that says so, nothing logged.
+  const f = await library({ request: get('/api/library?item=wb&t=' + ana), env: { ...env, WORKBOOKS: { get: async () => null } } });
+  ok(f.status === 503 && /free with your account/.test(await f.text()) && events(env, ana, 'library-download').length === 1, 'a free book missing from the bucket: says so, logs nothing');
 }
 ok(mc.length === 1 && mc[0].method === 'POST' && /\/tags$/.test(mc[0].url) && JSON.stringify(mc[0].body) === JSON.stringify({ tags: [{ name: 'linktolead-library-worth-building', status: 'active' }] }), 'Mailchimp: the one library tag, active');
 await library({ request: get('/api/library?item=wb&t=' + ana), env });
@@ -72,11 +73,11 @@ ok(roster[0].library.split(',').sort().join() === 'grow,wb', 'roster: what they 
 ok(summary(roster, []).library === 1 && filter(roster, { tile: 'library' }).length === 1 && filter([{ id: 'x' }], { tile: 'library' }).length === 0, 'the "Downloaded from the library" filter');
 const csv = await (await mGet({ request: new Request('https://x/api/mentor?csv=1', { headers: K }), env })).text();
 ok(csv.split('\r\n')[0].includes('"Library"') && csv.includes('Worth Building; The Founder’s Blueprint · Growing'), 'CSV: a Library column');
-env = fresh();
+env = fresh(BUCKET);
 const bo = await join(env, { email: 'bo@example.com' });
 mc = []; // the join itself went through the public form
 r = await library({ request: get('/api/library?item=wb&t=' + bo), env });
-ok(r.status === 302 && mc.length === 0, 'form mode: the download works, nothing is tagged');
+ok(r.status === 200 && mc.length === 0, 'form mode: the download works, nothing is tagged');
 
 // ── Where I stand ───────────────────────────────────────────────────────────
 env = fresh({ MAILCHIMP_API_KEY: 'key-us19' });

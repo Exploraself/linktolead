@@ -27,8 +27,10 @@ const BOOKS = {
   fgm: { key: 'founders-growth-manual.pdf', as: 'The-Founders-Growth-Manual.pdf', page: 'https://exploraself.com/founders-growth-manual', name: 'The Founder’s Growth Manual' },
 };
 ok(HUB_NOTE === 'Only available with Business HUB-level access', 'the note, word for word');
-ok(JSON.stringify([...LIBRARY_R2_KEYS].sort()) === JSON.stringify(['built-to-lead.pdf', 'founders-growth-manual.pdf']), 'two HUB books in the private bucket, nothing else');
-ok(LIBRARY_ITEMS.wb.file === '/library/worth-building.pdf' && !LIBRARY_ITEMS.wb.r2 && existsSync('public/library/worth-building.pdf'), 'Worth Building stays free, as before');
+ok(JSON.stringify([...LIBRARY_R2_KEYS].sort()) === JSON.stringify(['a-new-way-of-winning.pdf', 'blueprint-building.pdf', 'blueprint-growing.pdf', 'blueprint-scaling.pdf', 'built-to-lead.pdf', 'founders-growth-manual.pdf', 'leaders-growth-planner-2027.pdf', 'massive-growth-plan.pdf', 'worth-building.pdf']), 'every book in the private bucket, under its lowercase key');
+ok(JSON.stringify(Object.keys(LIBRARY_ITEMS).filter((k) => !LIBRARY_ITEMS[k].free)) === JSON.stringify(['btl', 'fgm']), 'two HUB books; everything else free with an account');
+ok(LIBRARY_ITEMS.wb.free && LIBRARY_ITEMS.wb.r2 === 'worth-building.pdf' && !existsSync('public/library/worth-building.pdf') && existsSync('public/library/worth-building-preview.pdf'), 'Worth Building stays free, behind the account; its first pages stay public');
+for (const v of Object.values(LIBRARY_ITEMS)) ok(!v.file && !existsSync(`public/library/${v.r2}`), `${v.name}: no public file (public/library/${v.r2})`);
 ok(HUB_BOOK_TIERS.join() === 'hub,premium' && holdsHubBook('hub') && holdsHubBook('premium') && !holdsHubBook('lab') && !holdsHubBook('session') && !holdsHubBook('free') && !holdsHubBook(null), 'only The HUB and The Summit hold them, never The LAB');
 
 const PDF = new TextEncoder().encode('%PDF-1.7 a HUB book');

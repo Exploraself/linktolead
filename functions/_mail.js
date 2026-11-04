@@ -57,6 +57,17 @@ export function footer(env, { why, unsubUrl }) {
   return { html, text };
 }
 
+/** A file in the private bucket (WORKBOOKS), as base64 for Resend, or null. */
+async function fromBucket(env, key) {
+  const B = env && env.WORKBOOKS && typeof env.WORKBOOKS.get === 'function' ? env.WORKBOOKS : null;
+  const obj = B ? await B.get(key).catch(() => null) : null;
+  if (!obj || typeof obj.arrayBuffer !== 'function') return null;
+  const bytes = new Uint8Array(await obj.arrayBuffer());
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+
 /** Send one email. Resolves to { ok, why }. Never throws.
  *  `html` is a full document whose </body> receives the footer. A letter's
  *  `replyTo` (the mentor's address) and `fromName` ("Alexandru at ExploraSelf")
@@ -77,8 +88,18 @@ export async function send(env, { to, subject, html, text, why, unsubUrl: unsub,
     text: text + '\n' + f.text,
   };
   if (replyTo && /^[^@\s<>"]+@[^@\s<>"]+$/.test(replyTo)) body.reply_to = replyTo;
-  // Files Resend fetches from our own site and attaches (a public https path).
-  if (Array.isArray(attachments) && attachments.length) body.attachments = attachments.map((a) => ({ filename: a.filename, path: a.path }));
+  // Attachments: a file from the private bucket (`r2`, WORKBOOKS) goes as the
+  // file itself, since the full books have no public address (4 Nov 2026); a
+  // public https `path` Resend fetches. One that cannot be read is left out,
+  // and the letter still goes.
+  if (Array.isArray(attachments) && attachments.length) {
+    const files = [];
+    for (const a of attachments) {
+      if (a.r2) { const content = await fromBucket(env, a.r2); if (content) files.push({ filename: a.filename, content }); }
+      else if (a.path) files.push({ filename: a.filename, path: a.path });
+    }
+    if (files.length) body.attachments = files;
+  }
   if (unsubUrl) body.headers = { 'List-Unsubscribe': `<${unsubUrl}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' };
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST',

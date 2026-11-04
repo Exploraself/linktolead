@@ -151,11 +151,18 @@ ok(r.status === 200 && sent[0].body.text.includes('For you that’s Lead your bu
 {
   const N = northStarWelcome(B, { first: 'Ana' });
   ok(Array.isArray(N.attachments) && N.attachments.length === 1 && N.attachments[0] === GROWTH_PLAN_PDF && /attached/.test(N.text), 'North Star welcome: the plan is attached, and the letter says so');
-  ok(GROWTH_PLAN_PDF.path === 'https://linktolead.exploraself.com/library/massive-growth-plan.pdf' && existsSync(new URL('../public/library/massive-growth-plan.pdf', import.meta.url)), 'the attachment is the Library file, at its public address');
+  ok(GROWTH_PLAN_PDF.r2 === 'massive-growth-plan.pdf' && !GROWTH_PLAN_PDF.path && !existsSync(new URL('../public/library/massive-growth-plan.pdf', import.meta.url)), 'the attachment is the Library file in the private bucket, with no public address');
   ok(!launchpadWelcome(B, { first: 'Ana' }).attachments, 'the Launchpad welcome attaches nothing');
+  // The file is read from the private bucket and handed to Resend as itself (base64).
+  const PLAN = new TextEncoder().encode('%PDF-1.7 the plan ' + 'x'.repeat(70000));
+  const WORKBOOKS = { get: async (k) => (k === 'massive-growth-plan.pdf' ? { arrayBuffer: async () => PLAN.buffer } : null) };
   const sent = fakeResend();
-  const r = await sendMail({ RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'Via Roma 1, Rome' }, { to: 'a@x.y', ...N, why: 'test' });
-  ok(r.ok && JSON.stringify(sent[0].body.attachments) === JSON.stringify([{ filename: 'North-Star-Massive-Growth-Plan.pdf', path: GROWTH_PLAN_PDF.path }]), 'send() hands the attachment to Resend');
+  const r = await sendMail({ RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'Via Roma 1, Rome', WORKBOOKS }, { to: 'a@x.y', ...N, why: 'test' });
+  const att = sent[0].body.attachments;
+  ok(r.ok && att.length === 1 && att[0].filename === 'North-Star-Massive-Growth-Plan.pdf' && !att[0].path && Buffer.from(att[0].content, 'base64').equals(Buffer.from(PLAN)), 'send() reads the plan from the bucket and hands Resend the file itself');
+  const sent1 = fakeResend();
+  const r1 = await sendMail({ RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'Via Roma 1, Rome', WORKBOOKS: { get: async () => null } }, { to: 'a@x.y', ...N, why: 'test' });
+  ok(r1.ok && !('attachments' in sent1[0].body), 'the file missing from the bucket: the letter still goes, without it');
   const sent2 = fakeResend();
   await sendMail({ RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'Via Roma 1, Rome' }, { to: 'a@x.y', ...launchpadWelcome(B, { first: 'Ana' }), why: 'test' });
   ok(!('attachments' in sent2[0].body), 'no attachment field when there is nothing to attach');

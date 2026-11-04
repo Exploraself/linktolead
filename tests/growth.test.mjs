@@ -76,7 +76,7 @@ ok(!/Coming soon/.test(hin + hout), 'no “Coming soon to your Library” any mo
 const direct = /\/library\/[^"'\s)]*\.pdf/;
 const northstar = ['public/northstar/index.html', 'public/northstar/app.js', 'public/northstar/growth.js', 'public/northstar/growth-plan.js'].map(read).join('\n');
 ok(!direct.test(northstar) && !direct.test(hin) && !direct.test(hout), 'the North Star never links /library/*.pdf directly');
-ok(![LIBRARY_ITEMS.mgp.file, LIBRARY_ITEMS.lgp.file].some((f) => northstar.includes(f) || hin.includes(f)), `neither ${LIBRARY_ITEMS.mgp.file} nor ${LIBRARY_ITEMS.lgp.file} is linked from the North Star`);
+ok(![LIBRARY_ITEMS.mgp.r2, LIBRARY_ITEMS.lgp.r2].some((f) => northstar.includes(`/library/${f}`) || hin.includes(`/library/${f}`)), `neither ${LIBRARY_ITEMS.mgp.r2} nor ${LIBRARY_ITEMS.lgp.r2} is linked from the North Star`);
 ok(J.includes("case 'gp-dl': if (!signedIn()) { e.preventDefault(); menuSignin(); } return;") && J.includes('lib: signedIn() && A.libraryHref ? (k) => A.libraryHref(k) : null') && read('public/account.js').includes('export const libraryHref = (item) => `/api/library?item=${encodeURIComponent(item)}&t=${encodeURIComponent(token())}`'),
   'app.js: signed in, the links are A.libraryHref (the token from ftb-token); signed out, a tap opens the North Star sign-in')
 const L = GV.line('The first time I keep it: ______________ (day). Next “________”.');

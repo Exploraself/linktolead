@@ -208,8 +208,10 @@ export const payHref = (step) => `/pay/?step=${encodeURIComponent(step)}`;
 
 // ── The library ──────────────────────────────────────────────────────────────
 // Working materials and companion books, shown on the entrance and inside the
-// programme. A free account opens every download; previews need
-// nothing. Print editions are paid, through the shop and Amazon. The LAB
+// programme. A free account opens every free download; previews need
+// nothing. Every full book is in the private bucket (`r2`, served by
+// functions/api/library.js), never a public file (4 Nov 2026). Print
+// editions are paid, through the shop and Amazon. The LAB
 // workbook is a paid product, so it opens on exploraself.com/lab, never here.
 /** The note under every HUB book, on every shelf, word for word (Alexandru,
  *  4 Nov 2026). */
@@ -224,14 +226,14 @@ export const LIBRARY = {
       // Written in online, in the plan at the end of the North Star. Founders from
       // the Blueprint cross with the North Star's one question ("Is this you?"),
       // then land on the plan, not the top (#growth-plan).
-      online: '/northstar/#growth-plan', preview: '/library/massive-growth-plan-preview.pdf', file: '/library/massive-growth-plan.pdf', print: false, tall: true },
+      online: '/northstar/#growth-plan', preview: '/library/massive-growth-plan-preview.pdf', r2: 'massive-growth-plan.pdf', print: false, tall: true },
     { k: 'lgp', kicker: '2027 · 52 weeks', n: 'The Leader’s Growth Planner 2027', sub: 'Plan the week on the left. Face it on the right, in your Sunday boardroom. Digital first, ready to print.',
-      cover: '/library/cover-leaders-growth-planner-2027.jpg', preview: '/library/leaders-growth-planner-2027-preview.pdf', file: '/library/leaders-growth-planner-2027.pdf', print: null, tall: true },
+      cover: '/library/cover-leaders-growth-planner-2027.jpg', preview: '/library/leaders-growth-planner-2027-preview.pdf', r2: 'leaders-growth-planner-2027.pdf', print: null, tall: true },
   ],
   manuals: [
-    { k: 'build', n: 'The Founder’s Blueprint · Building', sub: 'Finding the offer and the first clients', pages: 88, file: '/library/blueprint-building.pdf' },
-    { k: 'grow', n: 'The Founder’s Blueprint · Growing', sub: 'Clients repeat, everything runs through you', pages: 88, file: '/library/blueprint-growing.pdf' },
-    { k: 'scale', n: 'The Founder’s Blueprint · Scaling', sub: 'There is a team, and your job has changed', pages: 88, file: '/library/blueprint-scaling.pdf' },
+    { k: 'build', n: 'The Founder’s Blueprint · Building', sub: 'Finding the offer and the first clients', pages: 88, r2: 'blueprint-building.pdf' },
+    { k: 'grow', n: 'The Founder’s Blueprint · Growing', sub: 'Clients repeat, everything runs through you', pages: 88, r2: 'blueprint-growing.pdf' },
+    { k: 'scale', n: 'The Founder’s Blueprint · Scaling', sub: 'There is a team, and your job has changed', pages: 88, r2: 'blueprint-scaling.pdf' },
   ],
   books: [
     // HUB material (Alexandru, 4 Nov 2026): no public file. Everyone may read
@@ -241,9 +243,9 @@ export const LIBRARY = {
     { k: 'btl', kicker: '99 practical tools', n: 'Built to Lead', sub: 'One leader in the making. A personal leadership field guide.',
       cover: '/library/cover-built-to-lead.jpg', preview: '/library/built-to-lead-preview.pdf', hub: true, page: 'https://exploraself.com/built-to-lead', print: null },
     { k: 'wb', kicker: '32 leadership frameworks', n: 'Worth Building', sub: 'The Founder’s Playbook. Turn grit into growth and build a business that lasts.',
-      cover: '/library/cover-worth-building.jpg', preview: '/library/worth-building-preview.pdf', file: '/library/worth-building.pdf', print: null },
+      cover: '/library/cover-worth-building.jpg', preview: '/library/worth-building-preview.pdf', r2: 'worth-building.pdf', print: null },
     { k: 'nww', kicker: '12 principles', n: 'A New Way of Winning', sub: 'The Link to Lead Manual. Four stages. Four domains.',
-      cover: '/library/cover-a-new-way-of-winning.jpg', preview: '/library/a-new-way-of-winning-preview.pdf', file: '/library/a-new-way-of-winning.pdf', print: null },
+      cover: '/library/cover-a-new-way-of-winning.jpg', preview: '/library/a-new-way-of-winning-preview.pdf', r2: 'a-new-way-of-winning.pdf', print: null },
     // HUB material, the second book (Alexandru, 4 Nov 2026): 80 pages, 8 modules.
     { k: 'fgm', kicker: '8 modules', n: 'The Founder’s Growth Manual', sub: 'A working manual for founders, owners and leaders.',
       cover: '/library/cover-founders-growth-manual.jpg', preview: '/library/founders-growth-manual-preview.pdf', hub: true, page: 'https://exploraself.com/founders-growth-manual', print: null },

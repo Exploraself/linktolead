@@ -7,28 +7,33 @@
 // one. The tag shows on the founder's Mailchimp profile; /mentor lists what
 // each founder took and when.
 //
+// Every book is in the private WORKBOOKS bucket (key in `r2`), never at a
+// public address (Alexandru, 4 Nov 2026: "putting the free full books behind
+// the account, name and email, always: yes"). The free ones (`free: true`)
+// open for any account; the free first pages (previews) stay public.
 // HUB material (Alexandru, 4 Nov 2026): Built to Lead, the 99 practical
-// tools, and The Founder’s Growth Manual, 8 modules, are not free. It opens only with The HUB and The Summit, from
-// the private WORKBOOKS bucket (key in `r2`), never from a public address.
-// Anyone else is sent to the HUB page; ?item=btl&check=1 (or fgm) says yes/no only,
-// like /api/workbook?check=1.
+// tools, and The Founder’s Growth Manual, 8 modules, are not free. They open
+// only with The HUB and The Summit; anyone else is sent to the HUB page.
+// ?item=<key>&check=1 says yes/no only (can the site see the file?), like
+// /api/workbook?check=1.
 
 import { bad, db, now, studentBy, accountTables } from '../_shared.js';
 import { syncFounder } from '../_mailchimp.js';
 
-/** The downloads: the same keys, names and files as LIBRARY in
- *  public/content.js (a test holds them equal). An item with `r2` is HUB
- *  material: no public file, only that key in the private bucket. */
+/** The downloads: the same keys, names and bucket keys as LIBRARY in
+ *  public/content.js (a test holds them equal). `r2` is the file's key in the
+ *  private bucket (lowercase, exactly as uploaded), `as` the name it downloads
+ *  under. `free: true` opens for any account; without it, HUB material. */
 export const LIBRARY_ITEMS = {
-  build: { name: 'The Founder’s Blueprint · Building', slug: 'blueprint-building', file: '/library/blueprint-building.pdf' },
-  grow: { name: 'The Founder’s Blueprint · Growing', slug: 'blueprint-growing', file: '/library/blueprint-growing.pdf' },
-  scale: { name: 'The Founder’s Blueprint · Scaling', slug: 'blueprint-scaling', file: '/library/blueprint-scaling.pdf' },
+  build: { name: 'The Founder’s Blueprint · Building', slug: 'blueprint-building', r2: 'blueprint-building.pdf', as: 'The-Founders-Blueprint-Building.pdf', free: true },
+  grow: { name: 'The Founder’s Blueprint · Growing', slug: 'blueprint-growing', r2: 'blueprint-growing.pdf', as: 'The-Founders-Blueprint-Growing.pdf', free: true },
+  scale: { name: 'The Founder’s Blueprint · Scaling', slug: 'blueprint-scaling', r2: 'blueprint-scaling.pdf', as: 'The-Founders-Blueprint-Scaling.pdf', free: true },
   btl: { name: 'Built to Lead', slug: 'built-to-lead', r2: 'built-to-lead.pdf', as: 'Built-to-Lead.pdf' },
-  wb: { name: 'Worth Building', slug: 'worth-building', file: '/library/worth-building.pdf' },
-  nww: { name: 'A New Way of Winning', slug: 'a-new-way-of-winning', file: '/library/a-new-way-of-winning.pdf' },
+  wb: { name: 'Worth Building', slug: 'worth-building', r2: 'worth-building.pdf', as: 'Worth-Building.pdf', free: true },
+  nww: { name: 'A New Way of Winning', slug: 'a-new-way-of-winning', r2: 'a-new-way-of-winning.pdf', as: 'A-New-Way-of-Winning.pdf', free: true },
   fgm: { name: 'The Founder’s Growth Manual', slug: 'founders-growth-manual', r2: 'founders-growth-manual.pdf', as: 'The-Founders-Growth-Manual.pdf' },
-  mgp: { name: 'The Leader’s North Star · Massive Growth Plan', slug: 'massive-growth-plan', file: '/library/massive-growth-plan.pdf' },
-  lgp: { name: 'The Leader’s Growth Planner 2027', slug: 'leaders-growth-planner', file: '/library/leaders-growth-planner-2027.pdf' },
+  mgp: { name: 'The Leader’s North Star · Massive Growth Plan', slug: 'massive-growth-plan', r2: 'massive-growth-plan.pdf', as: 'North-Star-Massive-Growth-Plan.pdf', free: true },
+  lgp: { name: 'The Leader’s Growth Planner 2027', slug: 'leaders-growth-planner', r2: 'leaders-growth-planner-2027.pdf', as: 'The-Leaders-Growth-Planner-2027.pdf', free: true },
 };
 /** The tag system (functions/_mailchimp.js): linktolead-library-<book>. */
 export const libraryTag = (key) => `linktolead-library-${LIBRARY_ITEMS[key].slug}`;
@@ -53,8 +58,8 @@ export async function onRequestGet({ request, env, waitUntil }) {
   if (!Object.hasOwn(LIBRARY_ITEMS, key)) return bad('There is no such book in the library.', 404);
   const item = LIBRARY_ITEMS[key];
   const B = env.WORKBOOKS && typeof env.WORKBOOKS.get === 'function' ? env.WORKBOOKS : null;
-  // HUB material: can the site see the bucket and the file? Yes/no only.
-  if (item.r2 && url.searchParams.has('check')) {
+  // Can the site see the bucket and the file? Yes/no only.
+  if (url.searchParams.has('check')) {
     const file = B ? !!(await B.get(item.r2).catch(() => null)) : false;
     return new Response(JSON.stringify({ ok: !!B && file, bucket: !!B, file }), { headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
   }
@@ -67,9 +72,9 @@ export async function onRequestGet({ request, env, waitUntil }) {
   if (!me) return go(request, t ? `/ground-plan/?next=${encodeURIComponent('/ground-plan/#library')}#signin` : '/north3/#join');
   // HUB material opens only with The HUB or The Summit; anyone else is
   // shown the HUB, never the file.
-  if (item.r2 && !holdsHubBook(me.tier)) return go(request, HUB_PAGE);
-  const obj = item.r2 && B ? await B.get(item.r2).catch(() => null) : null;
-  if (item.r2 && !obj) return page(503, `${item.name} is not ready to download yet`, 'It is yours with The HUB. Try again tomorrow, or reply to any of our emails and Alexandru and the team will send it to you.');
+  if (!item.free && !holdsHubBook(me.tier)) return go(request, HUB_PAGE);
+  const obj = B ? await B.get(item.r2).catch(() => null) : null;
+  if (!obj) return page(503, `${item.name} is not ready to download yet`, `${item.free ? 'It is yours, free with your account.' : 'It is yours with The HUB.'} Try again tomorrow, or reply to any of our emails and Alexandru and the team will send it to you.`);
   await accountTables(D);
   const before = await D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'library-download' AND detail = ? LIMIT 1").bind(me.id, key).first();
   await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(me.id, 'library-download', now(), key).run();
@@ -77,24 +82,6 @@ export async function onRequestGet({ request, env, waitUntil }) {
     const job = syncFounder(env, D, me.id, 'tag', { tag: libraryTag(key) }).catch(() => {});
     if (typeof waitUntil === 'function') waitUntil(job); else await job;
   }
-  if (obj) {
-    return new Response(obj.body, { status: 200, headers: { 'content-type': 'application/pdf', 'content-disposition': `attachment; filename="${item.as}"`, 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' } });
-  }
-  // The file itself, as a download (4 Nov 2026): the button no longer needs the
-  // browser's download attribute, which saved any page that came back (a
-  // sign-in page, an error) as "download.html". Where the site's files can be
-  // read here (env.ASSETS), the PDF comes back named, as an attachment;
-  // otherwise the browser is sent on to it.
-  const file = item.file;
-  if (env.ASSETS && typeof env.ASSETS.fetch === 'function') {
-    const r = await env.ASSETS.fetch(new Request(new URL(file, request.url))).catch(() => null);
-    if (r && r.ok) {
-      const h = new Headers(r.headers);
-      h.set('content-type', 'application/pdf');
-      h.set('content-disposition', `attachment; filename="${file.split('/').pop()}"`);
-      h.set('cache-control', 'private, no-store');
-      return new Response(r.body, { status: 200, headers: h });
-    }
-  }
-  return go(request, file);
+  // The file itself, as a named download, never cached on the way.
+  return new Response(obj.body, { status: 200, headers: { 'content-type': 'application/pdf', 'content-disposition': `attachment; filename="${item.as}"`, 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex' } });
 }
