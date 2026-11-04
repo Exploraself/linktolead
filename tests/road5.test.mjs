@@ -11,7 +11,11 @@ const { ok, done } = tally('road5');
 const page = fs.readFileSync(new URL('../public/road5/index.html', import.meta.url), 'utf8');
 const hrefs = [...page.matchAll(/href="([^"]+)"/g)].map((m) => m[1]).filter((h) => !h.startsWith('/assets/') && !h.startsWith('/northstar/assets/'));
 ok(hrefs.filter((h) => h.startsWith('/pay/')).length >= 4 && hrefs.filter((h) => h.startsWith('/pay/')).every((h) => h === '/pay/?step=session&amp;from=road5'), 'every button: the Boardroom pay page, landing road5');
-ok(hrefs.every((h) => h.startsWith('/pay/') || h === 'https://exploraself.com/privacy' || h === 'https://exploraself.com/terms'), 'no links out but privacy and terms');
+// The page's own canonical address and the skip link stay on this page (the /jury fixes, 4 Nov 2026).
+ok(hrefs.every((h) => h.startsWith('/pay/') || h === 'https://exploraself.com/privacy' || h === 'https://exploraself.com/terms' || h === '#main' || h === 'https://linktolead.exploraself.com/road5/'), 'no links out but privacy and terms');
+ok(page.indexOf('class="skip" href="#main"') < page.indexOf('<header') && page.includes('<main id="main">'), 'a skip link comes first and lands on the content');
+ok(page.includes('rel="canonical" href="https://linktolead.exploraself.com/road5/"') && page.includes('property="og:image" content="https://linktolead.exploraself.com/road5/og.jpg"') && fs.existsSync(new URL('../public/road5/og.jpg', import.meta.url)), 'canonical, and a share picture that exists');
+ok(!/<p class="rv"[^>]*>\s*<a class="go/.test(page), 'no pay button sits inside a scroll reveal (it would start invisible)');
 ok(!/money back|14 days/i.test(page), 'no money-back line on this page');
 ok(!/fetch\(|sendBeacon|XMLHttpRequest/.test(page) && page.includes("import { count, trackScroll } from '/road-kit.js';") && !/count\('road5', [^)]*pain[^_]/.test(page), 'the taps stay on the page; only anonymous moments are counted (road-kit, page and moment)');
 ok(page.includes('data-tally') && page.indexOf('data-pains') < page.indexOf('id="h-how"') && page.includes('The next thirteen, if nothing changes'), 'the first screen: one question, then the weeks drawn as tally marks with the next thirteen');
