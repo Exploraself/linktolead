@@ -25,6 +25,8 @@
 .kit-what p,.kit-cell p{font-size:15px;line-height:1.55;color:#3D4966;margin-top:6px}
 .kit-cell p{margin-top:0;color:#121C2D}
 .kit-n{flex:none;width:30px;height:30px;border-radius:50%;background:#121C2D;color:#6F93B8;font-weight:900;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+.kit-hubnote{font-weight:700;color:#7A5C16 !important}
+.kit-hublinks a{font-weight:700;color:#3E6A94;text-underline-offset:3px}
 .kit-tag{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3E6A94;background:#EEF2F7;padding:2px 7px;border-radius:3px;white-space:nowrap}
 .kit-lab{display:none;font-size:11px;font-weight:700;letter-spacing:.16em;color:#3E6A94;margin-bottom:4px}
 .kit-mentor{background:#121C2D;color:#EEF2F7;border-radius:10px;padding:30px;display:flex;gap:24px;align-items:center}

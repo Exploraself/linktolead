@@ -41,7 +41,7 @@ export const OFFERS = {
   unshakeable: { paid: true, line: () => ['One thing I’d love you to try: the Unshakeable assessment. It shows how steady you stay when the pressure comes, and where to start building. It’s $9.99 (valued at $199). ', link('https://exploraself.com/unshakeable', 'Take the Unshakeable assessment →')] },
   play: { paid: false, line: () => ['Got ten minutes? Play Leadionaire: fifteen decisions, thirty seconds each. It shows how you choose under pressure: ', link('https://exploraself.com/play')] },
   first100: { paid: false, line: () => ['If clients are the next thing on your mind, the First 100 Clients assessment is free and takes ten minutes: ', link('https://exploraself.com/first-100-clients')] },
-  library: { paid: false, line: (base) => ['While you’re in, open Built to Lead in your library: 99 practical tools, free with your account. ', link(`${base}/ground-plan/#library`)] },
+  library: { paid: false, line: (base) => ['While you’re in, open Worth Building in your library: 32 frameworks, free with your account. ', link(`${base}/ground-plan/#library`)] },
 };
 /** Letters that may carry a paid offer. Everything else is free offers only. */
 export const PAID_KINDS = ['launchpad-welcome', 'results', 'mentor'];

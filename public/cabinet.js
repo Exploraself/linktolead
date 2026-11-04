@@ -19,6 +19,7 @@
  * founder allows it, and fades out when the tab is hidden or the founder
  * moves to the programme. */
 import * as M from './music.js';
+import { HUB_NOTE } from './content.js';
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const get = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
@@ -100,14 +101,19 @@ const BOOKS = [
   { css: 'I', t: 'Building', sub: 'The offer · first clients', cloth: '#5A1E1B', cap: 'Volume I · 88 pages' },
   { css: 'II', t: 'Growing', sub: 'Clients repeat', cloth: '#1F3B2B', cap: 'Volume II · 88 pages' },
   { css: 'III', t: 'Scaling', sub: 'A team · a new job', cloth: '#18263F', cap: 'Volume III · 88 pages' },
-  { img: '/library/cover-built-to-lead.jpg', t: 'Built to Lead', cap: '99 tools' },
+  { img: '/library/cover-built-to-lead.jpg', t: 'Built to Lead', cap: '99 tools', hub: 'https://exploraself.com/built-to-lead', pre: '/library/built-to-lead-preview.pdf' },
   { img: '/library/cover-worth-building.jpg', t: 'Worth Building', cap: 'The Founder’s Playbook · 32 frameworks' },
   { img: '/library/cover-a-new-way-of-winning.jpg', t: 'A New Way of Winning', cap: 'The Link to Lead Manual · 12 principles' },
+  { img: '/library/cover-founders-growth-manual.jpg', t: 'The Founder’s Growth Manual', cap: '8 modules', hub: 'https://exploraself.com/founders-growth-manual', pre: '/library/founders-growth-manual-preview.pdf' },
 ];
-function book(b) {
+/** HUB material (4 Nov 2026): below The HUB, the book opens its own page in a
+ *  new tab, never the library; The HUB and The Summit find it in the library. */
+const hubHolds = (tier) => STEP_ORDER.indexOf(tier || 'free') >= STEP_ORDER.indexOf('hub');
+function book(b, hubOk) {
   const inner = b.img
     ? `<img src="${b.img}" alt="" loading="lazy">${b.soon ? '<span class="cab-ribbon">Coming soon</span>' : ''}`
     : `<span class="cab-frame"><span class="cab-series cab-foil">The Founder’s<br>Blueprint</span><span class="cab-num cab-foil">${b.css}</span><span><span class="cab-ttl cab-foil">${b.t}</span><span class="cab-sub cab-foil">${b.sub}</span></span><span class="cab-orn"><i></i></span><span class="cab-auth cab-foil">Alexandru Cojocari</span></span>`;
+  if (b.hub && !hubOk) return `<a class="cab-book real" href="${esc(b.hub)}" target="_blank" rel="noopener" aria-label="${esc(b.t)}. ${esc(HUB_NOTE)}. See what’s inside">${inner}</a>`;
   return `<button type="button" class="cab-book${b.img ? ' real' : ''}" data-go="library" style="${b.cloth ? `--cloth:${b.cloth}` : ''}" aria-label="${esc(b.t)}${b.soon ? ', coming soon' : ''}. Open the library">${inner}</button>`;
 }
 
@@ -170,9 +176,9 @@ export function cabinetHTML(c) {
         <button type="button" class="cab-btn" data-go="ask">${c.askUnread ? 'Read the answer →' : 'Ask Alexandru →'}</button></article>
     </div>
   </div>
-  <div class="cab-lib"><div class="cab-libhead"><p class="cab-eb">The Library</p><h2>Your shelf</h2><p>Digital copies are free with your account. Print editions are on their way.</p></div>
-    <div class="cab-shelf"><span class="cab-lamp" aria-hidden="true"></span><div class="cab-books">${BOOKS.map(book).join('')}</div><div class="cab-ledge" aria-hidden="true"></div></div>
-    <div class="cab-caps">${BOOKS.map((b) => `<div><b>${esc(b.t)}</b><span>${esc(b.cap)}</span>${b.soon ? '<em>Coming soon</em>' : '<button type="button" data-go="library">Read free</button>'}</div>`).join('')}</div>
+  <div class="cab-lib"><div class="cab-libhead"><p class="cab-eb">The Library</p><h2>Your shelf</h2><p>Digital copies are free with your account. Built to Lead and The Founder’s Growth Manual: ${esc(HUB_NOTE[0].toLowerCase() + HUB_NOTE.slice(1))}. Print editions are on their way.</p></div>
+    <div class="cab-shelf"><span class="cab-lamp" aria-hidden="true"></span><div class="cab-books">${BOOKS.map((b) => book(b, hubHolds(c.tier))).join('')}</div><div class="cab-ledge" aria-hidden="true"></div></div>
+    <div class="cab-caps">${BOOKS.map((b) => `<div><b>${esc(b.t)}</b><span>${esc(b.cap)}</span>${b.soon ? '<em>Coming soon</em>' : b.hub ? (hubHolds(c.tier) ? '<button type="button" data-go="library">Download your copy</button>' : `<em class="cab-hubnote">${esc(HUB_NOTE)}</em><a class="cab-hub" href="${esc(b.pre)}" target="_blank" rel="noopener">Read the first pages</a><a class="cab-hub" href="${esc(b.hub)}" target="_blank" rel="noopener">See what’s inside →</a>`) : '<button type="button" data-go="library">Read free</button>'}</div>`).join('')}</div>
   </div>
 </section>`;
 }

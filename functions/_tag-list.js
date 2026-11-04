@@ -84,8 +84,10 @@ export const TAG_LIST = [
     from: `${LTL}/ground-plan/`, fromName: '/ground-plan/ (The Founder’s Blueprint)', when: `They confirm their name and email as they open the Blueprint. ${CONSENT}`, by: 'functions/api/cross.js' },
   { name: CROSS_TAGS.northstar, group: 'crossed', what: 'Came in through The Founder’s Blueprint, then opened The Leader’s North Star.',
     from: `${LTL}/northstar/`, fromName: '/northstar/ (The Leader’s North Star)', when: `They confirm their name and email as they open the North Star. ${CONSENT}`, by: 'functions/api/cross.js' },
-  ...Object.keys(LIBRARY_ITEMS).map((k) => ({ name: libraryTag(k), group: 'library', what: `Took “${LIBRARY_ITEMS[k].name}” from the library.`,
-    from: `${LTL}/ground-plan/`, fromName: 'The library in Base Camp or The Leader’s North Star', when: `The first time they download that book. ${CONSENT}`, by: 'functions/api/library.js' })),
+  // HUB material (an item with r2, 4 Nov 2026): only The HUB and The Summit
+  // can download it, so its tag means a HUB or Summit founder took it.
+  ...Object.keys(LIBRARY_ITEMS).map((k) => ({ name: libraryTag(k), group: 'library', what: LIBRARY_ITEMS[k].r2 ? `A HUB or Summit founder took “${LIBRARY_ITEMS[k].name}” (HUB material) from the library.` : `Took “${LIBRARY_ITEMS[k].name}” from the library.`,
+    from: `${LTL}/ground-plan/`, fromName: 'The library in Base Camp or The Leader’s North Star', when: `The first time they download that book${LIBRARY_ITEMS[k].r2 ? ', which opens only with The HUB or The Summit' : ''}. ${CONSENT}`, by: 'functions/api/library.js' })),
   { name: TOOLS_TAG, group: 'toolkit', what: 'Opened the Growth Toolkit with their account.',
     from: `${LTL}/tools/`, fromName: '/tools/ and every tool page', when: `The first time they open a tool, or tap “Yes, that’s me” on the toolkit. Mailchimp makes the tag the first time it is added: nobody needs to create it. ${CONSENT}`, by: 'functions/_tools.js' },
   { name: SERIES_TAGS.northstar, group: 'letters', what: 'Gets the letters that follow the first pain they picked in The Leader’s North Star.',
