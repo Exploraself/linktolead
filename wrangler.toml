@@ -22,6 +22,12 @@ keep_vars = true
 # under any name (as it comes from Drive). Paid content: never in this repo,
 # never public. Without the binding the button explains it is not ready yet.
 #
+# The study room's music (functions/api/music.js): the R2 bucket
+# music-background, bound as MUSIC on the PAGES app (Settings → Bindings →
+# R2 bucket, then Deployments → Retry deployment). Two folders, Classic/ and
+# Modern/: every audio file in them shows in the player, named by its file
+# name. Without the binding the player says "No music yet".
+#
 # Mailchimp (functions/_mailchimp.js), all optional, set in the dashboard:
 #   MAILCHIMP_MODE          text    "test" stops every call; each join is only logged
 #   MAILCHIMP_FORM_URL      text    another sign-up form link; empty = Link to Lead form
