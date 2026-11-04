@@ -13,7 +13,8 @@
  * (done, here, open, or behind a gate they do not hold yet) and Continue.
  * Static, always there, real data only.
  *
- * The music (music.js) plays live in the browser, only on the dashboard (Your
+ * The music (music.js: recordings from the music bucket, Classic and Modern)
+ * plays only on the dashboard (Your
  * Base Camp, the Library, Ask Alexandru), starts on the first click if the
  * founder allows it, and fades out when the tab is hidden or the founder
  * moves to the programme. */
@@ -140,7 +141,7 @@ export function cabinetHTML(c) {
       <p class="cab-eb">The Cabinet Sessions</p>
       <div class="cab-deck">${DECK}</div>
       <div class="cab-ctrl"><button type="button" class="cab-play" data-cab="play" aria-label="Play music"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
-        <div class="cab-now"><b id="cab-track">${esc(M.TRACKS[ms.track].n)}</b><span id="cab-status">${auto ? 'Starts with your first click' : 'Paused'}</span></div></div>
+        <div class="cab-now"><b id="cab-track">${esc(M.nowTitle())}</b><span id="cab-status">${auto ? 'Starts with your first click' : 'Paused'}</span></div></div>
       <label class="cab-vol" for="cab-vol">Volume <input type="range" id="cab-vol" min="0" max="100" value="${ms.vol}"></label>
       <label class="cab-auto" for="cab-auto"><input type="checkbox" id="cab-auto"${auto ? ' checked' : ''}> Play when I open Your Base Camp</label>
     </div>
@@ -187,9 +188,9 @@ function paint() {
   const b = pl.querySelector('[data-cab="play"]');
   if (b) { b.innerHTML = p ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>'; b.setAttribute('aria-label', p ? 'Pause music' : 'Play music'); }
   const s = document.getElementById('cab-status');
-  if (s) s.textContent = M.failed ? 'Music is not available in this browser' : p ? 'Playing in your cabinet' : (get('cab-music') !== 'off' && !M.pausedByFounder() ? 'Starts with your first click' : 'Paused');
+  if (s) s.textContent = M.failed ? 'Music is not available right now' : p ? 'Playing in your cabinet' : (get('cab-music') !== 'off' && !M.pausedByFounder() ? 'Starts with your first click' : 'Paused');
   const n = document.getElementById('cab-track');
-  if (n) n.textContent = M.TRACKS[M.current().track].n;
+  if (n) n.textContent = M.nowTitle();
   const v = document.getElementById('cab-vol');
   if (v && document.activeElement !== v) v.value = String(M.current().vol);
 }

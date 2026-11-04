@@ -1,25 +1,21 @@
 /* The study room: music, light and Focus mode for Your Base Camp, the
- * Library and Ask Alexandru (the dashboard). One engine for the whole
+ * Library and Ask Alexandru (the dashboard). One player for the whole
  * dashboard; the Cabinet's record player and the mini player both drive it.
  *
- * The music is played live by the browser (Web Audio, no file), so nothing
- * is downloaded and nothing is licensed. Clean sound, no vinyl crackle.
- * Six pieces:
- *   trio    Late-night trio: piano, double bass, brushes
- *   piano   Quiet piano: slow chords, a few high notes
- *   ambient Warm room: long pads and soft bells
- *   road    Open road: driving guitar, bass and drums (rock)
- *   burn    Slow burn: half-time drums, heavy chords (rock)
- *   riff    Steady riff: one riff, bass and drums (rock)
- * Energy (calmer ↔ more energy) moves the tempo and which instruments play:
- * calm drops the brushes and walks the bass less; more energy adds them back.
+ * The music (4 Nov 2026, Alexandru: "cancel the existing music and add 2
+ * categories, classic and modern") is real recordings, kept in the R2 bucket
+ * music-background in two folders, Classic/ and Modern/, and listed and
+ * streamed by /api/music. Upload a file to a folder and it appears here:
+ * nothing to change in code. The pieces of a category play one after the
+ * other, round and round. The six pieces the browser used to play are gone,
+ * and the Energy slider with them (it only shaped those).
  *
  * Light (dimmer ↔ brighter) lays a warm shade over the whole page. The Lamp
  * (Focus mode's third part) turns that shade into a pool of lamplight that
  * follows the question the founder is writing, and the room answers the
- * work: each finished answer plays a soft chord in the music's key and lights
- * one of seven candles for the domain. Study mode and Focus mode are the two
- * presets of music, energy, light and the Lamp together.
+ * work: each finished answer plays a soft chord and lights one of seven
+ * candles for the domain. Study mode and Focus mode are the two presets of
+ * music, light and the Lamp together.
  *
  * Never plays before a click: the browser forbids it and so do we. Two
  * minutes on the dashboard (Your Base Camp, the programme, the Library,
@@ -31,29 +27,26 @@ const KEY = 'es-music';
 const get = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
 const put = (k, v) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } };
 
-export const TRACKS = {
-  trio: { n: 'Late-night trio', d: 'Piano, double bass, brushes' },
-  piano: { n: 'Quiet piano', d: 'Slow chords, room to think' },
-  ambient: { n: 'Warm room', d: 'Long pads, soft bells' },
-  road: { n: 'Open road', d: 'Driving guitar, bass and drums' },
-  burn: { n: 'Slow burn', d: 'Half-time drums, heavy chords' },
-  riff: { n: 'Steady riff', d: 'One riff, bass and drums' },
+/** The two shelves of music, as the bucket's two folders. */
+export const CATS = {
+  classic: { n: 'Classic', d: 'Piano, strings, the great composers' },
+  modern: { n: 'Modern', d: 'Calm, steady music of today' },
 };
 export const MODES = {
-  study: { n: 'Study mode', d: 'Quiet piano, calm, the light softened', track: 'piano', energy: 30, light: 82, lamp: false },
-  focus: { n: 'Focus mode', d: 'Dimmed room, steady music, and the Lamp', track: 'trio', energy: 55, light: 48, lamp: true },
+  study: { n: 'Study mode', d: 'Classic music, calm, the light softened', cat: 'classic', light: 82, lamp: false },
+  focus: { n: 'Focus mode', d: 'Dimmed room, modern music, and the Lamp', cat: 'modern', light: 48, lamp: true },
 };
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const num = (v, d) => (Number.isFinite(Number(v)) ? Number(v) : d);
+const num = (v, d) => (v != null && v !== '' && Number.isFinite(Number(v)) ? Number(v) : d);
 /** The founder's settings, with safe defaults. */
 export function settings() {
   let s = {};
   try { s = JSON.parse(get(KEY) || '{}') || {}; } catch { s = {}; }
   return {
-    track: TRACKS[s.track] ? s.track : 'trio',
+    cat: CATS[s.cat] ? s.cat : 'classic',
+    track: typeof s.track === 'string' && s.track.includes('/') ? s.track : '',
     vol: clamp(num(s.vol, num(get('cab-vol'), 55)), 0, 100),
-    energy: clamp(num(s.energy, 45), 0, 100),
     light: clamp(num(s.light, 100), 0, 100),
     mode: MODES[s.mode] ? s.mode : '',
     lamp: s.lamp === true,
@@ -64,174 +57,76 @@ const keep = () => put(KEY, JSON.stringify(S));
 
 /** How dark the shade is for a light setting: 100 = none, 0 = deep dusk. */
 export const shade = (light) => Math.round((1 - clamp(light, 0, 100) / 100) * 0.62 * 100) / 100;
-/** Beats per minute for a piece at an energy (0–100). */
-export const tempo = (track, energy) => Math.round(({ trio: 62, piano: 54, ambient: 48, road: 92, burn: 58, riff: 80 }[track] || 62) + clamp(energy, 0, 100) * 0.36);
 
-/* ── The engine ──────────────────────────────────────────────────────────── */
-let E = null;
-function engine() {
-  if (E) return E;
-  E = (function () {
-    var ctx, master, out, verb, ep, gtr, noise, timer = null, playing = false, nextT = 0, beatN = 0, vol = .55, stopTok = 0;
-    var track = 'trio', energy = .45;
-    function bpm() { return tempo(track, energy * 100); }
-    function mtof(m) { return 440 * Math.pow(2, (m - 69) / 12); }
-    var CH = [{ r: 38, t: 3, v: [53, 57, 60, 64] }, { r: 43, t: 4, v: [53, 59, 64, 69] }, { r: 36, t: 4, v: [52, 55, 59, 62] }, { r: 45, t: 4, v: [55, 61, 65, 70] },
-      { r: 38, t: 3, v: [53, 57, 60, 65] }, { r: 43, t: 4, v: [53, 59, 62, 69] }, { r: 40, t: 3, v: [50, 55, 59, 62] }, { r: 45, t: 4, v: [55, 61, 64, 70] }];
-    function impulse(sec) { var r = ctx.sampleRate, n = Math.floor(r * sec), b = ctx.createBuffer(2, n, r); for (var c = 0; c < 2; c++) { var d = b.getChannelData(c); for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3.2); } return b; }
-    function init() {
-      var AC = window.AudioContext || window.webkitAudioContext; ctx = new AC();
-      var comp = ctx.createDynamicsCompressor(); comp.threshold.value = -20; comp.ratio.value = 3;
-      master = ctx.createGain(); master.gain.value = 0; comp.connect(master); master.connect(ctx.destination);
-      out = ctx.createGain(); out.connect(comp);
-      verb = ctx.createConvolver(); verb.buffer = impulse(2.6); var vg = ctx.createGain(); vg.gain.value = .3; out.connect(verb); verb.connect(vg); vg.connect(comp);
-      var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3000;
-      ep = ctx.createGain(); ep.gain.value = .85; var lfo = ctx.createOscillator(), ld = ctx.createGain(); lfo.frequency.value = 4.2; ld.gain.value = .18; lfo.connect(ld); ld.connect(ep.gain); lfo.start();
-      ep.connect(lp); lp.connect(out);
-      var n = ctx.sampleRate * 2; noise = ctx.createBuffer(1, n, ctx.sampleRate); var d = noise.getChannelData(0); for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-      // The guitar: two detuned saws into a soft clip and a speaker-like low pass.
-      var sh = ctx.createWaveShaper(), cv = new Float32Array(1024); for (var q = 0; q < 1024; q++) { var x = q / 511.5 - 1; cv[q] = Math.tanh(x * 6) / Math.tanh(6); }
-      sh.curve = cv; sh.oversample = '2x'; gtr = ctx.createGain(); gtr.gain.value = 1; var cab = ctx.createBiquadFilter(); cab.type = 'lowpass'; cab.frequency.value = 2600; cab.Q.value = .7;
-      var gOut = ctx.createGain(); gOut.gain.value = .085; gtr.connect(sh); sh.connect(cab); cab.connect(gOut); gOut.connect(out);
-    }
-    function key(m, t, dur, vel, dest) {
-      var f = mtof(m), g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.1 * vel, t + .006); g.gain.exponentialRampToValueAtTime(.035 * vel, t + .55); g.gain.exponentialRampToValueAtTime(.0005, t + dur);
-      var o1 = ctx.createOscillator(); o1.frequency.value = f; var o2 = ctx.createOscillator(); o2.frequency.value = f * 2.003; var g2 = ctx.createGain(); g2.gain.value = .22;
-      var o3 = ctx.createOscillator(); o3.frequency.value = f * 7.1; var g3 = ctx.createGain(); g3.gain.setValueAtTime(.05 * vel, t); g3.gain.exponentialRampToValueAtTime(.0001, t + .1);
-      o1.connect(g); o2.connect(g2); g2.connect(g); o3.connect(g3); g3.connect(g); g.connect(dest || ep);
-      [o1, o2, o3].forEach(function (o) { o.start(t); o.stop(t + dur + .05); });
-    }
-    function chord(c, t, dur, vel, spread) { c.v.forEach(function (m, i) { key(m, t + i * (spread || .014) + Math.random() * .008, dur, vel * (.85 + Math.random() * .25)); }); }
-    function bass(m, t, dur, gain) {
-      var f = mtof(m), o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = f; var o2 = ctx.createOscillator(); o2.frequency.value = f;
-      var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(1000, t); lp.frequency.exponentialRampToValueAtTime(320, t + .25);
-      var g = ctx.createGain(), pk = .34 * (gain || 1); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(pk, t + .012); g.gain.exponentialRampToValueAtTime(pk * .35, t + .16); g.gain.exponentialRampToValueAtTime(.001, t + dur);
-      o.connect(lp); o2.connect(lp); lp.connect(g); g.connect(out); o.start(t); o2.start(t); o.stop(t + dur + .05); o2.stop(t + dur + .05);
-    }
-    function hiss(t, len, gain, freq, type) {
-      var s = ctx.createBufferSource(); s.buffer = noise; var f = ctx.createBiquadFilter(); f.type = type || 'bandpass'; f.frequency.value = freq; f.Q.value = .8;
-      var g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + Math.min(.02, len * .3)); g.gain.exponentialRampToValueAtTime(.0001, t + len);
-      s.connect(f); f.connect(g); g.connect(out); s.start(t, Math.random() * 1.5); s.stop(t + len + .03);
-    }
-    function pad(c, t, dur) {
-      c.v.forEach(function (m) {
-        [-5, 5].forEach(function (cent) {
-          var o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = mtof(m - 12) * Math.pow(2, cent / 1200);
-          var g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.02, t + 1.6); g.gain.setValueAtTime(.02, t + Math.max(1.7, dur - 1.4)); g.gain.linearRampToValueAtTime(0, t + dur);
-          o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + .05);
-        });
-      });
-    }
-    function kick(t, g) {
-      var o = ctx.createOscillator(); o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(42, t + .12);
-      var v = ctx.createGain(); v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(.55 * g, t + .004); v.gain.exponentialRampToValueAtTime(.001, t + .32);
-      o.connect(v); v.connect(out); o.start(t); o.stop(t + .35);
-    }
-    function snareHit(t, g) {
-      hiss(t, .2, .07 * g, 1900);
-      var o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = 185; var v = ctx.createGain(); v.gain.setValueAtTime(.12 * g, t); v.gain.exponentialRampToValueAtTime(.001, t + .09);
-      o.connect(v); v.connect(out); o.start(t); o.stop(t + .1);
-    }
-    function hat(t, g) { hiss(t, .045, .02 * g, 8200, 'highpass'); }
-    /** A power chord (or one note): root, fifth, octave. `mute` = palm-muted chug. */
-    function power(r, t, dur, vel, mute, single) {
-      (single ? [r] : [r, r + 7, r + 12]).forEach(function (m) {
-        [-6, 6].forEach(function (cent) {
-          var o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m) * Math.pow(2, cent / 1200);
-          var v = ctx.createGain(), pk = .5 * vel, len = mute ? Math.min(dur, .16) : dur;
-          v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(pk, t + .005); v.gain.exponentialRampToValueAtTime(pk * (mute ? .15 : .55), t + (mute ? .08 : .4)); v.gain.exponentialRampToValueAtTime(.0005, t + len);
-          if (mute) { var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; o.connect(lp); lp.connect(v); } else o.connect(v);
-          v.connect(gtr); o.start(t); o.stop(t + len + .05);
-        });
-      });
-    }
-    var RK = { road: [40, 36, 43, 38], burn: [45, 41, 36, 43], riff: [40, 40, 43, 38] };
-    var RIFF = [0, 0, 3, 0, 5, 0, 3, -2];
-    function rock(n, t) {
-      var BEAT = 60 / bpm(), H = BEAT / 2, bar = Math.floor(n / 4) % 4, b = n % 4, r = RK[track][bar];
-      if (track === 'road') {
-        for (var e = 0; e < 2; e++) { var te = t + e * H;
-          if (b === 0 && e === 0 && energy >= .4) power(r, te, BEAT * 1.9, .9); else power(r, te, H, .55, true);
-          bass(r - 12, te, H * .9, .5);
-          if (energy >= .3 || e === 0) hat(te, e ? .7 : 1); }
-        if (b === 0 || b === 2) kick(t, 1); if (b === 2 && energy >= .55) kick(t + H, .8);
-        if (b === 1 || b === 3) snareHit(t, 1);
-        return;
-      }
-      if (track === 'burn') {
-        if (b === 0) { power(r, t, BEAT * 3.8, .85); bass(r - 12, t, BEAT * 3.6, .7); kick(t, 1); }
-        if (b === 2) snareHit(t, 1.1);
-        if (b === 3 && energy >= .5) kick(t + H, .7);
-        hat(t, .8); if (energy >= .45) hat(t + H, .5);
-        if (b === 2 && Math.random() < .25 + energy * .3) power(r + 24 + [0, 3, 5, 7][Math.floor(Math.random() * 4)], t + H, BEAT * 1.4, .45, false, true);
-        return;
-      }
-      // riff: the same eight notes over the bar's root, bass doubling, a plain backbeat.
-      for (var k = 0; k < 2; k++) { var tk = t + k * H, m = r + RIFF[b * 2 + k];
-        if (b === 0 && k === 0) power(m, tk, H * 1.6, .8); else power(m, tk, H * .9, .6, energy < .6, true);
-        bass(m - 12, tk, H * .85, .45);
-        if (energy >= .35 || k === 0) hat(tk, k ? .6 : .9); }
-      if (b === 0 || (b === 2 && energy >= .4)) kick(t, 1); if (b === 1 && energy >= .6) kick(t + H, .7);
-      if (b === 1 || b === 3) snareHit(t, .9);
-    }
-    function beat(n, t) {
-      if (RK[track]) { rock(n, t); return; }
-      var BEAT = 60 / bpm(), bar = Math.floor(n / 4) % CH.length, b = n % 4, c = CH[bar], nx = CH[(bar + 1) % CH.length], sw = BEAT * .66;
-      if (track === 'ambient') {
-        if (b === 0 && bar % 2 === 0) { pad(c, t, BEAT * 8.4); bass(c.r, t, BEAT * 7.5, .45); }
-        if (Math.random() < .08 + energy * .22) { var bl = c.v[Math.floor(Math.random() * c.v.length)] + 24; key(bl, t + (Math.random() < .5 ? 0 : sw), 2.4, .3); }
-        if (energy > .6 && b % 2 === 0) hiss(t, .1, .006 + (energy - .6) * .02, 6500, 'highpass');
-        return;
-      }
-      if (track === 'piano') {
-        if (b === 0) { chord(c, t, BEAT * 3.6, .7, .11); bass(c.r, t, BEAT * 3.4, .5); }
-        if (b === 2 && Math.random() < .2 + energy * .5) chord(c, t, BEAT * 1.6, .38, .05);
-        if (Math.random() < .1 + energy * .25) { var pool = c.v.map(function (m) { return m + 12; }); key(pool[Math.floor(Math.random() * pool.length)] + (Math.random() < .3 ? 12 : 0), t + (b % 2 ? sw : 0), 1.8, .45); }
-        if (energy > .7 && (b === 1 || b === 3)) hiss(t, .18, .012, 7000, 'highpass');
-        return;
-      }
-      // The trio. Below a third of the energy the bass holds the root; the
-      // brushes come in a little after that.
-      var walk = energy >= .35, brushes = energy >= .3, snare = energy >= .45;
-      if (walk) {
-        var r = c.r, line = [r, r + c.t, r + 7, (Math.random() < .5 ? nx.r - 1 : nx.r + 1)]; if (Math.random() < .3) line[2] = r + (c.t === 3 ? 10 : 9);
-        bass(line[b], t, BEAT * .92);
-      } else if (b === 0) bass(c.r, t, BEAT * 3.5, .8);
-      else if (b === 2 && Math.random() < .4) bass(c.r + 7, t, BEAT * 1.6, .55);
-      if (brushes) hiss(t, .22, .016, 7000, 'highpass');
-      if (b === 1 || b === 3) { if (brushes) hiss(t + sw, .12, .012, 7000, 'highpass'); if (snare) hiss(t, .26, .05, 3200); } else if (brushes) hiss(t, .08, .018, 2600);
-      if (energy > .72 && b % 2 === 0) hiss(t + sw, .09, .01, 7500, 'highpass');
-      if (b === 0) chord(c, t, BEAT * 2.6, .9);
-      if (b === 1 && Math.random() < .3 + energy * .3) chord(c, t + sw, BEAT * .45, .55);
-      if (b === 2 && Math.random() < .2 + energy * .25) chord(c, t, BEAT * 1.1, .45);
-      if (b === 3 && Math.random() < .3) chord(nx, t + sw, BEAT * .5, .5);
-      for (var e = 0; e < 2; e++) { if (Math.random() < .06 + energy * .16) { var p = c.v.concat(c.v.map(function (m) { return m + 12; })).filter(function (m) { return m >= 64 && m <= 82; }); key(p[Math.floor(Math.random() * p.length)] + 12, t + (e ? sw : 0), 1.6, .55); } }
-    }
-    function tick() { while (nextT < ctx.currentTime + .25) { beat(beatN, nextT); nextT += 60 / bpm(); beatN++; } }
-    function start() {
-      if (!ctx) init(); stopTok++; ctx.resume();
-      if (!timer) { nextT = ctx.currentTime + .12; timer = setInterval(tick, 40); }
-      var g = master.gain; g.cancelScheduledValues(ctx.currentTime); g.setValueAtTime(g.value, ctx.currentTime); g.linearRampToValueAtTime(vol * .6, ctx.currentTime + 2.4);
-      playing = true;
-    }
-    function stop() {
-      if (!ctx || !playing) return; playing = false; var tok = ++stopTok, g = master.gain;
-      g.cancelScheduledValues(ctx.currentTime); g.setValueAtTime(g.value, ctx.currentTime); g.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
-      setTimeout(function () { if (tok !== stopTok) return; clearInterval(timer); timer = null; ctx.suspend(); }, 1300);
-    }
-    function setVol(v) { vol = v; if (ctx && playing) { var g = master.gain; g.cancelScheduledValues(ctx.currentTime); g.setTargetAtTime(vol * .6, ctx.currentTime, .1); } }
-    function setEnergy(e) { energy = Math.min(1, Math.max(0, e)); }
-    /** The room answers the work: the bar's chord, rising, soft. */
-    function chime() {
-      if (!ctx || !playing) return;
-      var c = CH[Math.floor(beatN / 4) % CH.length], t = ctx.currentTime + .05;
-      c.v.forEach(function (m, i) { key(m + 12, t + i * .09, 2.6, .5); });
-      key(c.v[c.v.length - 1] + 24, t + c.v.length * .09 + .05, 2.2, .35);
-    }
-    function setTrack(t) { if (TRACKS[t]) { track = t; beatN = 0; } }
-    return { start: start, stop: stop, setVol: setVol, setEnergy: setEnergy, setTrack: setTrack, chime: chime, isPlaying: function () { return playing; } };
-  })();
-  return E;
+/* ── The music library (/api/music) ──────────────────────────────────────── */
+let LIB = { classic: [], modern: [] }, libState = 'idle', libP = null;
+/** Fetch the two lists once; again only after a failure. */
+export function load() {
+  if (libState === 'ready' || libState === 'loading') return libP;
+  if (typeof fetch !== 'function') { libState = 'failed'; return Promise.resolve(); }
+  libState = 'loading';
+  libP = fetch('/api/music').then((r) => r.json()).then((j) => {
+    LIB = { classic: Array.isArray(j.classic) ? j.classic : [], modern: Array.isArray(j.modern) ? j.modern : [] };
+    libState = 'ready';
+    if (!pieces().some((p) => p.key === S.track)) S.track = '';
+    tell();
+  }).catch(() => { libState = 'failed'; tell(); });
+  return libP;
+}
+/** The pieces on one shelf. */
+export const pieces = (cat = S.cat) => LIB[cat] || [];
+/** The piece chosen now (or the shelf's first), or null when the shelf is empty. */
+export function now() { const l = pieces(); return l.find((p) => p.key === S.track) || l[0] || null; }
+/** What the players show as the title. */
+export function nowTitle() {
+  const p = now();
+  if (p) return p.title;
+  return libState === 'ready' || libState === 'failed' ? 'No music yet' : 'Study music';
+}
+/** For tests: set the library by hand. */
+export function _setLibrary(lib) { LIB = { classic: lib.classic || [], modern: lib.modern || [] }; libState = 'ready'; }
+
+/* ── The player ──────────────────────────────────────────────────────────── */
+let au = null, playing = false, fadeT = null, errors = 0;
+const src = (p) => `/api/music?f=${encodeURIComponent(p.key)}`;
+const level = () => (S.vol / 100) * 0.8;
+function audio() {
+  if (au) return au;
+  au = new Audio(); au.preload = 'none';
+  au.addEventListener('ended', () => next());
+  au.addEventListener('playing', () => { errors = 0; });
+  au.addEventListener('error', () => {
+    if (!playing) return;
+    errors++;
+    if (errors >= Math.max(1, pieces().length)) { playing = false; failed = true; tell(); return; }
+    next();
+  });
+  return au;
+}
+function fade(to, ms, done) {
+  if (!au) return;
+  clearInterval(fadeT);
+  const a = au, from = a.volume, steps = Math.max(1, Math.round(ms / 50));
+  let i = 0;
+  fadeT = setInterval(() => {
+    i++; a.volume = clamp(from + (to - from) * (i / steps), 0, 1);
+    if (i >= steps) { clearInterval(fadeT); fadeT = null; if (done) done(); }
+  }, 50);
+}
+/** Put the chosen piece in the player (if it is not there already). */
+function cue() {
+  const p = now(); if (!p) return false;
+  const a = audio();
+  if (a.dataset.key !== p.key) { a.dataset.key = p.key; a.src = src(p); }
+  return true;
+}
+/** The next piece on the shelf, round and round. */
+function next() {
+  const l = pieces(); if (!l.length) return;
+  const i = l.findIndex((p) => p.key === (now() || {}).key);
+  S.track = l[(i + 1) % l.length].key; keep();
+  if (cue() && playing) { const a = audio(); if (l.length === 1) a.currentTime = 0; a.volume = level(); a.play().catch(() => {}); }
+  tell();
 }
 
 /* ── Playing ─────────────────────────────────────────────────────────────── */
@@ -239,35 +134,69 @@ const subs = new Set();
 /** Called with no arguments whenever anything changes (playing, settings). */
 export const onChange = (fn) => { subs.add(fn); return () => subs.delete(fn); };
 const tell = () => subs.forEach((fn) => { try { fn(); } catch { /* a painter failed */ } });
-export const isOn = () => !!(E && E.isPlaying());
+export const isOn = () => playing;
 export let failed = false;
 
 export function play() {
-  try { const J = engine(); J.setTrack(S.track); J.setEnergy(S.energy / 100); J.setVol(S.vol / 100); J.start(); }
-  catch { failed = true; }
+  if (typeof Audio === 'undefined') { failed = true; tell(); return; }
+  const go = () => {
+    if (!cue()) { playing = false; tell(); return; }
+    const a = audio(); failed = false; playing = true;
+    clearInterval(fadeT); fadeT = null; a.volume = 0;
+    const pr = a.play();
+    if (pr && pr.then) pr.then(() => fade(level(), 1500), () => { playing = false; tell(); });
+    else fade(level(), 1500);
+    tell();
+  };
+  if (libState === 'ready') go(); else { const l = load(); if (l && l.then) l.then(go); }
+}
+export function pause() {
+  if (!au || !playing) { playing = false; tell(); return; }
+  playing = false;
+  const a = au;
+  fade(0, 900, () => { if (!playing) a.pause(); });
   tell();
 }
-export function pause() { if (E) E.stop(); tell(); }
 let userPaused = false;
 export function toggle() { if (isOn()) { userPaused = true; pause(); } else { userPaused = false; play(); } }
 export const pausedByFounder = () => userPaused;
 
+/** The room answers the work: a soft rising chord over the music. */
+let cctx = null;
+function chime() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    cctx = cctx || new AC(); cctx.resume();
+    const t = cctx.currentTime + 0.05, v = 0.06 * (S.vol / 100);
+    [72, 76, 79, 84].forEach((m, i) => {
+      const o = cctx.createOscillator(), g = cctx.createGain(), at = t + i * 0.09;
+      o.type = 'sine'; o.frequency.value = 440 * Math.pow(2, (m - 69) / 12);
+      g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(v, at + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, at + 2.2);
+      o.connect(g); g.connect(cctx.destination); o.start(at); o.stop(at + 2.3);
+    });
+  } catch { /* no sound: the candle still lights */ }
+}
+
 export function set(patch) {
+  const was = { cat: S.cat, track: S.track };
   S = { ...S, ...patch };
-  S.vol = clamp(num(S.vol, 55), 0, 100); S.energy = clamp(num(S.energy, 45), 0, 100); S.light = clamp(num(S.light, 100), 0, 100);
+  if (!CATS[S.cat]) S.cat = 'classic';
+  if (S.cat !== was.cat && !('track' in patch)) S.track = '';
+  S.vol = clamp(num(S.vol, 55), 0, 100); S.light = clamp(num(S.light, 100), 0, 100);
   keep();
-  if (E) { E.setTrack(S.track); E.setEnergy(S.energy / 100); E.setVol(S.vol / 100); }
+  if (au && (S.cat !== was.cat || S.track !== was.track)) { if (cue() && playing) { au.volume = level(); au.play().catch(() => {}); } }
+  else if (au && playing && !fadeT) au.volume = level();
   dim();
   tell();
 }
 export const current = () => ({ ...S });
 
-/** Study or Focus: music, energy and light together. The same mode again
+/** Study or Focus: music, light and the Lamp together. The same mode again
  *  turns it off and lets the light back up. Starts the music (a click). */
 export function mode(k) {
   if (S.mode === k || !MODES[k]) { set({ mode: '', light: 100, lamp: false }); return; }
   const m = MODES[k];
-  set({ mode: k, track: m.track, energy: m.energy, light: m.light, lamp: m.lamp });
+  set({ mode: k, cat: m.cat, light: m.light, lamp: m.lamp });
   userPaused = false;
   if (!isOn()) play();
 }
@@ -322,7 +251,7 @@ function candles() {
 /** A finished answer: one more candle, and the room plays it back. */
 export function answered(n) {
   setCandles(n);
-  if (E && S.lamp) E.chime();
+  if (playing && S.lamp) chime();
   const c = document.getElementById('mp-candles');
   if (c) { const last = c.querySelectorAll('i.on'); const i = last[last.length - 1]; if (i) i.classList.add('new'); }
 }
@@ -335,28 +264,30 @@ const DISC = '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20
 
 /** The player's markup, from the settings. */
 export function playerHTML(s = S, playing = false, open = false) {
-  const t = TRACKS[s.track];
+  const t = now(), list = pieces(s.cat), cat = CATS[s.cat];
+  const what = failed ? 'Music is not available right now' : t ? `${cat.n} · ${list.length} ${list.length === 1 ? 'piece' : 'pieces'}` : libState === 'ready' || libState === 'failed' ? 'No music on this shelf yet' : 'Loading the music…';
   return `<button type="button" class="mp-pill" data-mp="open" aria-expanded="${open}" aria-controls="mp-win">
     <span class="mp-disc">${DISC}</span>
-    <span class="mp-pt"><b>${esc(t.n)}</b><small>${playing ? (s.mode ? esc(MODES[s.mode].n) : 'Playing') : 'Study music'}</small></span>
+    <span class="mp-pt"><b>${esc(nowTitle())}</b><small>${playing ? (s.mode ? esc(MODES[s.mode].n) : 'Playing') : 'Study music'}</small></span>
     <span class="mp-eq" aria-hidden="true"><i></i><i></i><i></i></span>
   </button>
   <div class="mp-win" id="mp-win" role="dialog" aria-label="Study music, light and focus"${open ? '' : ' hidden'}>
     <div class="mp-head"><div><p class="mp-k">Your study room</p><h2>Music &amp; light</h2></div>
       <button type="button" class="mp-x" data-mp="close" aria-label="Close the player"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="mp-now"><button type="button" class="mp-play" data-mp="play" aria-label="${playing ? 'Pause the music' : 'Play the music'}">${playing ? PAUSE : PLAY}</button>
-      <div><b>${esc(t.n)}</b><span>${failed ? 'Music is not available in this browser' : esc(t.d)}</span></div></div>
-    <fieldset class="mp-tracks"><legend>Choose the music</legend>
-      ${Object.entries(TRACKS).map(([k, v]) => `<label><input type="radio" name="mp-track" value="${k}"${k === s.track ? ' checked' : ''}><span>${esc(v.n)}</span></label>`).join('')}
+      <div><b>${esc(nowTitle())}</b><span>${esc(what)}</span></div></div>
+    <div class="mp-cats" role="group" aria-label="Choose the music">${Object.entries(CATS).map(([k, v]) => `<button type="button" class="mp-cat" data-mp-cat="${k}" aria-pressed="${s.cat === k}">${esc(v.n)}</button>`).join('')}</div>
+    <fieldset class="mp-tracks"><legend>${esc(cat.n)}: ${esc(cat.d)}</legend>
+      ${list.length ? list.map((p) => `<label><input type="radio" name="mp-track" value="${esc(p.key)}"${t && p.key === t.key ? ' checked' : ''}><span>${esc(p.title)}</span></label>`).join('')
+        : `<p class="mp-empty">${libState === 'ready' || libState === 'failed' ? 'No music on this shelf yet.' : 'Loading the music…'}</p>`}
     </fieldset>
     <div class="mp-sls"><label class="mp-sl"><span class="mp-sk">Light</span><span class="mp-ends"><em>Dimmer</em><input type="range" id="mp-light" min="0" max="100" step="1" value="${s.light}" aria-label="Light: dimmer to brighter"><em>Brighter</em></span></label>
-    <label class="mp-sl"><span class="mp-sk">Energy</span><span class="mp-ends"><em>Calmer</em><input type="range" id="mp-energy" min="0" max="100" step="1" value="${s.energy}" aria-label="Energy: calmer to more energy"><em>More energy</em></span></label>
     <label class="mp-sl mp-vol"><span class="mp-sk">Volume</span><span class="mp-ends"><em></em><input type="range" id="mp-vol" min="0" max="100" step="1" value="${s.vol}" aria-label="Volume"><em></em></span></label></div>
     <label class="mp-lamp"><input type="checkbox" id="mp-lamp"${s.lamp ? ' checked' : ''}><span><b>The Lamp</b><small>A pool of light on the question you’re writing. Each answer you finish plays a chord and lights a candle.</small></span></label>
     <div class="mp-modes" role="group" aria-label="Modes">
       ${Object.entries(MODES).map(([k, v]) => `<button type="button" class="mp-mode" data-mp-mode="${k}" aria-pressed="${s.mode === k}"><b>${esc(v.n)}</b><small>${esc(v.d)}</small></button>`).join('')}
     </div>
-    <p class="mp-fine">Played live in your browser. It pauses when you leave this tab.</p>
+    <p class="mp-fine">Music from the ExploraSelf library. It pauses when you leave this tab.</p>
   </div>`;
 }
 
@@ -399,6 +330,7 @@ export function openPlayer(focusId) {
 function mount() {
   if (mounted || typeof document === 'undefined') return;
   mounted = true;
+  load();
   const root = document.createElement('div');
   root.id = 'mp'; root.className = 'mp'; root.hidden = true;
   document.body.appendChild(root);
@@ -409,19 +341,19 @@ function mount() {
     if (b.dataset.mp === 'close') { hideWin(() => { const p = root.querySelector('.mp-pill'); if (p) p.focus({ preventScroll: true }); }); return; }
     if (b.dataset.mp === 'play') { toggle(); return; }
     if (b.dataset.mpMode) { mode(b.dataset.mpMode); return; }
+    if (b.dataset.mpCat) { set({ cat: b.dataset.mpCat }); return; }
   });
   // Sliders change the sound and light as they move, and redraw only on release.
   root.addEventListener('input', (e) => {
     const t = e.target;
     if (t.id === 'mp-light') { S.light = +t.value; keep(); dim(); }
-    else if (t.id === 'mp-energy') { S.energy = +t.value; keep(); if (E) E.setEnergy(S.energy / 100); }
-    else if (t.id === 'mp-vol') { S.vol = +t.value; keep(); if (E) E.setVol(S.vol / 100); }
+    else if (t.id === 'mp-vol') { S.vol = +t.value; keep(); if (au && playing && !fadeT) au.volume = level(); }
   });
   root.addEventListener('change', (e) => {
     const t = e.target;
     if (t.name === 'mp-track') set({ track: t.value });
     else if (t.id === 'mp-lamp') set({ lamp: t.checked });
-    else if (/^mp-(light|energy|vol)$/.test(t.id)) tell();
+    else if (/^mp-(light|vol)$/.test(t.id)) tell();
   });
   root.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) hideWin(() => { const p = root.querySelector('.mp-pill'); if (p) p.focus(); }); });
   // A click anywhere outside the open player closes it (31 Oct). Not the
