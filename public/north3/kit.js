@@ -28,9 +28,9 @@ export function items(L, steps) {
     library: [
       { what: `${mb.n.split(' · ')[0]} for your stage`, desc: `A manual for ${STAGE[mb.k]} (${mb.pages} pages), ${STAGE[mg.k]} (${mg.pages}) or ${STAGE[ms.k]} (${ms.pages}). All three open with your account.`,
         life: 'Advice for where you are, not for someone else’s business.', biz: 'A clear road from your stage to the next one.' },
-      { what: btl.n, desc: `${btl.kicker}. ${btl.sub.split(/\.\s/).slice(1).join('. ')}`,
+      { what: btl.n, hub: !!btl.hub, desc: `${btl.kicker}. ${btl.sub.split(/\.\s/).slice(1).join('. ')}`,
         life: 'A tool ready for the hard moment: the talk, the decision, the no.', biz: 'Lead people with confidence, even if nobody taught you how.' },
-      { what: wb.n, hub: !!wb.hub, desc: `${wb.kicker}. ${head(wb.sub)}.`,
+      { what: wb.n, desc: `${wb.kicker}. ${head(wb.sub)}.`,
         life: 'Think bigger, with a structure behind it.', biz: 'Build toward a business that lasts and can run without you.' },
       { what: nww.n, soon: !!nww.soon, desc: `${nww.kicker}. ${nww.sub.split(/\.\s/).slice(1).join('. ')} ${nww.soon ? 'In your library the day it opens.' : 'Free to download with your account.'}`,
         life: 'A win that counts at home as well as at work.', biz: 'Decide what winning is for, then build toward it.' },
@@ -84,8 +84,8 @@ function group(title, list, start, kind, L) {
 /** Everything under the section's heading. */
 export function markup(L, steps) {
   const I = items(L, steps);
-  // HUB material (Worth Building, 4 Nov 2026) stays on the shelf, marked: it
-  // opens with the HUB, not with the free account.
+  // HUB material (Built to Lead, 4 Nov 2026) stays on the shelf, marked: it
+  // opens with the HUB, not with the account.
   const out = L.books.filter((b) => !b.soon && !b.hub).length, soon = L.books.filter((b) => b.soon).length, hub = L.books.filter((b) => b.hub).length;
   return `${shelf(L)}
     ${group('Your tools · they work for you from day one', I.tools, 1, 'tools', L)}

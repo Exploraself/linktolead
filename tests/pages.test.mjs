@@ -119,11 +119,11 @@ const COPY = [
   'Your Account Plans', `${ALL_STEP_IDS.length} short steps in your own order, weakest domain first. Tick them off as you go.`, 'Feel progress every week, instead of only pressure.', 'Small moves that add up to a business that runs.',
   'The Founder Launchpad', 'Three levels in all four domains. Each step names what to open, count and write. Free, and free to stay.', 'Rewrite your principles. Unlock your mind.', 'Lead your business instead of being its busiest employee.',
   'The Founder’s Blueprint for your stage', 'A manual for Building (88 pages), Growing (88) or Scaling (88). All three open with your account.', 'Advice for where you are, not for someone else’s business.', 'A clear road from your stage to the next one.',
-  'Built to Lead', '99 practical tools. A personal leadership field guide.', 'A tool ready for the hard moment: the talk, the decision, the no.', 'Lead people with confidence, even if nobody taught you how.',
-  'Worth Building in the HUB', '32 leadership frameworks · in the HUB. The Founder’s Playbook.', 'Think bigger, with a structure behind it.', 'Build toward a business that lasts and can run without you.',
+  'Built to Lead in the HUB', '99 practical tools · in the HUB. A personal leadership field guide.', 'A tool ready for the hard moment: the talk, the decision, the no.', 'Lead people with confidence, even if nobody taught you how.',
+  'Worth Building', '32 leadership frameworks. The Founder’s Playbook.', 'Think bigger, with a structure behind it.', 'Build toward a business that lasts and can run without you.',
   'A New Way of Winning', '12 principles. Four stages. Four domains. Free to download with your account.', 'A win that counts at home as well as at work.', 'Decide what winning is for, then build toward it.',
   'Your tools · they work for you from day one', 'Your library · download and keep', 'WHAT YOU GET', 'IN YOUR LIFE', 'IN YOUR BUSINESS',
-  '3 manuals, one for each stage · 99 practical tools · 32 leadership frameworks · in the HUB · 12 principles',
+  '3 manuals, one for each stage · 99 practical tools · in the HUB · 32 leadership frameworks · 12 principles',
   'You don’t have to figure it out alone. Your mentor, and the whole team behind you.', 'Notes from Alexandru and the team arrive at your Base Camp, and you can reply.',
   'One question before you scroll on: what would one more free evening a week give your family?', '4 tools that work from day one', '3 manuals and 2 books to download, a third with the HUB', 'Alexandru and the team beside you',
   'Free and yours to keep', 'Create my free account →', 'Your name, your email, a password and three short questions about your business. No card.',
@@ -132,7 +132,7 @@ for (const t of COPY) ok(flat.includes(t), `kit copy: ${t}`);
 const I = items(LIBRARY, ALL_STEP_IDS.length);
 ok(I.tools.length + I.library.length === 8 && (K.match(/class="kit-item"/g) || []).length === 8, 'eight items');
 ok((K.match(/IN YOUR LIFE<\/span><p>/g) || []).length === 8 && (K.match(/IN YOUR BUSINESS<\/span><p>/g) || []).length === 8, 'every item has a LIFE and a BUSINESS line');
-ok(K.includes('Worth Building <span class="kit-tag">in the HUB</span>') && K.includes('IN THE HUB'), 'Worth Building stays on the shelf, marked: it opens with the HUB');
+ok(K.includes('Built to Lead <span class="kit-tag">in the HUB</span>') && K.includes('IN THE HUB'), 'Built to Lead stays on the shelf, marked: it opens with the HUB');
 for (const m of LIBRARY.manuals) ok(K.includes(`${m.pages} pages`), `page count ${m.pages} comes from LIBRARY`);
 ok(markup({ ...LIBRARY, manuals: LIBRARY.manuals.map((m) => ({ ...m, pages: m.pages + 1 })) }, 32).includes(`(${LIBRARY.manuals[1].pages + 1})`), 'change LIBRARY and the page counts follow');
 ok(items(LIBRARY, null).tools[2].desc.startsWith('Short steps in your own order'), 'no live step count: no number is made up');

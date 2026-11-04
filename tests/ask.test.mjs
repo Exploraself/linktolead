@@ -46,32 +46,32 @@ const ana = await join(env, {});
 mc = [];
 let r = await library({ request: get('/api/library?item=nope&t=' + ana), env });
 ok(r.status === 404, 'an unknown book: 404');
-r = await library({ request: get('/api/library?item=btl'), env });
+r = await library({ request: get('/api/library?item=wb'), env });
 ok(r.status === 302 && r.headers.get('location') === 'https://linktolead.exploraself.com/north3/#join', 'not signed in: off to make an account');
-r = await library({ request: get('/api/library?item=btl&t=not-a-real-token-at-all-xx'), env });
+r = await library({ request: get('/api/library?item=wb&t=not-a-real-token-at-all-xx'), env });
 ok(r.status === 302 && r.headers.get('location') === 'https://linktolead.exploraself.com/ground-plan/?next=%2Fground-plan%2F%23library#signin', 'an account the site does not know: sign in again, back to the Library');
 ok(mc.length === 0, 'nothing tagged without an account');
-r = await library({ request: get('/api/library?item=btl&t=' + ana), env });
-ok(r.status === 302 && r.headers.get('location') === 'https://linktolead.exploraself.com/library/built-to-lead.pdf', 'signed in: on to the file');
-ok(JSON.stringify(events(env, ana, 'library-download')) === '["btl"]', "event 'library-download' with the key");
+r = await library({ request: get('/api/library?item=wb&t=' + ana), env });
+ok(r.status === 302 && r.headers.get('location') === 'https://linktolead.exploraself.com/library/worth-building.pdf', 'signed in: on to the file');
+ok(JSON.stringify(events(env, ana, 'library-download')) === '["wb"]', "event 'library-download' with the key");
 { // Where the site's files can be read: the PDF itself, as a named attachment.
-  const assets = { fetch: async (req) => new Response('%PDF-1.4 test', { status: new URL(req.url).pathname === '/library/built-to-lead.pdf' ? 200 : 404, headers: { 'content-type': 'application/octet-stream' } }) };
-  const f = await library({ request: get('/api/library?item=btl&t=' + ana), env: { ...env, ASSETS: assets } });
-  ok(f.status === 200 && f.headers.get('content-type') === 'application/pdf' && f.headers.get('content-disposition') === 'attachment; filename="built-to-lead.pdf"' && (await f.text()).startsWith('%PDF'), 'the PDF comes back as a named download');
+  const assets = { fetch: async (req) => new Response('%PDF-1.4 test', { status: new URL(req.url).pathname === '/library/worth-building.pdf' ? 200 : 404, headers: { 'content-type': 'application/octet-stream' } }) };
+  const f = await library({ request: get('/api/library?item=wb&t=' + ana), env: { ...env, ASSETS: assets } });
+  ok(f.status === 200 && f.headers.get('content-type') === 'application/pdf' && f.headers.get('content-disposition') === 'attachment; filename="worth-building.pdf"' && (await f.text()).startsWith('%PDF'), 'the PDF comes back as a named download');
   env.DB.raw.prepare('DELETE FROM event WHERE id = (SELECT MAX(id) FROM event)').run(); // keep the counts below as they were
 }
-ok(mc.length === 1 && mc[0].method === 'POST' && /\/tags$/.test(mc[0].url) && JSON.stringify(mc[0].body) === JSON.stringify({ tags: [{ name: 'linktolead-library-built-to-lead', status: 'active' }] }), 'Mailchimp: the one library tag, active');
-await library({ request: get('/api/library?item=btl&t=' + ana), env });
+ok(mc.length === 1 && mc[0].method === 'POST' && /\/tags$/.test(mc[0].url) && JSON.stringify(mc[0].body) === JSON.stringify({ tags: [{ name: 'linktolead-library-worth-building', status: 'active' }] }), 'Mailchimp: the one library tag, active');
+await library({ request: get('/api/library?item=wb&t=' + ana), env });
 ok(mc.length === 1 && events(env, ana, 'library-download').length === 2, 'the same book again: logged, not tagged twice');
 await library({ request: get('/api/library?item=grow&t=' + ana), env });
 ok(mc.length === 2 && mc[1].body.tags[0].name === 'linktolead-library-blueprint-growing', 'another book: its own tag');
 const one = await mOne(env, ana);
-ok(JSON.stringify(one.library.map((x) => x.name)) === JSON.stringify(['Built to Lead', 'The Founder’s Blueprint · Growing']) && one.library.every((x) => x.at), '/mentor: each book once, with its date');
+ok(JSON.stringify(one.library.map((x) => x.name)) === JSON.stringify(['Worth Building', 'The Founder’s Blueprint · Growing']) && one.library.every((x) => x.at), '/mentor: each book once, with its date');
 const roster = (await (await mGet({ request: new Request('https://x/api/mentor', { headers: K }), env })).json()).students;
-ok(roster[0].library.split(',').sort().join() === 'btl,grow', 'roster: what they downloaded');
+ok(roster[0].library.split(',').sort().join() === 'grow,wb', 'roster: what they downloaded');
 ok(summary(roster, []).library === 1 && filter(roster, { tile: 'library' }).length === 1 && filter([{ id: 'x' }], { tile: 'library' }).length === 0, 'the "Downloaded from the library" filter');
 const csv = await (await mGet({ request: new Request('https://x/api/mentor?csv=1', { headers: K }), env })).text();
-ok(csv.split('\r\n')[0].includes('"Library"') && csv.includes('Built to Lead; The Founder’s Blueprint · Growing'), 'CSV: a Library column');
+ok(csv.split('\r\n')[0].includes('"Library"') && csv.includes('Worth Building; The Founder’s Blueprint · Growing'), 'CSV: a Library column');
 env = fresh();
 const bo = await join(env, { email: 'bo@example.com' });
 mc = []; // the join itself went through the public form

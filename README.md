@@ -144,7 +144,7 @@ font until a scan of the real one replaces the file), a plain-text part, and a
 P.S. offer. The welcome (`launchpad-welcome`, once, on account creation), the
 North Star results, Alexandru's notes and his answers in **Ask Alexandru** may carry
 a paid offer (The Boardroom, Unshakeable); the sign-in link and **Your password was
-changed** carry free ones only (Leadionaire, First 100 Clients, Built to Lead).
+changed** carry free ones only (Leadionaire, First 100 Clients, Worth Building).
 The footer (why it came, unsubscribe, postal address) is on every one.
 
 Library downloads go through `/api/library?item=<key>`: signed-in only, logged,

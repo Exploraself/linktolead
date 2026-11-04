@@ -7,11 +7,11 @@
 // one. The tag shows on the founder's Mailchimp profile; /mentor lists what
 // each founder took and when.
 //
-// HUB material (Alexandru, 4 Nov 2026): Worth Building, the 32 frameworks,
-// is no longer free. It opens only with The HUB and The Summit, from the
-// private WORKBOOKS bucket (key in `r2`), never from a public address. Anyone
-// else is sent to the HUB page; ?item=wb&check=1 says yes/no only, like
-// /api/workbook?check=1.
+// HUB material (Alexandru, 4 Nov 2026): Built to Lead, the 99 practical
+// tools, is no longer free. It opens only with The HUB and The Summit, from
+// the private WORKBOOKS bucket (key in `r2`), never from a public address.
+// Anyone else is sent to the HUB page; ?item=btl&check=1 says yes/no only,
+// like /api/workbook?check=1.
 
 import { bad, db, now, studentBy, accountTables } from '../_shared.js';
 import { syncFounder } from '../_mailchimp.js';
@@ -23,8 +23,8 @@ export const LIBRARY_ITEMS = {
   build: { name: 'The Founder’s Blueprint · Building', slug: 'blueprint-building', file: '/library/blueprint-building.pdf' },
   grow: { name: 'The Founder’s Blueprint · Growing', slug: 'blueprint-growing', file: '/library/blueprint-growing.pdf' },
   scale: { name: 'The Founder’s Blueprint · Scaling', slug: 'blueprint-scaling', file: '/library/blueprint-scaling.pdf' },
-  btl: { name: 'Built to Lead', slug: 'built-to-lead', file: '/library/built-to-lead.pdf' },
-  wb: { name: 'Worth Building', slug: 'worth-building', r2: 'worth-building.pdf', as: 'Worth-Building-The-Founders-Playbook.pdf' },
+  btl: { name: 'Built to Lead', slug: 'built-to-lead', r2: 'built-to-lead.pdf', as: 'Built-to-Lead.pdf' },
+  wb: { name: 'Worth Building', slug: 'worth-building', file: '/library/worth-building.pdf' },
   nww: { name: 'A New Way of Winning', slug: 'a-new-way-of-winning', file: '/library/a-new-way-of-winning.pdf' },
   mgp: { name: 'The Leader’s North Star · Massive Growth Plan', slug: 'massive-growth-plan', file: '/library/massive-growth-plan.pdf' },
   lgp: { name: 'The Leader’s Growth Planner 2027', slug: 'leaders-growth-planner', file: '/library/leaders-growth-planner-2027.pdf' },
