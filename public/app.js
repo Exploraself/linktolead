@@ -11,7 +11,7 @@
 
 import { DOMAINS, SEVEN, STAGES, WEEKS, LADDER, LEVELS, SHEETS, SECTIONS, loadStage,
   gateFor, levelFor, isWritten, weekTitle, videoFor, levelVideo, nextGain, holds,
-  LEAD, BOOKING, DISCOVERY, LIBRARY, payHref } from './content.js';
+  LEAD, BOOKING, DISCOVERY, LIBRARY, HUB_NOTE, payHref } from './content.js';
 import { entry, programmeStage, groundPlan, stageNudge, PROGRAMME } from './home.js';
 import { cabinetHTML, cabinetShown, cabinetHidden, cabinetClick, dashboardShown, levelDots, compassStripHTML } from './cabinet.js';
 import { result as fwResult } from './frameworks.js';
@@ -1843,15 +1843,17 @@ function libraryView() {
   const card = (b) => (b.soon
     ? `<li class="lib-book lib-soon">${b.cover ? `<span class="bk3"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>` : '<span class="bk3" aria-hidden="true"><span class="bk3-cover bk3-blank">In preparation</span></span>'}
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small><em>In preparation</em></span></li>`
+    : b.hub
+    // HUB material (4 Nov 2026): no preview and no download below the HUB.
+    // The HUB and The Summit download it (functions/api/library.js checks
+    // again); for everyone else the whole card opens its page in a new tab.
+    ? `<li class="lib-book${joined && hasHub ? '' : ' hub-card'}"><span class="bk3${b.tall ? ' bk3-tall' : ''}"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>
+        <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small><em class="lib-hubnote">${esc(HUB_NOTE)}</em>
+        <span class="lib-acts">${joined && hasHub ? `<a href="${esc(account.libraryHref(b.k))}">${dl}Download your copy</a>` : `<a class="hub-go" href="${esc(b.page)}" target="_blank" rel="noopener">See what’s inside ↗</a>`}</span></span></li>`
     : `<li class="lib-book"><span class="bk3${b.tall ? ' bk3-tall' : ''}"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small>
         <span class="lib-acts"><a href="${esc(b.preview)}" target="_blank" rel="noopener">Preview the first pages →</a>
-        ${b.hub
-    // HUB material (4 Nov 2026): the download for The HUB and The Summit
-    // (functions/api/library.js checks again); everyone else sees what is
-    // inside, on the page that sells it with the HUB.
-    ? (joined && hasHub ? `<a href="${esc(account.libraryHref(b.k))}">${dl}Download your copy</a>` : `<a class="lib-link" href="${esc(b.page)}" target="_blank" rel="noopener">See what’s inside ↗</a>`)
-    : joined ? `<a href="${esc(account.libraryHref(b.k))}">${dl}Free digital copy</a>` : `<a class="lib-link" href="/north3/#join">Create a free account for the free digital copy</a>`}
+        ${joined ? `<a href="${esc(account.libraryHref(b.k))}">${dl}Free digital copy</a>` : `<a class="lib-link" href="/north3/#join">Create a free account for the free digital copy</a>`}
         ${b.online ? `<a class="lib-online" href="${esc(b.online)}">Fill it in online →</a>` : ''}
         ${b.print === false ? '' : `<span class="lib-print">${b.print ? `<a href="${esc(b.print)}" target="_blank" rel="noopener">Print edition ↗</a>` : 'Print edition coming'}</span>`}</span></span></li>`);
   const books = LIBRARY.books.map(card).join('');
@@ -1887,7 +1889,7 @@ function libBanner() {
   if (!libThisVisit) { if (bannerSeen()) return ''; libThisVisit = true; bannerDone(); }
   return `<div class="libban" role="status">
     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/></svg>
-    <div><b>Your library just got fuller.</b><p>With your free account: the North Star’s Massive Growth Plan, The Leader’s Growth Planner 2027, the three Founder’s Blueprint manuals, Worth Building (32 leadership frameworks) and A New Way of Winning (12 principles). Built to Lead (99 practical tools) comes with the HUB.</p></div>
+    <div><b>Your library just got fuller.</b><p>With your free account: the North Star’s Massive Growth Plan, The Leader’s Growth Planner 2027, the three Founder’s Blueprint manuals, Worth Building (32 leadership frameworks) and A New Way of Winning (12 principles). Built to Lead and The Founder’s Growth Manual: ${esc(HUB_NOTE[0].toLowerCase() + HUB_NOTE.slice(1))}.</p></div>
     <button type="button" class="cta" data-go="library">Open my library →</button>
     <button type="button" class="x" data-banner="close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
   </div>`;
