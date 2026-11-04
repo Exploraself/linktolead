@@ -33,8 +33,11 @@ export async function onRequestGet({ request, env, waitUntil }) {
   if (!Object.hasOwn(LIBRARY_ITEMS, key)) return bad('There is no such book in the library.', 404);
   const D = db(env);
   if (!D) return bad('The library is not available right now.', 503);
-  const me = await studentBy(D, url.searchParams.get('t'));
-  if (!me) return go(request, '/north3/#join');
+  const t = url.searchParams.get('t');
+  const me = await studentBy(D, t);
+  // No account: off to make one. An account this browser holds but the site
+  // does not know (an old sign-in): sign in again, then back to the Library.
+  if (!me) return go(request, t ? `/ground-plan/?next=${encodeURIComponent('/ground-plan/#library')}#signin` : '/north3/#join');
   await accountTables(D);
   const before = await D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'library-download' AND detail = ? LIMIT 1").bind(me.id, key).first();
   await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(me.id, 'library-download', now(), key).run();
@@ -42,5 +45,21 @@ export async function onRequestGet({ request, env, waitUntil }) {
     const job = syncFounder(env, D, me.id, 'tag', { tag: libraryTag(key) }).catch(() => {});
     if (typeof waitUntil === 'function') waitUntil(job); else await job;
   }
-  return go(request, LIBRARY_ITEMS[key].file);
+  // The file itself, as a download (4 Nov 2026): the button no longer needs the
+  // browser's download attribute, which saved any page that came back (a
+  // sign-in page, an error) as "download.html". Where the site's files can be
+  // read here (env.ASSETS), the PDF comes back named, as an attachment;
+  // otherwise the browser is sent on to it.
+  const file = LIBRARY_ITEMS[key].file;
+  if (env.ASSETS && typeof env.ASSETS.fetch === 'function') {
+    const r = await env.ASSETS.fetch(new Request(new URL(file, request.url))).catch(() => null);
+    if (r && r.ok) {
+      const h = new Headers(r.headers);
+      h.set('content-type', 'application/pdf');
+      h.set('content-disposition', `attachment; filename="${file.split('/').pop()}"`);
+      h.set('cache-control', 'private, no-store');
+      return new Response(r.body, { status: 200, headers: h });
+    }
+  }
+  return go(request, file);
 }

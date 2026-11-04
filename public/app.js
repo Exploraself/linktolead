@@ -374,7 +374,7 @@ function workbookHTML() {
   if (!WORKBOOK_TIERS.includes(state.tier || 'free')) return '';
   return `<section class="gp-wrap gp-workbook" aria-labelledby="wb-h">
     <div class="wb"><span class="rf-ic">${WORKBOOK_IC}</span><span class="wb-t"><b id="wb-h">Your LAB workbook</b><small>Personal Leadership LAB · The Workbook. Thirteen steps on paper, 94 pages to print and write in.</small></span>
-    <a class="cta wb-btn" href="${esc(account.workbookHref())}" download>${DL_IC}Download your workbook</a></div>
+    <a class="cta wb-btn" href="${esc(account.workbookHref())}">${DL_IC}Download your workbook</a></div>
   </section>`;
 }
 
@@ -1838,7 +1838,7 @@ function libraryView() {
   const manuals = LIBRARY.manuals.map((m) => `<li class="lib-man${m.k === state.stage ? ' lib-yours' : ''}">
       <span class="bk3 bk3-man bk3-${m.k}" aria-hidden="true"><span class="bk3-cover"><small>The Founder’s Blueprint</small><b>${esc(STAGES[m.k].n)}</b></span><i class="bk3-spine"></i></span>
       <span class="lib-mtext"><b>${esc(m.n)}</b><small>${esc(m.sub)} · ${m.pages} pages${m.k === state.stage ? ' · your stage' : ''}</small></span>
-      ${joined ? `<a class="lib-btn" href="${esc(account.libraryHref(m.k))}" download>${dl}Download PDF</a>` : `<a class="lib-btn" href="/north3/#join">Create a free account to download</a>`}
+      ${joined ? `<a class="lib-btn" href="${esc(account.libraryHref(m.k))}">${dl}Download PDF</a>` : `<a class="lib-btn" href="/north3/#join">Create a free account to download</a>`}
     </li>`).join('');
   const card = (b) => (b.soon
     ? `<li class="lib-book lib-soon">${b.cover ? `<span class="bk3"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>` : '<span class="bk3" aria-hidden="true"><span class="bk3-cover bk3-blank">In preparation</span></span>'}
@@ -1846,7 +1846,7 @@ function libraryView() {
     : `<li class="lib-book"><span class="bk3${b.tall ? ' bk3-tall' : ''}"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small>
         <span class="lib-acts"><a href="${esc(b.preview)}" target="_blank" rel="noopener">Preview the first pages →</a>
-        ${joined ? `<a href="${esc(account.libraryHref(b.k))}" download>${dl}Free digital copy</a>` : `<a class="lib-link" href="/north3/#join">Create a free account for the free digital copy</a>`}
+        ${joined ? `<a href="${esc(account.libraryHref(b.k))}">${dl}Free digital copy</a>` : `<a class="lib-link" href="/north3/#join">Create a free account for the free digital copy</a>`}
         ${b.online ? `<a class="lib-online" href="${esc(b.online)}">Fill it in online →</a>` : ''}
         ${b.print === false ? '' : `<span class="lib-print">${b.print ? `<a href="${esc(b.print)}" target="_blank" rel="noopener">Print edition ↗</a>` : 'Print edition coming'}</span>`}</span></span></li>`);
   const books = LIBRARY.books.map(card).join('');
@@ -1866,7 +1866,7 @@ function libraryView() {
       ${hasLab
         // Theirs with their step (3 Nov 2026, the whole check): the download
         // itself (functions/api/workbook.js), not the page that sells the LAB.
-        ? `<a class="lib-btn" href="${esc(account.workbookHref())}" download>Download your workbook</a>`
+        ? `<a class="lib-btn" href="${esc(account.workbookHref())}">Download your workbook</a>`
         : `<a class="lib-btn" href="${esc(L.url)}" target="_blank" rel="noopener">See the LAB ↗</a>`}</div>
   </div></section>`;
 }

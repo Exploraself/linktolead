@@ -57,4 +57,11 @@ const walk = (d) => { for (const f of readdirSync(d)) { const p = join(d, f); if
 walk('.');
 ok(pdfs.length === 0, 'no workbook PDF or PPTX in the repo: ' + pdfs.join(', '));
 
+// The check (4 Nov 2026): yes/no only, nothing paid.
+const chk = async (env) => (await workbook({ request: new Request('https://linktolead.exploraself.com/api/workbook?check=1'), env })).json();
+const c1 = await chk(env0({ WORKBOOKS: bucket() })), c2 = await chk(env0({ WORKBOOKS: bucket(false) })), c3 = await chk(env0());
+ok(c1.ok && c1.bucket && c1.file && !c2.ok && c2.bucket && !c2.file && !c3.ok && !c3.bucket, 'the check says whether the site sees the bucket and the PDF, and nothing more');
+const appjs = readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+ok(!/workbookHref\(\)\)\}" download>/.test(appjs) && !/libraryHref\([mb]\.k\)\)\}" download>/.test(appjs), 'no download attribute: a page that comes back is shown, never saved as download.html');
+ok(/\[\[r2_buckets\]\]\s*binding = "WORKBOOKS"\s*bucket_name = "exploraself-workbooks"/.test(readFileSync(new URL('../wrangler.toml', import.meta.url), 'utf8')), 'the Worker deploy carries the workbook bucket');
 done();
