@@ -413,8 +413,8 @@ export function answerLetter(base, { first, question, answer, to = '', tier, off
 export const UNLOCKED = {
   session: { name: 'The Boardroom', last: 5, extra: 'each one with its questions and its twenty actions', sessions: 'One 1:1 session with me. Before we speak, the team and I read your first three levels, so the time is spent on you, not on catching up.' },
   lab: { name: 'The LAB', last: 9, extra: 'each one with its questions and its twenty actions', sessions: 'Two 1:1 sessions with me in total: the Boardroom’s, and the second with the LAB.' },
-  hub: { name: 'The HUB', last: 12, extra: 'with the LAB included and every resource. Nothing is held back', sessions: 'Three 1:1 sessions with me in total: the Boardroom’s, the LAB’s, and the third with the HUB.' },
-  premium: { name: 'The Summit', last: 12, extra: 'with the LAB, the HUB and every resource. Everything is yours', sessions: 'Me, every week. We will set the day together.' },
+  hub: { name: 'The HUB', last: 12, extra: 'with the LAB included and every resource. Nothing is held back', sessions: 'Three 1:1 sessions with me in total: the Boardroom’s, the LAB’s, and the third with the HUB.', books: true },
+  premium: { name: 'The Summit', last: 12, extra: 'with the LAB, the HUB and every resource. Everything is yours', sessions: 'Me, every week. We will set the day together.', books: true },
 };
 /** The first level a payment opens: the step after the one they had. A
  *  higher step always includes every step below it (Alexandru, 2 Nov 2026). */
@@ -430,6 +430,8 @@ export function unlockedLetter(base, { first, step, from = 'free', to = '', ...o
     opens,
     `What you have with it: ${U.sessions.charAt(0).toLowerCase() + U.sessions.slice(1)}`,
     ['Book your session here, at a time that suits you: ', link(BOOKING)],
+    // The two HUB books (Alexandru, 4 Nov 2026): they open with the HUB and The Summit.
+    ...(U.books ? [['Your two HUB books are waiting in your library: Built to Lead and The Founder’s Growth Manual. ', link(`${base}/ground-plan/#library`, 'Open my library')]] : []),
     `Now we move forward. Level ${pad2(a)} is waiting for you in your Base Camp.`,
     button(`${base}/ground-plan/#programme-${a}`, `Open Level ${pad2(a)}`),
     'You chose to invest in yourself and your business. That decision is already a step. The team and I are here for you.',
