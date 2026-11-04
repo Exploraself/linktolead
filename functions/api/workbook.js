@@ -38,6 +38,14 @@ const page = (status, title, text) => new Response(`<!doctype html><html lang="e
 
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
+  // A check that shows nothing paid (4 Nov 2026): can the site see the
+  // bucket, and is a workbook PDF in it? Yes/no only, so a missing binding is
+  // found in a second instead of by a founder downloading an error page.
+  if (url.searchParams.has('check')) {
+    const bucket = !!(env.WORKBOOKS && typeof env.WORKBOOKS.get === 'function');
+    const file = bucket ? !!(await workbookFile(env.WORKBOOKS)) : false;
+    return new Response(JSON.stringify({ ok: bucket && file, bucket, file }), { headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
+  }
   const D = db(env);
   if (!D) return page(503, 'Not available right now', 'Your workbook can’t be reached right now. Try again in a few minutes.');
   const me = await studentBy(D, url.searchParams.get('t'));

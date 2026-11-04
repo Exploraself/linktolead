@@ -16,11 +16,20 @@ main = "worker.js"
 keep_vars = true
 #
 # The LAB workbook (functions/api/workbook.js): the PRIVATE R2 bucket
-# exploraself-workbooks, bound as WORKBOOKS on the PAGES app (Settings →
-# Bindings → R2 bucket, then Deployments → Retry deployment). It holds the
-# workbook PDF: personal-leadership-lab-workbook-2026.pdf, or the one PDF
-# under any name (as it comes from Drive). Paid content: never in this repo,
-# never public. Without the binding the button explains it is not ready yet.
+# exploraself-workbooks, bound as WORKBOOKS below. It holds the workbook PDF:
+# personal-leadership-lab-workbook-2026.pdf, or the one PDF under any name
+# (as it comes from Drive). Paid content: never in this repo, never public.
+# Without the binding the button explains it is not ready yet.
+#
+# The study room's music (functions/api/music.js): the R2 bucket
+# music-background, bound as MUSIC below, folders Classic/ and Modern/.
+#
+# Both apps need both buckets (4 Nov 2026). The Worker gets them from the
+# [[r2_buckets]] blocks at the end of this file (a binding added only in the
+# Worker's dashboard is dropped by its next deploy). The PAGES app (the live
+# site) needs them in its own dashboard: Settings → Bindings → R2 bucket,
+# for Production, then Deployments → Retry deployment. To see whether the
+# live site reaches the workbook: /api/workbook?check=1 (yes/no only).
 #
 # Mailchimp (functions/_mailchimp.js), all optional, set in the dashboard:
 #   MAILCHIMP_MODE          text    "test" stops every call; each join is only logged
@@ -73,3 +82,11 @@ secret_name = "RESEND_API_KEY"
 # to send does nothing.
 [triggers]
 crons = ["7 * * * *"]
+
+[[r2_buckets]]
+binding = "WORKBOOKS"
+bucket_name = "exploraself-workbooks"
+
+[[r2_buckets]]
+binding = "MUSIC"
+bucket_name = "music-background"

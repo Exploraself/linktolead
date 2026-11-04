@@ -49,11 +49,17 @@ ok(r.status === 404, 'an unknown book: 404');
 r = await library({ request: get('/api/library?item=btl'), env });
 ok(r.status === 302 && r.headers.get('location') === 'https://linktolead.exploraself.com/north3/#join', 'not signed in: off to make an account');
 r = await library({ request: get('/api/library?item=btl&t=not-a-real-token-at-all-xx'), env });
-ok(r.status === 302 && /\/north3\/#join$/.test(r.headers.get('location')), 'a wrong token: the same');
+ok(r.status === 302 && r.headers.get('location') === 'https://linktolead.exploraself.com/ground-plan/?next=%2Fground-plan%2F%23library#signin', 'an account the site does not know: sign in again, back to the Library');
 ok(mc.length === 0, 'nothing tagged without an account');
 r = await library({ request: get('/api/library?item=btl&t=' + ana), env });
 ok(r.status === 302 && r.headers.get('location') === 'https://linktolead.exploraself.com/library/built-to-lead.pdf', 'signed in: on to the file');
 ok(JSON.stringify(events(env, ana, 'library-download')) === '["btl"]', "event 'library-download' with the key");
+{ // Where the site's files can be read: the PDF itself, as a named attachment.
+  const assets = { fetch: async (req) => new Response('%PDF-1.4 test', { status: new URL(req.url).pathname === '/library/built-to-lead.pdf' ? 200 : 404, headers: { 'content-type': 'application/octet-stream' } }) };
+  const f = await library({ request: get('/api/library?item=btl&t=' + ana), env: { ...env, ASSETS: assets } });
+  ok(f.status === 200 && f.headers.get('content-type') === 'application/pdf' && f.headers.get('content-disposition') === 'attachment; filename="built-to-lead.pdf"' && (await f.text()).startsWith('%PDF'), 'the PDF comes back as a named download');
+  env.DB.raw.prepare('DELETE FROM event WHERE id = (SELECT MAX(id) FROM event)').run(); // keep the counts below as they were
+}
 ok(mc.length === 1 && mc[0].method === 'POST' && /\/tags$/.test(mc[0].url) && JSON.stringify(mc[0].body) === JSON.stringify({ tags: [{ name: 'linktolead-library-built-to-lead', status: 'active' }] }), 'Mailchimp: the one library tag, active');
 await library({ request: get('/api/library?item=btl&t=' + ana), env });
 ok(mc.length === 1 && events(env, ana, 'library-download').length === 2, 'the same book again: logged, not tagged twice');
