@@ -12,6 +12,7 @@
 // never a broken download.
 
 import { db, now, studentBy, accountTables } from '../_shared.js';
+import { LIBRARY_R2_KEYS } from './library.js';
 
 /** The steps that hold the workbook (functions/_stripe.js ORDER). */
 export const WORKBOOK_TIERS = ['lab', 'hub', 'premium'];
@@ -22,13 +23,15 @@ export const holdsWorkbook = (tier) => WORKBOOK_TIERS.includes(tier || 'free');
 
 /** The workbook in the bucket: WORKBOOK_KEY, or else the one PDF uploaded
  *  under any name (3 Nov 2026: so the file can go in straight from Drive,
- *  as it is named there, with nothing to rename). */
+ *  as it is named there, with nothing to rename). Never a library book that
+ *  shares the bucket (LIBRARY_R2_KEYS, 4 Nov 2026: Worth Building is HUB
+ *  material, and a LAB founder must never be handed it as their workbook). */
 export async function workbookFile(B) {
   if (!B || typeof B.get !== 'function') return null;
   const named = await B.get(WORKBOOK_KEY).catch(() => null);
   if (named || typeof B.list !== 'function') return named;
   const all = await B.list({ limit: 50 }).catch(() => null);
-  const pdf = all && (all.objects || []).find((o) => /\.pdf$/i.test(o.key));
+  const pdf = all && (all.objects || []).find((o) => /\.pdf$/i.test(o.key) && !LIBRARY_R2_KEYS.includes(o.key));
   return pdf ? B.get(pdf.key).catch(() => null) : null;
 }
 

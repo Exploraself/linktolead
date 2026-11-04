@@ -1833,7 +1833,7 @@ function mbFocus(sel) {
 
 function libraryView() {
   const joined = account.joined() || !!state.me;
-  const hasLab = holds(tierNow(), 'lab');
+  const hasLab = holds(tierNow(), 'lab'), hasHub = holds(tierNow(), 'hub');
   const dl = '<svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const manuals = LIBRARY.manuals.map((m) => `<li class="lib-man${m.k === state.stage ? ' lib-yours' : ''}">
       <span class="bk3 bk3-man bk3-${m.k}" aria-hidden="true"><span class="bk3-cover"><small>The Founder’s Blueprint</small><b>${esc(STAGES[m.k].n)}</b></span><i class="bk3-spine"></i></span>
@@ -1846,7 +1846,12 @@ function libraryView() {
     : `<li class="lib-book"><span class="bk3${b.tall ? ' bk3-tall' : ''}"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small>
         <span class="lib-acts"><a href="${esc(b.preview)}" target="_blank" rel="noopener">Preview the first pages →</a>
-        ${joined ? `<a href="${esc(account.libraryHref(b.k))}">${dl}Free digital copy</a>` : `<a class="lib-link" href="/north3/#join">Create a free account for the free digital copy</a>`}
+        ${b.hub
+    // HUB material (4 Nov 2026): the download for The HUB and The Summit
+    // (functions/api/library.js checks again); everyone else sees what is
+    // inside, on the page that sells it with the HUB.
+    ? (joined && hasHub ? `<a href="${esc(account.libraryHref(b.k))}">${dl}Download your copy</a>` : `<a class="lib-link" href="${esc(b.page)}" target="_blank" rel="noopener">See what’s inside ↗</a>`)
+    : joined ? `<a href="${esc(account.libraryHref(b.k))}">${dl}Free digital copy</a>` : `<a class="lib-link" href="/north3/#join">Create a free account for the free digital copy</a>`}
         ${b.online ? `<a class="lib-online" href="${esc(b.online)}">Fill it in online →</a>` : ''}
         ${b.print === false ? '' : `<span class="lib-print">${b.print ? `<a href="${esc(b.print)}" target="_blank" rel="noopener">Print edition ↗</a>` : 'Print edition coming'}</span>`}</span></span></li>`);
   const books = LIBRARY.books.map(card).join('');
@@ -1855,7 +1860,7 @@ function libraryView() {
   return `<section class="band qband lib"><div class="wrap">
     <p class="eyebrow">${compass} Library &amp; working materials</p>
     <h1 class="qh">Everything that goes with the work</h1>
-    <p class="sec-lede">Your plan and your planner come first: the action, week by week. The three manuals are the programme on paper, to print and fill by hand. The books sit alongside it — the thinking the levels are built from.${joined ? '' : ' A free account opens every download.'}</p>
+    <p class="sec-lede">Your plan and your planner come first: the action, week by week. The three manuals are the programme on paper, to print and fill by hand. The books sit alongside it — the thinking the levels are built from.${joined ? '' : ' A free account opens every free download.'}</p>
     ${growth ? `<h2 class="lib-h">Your plan and your planner</h2>
     <ul class="lib-books">${growth}</ul>` : ''}
     <h2 class="lib-h">The Founder’s Blueprint · the manuals</h2>
@@ -1882,7 +1887,7 @@ function libBanner() {
   if (!libThisVisit) { if (bannerSeen()) return ''; libThisVisit = true; bannerDone(); }
   return `<div class="libban" role="status">
     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z" fill="none" stroke="#B4975F" stroke-width="1.6" stroke-linejoin="round"/></svg>
-    <div><b>Your library just got fuller.</b><p>With your free account: the North Star’s Massive Growth Plan, The Leader’s Growth Planner 2027, the three Founder’s Blueprint manuals, Built to Lead (99 practical tools), Worth Building (32 leadership frameworks) and A New Way of Winning (12 principles).</p></div>
+    <div><b>Your library just got fuller.</b><p>With your free account: the North Star’s Massive Growth Plan, The Leader’s Growth Planner 2027, the three Founder’s Blueprint manuals, Built to Lead (99 practical tools) and A New Way of Winning (12 principles). Worth Building (32 leadership frameworks) comes with the HUB.</p></div>
     <button type="button" class="cta" data-go="library">Open my library →</button>
     <button type="button" class="x" data-banner="close" aria-label="Close"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
   </div>`;

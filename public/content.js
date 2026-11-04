@@ -232,8 +232,11 @@ export const LIBRARY = {
   books: [
     { k: 'btl', kicker: '99 practical tools', n: 'Built to Lead', sub: 'One leader in the making. A personal leadership field guide.',
       cover: '/library/cover-built-to-lead.jpg', preview: '/library/built-to-lead-preview.pdf', file: '/library/built-to-lead.pdf', print: null },
-    { k: 'wb', kicker: '32 leadership frameworks', n: 'Worth Building', sub: 'The Founder’s Playbook. Turn grit into growth and build a business that lasts.',
-      cover: '/library/cover-worth-building.jpg', preview: '/library/worth-building-preview.pdf', file: '/library/worth-building.pdf', print: null },
+    // HUB material (Alexandru, 4 Nov 2026): no public file. The HUB and The
+    // Summit download it (functions/api/library.js); everyone else sees what
+    // is inside on its own page, which sells the HUB.
+    { k: 'wb', kicker: '32 leadership frameworks · in the HUB', n: 'Worth Building', sub: 'The Founder’s Playbook. Turn grit into growth and build a business that lasts.',
+      cover: '/library/cover-worth-building.jpg', preview: '/library/worth-building-preview.pdf', hub: true, page: 'https://exploraself.com/worth-building', print: null },
     { k: 'nww', kicker: '12 principles', n: 'A New Way of Winning', sub: 'The Link to Lead Manual. Four stages. Four domains.',
       cover: '/library/cover-a-new-way-of-winning.jpg', preview: '/library/a-new-way-of-winning-preview.pdf', file: '/library/a-new-way-of-winning.pdf', print: null },
   ],

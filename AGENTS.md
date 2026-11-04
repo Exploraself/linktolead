@@ -317,7 +317,13 @@ how many paid and the share, who did not pay yet, who just paid and the money
 in, for today, 7 days, 30 days or all (pulse in public/mentor/dash.js); the
 amounts only for those with the payments right. A promise on a pay page or in
 a letter names only what the step really opens (rule 6): the library is free
-for everyone, so it is never sold as part of a step.
+for everyone, so it is never sold as part of a step. One exception, HUB
+material (Alexandru, 4 Nov 2026): Worth Building, the 32 frameworks, is shown
+in the library but opens only for The HUB and The Summit. Its file lives only
+in the private WORKBOOKS bucket (`worth-building.pdf`, served by
+functions/api/library.js), never in this repo; its free preview stays in
+public/library/; everyone else gets "See what’s inside", its page on
+exploraself.com, which sells the HUB. No page or letter calls it free.
 
 Refunds (Alexandru, 2 Nov 2026): every Base Camp has "Ask for a refund". The
 founder chooses the programme they paid for and confirms their name and

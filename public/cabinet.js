@@ -101,7 +101,7 @@ const BOOKS = [
   { css: 'II', t: 'Growing', sub: 'Clients repeat', cloth: '#1F3B2B', cap: 'Volume II · 88 pages' },
   { css: 'III', t: 'Scaling', sub: 'A team · a new job', cloth: '#18263F', cap: 'Volume III · 88 pages' },
   { img: '/library/cover-built-to-lead.jpg', t: 'Built to Lead', cap: '99 tools' },
-  { img: '/library/cover-worth-building.jpg', t: 'Worth Building', cap: 'The Founder’s Playbook · 32 frameworks' },
+  { img: '/library/cover-worth-building.jpg', t: 'Worth Building', cap: 'The Founder’s Playbook · 32 frameworks', hub: true },
   { img: '/library/cover-a-new-way-of-winning.jpg', t: 'A New Way of Winning', cap: 'The Link to Lead Manual · 12 principles' },
 ];
 function book(b) {
@@ -170,9 +170,9 @@ export function cabinetHTML(c) {
         <button type="button" class="cab-btn" data-go="ask">${c.askUnread ? 'Read the answer →' : 'Ask Alexandru →'}</button></article>
     </div>
   </div>
-  <div class="cab-lib"><div class="cab-libhead"><p class="cab-eb">The Library</p><h2>Your shelf</h2><p>Digital copies are free with your account. Print editions are on their way.</p></div>
+  <div class="cab-lib"><div class="cab-libhead"><p class="cab-eb">The Library</p><h2>Your shelf</h2><p>Digital copies are free with your account; Worth Building comes with the HUB. Print editions are on their way.</p></div>
     <div class="cab-shelf"><span class="cab-lamp" aria-hidden="true"></span><div class="cab-books">${BOOKS.map(book).join('')}</div><div class="cab-ledge" aria-hidden="true"></div></div>
-    <div class="cab-caps">${BOOKS.map((b) => `<div><b>${esc(b.t)}</b><span>${esc(b.cap)}</span>${b.soon ? '<em>Coming soon</em>' : '<button type="button" data-go="library">Read free</button>'}</div>`).join('')}</div>
+    <div class="cab-caps">${BOOKS.map((b) => `<div><b>${esc(b.t)}</b><span>${esc(b.cap)}</span>${b.soon ? '<em>Coming soon</em>' : b.hub ? '<button type="button" data-go="library">In the HUB</button>' : '<button type="button" data-go="library">Read free</button>'}</div>`).join('')}</div>
   </div>
 </section>`;
 }

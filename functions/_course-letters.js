@@ -155,8 +155,8 @@ export const COURSE_LETTERS = [
    "My Day 5 answer"
   ],
   "ps": {
-   "text": "Worth Building is free in your library: 32 frameworks for the decisions in front of you. ",
-   "path": "/ground-plan/#library"
+   "text": "Worth Building: 32 frameworks. See what’s inside: ",
+   "url": "https://exploraself.com/worth-building"
   }
  },
  {

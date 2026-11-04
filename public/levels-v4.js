@@ -1602,7 +1602,8 @@ export function countedFor(ci) {
   return out;
 }
 /** One sentence of Alexandru's for each reading, word for word from his book
- *  Worth Building (public/library/worth-building.pdf). */
+ *  Worth Building (HUB material since 4 Nov 2026: the file sits in the
+ *  private bucket, never in this repo; the preview is public/library/). */
 export const READ_QUOTES = [
   { q: 'The way you run your day is the way you run your company. If you avoid your numbers at home, you will avoid them at work.', src: 'Worth Building · Business is life, and life is business' },
   { q: 'Stick to what you do best, and serve people. The money follows the service, not the other way round.', src: 'Worth Building · The 50/50 rule' },
