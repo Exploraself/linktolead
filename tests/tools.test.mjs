@@ -49,7 +49,8 @@ const days = read('public/12-days/days.js');
 const D12 = JSON.parse(/export const DAYS12 = (\[[\s\S]*?\]);/.exec(days)[1].replace(/'/g, '"'));
 ok(JSON.stringify(D12) === JSON.stringify(COURSE_LETTERS.slice(1, 13).map((l) => l.subject.replace(/^Day \d+ · /, ''))), '/12-days/ lists the letters’ own subjects');
 const toolkit = read('public/toolkit/index.html');
-ok(!/<a\s[^>]*href=/.test(toolkit) && !toolkit.includes('pmhost'), '/toolkit/: one offer, no links out, no menu');
+// The two HUB books are the one exception (Alexandru, 4 Nov 2026): their first pages and their own page.
+ok(!/<a\s[^>]*href=/.test(toolkit.replace(/<a href=\"(https:\/\/exploraself\.com\/(built-to-lead|founders-growth-manual)|\/library\/(built-to-lead|founders-growth-manual)-preview\.pdf)\" target=\"_blank\" rel=\"noopener\">[^<]+<\/a>/g, '')) && !toolkit.includes('pmhost'), '/toolkit/: one offer, no links out but the HUB books’ first pages and page, no menu');
 ok(toolkit.includes('The Growth Toolkit. <em>For the cash, the team, the evenings and the mornings.</em>'), '/toolkit/: the headline, with the new name');
 for (const f of ['public/tools/catalog.js', 'public/tools/tools-data.js', 'public/toolkit/index.html', 'public/12-days/index.html', 'functions/_course-letters.js', 'functions/_letters.js']) {
   const s = read(f);

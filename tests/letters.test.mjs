@@ -48,7 +48,7 @@ L = passwordChangedLetter(B, { first: 'Maria', offer: 'first100' });
 ok(L.subject === 'Your password was changed' && paras(L.text)[1] === 'Your password was just changed. If that was you, all is well and there’s nothing else to do.'
   && paras(L.text)[2] === 'If it wasn’t, just reply to this email and we’ll lock the account straight away. Your work is safe with us.', 'password: subject and words');
 ok(!L.text.includes('P.S.') && L.text.includes('Thank you for keeping your account safe.') && !L.text.includes(OPENER) && L.receipt === true, 'password: a receipt: thanked, no P.S., no first line');
-ok(launchpadWelcome(B, { first: 'Maria', offer: 'library' }).text.includes(`P.S. While you’re in, open Built to Lead in your library: 99 practical tools, free with your account. ${B}/ground-plan/#library`), 'the library P.S.');
+ok(launchpadWelcome(B, { first: 'Maria', offer: 'library' }).text.includes(`P.S. While you’re in, open Worth Building in your library: 32 frameworks, free with your account. ${B}/ground-plan/#library`), 'the library P.S.');
 ok(launchpadWelcome(B, { offer: null }).text.startsWith('Hi,\n\n'), 'no first name: "Hi,"');
 
 // ── The look ────────────────────────────────────────────────────────────────

@@ -211,6 +211,10 @@ export const payHref = (step) => `/pay/?step=${encodeURIComponent(step)}`;
 // programme. A free account opens every download; previews need
 // nothing. Print editions are paid, through the shop and Amazon. The LAB
 // workbook is a paid product, so it opens on exploraself.com/lab, never here.
+/** The note under every HUB book, on every shelf, word for word (Alexandru,
+ *  4 Nov 2026). */
+export const HUB_NOTE = 'Only available with Business HUB-level access';
+
 export const LIBRARY = {
   // The plan and the planner (31 Oct 2026): personal working material, so a
   // free account opens them like everything else here. Portrait covers (tall).
@@ -230,12 +234,19 @@ export const LIBRARY = {
     { k: 'scale', n: 'The Founder’s Blueprint · Scaling', sub: 'There is a team, and your job has changed', pages: 88, file: '/library/blueprint-scaling.pdf' },
   ],
   books: [
+    // HUB material (Alexandru, 4 Nov 2026): no public file. Everyone may read
+    // the first pages (the free preview) and see what is inside (its own page,
+    // which sells the HUB); the HUB and The Summit download it
+    // (functions/api/library.js). Never "Free digital copy". The note: HUB_NOTE.
     { k: 'btl', kicker: '99 practical tools', n: 'Built to Lead', sub: 'One leader in the making. A personal leadership field guide.',
-      cover: '/library/cover-built-to-lead.jpg', preview: '/library/built-to-lead-preview.pdf', file: '/library/built-to-lead.pdf', print: null },
+      cover: '/library/cover-built-to-lead.jpg', preview: '/library/built-to-lead-preview.pdf', hub: true, page: 'https://exploraself.com/built-to-lead', print: null },
     { k: 'wb', kicker: '32 leadership frameworks', n: 'Worth Building', sub: 'The Founder’s Playbook. Turn grit into growth and build a business that lasts.',
       cover: '/library/cover-worth-building.jpg', preview: '/library/worth-building-preview.pdf', file: '/library/worth-building.pdf', print: null },
     { k: 'nww', kicker: '12 principles', n: 'A New Way of Winning', sub: 'The Link to Lead Manual. Four stages. Four domains.',
       cover: '/library/cover-a-new-way-of-winning.jpg', preview: '/library/a-new-way-of-winning-preview.pdf', file: '/library/a-new-way-of-winning.pdf', print: null },
+    // HUB material, the second book (Alexandru, 4 Nov 2026): 80 pages, 8 modules.
+    { k: 'fgm', kicker: '8 modules', n: 'The Founder’s Growth Manual', sub: 'A working manual for founders, owners and leaders.',
+      cover: '/library/cover-founders-growth-manual.jpg', preview: '/library/founders-growth-manual-preview.pdf', hub: true, page: 'https://exploraself.com/founders-growth-manual', print: null },
   ],
   lab: { n: 'Personal Leadership LAB · The Workbook', sub: '13 steps, each one built on the last. One written answer at a time.', pages: 93, url: 'https://exploraself.com/lab' },
 };

@@ -129,7 +129,7 @@ export const COURSE_LETTERS = [
    "My Day 4 answer"
   ],
   "ps": {
-   "text": "While you’re in, open Built to Lead in your library: 99 practical tools, free with your account. ",
+   "text": "While you’re in, open Worth Building in your library: 32 frameworks, free with your account. ",
    "path": "/ground-plan/#library"
   }
  },
@@ -260,7 +260,7 @@ export const COURSE_LETTERS = [
    "My Day 9 answer"
   ],
   "ps": {
-   "text": "While you’re in, open Built to Lead in your library: 99 practical tools, free with your account. ",
+   "text": "While you’re in, open Worth Building in your library: 32 frameworks, free with your account. ",
    "path": "/ground-plan/#library"
   }
  },

@@ -91,6 +91,9 @@
 .cab-caps b{display:block;font:440 16px/1.2 Newsreader,Georgia,serif}.cab-caps span{display:block;color:var(--muted);font-size:12px;margin:2px 0 4px}
 .cab-caps button{background:none;border:0;padding:0;min-height:32px;font:520 13px 'Inter',Arial,sans-serif;color:var(--gold-ink);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .cab-caps em{color:var(--muted);font-size:12px}
+.cab-caps .cab-hubnote{display:block;font-style:normal;font-weight:600;color:var(--gold-ink)}
+.cab-caps .cab-hub{display:block;min-height:32px;padding-top:6px;font:520 13px 'Inter',Arial,sans-serif;color:var(--gold-ink);text-underline-offset:3px}
+a.cab-book{display:block;text-decoration:none}
 .cab button:focus-visible,.cab a:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 @media(max-width:1020px){.cab-wall{grid-template-columns:1fr 1fr}.cab-dialwrap{grid-column:1/-1;order:-1}.cab-objs{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.cab{padding:0 12px}.cab-wall{grid-template-columns:1fr;padding:20px 16px}.cab-desk{padding:22px 16px}.cab-objs{grid-template-columns:1fr}.cab-books,.cab-caps{justify-content:flex-start}.cab-shelf{padding:34px 16px 0}.cab-ledge{margin:0 -16px}}
