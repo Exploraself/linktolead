@@ -30,15 +30,15 @@ export function items(L, steps) {
     library: [
       { what: `${mb.n.split(' · ')[0]} for your stage`, desc: `A manual for ${STAGE[mb.k]} (${mb.pages} pages), ${STAGE[mg.k]} (${mg.pages}) or ${STAGE[ms.k]} (${ms.pages}). All three open with your account.`,
         life: 'Advice for where you are, not for someone else’s business.', biz: 'A clear road from your stage to the next one.' },
-      { what: btl.n, hub: btl.hub && btl.page, desc: `${btl.kicker}. ${btl.sub.split(/\.\s/).slice(1).join('. ')}`,
+      { what: btl.n, hub: btl.hub && btl.page, pre: btl.preview, desc: `${btl.kicker}. ${btl.sub.split(/\.\s/).slice(1).join('. ')}`,
         life: 'A tool ready for the hard moment: the talk, the decision, the no.', biz: 'Lead people with confidence, even if nobody taught you how.' },
       { what: wb.n, desc: `${wb.kicker}. ${head(wb.sub)}.`,
         life: 'Think bigger, with a structure behind it.', biz: 'Build toward a business that lasts and can run without you.' },
       { what: nww.n, soon: !!nww.soon, desc: `${nww.kicker}. ${nww.sub.split(/\.\s/).slice(1).join('. ')} ${nww.soon ? 'In your library the day it opens.' : 'Free to download with your account.'}`,
         life: 'A win that counts at home as well as at work.', biz: 'Decide what winning is for, then build toward it.' },
-      // HUB material: marked with the note, never linked (this section has one
-      // button only, the free account). Its lines are the book's own words.
-      { what: fgm.n, hub: fgm.hub && fgm.page, desc: `${fgm.kicker}. ${fgm.sub}`,
+      // HUB material: the note, the free first pages and its own page
+      // (Alexandru, 4 Nov 2026). Its lines are the book's own words.
+      { what: fgm.n, hub: fgm.hub && fgm.page, pre: fgm.preview, desc: `${fgm.kicker}. ${fgm.sub}`,
         life: 'Cleaner decisions and stronger relationships.', biz: 'A business that can carry its own weight.' },
     ],
   };
@@ -82,7 +82,7 @@ function group(title, list, start, kind, L) {
     <span class="kit-heads">WHAT YOU GET</span>
     <ol class="kit-list kit-cards" start="${start}">${list.map((x, i) => `<li class="kit-item">
       <div class="kit-vis${KEYS[kind][i] === 'cover' ? ' kit-vis-cover' : ''}" aria-hidden="true">${visFor(KEYS[kind][i], L, i - 1)}<span class="kit-n">${start + i}</span>${x.soon ? '<span class="kit-soonband">COMING SOON</span>' : x.hub ? '<span class="kit-soonband">IN THE HUB</span>' : ''}</div>
-      <div class="kit-what"><b>${esc(x.what)}${x.soon ? ' <span class="kit-tag">coming soon</span>' : ''}</b><p>${esc(x.desc)}</p>${x.hub ? `<p class="kit-hubnote">${esc(HUB_NOTE)}</p>` : ''}</div>
+      <div class="kit-what"><b>${esc(x.what)}${x.soon ? ' <span class="kit-tag">coming soon</span>' : ''}</b><p>${esc(x.desc)}</p>${x.hub ? `<p class="kit-hubnote">${esc(HUB_NOTE)}</p><p class="kit-hublinks"><a href="${esc(x.pre)}" target="_blank" rel="noopener">Read the first pages</a> · <a href="${esc(x.hub)}" target="_blank" rel="noopener">See what’s inside →</a></p>` : ''}</div>
       <div class="kit-cell kit-life"><span class="kit-lab">IN YOUR LIFE</span><p>${esc(x.life)}</p></div>
       <div class="kit-cell kit-biz"><span class="kit-lab">IN YOUR BUSINESS</span><p>${esc(x.biz)}</p></div></li>`).join('')}</ol></div>`;
 }

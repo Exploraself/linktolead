@@ -92,7 +92,7 @@
 .cab-caps button{background:none;border:0;padding:0;min-height:32px;font:520 13px 'Inter',Arial,sans-serif;color:var(--gold-ink);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .cab-caps em{color:var(--muted);font-size:12px}
 .cab-caps .cab-hubnote{display:block;font-style:normal;font-weight:600;color:var(--gold-ink)}
-.cab-caps .cab-hub{display:inline-block;min-height:32px;padding-top:6px;font:520 13px 'Inter',Arial,sans-serif;color:var(--gold-ink);text-underline-offset:3px}
+.cab-caps .cab-hub{display:block;min-height:32px;padding-top:6px;font:520 13px 'Inter',Arial,sans-serif;color:var(--gold-ink);text-underline-offset:3px}
 a.cab-book{display:block;text-decoration:none}
 .cab button:focus-visible,.cab a:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 @media(max-width:1020px){.cab-wall{grid-template-columns:1fr 1fr}.cab-dialwrap{grid-column:1/-1;order:-1}.cab-objs{grid-template-columns:1fr 1fr}}

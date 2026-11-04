@@ -124,7 +124,7 @@ const COPY = [
   'A New Way of Winning', '12 principles. Four stages. Four domains. Free to download with your account.', 'A win that counts at home as well as at work.', 'Decide what winning is for, then build toward it.',
   'Your tools · they work for you from day one', 'Your library · download and keep', 'WHAT YOU GET', 'IN YOUR LIFE', 'IN YOUR BUSINESS',
   '3 manuals, one for each stage · 99 practical tools, with the HUB · 32 leadership frameworks · 12 principles · 8 modules, with the HUB',
-  'The Founder’s Growth Manual', '8 modules. A working manual for founders, owners and leaders.', 'Cleaner decisions and stronger relationships.', 'A business that can carry its own weight.', 'Only available with the HUB',
+  'The Founder’s Growth Manual', '8 modules. A working manual for founders, owners and leaders.', 'Cleaner decisions and stronger relationships.', 'A business that can carry its own weight.', 'Only available with Business HUB-level access', 'Read the first pages', 'See what’s inside →',
   'You don’t have to figure it out alone. Your mentor, and the whole team behind you.', 'Notes from Alexandru and the team arrive at your Base Camp, and you can reply.',
   'One question before you scroll on: what would one more free evening a week give your family?', '4 tools that work from day one', '3 manuals and 2 books to download, two more with the HUB', 'Alexandru and the team beside you',
   'Free and yours to keep', 'Create my free account →', 'Your name, your email, a password and three short questions about your business. No card.',
@@ -133,13 +133,14 @@ for (const t of COPY) ok(flat.includes(t), `kit copy: ${t}`);
 const I = items(LIBRARY, ALL_STEP_IDS.length);
 ok(I.tools.length + I.library.length === 9 && (K.match(/class="kit-item"/g) || []).length === 9, 'nine items');
 ok((K.match(/IN YOUR LIFE<\/span><p>/g) || []).length === 9 && (K.match(/IN YOUR BUSINESS<\/span><p>/g) || []).length === 9, 'every item has a LIFE and a BUSINESS line');
-ok((K.match(/Only available with the HUB/g) || []).length === 2 && K.includes('IN THE HUB'), 'both HUB books stay on the shelf, marked: they open with the HUB');
+ok((K.match(/Only available with Business HUB-level access/g) || []).length === 2 && K.includes('IN THE HUB'), 'both HUB books stay on the shelf, with the note');
 for (const m of LIBRARY.manuals) ok(K.includes(`${m.pages} pages`), `page count ${m.pages} comes from LIBRARY`);
 ok(markup({ ...LIBRARY, manuals: LIBRARY.manuals.map((m) => ({ ...m, pages: m.pages + 1 })) }, 32).includes(`(${LIBRARY.manuals[1].pages + 1})`), 'change LIBRARY and the page counts follow');
 ok(items(LIBRARY, null).tools[2].desc.startsWith('Short steps in your own order'), 'no live step count: no number is made up');
 for (const b of LIBRARY.books) ok(K.includes(`src="${b.cover}"`) && /loading="lazy" decoding="async"/.test(K) && K.includes('width="480" height="480"'), `${b.n}: real cover, lazy, sized`);
 ok((K.match(/data-gate class="gold-btn">Create my free account →/g) || []).length === 1, 'the closing button opens the account box (data-gate)');
-ok(!/<a\s/i.test(K), 'no links to other offers in the section');
+// The two HUB books are the one exception (Alexandru, 4 Nov 2026): their first pages and their own page.
+ok(!/<a\s/i.test(K.replace(/<a href=\"(https:\/\/exploraself\.com\/(built-to-lead|founders-growth-manual)|\/library\/(built-to-lead|founders-growth-manual)-preview\.pdf)\" target=\"_blank\" rel=\"noopener\">[^<]+<\/a>/g, '')), 'no links to other offers in the section but the HUB books’ first pages and page');
 const SJ = read('public/north3/sales.js');
 ok(/kit\.querySelectorAll\('\[data-gate\]'\)\.forEach\(\(b\) => b\.addEventListener\('click', openGate\)\)/.test(SJ), 'the section’s buttons are wired to the same account box');
 ok(!/mailchimp/i.test(SJ + read('public/north3/kit.js') + read('public/account-box.js') + read('public/northstar/app.js')), 'no Mailchimp code on the sales pages or the North Star');

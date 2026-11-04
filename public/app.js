@@ -1844,12 +1844,12 @@ function libraryView() {
     ? `<li class="lib-book lib-soon">${b.cover ? `<span class="bk3"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>` : '<span class="bk3" aria-hidden="true"><span class="bk3-cover bk3-blank">In preparation</span></span>'}
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small><em>In preparation</em></span></li>`
     : b.hub
-    // HUB material (4 Nov 2026): no preview and no download below the HUB.
-    // The HUB and The Summit download it (functions/api/library.js checks
-    // again); for everyone else the whole card opens its page in a new tab.
-    ? `<li class="lib-book${joined && hasHub ? '' : ' hub-card'}"><span class="bk3${b.tall ? ' bk3-tall' : ''}"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>
-        <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small><em class="lib-hubnote">${esc(HUB_NOTE)}</em>
-        <span class="lib-acts">${joined && hasHub ? `<a href="${esc(account.libraryHref(b.k))}">${dl}Download your copy</a>` : `<a class="hub-go" href="${esc(b.page)}" target="_blank" rel="noopener">See what’s inside ↗</a>`}</span></span></li>`
+    // HUB material (Alexandru, 4 Nov 2026): the cover with its note under it,
+    // the free first pages and its own page for everyone; "Download your copy"
+    // for The HUB and The Summit (functions/api/library.js checks again).
+    ? `<li class="lib-book lib-hubbook"><span class="lib-hubcov"><a class="bk3${b.tall ? ' bk3-tall' : ''}" href="${esc(b.page)}" target="_blank" rel="noopener" aria-label="${esc(b.n)}: see what’s inside"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></a><em class="lib-hubnote">${esc(HUB_NOTE)}</em></span>
+        <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small>
+        <span class="lib-acts">${joined && hasHub ? `<a href="${esc(account.libraryHref(b.k))}">${dl}Download your copy</a>` : ''}<a href="${esc(b.preview)}" target="_blank" rel="noopener">Read the first pages →</a><a href="${esc(b.page)}" target="_blank" rel="noopener">See what’s inside →</a></span></span></li>`
     : `<li class="lib-book"><span class="bk3${b.tall ? ' bk3-tall' : ''}"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small>
         <span class="lib-acts"><a href="${esc(b.preview)}" target="_blank" rel="noopener">Preview the first pages →</a>

@@ -1,10 +1,11 @@
 // The HUB books (Alexandru, 4 Nov 2026): Built to Lead (99 practical tools)
 // and The Founder's Growth Manual (8 modules) open only with The HUB and The
-// Summit, from the private WORKBOOKS bucket, never from this public repo. They
-// stay on every shelf with the note "Only available with the HUB"; below the
-// HUB there is no preview and no download, and the whole card opens the
-// book's own page. The LAB workbook's fallback never picks them. No page or
-// letter calls them free. Worth Building (32 frameworks) stays free.
+// Summit, from the private WORKBOOKS bucket, never from this public repo. On
+// every shelf: the cover, the note "Only available with Business HUB-level
+// access", "Read the first pages" (the free preview, for everyone) and "See
+// what's inside" (the book's page); the HUB and the Summit "Download your
+// copy". Never "Free digital copy". The LAB workbook's fallback never picks
+// them. Worth Building (32 frameworks) stays free.
 
 import { onRequestGet as library, LIBRARY_ITEMS, HUB_BOOK_TIERS, HUB_PAGE, LIBRARY_R2_KEYS, holdsHubBook } from '../functions/api/library.js';
 import { workbookFile } from '../functions/api/workbook.js';
@@ -25,7 +26,7 @@ const BOOKS = {
   btl: { key: 'built-to-lead.pdf', as: 'Built-to-Lead.pdf', page: 'https://exploraself.com/built-to-lead', name: 'Built to Lead' },
   fgm: { key: 'founders-growth-manual.pdf', as: 'The-Founders-Growth-Manual.pdf', page: 'https://exploraself.com/founders-growth-manual', name: 'The Founder’s Growth Manual' },
 };
-ok(HUB_NOTE === 'Only available with the HUB', 'the note, word for word');
+ok(HUB_NOTE === 'Only available with Business HUB-level access', 'the note, word for word');
 ok(JSON.stringify([...LIBRARY_R2_KEYS].sort()) === JSON.stringify(['built-to-lead.pdf', 'founders-growth-manual.pdf']), 'two HUB books in the private bucket, nothing else');
 ok(LIBRARY_ITEMS.wb.file === '/library/worth-building.pdf' && !LIBRARY_ITEMS.wb.r2 && existsSync('public/library/worth-building.pdf'), 'Worth Building stays free, as before');
 ok(HUB_BOOK_TIERS.join() === 'hub,premium' && holdsHubBook('hub') && holdsHubBook('premium') && !holdsHubBook('lab') && !holdsHubBook('session') && !holdsHubBook('free') && !holdsHubBook(null), 'only The HUB and The Summit hold them, never The LAB');
@@ -59,9 +60,9 @@ for (const [k, B] of Object.entries(BOOKS)) {
   const chk = async (e) => (await hit(e, '', '&check=1')).json();
   const c1 = await chk(env0({ WORKBOOKS: bucket() })), c2 = await chk(env0({ WORKBOOKS: bucket(false) })), c3 = await chk(env0());
   ok(c1.ok && c1.bucket && c1.file && !c2.ok && c2.bucket && !c2.file && !c3.ok && !c3.bucket && Object.keys(c1).join() === 'ok,bucket,file', `${k}: ?check=1 says yes/no only`);
-  ok(!existsSync(`public/library/${B.key}`) && existsSync(`public/library/cover-${B.key.replace('.pdf', '.jpg')}`), `${k}: no full PDF in the repo; the cover is there`);
+  ok(!existsSync(`public/library/${B.key}`) && existsSync(`public/library/cover-${B.key.replace('.pdf', '.jpg')}`) && existsSync(`public/library/${B.key.replace('.pdf', '-preview.pdf')}`), `${k}: no full PDF in the repo; the cover and the free first pages are there`);
   const card = LIBRARY.books.find((b) => b.k === k);
-  ok(card && card.hub && !card.file && !card.preview && card.page === B.page, `${k}: the library card has its page, and no file and no preview`);
+  ok(card && card.hub && !card.file && card.preview === `/library/${B.key.replace('.pdf', '-preview.pdf')}` && card.page === B.page, `${k}: the library card has its page and its first pages, and no file`);
 }
 
 // ── The LAB workbook never picks a HUB book ────────────────────────────────
@@ -74,24 +75,23 @@ for (const [k, B] of Object.entries(BOOKS)) {
 
 // ── Never in this public repo; no preview below the HUB ───────────────────
 const files = [];
-const walk = (d) => { for (const f of readdirSync(d)) { const p = join(d, f); if (f === 'node_modules' || f === '.git') continue; if (statSync(p).isDirectory()) walk(p); else if (/^(built-to-lead|founders-growth-manual)(-preview)?\.pdf$/i.test(f)) files.push(p); } };
+const walk = (d) => { for (const f of readdirSync(d)) { const p = join(d, f); if (f === 'node_modules' || f === '.git') continue; if (statSync(p).isDirectory()) walk(p); else if (/^(built-to-lead|founders-growth-manual)\.pdf$/i.test(f)) files.push(p); } };
 walk('.');
-ok(files.length === 0, 'no HUB book and no preview of one anywhere in the repo: ' + files.join(', '));
+ok(files.length === 0, 'no HUB book anywhere in the repo (only its free first pages): ' + files.join(', '));
 
 // ── Every shelf: both books, the note, the whole card to the page ─────────
 const app = readFileSync('public/app.js', 'utf8');
-ok(/: b\.hub[\s\S]{0,400}hub-card[\s\S]{0,600}HUB_NOTE[\s\S]{0,300}joined && hasHub \?[\s\S]{0,200}Download your copy[\s\S]{0,200}class="hub-go" href="\$\{esc\(b\.page\)\}" target="_blank"/.test(app), 'Base Camp: Download for The HUB and The Summit; for everyone else the whole card opens the book’s page, with the note');
-const css = readFileSync('public/style.css', 'utf8');
-ok(/\.hub-card \.hub-go::after\{content:"";position:absolute;inset:0\}/.test(css) && /\.hub-card:focus-within\{outline/.test(css), 'the whole card is the link, and its focus shows');
+ok(/: b\.hub[\s\S]{0,400}lib-hubcov[\s\S]{0,300}HUB_NOTE[\s\S]{0,400}joined && hasHub \?[\s\S]{0,200}Download your copy[\s\S]{0,200}Read the first pages →[\s\S]{0,200}See what’s inside →/.test(app), 'Base Camp: the note under the cover, Read the first pages and See what’s inside for everyone, Download for The HUB and The Summit');
 const kit = markup(LIBRARY, 20);
-ok((kit.match(/Only available with the HUB/g) || []).length === 2 && kit.includes('Built to Lead') && kit.includes('The Founder’s Growth Manual') && !/<a\s/i.test(kit), 'road2 kit (one button only, no links out): both books, with the note');
+ok((kit.match(/Only available with Business HUB-level access/g) || []).length === 2 && kit.includes('/library/built-to-lead-preview.pdf') && kit.includes('/library/founders-growth-manual-preview.pdf') && kit.includes('https://exploraself.com/founders-growth-manual'), 'road2 kit: both books, the note, the first pages and the page');
+{ const t = readFileSync('public/toolkit/index.html', 'utf8'); ok((t.match(/Only available with Business HUB-level access\./g) || []).length === 2 && t.includes('/library/founders-growth-manual-preview.pdf') && t.includes('https://exploraself.com/built-to-lead'), 'the toolkit page: both books, the note, the first pages and the page'); }
 const SHELVES = ['public/road1/index.html', 'public/road3/index.html', 'public/north2/index.html', 'public/cabinet.js'];
-{ const t = readFileSync('public/toolkit/index.html', 'utf8'); ok((t.match(/Only available with the HUB\./g) || []).length === 2 && t.includes('Built to Lead') && t.includes('The Founder’s Growth Manual'), 'the toolkit page (no links out): both books, with the note'); }
 for (const p of SHELVES) {
   const s = readFileSync(p, 'utf8');
   ok(s.includes('https://exploraself.com/built-to-lead') && s.includes('https://exploraself.com/founders-growth-manual'), `${p}: both books, each to its page`);
-  ok(/only available with the HUB|Only available with the HUB|HUB_NOTE/.test(s) && !/available with the hub/.test(s), `${p}: the note, with HUB in capitals`);
-  ok(!/built-to-lead-preview|founders-growth-manual-preview/.test(s), `${p}: no preview below the HUB`);
+  ok(/only available with Business HUB-level access|Only available with Business HUB-level access|HUB_NOTE/.test(s), `${p}: the note`);
+  ok(s.includes('built-to-lead-preview.pdf') && s.includes('founders-growth-manual-preview.pdf'), `${p}: the free first pages of both`);
+  ok(!/Free digital copy/.test(s), `${p}: never “Free digital copy” for a HUB book`);
 }
 const FREE = /(Built to Lead|Growth Manual)[^.\n]{0,60}\bfree\b|\bfree\b[^.\n]{0,40}(Built to Lead|Growth Manual)|Built to Lead \(99 tools\)(?!.{0,80}HUB)|99 practical tools, the digital copy/i;
 for (const p of ['public/app.js', 'public/cabinet.js', 'public/content.js', 'public/north2/index.html', 'public/north3/kit.js', 'public/road1/index.html', 'public/road3/index.html', 'public/toolkit/index.html']) {
