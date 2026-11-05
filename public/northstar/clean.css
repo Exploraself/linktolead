@@ -1,0 +1,180 @@
+/* ExploraSelf Leader's North Star · the clean look (Alexandru, 5 Nov 2026).
+   Loaded last. It changes the look only: the words, their order and the
+   flow stay as they are. Light and white, one easy-to-read font
+   (Atkinson Hyperlegible, AGENTS.md rule 11) with Newsreader for titles,
+   hairlines instead of heavy boxes, navy ink with the blue accent and gold
+   only where something is a gift. The four-domain wheel in the hero stays
+   (Alexandru's pick). The light-only changes sit under :not([data-theme=dark]),
+   so the dark workspace theme keeps its own look. */
+
+.cf{--line:#E1E6ED;--cream:#EDF1F6;--panel:#F7F9FC;--soft:#F3F6FA;--goldtx:#8A6A2F;--shadow:0 1px 2px rgba(14,28,43,.04),0 16px 36px -22px rgba(14,28,43,.22)}
+.cf[data-theme="dark"]{--soft:#121E2D;--goldtx:#D6BF8F;--shadow:none}
+
+/* One easy-to-read font for the text, Newsreader for titles. */
+.cf,.cf button,.cf input,.cf select,.cf textarea,.dbox,.nsmenu{font-family:'Atkinson Hyperlegible','Segoe UI',system-ui,-apple-system,Arial,sans-serif}
+.cf{font-size:15px;line-height:1.6}
+body{font-weight:400}
+.cf .eb{font-weight:700;letter-spacing:.16em}
+.cf .nsdiv-n{font-family:inherit}
+
+/* A plain white page: no rings, no glow. */
+.cf:not([data-theme="dark"]).atmo,.cf:not([data-theme="dark"]) .atmo{background:#FFFFFF;background-image:none}
+body:not(.dark){background:#FFFFFF}
+.cf .card{border-radius:14px}
+.cf .lift:hover{box-shadow:var(--shadow)}
+
+/* ── The left menu: white, a hairline at its edge ── */
+.cf:not([data-theme="dark"]) .side{background:#FFFFFF;color:var(--ink);border-right:1px solid var(--line)}
+.cf:not([data-theme="dark"]) .side>a[data-go="overview"]{color:var(--ink) !important}
+.cf:not([data-theme="dark"]) .side>a[data-go="overview"] small{color:var(--muted) !important}
+.cf:not([data-theme="dark"]) .side .side-extra{color:var(--muted) !important}
+.cf:not([data-theme="dark"]) .side .side-extra p{color:var(--ink) !important}
+.cf:not([data-theme="dark"]) .side .side-extra small,.cf:not([data-theme="dark"]) .side #save-status{color:var(--muted) !important}
+.cf:not([data-theme="dark"]) .side .nl{color:var(--muted)}
+.cf:not([data-theme="dark"]) .side .nl:hover{background:var(--soft);color:var(--ink)}
+.cf:not([data-theme="dark"]) .side .nl.on{color:var(--ink);background:var(--soft);border-color:transparent}
+.cf:not([data-theme="dark"]) .side .ni{color:var(--muted)}
+.cf:not([data-theme="dark"]) .side .nl.on .ni{color:var(--goldink)}
+.cf:not([data-theme="dark"]) .side .nl small{color:var(--muted) !important}
+.cf:not([data-theme="dark"]) .side .nl svg [stroke="#EEF2F7"],.cf:not([data-theme="dark"]) .side .nl svg [stroke="#B8C6D6"]{stroke:currentColor}
+.cf:not([data-theme="dark"]) .side .nl svg [fill="#EEF2F7"],.cf:not([data-theme="dark"]) .side .nl svg [fill="#B8C6D6"]{fill:currentColor}
+.cf:not([data-theme="dark"]) .incub-link{background:#FFFFFF;color:var(--ink);border:1px solid #E2D3B0}
+.cf:not([data-theme="dark"]) .incub-link:hover{border-color:#B4975F}
+.cf:not([data-theme="dark"]) .incub-link svg,.cf:not([data-theme="dark"]) .incub-link i{color:#B4975F}
+.cf:not([data-theme="dark"]) .incub-link small{color:var(--goldtx)}
+.cf:not([data-theme="dark"]) .tk-link{background:#FFFFFF;color:var(--ink);border:1px solid var(--line)}
+.cf:not([data-theme="dark"]) .tk-link:hover{border-color:var(--gold)}
+.cf:not([data-theme="dark"]) .tk-link svg{color:var(--goldink);background:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
+.cf:not([data-theme="dark"]) .tk-link:hover svg{color:var(--ink)}
+.cf:not([data-theme="dark"]) .tk-link small,.cf:not([data-theme="dark"]) .tk-link i{color:var(--goldink)}
+.cf:not([data-theme="dark"]) .tk-link em{color:var(--muted)}
+.cf:not([data-theme="dark"]) .days-link{background:#FFFFFF;color:var(--ink);border-color:var(--line)}
+.cf:not([data-theme="dark"]) .days-link:hover{border-color:#B4975F}
+.cf:not([data-theme="dark"]) .days-link svg{color:#B4975F}
+.cf:not([data-theme="dark"]) .days-link small{color:var(--muted)}
+.cf:not([data-theme="dark"]) .days-link em{color:var(--goldtx)}
+
+/* How the North Star works: a quiet line under the four parts. */
+.ns-intro{display:flex;align-items:center;gap:10px;margin:10px 0 0;padding:11px 13px;border-radius:8px;text-decoration:none;color:#B8C6D6;font-size:13px;line-height:1.3;border:1px solid transparent}
+.ns-intro svg{width:18px;height:18px;flex:none}
+.ns-intro span{flex:1;min-width:0}
+.ns-intro i{font-style:normal}
+.ns-intro:hover{color:#EEF2F7;background:rgba(255,255,255,.07)}
+.cf:not([data-theme="dark"]) .ns-intro{color:var(--goldink);border-color:var(--line)}
+.cf:not([data-theme="dark"]) .ns-intro:hover{color:var(--ink);background:var(--soft)}
+
+/* ── The hero: white, the wheel kept ── */
+.cf:not([data-theme="dark"]) .hz{background:#FFFFFF;color:var(--ink);border-radius:0;padding:36px 8px 20px;box-shadow:none}
+.cf:not([data-theme="dark"]) .hz::after{display:none}
+.cf:not([data-theme="dark"]) .hz .hz-sky{display:none}
+.cf:not([data-theme="dark"]) .hz-eb{color:var(--muted)}
+.cf:not([data-theme="dark"]) .hz-row::before{background:linear-gradient(90deg,transparent,var(--line) 18%,var(--line) 82%,transparent)}
+.cf:not([data-theme="dark"]) .hz-l{color:var(--ink)}
+.cf:not([data-theme="dark"]) .hz-r{color:var(--goldink)}
+.cf:not([data-theme="dark"]) .hz-mid{color:var(--ink);filter:none}
+.cf:not([data-theme="dark"]) .hz-sub{color:var(--ink);font-size:17px}
+.cf:not([data-theme="dark"]) .hz-gift{border:0;background:none;color:var(--muted);text-align:center;flex-direction:column;align-items:center;gap:8px;padding:0;margin:0}
+.cf:not([data-theme="dark"]) .hz-gift svg{color:#B4975F;margin:0}
+.cf:not([data-theme="dark"]) .hz-gift b{color:var(--ink);font-weight:700}
+.cf:not([data-theme="dark"]) .hz-gift .hz-by{color:var(--goldtx)}
+.cf .hz-go{border-radius:999px;font-weight:700}
+.cf:not([data-theme="dark"]) .hz-go{background:var(--ink);color:#FFFFFF;border:0}
+.cf:not([data-theme="dark"]) .hz-go:hover{background:#1D3048;box-shadow:0 14px 30px -14px rgba(14,28,43,.6)}
+.cf:not([data-theme="dark"]) .hz-meta{color:var(--muted)}
+
+/* ── Light panels where the page had dark ones ──
+   The banner, the reading, small notes, the Growth Plan header and the next
+   step. The what-if lab (Part 4) stays a flat navy panel: one dark moment. */
+.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease),.cf:not([data-theme="dark"]) .gp-head,.cf:not([data-theme="dark"]) .nsnext{background:#FFFFFF;background-image:none;color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow)}
+.cf:not([data-theme="dark"]) .lp-sticky{background:rgba(255,255,255,.92) !important;-webkit-backdrop-filter:saturate(1.4) blur(12px);backdrop-filter:saturate(1.4) blur(12px)}
+.cf:not([data-theme="dark"]) .fbtease,.cf:not([data-theme="dark"]) #s-whatif{background:#0E1C2B;background-image:none}
+:is(.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease),.cf:not([data-theme="dark"]) .gp-head,.cf:not([data-theme="dark"]) .nsnext) :is([style*="color: #EEF2F7"],[style*="color: #E3EAF2"],[style*="color: #D9E2EC"]){color:var(--ink) !important}
+:is(.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease),.cf:not([data-theme="dark"]) .gp-head,.cf:not([data-theme="dark"]) .nsnext) :is([style*="color: #A9C0D9"]){color:var(--goldink) !important}
+:is(.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease),.cf:not([data-theme="dark"]) .gp-head,.cf:not([data-theme="dark"]) .nsnext) :is([style*="color: #B8C6D6"],[style*="color: #A9B6C6"],[style*="color: #C9D3DE"]){color:var(--muted) !important}
+:is(.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease),.cf:not([data-theme="dark"]) .gp-head,.cf:not([data-theme="dark"]) .nsnext) :is([style*=" color: #D6BF8F"],[style^="color: #D6BF8F"]){color:var(--goldtx) !important}
+/* Domain colours drawn for a dark panel get their deeper shade on white. */
+:is(.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease)) [style*="color: #E0A282"]{color:var(--self) !important}
+:is(.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease)) [style*="color: #9BC0A1"]{color:var(--people) !important}
+:is(.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease)) [style*="color: #91B8D5"]{color:var(--work) !important}
+:is(.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease)) [style*="color: #DDBD69"]{color:var(--market) !important}
+.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease) [style*="background: #E0A282"]{background:var(--self) !important}
+.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease) [style*="background: #9BC0A1"]{background:var(--people) !important}
+.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease) [style*="background: #91B8D5"]{background:var(--work) !important}
+.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease) [style*="background: #DDBD69"]{background:var(--market) !important}
+.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease) svg [fill="#E0A282"]{fill:var(--self)}
+.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease) svg [fill="#9BC0A1"]{fill:var(--people)}
+.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease) svg [fill="#91B8D5"]{fill:var(--work)}
+.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease) svg [fill="#DDBD69"]{fill:var(--market)}
+.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease) svg [stroke="#E0A282"]{stroke:var(--self)}
+.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease) svg [stroke="#9BC0A1"]{stroke:var(--people)}
+.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease) svg [stroke="#91B8D5"]{stroke:var(--work)}
+.cf:not([data-theme="dark"]) .deep:not(#s-whatif):not(.fbtease) svg [stroke="#DDBD69"]{stroke:var(--market)}
+/* The reading's chart lines and words, redrawn for white. */
+.cf:not([data-theme="dark"]) .nscompbox svg [stroke="#2A3A50"]{stroke:var(--line)}
+.cf:not([data-theme="dark"]) .nscompbox svg [fill="#2A3A50"]{fill:var(--line)}
+.cf:not([data-theme="dark"]) .nscompbox svg [fill="#EEF2F7"]{fill:var(--ink)}
+.cf:not([data-theme="dark"]) .nscompbox svg [stroke="#EEF2F7"]{stroke:var(--ink)}
+.cf:not([data-theme="dark"]) .nscompbox svg [fill="#A9C0D9"]{fill:var(--goldink)}
+.cf:not([data-theme="dark"]) .nscompbox svg [stroke="#A9C0D9"]{stroke:var(--goldink)}
+.cf:not([data-theme="dark"]) .nscompbox svg [fill="#C9D3DE"]{fill:var(--muted)}
+.cf:not([data-theme="dark"]) .nscompbox svg [fill="#22405F"]{fill:#DCE6F1}
+.cf:not([data-theme="dark"]) .nsread{color:var(--ink)}
+.cf:not([data-theme="dark"]) .nsread span:not(.eb){color:var(--ink)}
+
+/* The Growth Plan header. */
+.cf:not([data-theme="dark"]) .gp-head{border-color:#E2D3B0}
+.cf:not([data-theme="dark"]) .gp-head h2,.cf:not([data-theme="dark"]) .gp-lead,.cf:not([data-theme="dark"]) .gp-tag i{color:var(--ink)}
+.cf:not([data-theme="dark"]) .gp-sub,.cf:not([data-theme="dark"]) .gp-moves li::before,.cf:not([data-theme="dark"]) .gp-prog b{color:var(--goldtx)}
+.cf:not([data-theme="dark"]) .gp-tag,.cf:not([data-theme="dark"]) .gp-prog{color:var(--muted)}
+.cf:not([data-theme="dark"]) .gp-lead{border-top-color:var(--line)}
+.cf:not([data-theme="dark"]) .gp-moves li{color:var(--ink);border-color:var(--line)}
+.cf:not([data-theme="dark"]) .gp-bar{background:var(--cream)}
+.cf:not([data-theme="dark"]) .gp-bar i{background:#B4975F}
+.cf .gp-pdf{border-radius:999px}
+.cf .gp-step{border-left-width:3px;border-radius:12px}
+
+/* The next step. */
+.cf:not([data-theme="dark"]) .nsnext h2{color:var(--ink)}
+.cf:not([data-theme="dark"]) .nsnext h2 .sfi{color:var(--goldtx)}
+.cf:not([data-theme="dark"]) .nsnext p{color:var(--muted)}
+.cf:not([data-theme="dark"]) .nsnext-all{color:var(--ink)}
+.cf .nsnext-go{border-radius:999px}
+.cf:not([data-theme="dark"]) .nsnext .days-link{background:#FFFFFF}
+
+/* ── Part dividers: a hairline and a plain label ── */
+.cf .nsdiv{border-top:1px solid var(--line)}
+.cf .nsdiv::before{width:7px;height:7px;top:-4px;background:var(--gold)}
+.cf .nsdiv-n{background:none;color:var(--goldink);padding:0;border-radius:0;font-weight:700;letter-spacing:.2em}
+
+/* ── Buttons: rounded, calm ── */
+.cf .go{border-radius:999px}
+.cf .nsb-next,.cf .bys-next{border-radius:999px}
+
+@media (max-width:760px){
+  .cf:not([data-theme="dark"]) .hz{padding:24px 0 16px}
+}
+@media (prefers-reduced-motion:reduce){.cf .hz-go{transition:none}}
+
+/* The reading's key, on white. */
+.cf:not([data-theme="dark"]) .nskey{color:var(--ink)}
+.cf:not([data-theme="dark"]) .nskey small{color:var(--muted)}
+.cf:not([data-theme="dark"]) .nskey .k-str{border-color:var(--ink)}
+.cf:not([data-theme="dark"]) .nskey p{color:var(--ink)}
+.cf:not([data-theme="dark"]) .nskey p.nsdare{color:var(--muted)}
+.cf:not([data-theme="dark"]) .nskey p.nsdare b{color:var(--ink)}
+/* Part 4 while it waits: one quiet line, like Parts 2 and 3. */
+.cf:not([data-theme="dark"]) #s-whatif.nslocked{background:none;padding:0;border:0;box-shadow:none}
+.cf:not([data-theme="dark"]) .incub-link{box-shadow:none}
+
+@media (max-width:860px){
+  /* On a phone the link lives in the Menu (clarity.js), like the other cards. */
+  .side .ns-intro{display:none !important}
+}
+@media (max-width:760px){
+  /* The phone's start card for Part 1, on white. */
+  .cf:not([data-theme="dark"]) .nsq-start{background:#FFFFFF;color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow)}
+  .cf:not([data-theme="dark"]) .nsq-start .eb{color:var(--goldink)}
+  .cf:not([data-theme="dark"]) .nsq-start b .sfi{color:var(--goldink)}
+  .cf:not([data-theme="dark"]) .nsq-start>span:not(.eb){color:var(--muted)}
+  .cf:not([data-theme="dark"]) .nsq-start .go{background:var(--ink);color:#FFFFFF;border-radius:999px}
+}
