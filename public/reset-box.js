@@ -226,11 +226,12 @@ export function openConfirm({ to = 'blueprint', first = '', last = '', email = '
   const bp = to === 'blueprint';
   const inner = shell('');
   put(inner, `<span class="rbx-k">${bp ? 'Welcome to Your Base Camp' : 'Welcome to The Leader’s North Star'}</span>
-    <h2 id="rbx-h">${bp ? 'Open The Founder’s Blueprint with your account?' : 'Open your North Star with your account?'}</h2>
-    <p>${email ? `You’re signed in as <b>${esc(email)}</b>. ` : ''}One account keeps your North Star and your Blueprint together. Nothing to fill in.</p>
+    <h2 id="rbx-h">Save your answers to your account?</h2>
+    <p>${email ? `You’re signed in as <b>${esc(email)}</b>. ` : ''}One account keeps your ${bp ? 'Blueprint' : 'North Star'} answers safe, on any device, next to your ${bp ? 'North Star' : 'Blueprint'}. Nothing to fill in.</p>
     <div class="rbx-err" role="alert"></div>
-    <button type="button" class="rbx-go" data-cross="yes">Yes, open it</button>
-    <button type="button" class="rbx-link" data-cross="no">Not me · sign in with my own account</button>`);
+    <button type="button" class="rbx-go" data-cross="yes">Yes, save and open</button>
+    <button type="button" class="rbx-link" data-cross="no">Not me · sign in with my own account</button>
+    <p class="rbx-tip" style="text-align:center">Not you? Anything you answer now goes into this account, not yours.</p>`);
   // Closing the box is a yes too (Alexandru, 5 Nov 2026: it kept coming back,
   // because only "Yes" was saved). Signed in, nothing to fill in, so closing
   // means "go on with my account"; "Not me" is still the way out.
