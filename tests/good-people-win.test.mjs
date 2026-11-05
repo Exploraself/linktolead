@@ -67,7 +67,9 @@ ok(letter(B, ['A <b>x</b> **y**'], null, { sign: false }).html.includes('&lt;b&g
 // ── When ───────────────────────────────────────────────────────────────────
 const H = 3600_000;
 const t0 = new Date('2026-11-06T14:00:00Z'); // 9:00 in New York
-ok(due({ sent: 0 }, t0) === 1, 'letter 1 is owed at once');
+ok(due({ sent: 0 }, t0) === 1, 'letter 1, in the hourly run, in the daytime: owed now');
+ok(due({ sent: 0, tz: NY }, new Date('2026-11-06T05:00:00Z')) === 0 && due({ sent: 0, tz: 'Europe/Rome' }, new Date('2026-11-06T05:00:00Z')) === 0, 'letter 1 in the hourly run waits for 8:00 their time (midnight in New York, 6:00 in Rome)');
+ok(due({ sent: 0, tz: 'Europe/Rome' }, new Date('2026-11-06T08:00:00Z')) === 1 && due({ sent: 0, tz: NY }, new Date('2026-11-06T08:00:00Z')) === 0, 'the same hour: morning in Rome sends, night in New York waits (according to location)');
 ok(due({ sent: 1, last_sent_at: t0.getTime(), tz: NY }, new Date(t0.getTime() + 24 * H)) === 0, 'not after one day');
 ok(due({ sent: 1, last_sent_at: t0.getTime(), tz: NY }, new Date(t0.getTime() + 47.2 * H)) === 2, 'letter 2 about 48 hours later (the hourly run may be early by up to an hour)');
 ok(due({ sent: 1, last_sent_at: t0.getTime(), tz: NY }, new Date(t0.getTime() + 46 * H)) === 0, 'not two hours early');
@@ -89,7 +91,7 @@ ok(st === 200 && j.status === 'ok', 'a name + email from exploraself.com joins')
 ok(h.get('access-control-allow-origin') === 'https://exploraself.com', 'exploraself.com may post from the browser');
 let row = DB.raw.prepare('SELECT * FROM gpw_sub WHERE email = ?').get('lia@example.com');
 ok(row && row.first === 'Lia' && row.source === 'exploraself-rise' && row.sent === 1 && !row.student_id, 'one row, the address in small letters, letter 1 sent, no account needed');
-ok(sent.length === 1 && sent[0].body.subject === 'Why we exist · Good People Win 1/10' && sent[0].body.to[0] === 'lia@example.com', 'letter 1 went at once');
+ok(sent.length === 1 && sent[0].body.subject === 'Your business learns your habits. All of them. · Good People Win 1/10' && sent[0].body.to[0] === 'lia@example.com', 'letter 1 went at once');
 ok(/You get these letters because you left your name and email at exploraself\.com/.test(sent[0].body.text), 'the footer says why: exploraself.com');
 ok(sent[0].body.headers['List-Unsubscribe'].includes(`/api/unsubscribe?g=${row.unsub_id}`), 'its own unsubscribe link');
 const mailRow = DB.raw.prepare('SELECT * FROM gpw_mail WHERE email = ?').get('lia@example.com');
@@ -165,7 +167,7 @@ const maria = { first: 'Maria', last: 'Rossi', email: 'maria@example.com', conse
 [st, j] = await jsonOf(await signup({ request: post('/api/signup', maria), env }));
 row = DB.raw.prepare('SELECT * FROM gpw_sub WHERE email = ?').get('maria@example.com');
 ok(row && row.student_id === j.token && row.source === 'linktolead-account' && row.sent === 1, 'a new account joins, linked to the account, letter 1 sent');
-ok(sent.some((m) => m.body.subject === 'Why we exist · Good People Win 1/10'), 'and letter 1 went, beside the welcome');
+ok(sent.some((m) => m.body.subject === 'Your business learns your habits. All of them. · Good People Win 1/10'), 'and letter 1 went, beside the welcome');
 ok(DB.raw.prepare("SELECT COUNT(*) AS n FROM event WHERE student_id = ? AND kind = 'gpw-start'").get(j.token).n === 1, 'their account remembers it');
 await signup({ request: post('/api/signup', { ...maria, email: 'nora@example.com', consent: false }), env });
 ok(!DB.raw.prepare('SELECT 1 FROM gpw_sub WHERE email = ?').get('nora@example.com'), 'no yes to letters at sign-up: no letters');
@@ -283,6 +285,13 @@ ok(outbox.slice(out1).some((m) => m.to[0] === 'nova@example.com' && /1\/10/.test
 ok(MC_EVERY_HOURS === 6, 'the list is read every 6 hours');
 const [gs, gr] = await jsonOf(await mentorGet({ request: mreq('/api/mentor?gpw=1', MK), env: base }));
 ok(gs === 200 && gr.auto && gr.auto.mailchimp === true && gr.auto.readAt && gr.auto.everyHours === 6, '/mentor: shows when the list was last read');
+
+// ── The /internal page of the ten letters ─────────────────────────────────
+const { gpwPage } = await import('../scripts/gpw-page.mjs');
+const pg = gpwPage({ date: '2026-11-06' });
+ok((pg.match(/<iframe /g) || []).length === 10 && pg.includes('Your business learns your habits. All of them. · Good People Win 1/10') && !pg.includes('Why we exist'), 'the internal page: ten letters, letter 1 with its new title');
+ok(pg.includes('https://linktolead.exploraself.com/mail/gpw/01.jpg') && !/https:\/\/linktolead\.com/.test(pg), 'the internal page: covers from the live site');
+ok(/name="robots" content="noindex,nofollow"/.test(pg), 'the internal page is kept out of search');
 
 // ── Wiring ─────────────────────────────────────────────────────────────────
 ok(ROUTES['/api/good-people'] && typeof JOBS['good-people-win'] === 'function', 'the Worker serves the route and runs the hourly job');
