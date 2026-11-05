@@ -47,7 +47,7 @@
 .nsb-note{margin-top:96px !important;font:400 20px/1.4 'La Belle Aurore','Segoe Script','Bradley Hand',cursive;color:var(--hand);transform:rotate(-1.5deg);animation:nsnote .5s ease both}
 .nsb-note small{display:block;font:500 10px Inter,Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:4px;transform:rotate(1.5deg)}
 @keyframes nsnote{from{opacity:0;transform:translateY(6px) rotate(-1.5deg)}to{opacity:1;transform:rotate(-1.5deg)}}
-.nsb-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:110px;padding-top:20px;border-top:1px solid var(--rule)}
+.nsb-foot{margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:110px}
 .nsb-back,.nsb-next{min-height:44px;padding:0 20px;border-radius:999px;font:500 14px/1 Inter,Arial,sans-serif;cursor:pointer;white-space:nowrap}
 .nsb-back{border:1px solid var(--edge);background:none;color:var(--qink)}
 .nsb-back[disabled]{opacity:.35;cursor:default}
@@ -477,7 +477,7 @@ body:not(.ns-p1done) .mbar{display:none !important}
   .nsq-start .go{margin-top:6px;min-height:52px;border:0;border-radius:6px;background:#6F93B8;color:#0E1C2B;font-weight:600;font-size:16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}
   body:not(.nsq-full) .nsb{display:none}
   body.nsq-full .nsb{position:fixed;inset:0;z-index:80;margin:0;overflow-y:auto;overscroll-behavior:contain;background:var(--rt);display:block}
-  body.nsq-full .nsb-r{min-height:100svh;border:0;border-radius:0;padding:12px 18px 128px}
+  body.nsq-full .nsb-r{min-height:100svh;border:0;border-radius:0;padding:12px 18px 104px}
   body.nsq-full{overflow:hidden}
   body.nsq-full #acct-gate{z-index:99}
   body.nsq-full #toast{z-index:100}
@@ -565,7 +565,7 @@ body:not(.ns-p1done) .mbar{display:none !important}
   body.p2-full{overflow:hidden}
   body.p2-full #acct-gate{z-index:99}
   body.p2-full #p2>.p2-start,body.p2-full #p2>.p2grp,body.p2-full #p2>.card:not(.cur){display:none}
-  body.p2-full #p2>.card.cur{border:0;box-shadow:none;padding:6px 2px;min-height:calc(100svh - 170px)}
+  body.p2-full #p2>.card.cur{border:0;box-shadow:none;padding:6px 2px}
   body.p2-full .p2nav{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;position:relative;font-size:12px;color:var(--muted);padding-right:44px}
   body.p2-full .p2nav .nsq-x{display:block;top:-6px;right:-4px;color:var(--ink)}
   .p2seg{display:flex;gap:4px;width:100%}
@@ -821,14 +821,13 @@ body:not(.ns-p1done) #s-save,body:not(.ns-p1done) #s-plan{display:none !importan
 }
 @media (prefers-reduced-motion:reduce){.gp-allb,.days-link{transition:none}}
 
-/* Back sits beside Next (Alexandru, 3 Nov 2026), on a computer and a phone;
-   on a phone both sit at the bottom, where the thumb is. */
+/* Back sits beside Next (Alexandru, 3 Nov 2026), right under the answers on a
+   computer and a phone (5 Nov 2026: "everything close", the finger and the
+   mouse barely move); the key hint comes after them. */
 .nsb-foot{justify-content:flex-start;gap:12px}
 .nsb-back,.nsb-next{min-height:50px;padding:0 24px;font-size:15.5px;font-weight:600}
 @media (max-width:860px){
-  .nsb-foot{display:flex !important;margin-top:16px;padding-top:14px}
-  body.nsq-full .nsb-foot{position:fixed;left:0;right:0;bottom:0;z-index:97;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--rt,#fff);border-top:1px solid var(--rule)}
+  .nsb-foot{display:flex !important;margin-top:14px;padding-top:0}
   .nsb-next{flex:1}
   .nsb-back[disabled]{display:none}
-  body.nsq-full .crown-wrap{--cb:calc(96px + env(safe-area-inset-bottom,0px))}
 }

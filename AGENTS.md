@@ -143,6 +143,12 @@ carry the meaning too (icons are hidden from screen readers). One icon set
 per surface, drawn in the text colour; the toolkit's lives in
 public/tools/icons.js.
 
+Everything close (Alexandru, 5 Nov 2026): the founder moves the finger or the
+mouse as little as possible. Back and Next sit side by side, right under the
+answers, on every question, part and device (Before you start, the parts of
+the North Star, the assessments); never pinned to the bottom of the screen,
+never alone at the far side. The same for any button that follows a choice.
+
 ## 14. Every material follows a change; every email is on the map (Alexandru, 2 Nov 2026)
 
 When anything merges, everything tied to it is updated in the same work, or
