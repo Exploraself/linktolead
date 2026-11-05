@@ -65,9 +65,12 @@ a.rbx-go{display:flex;align-items:center;justify-content:center;text-decoration:
 :root[data-theme="dark"] .rbx-err{background:#3A2220;color:#F0A27E}
 :root[data-theme="dark"] .rbx-checks li.ok{color:#9BC0A1}`;
 
-let veil = null, lastFocus = null;
+let veil = null, lastFocus = null, onDismiss = null;
+// The founder closed the box (×, Esc or a click outside). A box can treat
+// that as its answer (onDismiss), so it does not come back on every visit.
+function dismiss() { const f = onDismiss; onDismiss = null; close(); if (f) f(); }
 function shell(html) {
-  close();
+  close(); onDismiss = null;
   lastFocus = document.activeElement;
   if (!document.getElementById('rbx-style')) { const s = document.createElement('style'); s.id = 'rbx-style'; s.textContent = STYLE; document.head.appendChild(s); }
   veil = document.createElement('div');
@@ -77,12 +80,12 @@ function shell(html) {
   // Closes only when the press starts and ends outside the box.
   let downOut = false;
   veil.addEventListener('pointerdown', (e) => { downOut = e.target === veil; });
-  veil.addEventListener('click', (e) => { if (e.target === veil && downOut) close(); downOut = false; });
-  veil.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.stopPropagation(); close(); } });
+  veil.addEventListener('click', (e) => { if (e.target === veil && downOut) dismiss(); downOut = false; });
+  veil.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.stopPropagation(); dismiss(); } });
   veil.addEventListener('click', (e) => {
     const b = e.target.closest('[data-rbx]'); if (!b) return;
     const k = b.dataset.rbx;
-    if (k === 'close') close();
+    if (k === 'close') dismiss();
     else if (k === 'eye') { const f = veil.querySelector('#' + b.dataset.for), show = f.type === 'password'; f.type = show ? 'text' : 'password'; b.setAttribute('aria-pressed', String(show)); b.setAttribute('aria-label', show ? 'Hide password' : 'Show password'); }
     else if (k === 'copy') copy(veil.querySelector('#' + b.dataset.for), b);
   });
@@ -228,8 +231,13 @@ export function openConfirm({ to = 'blueprint', first = '', last = '', email = '
     <div class="rbx-err" role="alert"></div>
     <button type="button" class="rbx-go" data-cross="yes">Yes, open it</button>
     <button type="button" class="rbx-link" data-cross="no">Not me · sign in with my own account</button>`);
+  // Closing the box is a yes too (Alexandru, 5 Nov 2026: it kept coming back,
+  // because only "Yes" was saved). Signed in, nothing to fill in, so closing
+  // means "go on with my account"; "Not me" is still the way out.
+  onDismiss = () => { import('/account.js').then((A) => A.cross(to)).catch(() => {}); if (done) done({ first, last }); };
   inner.addEventListener('click', async (e) => {
     const b = e.target.closest('[data-cross]'); if (!b) return;
+    onDismiss = null;
     if (b.dataset.cross === 'no') {
       try { const A = await import('/account.js'); A.signOut(); } catch { /* still go to sign in */ }
       try { localStorage.removeItem('ftb-me'); } catch { /* private mode */ }
