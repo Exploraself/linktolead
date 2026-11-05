@@ -26,10 +26,16 @@ ok(/<span class="hz-w hz-l sf">From founder<\/span>/.test(html) && html.includes
 
 // How the North Star works.
 const link = '/north1/?utm_source=northstar&amp;utm_medium=menu';
-ok(new RegExp('<nav class="navl"[^>]*></nav>\\s*<!--[^>]*-->\\s*<a class="ns-intro" href="' + link.replace(/[?.]/g, '\\$&') + '">').test(html), 'the left menu links to /north1/ right under the four parts');
+ok(new RegExp('<a class="ns-intro" href="' + link.replace(/[?.]/g, '\\$&') + '">[\\s\\S]*?</a>\\s*<div class="side-extra"[^>]*>YOUR NEXT CHAPTER</div>').test(html) && html.indexOf('class="ns-intro"') < html.indexOf('id="nav"'), 'the link is first in the left menu, above the four parts (5 Nov)');
 ok(/<aside class="side"[\s\S]*class="ns-intro"[\s\S]*How the North Star works[\s\S]*<\/aside>/.test(html), 'the link says "How the North Star works", inside the left menu');
 const rowA = js.indexOf("'/north1/?utm_source=northstar&utm_medium=menu', IC.info, 'How the North Star works'"), rowB = js.indexOf("'How to use this'");
-ok(rowA > 0 && rowB > rowA, 'the phone Menu has the same link, just above How to use this');
+ok(rowA > 0 && rowB > rowA && js.indexOf('const ROWS = [\n  [\'a\', \'/north1/') > 0, 'the phone Menu has the same link, as its first row');
+// Blue and flashing for two minutes, then calm; once opened, never again (Alexandru, 5 Nov 2026).
+ok(/\.cf \.side a\.ns-intro\{color:#3E6A94/.test(css) && /\.cf \.side a\.ns-intro\.flash\{background:#3E6A94;color:#FFFFFF[^}]*animation:nsIntroPulse/.test(css), 'the link is blue, and blue-filled while it flashes');
+ok(css.includes('@media (prefers-reduced-motion:reduce){.cf .hz-go{transition:none}.cf .side a.ns-intro.flash{animation:none}}'), 'no flashing for people who turn motion off');
+ok(/INTRO_SEEN = 'ns-intro-opened', INTRO_MS = 120000/.test(js) && /try \{ seen = localStorage\.getItem\(INTRO_SEEN\) === '1'; \} catch/.test(js), 'it flashes for two minutes, and remembers on this browser once opened (every access guarded)');
+ok(/closest\('a\[href\^="\/north1\/"\]'\)[\s\S]{0,200}localStorage\.setItem\(INTRO_SEEN, '1'\)[\s\S]{0,120}classList\.remove\('flash'\)/.test(js), 'opening it (left menu or phone Menu) stops the flashing for good');
+ok(/if \(seen \|\| !a\) return;\s*a\.classList\.add\('flash'\)/.test(js), 'once opened, it never flashes again');
 ok(/@media \(max-width:860px\)\{[^}]*\.side \.ns-intro\{display:none !important\}/.test(css), 'on a phone the link lives in the Menu only');
 ok(readme.includes('clean.css') && readme.includes('/north1/'), 'the README says where the look and the link live');
 

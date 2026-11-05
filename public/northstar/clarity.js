@@ -31,10 +31,10 @@ const IC = {
 
 /* ── 1. The phone's one menu ─────────────────────────────────────────── */
 const ROWS = [
+  ['a', '/north1/?utm_source=northstar&utm_medium=menu', IC.info, 'How the North Star works', ''],
   ['a', '/ground-plan/#programme', IC.bp, 'The Founder’s Blueprint', 'Your programme'],
   ['a', '/tools/', IC.tk, 'Growth Toolkit', 'Cash, team, evenings, camera'],
   ['days', '', IC.sun, '12 Days to Start Winning', 'A bonus for you'],
-  ['a', '/north1/?utm_source=northstar&utm_medium=menu', IC.info, 'How the North Star works', ''],
   ['click', '#how-btn', IC.how, 'How to use this', ''],
   ['click', '[data-act="download"]', IC.dl, 'Download your progress', ''],
   ['click', '[data-fs]', IC.fs, 'Full screen', ''],
@@ -199,4 +199,27 @@ function start() {
   const sc = $('#s-clear'); if (sc) keep.observe(sc, { childList: true });
   daysLoad();
 }
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+/* ── How the North Star works (Alexandru, 5 Nov 2026): blue and flashing for two minutes, then calm.
+   Once it is opened (the left menu or the phone Menu), it never flashes again on this browser. ── */
+const INTRO_SEEN = 'ns-intro-opened', INTRO_MS = 120000;
+function introFlash() {
+  const a = $('.side .ns-intro');
+  let seen = false;
+  try { seen = localStorage.getItem(INTRO_SEEN) === '1'; } catch { /* private mode: it flashes, nothing breaks */ }
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('a[href^="/north1/"]')) return;
+    try { localStorage.setItem(INTRO_SEEN, '1'); } catch { /* fine */ }
+    if (a) a.classList.remove('flash');
+  }, true);
+  if (seen || !a) return;
+  a.classList.add('flash');
+  // After two minutes it ends on a calm beat (the glow at rest), then the blue fades.
+  setTimeout(() => {
+    let done = false;
+    const end = () => { if (done) return; done = true; a.removeEventListener('animationiteration', end); a.classList.remove('flash'); };
+    a.addEventListener('animationiteration', end);
+    setTimeout(end, 1800);
+  }, INTRO_MS);
+}
+function startAll() { start(); introFlash(); }
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startAll); else startAll();
