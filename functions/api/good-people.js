@@ -15,7 +15,7 @@
 //   The browser's check before the POST (exploraself.com is another site).
 
 import { db, clean, looksLikeEmail, accountTables } from '../_shared.js';
-import { gpwJoin, sendFirst, markOpened, gpwMode } from '../_gpw.js';
+import { gpwJoin, sendFirst, markOpened, gpwMode, addFromMailchimp } from '../_gpw.js';
 import { allowed, origin } from '../_mail.js';
 
 /** The sites whose pages may post here from a browser. */
@@ -61,5 +61,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const job = sendFirst(env, D, origin(request), email, ip).catch(() => {});
     if (typeof waitUntil === 'function') waitUntil(job); else await job;
   }
+  // The live site holds the Mailchimp key: anyone new on the list joins too
+  // (at most every 6 hours), even if the hourly job cannot read Mailchimp.
+  const more = addFromMailchimp(env, D).catch(() => {});
+  if (typeof waitUntil === 'function') waitUntil(more); else await more;
   return reply(request, { ok: true, status: r.status });
 }

@@ -15,7 +15,7 @@ import { onRequestGet as mentorGet, onRequestPost as mentorPost } from '../funct
 import { onRequestPost as googlePost } from '../functions/api/google.js';
 import { guestAccount } from '../functions/_stripe.js';
 import { md5 } from '../functions/_mailchimp.js';
-import { NOW_MAX, PER_RUN } from '../functions/_gpw.js';
+import { NOW_MAX, PER_RUN, addFromMailchimp, MC_EVERY_HOURS, hourly } from '../functions/_gpw.js';
 import { ROUTES, JOBS } from '../worker.js';
 import { TAG_LIST } from '../functions/_tag-list.js';
 import { fakeD1, fakeResend, post, get, tally } from './_d1.mjs';
@@ -262,7 +262,27 @@ await sendDue(base, DB, B, day);
 ok(DB.raw.prepare('SELECT stop_why FROM gpw_sub WHERE email = ?').get('dora@example.com').stop_why === 'unsubscribed in Mailchimp' && !outbox.slice(out0).some((m) => m.to[0] === 'dora@example.com'), 'unsubscribed in Mailchimp: no more letters');
 ok(outbox.slice(out0).some((m) => m.to[0] === 'ana@example.com' && /2\/10/.test(m.subject)), 'and the others go on to letter 2');
 const mj2 = read('public/mentor/mentor.js');
-ok(/Count them/.test(mj2) && /gpw-everyone/.test(mj2) && /window\.confirm\(/.test(mj2) && /Replies come to your inbox, so they are not counted here/.test(mj2), '/mentor: Count first, then Send, asked once more; says replies are not counted');
+ok(/<b>Automatic\.<\/b>/.test(mj2) && !/Count them|gpw-send/.test(mj2) && /Replies come to your inbox, so they are not counted here/.test(mj2), '/mentor: says it is automatic, with nothing to press, and that replies are not counted');
+
+// ── Automatic: the Mailchimp list joins by itself ─────────────────────────
+// (Alexandru, 5 Nov 2026: "I don't want to count them and send them. I want it to happen automatically.")
+const t0m = new Date('2026-11-06T15:00:00Z');
+mcMembers = [{ email_address: 'nova@example.com', merge_fields: { FNAME: 'Nova' } }, { email_address: 'cy@example.com', merge_fields: { FNAME: 'Cy' } }, { email_address: 'ana@example.com', merge_fields: { FNAME: 'Ana' } }];
+let a1 = await addFromMailchimp({ ...base, MAILCHIMP_API_KEY: '' }, DB, { at: t0m });
+ok(a1.skipped && !DB.raw.prepare('SELECT 1 FROM gpw_sub WHERE email = ?').get('nova@example.com'), 'automatic: nothing without the Mailchimp key');
+a1 = await addFromMailchimp(base, DB, { at: t0m, force: true });
+ok(a1.added === 1 && DB.raw.prepare('SELECT source FROM gpw_sub WHERE email = ?').get('nova@example.com').source === 'mailchimp', 'automatic: a new subscriber on the list joins by itself (Nova); Cy, unsubscribed, and Ana, already in, do not');
+mcMembers.push({ email_address: 'omar@example.com', merge_fields: { FNAME: 'Omar' } });
+a1 = await addFromMailchimp(base, DB, { at: new Date(t0m.getTime() + 2 * H) });
+ok(a1.skipped && !DB.raw.prepare('SELECT 1 FROM gpw_sub WHERE email = ?').get('omar@example.com'), 'automatic: the list is read at most every 6 hours');
+const out1 = outbox.length;
+ok(typeof JOBS['good-people-win'] === 'function' && /goodPeopleHourly\(env, D\)/.test(read('worker.js')), 'automatic: the Worker\'s hourly job is this one');
+const job = await hourly(base, DB, B, new Date(t0m.getTime() + 7 * H));
+ok(DB.raw.prepare('SELECT 1 FROM gpw_sub WHERE email = ?').get('omar@example.com') && job.mailchimp && job.mailchimp.added === 1, 'automatic: the hourly job reads the list again after 6 hours (Omar joins)');
+ok(outbox.slice(out1).some((m) => m.to[0] === 'nova@example.com' && /1\/10/.test(m.subject)) && outbox.slice(out1).some((m) => m.to[0] === 'omar@example.com' && /1\/10/.test(m.subject)), 'automatic: and in the same run, letter 1 goes to them');
+ok(MC_EVERY_HOURS === 6, 'the list is read every 6 hours');
+const [gs, gr] = await jsonOf(await mentorGet({ request: mreq('/api/mentor?gpw=1', MK), env: base }));
+ok(gs === 200 && gr.auto && gr.auto.mailchimp === true && gr.auto.readAt && gr.auto.everyHours === 6, '/mentor: shows when the list was last read');
 
 // ── Wiring ─────────────────────────────────────────────────────────────────
 ok(ROUTES['/api/good-people'] && typeof JOBS['good-people-win'] === 'function', 'the Worker serves the route and runs the hourly job');

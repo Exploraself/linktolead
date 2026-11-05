@@ -27,9 +27,15 @@
 // apps that block pictures record nothing, and Apple Mail loads every picture
 // on arrival, so opens are a sign, not a count.
 //
+// Automatic (Alexandru, 5 Nov 2026: "I don't want to count them and send
+// them. I want it to happen automatically."): the hourly job also adds every
+// subscribed member of the Mailchimp audience who is not in yet
+// (addFromMailchimp, at most every MC_EVERY_HOURS hours), and letter 1 goes
+// with the hourly sends. Nobody has to press anything.
+//
 // Everyone who already exists (Alexandru, 5 Nov 2026: "those who exist, yes,
-// send them. I'm one of them, my partner is one of them."): /mentor → Good
-// People Win → Count, then Send. Every account that has not unsubscribed (the
+// send them. I'm one of them, my partner is one of them."): kept as a /mentor
+// action for a one-off (gpw-everyone: count, then send); no button shows it. Every account that has not unsubscribed (the
 // ones that never ticked yes to letters only with the tick, on by default)
 // and every subscribed member of the Mailchimp audience, one series per
 // address. Letter 1 goes to the first NOW_MAX at once, the rest with the
@@ -69,8 +75,9 @@ export const SOURCES = {
   'linktolead-pay': 'An account made when they paid',
   'existing-account': 'Had an account before Good People Win',
   'existing-mailchimp': 'On the Mailchimp list before Good People Win',
+  mailchimp: 'On the Mailchimp list',
 };
-export const WHY = (source) => `You get these letters because you left your name and email ${/^exploraself/.test(source || '') ? 'at exploraself.com' : source === 'existing-mailchimp' ? 'with ExploraSelf' : 'at linktolead.exploraself.com'}. Ten letters, one every two days, then they stop.`;
+export const WHY = (source) => `You get these letters because you left your name and email ${/^exploraself/.test(source || '') ? 'at exploraself.com' : /mailchimp$/.test(source || '') ? 'with ExploraSelf' : 'at linktolead.exploraself.com'}. Ten letters, one every two days, then they stop.`;
 
 export const gpwMode = (env) => (String((env && env.GPW_MODE) || '').trim().toLowerCase() === 'off' ? 'off' : 'on');
 
@@ -81,6 +88,7 @@ export async function gpwTables(D) {
     D.prepare(`CREATE TABLE IF NOT EXISTS gpw_mail (id TEXT PRIMARY KEY, email TEXT NOT NULL, n INTEGER NOT NULL, sent_at INTEGER NOT NULL,
       opened_at INTEGER, opens INTEGER NOT NULL DEFAULT 0)`),
     D.prepare('CREATE INDEX IF NOT EXISTS gpw_mail_email ON gpw_mail (email)'),
+    D.prepare('CREATE TABLE IF NOT EXISTS gpw_meta (k TEXT PRIMARY KEY, v TEXT)'),
   ]);
 }
 
@@ -212,6 +220,59 @@ export async function sendDue(env, D, base = SITE, at = new Date()) {
   return { sent, failed };
 }
 
+/** How often the Mailchimp list is read for people not in the letters yet. */
+export const MC_EVERY_HOURS = 6;
+
+/**
+ * Everyone subscribed on the Mailchimp list joins by themselves (Alexandru,
+ * 5 Nov 2026: "I want it to happen automatically"), once per email, never an
+ * account that unsubscribed from everything. At most every MC_EVERY_HOURS
+ * hours; nothing without the Mailchimp API key. Letter 1 then goes with the
+ * hourly sends. Returns { added } or { skipped: why }. Never throws.
+ */
+export async function addFromMailchimp(env, D, { at = new Date(), force = false } = {}) {
+  if (gpwMode(env) === 'off') return { skipped: 'GPW_MODE is off' };
+  if (!env || !env.MAILCHIMP_API_KEY) return { skipped: 'no Mailchimp API key here' };
+  try {
+    await gpwTables(D);
+    const t = new Date(at).getTime();
+    const last = await D.prepare("SELECT v FROM gpw_meta WHERE k = 'mc_read_at'").first();
+    if (!force && last && t - Number(last.v) < MC_EVERY_HOURS * HOUR) return { skipped: 'read less than 6 hours ago' };
+    await D.prepare("INSERT INTO gpw_meta (k, v) VALUES ('mc_read_at', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v").bind(String(t)).run();
+    const mc = await readMembers(env);
+    if (!mc.ok) return { skipped: mc.why };
+    const inLetters = new Set(((await D.prepare('SELECT email FROM gpw_sub').all()).results || []).map((r) => r.email));
+    const accounts = new Map(((await D.prepare('SELECT s.id, lower(trim(s.email)) AS email, COALESCE(p.unsubscribed, 0) AS unsub FROM student s LEFT JOIN student_profile p ON p.student_id = s.id').all()).results || []).map((a) => [a.email, a]));
+    const stamp = new Date(at).toISOString();
+    const fresh = [];
+    for (const m of mc.members) {
+      const a = accounts.get(m.email);
+      if (inLetters.has(m.email) || (a && a.unsub) || !looksLikeEmail(m.email)) continue;
+      inLetters.add(m.email);
+      fresh.push({ ...m, studentId: a ? a.id : null });
+    }
+    let added = 0;
+    for (let i = 0; i < fresh.length; i += 50) {
+      const res = await D.batch(fresh.slice(i, i + 50).map((m) => D.prepare('INSERT OR IGNORE INTO gpw_sub (email, first, source, student_id, started_at, unsub_id) VALUES (?,?,?,?,?,?)')
+        .bind(m.email, m.first.slice(0, 60) || null, 'mailchimp', m.studentId, stamp, newToken())));
+      added += res.filter((x) => x && x.meta && x.meta.changes).length;
+    }
+    const linked = fresh.filter((m) => m.studentId);
+    if (linked.length) await D.batch(linked.map((m) => D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(m.studentId, 'gpw-start', now(), 'mailchimp')));
+    await D.prepare("INSERT INTO gpw_meta (k, v) VALUES ('mc_added', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v").bind(String(added)).run();
+    return { added };
+  } catch (e) {
+    return { skipped: String((e && e.message) || e).slice(0, 160) };
+  }
+}
+
+/** The hourly job (worker.js JOBS): first anyone new on the Mailchimp list,
+ *  then every letter owed now. */
+export async function hourly(env, D, base = SITE, at = new Date()) {
+  const mailchimp = await addFromMailchimp(env, D, { at });
+  return { ...(await sendDue(env, D, base, at)), mailchimp };
+}
+
 /**
  * Everyone who already exists and is not in the letters yet, for /mentor's
  * Count. Accounts: not unsubscribed; "yes" when they ticked yes to letters or
@@ -300,7 +361,7 @@ export async function gpwStop(D, unsubId) {
 
 /** For /mentor: everyone in the letters, newest first, with what they opened,
  *  and each letter's sent and opened counts. */
-export async function gpwReport(D, limit = 500) {
+export async function gpwReport(D, limit = 500, env = null) {
   await gpwTables(D);
   const people = (await D.prepare(`SELECT g.email, g.first, g.source, g.student_id, g.started_at, g.sent, g.last_sent_at, g.stopped_at, g.stop_why,
       (SELECT GROUP_CONCAT(m.n) FROM gpw_mail m WHERE m.email = g.email AND m.opened_at IS NOT NULL) AS opened
@@ -311,5 +372,10 @@ export async function gpwReport(D, limit = 500) {
     letters: GPW_LETTERS.map((L) => ({ n: L.n, title: L.title, sent: byN[L.n]?.sent || 0, opened: byN[L.n]?.opened || 0 })),
     people: people.map((p) => ({ ...p, opened: p.opened ? String(p.opened).split(',').map(Number).sort((a, b) => a - b) : [] })),
     total: (await D.prepare('SELECT COUNT(*) AS n FROM gpw_sub').first())?.n || 0,
+    auto: {
+      mailchimp: !!(env && env.MAILCHIMP_API_KEY),
+      readAt: Number((await D.prepare("SELECT v FROM gpw_meta WHERE k = 'mc_read_at'").first())?.v) || null,
+      everyHours: MC_EVERY_HOURS,
+    },
   };
 }

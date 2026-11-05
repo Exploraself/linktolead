@@ -39,7 +39,7 @@ import { thread } from './thread.js';
 import { profile, unsubLink, deleteFounder } from '../_account.js';
 import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER, readTags, FORGOTTEN } from '../_mailchimp.js';
 import { sortTags } from '../_tag-list.js';
-import { gpwReport, gpwPlan, planCounts, gpwEveryone } from '../_gpw.js';
+import { gpwReport, gpwPlan, planCounts, gpwEveryone, addFromMailchimp } from '../_gpw.js';
 import { webhookState, payments } from '../_stripe.js';
 import { refundList, refundTable } from '../_refund.js';
 import { holdLetters } from '../_series.js';
@@ -210,7 +210,13 @@ export async function onRequestGet({ request, env }) {
   }
   // Good People Win (functions/_gpw.js): everyone in the ten letters, the
   // letter they are on and the ones they opened. Reading, like the roster.
-  if (url.searchParams.get('gpw')) return json({ ok: true, ...(await gpwReport(D)) });
+  if (url.searchParams.get('gpw')) {
+    // The live site holds the Mailchimp key: looking here also adds anyone new
+    // on the list (at most every 6 hours), so it happens even if the hourly
+    // job cannot read Mailchimp.
+    await addFromMailchimp(env, D);
+    return json({ ok: true, ...(await gpwReport(D, 500, env)) });
+  }
   // Payments (functions/_stripe.js): the mode, the webhook, the latest
   // payments. The key only.
   if (url.searchParams.get('stripe')) {
