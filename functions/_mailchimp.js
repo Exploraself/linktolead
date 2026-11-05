@@ -379,6 +379,52 @@ export async function readTags(env = {}) {
   }
 }
 
+/** Good People Win (functions/_gpw.js): everyone subscribed in the audience,
+ *  as [{ email, first }], read page by page (1,000 a page, at most `max`).
+ *  Unsubscribed, cleaned and pending people are never read. A read changes
+ *  nothing in Mailchimp. Never throws. */
+export async function readMembers(env = {}, { max = 10000 } = {}) {
+  const st = mailchimpState(env);
+  if (!env.MAILCHIMP_API_KEY) return { ok: false, why: 'Mailchimp’s API key (MAILCHIMP_API_KEY) is not set, so the audience cannot be read from here.' };
+  const key = await apiKey(env);
+  const audience = st.audience || text(env.MAILCHIMP_AUDIENCE_ID) || (st.form && st.form.id) || '';
+  if (!key || !audience) return { ok: false, why: st.reason || 'The API key or the audience is missing.' };
+  const out = [];
+  let total = 0;
+  try {
+    for (let offset = 0; offset < max; offset += 1000) {
+      const r = await fetch(`https://${apiServer(key, st)}.api.mailchimp.com/3.0/lists/${audience}/members?status=subscribed&count=1000&offset=${offset}&fields=members.email_address,members.merge_fields.FNAME,total_items`,
+        { headers: { authorization: 'Basic ' + btoa('linktolead:' + key), 'user-agent': 'exploraself-linktolead' } });
+      if (!r.ok) return { ok: false, why: `Mailchimp API said no (HTTP ${r.status}).` };
+      const j = await r.json();
+      total = j.total_items || 0;
+      for (const m of j.members || []) out.push({ email: String(m.email_address || '').trim().toLowerCase(), first: String((m.merge_fields && m.merge_fields.FNAME) || '').trim() });
+      if (!(j.members || []).length || out.length >= total) break;
+    }
+    return { ok: true, members: out.filter((m) => m.email), total };
+  } catch (e) {
+    return { ok: false, why: `Could not reach Mailchimp: ${String((e && e.message) || e).slice(0, 160)}` };
+  }
+}
+
+/** One address's status in the audience ('subscribed', 'unsubscribed',
+ *  'cleaned', 'pending', 'archived'), or '' when it is not there or cannot be
+ *  read (no key, test of the network). Never throws. */
+export async function memberStatus(env = {}, email = '') {
+  if (!env.MAILCHIMP_API_KEY || !email) return '';
+  const st = mailchimpState(env);
+  const key = await apiKey(env);
+  const audience = st.audience || text(env.MAILCHIMP_AUDIENCE_ID) || (st.form && st.form.id) || '';
+  if (!key || !audience) return '';
+  try {
+    const r = await fetch(`https://${apiServer(key, st)}.api.mailchimp.com/3.0/lists/${audience}/members/${md5(String(email).trim().toLowerCase())}?fields=status`,
+      { headers: { authorization: 'Basic ' + btoa('linktolead:' + key), 'user-agent': 'exploraself-linktolead' } });
+    if (!r.ok) return '';
+    const j = await r.json();
+    return typeof j.status === 'string' ? j.status : '';
+  } catch { return ''; }
+}
+
 /** Find an audience tag by its exact name, or make it (Mailchimp's tags are
  *  static segments; a form's `tags` number is the segment's id). Only for
  *  names already on the tag list (functions/_tag-list.js, rule 17): never a

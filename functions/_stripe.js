@@ -24,6 +24,8 @@ import { syncFounder } from './_mailchimp.js';
 import { unsubLink, profile } from './_account.js';
 import { landingOf } from './_profile.js';
 import { letterContext } from './_mentor.js';
+import { gpwJoin, sendFirst } from './_gpw.js';
+import { SITE } from './_course.js';
 
 /** What each step costs (cents, USD) and what it opens. Prices = LADDER in
  *  public/content.js (a test holds them equal). */
@@ -162,6 +164,11 @@ export async function guestAccount(env, D, s) {
   await D.prepare("UPDATE student_profile SET signup_type = 'full', landing = ? WHERE student_id = ?").bind(landingOf(m.landing) || 'road1', id).run();
   await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(id, 'signup', now(), `stripe · ${s.id}`).run();
   if (consent) await syncFounder(env, D, id, 'join').catch(() => null);
+  // Good People Win (functions/_gpw.js): with their yes, letter 1 now, then every 48 hours.
+  if (consent) {
+    const g = await gpwJoin(env, D, { email, first, source: 'linktolead-pay', studentId: id }).catch(() => ({}));
+    if (g.status === 'ok') await sendFirst(env, D, SITE, email).catch(() => null);
+  }
   return { id, made: true };
 }
 

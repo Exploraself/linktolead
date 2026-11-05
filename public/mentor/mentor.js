@@ -658,16 +658,60 @@ export function gpwHTML(g) {
       <td class="tiny">${p.sent} of ${N}${p.stopped_at ? `<br>${esc(p.stop_why || 'stopped')}` : ''}</td>
       <td class="tiny">${esc(day(p.started_at))}</td></tr>`).join('');
   return `<h2>Good People Win</h2>
-    <p class="tiny">Ten letters from Alexandru, one every 48 hours, to everyone who leaves their name and email on linktolead or exploraself.com. ${g.total || 0} ${g.total === 1 ? 'person' : 'people'} so far. A gold number is a letter they opened; an outlined one was sent and not opened yet. Opens are a sign, not a count: some mail apps block pictures, and Apple Mail opens every letter by itself.</p>
+    <p class="tiny">Ten letters from Alexandru, one every 48 hours, to everyone who leaves their name and email on linktolead or exploraself.com. ${g.total || 0} ${g.total === 1 ? 'person' : 'people'} so far. A gold number is a letter they opened; an outlined one was sent and not opened yet. Opens are a sign, not a count: some mail apps block pictures, and Apple Mail opens every letter by itself. Replies come to your inbox, so they are not counted here.</p>
+    ${can('mailchimp') ? gpwEveryoneHTML() : ''}
     <ol class="gpws">${strip}</ol>
     ${P.length ? `<div class="gwrap"><table class="gtable"><thead><tr><th>Who</th><th>From</th><th>Letters</th><th>Where</th><th>Started</th></tr></thead><tbody>${rows}</tbody></table></div>`
       : '<p class="tiny">Nobody yet. The first person to leave their name and email appears here.</p>'}`;
+}
+// Everyone who already exists (Alexandru, 5 Nov 2026: "those who exist, yes,
+// send them"): Count first, then Send. Nothing goes until Send, and Send asks once more.
+let gpwCounts = null, gpwWithout = true, gpwDone = null, gpwBusy = false, gpwErr = '';
+const gpwTotal = (c) => c.accountsYes + (gpwWithout ? c.accountsWithout : 0) + c.mailchimp;
+export function gpwEveryoneHTML() {
+  const c = gpwCounts;
+  const head = `<div class="gev"><h3>Everyone who already exists</h3>
+    <p class="tiny">Accounts that have not unsubscribed, and everyone subscribed on the Mailchimp list, once per email. Count first: nothing is sent until you press Send.</p>${gpwErr ? `<p class="err">${esc(gpwErr)}</p>` : ''}`;
+  if (gpwDone) return `${head}<p class="flash" role="status">Started for ${gpwDone.joined} ${gpwDone.joined === 1 ? 'person' : 'people'}. Letter 1 went to ${gpwDone.sentNow} now; ${gpwDone.waiting} more get it with the hourly run, ${c ? c.perHour : ''} an hour.</p></div>`;
+  if (!c) return `${head}<button type="button" class="ghost" id="gpw-count"${gpwBusy ? ' disabled' : ''}>${gpwBusy ? 'Counting…' : 'Count them'}</button></div>`;
+  const total = gpwTotal(c), now = Math.min(c.nowMax, total);
+  const mc = c.mailchimpRead && c.mailchimpRead.ok
+    ? `<b>${c.mailchimp}</b> on the Mailchimp list with no account here (${c.mailchimpRead.subscribed} subscribed in all; ${c.overlap} of them also have an account)`
+    : `Mailchimp could not be read, so nobody from the list is counted: ${esc((c.mailchimpRead && c.mailchimpRead.why) || '')}`;
+  return `${head}<ul class="gev-l">
+      <li><b>${c.accountsYes}</b> accounts with a yes to letters</li>
+      <li><b>${c.accountsWithout}</b> accounts that never ticked yes to letters <label class="gev-t"><input type="checkbox" id="gpw-without"${gpwWithout ? ' checked' : ''}> include them</label></li>
+      <li>${mc}</li>
+      <li class="tiny">${c.already} already in the letters · ${c.unsubscribed} unsubscribed ${c.unsubscribed === 1 ? 'account' : 'accounts'} left out</li>
+    </ul>
+    <p><b>${total}</b> ${total === 1 ? 'person' : 'people'} would start. Letter 1 goes to the first ${now} at once, then ${c.perHour} an hour; after that, one letter every 48 hours.</p>
+    <button type="button" id="gpw-send"${total && !gpwBusy ? '' : ' disabled'}>${gpwBusy ? 'Sending…' : `Send letter 1 to ${total} ${total === 1 ? 'person' : 'people'}`}</button></div>`;
 }
 async function loadGpw() {
   const r = await api('?gpw=1');
   const box = $('#gpw');
   if (!box) return;
   box.innerHTML = r.ok ? gpwHTML(r.data) : `<h2>Good People Win</h2><p class="err">${esc((r.data && r.data.error) || 'Could not read the letters.')}</p>`;
+  const cnt = $('#gpw-count');
+  if (cnt) cnt.onclick = async () => {
+    gpwBusy = true; loadGpw();
+    const x = await act({ action: 'gpw-everyone', send: false });
+    gpwBusy = false; gpwCounts = x.ok ? x.data.counts : null;
+    gpwErr = x.ok ? '' : (x.data && x.data.error) || 'Could not count.';
+    loadGpw();
+  };
+  const w = $('#gpw-without');
+  if (w) w.onchange = () => { gpwWithout = w.checked; loadGpw(); };
+  const send = $('#gpw-send');
+  if (send) send.onclick = async () => {
+    const total = gpwTotal(gpwCounts);
+    if (!window.confirm(`Start Good People Win for ${total} ${total === 1 ? 'person' : 'people'}? Letter 1 goes out now.`)) return;
+    gpwBusy = true; loadGpw();
+    const x = await act({ action: 'gpw-everyone', send: true, without: gpwWithout });
+    gpwBusy = false;
+    if (x.ok) { gpwDone = x.data; gpwErr = ''; } else gpwErr = (x.data && x.data.error) || 'Could not send.';
+    loadGpw();
+  };
 }
 
 let tagsRead = null;
