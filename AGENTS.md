@@ -373,13 +373,16 @@ every 48 hours, never at night in their time zone, alongside 12 Days and the
 letters that follow each pain. One row per address. A new door that takes a
 name and email calls gpwJoin (and sendFirst), with a test.
 
-Everyone who was here before (Alexandru, 5 Nov 2026: "those who exist, yes,
-send them"): /mentor → Good People Win → Count, then Send (the Mailchimp
-right). Accounts not unsubscribed (those that never ticked yes only with
-the tick, on by default) and every subscribed member of the Mailchimp
-audience, deduped. Letter 1 to the first 20 at once, the rest with the
-hourly run (20 a run). Someone with no account here who unsubscribed or was
-cleaned in Mailchimp gets no further letter.
+Automatic, nothing to press (Alexandru, 5 Nov 2026: "I don't want to count
+them and send them. I want it to happen automatically."): the hourly job
+also adds every subscribed member of the Mailchimp audience who is not in
+yet, at most every 6 hours (addFromMailchimp; /mentor and /api/good-people
+run the same check, since the live site holds the Mailchimp key), and
+letter 1 goes with the hourly sends (20 a run). The accounts that existed
+before Good People Win were added on 5 Nov. A one-off for the team stays as
+a /mentor action (gpw-everyone: count, then send), with no button. Someone
+with no account here who unsubscribed or was cleaned in Mailchimp gets no
+further letter.
 
 The words are in functions/_gpw-letters.js, the engine in functions/_gpw.js.
 Every letter has the same shape: a small cover (public/mail/gpw/), a thank
