@@ -11,12 +11,17 @@ import { heading, diagram, marked, letter } from '../functions/_letters.js';
 import { onRequestPost as joinPost, onRequestGet as pixelGet, onRequestOptions as joinOptions } from '../functions/api/good-people.js';
 import { onRequestGet as unsubGet } from '../functions/api/unsubscribe.js';
 import { onRequestPost as signup } from '../functions/api/signup.js';
-import { onRequestGet as mentorGet } from '../functions/api/mentor.js';
+import { onRequestGet as mentorGet, onRequestPost as mentorPost } from '../functions/api/mentor.js';
+import { onRequestPost as googlePost } from '../functions/api/google.js';
+import { guestAccount } from '../functions/_stripe.js';
+import { md5 } from '../functions/_mailchimp.js';
+import { NOW_MAX, PER_RUN } from '../functions/_gpw.js';
 import { ROUTES, JOBS } from '../worker.js';
 import { TAG_LIST } from '../functions/_tag-list.js';
 import { fakeD1, fakeResend, post, get, tally } from './_d1.mjs';
 
 const { ok, done } = tally('good-people-win');
+const planCountsTotal = (c, without = true) => c.accountsYes + (without ? c.accountsWithout : 0) + c.mailchimp;
 const B = 'https://linktolead.exploraself.com';
 const NY = 'America/New_York';
 const read = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
@@ -176,6 +181,88 @@ const off = { ...env, GPW_MODE: 'off' };
 [st, j] = await jsonOf(await joinPost({ request: fromES({ first: 'Zed', email: 'zed@example.com', consent: true }), env: off }));
 ok(j.status === 'off' && !DB.raw.prepare('SELECT 1 FROM gpw_sub WHERE email = ?').get('zed@example.com'), 'GPW_MODE "off": nobody joins');
 ok((await sendDue(off, DB, B)).why === 'GPW_MODE is off', 'GPW_MODE "off": nothing is sent');
+
+// ── Every door, and everyone who already exists ────────────────────────────
+// One fake for the outside world: Google's token check, Resend, and Mailchimp
+// (the subscribed members, and one person's status).
+const CID = '1234-abc.apps.googleusercontent.com';
+const outbox = [];
+let mcMembers = [], mcStatus = {};
+globalThis.fetch = async (url, opts = {}) => {
+  const u = String(url);
+  if (u.startsWith('https://oauth2.googleapis.com/tokeninfo')) {
+    return new URL(u).searchParams.get('id_token') === 'tok-gpw-google-000000001'
+      ? { ok: true, json: async () => ({ iss: 'https://accounts.google.com', aud: CID, email_verified: 'true', exp: String(Math.floor(Date.now() / 1000) + 600), sub: '7', email: 'Gia@Example.com', given_name: 'Gia', family_name: 'Lu' }) }
+      : { ok: false, json: async () => ({}) };
+  }
+  if (u.includes('api.resend.com')) { outbox.push(JSON.parse(opts.body)); return { ok: true }; }
+  if (u.includes('api.mailchimp.com') && u.includes('/members?status=subscribed')) return { ok: true, json: async () => ({ members: mcMembers, total_items: mcMembers.length }) };
+  const h = /\/members\/([0-9a-f]{32})\?fields=status/.exec(u);
+  if (h) return mcStatus[h[1]] ? { ok: true, json: async () => ({ status: mcStatus[h[1]] }) } : { ok: false, status: 404, json: async () => ({}) };
+  return { ok: false, status: 503, headers: new Headers(), text: async () => 'offline', json: async () => ({}) };
+};
+DB = fakeD1();
+const MK = 'mk';
+const base = { DB, RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Via Esempio 1, Rome', MENTOR_KEY: MK, GOOGLE_CLIENT_ID: CID, MAILCHIMP_API_KEY: 'k-us8', MAILCHIMP_MODE: 'test' };
+const toOf = (to) => outbox.filter((m) => m.to[0] === to);
+
+// Google.
+await googlePost({ request: post('/api/google', { credential: 'tok-gpw-google-000000001', consent: true, tz: NY }), env: base });
+row = DB.raw.prepare('SELECT * FROM gpw_sub WHERE email = ?').get('gia@example.com');
+ok(row && row.source === 'linktolead-google' && row.student_id && row.sent === 1 && toOf('gia@example.com').some((m) => /Good People Win 1\/10/.test(m.subject)), 'door: Google sign-up joins, letter 1 at once');
+
+// Paying first: the account is made when Stripe says paid.
+await guestAccount(base, DB, { id: 'cs_test_gpw', metadata: { guest: '1', email: 'Pia@Example.com', first: 'Pia', consent: '1', step: 'session' } });
+row = DB.raw.prepare('SELECT * FROM gpw_sub WHERE email = ?').get('pia@example.com');
+ok(row && row.source === 'linktolead-pay' && row.sent === 1 && toOf('pia@example.com').length >= 1, 'door: an account made when they paid joins, letter 1 at once');
+await guestAccount(base, DB, { id: 'cs_test_gpw2', metadata: { guest: '1', email: 'quiet@example.com', first: 'Q', consent: '0', step: 'session' } });
+ok(!DB.raw.prepare('SELECT 1 FROM gpw_sub WHERE email = ?').get('quiet@example.com'), 'door: paid without a yes to letters: no letters');
+
+// People who were here before Good People Win (made with it off).
+const earlier = { ...base, GPW_MODE: 'off' };
+const mk = async (email, consent) => (await (await signup({ request: post('/api/signup', { ...maria, email, first: email.split('@')[0], consent }), env: earlier })).json()).token;
+await mk('ana@example.com', true);
+await mk('ben@example.com', false);
+const cy = await mk('cy@example.com', true);
+await mk('eve@example.com', false);
+DB.raw.prepare('UPDATE student_profile SET unsubscribed = 1 WHERE student_id = ?').run(cy);
+await joinPost({ request: fromES({ first: 'Lia', email: 'lia@example.com', consent: true }, '4.4.4.4'), env: base });
+mcMembers = [
+  { email_address: 'Ben@Example.com', merge_fields: { FNAME: 'Ben' } }, // an account that never ticked yes, but subscribed on the list
+  { email_address: 'dora@example.com', merge_fields: { FNAME: 'Dora' } }, // on the list only
+  { email_address: 'cy@example.com', merge_fields: { FNAME: 'Cy' } }, // unsubscribed on their account
+  { email_address: 'lia@example.com', merge_fields: { FNAME: 'Lia' } }, // already in the letters
+  { email_address: 'dora@example.com', merge_fields: { FNAME: 'Dora' } }, // twice on the list
+];
+const M = async (body, key = MK) => { const r = await mentorPost({ request: new Request(`${B}/api/mentor`, { method: 'POST', headers: { 'content-type': 'application/json', ...(key ? { 'x-mentor-key': key } : {}) }, body: JSON.stringify(body) }), env: base }); return [r.status, await r.json()]; };
+ok((await M({ action: 'gpw-everyone', send: false }, ''))[0] === 401, 'existing: nobody without the key or a team account');
+const sentBefore = outbox.length;
+let [code, c] = await M({ action: 'gpw-everyone', send: false });
+c = c.counts;
+ok(code === 200 && outbox.length === sentBefore, 'existing: Count sends nothing');
+ok(c.accountsYes === 2 && c.accountsWithout === 2, `existing: accounts with a yes (Ana; Ben, subscribed on the list) and without (Eve; Quiet, who paid without a yes): ${c.accountsYes}/${c.accountsWithout}`);
+ok(c.mailchimp === 1 && c.mailchimpRead.ok && c.mailchimpRead.subscribed === 5, 'existing: from Mailchimp, only who has no account and is not already in (Dora, once)');
+ok(c.unsubscribed === 1 && c.already === 3, 'existing: the unsubscribed account and the three already in (Gia, Pia, Lia) are left out');
+ok(c.total === 5 && planCountsTotal(c, false) === 3 && c.nowMax === NOW_MAX && c.perHour === PER_RUN, 'existing: 5 would start with the tick, 3 without; how many now and per hour');
+[code, c] = await M({ action: 'gpw-everyone', send: true, without: false });
+ok(code === 200 && c.joined === 3 && c.sentNow === 3 && c.waiting === 0, `existing, without the tick: 3 start and get letter 1 now (${JSON.stringify(c)})`);
+ok(!DB.raw.prepare('SELECT 1 FROM gpw_sub WHERE email = ?').get('eve@example.com') && !DB.raw.prepare('SELECT 1 FROM gpw_sub WHERE email = ?').get('cy@example.com'), 'existing: Eve waits for the tick; Cy, unsubscribed, never');
+ok(DB.raw.prepare('SELECT source FROM gpw_sub WHERE email = ?').get('ana@example.com').source === 'existing-account' && DB.raw.prepare('SELECT source FROM gpw_sub WHERE email = ?').get('dora@example.com').source === 'existing-mailchimp', 'existing: each row says where it came from');
+ok(toOf('dora@example.com').length === 1 && /left your name and email with ExploraSelf/.test(toOf('dora@example.com')[0].text) && /^Hi Dora,/.test(toOf('dora@example.com')[0].text), 'existing: Dora gets letter 1, by name, and the footer says why');
+ok(toOf('lia@example.com').length === 1, 'existing: Lia, already in, gets nothing twice');
+[code, c] = await M({ action: 'gpw-everyone', send: true });
+ok(c.joined === 2 && toOf('eve@example.com').length === 1 && toOf('quiet@example.com').length === 1, 'existing, with the tick: Eve and Quiet start too');
+ok(DB.raw.prepare("SELECT COUNT(*) AS n FROM event WHERE kind = 'gpw-start'").get().n >= 4, 'existing: each account remembers it');
+// A "no" in Mailchimp stops it, for someone without an account here.
+mcStatus[md5('dora@example.com')] = 'unsubscribed';
+DB.raw.prepare('UPDATE gpw_sub SET last_sent_at = ? WHERE sent = 1').run(Date.now() - 49 * H);
+const out0 = outbox.length;
+let day = new Date(); while (Number(new Intl.DateTimeFormat('en-US', { timeZone: NY, hour: 'numeric', hourCycle: 'h23' }).format(day)) < 9 || Number(new Intl.DateTimeFormat('en-US', { timeZone: NY, hour: 'numeric', hourCycle: 'h23' }).format(day)) > 19) day = new Date(day.getTime() + H);
+await sendDue(base, DB, B, day);
+ok(DB.raw.prepare('SELECT stop_why FROM gpw_sub WHERE email = ?').get('dora@example.com').stop_why === 'unsubscribed in Mailchimp' && !outbox.slice(out0).some((m) => m.to[0] === 'dora@example.com'), 'unsubscribed in Mailchimp: no more letters');
+ok(outbox.slice(out0).some((m) => m.to[0] === 'ana@example.com' && /2\/10/.test(m.subject)), 'and the others go on to letter 2');
+const mj2 = read('public/mentor/mentor.js');
+ok(/Count them/.test(mj2) && /gpw-everyone/.test(mj2) && /window\.confirm\(/.test(mj2) && /Replies come to your inbox, so they are not counted here/.test(mj2), '/mentor: Count first, then Send, asked once more; says replies are not counted');
 
 // ── Wiring ─────────────────────────────────────────────────────────────────
 ok(ROUTES['/api/good-people'] && typeof JOBS['good-people-win'] === 'function', 'the Worker serves the route and runs the hourly job');

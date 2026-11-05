@@ -88,7 +88,7 @@ export const DEFAULT_RIGHTS = ['reply', 'message', 'signin-link', 'reset-link', 
 /** Which right each /mentor action needs. An action not here is the key's only. */
 export const ACTION_RIGHT = { reply: 'reply', message: 'message', 'signin-link': 'signin-link', 'reset-link': 'reset-link',
   'series-hold': 'series-hold', tier: 'tier', pause: 'pause', delete: 'delete', 'mentor-save': 'mentors', 'mentor-assign': 'mentors',
-  'mc-test': 'mailchimp', 'mc-backfill': 'mailchimp', 'team-add': 'team', 'team-remove': 'team', 'team-can': 'team', invite: 'invite',
+  'mc-test': 'mailchimp', 'mc-backfill': 'mailchimp', 'gpw-everyone': 'mailchimp', 'team-add': 'team', 'team-remove': 'team', 'team-can': 'team', invite: 'invite',
   'refund-done': 'payments',
   // A request for a call (functions/_booking.js): confirming a time sends a
   // letter, and the Google Meet links are what those letters carry.

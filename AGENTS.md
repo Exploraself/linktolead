@@ -366,10 +366,20 @@ of three, and what is being built as one line beneath.
 
 Everyone who leaves their name and email gets ten letters from Alexandru,
 on either site, with or without an account: an account here with a yes to
-letters (signup.js, google.js), or a name + email form on exploraself.com,
-which posts to /api/good-people with the person's yes. Letter 1 goes at
-once, then one every 48 hours, never at night in their time zone, alongside
-12 Days and the letters that follow each pain. One row per address.
+letters (signup.js, google.js, or made when they paid first: _stripe.js
+guestAccount), or a name + email form on exploraself.com, which posts to
+/api/good-people with the person's yes. Letter 1 goes at once, then one
+every 48 hours, never at night in their time zone, alongside 12 Days and the
+letters that follow each pain. One row per address. A new door that takes a
+name and email calls gpwJoin (and sendFirst), with a test.
+
+Everyone who was here before (Alexandru, 5 Nov 2026: "those who exist, yes,
+send them"): /mentor → Good People Win → Count, then Send (the Mailchimp
+right). Accounts not unsubscribed (those that never ticked yes only with
+the tick, on by default) and every subscribed member of the Mailchimp
+audience, deduped. Letter 1 to the first 20 at once, the rest with the
+hourly run (20 a run). Someone with no account here who unsubscribed or was
+cleaned in Mailchimp gets no further letter.
 
 The words are in functions/_gpw-letters.js, the engine in functions/_gpw.js.
 Every letter has the same shape: a small cover (public/mail/gpw/), a thank

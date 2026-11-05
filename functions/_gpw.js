@@ -27,6 +27,15 @@
 // apps that block pictures record nothing, and Apple Mail loads every picture
 // on arrival, so opens are a sign, not a count.
 //
+// Everyone who already exists (Alexandru, 5 Nov 2026: "those who exist, yes,
+// send them. I'm one of them, my partner is one of them."): /mentor → Good
+// People Win → Count, then Send. Every account that has not unsubscribed (the
+// ones that never ticked yes to letters only with the tick, on by default)
+// and every subscribed member of the Mailchimp audience, one series per
+// address. Letter 1 goes to the first NOW_MAX at once, the rest with the
+// hourly run. Someone without an account who unsubscribed or was cleaned in
+// Mailchimp gets no further letter (checked before each one).
+//
 // GPW_MODE in the Cloudflare settings: "off" stops joining and sending.
 // Empty (the default) sends.
 
@@ -36,7 +45,7 @@ import { GPW_LETTERS, GPW_NAME } from './_gpw-letters.js';
 import { send, mailState, allowed, logged } from './_mail.js';
 import { letterContext, okTz } from './_mentor.js';
 import { localParts, SEND_HOUR, LATEST_HOUR, DEFAULT_TZ, SITE } from './_course.js';
-import { syncFounder } from './_mailchimp.js';
+import { syncFounder, readMembers, memberStatus } from './_mailchimp.js';
 
 /** The Mailchimp tag for founders with an account who get these letters
  *  (approved by Alexandru, 5 Nov 2026: "give them a hashtag … good people win"). */
@@ -46,14 +55,22 @@ export const GAP_HOURS = 48;
 const HOUR = 3600_000;
 /** The hourly run comes at minute 7, so a letter is due up to an hour early. */
 export const EARLY = 55 * 60_000;
-/** At most this many letters per hourly run. */
-export const PER_RUN = 40;
+/** At most this many letters per hourly run (each may also ask Mailchimp
+ *  whether the person unsubscribed there: two calls out per letter at most,
+ *  inside what one run may make). */
+export const PER_RUN = 20;
+/** At most this many letters 1 straight away when /mentor adds everyone who
+ *  already exists; the rest go with the hourly run, PER_RUN an hour. */
+export const NOW_MAX = 20;
 /** Where letters come from: the door they used, in words, for /mentor. */
 export const SOURCES = {
   'linktolead-account': 'An account on linktolead',
   'linktolead-google': 'An account on linktolead, with Google',
+  'linktolead-pay': 'An account made when they paid',
+  'existing-account': 'Had an account before Good People Win',
+  'existing-mailchimp': 'On the Mailchimp list before Good People Win',
 };
-export const WHY = (source) => `You get these letters because you left your name and email at ${/^exploraself/.test(source || '') ? 'exploraself.com' : 'linktolead.exploraself.com'}. Ten letters, one every two days, then they stop.`;
+export const WHY = (source) => `You get these letters because you left your name and email ${/^exploraself/.test(source || '') ? 'at exploraself.com' : source === 'existing-mailchimp' ? 'with ExploraSelf' : 'at linktolead.exploraself.com'}. Ten letters, one every two days, then they stop.`;
 
 export const gpwMode = (env) => (String((env && env.GPW_MODE) || '').trim().toLowerCase() === 'off' ? 'off' : 'on');
 
@@ -133,6 +150,14 @@ export function due(row, at = new Date()) {
 
 /** Send one person the letter they are owed, and record it. */
 export async function sendOne(env, D, base, row, n, at = new Date()) {
+  // No account here: their "no" lives in Mailchimp. Unsubscribed or cleaned there, no more letters.
+  if (!row.student_id && env && env.MAILCHIMP_API_KEY) {
+    const st = await memberStatus(env, row.email);
+    if (st === 'unsubscribed' || st === 'cleaned') {
+      await D.prepare('UPDATE gpw_sub SET stopped_at = ?, stop_why = ? WHERE email = ?').bind(new Date(at).toISOString(), `${st} in Mailchimp`, row.email).run();
+      return { ok: false, stopped: true };
+    }
+  }
   const id = newToken();
   const ctx = await letterContext(D, row.student_id || null, row.tz);
   const L = gpwLetter(base, n, { first: row.first, ...ctx, at, pixel: `${base}/api/good-people?o=${id}` });
@@ -182,9 +207,79 @@ export async function sendDue(env, D, base = SITE, at = new Date()) {
     const n = due(row, at);
     if (!n) continue;
     const r = await sendOne(env, D, base, row, n, at);
-    if (r.ok) sent++; else failed++;
+    if (r.ok) sent++; else if (!r.stopped) failed++;
   }
   return { sent, failed };
+}
+
+/**
+ * Everyone who already exists and is not in the letters yet, for /mentor's
+ * Count. Accounts: not unsubscribed; "yes" when they ticked yes to letters or
+ * are subscribed in Mailchimp. Mailchimp: subscribed members with no account.
+ * Each address once.
+ */
+export async function gpwPlan(env, D) {
+  await gpwTables(D);
+  const inLetters = new Set(((await D.prepare('SELECT email FROM gpw_sub').all()).results || []).map((r) => r.email));
+  const accounts = (await D.prepare(`SELECT s.id, lower(trim(s.email)) AS email, s.name, COALESCE(p.consent, 0) AS consent, COALESCE(p.unsubscribed, 0) AS unsub, p.tz
+      FROM student s LEFT JOIN student_profile p ON p.student_id = s.id ORDER BY s.joined_at`).all()).results || [];
+  const accountEmails = new Set(accounts.map((a) => a.email));
+  const unsubscribed = new Set(accounts.filter((a) => a.unsub).map((a) => a.email));
+  const mc = await readMembers(env);
+  const mcEmails = new Set(mc.ok ? mc.members.map((m) => m.email) : []);
+  const seen = new Set();
+  const once = (e) => (seen.has(e) || inLetters.has(e) || unsubscribed.has(e) ? false : (seen.add(e), true));
+  const open = accounts.filter((a) => !a.unsub && looksLikeEmail(a.email) && once(a.email));
+  const yes = open.filter((a) => a.consent || mcEmails.has(a.email));
+  const without = open.filter((a) => !(a.consent || mcEmails.has(a.email)));
+  const fromMc = mc.ok ? mc.members.filter((m) => !accountEmails.has(m.email) && looksLikeEmail(m.email) && once(m.email)) : [];
+  return {
+    yes, without, fromMc,
+    mailchimp: mc.ok ? { ok: true, subscribed: mc.total } : { ok: false, why: mc.why },
+    overlap: mc.ok ? accounts.filter((a) => mcEmails.has(a.email)).length : 0,
+    already: inLetters.size,
+    unsubscribed: unsubscribed.size,
+  };
+}
+
+/** The numbers /mentor shows before anything is sent. */
+export const planCounts = (P, { withoutYes = true } = {}) => ({
+  accountsYes: P.yes.length, accountsWithout: P.without.length, mailchimp: P.fromMc.length,
+  mailchimpRead: P.mailchimp, overlap: P.overlap, already: P.already, unsubscribed: P.unsubscribed,
+  total: P.yes.length + (withoutYes ? P.without.length : 0) + P.fromMc.length,
+  now: Math.min(NOW_MAX, P.yes.length + (withoutYes ? P.without.length : 0) + P.fromMc.length), nowMax: NOW_MAX, perHour: PER_RUN,
+});
+
+/**
+ * Add everyone in the plan, then letter 1 to the first NOW_MAX at once; the
+ * hourly run sends the rest (letter 1 is owed at any hour). Returns
+ * { joined, sentNow, waiting }.
+ */
+export async function gpwEveryone(env, D, base = SITE, { withoutYes = true, at = new Date() } = {}) {
+  if (gpwMode(env) === 'off') return { joined: 0, sentNow: 0, waiting: 0, why: 'GPW_MODE is off' };
+  const P = await gpwPlan(env, D);
+  const stamp = new Date(at).toISOString();
+  const accounts = [...P.yes, ...(withoutYes ? P.without : [])];
+  let joined = 0;
+  for (const a of accounts) {
+    const [first] = String(a.name || '').trim().split(/\s+/);
+    const r = await gpwJoin(env, D, { email: a.email, first, source: 'existing-account', studentId: a.id, tz: a.tz || '', at });
+    if (r.status === 'ok') joined++;
+  }
+  // Mailchimp people have no account here: written in batches.
+  for (let i = 0; i < P.fromMc.length; i += 50) {
+    const rows = P.fromMc.slice(i, i + 50).map((m) => D.prepare('INSERT OR IGNORE INTO gpw_sub (email, first, source, started_at, unsub_id) VALUES (?,?,?,?,?)')
+      .bind(m.email, m.first.slice(0, 60) || null, 'existing-mailchimp', stamp, newToken()));
+    const res = await D.batch(rows);
+    joined += res.filter((x) => x && x.meta && x.meta.changes).length;
+  }
+  let sentNow = 0;
+  if (mailState(env).ready) {
+    const owed = (await D.prepare('SELECT g.*, COALESCE(NULLIF(g.tz, \'\'), p.tz) AS tz FROM gpw_sub g LEFT JOIN student_profile p ON p.student_id = g.student_id WHERE g.sent = 0 AND g.stopped_at IS NULL ORDER BY g.started_at LIMIT ?').bind(NOW_MAX).all()).results || [];
+    for (const row of owed) { const r = await sendOne(env, D, base, row, 1, at); if (r.ok) sentNow++; }
+  }
+  const waiting = (await D.prepare('SELECT COUNT(*) AS n FROM gpw_sub WHERE sent = 0 AND stopped_at IS NULL').first())?.n || 0;
+  return { joined, sentNow, waiting };
 }
 
 /** The 1 × 1 picture opened: mark that letter opened. Unknown ids do nothing. */

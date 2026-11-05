@@ -18,7 +18,7 @@
 //                  reply (an answer in the thread, emailed as a letter) · tier (change step, and its step tags in Mailchimp) ·
 //                  pause · series-hold (pause or resume the letters that
 //                  follow each pain) · delete · signin-link · message · mc-test ·
-//                  mc-backfill · book-confirm (one of the times of a
+//                  mc-backfill · gpw-everyone (Good People Win for everyone who already exists: count, then send) · book-confirm (one of the times of a
 //                  request for a call: the person gets it with the Google
 //                  Meet link) · book-links (the Meet link per kind of call).
 //                  Every action is logged as an event; every
@@ -39,7 +39,7 @@ import { thread } from './thread.js';
 import { profile, unsubLink, deleteFounder } from '../_account.js';
 import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER, readTags, FORGOTTEN } from '../_mailchimp.js';
 import { sortTags } from '../_tag-list.js';
-import { gpwReport } from '../_gpw.js';
+import { gpwReport, gpwPlan, planCounts, gpwEveryone } from '../_gpw.js';
 import { webhookState, payments } from '../_stripe.js';
 import { refundList, refundTable } from '../_refund.js';
 import { holdLetters } from '../_series.js';
@@ -454,6 +454,17 @@ async function post({ request, env }) {
     const out = await testJoin(env, D, { email, first: clean(body.first, 60) || 'Test', last: clean(body.last, 60) || 'Join' });
     await log('mentor', 'mentor-mc-test', out.status);
     return json({ ok: true, status: out.status, detail: out.detail });
+  }
+  if (body.action === 'gpw-everyone') {
+    // Good People Win for everyone who already exists (functions/_gpw.js;
+    // Alexandru, 5 Nov 2026: "those who exist, yes, send them"). send: false
+    // only counts; send: true adds them and sends letter 1 to the first ones.
+    // without: false leaves out the accounts that never ticked yes to letters.
+    const withoutYes = body.without !== false;
+    if (!body.send) return json({ ok: true, counts: planCounts(await gpwPlan(env, D), { withoutYes }) });
+    const r = await gpwEveryone(env, D, origin(request), { withoutYes });
+    if (access.me) await log(access.me.id, 'gpw-everyone', JSON.stringify({ ...r, withoutYes }));
+    return json({ ok: true, ...r });
   }
   if (body.action === 'mc-backfill') {
     // Everyone with consent, not unsubscribed and not yet in Mailchimp; then,
