@@ -1411,7 +1411,10 @@
           <div class="pop deep" style="border-radius: 7px; padding: 16px 18px; display: flex; gap: 14px; align-items: center; animation-delay: .2s">
             <svg class="shim" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z" fill="none" stroke="#6F93B8" stroke-width="1.6" stroke-linejoin="round"/></svg>
             <div style="display: flex; flex-direction: column; gap: 2px" aria-live="polite"><span class="eb" style="color: #A9C0D9">What this already tells you</span><span style="font-size: 16px; font-weight: 520">${esc(ins || 'Slide each one to a range, or type your own. The answer appears here.')}</span></div></div>
-          <button type="button" data-act="grp" data-i="${i + 1}" data-f="grp-next-${i}" style="align-self: flex-end; min-height: 46px; padding: 0 20px; border-radius: 5px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 520; cursor: pointer">${i === G.length - 1 ? 'See what it all means →' : 'Next group →'}</button>
+          <div class="nsg-nav" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center">
+            ${i > 0 ? `<button type="button" data-act="grp" data-i="${i - 1}" data-f="grp-back-${i}" style="min-height: 48px; padding: 0 22px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 600; cursor: pointer">← Back</button>` : ''}
+            <button type="button" data-act="grp" data-i="${i + 1}" data-f="grp-next-${i}" style="min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: var(--deep); color: #EEF2F7; font-weight: 600; cursor: pointer">${i === G.length - 1 ? 'See what it all means →' : 'Next group →'}</button>
+          </div>
         </div>` : ''}</div>`;
     }).join('');
     return `<div style="display: flex; flex-direction: column; gap: 8px; max-width: 720px">

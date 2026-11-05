@@ -17,4 +17,8 @@ ok(/tapsPage\(tap, qi \+ 1, total, foot\)/.test(app), 'the taps pages get the sa
 ok(css.includes('.nsb-foot{margin-top:14px;display:flex;') && !/\.nsb-foot\{margin-top:auto/.test(css), 'on a computer: 14px under the answers, not pushed to the bottom of the card');
 ok(!css.includes('body.nsq-full .nsb-foot{position:fixed'), 'on a phone: no longer pinned to the bottom of the screen');
 ok(css.includes('body.p2-full #p2>.card.cur{border:0;box-shadow:none;padding:6px 2px}'), 'Part 2 on a phone: the card no longer fills the screen, so Back and Next follow the answers');
+// Part 3, Your numbers: Back beside Next under each group, on the left (no longer one button alone at the far right).
+ok(/class="nsg-nav"[^>]*>\s*\$\{i > 0 \? `<button type="button" data-act="grp" data-i="\$\{i - 1\}"[^`]*← Back<\/button>` : ''\}\s*<button type="button" data-act="grp" data-i="\$\{i \+ 1\}"/.test(app) && !/data-f="grp-next-\$\{i\}" style="align-self: flex-end/.test(app), 'Part 3: Back beside Next under each group, on the left');
+// Before you start: Back beside Next already (clarity.js).
+ok(/<div class="bys-btns">\$\{bys > 0 \? '<button type="button" class="bys-back"/.test(readFileSync('public/northstar/clarity.js', 'utf8')), 'Before you start: Back beside Next');
 done();
