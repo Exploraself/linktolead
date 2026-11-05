@@ -398,4 +398,9 @@ Each letter has its own unsubscribe (?g=, these letters only) and a 1 × 1
 picture that marks it opened; /mentor → Good People Win shows who is on
 which letter and what they opened (a sign, not a count). GPW_MODE "off" in
 the Cloudflare settings stops joining and sending. Mailchimp tag (accounts):
-linktolead-letters-good-people-win. A letter changed: the email map (rule 14).
+linktolead-letters-good-people-win. A letter changed (Alexandru sends
+feedback on each one as it arrives): change the words in
+functions/_gpw-letters.js (a new title: redraw its cover too), then run
+`node scripts/gpw-page.mjs <out.html>` and the email map (rule 14), and put
+both pages in the exploraself repo's internal folder (good-people-win/ and
+email-map/).
