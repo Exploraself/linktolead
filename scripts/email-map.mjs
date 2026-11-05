@@ -29,6 +29,8 @@ import { MENTOR_EMAIL } from '../functions/api/note.js';
 import { TOOLKIT_PREVIEW } from '../functions/api/toolkit.js';
 import { SERIES_GROUPS, SERIES_TAGS } from '../functions/_series-letters.js';
 import { SERIES_STATUS, SERIES, PARSED, LATE_DAYS, seriesLetter, seriesOf, addDays, byDay, weekday, lettersOf } from '../functions/_series.js';
+import { gpwLetter, GPW_TAG, GAP_HOURS, LAST as GPW_LAST } from '../functions/_gpw.js';
+import { GPW_NAME } from '../functions/_gpw-letters.js';
 
 const BASE = 'https://linktolead.exploraself.com';
 const AT = new Date('2026-11-02T09:00:00Z');
@@ -108,6 +110,16 @@ export const ENTRIES = [
     sentBy: 'functions/_account.js sendWelcome',
     also: 'Joins the Mailchimp audience (with their yes).',
     build: () => L.launchpadWelcome(BASE, S),
+  },
+  {
+    id: 'gpw', stage: 'door', icon: 'mail', fn: 'gpwLetter', gpw: true,
+    name: GPW_NAME,
+    when: `They leave their name and email: an account on linktolead (with a yes to letters), or a name + email form on exploraself.com. Letter 1 at once, then one every ${GAP_HOURS} hours, from ${SEND_HOUR}:00 to ${LATEST_HOUR}:00 their time. Alongside 12 Days and the letters that follow each pain.`,
+    who: `Everyone who leaves their name and email, once per address. Stops on its own unsubscribe link (these letters only), on unsubscribing from everything, or after letter ${GPW_LAST}. Waits while an account is paused. Mailchimp tag (accounts): ${GPW_TAG}. Opens show in /mentor → Good People Win.`,
+    from: '/northstar/',
+    sentBy: 'functions/_gpw.js (letter 1 from functions/api/signup.js, google.js and good-people.js; the rest from the hourly job in worker.js)',
+    also: 'Each letter: a small cover, five numbered sections (where it hurts, a story, today’s tool as a small diagram, your 10 minutes, the hard truth), one invitation, a P.S. The stories are Alexandru’s own; quotes from the books are word for word.',
+    build: () => gpwLetter(BASE, 1, S),
   },
   {
     id: 'results', stage: 'use', icon: 'star', fn: 'resultsLetter',
@@ -424,6 +436,15 @@ export async function collect({ exploraself } = {}) {
     }
   }
   for (const e of ENTRIES) {
+    if (e.gpw) {
+      for (let n = 1; n <= GPW_LAST; n++) {
+        const r = gpwLetter(BASE, n, S);
+        out.push({ id: `gpw-${n}`, stage: 'door', icon: 'mail', site: 'linktolead', name: `Letter ${n}`, group: 'gpw', day: (n - 1) * 2,
+          when: e.when, who: e.who, from: e.from, sentBy: e.sentBy, also: e.also,
+          fromLine: `${r.fromName} · support@exploraself.com`, replyTo: r.replyTo, subject: r.subject, html: r.html, text: r.text, ps: psOf(r.text), preview: previewOf(r.text) });
+      }
+      continue;
+    }
     if (e.course) {
       COURSE_LETTERS.forEach((c, day) => {
         const r = courseLetter(BASE, day, S);
@@ -491,6 +512,7 @@ function followHTML(s, si, series) {
 
 export function page({ letters, withExploraself }, { date = '2 Nov 2026' } = {}) {
   const course = letters.filter((l) => l.group === 'course');
+  const gpw = letters.filter((l) => l.group === 'gpw');
   const singles = letters.filter((l) => !l.group);
   const series = letters.filter((l) => l.group === 'series');
   const count = (k) => letters.filter((l) => l.stage === k).length;
@@ -506,8 +528,9 @@ export function page({ letters, withExploraself }, { date = '2 Nov 2026' } = {})
   const stageHTML = STAGES.map((s, si) => {
     const list = singles.filter((l) => l.stage === s.key);
     const days = s.key === 'use' ? course : [];
+    const gdays = s.key === 'door' ? gpw : [];
     if (s.key === 'follow') return followHTML(s, si, series);
-    if (!list.length && !days.length) {
+    if (!list.length && !days.length && !gdays.length) {
       if (s.key !== 'find') return '';
       return `<section class="stage" id="st-${s.key}" aria-labelledby="h-${s.key}">
         <h2 id="h-${s.key}"><span class="sic">${ICONS[s.icon]}</span><span>${esc(s.name)}<small>${esc(s.sub)}</small></span></h2>
@@ -520,6 +543,10 @@ export function page({ letters, withExploraself }, { date = '2 Nov 2026' } = {})
       ${days.length ? `<div class="course">
         <div class="ch"><span class="ic">${ICONS.sun}</span><div><b>${esc(COURSE_NAME)}</b><p>${esc(days[0].when)}</p><p class="mut">${esc(days[0].who)}</p></div></div>
         <ol class="days">${days.map((d) => `<li><button type="button" data-open="${esc(d.id)}"><span class="dn">${esc(d.name)}</span><span class="ds">${esc(d.subject.replace(/^Day \d+ · /, ''))}</span></button></li>`).join('')}</ol>
+      </div>` : ''}
+      ${gdays.length ? `<div class="course">
+        <div class="ch"><span class="ic">${ICONS.mail}</span><div><b>${esc(GPW_NAME)}</b><p>${esc(gdays[0].when)}</p><p class="mut">${esc(gdays[0].who)}</p></div></div>
+        <ol class="days">${gdays.map((d) => `<li><button type="button" data-open="${esc(d.id)}"><span class="dn">${esc(d.name)} · day ${esc(d.day)}</span><span class="ds">${esc(d.subject.replace(/ · Good People Win \d+\/\d+$/, ''))}</span></button></li>`).join('')}</ol>
       </div>` : ''}
     </section>`;
   }).join('');

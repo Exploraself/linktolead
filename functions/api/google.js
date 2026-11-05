@@ -17,6 +17,7 @@
 import { json, bad, db, now, newToken, clean, accountTables } from '../_shared.js';
 import { profile, sendWelcome, SOURCES } from '../_account.js';
 import { afterAccount } from '../_series.js';
+import { gpwJoin, sendFirst } from '../_gpw.js';
 import { keepTz } from '../_mentor.js';
 import { allowed, logged, mailState, origin } from '../_mail.js';
 import { syncFounder } from '../_mailchimp.js';
@@ -85,7 +86,13 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (consent && !p.unsubscribed) {
     // Into the audience, then the letters for a founder who has not started
     // Level 01 yet (functions/_series.js).
-    const job = (async () => { await syncFounder(env, D, id, 'join').catch(() => {}); await afterAccount(env, D, id, { tz: body.tz }); })().catch(() => {});
+    // Then Good People Win (functions/_gpw.js): letter 1 now, then every 48 hours.
+    const job = (async () => {
+      await syncFounder(env, D, id, 'join').catch(() => {});
+      await afterAccount(env, D, id, { tz: body.tz });
+      const g = await gpwJoin(env, D, { email: who.email, first: who.first, source: 'linktolead-google', studentId: id, tz: body.tz }).catch(() => ({}));
+      if (g.status === 'ok') await sendFirst(env, D, origin(request), who.email, request.headers.get('cf-connecting-ip') || 'unknown').catch(() => {});
+    })().catch(() => {});
     if (typeof waitUntil === 'function') waitUntil(job); else await job;
   }
   return json({ ok: true, token: id, existing: false, me: { first: who.first, last: who.last, email: who.email }, missing: await missingFor(D, id) });

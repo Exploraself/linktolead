@@ -7,6 +7,7 @@ import * as L from '../functions/_letters.js';
 import { COURSE_LETTERS } from '../functions/_course-letters.js';
 import { ENTRIES, STAGES, ICONS, collect, page } from '../scripts/email-map.mjs';
 import { SERIES_LETTERS } from '../functions/_series-letters.js';
+import { GPW_LETTERS } from '../functions/_gpw-letters.js';
 import { tally } from './_d1.mjs';
 
 const { ok, done } = tally('email-map');
@@ -30,8 +31,10 @@ for (const s of STAGES) ok(ICONS[s.icon], `stage ${s.key}: an icon that exists`)
 
 // Without the exploraself repo, the linktolead letters alone, in order.
 const data = await collect({});
-const singles = ENTRIES.filter((e) => !e.course).length;
-ok(data.letters.length === singles + COURSE_LETTERS.length + SERIES_LETTERS.length, `every letter rendered (${data.letters.length})`);
+const singles = ENTRIES.filter((e) => !e.course && !e.gpw).length;
+ok(data.letters.length === singles + COURSE_LETTERS.length + SERIES_LETTERS.length + GPW_LETTERS.length, `every letter rendered (${data.letters.length})`);
+ok(ENTRIES.some((e) => e.gpw && e.fn === 'gpwLetter'), 'Good People Win is on the map');
+ok(data.letters.filter((l) => l.group === 'gpw').map((l) => l.day).join() === GPW_LETTERS.map((_, i) => i * 2).join(), 'the 10 Good People Win letters, every other day');
 ok(data.letters.filter((l) => l.group === 'series').length === 37 && data.letters.filter((l) => l.group === 'series').every((l) => l.stage === 'follow' && !/Launchpad|\[PRICE\]|⟦/.test(l.subject + l.text)), 'the 37 pain letters: approved, no Launchpad, no [PRICE], fields filled for Sam');
 ok(!data.withExploraself, 'no exploraself letters without the repo');
 for (const l of data.letters) ok(l.subject && /<html/.test(l.html) && l.text, `${l.id}: subject, html and text`);

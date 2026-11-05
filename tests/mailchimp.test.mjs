@@ -27,7 +27,9 @@ globalThis.fetch = async (url, opts = {}) => {
   const a = await mc(url, opts);
   return { ok: a.status < 300, status: a.status, headers: new Headers({ 'content-type': a.type || 'application/json' }), text: async () => a.body };
 };
-const fresh = (extra = {}) => { calls = []; return { DB: fakeD1(), ...BASE, ...extra }; };
+// Good People Win adds its own tag after a sign-up (tests/good-people-win.test.mjs);
+// these checks count the join alone.
+const fresh = (extra = {}) => { calls = []; return { DB: fakeD1(), ...BASE, GPW_MODE: 'off', ...extra }; };
 const join = (env, who, more = {}) => signup({ request: post('/api/signup', { first: 'Ana', last: 'Pop', email: 'ana@example.com', consent: true, source: 'sales-page', stage: 'growing', ...who, ...more }), env }).then((r) => r.json());
 const logOf = (env) => env.DB.raw.prepare('SELECT * FROM mailchimp_log ORDER BY id').all();
 const mcCalls = () => calls.filter((c) => /list-manage|api\.mailchimp/.test(c.url));

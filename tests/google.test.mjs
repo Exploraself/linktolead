@@ -47,7 +47,8 @@ ok(code === 503, 'POST: refused while it is off');
 
 // The private bucket holds the plan the North Star welcome attaches (4 Nov 2026).
 const WORKBOOKS = { get: async (k) => (k === 'massive-growth-plan.pdf' ? { arrayBuffer: async () => new TextEncoder().encode('%PDF-1.7 plan').buffer } : null) };
-const env = { DB, GOOGLE_CLIENT_ID: CID, RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Via Esempio 1, Rome', WORKBOOKS };
+// Good People Win (tests/good-people-win.test.mjs) is off here: these checks count the other letters.
+const env = { DB, GOOGLE_CLIENT_ID: CID, RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Via Esempio 1, Rome', WORKBOOKS, GPW_MODE: 'off' };
 [code, out] = await J(gGet({ env }));
 ok(out.ready === true && out.clientId === CID, 'GET: on, with the public client id');
 

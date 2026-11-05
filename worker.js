@@ -47,8 +47,10 @@ import * as checkout from './functions/api/checkout.js';
 import * as access from './functions/api/access.js';
 import * as stripeWebhook from './functions/api/stripe-webhook.js';
 import * as book from './functions/api/book.js';
+import * as goodPeople from './functions/api/good-people.js';
 import { sendDue } from './functions/_course.js';
 import { sendDue as sendSeries } from './functions/_series.js';
+import { sendDue as sendGoodPeople } from './functions/_gpw.js';
 import { json, db, accountTables } from './functions/_shared.js';
 
 /** One line per route. A new file in functions/api/ needs its line here. */
@@ -89,6 +91,7 @@ export const ROUTES = {
   '/api/access': access,
   '/api/stripe-webhook': stripeWebhook,
   '/api/book': book,
+  '/api/good-people': goodPeople,
 };
 
 /** The jobs the hourly cron runs (wrangler.toml [triggers]), in this order.
@@ -100,6 +103,9 @@ export const ROUTES = {
 export const JOBS = {
   'series-letters': (env, D) => sendSeries(env, D),
   'course-letters': (env, D) => sendDue(env, D),
+  // Good People Win (functions/_gpw.js): one letter every 48 hours, alongside
+  // the two above (Alexandru, 5 Nov 2026: "they go alongside").
+  'good-people-win': (env, D) => sendGoodPeople(env, D),
 };
 
 /** Every job, one after the other; one failing never stops the next. */

@@ -11,6 +11,7 @@
 //                  wrote in its blanks, with the date of each change
 // GET ?email=a@b   everything tied to one address: its accounts, ways in,
 //                  calls, refunds, payments, letters and Mailchimp (functions/_trail.js)
+// GET ?gpw=1       Good People Win: who gets the ten letters, and what they opened
 // GET ?tags=1      every Mailchimp tag of the audience, sorted Keep / Old /
 //                  Ask (functions/_tag-list.js). The key, or the 'mailchimp' right
 // POST { action }  (a team account: only the rights ticked for it, functions/_team.js; the key: everything)
@@ -38,6 +39,7 @@ import { thread } from './thread.js';
 import { profile, unsubLink, deleteFounder } from '../_account.js';
 import { mailchimpState, syncFounder, testJoin, backfillList, stepsBackfillList, canTag, stepName, TIER_ORDER, readTags, FORGOTTEN } from '../_mailchimp.js';
 import { sortTags } from '../_tag-list.js';
+import { gpwReport } from '../_gpw.js';
 import { webhookState, payments } from '../_stripe.js';
 import { refundList, refundTable } from '../_refund.js';
 import { holdLetters } from '../_series.js';
@@ -206,6 +208,9 @@ export async function onRequestGet({ request, env }) {
     const waiting = canTag(env) ? (await stepsBackfillList(D, 5000, mc.mode)).length : 0;
     return json({ ok: true, read: true, total: live.total, waiting, ...sortTags(live.tags, { kept: (kept.results || []).map((r) => r.t) }) });
   }
+  // Good People Win (functions/_gpw.js): everyone in the ten letters, the
+  // letter they are on and the ones they opened. Reading, like the roster.
+  if (url.searchParams.get('gpw')) return json({ ok: true, ...(await gpwReport(D)) });
   // Payments (functions/_stripe.js): the mode, the webhook, the latest
   // payments. The key only.
   if (url.searchParams.get('stripe')) {

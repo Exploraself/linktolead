@@ -120,7 +120,8 @@ ok(byDay('2026-11-02', 2) === 'by Wednesday' && byDay('2026-11-07', 2) === 'by M
 
 // ── The routes and the hourly run ───────────────────────────────────────────
 const DB = fakeD1();
-const base = { DB, RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Via Esempio 1, Rome', MENTOR_KEY: 'mk', MAILCHIMP_MODE: 'test', MAILCHIMP_API_KEY: 'k-us19' };
+// Good People Win (tests/good-people-win.test.mjs) is off here: these checks count the other letters.
+const base = { DB, RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Via Esempio 1, Rome', MENTOR_KEY: 'mk', MAILCHIMP_MODE: 'test', MAILCHIMP_API_KEY: 'k-us19', GPW_MODE: 'off' };
 let env = { ...base };
 let sent = fakeResend();
 const jsonOf = async (res) => [res.status, await res.json()];
