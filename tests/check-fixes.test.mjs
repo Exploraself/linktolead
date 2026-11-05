@@ -35,7 +35,8 @@ globalThis.fetch = async (url, opts = {}) => {
   return { ok: false, status: 503, headers: new Headers(), text: async () => 'offline' };
 };
 const DB = fakeD1();
-const env = { DB, STRIPE_SECRET_KEY: 'rk_test_51abc', RESEND_API_KEY: 'r', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Rome' };
+// Good People Win (tests/good-people-win.test.mjs) is off here: these checks count the other letters.
+const env = { DB, STRIPE_SECRET_KEY: 'rk_test_51abc', RESEND_API_KEY: 'r', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Rome', GPW_MODE: 'off' };
 const req = (path, body, ip = '1.2.3.4') => new Request(B + path, { method: 'POST', headers: { 'content-type': 'application/json', 'cf-connecting-ip': ip }, body: JSON.stringify(body) });
 const jsonOf = async (r) => [r.status, await r.json()];
 const person = (first, email, extra = {}) => ({ first, last: 'Lee', email, consent: true, source: 'home', type: 'full', company: 'Lee Co', interest: 'Steady clients',

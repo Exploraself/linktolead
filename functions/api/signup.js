@@ -28,6 +28,7 @@ import { passwordProblem, setPassword } from '../_auth.js';
 import { syncFounder } from '../_mailchimp.js';
 import { details, landingOf, utmFrom } from '../_profile.js';
 import { afterAccount } from '../_series.js';
+import { gpwJoin, sendFirst } from '../_gpw.js';
 
 /** Run after the reply when the platform allows it; never let it throw. */
 const later = (waitUntil, job) => {
@@ -107,9 +108,12 @@ export async function onRequestPost({ request, env, waitUntil }) {
   }
   // Into the audience, then the letters for a founder who has not started
   // Level 01 yet (functions/_series.js; their tag needs them in the audience).
+  // Then Good People Win (functions/_gpw.js): letter 1 now, then every 48 hours.
   if (consent && !p.unsubscribed) await later(waitUntil, async () => {
     await syncFounder(env, D, id, 'join').catch(() => {});
     await afterAccount(env, D, id, { tz: body.tz });
+    const g = await gpwJoin(env, D, { email, first, source: 'linktolead-account', studentId: id, tz: body.tz }).catch(() => ({}));
+    if (g.status === 'ok') await sendFirst(env, D, origin(request), email, request.headers.get('cf-connecting-ip') || 'unknown').catch(() => {});
   });
 
   return json({ ok: true, token: id, existing: false });

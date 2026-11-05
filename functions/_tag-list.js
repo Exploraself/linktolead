@@ -20,6 +20,7 @@
 
 import { LANDING_TAGS, STEP_TAGS, STEP_NAMES, STAGE_TAGS, WEAKEST_TAGS, CROSS_TAGS, DEFAULT_FORM } from './_mailchimp.js';
 import { SERIES_TAGS } from './_series-letters.js';
+import { GPW_TAG } from './_gpw.js';
 import { TOOLS_TAG } from './_tools.js';
 import { LIBRARY_ITEMS, libraryTag } from './api/library.js';
 import { BOOK_TAGS } from './_booking.js';
@@ -96,6 +97,8 @@ export const TAG_LIST = [
     from: `${LTL}/ground-plan/`, fromName: 'Base Camp (The Founder’s Blueprint)', when: `Their series starts: account made, Level 01 empty. Only when the letters are switched on, never in test. ${CONSENT}`, by: 'functions/_series.js' },
   { name: SERIES_TAGS.level3, group: 'letters', what: 'Wrote in Levels 01, 02 and 03, and gets the two letters for that win.',
     from: `${LTL}/ground-plan/`, fromName: 'Base Camp (The Founder’s Blueprint)', when: `Their series starts: Level 03 written. Only when the letters are switched on, never in test. ${CONSENT}`, by: 'functions/_series.js' },
+  { name: GPW_TAG, group: 'letters', what: 'Gets Good People Win: ten letters from Alexandru, one every 48 hours, for everyone who leaves their name and email.',
+    from: `${LTL}/northstar/`, fromName: 'Any account on linktolead (the sales pages, the North Star box, Google). People from exploraself.com forms get the letters too, with their form’s own tag', when: `They make their account with a yes to letters; letter 1 goes at once. Not when GPW_MODE is “off”. ${CONSENT}`, by: 'functions/_gpw.js' },
   { name: BOOK_TAGS.discovery, group: 'booking', what: 'Asked for a free 30-minute discovery call with Alexandru, signed in to their account.',
     from: `${LTL}/book/discovery/`, fromName: '/book/discovery/ (from Base Camp’s menu, exploraself.com and the letters)',
     when: `They send the request with their time (one, or up to three), signed in. Someone without an account, or not signed in, gets no tag: a typed address proves nothing. ${CONSENT}`, by: 'functions/api/book.js' },

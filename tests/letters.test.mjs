@@ -96,7 +96,8 @@ ok(seedOf('a') === seedOf('a') && seedOf('a') !== seedOf('b'), 'the rotation is 
 ok(!Object.values(OFFERS).some((o) => /only|left|hurry|today|ends|last chance/i.test(o.line(B).join(''))), 'no countdowns, no scarcity');
 
 // ── The routes ──────────────────────────────────────────────────────────────
-const env = { DB: fakeD1(), RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Via Esempio 1, Rome' };
+// Good People Win (tests/good-people-win.test.mjs) is off here: these checks count the other letters.
+const env = { DB: fakeD1(), RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Via Esempio 1, Rome', GPW_MODE: 'off' };
 let sent = fakeResend();
 let r = await signup({ request: post('/api/signup', { first: 'Ana', last: 'Pop', email: 'ana@example.com', consent: true, type: 'full', company: 'Acme', interest: 'Higher income', industry: 'Other', password: 'a-long-password', confirm: 'a-long-password' }), env });
 const ana = (await r.json()).token;

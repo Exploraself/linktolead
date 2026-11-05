@@ -11,7 +11,8 @@ import { fakeD1, fakeResend, post, get, tally } from './_d1.mjs';
 
 const { ok, done } = tally('account');
 const DB = fakeD1();
-const env = { DB, RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Via Esempio 1, Rome' };
+// Good People Win (tests/good-people-win.test.mjs) is off here: these checks count the other letters.
+const env = { DB, RESEND_API_KEY: 'k', MAIL_POSTAL_ADDRESS: 'ExploraSelf, Via Esempio 1, Rome', GPW_MODE: 'off' };
 let sent = fakeResend();
 const jsonOf = async (r) => [r.status, await r.json()];
 

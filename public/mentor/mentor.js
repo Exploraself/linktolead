@@ -22,7 +22,7 @@ let key = ''; try { key = localStorage.getItem(KEY) || ''; } catch { /* private 
  *  without the key (functions/_team.js); the key still works for Alexandru. */
 const acct = () => { try { return localStorage.getItem('ftb-token') || ''; } catch { return ''; } };
 const H = (extra) => Object.assign({ 'x-mentor-key': key, 'x-account-token': acct() }, extra || {});
-const TABS = [['today', 'Today'], ['founders', 'Founders'], ['inbox', 'Inbox'], ['calls', '1:1 requests'], ['boardroom1', 'Boardroom 1:1'], ['refunds', 'Refunds'], ['grow', 'Grow'], ['settings', 'Settings']];
+const TABS = [['today', 'Today'], ['founders', 'Founders'], ['inbox', 'Inbox'], ['calls', '1:1 requests'], ['boardroom1', 'Boardroom 1:1'], ['refunds', 'Refunds'], ['grow', 'Grow'], ['letters', 'Good People Win'], ['settings', 'Settings']];
 /** Old addresses still land in the right place (#questions, #mailchimp before 2 Nov 2026). */
 const OLD_TABS = { questions: 'inbox', mailchimp: 'settings' };
 /** One small line icon per tab, in the text colour (rule 13); the label carries the meaning. */
@@ -34,6 +34,7 @@ const TAB_ICONS = {
   calls: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M8 13.5h3M8 16.5h6"/>',
   boardroom1: '<rect x="7" y="9" width="10" height="7" rx="1"/><circle cx="4" cy="12.5" r="1.6"/><circle cx="20" cy="12.5" r="1.6"/><path d="M12 4v3M12 18v3"/>',
   refunds: '<path d="M9 7H5V3"/><path d="M5.4 7A8 8 0 1 1 4 12"/><path d="M14.4 9.6c-.4-.8-1.3-1.2-2.3-1.2-1.3 0-2.3.7-2.3 1.7 0 2.4 4.8 1.2 4.8 3.7 0 1-1 1.8-2.5 1.8-1 0-2-.5-2.4-1.3M12 7.2v1.2M12 15.6v1.2"/>',
+  letters: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
   settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
 };
 const icon = (k) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${TAB_ICONS[k] || ''}</svg>`;
@@ -634,6 +635,41 @@ async function loadStripe() {
       <span class="em">${esc(STEP_WORDS[p.step] || p.step)} · ${esc(money(p.amount))}${p.mode === 'test' ? ' · test' : ''} · ${esc(when(p.at))}${p.email ? ' · ' + esc(p.email) : ''}</span></div></li>`).join('')}</ul>`
       : '<p class="tiny">No payments yet. Each one opens the founder’s step at once and sends the “It’s unlocked” letter.</p>'}`;
 }
+// ── Good People Win (Alexandru, 5 Nov 2026: "in /mentor … which people do
+// open those emails") ─────────────────────────────────────────────────────
+// Everyone in the ten letters (functions/_gpw.js): where they came from, the
+// letter they are on, and which letters they opened. A letter counts as
+// opened when its small picture loaded: some mail apps block pictures, and
+// Apple Mail loads every picture on arrival, so it is a sign, not a count.
+const GPW_FROM = { 'linktolead-account': 'linktolead account', 'linktolead-google': 'linktolead, with Google', exploraself: 'exploraself.com' };
+const gpwFrom = (s) => GPW_FROM[s] || (String(s || '').startsWith('exploraself-') ? `exploraself.com · ${s.slice(12).replace(/-/g, ' ')}` : (s || '—'));
+export function gpwHTML(g) {
+  const L = g.letters || [], P = g.people || [], N = L.length || 10;
+  const pct = (a, b) => (b ? ` · ${Math.round((a / b) * 100)}%` : '');
+  const strip = L.map((l) => `<li><span class="gn">${l.n}</span><span class="gt">${esc(l.title)}</span><span class="tiny">${l.sent} sent · ${l.opened} opened${pct(l.opened, l.sent)}</span></li>`).join('');
+  const dots = (p) => Array.from({ length: N }, (_, i) => {
+    const n = i + 1, st = (p.opened || []).includes(n) ? 'op' : n <= p.sent ? 'se' : '';
+    return `<span class="gd ${st}" title="Letter ${n}: ${st === 'op' ? 'opened' : st === 'se' ? 'sent, not opened yet' : 'not sent yet'}">${n}</span>`;
+  }).join('');
+  const rows = P.map((p) => `<tr>
+      <td><b>${esc(p.first || '—')}</b> ${emailBtn(p.email, 'tiny')}${p.student_id ? ` <button type="button" class="linkish tiny" data-drawer="${esc(p.student_id)}">Account</button>` : ''}</td>
+      <td class="tiny">${esc(gpwFrom(p.source))}</td>
+      <td class="gdots">${dots(p)}</td>
+      <td class="tiny">${p.sent} of ${N}${p.stopped_at ? `<br>${esc(p.stop_why || 'stopped')}` : ''}</td>
+      <td class="tiny">${esc(day(p.started_at))}</td></tr>`).join('');
+  return `<h2>Good People Win</h2>
+    <p class="tiny">Ten letters from Alexandru, one every 48 hours, to everyone who leaves their name and email on linktolead or exploraself.com. ${g.total || 0} ${g.total === 1 ? 'person' : 'people'} so far. A gold number is a letter they opened; an outlined one was sent and not opened yet. Opens are a sign, not a count: some mail apps block pictures, and Apple Mail opens every letter by itself.</p>
+    <ol class="gpws">${strip}</ol>
+    ${P.length ? `<div class="gwrap"><table class="gtable"><thead><tr><th>Who</th><th>From</th><th>Letters</th><th>Where</th><th>Started</th></tr></thead><tbody>${rows}</tbody></table></div>`
+      : '<p class="tiny">Nobody yet. The first person to leave their name and email appears here.</p>'}`;
+}
+async function loadGpw() {
+  const r = await api('?gpw=1');
+  const box = $('#gpw');
+  if (!box) return;
+  box.innerHTML = r.ok ? gpwHTML(r.data) : `<h2>Good People Win</h2><p class="err">${esc((r.data && r.data.error) || 'Could not read the letters.')}</p>`;
+}
+
 let tagsRead = null;
 async function loadTags(read) {
   const box = $('#mctags');
@@ -1018,10 +1054,12 @@ function draw() {
     : tab === 'boardroom1' ? requestsHTML('boardroom')
     : tab === 'inbox' ? `${questionsHTML()}<section class="panel" id="vcom"><p class="tiny">Loading the video comments…</p></section>`
     : tab === 'grow' ? growHTML(S)
+    : tab === 'letters' ? '<section class="panel" id="gpw"><h2>Good People Win</h2><p class="tiny">Loading the letters…</p></section>'
     : tab === 'settings' ? `${settingsJump()}${isTeam() ? teamCanHTML() : ''}${bookLinksHTML()}<section class="panel" id="team"><p class="tiny">Loading the team…</p></section>${can('payments') ? '<section class="panel" id="stripebox"><p class="tiny">Loading the payments…</p></section>' : ''}${can('mailchimp') ? '<section class="panel" id="mctags"></section>' : ''}${mailchimpHTML()}${mentorsHTML()}${mailchimpLogHTML()}`
     : todayHTML(S);
   $('#main').innerHTML = `<div class="stack" role="tabpanel">${said}${pane}</div>`;
   if (tab === 'inbox') loadComments();
+  if (tab === 'letters') loadGpw();
   if (tab === 'settings') { loadTeam(); loadStripe(); loadTags(false); }
   if (openId) openDrawer(openId); else closeDrawer();
 }

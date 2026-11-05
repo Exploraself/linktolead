@@ -39,6 +39,9 @@ are **not** displayed to the founder as content, and no tool names or numbers
 appear on the surface. A founder arriving here has never heard of them, and
 jargon they cannot place reads as noise.
 
+One exception (Alexandru, 5 Nov 2026): the Good People Win letters (rule 21)
+teach one tool each, by name, with a small diagram. He asked for it there.
+
 ## 5. Twelve levels exist regardless of payment
 
 The ladder decides what **opens**. It never decides what gets **built**. Never
@@ -358,3 +361,26 @@ in catalog.js is followed by `node scripts/toolkit-json.mjs` in the same work;
 tests/toolkit-sync.test.mjs fails until it is. Nothing changes in exploraself
 for a new tool. Each list shows its name large, its live tools in whole rows
 of three, and what is being built as one line beneath.
+
+## 21. Good People Win: ten letters for everyone who leaves a name (Alexandru, 5 Nov 2026)
+
+Everyone who leaves their name and email gets ten letters from Alexandru,
+on either site, with or without an account: an account here with a yes to
+letters (signup.js, google.js), or a name + email form on exploraself.com,
+which posts to /api/good-people with the person's yes. Letter 1 goes at
+once, then one every 48 hours, never at night in their time zone, alongside
+12 Days and the letters that follow each pain. One row per address.
+
+The words are in functions/_gpw-letters.js, the engine in functions/_gpw.js.
+Every letter has the same shape: a small cover (public/mail/gpw/), a thank
+you, five numbered sections (Where it hurts · a story · Today's tool, as a
+small diagram drawn with tables · Your 10 minutes, with "Done when" · The
+hard truth), bold key lines, one invitation, "Reply and tell me", a P.S. The
+stories are his own; a section with no story of his says "From the book".
+Quotes from the books are word for word.
+
+Each letter has its own unsubscribe (?g=, these letters only) and a 1 × 1
+picture that marks it opened; /mentor → Good People Win shows who is on
+which letter and what they opened (a sign, not a count). GPW_MODE "off" in
+the Cloudflare settings stops joining and sending. Mailchimp tag (accounts):
+linktolead-letters-good-people-win. A letter changed: the email map (rule 14).

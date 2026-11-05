@@ -34,6 +34,26 @@ const BUTTON = Symbol('button');
  *  the html (a table, so every inbox draws it), "label: url" in plain text. */
 export const button = (url, label) => ({ [BUTTON]: true, url, label });
 
+// Letters that are easy to read (Alexandru, 5 Nov 2026, Good People Win:
+// "shorter, with chapters … some bold … a diagram or something, to make it
+// more readable"). Bold words, a section heading, and a small diagram drawn
+// as tables (no picture: every mail app shows it, and it reads the same in
+// the plain-text part).
+const STRONG = Symbol('strong');
+/** Bold words inside a paragraph. */
+export const strong = (s) => ({ [STRONG]: true, s: String(s) });
+/** A sentence with **bold** marks, as the parts of a paragraph. */
+export const marked = (s) => String(s).split(/\*\*(.+?)\*\*/).map((x, i) => (i % 2 ? strong(x) : x)).filter((x) => x !== '');
+const BLOCK = Symbol('block');
+/** A section heading ("1 · Where it hurts"), as its own paragraph. */
+export const heading = (t) => ({ [BLOCK]: true, kind: 'heading', t: String(t) });
+/** A small diagram, as its own paragraph. `kind`:
+ *    grid    four steps in a 2 × 2 loop: rows [badge, word, line]
+ *    ladder  steps down the page:         rows [badge, word, line]
+ *    ifthen  "when … then …" pairs:       rows [when, then]
+ *  `title` sits on top, `foot` (optional) underneath in italics. */
+export const diagram = ({ kind = 'ladder', title = '', rows = [], foot = '' }) => ({ [BLOCK]: true, kind: 'diagram', d: { kind, title, rows, foot } });
+
 /** The offers, each a paragraph after "P.S.". `tier` hides an offer the
  *  founder already holds (The Boardroom, once they are in it). */
 export const OFFERS = {
@@ -70,10 +90,51 @@ function parts(p) {
     html: `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 22px"><tr><td style="border-radius:6px;background:#B4975F"><a href="${esc(p.url)}" style="display:block;padding:14px 26px;font:bold 16px/1 Arial,sans-serif;color:#14100B;text-decoration:none;border-radius:6px">${esc(p.label)}</a></td></tr></table>`,
     text: `${p.label}: ${p.url}`,
   };
+  if (p && p[BLOCK]) return { button: true, ...(p.kind === 'heading' ? headingParts(p.t) : diagramParts(p.d)) };
   const list = Array.isArray(p) ? p : [p];
-  const html = list.map((x) => (x && x[LINK] ? `<a href="${esc(x.url)}" style="color:${GOLD_INK}">${esc(x.label)}</a>` : esc(x))).join('');
-  const text = list.map((x) => (x && x[LINK] ? x.url : String(x))).join('');
+  const html = list.map((x) => (x && x[LINK] ? `<a href="${esc(x.url)}" style="color:${GOLD_INK}">${esc(x.label)}</a>` : x && x[STRONG] ? `<b>${esc(x.s)}</b>` : esc(x))).join('');
+  const text = list.map((x) => (x && x[LINK] ? x.url : x && x[STRONG] ? x.s : String(x))).join('');
   return { html, text };
+}
+
+const PANEL = '#F7F0E1', RULE = '#E3D6BA', BADGE_INK = '#E8C978';
+function headingParts(t) {
+  return {
+    html: `<p style="margin:26px 0 10px;padding-top:14px;border-top:1px solid ${RULE};font:bold 12px/1.3 Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:${GOLD_INK}">${esc(t)}</p>`,
+    text: t.toUpperCase(),
+  };
+}
+/** A badge: a letter or a number on a dark square (round in the grid). A
+ *  fixed box inside its cell, so a tall neighbour never stretches it. */
+const badge = (b, round) => `<div style="width:30px;height:30px;background:${INK};border-radius:${round ? 15 : 6}px;text-align:center;font:bold ${round ? 14 : 16}px/30px Georgia,serif;color:${BADGE_INK}">${esc(b)}</div>`;
+function diagramParts({ kind, title, rows, foot }) {
+  const top = title ? `<tr><td colspan="2" style="padding:12px 14px 6px;font:bold 11px/1.3 Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:${GOLD_INK}">${esc(title)}</td></tr>` : '';
+  const end = foot ? `<tr><td colspan="2" style="padding:6px 14px 12px;font:italic 13px/1.4 Georgia,serif;color:${GOLD_INK}">${esc(foot)}</td></tr>` : '';
+  const box = (inner) => `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:4px 0 18px;background:${PANEL};border:1px solid ${RULE};border-radius:10px">${top}${inner}${end}</table>`;
+  let html, lines;
+  if (kind === 'grid') {
+    const cell = ([b, w, l], i) => `<td width="50%" valign="top" style="padding:8px 14px 10px"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td valign="top" style="width:30px">${badge(b, true)}</td>
+      <td valign="top" style="padding-left:9px;font:14px/1.4 Arial,sans-serif;color:${INK}"><b style="display:block">${i + 1} · ${esc(w)}</b><span style="color:${MUTED};font-size:13px">${esc(l)}</span></td></tr></table></td>`;
+    const pairs = [];
+    for (let i = 0; i < rows.length; i += 2) pairs.push(`<tr>${rows.slice(i, i + 2).map((r, j) => cell(r, i + j)).join('')}</tr>`);
+    html = box(pairs.join(''));
+    lines = rows.map(([, w, l], i) => `${i + 1}. ${w}: ${l}`);
+  } else if (kind === 'ifthen') {
+    html = box(rows.map(([w, t]) => `<tr><td colspan="2" style="padding:6px 14px">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+      <td valign="top" width="46%" style="padding:8px 10px;background:#fff;border:1px solid ${RULE};border-radius:6px;font:14px/1.4 Arial,sans-serif;color:${INK}"><span style="display:block;font:bold 10px/1.3 Arial,sans-serif;letter-spacing:.14em;color:${GOLD_INK}">WHEN</span>${esc(w)}</td>
+      <td valign="middle" width="8%" style="text-align:center;font:bold 16px/1 Arial,sans-serif;color:${GOLD_INK}">→</td>
+      <td valign="top" width="46%" style="padding:8px 10px;background:${INK};border-radius:6px;font:14px/1.4 Arial,sans-serif;color:#F3EAD6"><span style="display:block;font:bold 10px/1.3 Arial,sans-serif;letter-spacing:.14em;color:${BADGE_INK}">I WILL</span>${esc(t)}</td>
+      </tr></table></td></tr>`).join(''));
+    lines = rows.map(([w, t]) => `When ${w.replace(/^./, (c) => c.toLowerCase())} → I will ${t.replace(/^./, (c) => c.toLowerCase())}`);
+  } else {
+    html = box(rows.map(([b, w, l], i) => `<tr>
+      <td valign="middle" style="width:34px;padding:${i ? 6 : 4}px 0 6px 14px">${badge(b, false)}</td>
+      <td valign="middle" style="padding:${i ? 6 : 4}px 14px 6px 10px;font:14px/1.4 Arial,sans-serif;color:${INK}"><b>${esc(w)}</b> <span style="color:${MUTED}">${esc(l)}</span></td></tr>`).join(''));
+    lines = rows.map(([b, w, l]) => `${b}  ${w} ${l}`);
+  }
+  return { html, text: [title.toUpperCase(), ...lines, foot].filter(Boolean).join('\n') };
 }
 
 /** The part of the day for a founder, from their time zone: 'morning',
@@ -140,7 +201,7 @@ const mailto = (to, q) => `mailto:${to}?subject=${encodeURIComponent(q)}`;
  *   sign    false leaves out the whole close (the notice to the mentor)
  * Returns { html, text, replyTo, fromName } for send().
  */
-export function letter(base, paras, offer = null, { sign = true, mentor, tz = '', at, ask = 'start', seed = 0, intro = false, security = false, founder = true, receipt = false } = {}) {
+export function letter(base, paras, offer = null, { sign = true, mentor, tz = '', at, ask = 'start', seed = 0, intro = false, security = false, founder = true, receipt = false, cover = null, pixel = '' } = {}) {
   const M = asMentor(mentor);
   const pic = (u) => (/^https:\/\//.test(u) ? u : `${base}${u}`);
   const P = paras.map(parts);
@@ -173,8 +234,12 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
   const qs = !sign || ask === null || receipt ? [] : Array.isArray(ask) ? ask : (SHORTCUTS[ask] || SHORTCUTS.start);
   const bye = sign ? farewell(tz, at) : '';
   const replyLine = 'Any question at all, big or small? Just reply to this email. It comes straight to me, and I read every one.';
+  // cover: a small picture on top ({ src, alt }, Good People Win). pixel: a
+  // 1 × 1 image at the very end whose address records that the letter was
+  // opened (functions/_gpw.js); a mail app that blocks pictures records nothing.
+  const top = cover && cover.src ? `<img src="${esc(pic(cover.src))}" width="516" alt="${esc(cover.alt || '')}" style="display:block;width:100%;max-width:516px;height:auto;border:0;border-radius:10px;margin:0 0 24px">\n    ` : '';
   const html = `<!doctype html><html><body style="margin:0;background:${PAPER}"><div style="max-width:560px;margin:0 auto;padding:32px 22px;background:${PAPER};font:16px/1.7 Georgia,'Times New Roman',serif;color:${INK}">
-    ${P.map((p) => (p.button ? p.html : `<p style="margin:0 0 16px;white-space:pre-wrap">${p.html}</p>`)).join('\n    ')}
+    ${top}${P.map((p) => (p.button ? p.html : `<p style="margin:0 0 16px;white-space:pre-wrap">${p.html}</p>`)).join('\n    ')}
     ${good ? `<p style="margin:0 0 16px">${esc(good)}</p>` : ''}
     ${sign ? `<p style="margin:0 0 ${qs.length ? 10 : 16}px">${esc(replyLine)}</p>` : ''}
     ${qs.length ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 18px;border-left:2px solid #B4975F"><tr><td style="padding:2px 0 2px 14px;font:14px/1.5 Arial,sans-serif;color:${MUTED}">
@@ -188,6 +253,7 @@ export function letter(base, paras, offer = null, { sign = true, mentor, tz = ''
       <p style="margin:0;font:13px/1.5 Arial,sans-serif;color:${MUTED}">${esc(M.name)} · ${esc(M.title)}</p></td></tr></table>` : ''}
     ${ps ? `<p style="margin:0;padding-top:14px;border-top:1px dashed #D6C9AC;font-style:italic">${ps.html}</p>` : ''}
     ${tests.length ? `<p style="margin:14px 0 0;font:14px/1.6 Arial,sans-serif;color:${MUTED}">Free assessments, when you want to look deeper: ${tests.map((t) => `<a href="${esc(t.u)}" style="color:${GOLD_INK};text-decoration:underline">${esc(t.n)}</a>`).join(' · ')}</p>` : ''}
+    ${pixel ? `<img src="${esc(pixel)}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;border:0">` : ''}
   </div></body></html>`;
   const text = [
     P.map((p) => p.text).join('\n\n'),
