@@ -62,6 +62,15 @@ body:not(.dark){background:#FFFFFF}
 .ns-intro:hover{color:#EEF2F7;background:rgba(255,255,255,.07)}
 .cf:not([data-theme="dark"]) .ns-intro{color:var(--goldink);border-color:var(--line)}
 .cf:not([data-theme="dark"]) .ns-intro:hover{color:var(--ink);background:var(--soft)}
+/* First in the menu (Alexandru, 5 Nov 2026), in blue; it flashes for two minutes, then fades to calm. */
+.side .ns-intro{margin:26px 0 0;transition:background-color 1.2s ease,color 1.2s ease,border-color 1.2s ease}
+.side .ns-intro + .side-extra{margin-top:26px !important}
+.cf .side a.ns-intro{color:#3E6A94;border-color:rgba(62,106,148,.45);font-weight:700}
+.cf[data-theme="dark"] .side a.ns-intro{color:#A9C0D9;border-color:rgba(169,192,217,.45)}
+.cf .side a.ns-intro.flash{background:#3E6A94;color:#FFFFFF;border-color:#3E6A94;animation:nsIntroPulse 1.6s ease-in-out infinite}
+@keyframes nsIntroPulse{0%,100%{box-shadow:0 0 0 0 rgba(62,106,148,.6)}50%{box-shadow:0 0 0 9px rgba(62,106,148,0)}}
+.nsmenu a[href^="/north1/"] .nsmenu-ic{background:#3E6A94;color:#FFFFFF}
+.nsmenu a[href^="/north1/"] b{color:#3E6A94}
 
 /* ── The hero: white, the wheel kept ── */
 .cf:not([data-theme="dark"]) .hz{background:#FFFFFF;color:var(--ink);border-radius:0;padding:36px 8px 20px;box-shadow:none}
@@ -153,7 +162,7 @@ body:not(.dark){background:#FFFFFF}
 @media (max-width:760px){
   .cf:not([data-theme="dark"]) .hz{padding:24px 0 16px}
 }
-@media (prefers-reduced-motion:reduce){.cf .hz-go{transition:none}}
+@media (prefers-reduced-motion:reduce){.cf .hz-go{transition:none}.cf .side a.ns-intro.flash{animation:none}}
 
 /* The reading's key, on white. */
 .cf:not([data-theme="dark"]) .nskey{color:var(--ink)}

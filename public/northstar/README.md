@@ -15,7 +15,7 @@ pages beside it. Plain HTML, CSS and JavaScript; no build, no dependencies.
 
 ## Clean look (5 Nov 2026)
 
-`clean.css` loads last and changes the look only (Alexandru, 5 Nov 2026): a white page, Atkinson Hyperlegible for the text and Newsreader for titles, hairlines instead of heavy boxes, the left menu, the hero, the banner, the reading, the Growth Plan header and the next step on white. The four-domain wheel in the hero stays as it is (his pick). The what-if lab keeps one flat navy panel. The dark workspace theme keeps its own look. "How the North Star works" links to the presentation page, `/north1/`, under the four parts in the left menu and in the phone's Menu (`clarity.js`).
+`clean.css` loads last and changes the look only (Alexandru, 5 Nov 2026): a white page, Atkinson Hyperlegible for the text and Newsreader for titles, hairlines instead of heavy boxes, the left menu, the hero, the banner, the reading, the Growth Plan header and the next step on white. The four-domain wheel in the hero stays as it is (his pick). The what-if lab keeps one flat navy panel. The dark workspace theme keeps its own look. "How the North Star works" links to the presentation page, `/north1/`: first in the left menu and in the phone's Menu (`clarity.js`). It is blue and flashes for two minutes, then fades to calm; once opened, it never flashes again on that browser (`ns-intro-opened`, every access guarded).
 
 ## Where the intelligence lives
 
