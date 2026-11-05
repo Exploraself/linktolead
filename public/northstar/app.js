@@ -687,7 +687,7 @@
   ][k];
   /* A word between questions (model.js SPARKS), once the page is answered. */
   const spark = (i) => { const all = M.SPARKS && M.SPARKS[i], list = all ? [].concat(all) : [], x = list.length ? list[(Math.max(0, E.STAGES.findIndex((st) => st.id === S.stage)) + i) % list.length] : null; return x ? `<div class="nsspark"><small>${x.by ? 'A word from ' + esc(x.by) : 'A small note'}</small><p class="sf">${esc(x.t)}</p>${x.sub ? `<span>${esc(x.sub)}</span>` : ''}</div>` : ''; };
-  function tapsPage(k, qn, total) {
+  function tapsPage(k, qn, total, foot = '') {
     const T = tapOf(k);
     return `<span class="eb nsb-lab">${String(qn).padStart(2, '0')} · ${k === 2 ? 'The last tap' : 'Taps that shape your feedback'}</span>
       <div class="nsb-body">
@@ -697,6 +697,7 @@
             ${T.list.map(([id, t, di], i) => `<button type="button" class="nsb-o" data-act="${T.act}" data-v="${id}" data-f="${T.act}-${id}" aria-pressed="${T.on(id)}">
               <kbd aria-hidden="true">${i + 1}</kbd><span class="nsb-dot" style="background: ${di >= 0 ? D[di].hex : '#B4975F'}"></span><span><b>${esc(t)}</b></span></button>`).join('')}
           </div>
+          ${foot}
           <p class="nsb-keys"><kbd>1–${T.list.length}</kbd> choose · <kbd>Enter ↵</kbd> ${qn === total ? 'see my North Star' : 'next'}</p>
         </div>
         ${T.n ? `<div><p class="nsb-note">${T.note}</p>${spark(qn - 1)}</div>` : ''}
@@ -722,6 +723,11 @@
     const tap = qi >= qs.length ? qi - qs.length : -1;
     const q = qs[Math.min(qi, qs.length - 1)], di = D.findIndex((d) => d.id === q.domain), a = S.ans[q.id];
     const last = qi === total - 1;
+    // Back and Next, right under the answers (Alexandru, 5 Nov 2026: "everything close").
+    const foot = `<footer class="nsb-foot">
+              <button type="button" class="nsb-back" data-act="nsmove" data-v="-1" data-f="ns-back"${qi === 0 ? ' disabled' : ''}>← Back</button>
+              <button type="button" class="nsb-next" data-act="nsmove" data-v="1" data-f="ns-next">${last ? 'See my North Star' : 'Next ↵'}</button>
+            </footer>`;
     const seg = qs.map((x, i) => `<i class="${Number.isInteger(S.ans[x.id]) ? 'done' : ''}${i === qi ? ' now' : ''}"></i>`).join('')
       + TAPS.map((_, k) => `<i class="${tapOf(k).n ? 'done' : ''}${qs.length + k === qi ? ' now' : ''}"></i>`).join('');
     const k1 = p1Count(c);
@@ -743,7 +749,7 @@
         <div class="nsmini" title="Your shape grows with every answer">${miniShape(c)}<span>Your shape</span></div>
         <button type="button" class="nsb-phone" data-act="nsb-steps" aria-label="Show all the questions"><span><i aria-hidden="true"></i>Part 1 · Question ${qi + 1} of ${total}</span><span aria-hidden="true">Questions ▾</span></button>
         <div class="nsb-seg" aria-hidden="true">${seg}</div>
-        ${tap >= 0 ? tapsPage(tap, qi + 1, total) : `<span class="eb nsb-lab">0${qi + 1} · ${esc(D[di].name)}</span>
+        ${tap >= 0 ? tapsPage(tap, qi + 1, total, foot) : `<span class="eb nsb-lab">0${qi + 1} · ${esc(D[di].name)}</span>
         <div class="nsb-body">
           <div class="nsb-col">
             <h3 class="sf nsb-q" id="qt-${q.id}">${esc(q.text)}</h3>
@@ -752,14 +758,11 @@
               ${E.ANSWERS.map(([label, sub], k) => `<button type="button" class="nsb-o" data-act="ans" data-q="${q.id}" data-v="${k}" data-f="ans-${q.id}-${k}" aria-pressed="${a === k}">
                 <kbd aria-hidden="true">${k + 1}</kbd><span><b>${label}</b> <span>· ${sub}</span></span></button>`).join('')}
             </div>
+            ${foot}
             <p class="nsb-keys"><kbd>1–4</kbd> choose · <kbd>Enter ↵</kbd> next</p>
           </div>
           ${Number.isInteger(a) ? `<div><p class="nsb-note" role="status"><small>${a < 2 ? 'Your next step' : 'Keep going'}</small>${esc(noteFor(q, a))}</p>${spark(qi)}</div>` : ''}
         </div>`}
-        <footer class="nsb-foot">
-          <button type="button" class="nsb-back" data-act="nsmove" data-v="-1" data-f="ns-back"${qi === 0 ? ' disabled' : ''}>← Back</button>
-          <button type="button" class="nsb-next" data-act="nsmove" data-v="1" data-f="ns-next">${last ? 'See my North Star' : 'Next ↵'}</button>
-        </footer>
       </section>
     </div>`;
   }

@@ -13,7 +13,7 @@ ok(['The Founder’s Blueprint', 'Growth Toolkit', '12 Days to Start Winning', '
 ok(css.includes('#s-overview > div:has(#stepcards),#s-method{display:none !important}') && !app.includes("['method', '⌘', 'How it works']") && !spy.includes("'s-method'"), '“four parts” said once');
 ok(css.includes('.nslocked>*:not(.nslocknote){display:none !important}') && app.includes('4: !p1 || !p2 || !p3'), 'a locked part is one quiet line; the What-if lab waits for the numbers');
 ok(js.includes("Before you start · ${bys + 1} of ${U.length}") && js.includes("'Start Part 1 →'") && css.includes('#s-clear[data-bys="r1"]'), 'Before you start, one at a time, with Back beside Next');
-ok(css.includes('.nsb-foot{justify-content:flex-start;gap:12px}') && css.includes('body.nsq-full .nsb-foot{position:fixed'), 'the questions: Back beside Next, at the bottom on a phone');
+ok(css.includes('.nsb-foot{justify-content:flex-start;gap:12px}') && !css.includes('body.nsq-full .nsb-foot{position:fixed') && css.includes('.nsb-foot{margin-top:14px;'), 'the questions: Back beside Next, right under the answers, on a phone too (5 Nov)');
 ok(js.includes("fetch('/api/course', { method: 'POST'") && js.includes('Done. Wait for the surprises: check your email.') && html.includes('class="days-link" data-days="open"'), '12 Days: the card in the side and at the end, a pop-up in place');
 
 // The Growth Plan: the next five steps; the rest behind one button.
