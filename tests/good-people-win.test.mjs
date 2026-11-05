@@ -67,7 +67,9 @@ ok(letter(B, ['A <b>x</b> **y**'], null, { sign: false }).html.includes('&lt;b&g
 // ── When ───────────────────────────────────────────────────────────────────
 const H = 3600_000;
 const t0 = new Date('2026-11-06T14:00:00Z'); // 9:00 in New York
-ok(due({ sent: 0 }, t0) === 1, 'letter 1 is owed at once');
+ok(due({ sent: 0 }, t0) === 1, 'letter 1, in the hourly run, in the daytime: owed now');
+ok(due({ sent: 0, tz: NY }, new Date('2026-11-06T05:00:00Z')) === 0 && due({ sent: 0, tz: 'Europe/Rome' }, new Date('2026-11-06T05:00:00Z')) === 0, 'letter 1 in the hourly run waits for 8:00 their time (midnight in New York, 6:00 in Rome)');
+ok(due({ sent: 0, tz: 'Europe/Rome' }, new Date('2026-11-06T08:00:00Z')) === 1 && due({ sent: 0, tz: NY }, new Date('2026-11-06T08:00:00Z')) === 0, 'the same hour: morning in Rome sends, night in New York waits (according to location)');
 ok(due({ sent: 1, last_sent_at: t0.getTime(), tz: NY }, new Date(t0.getTime() + 24 * H)) === 0, 'not after one day');
 ok(due({ sent: 1, last_sent_at: t0.getTime(), tz: NY }, new Date(t0.getTime() + 47.2 * H)) === 2, 'letter 2 about 48 hours later (the hourly run may be early by up to an hour)');
 ok(due({ sent: 1, last_sent_at: t0.getTime(), tz: NY }, new Date(t0.getTime() + 46 * H)) === 0, 'not two hours early');

@@ -114,7 +114,7 @@ export const ENTRIES = [
   {
     id: 'gpw', stage: 'door', icon: 'mail', fn: 'gpwLetter', gpw: true,
     name: GPW_NAME,
-    when: `They leave their name and email: an account on linktolead (with a yes to letters; by email, Google, or made when they paid first), or a name + email form on exploraself.com. Everyone subscribed on the Mailchimp list joins by themselves (checked every 6 hours). Letter 1 at once, then one every ${GAP_HOURS} hours, from ${SEND_HOUR}:00 to ${LATEST_HOUR}:00 their time. Alongside 12 Days and the letters that follow each pain.`,
+    when: `They leave their name and email: an account on linktolead (with a yes to letters; by email, Google, or made when they paid first), or a name + email form on exploraself.com. Everyone subscribed on the Mailchimp list joins by themselves (checked every 6 hours). Letter 1 at once when they sign up (from the list: the next hour between ${SEND_HOUR}:00 and ${LATEST_HOUR}:00 their time), then one every ${GAP_HOURS} hours, from ${SEND_HOUR}:00 to ${LATEST_HOUR}:00 their time. Alongside 12 Days and the letters that follow each pain.`,
     who: `Everyone who leaves their name and email, once per address. Stops on its own unsubscribe link (these letters only), on unsubscribing from everything, on an unsubscribe in Mailchimp (people with no account here), or after letter ${GPW_LAST}. Waits while an account is paused. Mailchimp tag (accounts): ${GPW_TAG}. Opens show in /mentor → Good People Win.`,
     from: '/northstar/',
     sentBy: 'functions/_gpw.js (letter 1 from functions/api/signup.js, google.js and good-people.js; the rest from the hourly job in worker.js)',

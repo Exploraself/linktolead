@@ -368,8 +368,10 @@ Everyone who leaves their name and email gets ten letters from Alexandru,
 on either site, with or without an account: an account here with a yes to
 letters (signup.js, google.js, or made when they paid first: _stripe.js
 guestAccount), or a name + email form on exploraself.com, which posts to
-/api/good-people with the person's yes. Letter 1 goes at once, then one
-every 48 hours, never at night in their time zone, alongside 12 Days and the
+/api/good-people with the person's yes. Letter 1 goes at once at sign-up;
+when the hourly run sends it (someone from the Mailchimp list), only between
+8:00 and 21:00 in their time zone (Alexandru: "according to location"). Then
+one every 48 hours, never at night in their time zone, alongside 12 Days and the
 letters that follow each pain. One row per address. A new door that takes a
 name and email calls gpwJoin (and sendFirst), with a test.
 
