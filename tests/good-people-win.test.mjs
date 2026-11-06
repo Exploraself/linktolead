@@ -139,7 +139,27 @@ ok(!sent.some((m) => m.body.to[0] === 'lia@example.com'), 'a day later: nothing 
 // Find a daytime hour in New York about 48 hours on.
 let at = new Date(start + 48 * H);
 while (Number(new Intl.DateTimeFormat('en-US', { timeZone: NY, hour: 'numeric', hourCycle: 'h23' }).format(at)) < 9) at = new Date(at.getTime() + H);
+// A "no" in Mailchimp must always stop the letters (Alexandru, 6 Nov 2026:
+// "must solve"). Lia has no account here, so her "no" lives in Mailchimp. With
+// no Mailchimp key here (the hourly Worker, 5–6 Nov), it can't be checked, so
+// letter 2 waits instead of going unchecked.
 r = await sendDue(env, DB, B, at);
+ok(!sent.some((m) => m.body.to[0] === 'lia@example.com') && r.held >= 1 && r.heldWhy === 'no Mailchimp key here', `no Mailchimp key: letter 2 for someone with no account waits, unchecked letters never go (${JSON.stringify(r)})`);
+const heldRow = JSON.parse(DB.raw.prepare("SELECT v FROM gpw_meta WHERE k = 'held'").get().v);
+ok(heldRow.n >= 1 && heldRow.why === 'no Mailchimp key here' && heldRow.at === at.toISOString(), 'no Mailchimp key: the run remembers what waited, and why, for /mentor');
+ok(DB.raw.prepare('SELECT sent FROM gpw_sub WHERE email = ?').get('lia@example.com').sent === 1 && !DB.raw.prepare('SELECT stopped_at FROM gpw_sub WHERE email = ?').get('lia@example.com').stopped_at, 'no Mailchimp key: Lia is not stopped, only waiting');
+// With the key, Mailchimp says she is subscribed: letter 2 goes.
+const fetch1 = globalThis.fetch;
+const mcCalls1 = [];
+globalThis.fetch = async (url, opts) => {
+  const u = String(url);
+  if (u.includes('api.mailchimp.com') && /\/members\/[0-9a-f]{32}\?fields=status/.test(u)) return mcCalls1.push(u), { ok: true, status: 200, json: async () => ({ status: 'subscribed' }) };
+  if (u.includes('api.mailchimp.com')) return { ok: true, status: 200, json: async () => ({ members: [], total_items: 0 }) };
+  return fetch1(url, opts);
+};
+Object.assign(env, { MAILCHIMP_API_KEY: 'k-us8', MAILCHIMP_MODE: 'test' });
+r = await sendDue(env, DB, B, at);
+ok(mcCalls1.length >= 1 && r.held === 0, 'with the key: Mailchimp is checked before the letter, and nothing waits');
 ok(sent.some((m) => m.body.to[0] === 'lia@example.com' && m.body.subject === 'Busy is not winning · Good People Win 2/10'), 'two days later: letter 2');
 for (let n = 3; n <= 10; n++) { at = new Date(at.getTime() + 48 * H); await sendDue(env, DB, B, at); }
 row = DB.raw.prepare('SELECT * FROM gpw_sub WHERE email = ?').get('lia@example.com');
@@ -190,7 +210,7 @@ ok((await sendDue(off, DB, B)).why === 'GPW_MODE is off', 'GPW_MODE "off": nothi
 // (the subscribed members, and one person's status).
 const CID = '1234-abc.apps.googleusercontent.com';
 const outbox = [];
-let mcMembers = [], mcStatus = {};
+let mcMembers = [], mcStatus = {}, mcStatusCalls = 0;
 const mcUrls = [];
 globalThis.fetch = async (url, opts = {}) => {
   const u = String(url);
@@ -202,7 +222,10 @@ globalThis.fetch = async (url, opts = {}) => {
   if (u.includes('api.resend.com')) { outbox.push(JSON.parse(opts.body)); return { ok: true }; }
   if (u.includes('api.mailchimp.com') && u.includes('/members?status=subscribed')) return mcUrls.push(u), { ok: true, json: async () => ({ members: mcMembers, total_items: mcMembers.length }) };
   const h = /\/members\/([0-9a-f]{32})\?fields=status/.exec(u);
-  if (h) return mcStatus[h[1]] ? { ok: true, json: async () => ({ status: mcStatus[h[1]] }) } : { ok: false, status: 404, json: async () => ({}) };
+  // Anyone on the subscribed list answers "subscribed" unless a test says otherwise; anyone else is not in the audience (404).
+  if (h) mcStatusCalls++;
+  const s1 = h && (mcStatus[h[1]] || (mcMembers.some((m) => md5(m.email_address) === h[1]) ? 'subscribed' : ''));
+  if (h) return s1 === 'DOWN' ? { ok: false, status: 503, json: async () => ({}) } : s1 ? { ok: true, status: 200, json: async () => ({ status: s1 }) } : { ok: false, status: 404, json: async () => ({}) };
   return { ok: false, status: 503, headers: new Headers(), text: async () => 'offline', json: async () => ({}) };
 };
 DB = fakeD1();
@@ -265,6 +288,36 @@ let day = new Date(); while (Number(new Intl.DateTimeFormat('en-US', { timeZone:
 await sendDue(base, DB, B, day);
 ok(DB.raw.prepare('SELECT stop_why FROM gpw_sub WHERE email = ?').get('dora@example.com').stop_why === 'unsubscribed in Mailchimp' && !outbox.slice(out0).some((m) => m.to[0] === 'dora@example.com'), 'unsubscribed in Mailchimp: no more letters');
 ok(outbox.slice(out0).some((m) => m.to[0] === 'ana@example.com' && /2\/10/.test(m.subject)), 'and the others go on to letter 2');
+// The check fails closed (Alexandru, 6 Nov 2026: "must solve"): a "no" in
+// Mailchimp always stops, and a letter that can't be checked waits.
+const addRow = (email, source) => DB.raw.prepare('INSERT INTO gpw_sub (email, first, source, student_id, started_at, tz, sent, last_sent_at, unsub_id) VALUES (?,?,?,?,?,?,?,?,?)')
+  .run(email, 'T', source, null, new Date().toISOString(), NY, 1, day.getTime() - 49 * H, 'u-' + email);
+const stopWhy = (e) => DB.raw.prepare('SELECT stop_why FROM gpw_sub WHERE email = ?').get(e).stop_why;
+addRow('arc@example.com', 'mailchimp'); mcStatus[md5('arc@example.com')] = 'archived';
+addRow('gone@example.com', 'mailchimp'); // came from the list, no longer in the audience (404)
+addRow('fresh@example.com', 'exploraself-rise'); // joined on exploraself.com, not in Mailchimp (404)
+const out2 = outbox.length;
+let rr = await sendDue(base, DB, B, day);
+const to2 = (e) => outbox.slice(out2).filter((m) => m.to[0] === e);
+ok(stopWhy('arc@example.com') === 'archived in Mailchimp' && !to2('arc@example.com').length, 'archived in Mailchimp: no more letters');
+ok(stopWhy('gone@example.com') === 'no longer in the Mailchimp audience' && !to2('gone@example.com').length, 'someone from the list who is no longer in the audience: no more letters');
+ok(!stopWhy('fresh@example.com') && to2('fresh@example.com').some((m) => /2\/10/.test(m.subject)), 'someone who joined on exploraself.com and is not in Mailchimp: their own yes stands, letter 2 goes');
+addRow('down1@example.com', 'mailchimp'); mcStatus[md5('down1@example.com')] = 'DOWN';
+addRow('down2@example.com', 'exploraself-eq'); mcStatus[md5('down2@example.com')] = 'DOWN';
+const calls0 = mcStatusCalls, out3 = outbox.length;
+rr = await sendDue(base, DB, B, day);
+ok(rr.held === 2 && rr.heldWhy === 'Mailchimp could not be read' && !outbox.slice(out3).some((m) => /down[12]@/.test(m.to[0])), `Mailchimp down: both wait, nothing goes unchecked (${JSON.stringify(rr)})`);
+ok(mcStatusCalls - calls0 === 1, 'Mailchimp down: asked once in the run, not once per person');
+ok(!stopWhy('down1@example.com') && !stopWhy('down2@example.com'), 'Mailchimp down: nobody is stopped, they only wait');
+let [hs, hr] = await jsonOf(await mentorGet({ request: mreq('/api/mentor?gpw=1', MK), env: base }));
+ok(hs === 200 && hr.auto.held && hr.auto.held.n === 2 && hr.auto.held.why === 'Mailchimp could not be read', '/mentor: says how many letters wait, and why');
+delete mcStatus[md5('down1@example.com')]; mcMembers.push({ email_address: 'down1@example.com', merge_fields: { FNAME: 'T' } }); mcStatus[md5('down2@example.com')] = 'subscribed';
+rr = await sendDue(base, DB, B, new Date(day.getTime() + H));
+ok(rr.held === 0 && outbox.slice(out3).some((m) => m.to[0] === 'down1@example.com') && outbox.slice(out3).some((m) => m.to[0] === 'down2@example.com'), 'Mailchimp back: the waiting letters go at the next run');
+[hs, hr] = await jsonOf(await mentorGet({ request: mreq('/api/mentor?gpw=1', MK), env: base }));
+ok(hr.auto.held && hr.auto.held.n === 0, '/mentor: nothing waiting once it went');
+const mj3 = read('public/mentor/mentor.js');
+ok(/export function gpwHeldHTML/.test(mj3) && /if \(!h \|\| !h\.n\) return ''/.test(mj3) && /secret MAILCHIMP_API_KEY/.test(mj3) && /nothing went to them unchecked/.test(mj3), '/mentor: the waiting line, with the Cloudflare fix when the key is missing');
 const mj2 = read('public/mentor/mentor.js');
 ok(/<b>Automatic\.<\/b>/.test(mj2) && !/Count them|gpw-send/.test(mj2) && /Replies come to your inbox, so they are not counted here/.test(mj2), '/mentor: says it is automatic, with nothing to press, and that replies are not counted');
 
