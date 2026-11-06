@@ -6,7 +6,7 @@
 // seen). Icons tell before the words do (rule 13); the words carry the meaning.
 
 import { token } from '/account.js';
-import { CONSENT, utm } from '/forms.js';
+import { CONSENT, utm, detailFields, readDetails } from '/forms.js';
 import { LEVELS4 } from '/levels-v4.js';
 
 const $ = (s) => document.querySelector(s);
@@ -99,7 +99,7 @@ function productCard(S, step, test) {
       <li>${ICON.invoice}An invoice comes with every payment</li>
       <li>${ICON.refund}Ask for a refund from your Base Camp</li>
     </ul>
-    <p class="note">After paying, Stripe brings you straight back to it on exploraself.com, and we email you your own access link, so it opens on any device.</p>
+    <p class="note">After paying, you complete your account here (a minute), and it opens at once. We also email you your own access link, so it opens on any device.</p>
     <p class="err" id="err" role="alert" hidden></p>`;
 }
 
@@ -119,48 +119,99 @@ function guestForm() {
 }
 const signinLink = () => `<a class="ghost gf-in" href="/ground-plan/?next=${encodeURIComponent(location.pathname + location.search)}#signin">Already have an account? Sign in</a>`;
 
-/** Back from Stripe as a new founder: the account is made and this browser is
- *  signed in. One last step, their password; their name and email are there. */
+/** The button that opens what was bought: a product's own page (with its
+ *  access), or the first level the step opened. */
+const OPEN_LABEL = { unshakeable: 'Open my Unshakeable Audit' };
+const openOf = (d, S) => d.access
+  ? { href: d.access, label: OPEN_LABEL[d.step] || `Open ${S.name || 'it'}` }
+  : { href: `/ground-plan/#programme-${d.first || S.first || 4}`, label: 'Open my Base Camp' };
+
+/** The full account right after payment (Alexandru, 6 Nov 2026: "After
+ *  payment: full account"; for the Unshakeable Assessment: "first name and
+ *  email or Google, then payment, then full account, then immediate access").
+ *  What the account still lacks (d.missing: password, company or "No company
+ *  yet", what they want most, industry), with their name and email already
+ *  there; one button saves it (api/complete.js) and opens what they bought.
+ *  A new founder (back from Stripe with the token this payment made) and a
+ *  signed-in founder whose account is not full yet see the same form. On a
+ *  phone the password shows as it is typed (Alexandru, 3 Nov 2026). */
 function finishAccount(d, S) {
-  try { localStorage.setItem('ftb-token', d.token); } catch { /* private mode */ }
-  const first = d.first || S.first || 4, open = `/ground-plan/#programme-${first}`;
-  // On a phone the password shows as it is typed, so it can be checked and
-  // copied (Alexandru, 3 Nov 2026); one tap hides it.
+  if (d.token) { try { localStorage.setItem('ftb-token', d.token); } catch { /* private mode */ } }
+  const need = Array.isArray(d.missing) ? d.missing : ['company', 'interest', 'industry', 'password'];
+  const O = openOf(d, S);
+  if (!need.length) return paidDone(d, S);
+  const pw = need.includes('password');
   const shown = matchMedia('(max-width: 600px)').matches;
   draw(`<p class="eb">${ICON.check}Thank you</p><h1>${esc(S.name || 'Your step')} is yours</h1>
-    <p class="ok">Your payment went through. One last step: choose your password, and your Base Camp opens.</p>
-    <form class="card gf" id="fin">
+    <p class="ok">Your payment went through. One last step: complete your account, and ${d.access ? 'it opens at once' : 'your Base Camp opens'}.</p>
+    <form class="card gf" id="fin" novalidate>
       <p class="gf-who"><b>${esc(d.name || '')}</b>${esc(d.email || '')}</p>
-      <label for="f-pw">Choose a password (at least 10 characters)</label>
+      ${detailFields('f', 'display:grid;gap:6px', need)}
+      ${pw ? `<label for="f-pw">Choose a password (at least 10 characters)</label>
       <input id="f-pw" type="${shown ? 'text' : 'password'}" autocomplete="new-password" autocapitalize="off" spellcheck="false" minlength="10" required>
       <label for="f-pw2">The same password again</label>
       <input id="f-pw2" type="${shown ? 'text' : 'password'}" autocomplete="new-password" autocapitalize="off" spellcheck="false" minlength="10" required>
       <div class="gf-tools">
         <button type="button" class="gf-tool" id="f-show" aria-pressed="${shown}">${shown ? 'Hide password' : 'Show password'}</button>
         <button type="button" class="gf-tool" id="f-copy">Copy it into the second box</button>
-      </div>
-      <button class="go" type="submit">${ICON.open}Open my Base Camp</button>
+      </div>` : ''}
+      <button class="go" type="submit">${ICON.open}${esc(O.label)}</button>
       <p class="err" id="err" role="alert" hidden></p>
-    </form>
-    <a class="ghost" href="${open}">Later: open Level ${pad(first)} now</a>`);
-  $('#f-show').onclick = (e) => {
-    const on = $('#f-pw').type === 'password';
-    for (const id of ['#f-pw', '#f-pw2']) $(id).type = on ? 'text' : 'password';
-    e.currentTarget.textContent = on ? 'Hide password' : 'Show password';
-    e.currentTarget.setAttribute('aria-pressed', String(on));
-  };
-  $('#f-copy').onclick = () => { $('#f-pw2').value = $('#f-pw').value; $('#f-pw2').focus(); };
+    </form>`);
+  const nc = $('#f-nocompany'), co = $('#f-company');
+  if (nc && co) nc.onchange = () => { co.disabled = nc.checked; if (nc.checked) co.value = ''; };
+  if (pw) {
+    $('#f-show').onclick = (e) => {
+      const on = $('#f-pw').type === 'password';
+      for (const id of ['#f-pw', '#f-pw2']) $(id).type = on ? 'text' : 'password';
+      e.currentTarget.textContent = on ? 'Hide password' : 'Show password';
+      e.currentTarget.setAttribute('aria-pressed', String(on));
+    };
+    $('#f-copy').onclick = () => { $('#f-pw2').value = $('#f-pw').value; $('#f-pw2').focus(); };
+  }
   $('#fin').onsubmit = async (e) => {
     e.preventDefault();
-    const err = $('#err'); err.hidden = true;
+    const err = $('#err'), b = e.currentTarget.querySelector('.go');
+    const say = (m) => { err.textContent = m; err.hidden = false; b.disabled = false; };
+    err.hidden = true;
+    const det = readDetails('f', need);
+    if (det.problem) return say(det.problem);
+    if (pw && $('#f-pw').value.length < 10) return say('At least 10 characters, please.');
+    if (pw && $('#f-pw').value !== $('#f-pw2').value) return say('The two passwords are not the same.');
+    const body = { token: d.token || token(), full: true };
+    if (need.includes('company')) Object.assign(body, { company: det.company, noCompany: det.noCompany });
+    if (need.includes('interest')) body.interest = det.interest;
+    if (need.includes('industry')) body.industry = det.industry;
+    if (pw) Object.assign(body, { password: $('#f-pw').value, confirm: $('#f-pw2').value });
+    b.disabled = true;
     try {
-      const r = await fetch('/api/password', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token: d.token, password: $('#f-pw').value, confirm: $('#f-pw2').value }) });
+      const r = await fetch('/api/complete', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
       const x = await r.json().catch(() => ({}));
-      if (x.ok) { location.href = open; return; }
-      err.textContent = x.error || 'That did not work. Try again.';
-    } catch { err.textContent = 'We could not reach the site. Check your connection and try again.'; }
-    err.hidden = false;
+      if (x.ok) { location.href = O.href; return; }
+      say(x.error || 'That did not work. Try again.');
+    } catch { say('We could not reach the site. Check your connection and try again.'); }
   };
+}
+
+/** Paid, and the account is full: what opened, and the way in. */
+function paidDone(d, S) {
+  const O = openOf(d, S);
+  try { history.replaceState(null, '', `/pay/?step=${encodeURIComponent(d.step || '')}&paid=1`); } catch { /* old browser */ }
+  return draw(`<p class="eb">${ICON.check}Thank you</p><h1>${esc(S.name || 'Your step')} is ${d.access ? 'yours' : 'open'}</h1>
+    <p class="ok">Your payment went through. ${d.access ? 'We have emailed you your own access link too, so it opens on any device.' : 'We have emailed you what opened and how to book your session.'}</p>
+    <a class="go" href="${esc(O.href)}">${ICON.open}${esc(O.label)}</a>
+    <a class="ghost" href="/ground-plan/#home">My Base Camp</a>`);
+}
+
+/** From exploraself.com's "Get access" window (6 Nov 2026): the first name,
+ *  email and yes it took come in the address's #part (never sent to a
+ *  server), fill the form here and go straight on to Stripe. */
+function fromWindow() {
+  const h = new URLSearchParams(String(location.hash || '').replace(/^#/, ''));
+  const first = (h.get('first') || '').trim().slice(0, 60), email = (h.get('email') || '').trim().slice(0, 200);
+  if (!first && !email) return null;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch { /* old browser */ }
+  return { first, email, yes: h.get('yes') === '1' };
 }
 
 async function start() {
@@ -180,6 +231,12 @@ async function start() {
       <a class="ghost" href="/ground-plan/#home">Back to my Base Camp</a>`);
   }
   const guest = !info.signedIn;
+  // "Already bought? Sign in" (exploraself.com, 6 Nov 2026): signed in, it
+  // opens what this account bought; not signed in, the sign-in comes first.
+  if (q.get('open') && S.product) {
+    if (guest) { location.replace(`/ground-plan/?next=${encodeURIComponent(`/pay/?step=${step}&open=1`)}#signin`); return; }
+    if (info.owned && info.owned[step]) { location.replace(info.owned[step]); return; }
+  }
   if (!guest && !S.product && ORDER.indexOf(step) <= ORDER.indexOf(info.tier || 'free')) {
     return draw(`<p class="eb">${ICON.check}Already yours</p><h1>${esc(S.name)} is open for you</h1>
       <p class="muted">Nothing to pay. It is waiting in your Base Camp.</p>
@@ -187,7 +244,9 @@ async function start() {
   }
   let html = S.product ? productCard(S, step, info.test) : card(S, step, info.test, info.tier || 'free');
   if (guest) html = html.replace('<button class="go"', () => guestForm() + '<button class="go"') + signinLink();
-  draw((q.get('cancelled') ? '<p class="err">No payment was made. When you are ready, it is one tap away.</p>' : '') + html);
+  const none = q.get('open') && S.product && !guest
+    ? `<p class="err">We found no payment for ${esc(S.name)} on ${esc(info.email || 'this account')}. If you paid with another email, sign in with that one, or open the link in your “It’s yours” email.</p>` : '';
+  draw((q.get('cancelled') ? '<p class="err">No payment was made. When you are ready, it is one tap away.</p>' : '') + none + html);
   $('#go').onclick = async (e) => {
     const b = e.currentTarget, err = $('#err');
     b.disabled = true; err.hidden = true;
@@ -210,6 +269,11 @@ async function start() {
     } catch { err.textContent = 'We could not reach Stripe. Check your connection and try again.'; }
     err.hidden = false; b.disabled = false;
   };
+  const w = guest ? fromWindow() : null;
+  if (w) {
+    $('#g-first').value = w.first; $('#g-email').value = w.email; $('#g-consent').checked = w.yes;
+    if (w.first && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(w.email)) $('#go').click();
+  }
 }
 
 /** Back from Stripe: ask until Stripe says paid (a few seconds at most). */
@@ -219,20 +283,21 @@ async function confirm(cs, steps) {
     let d = null;
     try { d = await (await fetch(`/api/checkout?cs=${encodeURIComponent(cs)}`, { headers: H() })).json(); } catch { d = null; }
     if (d && d.paid && d.fresh && d.token) return finishAccount(d, steps[d.step] || {});
-    if (d && d.paid && d.existing && !token()) {
+    if (d && d.paid && d.existing) {
       const S = steps[d.step] || {};
+      // A product opens from its link at once; the account is theirs to sign in to.
+      if (d.access) {
+        return draw(`<p class="eb">${ICON.check}Thank you</p><h1>${esc(S.name || 'It')} is yours</h1>
+          <p class="ok">Your payment went through. It is on your account (${esc(d.email || '')}), and we have emailed you your own access link too.</p>
+          <a class="go" href="${esc(d.access)}">${ICON.open}${esc(OPEN_LABEL[d.step] || 'Open it')}</a>
+          <a class="ghost" href="/ground-plan/?next=${encodeURIComponent('/ground-plan/#home')}#signin">Sign in to my Base Camp</a>`);
+      }
       return draw(`<p class="eb">${ICON.check}Thank you</p><h1>${esc(S.name || 'Your step')} is open</h1>
         <p class="ok">Your payment went through. It is open on your account (${esc(d.email || '')}). Sign in and it is waiting for you.</p>
         <a class="go" href="/ground-plan/?next=${encodeURIComponent('/ground-plan/#programme-' + (d.first || 4))}#signin">Sign in to my Base Camp</a>`);
     }
-    if (d && d.paid) {
-      const S = steps[d.step] || {};
-      try { history.replaceState(null, '', `/pay/?step=${encodeURIComponent(d.step || '')}&paid=1`); } catch { /* old browser */ }
-      return draw(`<p class="eb">${ICON.check}Thank you</p><h1>${esc(S.name || 'Your step')} is open</h1>
-        <p class="ok">Your payment went through. We have emailed you what opened and how to book your session.</p>
-        <a class="go" href="/ground-plan/#programme-${d.first || S.first || 4}">Open Level ${pad(d.first || S.first || 4)}</a>
-        <a class="ghost" href="/ground-plan/#home">My Base Camp</a>`);
-    }
+    // Signed in: the account made full here if it is not yet, then the way in.
+    if (d && d.paid) return finishAccount(d, steps[d.step] || {});
     if (d && d.error && !/reach|Stripe said/i.test(d.error)) return draw(`<h1>We could not check this payment</h1><p class="err">${esc(d.error)}</p><a class="ghost" href="/ground-plan/#home">Back to my Base Camp</a>`);
     await new Promise((r) => setTimeout(r, 2000));
   }

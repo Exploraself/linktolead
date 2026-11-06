@@ -422,7 +422,19 @@ the Blueprint alike; paying for a step raises the same account.
     Google sign-ups too: `full: true`);
   - in Base Camp: the first answer from Level 04 on (The Boardroom, paid
     first); Levels 01 to 03, The Founder Launchpad, run on name and email;
-  - for any download from the library (functions/api/library.js checks too).
+  - for any download from the library (functions/api/library.js checks too);
+  - **right after any payment** (Alexandru, 6 Nov 2026: "After payment: full
+    account"), on /pay/ when Stripe brings the buyer back: a new founder, or a
+    signed-in one whose account is not full yet, fills what is missing there
+    (a password for Google sign-ups too), name and email already in, and the
+    one button saves it (api/complete.js) and opens what they bought. No
+    "later" link. The Unshakeable Assessment (a product, functions/_stripe.js
+    PRODUCTS) comes back to /pay/ the same way, then "Open my Unshakeable
+    Audit" opens it on exploraself.com with its access ("first name and email
+    or Google, then payment, then full account, then immediate access"); the
+    letter and the Base Camp tile "Unshakeable · open" carry the same link, and
+    /pay/?step=unshakeable&open=1 ("Already bought? Sign in") opens it after
+    the sign-in.
 - **Open with name and email:** everything else in the North Star (the
   reading, its PDF and print, emailing the results, the step-by-step plans,
   the Growth Plan with its writing and PDF) and Levels 01 to 03.

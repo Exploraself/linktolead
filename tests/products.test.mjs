@@ -63,7 +63,7 @@ let [st, j] = await jsonOf(await payGet({ request: req('/api/checkout', { token:
 ok(j.steps.unshakeable && j.steps.unshakeable.product === true && j.steps.unshakeable.price === '$9.99', '/pay/ knows the product and its price');
 [st, j] = await jsonOf(await payPost({ request: req('/api/checkout', { method: 'POST', token: maya, body: { step: 'unshakeable' } }), env }));
 const body = calls.find((c) => c.url.endsWith('/checkout/sessions') && c.method === 'POST').body;
-ok(st === 200 && j.url && body.get('line_items[0][price_data][unit_amount]') === '999' && body.get('metadata[step]') === 'unshakeable' && body.get('success_url') === 'https://exploraself.com/unshakeable?access={CHECKOUT_SESSION_ID}', 'a Stripe page for $9.99, back to exploraself.com/unshakeable with the session');
+ok(st === 200 && j.url && body.get('line_items[0][price_data][unit_amount]') === '999' && body.get('metadata[step]') === 'unshakeable' && body.get('success_url') === `${B}/pay/?step=unshakeable&cs={CHECKOUT_SESSION_ID}`, 'a Stripe page for $9.99, back to /pay/ for the full account (Alexandru, 6 Nov 2026), then the audit');
 ok(body.get('invoice_creation[enabled]') === 'true', 'an invoice, as for every payment');
 
 const paid = (sid, extra = {}) => ({ id: sid, object: 'checkout.session', payment_status: 'paid', amount_total: 999, currency: 'usd', livemode: false, client_reference_id: id, metadata: { student: id, step: 'unshakeable' }, ...extra });
@@ -78,6 +78,20 @@ const letters = () => sent.filter((m) => /It’s yours/.test(m.subject));
 ok(letters().length === 1 && letters()[0].html.includes('access=cs_test_1'), 'the letter goes once, with the access link');
 await access({ request: req('/api/access?session=cs_test_1'), env });
 ok(letters().length === 1 && DB.raw.prepare("SELECT COUNT(*) AS n FROM payment WHERE step = 'unshakeable'").get().n === 1, 'asked again: recorded once, one letter');
+// Back on /pay/ from Stripe, signed in with a full account: nothing to ask, the audit opens.
+[st, j] = await jsonOf(await payGet({ request: req('/api/checkout?cs=cs_test_1', { token: maya }), env }));
+ok(st === 200 && j.paid && j.access === 'https://exploraself.com/unshakeable?access=cs_test_1' && Array.isArray(j.missing) && !j.missing.length, '/pay/ back from Stripe: the access link, and a full account has nothing missing');
+[st, j] = await jsonOf(await payGet({ request: req('/api/checkout', { token: maya }), env }));
+ok(j.owned && j.owned.unshakeable === 'https://exploraself.com/unshakeable?access=cs_test_1', '"Already bought? Sign in": signed in, /pay/ knows the link to open');
+[st, j] = await jsonOf(await payGet({ request: req('/api/checkout'), env }));
+ok(j.owned && !Object.keys(j.owned).length && !j.email, 'not signed in: nothing owned, nothing personal');
+const { onRequestGet: stateGet } = await import('../functions/api/state.js');
+[st, j] = await jsonOf(await stateGet({ request: req(`/api/state?t=${maya}`), env }));
+ok(st === 200 && j.me.products.length === 1 && j.me.products[0].step === 'unshakeable' && j.me.products[0].access === 'https://exploraself.com/unshakeable?access=cs_test_1', 'Base Camp knows what they bought, with the link that opens it');
+const app = read('public/app.js');
+ok(/function productsHTML\(\)/.test(app) && app.includes("title: 'Unshakeable · open'") && app.includes("go: 'Open my Unshakeable Audit'") && /\$\{productsHTML\(\)\}/.test(app), 'Base Camp: the tile “Unshakeable · open”, for the buyer to get back in');
+ok(/owned = Array\.isArray\(r\.me\.products\) \? r\.me\.products : \[\];/.test(app) && /const mine = owned\.filter\(/.test(app), 'Base Camp keeps the links in memory only, never in the browser’s storage');
+ok(/\^https:\\\/\\\/exploraself\\\.com\\\//.test(app), 'the tile only ever links to exploraself.com');
 
 sessions.cs_test_2 = { ...paid('cs_test_2'), metadata: { student: id, step: 'hub' }, amount_total: 75000 };
 [st] = await jsonOf(await access({ request: req('/api/access?session=cs_test_2'), env }));
