@@ -119,6 +119,10 @@ function guestForm() {
 }
 const signinLink = () => `<a class="ghost gf-in" href="/ground-plan/?next=${encodeURIComponent(location.pathname + location.search)}#signin">Already have an account? Sign in</a>`;
 
+// The eye and copy icons of the password boxes (the same as public/account-box.js).
+const PW_EYE = '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const PW_COPY = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+
 /** The button that opens what was bought: a product's own page (with its
  *  access), or the first level the step opened. */
 const OPEN_LABEL = { unshakeable: 'Open my Unshakeable Audit' };
@@ -142,33 +146,36 @@ function finishAccount(d, S) {
   if (!need.length) return paidDone(d, S);
   const pw = need.includes('password');
   const shown = matchMedia('(max-width: 600px)').matches;
+  // The same password boxes as every other full account form (public/account-box.js
+  // pwInput; Alexandru, 6 Nov 2026: "the same style … copy button when asking to
+  // confirm the password"): each box has its eye and its copy beside it.
+  const pwBox = (id) => `<span class="pw-row"><input id="${id}" type="${shown ? 'text' : 'password'}" autocomplete="new-password" autocapitalize="off" spellcheck="false" minlength="10" maxlength="200" required><button type="button" class="pw-ic" data-eye="${id}" aria-pressed="${shown}" aria-label="${shown ? 'Hide password' : 'Show password'}">${PW_EYE}</button><button type="button" class="pw-ic" data-copy="${id}" aria-label="Copy password">${PW_COPY}</button></span>`;
   draw(`<p class="eb">${ICON.check}Thank you</p><h1>${esc(S.name || 'Your step')} is yours</h1>
     <p class="ok">Your payment went through. One last step: complete your account, and ${d.access ? 'it opens at once' : 'your Base Camp opens'}.</p>
     <form class="card gf" id="fin" novalidate>
       <p class="gf-who"><b>${esc(d.name || '')}</b>${esc(d.email || '')}</p>
       ${detailFields('f', 'display:grid;gap:6px', need)}
-      ${pw ? `<label for="f-pw">Choose a password (at least 10 characters)</label>
-      <input id="f-pw" type="${shown ? 'text' : 'password'}" autocomplete="new-password" autocapitalize="off" spellcheck="false" minlength="10" required>
-      <label for="f-pw2">The same password again</label>
-      <input id="f-pw2" type="${shown ? 'text' : 'password'}" autocomplete="new-password" autocapitalize="off" spellcheck="false" minlength="10" required>
-      <div class="gf-tools">
-        <button type="button" class="gf-tool" id="f-show" aria-pressed="${shown}">${shown ? 'Hide password' : 'Show password'}</button>
-        <button type="button" class="gf-tool" id="f-copy">Copy it into the second box</button>
-      </div>` : ''}
+      ${pw ? `<label for="f-pw">Password</label>${pwBox('f-pw')}
+      <label for="f-pw2">Confirm password</label>${pwBox('f-pw2')}
+      <p class="gf-why">At least 10 characters. You sign in with your email and this password.</p>` : ''}
       <button class="go" type="submit">${ICON.open}${esc(O.label)}</button>
       <p class="err" id="err" role="alert" hidden></p>
     </form>`);
   const nc = $('#f-nocompany'), co = $('#f-company');
   if (nc && co) nc.onchange = () => { co.disabled = nc.checked; if (nc.checked) co.value = ''; };
-  if (pw) {
-    $('#f-show').onclick = (e) => {
-      const on = $('#f-pw').type === 'password';
-      for (const id of ['#f-pw', '#f-pw2']) $(id).type = on ? 'text' : 'password';
-      e.currentTarget.textContent = on ? 'Hide password' : 'Show password';
-      e.currentTarget.setAttribute('aria-pressed', String(on));
-    };
-    $('#f-copy').onclick = () => { $('#f-pw2').value = $('#f-pw').value; $('#f-pw2').focus(); };
-  }
+  // The eye shows or hides what was typed; copy keeps the password, to paste
+  // into the second box or somewhere safe (as in public/account-box.js).
+  for (const btn of document.querySelectorAll('#fin [data-eye]')) btn.onclick = () => {
+    const f = $('#' + btn.dataset.eye), on = f.type === 'password';
+    f.type = on ? 'text' : 'password';
+    btn.setAttribute('aria-pressed', String(on));
+    btn.setAttribute('aria-label', on ? 'Hide password' : 'Show password');
+  };
+  for (const btn of document.querySelectorAll('#fin [data-copy]')) btn.onclick = async () => {
+    const f = $('#' + btn.dataset.copy); if (!f || !f.value) return;
+    let ok = true; try { await navigator.clipboard.writeText(f.value); } catch { ok = false; }
+    btn.textContent = ok ? '✓' : '—'; setTimeout(() => { btn.innerHTML = PW_COPY; }, 1400);
+  };
   $('#fin').onsubmit = async (e) => {
     e.preventDefault();
     const err = $('#err'), b = e.currentTarget.querySelector('.go');

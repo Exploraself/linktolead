@@ -73,7 +73,11 @@ h1{font-size:clamp(30px,7vw,40px);line-height:1.15;font-weight:700}
 .gf-who{margin:0 0 8px;display:grid;gap:2px}.gf-who b{font-size:18px}
 .gf-in{margin-top:14px}
 .gf .go{margin-top:8px}
-.gf-tools{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 4px}
-.gf-tool{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;min-height:40px;padding:0 14px;font:600 14px/1 var(--f);cursor:pointer}
+/* Password boxes as on every full account form (public/account-box.js): the eye and the copy beside each box. */
+.pw-row{display:flex;gap:6px}
+.pw-row input{flex:1;min-width:0}
+.pw-ic{flex:none;width:52px;min-height:52px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;padding:0;cursor:pointer;font:600 16px/1 var(--f)}
+.pw-ic[aria-pressed="true"]{background:#F3EBDA}
+.pw-ic:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 /* A soft change of page from the sales pages (the /jury run on /road5, 4 Nov 2026). */
 @view-transition{navigation:auto}
