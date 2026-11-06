@@ -18,6 +18,7 @@
 // a delete makes the member "unsubscribed" in API mode, never a hard delete.
 
 import { now } from './_shared.js';
+import { okTz } from './_mentor.js';
 
 export const DEFAULT_FORM = { host: 'exploraselfmba.us8.list-manage.com', server: 'us8', u: 'ab5e056ba759e867cde44f4da', id: '41448b6750', f_id: '005a1ae1f0', tag: '3359661' };
 
@@ -379,8 +380,37 @@ export async function readTags(env = {}) {
   }
 }
 
+/** Countries with one time zone (or one zone nearly everyone lives in), for a
+ *  Mailchimp member whose location has a country but no zone. Countries with
+ *  several zones (the US, Canada, Brazil, Russia, Australia, Mexico…) are left
+ *  out on purpose: a guess there could be hours wrong. */
+export const COUNTRY_TZ = {
+  IT: 'Europe/Rome', RO: 'Europe/Bucharest', MD: 'Europe/Chisinau', FR: 'Europe/Paris', DE: 'Europe/Berlin',
+  ES: 'Europe/Madrid', PT: 'Europe/Lisbon', GB: 'Europe/London', IE: 'Europe/Dublin', NL: 'Europe/Amsterdam',
+  BE: 'Europe/Brussels', LU: 'Europe/Luxembourg', CH: 'Europe/Zurich', AT: 'Europe/Vienna', PL: 'Europe/Warsaw',
+  CZ: 'Europe/Prague', SK: 'Europe/Bratislava', HU: 'Europe/Budapest', SI: 'Europe/Ljubljana', HR: 'Europe/Zagreb',
+  RS: 'Europe/Belgrade', BA: 'Europe/Sarajevo', ME: 'Europe/Podgorica', MK: 'Europe/Skopje', AL: 'Europe/Tirane',
+  GR: 'Europe/Athens', BG: 'Europe/Sofia', UA: 'Europe/Kyiv', BY: 'Europe/Minsk', CY: 'Asia/Nicosia', MT: 'Europe/Malta',
+  DK: 'Europe/Copenhagen', SE: 'Europe/Stockholm', NO: 'Europe/Oslo', FI: 'Europe/Helsinki', EE: 'Europe/Tallinn',
+  LV: 'Europe/Riga', LT: 'Europe/Vilnius', IS: 'Atlantic/Reykjavik', TR: 'Europe/Istanbul', GE: 'Asia/Tbilisi',
+  AM: 'Asia/Yerevan', IL: 'Asia/Jerusalem', AE: 'Asia/Dubai', SA: 'Asia/Riyadh', QA: 'Asia/Qatar', IN: 'Asia/Kolkata',
+  PK: 'Asia/Karachi', SG: 'Asia/Singapore', PH: 'Asia/Manila', JP: 'Asia/Tokyo', KR: 'Asia/Seoul', CN: 'Asia/Shanghai',
+  HK: 'Asia/Hong_Kong', ZA: 'Africa/Johannesburg', NG: 'Africa/Lagos', EG: 'Africa/Cairo', KE: 'Africa/Nairobi',
+  MA: 'Africa/Casablanca', NZ: 'Pacific/Auckland',
+};
+
+/** A Mailchimp member's time zone (Alexandru, 6 Nov 2026: letters "according to
+ *  location"): Mailchimp's own zone when it is a real one, otherwise the zone of
+ *  a one-zone country, otherwise '' (the letters then keep New York time,
+ *  _course.js DEFAULT_TZ; Alexandru's choice for no known location). */
+export function memberTz(location) {
+  const loc = location && typeof location === 'object' ? location : {};
+  return okTz(loc.timezone) || COUNTRY_TZ[String(loc.country_code || '').trim().toUpperCase()] || '';
+}
+
 /** Good People Win (functions/_gpw.js): everyone subscribed in the audience,
- *  as [{ email, first }], read page by page (1,000 a page, at most `max`).
+ *  as [{ email, first, tz }], read page by page (1,000 a page, at most `max`).
+ *  `tz` is their time zone from Mailchimp's location (memberTz), or ''.
  *  Unsubscribed, cleaned and pending people are never read. A read changes
  *  nothing in Mailchimp. Never throws. */
 export async function readMembers(env = {}, { max = 10000 } = {}) {
@@ -393,12 +423,12 @@ export async function readMembers(env = {}, { max = 10000 } = {}) {
   let total = 0;
   try {
     for (let offset = 0; offset < max; offset += 1000) {
-      const r = await fetch(`https://${apiServer(key, st)}.api.mailchimp.com/3.0/lists/${audience}/members?status=subscribed&count=1000&offset=${offset}&fields=members.email_address,members.merge_fields.FNAME,total_items`,
+      const r = await fetch(`https://${apiServer(key, st)}.api.mailchimp.com/3.0/lists/${audience}/members?status=subscribed&count=1000&offset=${offset}&fields=members.email_address,members.merge_fields.FNAME,members.location.timezone,members.location.country_code,total_items`,
         { headers: { authorization: 'Basic ' + btoa('linktolead:' + key), 'user-agent': 'exploraself-linktolead' } });
       if (!r.ok) return { ok: false, why: `Mailchimp API said no (HTTP ${r.status}).` };
       const j = await r.json();
       total = j.total_items || 0;
-      for (const m of j.members || []) out.push({ email: String(m.email_address || '').trim().toLowerCase(), first: String((m.merge_fields && m.merge_fields.FNAME) || '').trim() });
+      for (const m of j.members || []) out.push({ email: String(m.email_address || '').trim().toLowerCase(), first: String((m.merge_fields && m.merge_fields.FNAME) || '').trim(), tz: memberTz(m.location) });
       if (!(j.members || []).length || out.length >= total) break;
     }
     return { ok: true, members: out.filter((m) => m.email), total };
