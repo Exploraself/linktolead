@@ -90,6 +90,8 @@ const { onRequestGet: stateGet } = await import('../functions/api/state.js');
 ok(st === 200 && j.me.products.length === 1 && j.me.products[0].step === 'unshakeable' && j.me.products[0].access === 'https://exploraself.com/unshakeable?access=cs_test_1', 'Base Camp knows what they bought, with the link that opens it');
 const app = read('public/app.js');
 ok(/function productsHTML\(\)/.test(app) && app.includes("title: 'Unshakeable · open'") && app.includes("go: 'Open my Unshakeable Audit'") && /\$\{productsHTML\(\)\}/.test(app), 'Base Camp: the tile “Unshakeable · open”, for the buyer to get back in');
+ok(app.includes("sell: { title: 'Unshakeable · $9.99'") && app.includes("go: 'Get my Unshakeable Audit', href: 'https://exploraself.com/unshakeable'") && /const sell = pulled \? /.test(app) && /!mine\.some\(\(p\) => p\.step === k\)/.test(app), 'Base Camp: not bought yet, the tile offers it ($9.99, to exploraself.com/unshakeable), only once the account has loaded');
+ok(!/sell: \{[^}]*\bfree\b/i.test(app), 'the Unshakeable tile never says free');
 ok(/owned = Array\.isArray\(r\.me\.products\) \? r\.me\.products : \[\];/.test(app) && /const mine = owned\.filter\(/.test(app), 'Base Camp keeps the links in memory only, never in the browser’s storage');
 ok(/\^https:\\\/\\\/exploraself\\\.com\\\//.test(app), 'the tile only ever links to exploraself.com');
 
