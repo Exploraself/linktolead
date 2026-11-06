@@ -161,16 +161,45 @@ export function due(row, at = new Date()) {
   return day ? row.sent + 1 : 0;
 }
 
-/** Send one person the letter they are owed, and record it. */
-export async function sendOne(env, D, base, row, n, at = new Date()) {
-  // No account here: their "no" lives in Mailchimp. Unsubscribed or cleaned there, no more letters.
-  if (!row.student_id && env && env.MAILCHIMP_API_KEY) {
-    const st = await memberStatus(env, row.email);
-    if (st === 'unsubscribed' || st === 'cleaned') {
-      await D.prepare('UPDATE gpw_sub SET stopped_at = ?, stop_why = ? WHERE email = ?').bind(new Date(at).toISOString(), `${st} in Mailchimp`, row.email).run();
-      return { ok: false, stopped: true };
-    }
+/** Mailchimp statuses that end the letters for someone with no account here. */
+export const MC_STOP = ['unsubscribed', 'cleaned', 'archived'];
+
+/**
+ * Someone with no account here: their "no" lives in Mailchimp, so it is
+ * checked before every letter, and the check fails closed (Alexandru, 6 Nov
+ * 2026: "must solve"; the hourly Worker had no Mailchimp key, so the check was
+ * skipped and letters would have gone to people who had said no).
+ * - unsubscribed, cleaned or archived in Mailchimp: stop;
+ * - no longer in the audience, for someone who came from the list: stop;
+ * - not checked (no key here, or Mailchimp did not answer): letters 2–10, and
+ *   letter 1 for someone from the list, wait for the next hourly run. Letter 1
+ *   right after a sign-up still goes: they said yes a moment ago.
+ * `memo.down` (one hourly run): once Mailchimp did not answer, the rest wait
+ * without asking again.
+ * Returns { go } or { stop: why } or { hold: why }.
+ */
+export async function mailchimpGate(env, row, n, memo = {}) {
+  if (row.student_id) return { go: true };
+  const fromList = String(row.source || '').includes('mailchimp');
+  const hasKey = !!(env && env.MAILCHIMP_API_KEY);
+  const st = hasKey && !memo.down ? await memberStatus(env, row.email) : '';
+  if (MC_STOP.includes(st)) return { stop: `${st} in Mailchimp` };
+  if (st === 'missing' && fromList) return { stop: 'no longer in the Mailchimp audience' };
+  if (!st) {
+    if (hasKey) memo.down = true;
+    if (n > 1 || fromList) return { hold: hasKey ? 'Mailchimp could not be read' : 'no Mailchimp key here' };
   }
+  return { go: true };
+}
+
+/** Send one person the letter they are owed, and record it. */
+export async function sendOne(env, D, base, row, n, at = new Date(), memo = {}) {
+  const gate = await mailchimpGate(env, row, n, memo);
+  if (gate.stop) {
+    await D.prepare('UPDATE gpw_sub SET stopped_at = ?, stop_why = ? WHERE email = ?').bind(new Date(at).toISOString(), gate.stop, row.email).run();
+    return { ok: false, stopped: true };
+  }
+  if (gate.hold) return { ok: false, held: true, why: gate.hold };
   const id = newToken();
   const ctx = await letterContext(D, row.student_id || null, row.tz);
   const L = gpwLetter(base, n, { first: row.first, ...ctx, at, pixel: `${base}/api/good-people?o=${id}` });
@@ -209,7 +238,8 @@ export async function sendDue(env, D, base = SITE, at = new Date()) {
   const rows = (await D.prepare(`SELECT g.*, COALESCE(NULLIF(g.tz, ''), p.tz) AS tz, p.unsubscribed, COALESCE(au.paused, 0) AS paused
       FROM gpw_sub g LEFT JOIN student_profile p ON p.student_id = g.student_id LEFT JOIN account_auth au ON au.student_id = g.student_id
       WHERE g.stopped_at IS NULL AND g.sent < ? ORDER BY g.last_sent_at LIMIT 1000`).bind(LAST).all()).results || [];
-  let sent = 0, failed = 0;
+  let sent = 0, failed = 0, held = 0, why = '';
+  const memo = {};
   for (const row of rows) {
     if (sent + failed >= PER_RUN) break;
     if (row.unsubscribed) {
@@ -219,10 +249,15 @@ export async function sendDue(env, D, base = SITE, at = new Date()) {
     if (row.paused) continue;
     const n = due(row, at);
     if (!n) continue;
-    const r = await sendOne(env, D, base, row, n, at);
-    if (r.ok) sent++; else if (!r.stopped) failed++;
+    const r = await sendOne(env, D, base, row, n, at, memo);
+    if (r.ok) sent++;
+    else if (r.held) { held++; why = r.why; }
+    else if (!r.stopped) failed++;
   }
-  return { sent, failed };
+  // What waited in this run, for /mentor (gpwReport → auto.held).
+  await D.prepare("INSERT INTO gpw_meta (k, v) VALUES ('held', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v")
+    .bind(JSON.stringify({ n: held, why, at: new Date(at).toISOString() })).run();
+  return { sent, failed, held, ...(held ? { heldWhy: why } : {}) };
 }
 
 /** How often the Mailchimp list is read for people not in the letters yet. */
@@ -389,6 +424,14 @@ export async function gpwStop(D, unsubId) {
 
 /** For /mentor: everyone in the letters, newest first, with what they opened,
  *  and each letter's sent and opened counts. */
+/** gpw_meta 'held' ({ n, why, at } from the last hourly run), or null. */
+export function heldOf(v) {
+  try {
+    const h = JSON.parse(v || 'null');
+    return h && typeof h.n === 'number' ? { n: h.n, why: String(h.why || ''), at: String(h.at || '') } : null;
+  } catch { return null; }
+}
+
 export async function gpwReport(D, limit = 500, env = null) {
   await gpwTables(D);
   const people = (await D.prepare(`SELECT g.email, g.first, g.source, g.student_id, g.started_at, g.sent, g.last_sent_at, g.stopped_at, g.stop_why,
@@ -404,6 +447,7 @@ export async function gpwReport(D, limit = 500, env = null) {
       mailchimp: !!(env && env.MAILCHIMP_API_KEY),
       readAt: Number((await D.prepare("SELECT v FROM gpw_meta WHERE k = 'mc_read_at'").first())?.v) || null,
       everyHours: MC_EVERY_HOURS,
+      held: heldOf((await D.prepare("SELECT v FROM gpw_meta WHERE k = 'held'").first())?.v),
     },
   };
 }

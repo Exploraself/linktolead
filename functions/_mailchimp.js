@@ -438,8 +438,10 @@ export async function readMembers(env = {}, { max = 10000 } = {}) {
 }
 
 /** One address's status in the audience ('subscribed', 'unsubscribed',
- *  'cleaned', 'pending', 'archived'), or '' when it is not there or cannot be
- *  read (no key, test of the network). Never throws. */
+ *  'cleaned', 'pending', 'archived'), 'missing' when Mailchimp says the
+ *  address is not in the audience (404), or '' when it cannot be read (no key,
+ *  no audience, Mailchimp down). '' means "not checked", never "fine": Good
+ *  People Win holds a letter on '' (Decisions chat, 6 Nov 2026). Never throws. */
 export async function memberStatus(env = {}, email = '') {
   if (!env.MAILCHIMP_API_KEY || !email) return '';
   const st = mailchimpState(env);
@@ -449,6 +451,7 @@ export async function memberStatus(env = {}, email = '') {
   try {
     const r = await fetch(`https://${apiServer(key, st)}.api.mailchimp.com/3.0/lists/${audience}/members/${md5(String(email).trim().toLowerCase())}?fields=status`,
       { headers: { authorization: 'Basic ' + btoa('linktolead:' + key), 'user-agent': 'exploraself-linktolead' } });
+    if (r.status === 404) return 'missing';
     if (!r.ok) return '';
     const j = await r.json();
     return typeof j.status === 'string' ? j.status : '';

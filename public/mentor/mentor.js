@@ -668,7 +668,17 @@ export function gpwHTML(g) {
 // I want it to happen automatically."): nothing to press, only what happens.
 export function gpwAutoHTML(a = {}) {
   const read = a && a.readAt ? `last checked ${when(new Date(a.readAt).toISOString())}` : 'checked with the next hourly run';
-  return `<p class="gev"><b>Automatic.</b> Everyone new joins by themselves, with letter 1 at once. Everyone subscribed on the Mailchimp list joins by themselves too (${a && a.mailchimp === false ? 'when the Mailchimp key is set here' : `every ${(a && a.everyHours) || 6} hours, ${read}`}). Nothing to press.</p>`;
+  return `<p class="gev"><b>Automatic.</b> Everyone new joins by themselves, with letter 1 at once. Everyone subscribed on the Mailchimp list joins by themselves too (${a && a.mailchimp === false ? 'when the Mailchimp key is set here' : `every ${(a && a.everyHours) || 6} hours, ${read}`}). Nothing to press.</p>${gpwHeldHTML(a && a.held)}`;
+}
+// A "no" in Mailchimp always stops the letters (Alexandru, 6 Nov 2026: "must
+// solve"). When Mailchimp could not be checked, the letters to people with no
+// account here wait, and this line says so.
+export function gpwHeldHTML(h) {
+  if (!h || !h.n) return '';
+  const fix = h.why === 'no Mailchimp key here'
+    ? 'the hourly Worker has no Mailchimp key. Add it in Cloudflare: Workers &amp; Pages → linktolead (the Worker) → Settings → Variables and Secrets → secret MAILCHIMP_API_KEY'
+    : 'Mailchimp did not answer. The next hourly run tries again';
+  return `<p class="gev err"><b>${h.n} ${h.n === 1 ? 'letter is' : 'letters are'} waiting</b> (${esc(when(h.at))}): the hourly run could not check Mailchimp for people with no account here, so nothing went to them unchecked. Why: ${fix}.</p>`;
 }
 async function loadGpw() {
   const r = await api('?gpw=1');

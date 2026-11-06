@@ -387,8 +387,15 @@ run the same check, since the live site holds the Mailchimp key), and
 letter 1 goes with the hourly sends (20 a run). The accounts that existed
 before Good People Win were added on 5 Nov. A one-off for the team stays as
 a /mentor action (gpw-everyone: count, then send), with no button. Someone
-with no account here who unsubscribed or was cleaned in Mailchimp gets no
-further letter.
+with no account here who unsubscribed, was cleaned or archived in Mailchimp
+gets no further letter; nor does someone from the list who is no longer in
+the audience. This check fails closed (Alexandru, 6 Nov 2026: "must solve"):
+when Mailchimp can't be checked (no MAILCHIMP_API_KEY where the job runs, or
+Mailchimp down), letters 2–10 to people with no account, and letter 1 to
+people from the list, wait for the next hourly run and never go unchecked;
+/mentor → Good People Win says how many wait and why (gpw_meta 'held').
+Letter 1 right after a sign-up still goes at once. Both Cloudflare apps
+need the MAILCHIMP_API_KEY secret: the Pages app and the Worker.
 
 The words are in functions/_gpw-letters.js, the engine in functions/_gpw.js.
 Every letter has the same shape: a small cover (public/mail/gpw/), a thank
