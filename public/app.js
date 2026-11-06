@@ -651,18 +651,24 @@ function gpBack(p, at) {
   return said.length ? `<p class="cw-gp"><b>From your Growth Plan · step ${p.gp.step}</b> ${said.map((x) => `“${esc(x)}”`).join(' · ')}</p>` : '';
 }
 /** Keep one answer: on this device first, then the account, in batches. */
-// ── One step before the first answer (31 Oct 2026, Alexandru) ──────────────
-// One universal rule, whatever sales page a founder came from: an account
-// without its full details (company, what they want most, industry,
-// password; /api/state says which) is asked once, at its first answer, for
-// only what it lacks. The answer they were giving is held and applied after
-// the save, so nothing is lost. Accounts that are complete never see it.
+// ── The full account: after the Launchpad, and before any download ─────────
+// (Alexandru, 6 Nov 2026: "they get to the Launchpad, and when they try to
+// download anything, full account; when they try to access the Boardroom,
+// first payment, then full account.") An account with only a first name and
+// email answers Levels 01 to 03 freely. Its first answer from Level 04 on
+// (the Boardroom, paid first) and any download from the library ask once for
+// only what it lacks (company, what they want most, industry, password;
+// /api/state says which). The answer they were giving is held and applied
+// after the save, so nothing is lost. Complete accounts never see it.
 let missing = [];
-const needsAccount = () => account.joined() && pulled && missing.length > 0;
+/** The last level of The Founder Launchpad (free, name and email). */
+const LAUNCHPAD_TOP = 3;
+const lacksFull = () => account.joined() && pulled && missing.length > 0;
+const needsAccount = (lv = level) => lacksFull() && lv > LAUNCHPAD_TOP;
 let heldAnswer = null;
-function askAccount(then) {
+function askAccount(then, lock = '') {
   heldAnswer = then || null;
-  import('/reset-box.js').then((m) => m.openComplete({ name: state.me && state.me.name, email: state.me && state.me.email, missing,
+  import('/reset-box.js').then((m) => m.openComplete({ name: state.me && state.me.name, email: state.me && state.me.email, missing, lock,
     done: () => {
       if (missing.includes('password')) hasPassword = true;
       missing = []; signupType = 'full';
@@ -678,6 +684,14 @@ function saidNote(msg) {
   document.body.appendChild(n);
   setTimeout(() => n.remove(), 3200);
 }
+// A download from the library: the full account first, then the book.
+document.addEventListener('click', (e) => {
+  const a = e.target && e.target.closest && e.target.closest('a[href*="/api/library?item="]');
+  if (!a || !lacksFull()) return;
+  e.preventDefault();
+  const href = a.href;
+  askAccount(() => { location.href = href; }, 'library');
+}, true);
 // The slider and the sentence: asked before the first move, not after.
 document.addEventListener('pointerdown', (e) => {
   const v = e.target && e.target.closest && e.target.closest('input[data-v4s], input[data-v4u], input[data-qs]');
@@ -694,7 +708,7 @@ document.addEventListener('focusin', (e) => {
 
 function keep4(d, k, v, lv = level) {
   // Safety net: a move that reached here some other way waits for the account too.
-  if (needsAccount()) { askAccount(() => keep4(d, k, v, lv)); return; }
+  if (needsAccount(lv)) { askAccount(() => keep4(d, k, v, lv)); return; }
   const key = wkey(lv, d, k);
   state.work[key] = String(v);
   save();
@@ -1833,14 +1847,14 @@ function mbFocus(sel) {
 
 function libraryView() {
   const joined = account.joined() || !!state.me;
-  // The free books open with a first name and email (Alexandru, 5 Nov 2026):
-  // no account yet sends to the short box (/road3/#join), not the full form.
+  // No account yet: the short box (/road3/#join); a download then asks the
+  // full account, only what is missing (Alexandru, 6 Nov 2026).
   const hasLab = holds(tierNow(), 'lab'), hasHub = holds(tierNow(), 'hub');
   const dl = '<svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const manuals = LIBRARY.manuals.map((m) => `<li class="lib-man${m.k === state.stage ? ' lib-yours' : ''}">
       <span class="bk3 bk3-man bk3-${m.k}" aria-hidden="true"><span class="bk3-cover"><small>The Founder’s Blueprint</small><b>${esc(STAGES[m.k].n)}</b></span><i class="bk3-spine"></i></span>
       <span class="lib-mtext"><b>${esc(m.n)}</b><small>${esc(m.sub)} · ${m.pages} pages${m.k === state.stage ? ' · your stage' : ''}</small></span>
-      ${joined ? `<a class="lib-btn" href="${esc(account.libraryHref(m.k))}">${dl}Download PDF</a>` : `<a class="lib-btn" href="/road3/#join">Your name and email to download</a>`}
+      ${joined ? `<a class="lib-btn" href="${esc(account.libraryHref(m.k))}">${dl}Download PDF</a>` : `<a class="lib-btn" href="/road3/#join">Make your free account to download</a>`}
     </li>`).join('');
   const card = (b) => (b.soon
     ? `<li class="lib-book lib-soon">${b.cover ? `<span class="bk3"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>` : '<span class="bk3" aria-hidden="true"><span class="bk3-cover bk3-blank">In preparation</span></span>'}
@@ -1855,7 +1869,7 @@ function libraryView() {
     : `<li class="lib-book"><span class="bk3${b.tall ? ' bk3-tall' : ''}"><img src="${esc(b.cover)}" alt="${esc(b.n)} cover" loading="lazy"><i class="bk3-spine"></i></span>
         <span class="lib-btext"><span class="lib-kick">${esc(b.kicker)}</span><b>${esc(b.n)}</b><small>${esc(b.sub)}</small>
         <span class="lib-acts"><a href="${esc(b.preview)}" target="_blank" rel="noopener">Preview the first pages →</a>
-        ${joined ? `<a href="${esc(account.libraryHref(b.k))}">${dl}Free digital copy</a>` : `<a class="lib-link" href="/road3/#join">Your name and email for the free digital copy</a>`}
+        ${joined ? `<a href="${esc(account.libraryHref(b.k))}">${dl}Free digital copy</a>` : `<a class="lib-link" href="/road3/#join">Make your free account for the free digital copy</a>`}
         ${b.online ? `<a class="lib-online" href="${esc(b.online)}">Fill it in online →</a>` : ''}
         ${b.print === false ? '' : `<span class="lib-print">${b.print ? `<a href="${esc(b.print)}" target="_blank" rel="noopener">Print edition ↗</a>` : 'Print edition coming'}</span>`}</span></span></li>`);
   const books = LIBRARY.books.map(card).join('');
@@ -2259,7 +2273,7 @@ document.addEventListener('click', (e) => {
   if (b.dataset.bpdoc) { bpDoc = b.dataset.bpdoc === '1'; render(); window.scrollTo({ top: 0, behavior: 'instant' }); return; }
   if (b.dataset.mbact) {
     const [lv, d, i] = b.dataset.mbact.split(':').map(Number), on = actOn(lv, d, i);
-    if (needsAccount()) { askAccount(() => { const x = document.querySelector(`[data-mbact="${lv}:${d}:${i}"]`); if (x) x.click(); }); return; }
+    if (needsAccount(lv)) { askAccount(() => { const x = document.querySelector(`[data-mbact="${lv}:${d}:${i}"]`); if (x) x.click(); }); return; }
     keep4(d, `a${i}`, on ? '' : isoToday(), lv);
     if (i === 2) keep4(d, 'got', on ? '' : 0, lv);
     render(); mbFocus(`[data-mbact="${lv}:${d}:${i}"]`); return;
@@ -2270,7 +2284,7 @@ document.addEventListener('click', (e) => {
   }
   if (b.dataset.mbgot) {
     const [lv, d] = b.dataset.mbgot.split(':').map(Number);
-    if (needsAccount()) { askAccount(() => { const x = document.querySelector(`[data-mbgot="${lv}:${d}"]`); if (x) x.click(); }); return; }
+    if (needsAccount(lv)) { askAccount(() => { const x = document.querySelector(`[data-mbgot="${lv}:${d}"]`); if (x) x.click(); }); return; }
     keep4(d, 'got', gotOf(state.work, lv, d) === 0 ? '' : 0, lv);
     render(); mbFocus(`[data-mbgot="${lv}:${d}"]`); return;
   }

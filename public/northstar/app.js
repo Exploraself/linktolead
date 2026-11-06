@@ -266,8 +266,18 @@
     if (!signedIn()) { entry(); return; }
     if (!GP_ME) await loadGrowth();
   }
-  /** The two locks, the what-if lab and More feedback (Alexandru, 5 Nov
-   *  2026): signed out, the way in (first name and email); signed in without
+  /** A download from the library: the full account first (Alexandru, 6 Nov
+   *  2026: "when they try to download anything, full account"). The North
+   *  Star's own PDFs (the feedback, the Growth Plan) stay open. */
+  document.addEventListener('click', (e) => {
+    const a = e.target && e.target.closest && e.target.closest('a[href*="/api/library?item="]');
+    if (!a || !signedIn() || isFull()) return;
+    e.preventDefault();
+    const href = a.href;
+    needFull('library', () => { location.href = href; });
+  }, true);
+  /** The locks, the what-if lab, More feedback and the library's downloads
+   *  (Alexandru, 5 and 6 Nov 2026): signed out, the way in (first name and email); signed in without
    *  the full account, only what is missing, once (public/reset-box.js
    *  openComplete, `full`: a password for everyone); then `then`. Name and
    *  email are never asked again. */

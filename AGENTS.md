@@ -404,3 +404,26 @@ functions/_gpw-letters.js (a new title: redraw its cover too), then run
 `node scripts/gpw-page.mjs <out.html>` and the email map (rule 14), and put
 both pages in the exploraself repo's internal folder (good-people-win/ and
 email-map/).
+
+## 22. One account, short way in, full account only where it matters (Alexandru, 5–6 Nov 2026)
+
+There is one ExploraSelf account (here, on linktolead), for the North Star and
+the Blueprint alike; paying for a step raises the same account.
+
+- **The way in is always short:** first name and email (or Google) and the
+  yes to letters, no surname, no password. Every sales page (north2, north3,
+  road1, road2, road4; north1 sends people into the North Star) and the
+  North Star's first answer open this short box (public/account-box.js,
+  `nameOnly`). "From the sales pages, people should not go to full account."
+- **The full account** (company, what they want most, industry, a password)
+  is asked once, for only what is missing, never the name or email again
+  (public/reset-box.js openComplete), and only:
+  - in the North Star: the what-if lab and More feedback (a password for
+    Google sign-ups too: `full: true`);
+  - in Base Camp: the first answer from Level 04 on (The Boardroom, paid
+    first); Levels 01 to 03, The Founder Launchpad, run on name and email;
+  - for any download from the library (functions/api/library.js checks too).
+- **Open with name and email:** everything else in the North Star (the
+  reading, its PDF and print, emailing the results, the step-by-step plans,
+  the Growth Plan with its writing and PDF) and Levels 01 to 03.
+

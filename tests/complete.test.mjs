@@ -55,7 +55,8 @@ ok(code === 401, 'complete: only for a signed-in founder');
 
 // ── The Blueprint asks at the first answer, and keeps it ─────────────────────
 const app = fs.readFileSync('public/app.js', 'utf8'), box = fs.readFileSync('public/reset-box.js', 'utf8');
-ok(app.includes('const needsAccount = () => account.joined() && pulled && missing.length > 0') && app.includes("['v4t', 'got', 'v4day', 'carry'].find((k) => b.dataset[k] != null)") && app.includes('if (ans && needsAccount())') && app.includes("closest('input[data-v4s], input[data-v4f], input[data-v4u]')"), 'Base Camp: the first tap, slide, sentence, day or Sunday answer asks first');
-ok(/function keep4\(d, k, v, lv = level\) \{\s*\/\/[^\n]*\n\s*if \(needsAccount\(\)\) \{ askAccount\(\(\) => keep4\(d, k, v, lv\)\); return; \}/.test(app), 'Base Camp: the answer is held and applied after the save');
+// Alexandru, 6 Nov 2026: Levels 01 to 03 with name and email; the full account from Level 04 (paid first) and before any download.
+ok(app.includes('const needsAccount = (lv = level) => lacksFull() && lv > LAUNCHPAD_TOP;') && app.includes("['v4t', 'got', 'v4day', 'carry'].find((k) => b.dataset[k] != null)") && app.includes('if (ans && needsAccount())') && app.includes("closest('input[data-v4s], input[data-v4f], input[data-v4u]')"), 'Base Camp: from Level 04, the first tap, slide, sentence, day or Sunday answer asks first');
+ok(/function keep4\(d, k, v, lv = level\) \{\s*\/\/[^\n]*\n\s*if \(needsAccount\(lv\)\) \{ askAccount\(\(\) => keep4\(d, k, v, lv\)\); return; \}/.test(app), 'Base Camp: the answer is held and applied after the save');
 ok(box.includes('export function openComplete(') && box.includes("need('password') ? pw(") && box.includes('One step before your first answer'), 'the box asks only for what is missing');
 done();

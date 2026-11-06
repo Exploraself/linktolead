@@ -33,6 +33,10 @@ ok(/m\.openComplete\(\{[^}]*lock, full: true/.test(ns), 'the locks ask through t
 ok(/lab: \['The what-if lab'/.test(rb) && /feedback: \['More feedback'/.test(rb) && /if \(full\) f\.full = true;/.test(rb) && /Your name and email are already in\./.test(rb), 'the complete box says which lock it opens, and never asks the name or email');
 ok(/if \(!last && !ctx\.nameOnly\)/.test(box), 'the box asks no surname on the way in');
 ok(!/north3\/#join/.test(read('public/app.js').slice(read('public/app.js').indexOf('const manuals'), read('public/app.js').indexOf('const manuals') + 6000)), 'the library buttons send no account to the short box, not the full form');
+const bc = read('public/app.js');
+ok(/const LAUNCHPAD_TOP = 3;/.test(bc) && /const needsAccount = \(lv = level\) => lacksFull\(\) && lv > LAUNCHPAD_TOP;/.test(bc), 'Base Camp: Levels 01 to 03 with name and email; the full account from Level 04 (the Boardroom, paid first)');
+ok(/a\[href\*="\/api\/library\?item="\][\s\S]{0,120}lacksFull\(\)[\s\S]{0,200}askAccount\(\(\) => \{ location\.href = href; \}, 'library'\)/.test(bc), 'Base Camp: a download asks the full account first');
+ok(/a\[href\*="\/api\/library\?item="\][\s\S]{0,120}isFull\(\)[\s\S]{0,200}needFull\('library'/.test(ns) && /library: \['Your library'/.test(rb), 'the North Star: a library download asks the full account first, with its own words');
 
 // The Blueprint's sales pages (Alexandru, 6 Nov 2026): first name and email, then the Launchpad.
 for (const [page, land] of [['public/road1/page.js', 'road1'], ['public/road2/page.js', 'road2'], ['public/road4/page.js', 'road4']]) {
@@ -52,7 +56,7 @@ ok(st.me && st.me.email === 'nia@example.com' && st.me.missing.includes('passwor
 let r = await growthPost({ request: post('/api/growth-plan', { token: nia, blank: 'mgp-1.1', text: 'Being on time' }), env });
 ok(r.status === 200, 'the Growth Plan: she writes in it');
 r = await libraryGet({ request: get(`/api/library?item=nww&t=${nia}`), env });
-ok(r.status === 200 && /pdf/.test(r.headers.get('content-type') || ''), 'a free library book downloads with first name and email');
+ok(r.status === 302 && /\/ground-plan\/#library$/.test(r.headers.get('location') || ''), 'a free book with only name and email: back to the library, which asks the full account first (Alexandru, 6 Nov 2026)');
 r = await libraryGet({ request: get('/api/library?item=nww'), env });
 ok(r.status === 302 && /\/road3\/#join$/.test(r.headers.get('location') || ''), 'no account at all: the short box, not the full form');
 r = await libraryGet({ request: get(`/api/library?item=btl&t=${nia}`), env });
@@ -63,6 +67,8 @@ ok(r.status === 302 && /exploraself\.com\/hub/.test(r.headers.get('location') ||
 ok(s === 200 && a.complete, 'at a lock she adds company, want, industry and a password, nothing else');
 [, st] = await j(await stateGet({ request: get(`/api/state?t=${nia}`), env }));
 ok(st.me.missing.length === 0 && st.me.hasPassword === true && st.me.email === 'nia@example.com', 'now a full account, the same one: the Blueprint never asks again');
+r = await libraryGet({ request: get(`/api/library?item=nww&t=${nia}`), env });
+ok(r.status === 200 && /pdf/.test(r.headers.get('content-type') || ''), 'and now the free book downloads');
 
 // Google sign-ups: the locks ask a password too; Base Camp does not.
 [, a] = await j(await signup({ request: post('/api/signup', { first: 'Gus', email: 'gus@example.com', consent: true, type: 'simple' }), env }));

@@ -10,7 +10,10 @@
 // Every book is in the private WORKBOOKS bucket (key in `r2`), never at a
 // public address (Alexandru, 4 Nov 2026: "putting the free full books behind
 // the account, name and email, always: yes"). The free ones (`free: true`)
-// open for any account; the free first pages (previews) stay public.
+// open for any full account (Alexandru, 6 Nov 2026: "when they try to
+// download anything, full account"); the free first pages (previews) stay
+// public, and an account with only a name and email is asked for what it
+// lacks first.
 // HUB material (Alexandru, 4 Nov 2026): Built to Lead, the 99 practical
 // tools, and The Founder’s Growth Manual, 8 modules, are not free. They open
 // only with The HUB and The Summit; anyone else is sent to the HUB page.
@@ -19,6 +22,7 @@
 
 import { bad, db, now, studentBy, accountTables } from '../_shared.js';
 import { syncFounder } from '../_mailchimp.js';
+import { missingOf } from '../_profile.js';
 
 /** The downloads: the same keys, names and bucket keys as LIBRARY in
  *  public/content.js (a test holds them equal). `r2` is the file's key in the
@@ -74,6 +78,12 @@ export async function onRequestGet({ request, env, waitUntil }) {
   // HUB material opens only with The HUB or The Summit; anyone else is
   // shown the HUB, never the file.
   if (!item.free && !holdsHubBook(me.tier)) return go(request, HUB_PAGE);
+  // Every download needs the full account (Alexandru, 6 Nov 2026: "when they
+  // try to download anything, full account"). The library asks for only what
+  // is missing, then sends them here again.
+  const prof = await D.prepare('SELECT company, interest, industry, google_at FROM student_profile WHERE student_id = ?').bind(me.id).first();
+  const auth = await D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(me.id).first();
+  if (missingOf({ ...(prof || {}), hasPassword: !!(auth && auth.pass_hash) }).length) return go(request, '/ground-plan/#library');
   const obj = B ? await B.get(item.r2).catch(() => null) : null;
   if (!obj) return page(503, `${item.name} is not ready to download yet`, `${item.free ? 'It is yours, free with your account.' : 'It is yours with The HUB.'} Try again tomorrow, or reply to any of our emails and Alexandru and the team will send it to you.`);
   await accountTables(D);

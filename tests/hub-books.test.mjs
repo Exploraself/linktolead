@@ -35,7 +35,8 @@ ok(HUB_BOOK_TIERS.join() === 'hub,premium' && holdsHubBook('hub') && holdsHubBoo
 
 const PDF = new TextEncoder().encode('%PDF-1.7 a HUB book');
 const env0 = (extra = {}) => ({ DB: fakeD1(), ...extra });
-const join_ = async (env) => (await (await signup({ request: post('/api/signup', { first: 'Ana', last: 'Pop', email: 'ana@example.com', consent: true }), env })).json()).token;
+// A full account: every download needs one (Alexandru, 6 Nov 2026).
+const join_ = async (env) => (await (await signup({ request: post('/api/signup', { first: 'Ana', last: 'Pop', email: 'ana@example.com', consent: true, type: 'full', company: 'X', interest: 'More free time', industry: 'Other', password: 'longenough1', confirm: 'longenough1' }), env })).json()).token;
 const setTier = (env, tier) => env.DB.raw.prepare('UPDATE student SET tier = ?').run(tier);
 
 for (const [k, B] of Object.entries(BOOKS)) {

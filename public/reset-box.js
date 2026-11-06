@@ -262,6 +262,7 @@ export function openConfirm({ to = 'blueprint', first = '', last = '', email = '
 export const LOCKS = {
   lab: ['The what-if lab', 'Open the what-if lab', 'Move a lever and watch your cash, clients, time and people answer, with your own numbers. It is in your full free account: only what is missing, once.', 'Open the lab'],
   feedback: ['More feedback', 'Read the deeper feedback', 'The detail behind each reading is in your full free account: only what is missing, once.', 'Open my feedback'],
+  library: ['Your library', 'Download the full book', 'The full books download with your full free account: only what is missing, once.', 'Download my book'],
 };
 export function openComplete({ name = '', email = '', missing = [], done = null, lock = '', full = false } = {}) {
   const need = (k) => missing.includes(k);

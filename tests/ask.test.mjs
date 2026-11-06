@@ -45,7 +45,8 @@ ok(libraryTag('btl') === 'linktolead-library-built-to-lead', 'the tag: "linktole
 const FREE_KEYS = Object.values(LIBRARY_ITEMS).filter((v) => v.free).map((v) => v.r2);
 const BUCKET = { WORKBOOKS: { get: async (k) => (FREE_KEYS.includes(k) ? { body: '%PDF-1.4 ' + k } : null) } };
 let env = fresh({ MAILCHIMP_API_KEY: 'key-us19', ...BUCKET });
-const ana = await join(env, {});
+// A full account: every download needs one (Alexandru, 6 Nov 2026).
+const ana = await join(env, { type: 'full', company: 'X', interest: 'More free time', industry: 'Other', password: 'longenough1', confirm: 'longenough1' });
 mc = [];
 let r = await library({ request: get('/api/library?item=nope&t=' + ana), env });
 ok(r.status === 404, 'an unknown book: 404');
@@ -74,7 +75,7 @@ ok(summary(roster, []).library === 1 && filter(roster, { tile: 'library' }).leng
 const csv = await (await mGet({ request: new Request('https://x/api/mentor?csv=1', { headers: K }), env })).text();
 ok(csv.split('\r\n')[0].includes('"Library"') && csv.includes('Worth Building; The Founder’s Blueprint · Growing'), 'CSV: a Library column');
 env = fresh(BUCKET);
-const bo = await join(env, { email: 'bo@example.com' });
+const bo = await join(env, { email: 'bo@example.com', type: 'full', company: 'X', interest: 'More free time', industry: 'Other', password: 'longenough1', confirm: 'longenough1' });
 mc = []; // the join itself went through the public form
 r = await library({ request: get('/api/library?item=wb&t=' + bo), env });
 ok(r.status === 200 && mc.length === 0, 'form mode: the download works, nothing is tagged');
