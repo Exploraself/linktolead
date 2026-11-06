@@ -697,8 +697,28 @@ export function bookingLetter(base, { first, phone = '', kind = 'discovery', tim
  *  one paragraph per blank line; with none, the usual line (beforeWeSpeak). */
 const prepBlock = (base, kind, prep) => {
   const parts = String(prep || '').split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
-  return [heading(kind === 'boardroom' ? 'Before your 1:1' : 'Before we speak'), ...(parts.length ? parts : [beforeWeSpeak(base, kind)])];
+  return [heading(kind === 'boardroom' ? 'Before your 1:1' : 'Before we speak'), ...(parts.length ? parts.map(linked) : [beforeWeSpeak(base, kind)])];
 };
+/** Addresses in a text Alexandru writes become links (6 Nov 2026): https://…
+ *  as written, and our own sites written without it (linktolead.exploraself.com/…,
+ *  exploraself.com/…), which get https://. Nothing else becomes a link: no
+ *  http://, no other scheme, not the domain of an email address. Punctuation
+ *  right after an address stays text. Everything is escaped like any word. */
+const ADDRESS = /\bhttps:\/\/[^\s<>"']+|(?<![@\w.\/])(?:linktolead\.|www\.)?exploraself\.com(?:\/[^\s<>"']*)?/g;
+export function linked(s) {
+  const text = String(s ?? ''), out = [];
+  let last = 0;
+  for (const m of text.matchAll(ADDRESS)) {
+    const trail = (m[0].match(/[.,;:!?)\]]+$/) || [''])[0];
+    const shown = m[0].slice(0, m[0].length - trail.length);
+    if (!shown) continue;
+    out.push(text.slice(last, m.index), link(/^https:\/\//.test(shown) ? shown : `https://${shown}`, shown));
+    last = m.index + shown.length;
+  }
+  out.push(text.slice(last));
+  const parts = out.filter((x) => x !== '');
+  return parts.length === 1 && typeof parts[0] === 'string' ? parts[0] : parts;
+}
 
 /** "booking-confirmed": Alexandru confirmed one of their times in /mentor.
  *  The time (their zone and Rome), the Google Meet button, what helps before

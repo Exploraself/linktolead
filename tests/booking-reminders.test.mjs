@@ -5,7 +5,7 @@
 
 import { readFileSync } from 'node:fs';
 import { bookingTables, reminderDue, REMIND, prepTexts, clockText } from '../functions/_booking.js';
-import { bookingConfirmedLetter, bookingReminderDay, bookingReminderHour, RECEIPTS } from '../functions/_letters.js';
+import { bookingConfirmedLetter, bookingReminderDay, bookingReminderHour, RECEIPTS, linked } from '../functions/_letters.js';
 import { bookingReminders } from '../functions/_booking-reminders.js';
 import { onRequestPost as mentorPost } from '../functions/api/mentor.js';
 import { JOBS } from '../worker.js';
@@ -32,6 +32,19 @@ const H1 = bookingReminderHour(B, { first: 'maya', kind: 'boardroom', time: call
 ok(H1.subject === 'In one hour: your 1:1' && H1.text.includes('We speak in one hour, at 16:00.') && H1.text.includes('At that time, tap the button and you’re in.') && /BEFORE YOUR 1:1/.test(H1.text) && H1.text.includes('See you soon.') && H1.html.includes(MEET.boardroom), '1 hour before: the subject, the time, the Meet button, the text, "See you soon"');
 ok(RECEIPTS.includes('booking-reminder-day') && RECEIPTS.includes('booking-reminder-hour') && D1.receipt === true && H1.receipt === true, 'both reminders are receipts: no unsubscribe link, no offer');
 ok(clockText(call, 'America/New_York') === '10:00 New York time' && clockText(call, '') === '16:00', 'their clock time: the city when it is not Rome');
+
+// Addresses in the text are links (main chat, 6 Nov 2026: "make URLs in prep text clickable, escaped, https only").
+const BR = 'Please give this 20 minutes before your 1:1:\n\n1. If one of your first three levels is still open, finish it in your Base Camp: linktolead.exploraself.com/ground-plan/\n   The team and I read them before we meet, so the hour is spent on you.';
+L = bookingConfirmedLetter(B, { first: 'maya', kind: 'boardroom', time: call, meet: MEET.boardroom, prep: BR, tz: 'Europe/London', to: 'm@x.com' });
+ok(L.html.includes('<a href="https://linktolead.exploraself.com/ground-plan/" style="color:') && L.html.includes('>linktolead.exploraself.com/ground-plan/</a>') && L.text.includes('Base Camp: https://linktolead.exploraself.com/ground-plan/'), 'a Base Camp address written without https becomes a link, with https');
+ok(L.html.includes('\n   The team and I read them'), 'the lines and their indent stay as written');
+const lk = (s) => (Array.isArray(linked(s)) ? linked(s) : [linked(s)]).filter((x) => typeof x !== 'string').map((x) => x.url);
+ok(JSON.stringify(lk('See https://meet.google.com/abc-defg-hij.')) === '["https://meet.google.com/abc-defg-hij"]', 'an https address is a link, without the full stop after it');
+ok(!lk('http://example.com and javascript:alert(1) and ftp://x.com').length && !lk('Write to alex@exploraself.com').length, 'nothing else becomes a link: no http://, no other scheme, not an email address');
+ok(JSON.stringify(lk('exploraself.com/unshakeable, then www.exploraself.com')) === '["https://exploraself.com/unshakeable","https://www.exploraself.com"]', 'our own sites written without https get it');
+L = bookingConfirmedLetter(B, { first: 'maya', kind: 'discovery', time: call, meet: MEET.discovery, prep: 'Bring <b>this</b> & https://x.example/"onmouseover=alert(1)', to: 'm@x.com' });
+ok(L.html.includes('Bring &lt;b&gt;this&lt;/b&gt; &amp; ') && !L.html.includes('"onmouseover') && L.html.includes('href="https://x.example/"'), 'everything is escaped: no markup, and an address ends at a quote');
+ok(typeof linked('No address here.') === 'string', 'a text without an address stays plain text');
 
 // ── When a reminder is owed ──────────────────────────────────────────────────
 const t0 = Date.parse(call);
