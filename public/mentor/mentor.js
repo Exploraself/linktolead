@@ -502,6 +502,9 @@ function requestsHTML(kind) {
       ${mayConfirm ? `<details class="bk-own"><summary>Another time…</summary><div class="bk-ownrow"><label class="tiny" for="own-${esc(b.id)}">Day and time, Rome</label>
         <input type="datetime-local" id="own-${esc(b.id)}" step="900"><button type="button" class="btn" data-bown="${esc(b.id)}">Confirm this time</button></div>
         <p class="tiny">They get the same email: the time, in their own time too, and the Google Meet room.</p></details>` : ''}
+      ${mayConfirm ? `<label class="lbl" for="prep-${esc(b.id)}" style="margin-top:12px">${kind === 'boardroom' ? 'Before your 1:1' : 'Before we speak'} · for them, in the confirmation and both reminders</label>
+        <textarea id="prep-${esc(b.id)}" class="bk-note" rows="3" maxlength="1500" placeholder="What helps them prepare. Empty: the usual line. Your default is in Settings → Booking links.">${esc(b.prep || (data.bookPrep || {})[kind] || '')}</textarea>` : ''}
+      ${b.status === 'confirmed' ? `<p class="tiny">Reminders: 24 hours before · ${b.remind_day_at ? `sent ${esc(when(b.remind_day_at))}` : 'not yet'}; 1 hour before · ${b.remind_hour_at ? `sent ${esc(when(b.remind_hour_at))}` : 'not yet'}.</p>` : ''}
       ${open && !room && can('message') ? `<p class="tiny warn">Paste the ${esc(BOOK_LINK_NAMES[kind])} in Settings → Booking links before you confirm.</p>` : ''}
       ${b.status === 'confirmed' && room ? `<p class="tiny">Room: <a href="${esc(room)}" target="_blank" rel="noopener">${esc(room.replace('https://', ''))}</a></p>` : ''}
       ${can('message') ? `<label class="lbl" for="note-${esc(b.id)}" style="margin-top:12px">Private note (only the team sees it)</label>
@@ -540,6 +543,8 @@ function bookLinksHTML() {
     <p class="tiny">The Google Meet link for each kind of call. Paste it once: every confirmation from Inbox → Bookings carries it. Only links that start with https://meet.google.com/.</p>
     <div class="mform">${Object.keys(BOOK_LINK_NAMES).map((k) => `<label>${esc(BOOK_LINK_NAMES[k])}<input id="bl-${k}" type="url" inputmode="url" placeholder="https://meet.google.com/…" value="${esc(L[k] || '')}" autocomplete="off"></label>`).join('')}
       <label>Business WhatsApp number<input id="bl-wa" type="tel" inputmode="tel" placeholder="+39 …" value="${esc(L.whatsapp || '')}" autocomplete="off"></label>
+      ${Object.keys(BOOK_LINK_NAMES).map((k) => `<label>${k === 'boardroom' ? 'Before your 1:1 · your text for Boardroom 1:1s' : 'Before we speak · your text for discovery calls'}<textarea id="bl-prep-${k}" rows="4" maxlength="1500" placeholder="Write what helps them prepare. It is pre-filled on every request, and you can change it for each person before you confirm. Empty: the confirmation uses its usual line.">${esc((data.bookPrep || {})[k] || '')}</textarea></label>`).join('')}
+      <p class="tiny">This text goes in the confirmation and in both reminders (24 hours and 1 hour before), under “Before we speak” or “Before your 1:1”.</p>
       <p class="tiny">After booking, people see “Get my gift on WhatsApp”: one tap opens this number with their request and “Please send me my gift” written in. Your WhatsApp Business greeting message answers with the gift’s link, but only on a first message or after 14 days of silence: for anyone else, use the /gift quick reply. Empty: no button, and the gift opens on the page. The email copy always carries it.</p>
       <button type="button" id="bl-save">Save the links</button></div></section>`;
 }
@@ -1418,14 +1423,16 @@ document.addEventListener('click', async (e) => {
     const bk = (data.bookings || []).find((x) => x.id === bconf);
     if (!bk || !confirm(`${bk.status === 'confirmed' ? 'Move the call to' : 'Confirm'} ${romeTime(btime)} (Rome time) with ${bk.name || bk.email}? They get an email with this time and the Google Meet link.`)) return;
     b.disabled = true; b.textContent = 'Sending…';
-    const r = await act({ action: 'book-confirm', booking: bconf, time: btime, again: bk.status === 'confirmed' });
+    const pf = $(`#prep-${bconf}`);
+    const r = await act({ action: 'book-confirm', booking: bconf, time: btime, again: bk.status === 'confirmed', ...(pf ? { prep: pf.value } : {}) });
     flash = r.ok ? `Confirmed with ${bk.email}: ${romeTime(btime)} Rome time. The email with the Google Meet link is on its way.` : (r.data.error || 'The confirmation did not send.');
     return load();
   }
   if (b.id === 'bl-save') {
     b.disabled = true;
-    const r = await act({ action: 'book-links', discovery: $('#bl-discovery').value, boardroom: $('#bl-boardroom').value, whatsapp: $('#bl-wa').value });
-    flash = r.ok ? 'Booking links saved. Every confirmation carries them, and the booking pages show “Get my gift on WhatsApp” when the number is set.' : (r.data.error || 'The links did not save.');
+    const r = await act({ action: 'book-links', discovery: $('#bl-discovery').value, boardroom: $('#bl-boardroom').value, whatsapp: $('#bl-wa').value,
+      prep_discovery: $('#bl-prep-discovery').value, prep_boardroom: $('#bl-prep-boardroom').value });
+    flash = r.ok ? 'Booking links and texts saved. Every confirmation carries them, and the booking pages show “Get my gift on WhatsApp” when the number is set.' : (r.data.error || 'The links did not save.');
     return load();
   }
   if (d.link || d.reset) {

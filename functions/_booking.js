@@ -234,6 +234,10 @@ export function whenText(iso, tz = '') {
 /** One time as the person reads it: "Tuesday 10 November, 10:00 New York
  *  time (16:00 in Rome)", or "Tuesday 10 November, 16:00 Rome time". */
 export const timeLine = (iso, tz) => { const w = whenText(iso, tz); return w.same ? `${w.rome} Rome time` : `${w.mine} (${w.romeShort} in Rome)`; };
+/** Just the clock time, in their zone: "16:00" in Rome, "10:00 New York time" elsewhere. */
+export const clockText = (iso, tz) => { const zone = okTz(tz) || ZONE, h = hm(new Date(iso), zone); return zone === ZONE ? h : `${h} ${cityOf(zone)} time`; };
+/** Is the call on the same calendar day as `at`, in their zone? (A reminder then says "today".) */
+export const sameDay = (iso, at, tz) => { const zone = okTz(tz) || ZONE; return dayText(new Date(iso), zone) === dayText(new Date(at), zone); };
 
 // ── Where it is kept ──────────────────────────────────────────────────────────
 /** The booking tables, made the first time a request needs them (the same
@@ -257,6 +261,10 @@ export async function bookingTables(D) {
   try { await D.prepare('ALTER TABLE booking ADD COLUMN phone TEXT').run(); } catch { /* already there */ }
   // What a discovery call is about (3 Nov 2026), from the link that sent them.
   try { await D.prepare('ALTER TABLE booking ADD COLUMN about TEXT').run(); } catch { /* already there */ }
+  // The preparation text for this person, and when each reminder went (6 Nov 2026).
+  for (const col of ['prep', 'remind_day_at', 'remind_hour_at']) {
+    try { await D.prepare(`ALTER TABLE booking ADD COLUMN ${col} TEXT`).run(); } catch { /* already there */ }
+  }
   READY.add(D);
 }
 
@@ -306,6 +314,48 @@ export async function setMeetLink(D, kind, link, at) {
   else await D.prepare('INSERT OR REPLACE INTO booking_setting (k, v, at) VALUES (?,?,?)').bind(`meet.${kind}`, link, at).run();
 }
 
+/** "Before our call" (Alexandru, 6 Nov 2026): a text he writes once per kind
+ *  of call in /mentor → Settings → Booking links, pre-filled on every request
+ *  and editable for that person before Confirm. It goes in the confirmation
+ *  and both reminders. Never written by the site: empty until he writes it,
+ *  and the letters then use their usual line (beforeWeSpeak). */
+export const PREP_MAX = 1500;
+export const cleanPrep = (v) => String(v ?? '').replace(/\u0000/g, '').replace(/\r\n?/g, '\n').trim().slice(0, PREP_MAX);
+export async function prepTexts(D) {
+  await bookingTables(D);
+  const rows = (await D.prepare("SELECT k, v FROM booking_setting WHERE k IN ('prep.discovery', 'prep.boardroom')").all()).results || [];
+  const out = { discovery: '', boardroom: '' };
+  for (const r of rows) out[r.k.slice(5)] = cleanPrep(r.v);
+  return out;
+}
+export async function setPrepText(D, kind, text, at) {
+  await bookingTables(D);
+  if (!text) await D.prepare('DELETE FROM booking_setting WHERE k = ?').bind(`prep.${kind}`).run();
+  else await D.prepare('INSERT OR REPLACE INTO booking_setting (k, v, at) VALUES (?,?,?)').bind(`prep.${kind}`, text, at).run();
+}
+
+/** Reminders before a confirmed call (Alexandru, 6 Nov 2026: "24 hours before
+ *  and 1 hour before"), sent by the hourly run (worker.js, at :07). Which one
+ *  a booking is owed now, or '':
+ *  - only a confirmed booking with a time still ahead; each reminder once;
+ *  - 'hour': from 90 minutes before (the first hourly run in that window
+ *    lands 53 to 83 minutes before a call on the hour or half hour) until 10
+ *    minutes before;
+ *  - 'day': from 24 hours before until 3 hours before, and only when the call
+ *    was confirmed at least 24 hours ahead ("a booking confirmed less than
+ *    24 h before gets only the 1-hour reminder"); the hour one wins when both
+ *    are owed. */
+export const REMIND = { hourFrom: 90 * 60_000, hourTo: 10 * 60_000, dayFrom: 24 * 3600_000, dayTo: 3 * 3600_000 };
+export function reminderDue(b, at = Date.now()) {
+  if (!b || b.status !== 'confirmed' || !b.confirmed_time) return '';
+  const t = Date.parse(b.confirmed_time), now = new Date(at).getTime(), until = t - now;
+  if (!Number.isFinite(t) || until <= 0) return '';
+  if (!b.remind_hour_at && until <= REMIND.hourFrom && until > REMIND.hourTo) return 'hour';
+  const early = b.confirmed_at ? t - Date.parse(b.confirmed_at) >= REMIND.dayFrom : false;
+  if (!b.remind_day_at && early && until <= REMIND.dayFrom && until > REMIND.dayTo) return 'day';
+  return '';
+}
+
 /** The business WhatsApp number the booking pages' "Get my gift on
  *  WhatsApp" button opens (Alexandru, 3 Nov 2026: the free way, answered by
  *  the WhatsApp Business app's own greeting message). Pasted once in /mentor
@@ -329,7 +379,8 @@ export function bookingRow(r) {
   try { times = JSON.parse(r.times) || []; } catch { times = []; }
   return { id: r.id, kind: r.kind, name: r.name, email: r.email, created_at: r.created_at, status: r.status, tz: r.tz || ZONE,
     student_id: r.student_id || null, phone: r.phone || '', times, answers: answersText(r.kind, answers), confirmed_time: r.confirmed_time || null, confirmed_at: r.confirmed_at || null,
-    confirmed_by: r.confirmed_by || null, note: r.note || '', closed_at: r.closed_at || null, closed_by: r.closed_by || null };
+    confirmed_by: r.confirmed_by || null, note: r.note || '', closed_at: r.closed_at || null, closed_by: r.closed_by || null,
+    prep: r.prep || '', remind_day_at: r.remind_day_at || null, remind_hour_at: r.remind_hour_at || null };
 }
 /** What a request can be, in /mentor (Alexandru, 2 Nov 2026: "full control"):
  *  asked → confirmed (an email goes) → held, or no-show; or declined /

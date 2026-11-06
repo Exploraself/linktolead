@@ -17,7 +17,7 @@
 
 import { esc } from './_mail.js';
 import { asMentor } from './_mentor.js';
-import { whenText, timeLine, cityOf, answersText, RULES, KINDS, GIFTS, giftHref, waDigits } from './_booking.js';
+import { whenText, timeLine, clockText, sameDay, cityOf, answersText, RULES, KINDS, GIFTS, giftHref, waDigits } from './_booking.js';
 
 /** The same link as BOOKING in public/content.js (a test holds them equal):
  *  the page where a founder who paid picks a time (or up to three) for their 1:1
@@ -290,7 +290,7 @@ const close = (kind, { mentor, tz, at, to = '' } = {}, ask = 'start') => ({ ment
 const asReceipt = (c) => ({ ...c, receipt: true });
 /** Which letters are receipts: they answer something the founder just did.
  *  The welcomes and every other letter stay as they are. */
-export const RECEIPTS = ['unlocked', 'product', 'signin', 'reset', 'password', 'no-account', 'booking', 'booking-confirmed'];
+export const RECEIPTS = ['unlocked', 'product', 'signin', 'reset', 'password', 'no-account', 'booking', 'booking-confirmed', 'booking-reminder-day', 'booking-reminder-hour'];
 
 /** "launchpad-welcome": sent once, when the account is made. */
 export function launchpadWelcome(base, { first, to = '', tier, offer, ...o } = {}) {
@@ -692,10 +692,18 @@ export function bookingLetter(base, { first, phone = '', kind = 'discovery', tim
   ].filter(Boolean), null, asReceipt(close('booking', { tz, at, to }, null))) };
 }
 
+/** "Before we speak" / "Before your 1:1" (Alexandru, 6 Nov 2026): the text he
+ *  wrote for this person in /mentor (Settings → Booking links pre-fills it),
+ *  one paragraph per blank line; with none, the usual line (beforeWeSpeak). */
+const prepBlock = (base, kind, prep) => {
+  const parts = String(prep || '').split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
+  return [heading(kind === 'boardroom' ? 'Before your 1:1' : 'Before we speak'), ...(parts.length ? parts : [beforeWeSpeak(base, kind)])];
+};
+
 /** "booking-confirmed": Alexandru confirmed one of their times in /mentor.
  *  The time (their zone and Rome), the Google Meet button, what helps before
  *  the call. Sent only from /mentor, only with a Meet link. */
-export function bookingConfirmedLetter(base, { first, kind = 'discovery', time = '', meet = '', tz = '', to = '', at } = {}) {
+export function bookingConfirmedLetter(base, { first, kind = 'discovery', time = '', meet = '', prep = '', tz = '', to = '', at } = {}) {
   const one = kind === 'boardroom';
   const w = whenText(time, tz);
   return { subject: `Confirmed: ${one ? 'your 1:1' : 'our call'} on ${w.same ? w.romeDay : w.mine.split(',')[0]}`, ...letter(base, [
@@ -704,9 +712,39 @@ export function bookingConfirmedLetter(base, { first, kind = 'discovery', time =
     `${timeLine(time, tz)} · ${KINDS[kind].minutes} minutes, online, on ${RULES.where}.`,
     button(meet, 'Join on Google Meet →'),
     'At that time, tap the button and you’re in. Keep this email, so the link is at hand.',
-    beforeWeSpeak(base, kind),
+    ...prepBlock(base, kind, prep),
     'If the time no longer works, just reply to this email and we find another. The team and I are here for you.',
   ], null, asReceipt(close('booking-confirmed', { tz, at, to }, null))) };
+}
+
+/** "booking-reminder-day": about 24 hours before a confirmed call (Alexandru,
+ *  6 Nov 2026), from the hourly run (functions/_booking-reminders.js). His
+ *  words, as the main chat wrote them for him. "Today" instead of "tomorrow"
+ *  when the call falls on the same day where they live. */
+export function bookingReminderDay(base, { first, kind = 'discovery', time = '', meet = '', prep = '', tz = '', to = '', at } = {}) {
+  const one = kind === 'boardroom', when = sameDay(time, at || Date.now(), tz) ? 'today' : 'tomorrow';
+  return { subject: `${when === 'today' ? 'Today' : 'Tomorrow'}: ${one ? 'your 1:1' : 'our call'} at ${clockText(time, tz)}`, ...letter(base, [
+    hi(first),
+    `A short reminder: ${one ? 'your 1:1' : 'our call'} is ${when}.`,
+    `${timeLine(time, tz)} · ${KINDS[kind].minutes} minutes, online, on ${RULES.where}.`,
+    button(meet, 'Join on Google Meet →'),
+    ...prepBlock(base, kind, prep),
+    'If the time no longer works, just reply to this email and we find another. The team and I are here for you.',
+  ], null, asReceipt(close('booking-reminder-day', { tz, at, to }, null))) };
+}
+
+/** "booking-reminder-hour": about one hour before a confirmed call (the
+ *  hourly run sends it 53 to 83 minutes before). */
+export function bookingReminderHour(base, { first, kind = 'discovery', time = '', meet = '', prep = '', tz = '', to = '', at } = {}) {
+  const one = kind === 'boardroom';
+  return { subject: `In one hour: ${one ? 'your 1:1' : 'our call'}`, ...letter(base, [
+    hi(first),
+    `We speak in one hour, at ${clockText(time, tz)}.`,
+    button(meet, 'Join on Google Meet →'),
+    'At that time, tap the button and you’re in.',
+    ...prepBlock(base, kind, prep),
+    'See you soon.',
+  ], null, asReceipt(close('booking-reminder-hour', { tz, at, to }, null))) };
 }
 
 /** To Alexandru: someone asked for a call. Who, which call, their times

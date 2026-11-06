@@ -6,7 +6,7 @@
 // his photo kept, no unsubscribe header or link. Every other letter, the
 // welcome first, stays exactly as it was. Run: node tests/receipts.test.mjs
 
-import { unlockedLetter, productLetter, signinLetter, passwordChangedLetter, noAccountLetter, launchpadWelcome, northStarWelcome, bookingLetter, bookingConfirmedLetter, GOOD_WORDS, RECEIPTS, BOOKING } from '../functions/_letters.js';
+import { unlockedLetter, productLetter, signinLetter, passwordChangedLetter, noAccountLetter, launchpadWelcome, northStarWelcome, bookingLetter, bookingConfirmedLetter, bookingReminderDay, bookingReminderHour, GOOD_WORDS, RECEIPTS, BOOKING } from '../functions/_letters.js';
 import { send } from '../functions/_mail.js';
 import { fakeResend, tally } from './_d1.mjs';
 
@@ -26,8 +26,11 @@ const receipts = {
     answers: { stage: 'solo', struggles: ['clients', 'cash'], goals: ['clients', 'cash'] }, tz: 'Europe/London', to: 'maya@example.com' }),
   product: productLetter(B, { first: 'Maya', product: 'unshakeable', url: 'https://exploraself.com/unshakeable?access=cs_test_abc', to: 'maya@example.com' }),
   'booking-confirmed': bookingConfirmedLetter(B, { first: 'Maya', kind: 'boardroom', time: '2026-11-10T15:00:00.000Z', meet: 'https://meet.google.com/abc-defg-hij', tz: 'Europe/London', to: 'maya@example.com' }),
+  // The reminders before a confirmed call (Alexandru, 6 Nov 2026).
+  'booking-reminder-day': bookingReminderDay(B, { first: 'Maya', kind: 'boardroom', time: '2026-11-10T15:00:00.000Z', meet: 'https://meet.google.com/abc-defg-hij', tz: 'Europe/London', to: 'maya@example.com', at: '2026-11-09T15:20:00.000Z' }),
+  'booking-reminder-hour': bookingReminderHour(B, { first: 'Maya', kind: 'discovery', time: '2026-11-10T15:00:00.000Z', meet: 'https://meet.google.com/abc-defg-hij', tz: 'Europe/London', to: 'maya@example.com' }),
 };
-ok(Object.keys(receipts).every((k) => RECEIPTS.includes(k)) && RECEIPTS.length === Object.keys(receipts).length, 'eight receipts, named in one list');
+ok(Object.keys(receipts).every((k) => RECEIPTS.includes(k)) && RECEIPTS.length === Object.keys(receipts).length, 'ten receipts, named in one list');
 for (const [name, L] of Object.entries(receipts)) {
   ok(L.receipt === true, `${name}: marked as a receipt`);
   ok(!/Free assessments/.test(L.text) && !L.html.includes('exploraself.com/first-100-clients') && !L.html.includes('exploraself.com/eq'), `${name}: no assessments`);
@@ -35,7 +38,8 @@ for (const [name, L] of Object.entries(receipts)) {
   ok(!/mailto:/.test(L.html) && !/One tap to ask/i.test(L.html), `${name}: no one-tap questions`);
   ok(L.html.includes('/mail/alexandru.jpg'), `${name}: his photo is kept`);
   ok(!L.html.includes('/mail/signature.png') && /italic 22px[^>]*>Alexandru</.test(L.html), `${name}: the signature in words, not a picture`);
-  ok(/^Hi\b/.test(L.text) && /Thank you/.test(L.text), `${name}: greets and thanks`);
+  // A reminder (6 Nov 2026) answers nothing they just did: it greets, in the words written for Alexandru, without a thank-you.
+  ok(/^Hi\b/.test(L.text) && (/^booking-reminder-/.test(name) || /Thank you/.test(L.text)), `${name}: greets${/^booking-reminder-/.test(name) ? '' : ' and thanks'}`);
   ok(GOOD_WORDS.some((g) => L.text.includes(g)) && /reply to this email/i.test(L.text), `${name}: encourages, and says we are here (reply)`);
 }
 // One button, plus the booking link in "It's unlocked".
