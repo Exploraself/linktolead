@@ -159,7 +159,8 @@ ok(!/PHOTO/.test(A) && read('public/road3/page.js').includes("variant: 'simple',
 ok([1, 3, 4, 5, 6, 11, 12].map(band).join() === 'free,free,with,with,,,last', 'Road 3: the levels’ bands');
 const WB = read('public/north3/index.html');
 for (const W of [WB]) ok(W.includes('<button type="button" data-gate class="cta gold-btn" style="min-height: 56px; padding: 0 32px; font-size: 17px">Show me my road →</button>') && !W.includes('href="#dream"') && !/<a [^>]*href="\/(?!compass\/assets|assets)/.test(W), 'Road 2: "Show me my road" opens the full form; no link leaves the page');
-ok(read('public/north3/sales.js').includes("variant: 'full', landing: 'north3'") && WB.includes('src="/north3/sales.js"') && WB.includes('content="https://linktolead.exploraself.com/north3/"') && read('public/northstar/app.js').includes("type: 'simple', landing: doorOf(utm)") && read('public/northstar/app.js').includes("return src === 'north1' ? 'north1' : 'compass';"), 'Road 2 stays FULL, landing road2; the /northstar box stays SIMPLE');
+// Sales pages are a way in (Alexandru, 5 Nov 2026): first name and email, never the full form.
+ok(read('public/north3/sales.js').includes("variant: 'simple', nameOnly: true, landing: 'north3'") && WB.includes('src="/north3/sales.js"') && WB.includes('content="https://linktolead.exploraself.com/north3/"') && read('public/northstar/app.js').includes("type: 'simple', landing: doorOf(utm)") && read('public/northstar/app.js').includes("return src === 'north1' ? 'north1' : 'compass';"), 'north3 opens the short box (first name and email), landing road2; the /northstar box stays SIMPLE');
 const box = read('public/account-box.js');
 ok(/pwInput\('j-pw'\)/.test(box) && /pwInput\('j-pw2'\)/.test(box) && /data-eye=/.test(box) && /variant === 'full' \? detailFields/.test(box) && /landing: ctx\.landing, utm: utm\(\)/.test(box), 'the account box: a password (with the show-password eye) on the full form only, landing and utm sent');
 
@@ -200,7 +201,7 @@ ok(JSON.stringify(LANDING_TAGS) === JSON.stringify({ road1: 'linktolead-road1', 
   const t = tagsFor({ landing: 'north2', signupType: 'full' });
   ok(t.some((x) => x.name === 'linktolead-north2' && x.status === 'active') && t.every((x) => typeof x.name === 'string' && x.name), 'north2: tagged linktolead-north2, no empty tag');
   const R21 = read('public/north2/index.html'), J21 = read('public/north2/page.js');
-  ok(J21.includes("variant: 'full', landing: 'north2'") && R21.includes('src="/north2/page.js"') && !/PHOTO OF/.test(R21) && R21.includes('/cabinet/alexandru.jpg'), 'north2: full form, landing north2, the real photo');
+  ok(J21.includes("variant: 'simple', nameOnly: true, landing: 'north2'") && R21.includes('src="/north2/page.js"') && !/PHOTO OF/.test(R21) && R21.includes('/cabinet/alexandru.jpg'), 'north2: the short box (first name and email), landing north2, the real photo');
   const labels = new Set((R21.match(/<button type="button" data-gate[^>]*>([^<]+)/g) || []).map((m) => m.replace(/.*>/, '').trim()));
   ok(labels.size === 1 && labels.has('Start my North Star →'), 'road2.1: one button label, everywhere');
   const AB = read('public/account-box.js');
