@@ -137,6 +137,11 @@ ok(j.paid && j.existing && !j.token && j.access === `https://exploraself.com/uns
 const pay = readFileSync(new URL('../public/pay/pay.js', import.meta.url), 'utf8');
 ok(/detailFields\('f', 'display:grid;gap:6px', need\)/.test(pay) && pay.includes("fetch('/api/complete'") && /token: d\.token \|\| token\(\), full: true/.test(pay), '/pay/ after paying: the full account form, saved through /api/complete');
 ok(!pay.includes('Later: open Level') && !pay.includes("fetch('/api/password'"), '/pay/: no way past the full account, and no password-only step any more');
+ok(/<label for="f-pw">Password<\/label>\$\{pwBox\('f-pw'\)\}/.test(pay) && /<label for="f-pw2">Confirm password<\/label>\$\{pwBox\('f-pw2'\)\}/.test(pay) && /data-eye="\$\{id\}"/.test(pay) && /data-copy="\$\{id\}"/.test(pay) && pay.includes('At least 10 characters. You sign in with your email and this password.') && !pay.includes('Copy it into the second box'),
+  '/pay/: the password boxes look like every other full account form (Alexandru, 6 Nov 2026): Password and Confirm password, each with its eye and copy beside it');
+const box = readFileSync(new URL('../public/account-box.js', import.meta.url), 'utf8');
+const svgOf = (src, name) => (new RegExp(`const ${name} = '([^']+)'`).exec(src) || [])[1];
+ok(svgOf(pay, 'PW_EYE') === svgOf(box, 'EYE') && svgOf(pay, 'PW_COPY') === svgOf(box, 'COPY'), '/pay/: the same eye and copy icons as the account box');
 ok(pay.includes("unshakeable: 'Open my Unshakeable Audit'") && /href: d\.access/.test(pay), '/pay/: the button opens the audit for the Unshakeable Assessment');
 ok(/if \(d && d\.paid\) return finishAccount\(d, steps\[d\.step\] \|\| \{\}\);/.test(pay) && /if \(!need\.length\) return paidDone\(d, S\);/.test(pay), '/pay/: a signed-in founder is asked only what is missing; nothing missing goes straight to the way in');
 ok(/function fromWindow\(\)/.test(pay) && /location\.hash/.test(pay) && /history\.replaceState\(null, '', location\.pathname \+ location\.search\)/.test(pay) && /\$\('#go'\)\.click\(\)/.test(pay), '/pay/: exploraself.com\'s window fills the form through the #part, which is cleared, and goes on to Stripe');
