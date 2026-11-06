@@ -81,4 +81,11 @@ ok(s === 200 && a.complete, 'Google sign-up at Base Camp: no password asked, as 
 [s, a] = await j(await complete({ request: post('/api/complete', { token: gus, password: 'another-long-one', full: true }), env }));
 ok(s === 200 && DB.raw.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').get(gus)?.pass_hash, 'then, at a lock, only the password: and it is saved');
 
+// The pop-up boxes show (Alexandru, 6 Nov 2026: "when I click sign in … page goes dimmer and nothing
+// happens"): the box holder #gate is never paused as an off-screen section.
+{
+  const nsApp = readFileSync(new URL('../public/northstar/app.js', import.meta.url), 'utf8');
+  ok(/querySelectorAll\('#main > section, #main > div:not\(#gate\), \.side'\)/.test(nsApp), 'North Star: the pop-up boxes are never paused as off screen, so they fade in');
+  ok(nsApp.includes("${UI.signinFor === 'menu' ? 'Your North Star and your Blueprint, on any device.' : SIGNIN_LINE}"), 'North Star: Sign in from the menu does not claim the email already has an account');
+}
 done();
