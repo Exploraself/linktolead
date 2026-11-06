@@ -384,16 +384,23 @@ function workbookHTML() {
  *  back in from here, not only from the letter). The link is their own access
  *  (functions/_stripe.js productsOf); the page it opens asks Stripe again. */
 const PRODUCT_TILE = {
-  unshakeable: { title: 'Unshakeable · open', text: 'The Unshakeable Assessment, your Personal Leadership Audit, on exploraself.com.', go: 'Open my Unshakeable Audit' },
+  unshakeable: { title: 'Unshakeable · open', text: 'The Unshakeable Assessment, your Personal Leadership Audit, on exploraself.com.', go: 'Open my Unshakeable Audit',
+    // Not bought yet (Alexandru, 6 Nov 2026: "let's add in base camp"): the same tile, to get it.
+    // The words are the pay page's own (public/pay/pay.js PITCH); never "free".
+    sell: { title: 'Unshakeable · $9.99', text: 'The full Personal Leadership Audit, with your results and a printable certificate, on exploraself.com.', go: 'Get my Unshakeable Audit', href: 'https://exploraself.com/unshakeable' } },
 };
+const productTile = (step, T, href, icon) => `<section class="gp-wrap gp-workbook" aria-labelledby="pr-${esc(step)}">
+    <div class="wb"><span class="rf-ic">${icon}</span><span class="wb-t"><b id="pr-${esc(step)}">${esc(T.title)}</b><small>${esc(T.text)}</small></span>
+    <a class="cta wb-btn" href="${esc(href)}">${esc(T.go)} →</a></div>
+  </section>`;
 function productsHTML() {
   const mine = owned.filter((p) => PRODUCT_TILE[p.step] && /^https:\/\/exploraself\.com\//.test(p.access || ''));
-  if (!mine.length) return '';
-  return mine.map((p) => `<section class="gp-wrap gp-workbook" aria-labelledby="pr-${esc(p.step)}">
-    <div class="wb"><span class="rf-ic">${CHECK_IC}</span><span class="wb-t"><b id="pr-${esc(p.step)}">${esc(PRODUCT_TILE[p.step].title)}</b><small>${esc(PRODUCT_TILE[p.step].text)}</small></span>
-    <a class="cta wb-btn" href="${esc(p.access)}">${esc(PRODUCT_TILE[p.step].go)} →</a></div>
-  </section>`).join('');
+  const open = mine.map((p) => productTile(p.step, PRODUCT_TILE[p.step], p.access, CHECK_IC));
+  // The way to get it shows once the account has said what it owns, so a buyer never sees it first.
+  const sell = pulled ? Object.entries(PRODUCT_TILE).filter(([k, T]) => T.sell && !mine.some((p) => p.step === k)).map(([k, T]) => productTile(k, T.sell, T.sell.href, AUDIT_IC)) : [];
+  return [...open, ...sell].join('');
 }
+const AUDIT_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="5" y="3.5" width="14" height="18" rx="2"/><path d="M9 3.5h6v3H9z"/><path d="m8.5 11 1.5 1.5 2.5-2.5M8.5 16.5l1.5 1.5 2.5-2.5M14.5 11.5h1.5M14.5 17h1.5"/></svg>';
 const CHECK_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16.5 9.5"/></svg>';
 
 /** Ask for a refund (Alexandru, 2 Nov 2026): in every founder's Base Camp.
