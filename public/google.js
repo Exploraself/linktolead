@@ -25,10 +25,13 @@ function load() {
   return script;
 }
 
-/** The markup. `consentFor`: the id of the box's own consent tick, or ''. */
-export const slot = (consentFor = '', dark = false) => `<div class="g-slot" hidden style="flex-direction:column;gap:10px;align-items:stretch">
+/** The markup. `consentFor`: the id of the box's own consent tick, or ''.
+ *  `line`: false keeps the button's own consent line off the screen and reads
+ *  the box's tick instead: one tick for both ways in (Alexandru, 6 Nov 2026:
+ *  "eliminate the double tick"). */
+export const slot = (consentFor = '', dark = false, line = true) => `<div class="g-slot" hidden style="flex-direction:column;gap:10px;align-items:stretch">
   <div class="g-btn" style="display:flex;justify-content:center;min-height:44px"></div>
-  ${consentFor ? `<label class="g-consent" style="display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.45;color:${dark ? '#C9C2B3' : '#5A6580'}"><input type="checkbox" data-sync="${consentFor}" style="width:16px;height:16px;margin-top:1px;accent-color:#B4975F;flex:none">Email me my results and occasional guidance. I can unsubscribe any time.</label>` : ''}
+  ${consentFor ? (line ? `<label class="g-consent" style="display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.45;color:${dark ? '#C9C2B3' : '#5A6580'}"><input type="checkbox" data-sync="${consentFor}" style="width:16px;height:16px;margin-top:1px;accent-color:#B4975F;flex:none">Email me my results and occasional guidance. I can unsubscribe any time.</label>` : `<input type="checkbox" data-sync="${consentFor}" hidden>`) : ''}
   <div class="g-or" role="separator" style="display:flex;align-items:center;gap:10px;font-size:12px;color:${dark ? '#9C9585' : '#7B8399'};letter-spacing:.04em"><span style="flex:1;height:1px;background:currentColor;opacity:.35"></span>or with your email<span style="flex:1;height:1px;background:currentColor;opacity:.35"></span></div>
 </div>`;
 
