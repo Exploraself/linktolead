@@ -14,7 +14,7 @@
  * it, never because a drag or a text selection ended outside. Nothing here
  * says whether an address has an account: the answer is the same either way. */
 
-import { INTERESTS, INDUSTRIES } from '/forms.js';
+import { detailFields, readDetails } from '/forms.js';
 
 const OK_EMAIL = /^[^@\s]+@[^@\s.]+\.[^@\s]+$/;
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -31,6 +31,7 @@ const STYLE = `.rbx-veil{position:fixed;inset:0;z-index:120;background:rgba(14,2
 .rbx h2{margin:0;font:440 27px/1.2 Newsreader,Georgia,serif;padding-right:36px}
 .rbx p{margin:0;font-size:14.5px;line-height:1.55;color:#3D4966}
 .rbx label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#121C2D}
+.rbx label:has(> input[type=checkbox]){flex-direction:row;align-items:center;gap:10px;font-weight:400;align-self:flex-start}
 .rbx .inp{min-height:48px;border:1px solid #D8CDBB;border-radius:6px;padding:0 12px;font:16px Inter,Arial,sans-serif;color:#121C2D;background:#fff;width:100%}
 .rbx .inp:focus-visible,.rbx button:focus-visible,.rbx a:focus-visible{outline:2px solid #B4975F;outline-offset:2px}
 .rbx-pw{display:flex;gap:6px}.rbx-pw .inp{flex:1;min-width:0}
@@ -276,25 +277,30 @@ export function openComplete({ name = '', email = '', missing = [], done = null,
     <p>${L ? esc(L[2]) : 'Your answers are the most valuable thing here. Complete your free account once, so they are safe and follow you to any device.'}</p>
     ${email ? `<p class="rbx-tip" style="margin:-4px 0 4px">${name ? esc(name) + ' · ' : ''}<b>${esc(email)}</b></p>` : ''}
     <form class="rbx-form" novalidate style="display:flex;flex-direction:column;gap:12px">
-      ${need('company') ? `<label>Company<input class="inp" id="rbx-co" autocomplete="organization" maxlength="120" placeholder="Your business name"></label>
-        <label style="display:flex;flex-direction:row;align-items:center;gap:8px;font-weight:400"><input type="checkbox" id="rbx-noco" style="width:auto;min-height:0;margin:0"> No company yet</label>` : ''}
-      ${need('interest') ? `<label>What do you want most?<select class="inp" id="rbx-int"><option value="">Choose…</option>${INTERESTS.map((x) => `<option>${esc(x)}</option>`).join('')}</select></label>` : ''}
-      ${need('industry') ? `<label>Industry<select class="inp" id="rbx-ind"><option value="">Choose…</option>${INDUSTRIES.map((x) => `<option>${esc(x)}</option>`).join('')}</select></label>` : ''}
-      ${need('password') ? pw('rbx-pw1', 'Password · at least 10 characters') : ''}
+      ${detailFields('rbx', 'display:flex;flex-direction:column;gap:6px', missing.filter((k) => k !== 'password'))}
+      ${need('password') ? `${pw('rbx-pw1', 'Password')}${pw('rbx-pw2', 'Confirm password')}
+        <span class="rbx-tip" style="margin-top:-6px">At least 10 characters. You sign in with your email and this password.</span>` : ''}
       <div class="rbx-err" role="alert"></div>
       <button type="submit" class="rbx-go">${go}</button>
     </form>
     <p class="rbx-tip" style="text-align:center">${L ? (L[4] || 'Free. Your name and email are already in.') : 'Your answer is kept. Free, as before.'}</p>`);
-  const nc = inner.querySelector('#rbx-noco'), co = inner.querySelector('#rbx-co');
+  const nc = inner.querySelector('#rbx-nocompany'), co = inner.querySelector('#rbx-company');
   if (nc && co) nc.addEventListener('change', () => { co.disabled = nc.checked; if (nc.checked) co.value = ''; });
   inner.querySelector('.rbx-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const v = (id) => { const el = inner.querySelector('#' + id); return el ? el.value.trim() : ''; };
     const f = {};
-    if (need('company')) { f.noCompany = !!(nc && nc.checked); f.company = v('rbx-co'); if (!f.noCompany && !f.company) return say(inner, 'Your company’s name, or tick “No company yet”.'); }
-    if (need('interest')) { f.interest = v('rbx-int'); if (!f.interest) return say(inner, 'Choose what you want most from the business.'); }
-    if (need('industry')) { f.industry = v('rbx-ind'); if (!f.industry) return say(inner, 'Choose your industry.'); }
-    if (need('password')) { const p = inner.querySelector('#rbx-pw1').value; if (p.length < 10) return say(inner, 'At least 10 characters, please.'); f.password = p; f.confirm = p; }
+    // The same fields, words and checks as every full account form (account-box.js, /pay/; 6 Nov 2026).
+    const d = readDetails('rbx', missing.filter((k) => k !== 'password'), inner.ownerDocument);
+    if (d.problem) return say(inner, d.problem);
+    if (need('company')) { f.company = d.company; f.noCompany = d.noCompany; }
+    if (need('interest')) f.interest = d.interest;
+    if (need('industry')) f.industry = d.industry;
+    if (need('password')) {
+      const p = inner.querySelector('#rbx-pw1').value, p2 = inner.querySelector('#rbx-pw2').value;
+      if (p.length < 10) return say(inner, 'A password of at least 10 characters, please.');
+      if (p !== p2) return say(inner, 'The two passwords are different.');
+      f.password = p; f.confirm = p2;
+    }
     if (full) f.full = true;
     const b = inner.querySelector('.rbx-go'); b.disabled = true; b.textContent = 'Saving…'; say(inner, '');
     try {
