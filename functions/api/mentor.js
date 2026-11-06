@@ -31,7 +31,7 @@ import { GROWTH_IDS, GROWTH_SQL, GROWTH_BLANK_IDS } from '../_growth.js';
 import { sendLink, signinUrl } from './signin.js';
 import { send, origin, mailState } from '../_mail.js';
 import { mentorLetter, answerLetter, messageNotice, teamInvite, giftLetter, bookingConfirmedLetter } from '../_letters.js';
-import { KINDS as BOOK_KINDS, BOOK_STATUS, BOOK_CLOSED, isOtherTime, bookingTables, bookingList, bookingRow, meetLink, meetLinks, setMeetLink, phoneOf, waNumber, setWaNumber } from '../_booking.js';
+import { KINDS as BOOK_KINDS, BOOK_STATUS, BOOK_CLOSED, isOtherTime, bookingTables, bookingList, bookingRow, meetLink, meetLinks, setMeetLink, phoneOf, waNumber, setWaNumber, cleanPrep, prepTexts, setPrepText } from '../_booking.js';
 import { letterContext, mentors, saveMentor } from '../_mentor.js';
 import { LIBRARY_ITEMS } from './library.js';
 import { toolNames } from '../_tools.js';
@@ -298,7 +298,9 @@ export async function onRequestGet({ request, env }) {
   // Meet link per kind: Inbox → Bookings, and Settings → Booking links.
   const bookings = await bookingList(D, 100);
   const bookLinks = { ...(await meetLinks(D)), whatsapp: await waNumber(D) };
-  return json({ ok: true, you, students, paid, refunds, words: words.results || [], waiting: waiting.results || [], bookings, bookLinks, steps: STEPS, totalSteps: ALL_STEP_IDS.length, totalGrowth: GROWTH_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
+  // "Before our call", per kind (6 Nov 2026): pre-filled on every request.
+  const bookPrep = await prepTexts(D);
+  return json({ ok: true, you, students, paid, refunds, words: words.results || [], waiting: waiting.results || [], bookings, bookLinks, bookPrep, steps: STEPS, totalSteps: ALL_STEP_IDS.length, totalGrowth: GROWTH_IDS.length, mailReady: mailState(env).ready, mentors: await mentors(D),
     mailchimp: { mode: mc.mode, ready: mc.ready, reason: mc.reason, log: mcLog.results || [], waiting: waitingJoin + waitingTags, waitingJoin, waitingTags,
       forgotten: (gone.results || []).map((r) => r.email).filter(Boolean), forgottenWhy: FORGOTTEN } });
 }
@@ -520,10 +522,14 @@ async function post({ request, env }) {
       wa = phoneOf(raw);
       if (raw && !wa) return bad('The business WhatsApp number must start with + and the country code, for example +39 …');
     }
+    // "Before our call", one text per kind (Alexandru, 6 Nov 2026), written by him.
+    const prep = {};
+    for (const k of Object.keys(BOOK_KINDS)) if (body[`prep_${k}`] !== undefined) prep[k] = cleanPrep(body[`prep_${k}`]);
     for (const [k, link] of Object.entries(want)) await setMeetLink(D, k, link, now());
     if (wa !== undefined) await setWaNumber(D, wa, now());
-    await log('mentor', 'mentor-book-links', [...Object.keys(want), ...(wa !== undefined ? ['whatsapp'] : [])].join(',') || null);
-    return json({ ok: true, links: { ...(await meetLinks(D)), whatsapp: await waNumber(D) } });
+    for (const [k, text] of Object.entries(prep)) await setPrepText(D, k, text, now());
+    await log('mentor', 'mentor-book-links', [...Object.keys(want), ...(wa !== undefined ? ['whatsapp'] : []), ...Object.keys(prep).map((k) => `prep.${k}`)].join(',') || null);
+    return json({ ok: true, links: { ...(await meetLinks(D)), whatsapp: await waNumber(D) }, prep: await prepTexts(D) });
   }
 
   if (body.action === 'book-confirm') {
@@ -548,14 +554,19 @@ async function post({ request, env }) {
     const claim = await D.prepare("UPDATE booking SET status = 'sending' WHERE id = ? AND status = ?").bind(b.id, b.status).run();
     if (!claim || !claim.meta || claim.meta.changes !== 1) return bad('This request is being confirmed already. Refresh in a moment.', 409);
     const base = origin(request);
-    const r = await send(env, { to: b.email, ...bookingConfirmedLetter(base, { first: String(b.name || '').split(/\s+/)[0], kind: b.kind, time, meet, tz: b.tz, to: b.email }),
+    // "Before our call" for this person: what was written on the request, else
+    // what it held, else the default for its kind (Settings → Booking links).
+    const prep = body.prep !== undefined ? cleanPrep(body.prep) : (b.prep || (await prepTexts(D))[b.kind] || '');
+    const r = await send(env, { to: b.email, ...bookingConfirmedLetter(base, { first: String(b.name || '').split(/\s+/)[0], kind: b.kind, time, meet, prep, tz: b.tz, to: b.email }),
       why: b.kind === 'boardroom' ? 'You asked for your 1:1 with Alexandru at linktolead.exploraself.com.' : 'You asked for a free discovery call with Alexandru at linktolead.exploraself.com.' });
     if (!r.ok) {
       await D.prepare('UPDATE booking SET status = ? WHERE id = ?').bind(b.status, b.id).run();
       return bad('The confirmation did not send. Nothing changed; try again in a minute.', 502);
     }
     const by = access.by === 'key' ? 'key' : String((access.me && access.me.email) || 'team');
-    await D.prepare("UPDATE booking SET status = 'confirmed', confirmed_time = ?, confirmed_at = ?, confirmed_by = ? WHERE id = ?").bind(time, now(), by, b.id).run();
+    // A new time starts its reminders afresh; the same time keeps what was sent.
+    const moved = b.confirmed_time !== time;
+    await D.prepare(`UPDATE booking SET status = 'confirmed', confirmed_time = ?, confirmed_at = ?, confirmed_by = ?, prep = ?${moved ? ', remind_day_at = NULL, remind_hour_at = NULL' : ''} WHERE id = ?`).bind(time, now(), by, prep, b.id).run();
     if (b.student_id) await log(b.student_id, 'booking-confirmed', JSON.stringify({ kind: b.kind, time })).catch(() => {});
     return json({ ok: true, time, email: b.email, own });
   }

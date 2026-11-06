@@ -51,6 +51,7 @@ import * as goodPeople from './functions/api/good-people.js';
 import { sendDue } from './functions/_course.js';
 import { sendDue as sendSeries } from './functions/_series.js';
 import { hourly as goodPeopleHourly } from './functions/_gpw.js';
+import { bookingReminders } from './functions/_booking-reminders.js';
 import { json, db, accountTables } from './functions/_shared.js';
 
 /** One line per route. A new file in functions/api/ needs its line here. */
@@ -107,6 +108,9 @@ export const JOBS = {
   // by themselves, then one letter every 48 hours, alongside the two above
   // (Alexandru, 5 Nov 2026: "they go alongside"; "I want it to happen automatically").
   'good-people-win': (env, D) => goodPeopleHourly(env, D),
+  // Reminders 24 hours and 1 hour before a confirmed call (functions/_booking-reminders.js;
+  // Alexandru, 6 Nov 2026).
+  'booking-reminders': (env, D) => bookingReminders(env, D),
 };
 
 /** Every job, one after the other; one failing never stops the next. */

@@ -459,3 +459,20 @@ the Blueprint alike; paying for a step raises the same account.
   reading, its PDF and print, emailing the results, the step-by-step plans,
   the Growth Plan with its writing and PDF) and Levels 01 to 03.
 
+
+## 23. A call: the preparation text and the reminders (Alexandru, 6 Nov 2026)
+
+Each kind of call (the free discovery call, the Boardroom 1:1) has one Google
+Meet room, pasted in /mentor → Settings → Booking links. Beside it, Alexandru
+writes one "Before our call" text per kind; it is pre-filled on every request
+in /mentor (1:1 requests, Boardroom 1:1) and can be changed for that person
+before Confirm. The site never writes that text: empty, the letters use their
+usual line (beforeWeSpeak in functions/_letters.js). It goes in the
+confirmation and in both reminders, under "Before we speak" (discovery) or
+"Before your 1:1" (Boardroom). Reminders (functions/_booking-reminders.js, the
+hourly job booking-reminders): about 24 hours before, only when the call was
+confirmed at least 24 hours ahead, and about one hour before (the run at :07
+lands 53 to 83 minutes before); only for confirmed bookings, once each, never
+after Declined, Cancelled or Delete; moving a call to another time starts its
+reminders afresh. Every booking letter is a receipt (no unsubscribe link, no
+offer) and is on the email map (rule 14).
