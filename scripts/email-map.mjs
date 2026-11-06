@@ -197,8 +197,8 @@ export const ENTRIES = [
     who: 'The address they typed, with or without an account. At most 3 requests a day per address and per connection.',
     from: '/book/discovery/',
     sentBy: 'functions/api/book.js',
-    also: 'A receipt: their time (or times) in their own time zone with Rome beside it, “I’ll confirm within 24 hours”, Google Meet, then their gift (3 Nov 2026): The Leader’s North Star in Alexandru’s approved words, with one button “Open my gift →” (utm_source=email, utm_medium=gift). Then what they told us and their phone. No offer, no P.S. The same gift reaches them on WhatsApp when they tap “Get my gift on WhatsApp” on the last screen (answered by the WhatsApp Business greeting message, not by this site). A signed-in founder also gets the Mailchimp tag linktolead-book-discovery (with their yes to letters).',
-    build: () => L.bookingLetter(BASE, { ...S, kind: 'discovery', phone: BOOK_PHONE, times: BOOK_TIMES, answers: DISCOVERY_SAMPLE }),
+    also: 'A receipt: their time (or times) in their own time zone with Rome beside it, “I’ll confirm within 24 hours” and, if that email is not in their inbox, “look in Spam or Promotions” (6 Nov 2026), then the Google Meet room of this kind (since 6 Nov 2026, “Our room on Google Meet →”; without a room saved, “the link comes with my confirmation”), then their gift (3 Nov 2026): The Leader’s North Star in Alexandru’s approved words, with one button “Open my gift →” (utm_source=email, utm_medium=gift). Then what they told us and their phone, then “Before we speak” with the text from Settings → Booking links (the usual line when there is none). No offer, no P.S. The same gift reaches them on WhatsApp when they tap “Get my gift on WhatsApp” on the last screen (answered by the WhatsApp Business greeting message, not by this site). A signed-in founder also gets the Mailchimp tag linktolead-book-discovery (with their yes to letters).',
+    build: () => L.bookingLetter(BASE, { ...S, kind: 'discovery', phone: BOOK_PHONE, times: BOOK_TIMES, answers: DISCOVERY_SAMPLE, meet: 'https://meet.google.com/abc-defg-hij', prep: placeholder('The text Alexandru and the team write in /mentor → Settings → Booking links, for discovery calls') }),
   },
   {
     id: 'booking-boardroom', stage: 'book', icon: 'calendar', fn: 'bookingLetter',
@@ -208,7 +208,7 @@ export const ENTRIES = [
     from: '/book/boardroom/',
     sentBy: 'functions/api/book.js',
     also: 'A receipt, like the discovery one, for 60 minutes; its gift is the Massive Growth Plan (download the PDF or fill it in online, “Open my gift →” to /northstar/#growth-plan), and it points to their first three levels in Base Camp. Adds the Mailchimp tag linktolead-book-boardroom (with their yes to letters).',
-    build: () => L.bookingLetter(BASE, { ...S, kind: 'boardroom', phone: BOOK_PHONE, times: BOOK_TIMES.map((t) => t.replace(':30:', ':00:')), answers: BOARDROOM_SAMPLE }),
+    build: () => L.bookingLetter(BASE, { ...S, kind: 'boardroom', phone: BOOK_PHONE, times: BOOK_TIMES.map((t) => t.replace(':30:', ':00:')), answers: BOARDROOM_SAMPLE, meet: 'https://meet.google.com/abc-defg-hij', prep: placeholder('The text Alexandru and the team write in /mentor → Settings → Booking links, for Boardroom 1:1s') }),
   },
   {
     id: 'booking-confirmed', stage: 'book', icon: 'calendar', fn: 'bookingConfirmedLetter',

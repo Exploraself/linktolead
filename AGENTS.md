@@ -467,9 +467,12 @@ Meet room, pasted in /mentor → Settings → Booking links. Beside it, Alexandr
 writes one "Before our call" text per kind; it is pre-filled on every request
 in /mentor (1:1 requests, Boardroom 1:1) and can be changed for that person
 before Confirm. The site never writes that text: empty, the letters use their
-usual line (beforeWeSpeak in functions/_letters.js). It goes in the
-confirmation and in both reminders, under "Before we speak" (discovery) or
-"Before your 1:1" (Boardroom). Reminders (functions/_booking-reminders.js, the
+usual line (beforeWeSpeak in functions/_letters.js). It goes in the first
+email (the request's copy, with that kind's Google Meet room: "the links must
+go in the first email"), the confirmation and both reminders, under "Before we
+speak" (discovery) or "Before your 1:1" (Boardroom); addresses in it are links.
+The first email and the page after booking also say to look in Spam or
+Promotions if the next email is not in the inbox. Reminders (functions/_booking-reminders.js, the
 hourly job booking-reminders): about 24 hours before, only when the call was
 confirmed at least 24 hours ahead, and about one hour before (the run at :07
 lands 53 to 83 minutes before); only for confirmed bookings, once each, never
