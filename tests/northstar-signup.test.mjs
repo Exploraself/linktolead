@@ -34,6 +34,13 @@ ok(/lab: \['The what-if lab'/.test(rb) && /feedback: \['More feedback'/.test(rb)
 ok(/if \(!last && !ctx\.nameOnly\)/.test(box), 'the box asks no surname on the way in');
 ok(!/north3\/#join/.test(read('public/app.js').slice(read('public/app.js').indexOf('const manuals'), read('public/app.js').indexOf('const manuals') + 6000)), 'the library buttons send no account to the short box, not the full form');
 
+// The Blueprint's sales pages (Alexandru, 6 Nov 2026): first name and email, then the Launchpad.
+for (const [page, land] of [['public/road1/page.js', 'road1'], ['public/road2/page.js', 'road2'], ['public/road4/page.js', 'road4']]) {
+  ok(new RegExp(`nameOnly: true, landing: '${land}'`).test(read(page)) && !/variant: 'full'/.test(read(page)), `${land}: the short box, never the full form`);
+}
+ok(/launch: \['THE FOUNDER LAUNCHPAD · FREE'/.test(box) && /nameOnly \? 'OPEN MY LAUNCHPAD →'/.test(box), 'the Blueprint pages: their own words, and the button opens the Launchpad');
+ok(!/variant: 'full'/.test(read('public/north2/page.js')) && !/variant: 'full'/.test(read('public/north3/sales.js')), 'north2 and north3: the short box');
+
 // ── The account: one, never asked twice ────────────────────────────────────
 let [s, a] = await j(await signup({ request: post('/api/signup', { first: 'Nia', email: 'nia@example.com', consent: true, type: 'simple', source: 'compass', landing: 'compass' }), env }));
 ok(s === 200 && a.token, 'first name and email make the account (no surname, no password)');

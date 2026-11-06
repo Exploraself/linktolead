@@ -47,7 +47,7 @@ ok(LANDING_SHORT.road2 === 'Road 2' && LANDING_SHORT.north2 === 'North 2' && LAN
 ok(read('functions/api/mentor.js').includes("road2: 'Road 2'") && read('functions/api/mentor.js').includes("north3: 'North 3'"), '/mentor CSV: the same names');
 
 // ── The pages send their own keys ───────────────────────────────────────────
-ok(read('public/road2/page.js').includes("variant: 'full', landing: 'road2'"), '/road2/: the FULL form, landing road2');
+ok(read('public/road2/page.js').includes("variant: 'simple', nameOnly: true, landing: 'road2'"), '/road2/: the short form, first name and email, landing road2');
 ok(read('public/north2/page.js').includes("landing: 'north2'") && read('public/north3/sales.js').includes("landing: 'north3'"), '/north2/ and /north3/: their own landings');
 const AB = read('public/account-box.js');
 ok(AB.includes("const NS_PAGES = ['north2', 'north3'];") && AB.includes("NS_PAGES.includes(ctx.landing) ? 'sales-page' : 'home'"), "account box: only the North Star pages send source 'sales-page'");

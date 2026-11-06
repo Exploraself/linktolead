@@ -120,7 +120,7 @@ if (typeof document !== 'undefined' && $('#mirror-read')) {
   const join = (e) => {
     const opener = e && e.currentTarget;
     gate.hidden = false;
-    loadBox().then((m) => m && m.open({ gate, opener, stage: null, variant: 'full', landing: 'road2' }));
+    loadBox().then((m) => m && m.open({ gate, opener, stage: null, variant: 'simple', nameOnly: true, landing: 'road2' }));
   };
   document.querySelectorAll('[data-join]').forEach((x) => x.addEventListener('click', join));
   if (location.hash === '#join') join();

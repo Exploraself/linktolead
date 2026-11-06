@@ -69,7 +69,12 @@ const HEAD = {
   // The North Star's way in (Alexandru, 5 Nov 2026): first name and email are
   // enough; the full account comes only at the what-if lab and More feedback.
   entry: ['YOUR NORTH STAR · FREE', 'Where should we keep your North Star?', 'Your first name and email. Your answers come with you, to any device.'],
+  // The Blueprint's sales pages (road1, road2, road4; Alexandru, 6 Nov 2026:
+  // "simple name and email, then access to the Launchpad").
+  launch: ['THE FOUNDER LAUNCHPAD · FREE', 'Your free Launchpad', 'Your first name and email. Levels 01 to 03 open at once.'],
 };
+/** The North Star's doors: their short box speaks of the North Star. */
+const NS_DOORS = ['compass', 'north1', 'north2', 'north3'];
 
 const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpop abox" role="dialog" aria-modal="true" aria-labelledby="gate-h" style="position: relative; width: 100%; max-width: 480px; background: #FFFDF8; color: #121C2D; border-radius: 10px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.4); margin: auto; font-family: 'Inter', Arial, sans-serif; box-sizing: border-box">
     <style>${STYLE}</style>
@@ -113,7 +118,7 @@ function close() { if (ctx.gate) ctx.gate.hidden = true; if (ctx.opener && ctx.o
 const boxKey = (variant, landing) => `${variant} ${landing}${ctx.nameOnly ? ' name' : ''}`;
 
 function wire(gate, variant, landing) {
-  gate.innerHTML = markup(variant, ctx.head || HEAD[ctx.nameOnly ? 'entry' : ctx.stay ? 'stay' : landing === 'summit' ? 'summit' : variant === 'full' && NS_PAGES.includes(landing) ? 'compass' : variant], ctx.stay);
+  gate.innerHTML = markup(variant, ctx.head || HEAD[ctx.nameOnly ? (NS_DOORS.includes(landing) ? 'entry' : 'launch') : ctx.stay ? 'stay' : landing === 'summit' ? 'summit' : variant === 'full' && NS_PAGES.includes(landing) ? 'compass' : variant], ctx.stay);
   gate.dataset.variant = boxKey(variant, landing);
   gate.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
   gate.querySelectorAll('[data-eye]').forEach((b) => b.addEventListener('click', (e) => {
@@ -206,7 +211,7 @@ export function open({ gate, opener, stage, variant = 'full', landing = variant 
   }
   if (gate.dataset.variant !== boxKey(variant, landing)) wire(gate, variant, landing);
   // The button says where it goes.
-  { const g = gate.querySelector('.ab-go'); if (g && (ctx.label || !ctx.stay)) g.textContent = ctx.label || (NS_HOME.includes(landing) || ctx.next === '/northstar/' ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →'); }
+  { const g = gate.querySelector('.ab-go'); if (g && (ctx.label || !ctx.stay)) g.textContent = ctx.label || (NS_HOME.includes(landing) || ctx.next === '/northstar/' ? 'OPEN MY NORTH STAR →' : nameOnly ? 'OPEN MY LAUNCHPAD →' : 'OPEN MY BASE CAMP →'); }
   const p = known();
   if (p) { $('#j-first').value = p.first || ''; if ($('#j-last')) $('#j-last').value = p.last || ''; $('#j-email').value = p.email || ''; }
   if (email) $('#j-email').value = email;

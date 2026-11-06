@@ -76,7 +76,7 @@ const ctas = H.match(/<button[^>]*class="cta"[^>]*>[^<]*<\/button>/g) || [];
 ok(ctas.length === 4 && ctas.every((b) => b.includes('data-join') && />Start free tonight<\/button>$/.test(b)), 'four buttons, one kind: “Start free tonight”, each opening the box');
 const hrefs = [...H.matchAll(/href="([^"]+)"/g)].map((m) => m[1]).filter((h) => !/^(\/assets\/|\/northstar\/assets\/)/.test(h));
 ok(hrefs.every((h) => ['#main', '/ground-plan/#home', '/ground-plan/#signin'].includes(h)), 'no links to other pages or offers: skip link, Base Camp (signed in) and Sign in only');
-ok(J.includes("variant: 'full', landing: 'road2'") && J.includes("location.hash === '#join'") && J.includes("import('/account-box.js')"), 'the FULL account box, landing road2; /road2/#join opens it');
+ok(J.includes("variant: 'simple', nameOnly: true, landing: 'road2'") && J.includes("location.hash === '#join'") && J.includes("import('/account-box.js')"), 'the short account box (first name and email), landing road2; /road2/#join opens it');
 ok(!/fetch\(|localStorage\.setItem|sessionStorage|sendBeacon/.test(J), 'taps, answers and sliders stay on the page: nothing saved or sent');
 
 // Honest and plain.
