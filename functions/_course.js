@@ -28,6 +28,9 @@ import { letterContext, okTz } from './_mentor.js';
 
 export const COURSE = 'win12';
 export const COURSE_NAME = '12 Days to Start Winning';
+/** The Mailchimp tag for founders who start it (approved by Alexandru, 5 Nov
+ *  2026; functions/_tag-list.js). Added on Start, with their yes to letters. */
+export const COURSE_TAG = 'linktolead-letters-12-days';
 /** The last letter's day: 13 ("What next"). Day 0 is the welcome. */
 export const LAST_DAY = COURSE_LETTERS.length - 1;
 /** From 8:00 in the founder's time zone; never after 21:00 there. */

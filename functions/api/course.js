@@ -12,10 +12,11 @@
 // "Letters from your mentor" off, starting turns it back on (as the page says).
 
 import { json, bad, db, now, clean, accountTables, studentBy, looksLikeEmail, newToken } from '../_shared.js';
-import { COURSE, LAST_DAY, localParts, sendOne, inviteLetter, inviteTables, friendHash, senderHash,
+import { COURSE, COURSE_TAG, LAST_DAY, localParts, sendOne, inviteLetter, inviteTables, friendHash, senderHash,
   INVITE_PER_DAY, INVITE_GAP_DAYS, INVITE_NOTE_MAX } from '../_course.js';
 import { opened } from '../_tools.js';
 import { setLetters } from '../_account.js';
+import { syncFounder } from '../_mailchimp.js';
 import { keepTz, okTz } from '../_mentor.js';
 import { allowed, logged, mailState, origin, send } from '../_mail.js';
 
@@ -65,6 +66,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
   }
   await D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(me.id, 'course-start', at, COURSE).run();
   await opened(env, D, me.id, '12-days', waitUntil);
+  // Its own Mailchimp tag (Alexandru, 5 Nov 2026), with their yes to letters.
+  const tagged = syncFounder(env, D, me.id, 'tag', { tag: COURSE_TAG }).catch(() => {});
+  if (typeof waitUntil === 'function') waitUntil(tagged); else await tagged;
   c = await D.prepare('SELECT * FROM course_sub WHERE student_id = ? AND course = ?').bind(me.id, COURSE).first();
 
   // The welcome, once, right away (after the reply). If it cannot go now,
