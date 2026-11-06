@@ -30,7 +30,7 @@ import { okTz } from '../_mentor.js';
 import { mailState, origin, send } from '../_mail.js';
 import { bookingLetter, bookingNotice } from '../_letters.js';
 import { MENTOR_EMAIL } from './note.js';
-import { ABOUT, aboutOf, KINDS, RULES, BOOK_TAGS, NAME_MAX, EMAIL_MAX, isKind, isSlot, readAnswers, bookingTables, bookingAllowed, bookingLogged, phoneOf, waNumber, waDigits } from '../_booking.js';
+import { ABOUT, aboutOf, KINDS, RULES, BOOK_TAGS, NAME_MAX, EMAIL_MAX, isKind, isSlot, readAnswers, bookingTables, bookingAllowed, bookingLogged, phoneOf, waNumber, waDigits, meetLinks, prepTexts } from '../_booking.js';
 
 export const LIMIT = 'You have sent three requests today. Alexandru and the team will write back. If it is urgent, write to support@exploraself.com.';
 const HELP = 'Write to support@exploraself.com and we will find a time with you.';
@@ -119,7 +119,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
   await bookingLogged(D, email, ip);
 
   const first = name.split(/\s+/)[0];
-  const copy = await send(env, { to: email, ...bookingLetter(base, { first, phone, kind, times: sorted, answers: read.answers, tz, to: email }), why: WHY[kind] });
+  // That kind's Google Meet room and "Before our call" text go in this first email too (6 Nov 2026).
+  const meet = (await meetLinks(D).catch(() => ({})))[kind] || '', prep = (await prepTexts(D).catch(() => ({})))[kind] || '';
+  const copy = await send(env, { to: email, ...bookingLetter(base, { first, phone, kind, times: sorted, answers: read.answers, meet, prep, tz, to: email }), why: WHY[kind] });
   // The tag goes only to the signed-in account (a typed address proves
   // nothing), and syncFounder sends it only with their yes to letters.
   if (me) {

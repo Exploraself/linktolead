@@ -671,7 +671,7 @@ const beforeWeSpeak = (base, kind) => (kind === 'boardroom'
 /** "booking": to the person who asked for a call on /book/discovery/ or
  *  /book/boardroom/. Thanks, their time or times (their zone and Rome), what
  *  they told us, "I'll confirm within 24 hours", Google Meet. */
-export function bookingLetter(base, { first, phone = '', kind = 'discovery', times = [], answers = {}, tz = '', to = '', at } = {}) {
+export function bookingLetter(base, { first, phone = '', kind = 'discovery', times = [], answers = {}, meet = '', prep = '', tz = '', to = '', at } = {}) {
   const one = kind === 'boardroom';
   const told = answerLines(kind, answers);
   const many = times.length > 1;
@@ -681,13 +681,17 @@ export function bookingLetter(base, { first, phone = '', kind = 'discovery', tim
       : 'Thank you for asking for a free discovery call. I’m glad you did.',
     `${many ? `Here are the ${times.length === 2 ? 'two' : 'three'} times you suggested` : 'Here is the time you suggested'} for ${one ? 'your 1:1' : 'our call'} (${KINDS[kind].minutes} minutes, online):`,
     timeLines(times, tz),
-    `I’ll write back within ${RULES.confirmHours} hours to confirm ${many ? 'one of them' : 'it'}. We meet on ${RULES.where}: the link comes with my confirmation.`,
+    // The room and the text from the first email (Alexandru, 6 Nov 2026: "the links must go in the first
+    // email"): each kind has one standing Google Meet room. Without one saved, the old line.
+    `I’ll write back within ${RULES.confirmHours} hours to confirm ${many ? 'one of them' : 'it'}. If my email isn’t in your inbox, look in Spam or Promotions.`,
+    ...(meet ? [`We meet on ${RULES.where}, in this room. It stays the same, so keep this email:`, button(meet, 'Our room on Google Meet →')]
+      : [`We meet on ${RULES.where}: the link comes with my confirmation.`]),
     // The gift (3 Nov 2026): its name and his approved words, one button.
     `Your gift: ${GIFTS[kind].name}. ${GIFTS[kind].line}`,
     button(giftHref(kind, 'email', base), 'Open my gift →'),
     told ? `What you told us:\n${told}` : '',
     phone ? `Your phone: ${phone}. If it is not right, just reply with the right one.` : '',
-    beforeWeSpeak(base, kind),
+    ...prepBlock(base, kind, prep),
     `Plans change: if ${many ? 'none of these times works' : 'this time no longer works'} any more, just reply with ${many ? 'new ones' : 'another'}. The team and I are here for you.`,
   ].filter(Boolean), null, asReceipt(close('booking', { tz, at, to }, null))) };
 }

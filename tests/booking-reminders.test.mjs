@@ -5,7 +5,7 @@
 
 import { readFileSync } from 'node:fs';
 import { bookingTables, reminderDue, REMIND, prepTexts, clockText } from '../functions/_booking.js';
-import { bookingConfirmedLetter, bookingReminderDay, bookingReminderHour, RECEIPTS, linked } from '../functions/_letters.js';
+import { bookingConfirmedLetter, bookingReminderDay, bookingReminderHour, bookingLetter, RECEIPTS, linked } from '../functions/_letters.js';
 import { bookingReminders } from '../functions/_booking-reminders.js';
 import { onRequestPost as mentorPost } from '../functions/api/mentor.js';
 import { JOBS } from '../worker.js';
@@ -45,6 +45,18 @@ ok(JSON.stringify(lk('exploraself.com/unshakeable, then www.exploraself.com')) =
 L = bookingConfirmedLetter(B, { first: 'maya', kind: 'discovery', time: call, meet: MEET.discovery, prep: 'Bring <b>this</b> & https://x.example/"onmouseover=alert(1)', to: 'm@x.com' });
 ok(L.html.includes('Bring &lt;b&gt;this&lt;/b&gt; &amp; ') && !L.html.includes('"onmouseover') && L.html.includes('href="https://x.example/"'), 'everything is escaped: no markup, and an address ends at a quote');
 ok(typeof linked('No address here.') === 'string', 'a text without an address stays plain text');
+
+// The first email carries the room and the text too (Alexandru, 6 Nov 2026: "the links must go in the first
+// email"), and says where to look if the next one is not in the inbox ("remind them to check spam and promotions").
+const F1 = bookingLetter(B, { first: 'maya', kind: 'boardroom', times: [call], answers: {}, meet: MEET.boardroom, prep: BR, tz: 'Europe/Rome', to: 'm@x.com' });
+ok(F1.html.includes(MEET.boardroom) && F1.text.includes('We meet on Google Meet, in this room. It stays the same, so keep this email:') && !F1.text.includes('the link comes with my confirmation'), 'first email: the Google Meet room of its kind');
+ok(/BEFORE YOUR 1:1/.test(F1.text) && F1.html.includes('href="https://linktolead.exploraself.com/ground-plan/"'), 'first email: the "Before your 1:1" text, with its links');
+ok(F1.text.includes('If my email isn’t in your inbox, look in Spam or Promotions.'), 'first email: where to look for the confirmation');
+const F0 = bookingLetter(B, { first: 'maya', kind: 'discovery', times: [call], answers: {}, tz: 'Europe/Rome', to: 'm@x.com' });
+ok(F0.text.includes('We meet on Google Meet: the link comes with my confirmation.') && F0.text.includes('One thing helps before we speak'), 'no room or text saved: the first email keeps its old lines');
+const bookApi = read('functions/api/book.js'), bookPage = read('public/book/book.js');
+ok(/const meet = \(await meetLinks\(D\)[^\n]*\[kind\] \|\| '', prep = \(await prepTexts\(D\)[^\n]*\[kind\] \|\| '';/.test(bookApi) && /bookingLetter\(base, \{ [^}]*meet, prep,/.test(bookApi), '/api/book: the first email gets that kind\'s room and text from Settings');
+ok((bookPage.match(/Spam or Promotions/g) || []).length === 2, 'the page after booking: look in Spam or Promotions, now and for the confirmation');
 
 // ── When a reminder is owed ──────────────────────────────────────────────────
 const t0 = Date.parse(call);

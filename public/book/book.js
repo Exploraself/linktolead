@@ -308,8 +308,8 @@ function doneScreen(email, copy, sent = {}) {
     <p class="lede">${one ? 'Your request is with Alexandru, with all twenty of your answers.' : 'Your request is with Alexandru. We look forward to meeting you.'}</p>
     ${giftDone(sent, copy)}
     <div class="wait"><p class="wh">What happens now</p><ol class="tl2">
-      <li><span class="dot" aria-hidden="true">${ICON.mail}</span><div><b>Now</b><p>${copy ? `A copy of your request is on its way to <b>${esc(email)}</b>, with your gift.` : 'Keep an eye on your inbox.'}</p></div></li>
-      <li><span class="dot" aria-hidden="true">${ICON.clock}</span><div><b>Within 24 hours</b><p>Alexandru confirms ${sent.times > 1 ? 'one of your times' : 'your time'}, by email, with the Google Meet link.</p></div></li>
+      <li><span class="dot" aria-hidden="true">${ICON.mail}</span><div><b>Now</b><p>${copy ? `A copy of your request is on its way to <b>${esc(email)}</b>, with your gift.` : 'Keep an eye on your inbox.'} Not there in a few minutes? Look in Spam or Promotions.</p></div></li>
+      <li><span class="dot" aria-hidden="true">${ICON.clock}</span><div><b>Within 24 hours</b><p>Alexandru confirms ${sent.times > 1 ? 'one of your times' : 'your time'}, by email, with the Google Meet link. Look in Spam or Promotions too, so you don’t miss it.</p></div></li>
       <li><span class="dot" aria-hidden="true">${ICON.meet}</span><div><b>${one ? 'Your hour' : 'The call'}</b><p>${one ? '60 minutes, one to one. Your answers reach Alexandru before it, and you bring the decision you named.' : `30 minutes, one to one${told ? `, about what you told us: ${esc(told)}` : ''}.`}</p></div></li>
     </ol></div>
     <div class="gifts"><p class="eb">${ICON.gift}${one ? 'Before your hour' : 'While you wait'}</p>
