@@ -358,6 +358,7 @@ function homeView() {
     ${nudgeHTML(st)}
     ${gp ? planHTML(gp, st) : `<section class="gp-wrap gp-two gp-grid">${standHTML(st)}</section>${howItWorks(st)}`}
     ${workbookHTML()}
+    ${productsHTML()}
     ${accountHTML()}
     ${refundHTML()}
   </div>`;
@@ -377,6 +378,23 @@ function workbookHTML() {
     <a class="cta wb-btn" href="${esc(account.workbookHref())}">${DL_IC}Download your workbook</a></div>
   </section>`;
 }
+
+/** What they bought from exploraself.com, always one tap away (Alexandru,
+ *  6 Nov 2026: a Base Camp tile "Unshakeable · open", so the buyer can get
+ *  back in from here, not only from the letter). The link is their own access
+ *  (functions/_stripe.js productsOf); the page it opens asks Stripe again. */
+const PRODUCT_TILE = {
+  unshakeable: { title: 'Unshakeable · open', text: 'The Unshakeable Assessment, your Personal Leadership Audit, on exploraself.com.', go: 'Open my Unshakeable Audit' },
+};
+function productsHTML() {
+  const mine = owned.filter((p) => PRODUCT_TILE[p.step] && /^https:\/\/exploraself\.com\//.test(p.access || ''));
+  if (!mine.length) return '';
+  return mine.map((p) => `<section class="gp-wrap gp-workbook" aria-labelledby="pr-${esc(p.step)}">
+    <div class="wb"><span class="rf-ic">${CHECK_IC}</span><span class="wb-t"><b id="pr-${esc(p.step)}">${esc(PRODUCT_TILE[p.step].title)}</b><small>${esc(PRODUCT_TILE[p.step].text)}</small></span>
+    <a class="cta wb-btn" href="${esc(p.access)}">${esc(PRODUCT_TILE[p.step].go)} →</a></div>
+  </section>`).join('');
+}
+const CHECK_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16.5 9.5"/></svg>';
 
 /** Ask for a refund (Alexandru, 2 Nov 2026): in every founder's Base Camp.
  *  They choose the programme they paid for and confirm their name and email;
@@ -661,6 +679,8 @@ function gpBack(p, at) {
 // /api/state says which). The answer they were giving is held and applied
 // after the save, so nothing is lost. Complete accounts never see it.
 let missing = [];
+/** Products bought from exploraself.com, with the links that open them (api/state.js); kept in memory only. */
+let owned = [];
 /** The last level of The Founder Launchpad (free, name and email). */
 const LAUNCHPAD_TOP = 3;
 const lacksFull = () => account.joined() && pulled && missing.length > 0;
@@ -2661,6 +2681,7 @@ async function comeHome() {
       hasPassword = !!r.me.hasPassword;
       signupType = r.me.signupType || null;
       missing = Array.isArray(r.me.missing) ? r.me.missing.filter((k) => ['company', 'interest', 'industry', 'password'].includes(k)) : [];
+      owned = Array.isArray(r.me.products) ? r.me.products : [];
       if (r.me.mentor && r.me.mentor.first) mentor = r.me.mentor;
       pulled = true;
     }

@@ -18,10 +18,19 @@
 // Already theirs (3 Nov 2026, the whole check): a guest whose email has an
 // account that already holds the step (or a higher one) is not sent to pay
 // again: { ok: false, signin: true } and the page offers the sign-in.
+// The full account right after payment (Alexandru, 6 Nov 2026: "After
+// payment: full account"): back from Stripe, the answer carries `missing`,
+// what the account still lacks to be full (password, company, interest,
+// industry; a Google account is asked for a password too, as at the North
+// Star's locks), and /pay/ asks for it there, through /api/complete. A product
+// (Unshakeable) also carries `access`, the link that opens it. GET with no cs
+// carries `owned`: { product: access } for the signed-in account
+// ("Already bought? Sign in" on exploraself.com).
 
 import { json, bad, db, accountTables, studentBy, clean, looksLikeEmail } from '../_shared.js';
 import { origin } from '../_mail.js';
-import { checkout, stripe, applyPaid, guestOf, STEPS, PRODUCTS, stripeMode, dollars, above } from '../_stripe.js';
+import { checkout, stripe, applyPaid, guestOf, STEPS, PRODUCTS, stripeMode, dollars, above, accessUrl, productsOf } from '../_stripe.js';
+import { missingOf } from '../_profile.js';
 
 const tokenOf = (request, body) => (body && body.token) || request.headers.get('x-account-token') || new URL(request.url).searchParams.get('t') || '';
 const steps = () => ({
@@ -30,13 +39,28 @@ const steps = () => ({
   ...Object.fromEntries(Object.entries(PRODUCTS).map(([k, p]) => [k, { name: p.name, price: dollars(p.amount), opens: p.opens, product: true }])),
 });
 
+/** What an account still lacks to be full, Google or not (api/complete.js with full: true). */
+async function fullMissing(D, id) {
+  const p = (await D.prepare('SELECT company, interest, industry FROM student_profile WHERE student_id = ?').bind(id).first()) || {};
+  const auth = await D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(id).first();
+  return missingOf({ ...p, google_at: null, hasPassword: !!(auth && auth.pass_hash) });
+}
+/** The link that opens a product a session paid for, or nothing. */
+const accessOf = (s) => {
+  const step = s && s.metadata && s.metadata.step;
+  return Object.hasOwn(PRODUCTS, step || '') ? accessUrl(PRODUCTS[step], s.id) : undefined;
+};
+
 export async function onRequestGet({ request, env }) {
   const D = db(env);
   if (!D) return bad('Payments are not available right now.', 503);
   await accountTables(D);
   const me = await studentBy(D, tokenOf(request));
   const cs = clean(new URL(request.url).searchParams.get('cs'), 200);
-  if (!cs) return json({ ok: true, on: !!stripeMode(env), test: stripeMode(env) === 'test', steps: steps(), tier: me ? me.tier || 'free' : null, signedIn: !!me });
+  if (!cs) {
+    const owned = me ? Object.fromEntries((await productsOf(D, me.id)).map((p) => [p.step, p.access])) : {};
+    return json({ ok: true, on: !!stripeMode(env), test: stripeMode(env) === 'test', steps: steps(), tier: me ? me.tier || 'free' : null, signedIn: !!me, email: me ? me.email : undefined, owned });
+  }
   if (!/^cs_[A-Za-z0-9_]+$/.test(cs)) return bad('That payment link is not complete.');
   const r = await stripe(env, 'GET', `checkout/sessions/${cs}`);
   if (!r.ok) return bad(r.why, 502);
@@ -49,15 +73,20 @@ export async function onRequestGet({ request, env }) {
     const who = await D.prepare('SELECT id, name, tier FROM student WHERE email = ? ORDER BY joined_at LIMIT 1').bind(email).first();
     const made = who && await D.prepare("SELECT 1 AS x FROM event WHERE student_id = ? AND kind = 'signup' AND detail = ?").bind(who.id, `stripe · ${s.id}`).first();
     const pass = who && await D.prepare('SELECT 1 AS x FROM account_auth WHERE student_id = ? AND pass_hash IS NOT NULL').bind(who.id).first();
-    const base = { ok: true, paid: true, step: out.step || s.metadata.step, first: out.first || 4, email };
-    if (made && !pass) return json({ ...base, token: who.id, fresh: true, name: who.name || '' });
+    const base = { ok: true, paid: true, step: out.step || s.metadata.step, first: out.first || 4, email, access: accessOf(s) };
+    if (made && !pass) return json({ ...base, token: who.id, fresh: true, name: who.name || '', missing: await fullMissing(D, who.id) });
     return json({ ...base, existing: true });
   }
-  if (s.client_reference_id !== me.id && !(s.metadata && s.metadata.student === me.id)) return bad('This payment belongs to another account.', 403);
+  // A guest payment is theirs when it was made with this account's email (the
+  // page reloaded after the account was made here, or they signed in since).
+  const mine = s.client_reference_id === me.id || (s.metadata && s.metadata.student === me.id)
+    || (guestOf(s) && String(s.metadata.email || '').trim().toLowerCase() === String(me.email || '').trim().toLowerCase());
+  if (!mine) return bad('This payment belongs to another account.', 403);
   if (s.payment_status !== 'paid') return json({ ok: true, paid: false, step: s.metadata && s.metadata.step });
   const out = await applyPaid(env, D, origin(request), s);
   const now = await D.prepare('SELECT tier FROM student WHERE id = ?').bind(me.id).first();
-  return json({ ok: true, paid: true, step: out.step || (s.metadata && s.metadata.step), first: out.first || 4, tier: now ? now.tier : null });
+  return json({ ok: true, paid: true, step: out.step || (s.metadata && s.metadata.step), first: out.first || 4, tier: now ? now.tier : null,
+    access: accessOf(s), name: me.name || '', email: me.email, missing: await fullMissing(D, me.id) });
 }
 
 export async function onRequestPost({ request, env }) {

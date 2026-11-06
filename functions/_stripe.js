@@ -41,15 +41,36 @@ export const STEPS = {
 };
 /** One-off products, sold from exploraself.com (Alexandru, 3 Nov 2026:
  *  "everything to Stripe from exploraself, unless they go to Amazon or
- *  Etsy"). A product opens no level and never changes a founder's step: Stripe
- *  sends the buyer back to the page that sells it with ?access=<session>, and
- *  that page asks /api/access whether Stripe said paid. The letter carries the
- *  same link, so it opens on any device. */
+ *  Etsy"). A product opens no level and never changes a founder's step. After
+ *  paying, Stripe brings the buyer to /pay/ for the full account (Alexandru,
+ *  6 Nov 2026: "first name and email or Google, then payment, then full
+ *  account, then immediate access"), and its button opens the page that sells
+ *  it with ?access=<session>; that page asks /api/access whether Stripe said
+ *  paid. The letter and the Base Camp tile carry the same link, so it opens on
+ *  any device. */
 export const PRODUCTS = {
   unshakeable: { amount: 999, name: 'The Unshakeable Assessment', product: 'The Unshakeable Assessment · Personal Leadership Audit',
     opens: 'the Unshakeable Assessment on exploraself.com', back: 'https://exploraself.com/unshakeable' },
 };
 export const accessUrl = (P, session) => `${P.back}?access=${encodeURIComponent(session)}`;
+
+/** The products an account has paid for, newest payment first, once each:
+ *  [{ step, name, access }] (the Base Camp tile, and "Already bought? Sign in"
+ *  on /pay/). Never throws. */
+export async function productsOf(D, studentId) {
+  if (!D || !studentId) return [];
+  try {
+    await tables(D);
+    const rows = (await D.prepare('SELECT session, step FROM payment WHERE student_id = ? ORDER BY at DESC').bind(studentId).all()).results || [];
+    const seen = new Set(), out = [];
+    for (const r of rows) {
+      if (!Object.hasOwn(PRODUCTS, r.step) || seen.has(r.step)) continue;
+      seen.add(r.step);
+      out.push({ step: r.step, name: PRODUCTS[r.step].name, access: accessUrl(PRODUCTS[r.step], r.session) });
+    }
+    return out;
+  } catch { return []; }
+}
 /** The ladder's order (functions/_mailchimp.js TIER_ORDER). */
 export const ORDER = ['free', 'session', 'lab', 'hub', 'premium'];
 export const above = (step, tier) => ORDER.indexOf(step) > ORDER.indexOf(tier || 'free');
@@ -201,8 +222,8 @@ export async function checkout(env, D, base, me, step) {
   return r.ok ? { ok: true, url: r.data.url, id: r.data.id } : { ok: false, why: r.why };
 }
 
-/** A Stripe Checkout page for one product (PRODUCTS): back to the page that
- *  sells it, with the session as the buyer's access. */
+/** A Stripe Checkout page for one product (PRODUCTS): back to /pay/ for the
+ *  full account, whose button opens the product with the session as access. */
 async function productCheckout(env, D, base, me, step) {
   const P = PRODUCTS[step];
   await ensureWebhook(env, D, base).catch(() => null);
@@ -213,7 +234,7 @@ async function productCheckout(env, D, base, me, step) {
     client_reference_id: me.id || undefined,
     metadata: meta(me, step),
     payment_intent_data: { metadata: meta(me, step) },
-    success_url: `${P.back}?access={CHECKOUT_SESSION_ID}`,
+    success_url: `${base}/pay/?step=${step}&cs={CHECKOUT_SESSION_ID}`,
     cancel_url: `${base}/pay/?step=${step}&from=exploraself&cancelled=1`,
   };
   let r = await stripe(env, 'POST', 'checkout/sessions', { ...plain, ...INVOICE(P, me, step) });

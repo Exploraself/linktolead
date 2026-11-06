@@ -11,6 +11,8 @@ import { onRequestGet as payGet, onRequestPost as payPost } from '../functions/a
 import { onRequestPost as hook } from '../functions/api/stripe-webhook.js';
 import { onRequestPost as password } from '../functions/api/password.js';
 import { onRequestPost as signup } from '../functions/api/signup.js';
+import { onRequestPost as complete } from '../functions/api/complete.js';
+import { INTERESTS } from '../functions/_profile.js';
 import { STEPS } from '../functions/_stripe.js';
 import { fakeD1, tally } from './_d1.mjs';
 
@@ -73,6 +75,7 @@ const prof = DB.raw.prepare('SELECT landing, consent, signup_type FROM student_p
 ok(prof.landing === 'exploraself' && prof.consent === 1 && prof.signup_type === 'full', 'its landing is exploraself (tag linktolead-exploraself), with their yes to letters, as a full account');
 [st, j] = await jsonOf(await payGet({ request: req('/api/checkout?cs=cs_test_1'), env }));
 ok(j.fresh && count('ana@example.com') === 1, 'asked again: the same account, never two');
+ok(['company', 'interest', 'industry', 'password'].every((k) => j.missing.includes(k)) && !j.access, 'the full account right after payment (Alexandru, 6 Nov 2026): the page asks for all of it');
 
 // 4. The last step: their password; after it, the payment link signs no one in.
 [st, j] = await jsonOf(await password({ request: req('/api/password', { method: 'POST', body: { token: row.id, password: 'a-long-pass-1', confirm: 'a-long-pass-1' } }), env }));
@@ -98,8 +101,46 @@ ok(count('cleo@example.com') === 1 && DB.raw.prepare('SELECT tier FROM student W
 ok(j.fresh && j.token && count('cleo@example.com') === 1, 'then the return from Stripe signs them in, one account');
 ok(!(await applyPaid(env, DB, B, { ...sessions.cs_test_3, id: 'cs_test_9', amount_total: 100 })).ok, 'a wrong amount: nothing opens');
 
+// 7. Signed in: what is still missing is asked on /pay/ after paying. A reload of the page
+//    after the account was made here (this browser now signed in) still finds the payment.
+[st, j] = await jsonOf(await payGet({ request: req('/api/checkout?cs=cs_test_1', { token: row.id }), env }));
+ok(j.paid && JSON.stringify(j.missing) === JSON.stringify(['company', 'interest', 'industry']) && j.email === 'ana@example.com' && j.name === 'Ana', 'signed in, the payment that made the account: only what is still missing (Ana has a password)');
+await payPost({ request: req('/api/checkout', { method: 'POST', token: row.id, body: { step: 'hub' } }), env });
+const hsid = `cs_test_${next - 1}`;
+sessions[hsid].payment_status = 'paid';
+[st, j] = await jsonOf(await payGet({ request: req(`/api/checkout?cs=${hsid}`, { token: row.id }), env }));
+ok(j.paid && j.missing.length === 3 && !j.access && DB.raw.prepare('SELECT tier FROM student WHERE id = ?').get(row.id).tier === 'hub', 'signed in, paying for the HUB: it opens, and the same three are asked');
+[st, j] = await jsonOf(await payGet({ request: req('/api/checkout?cs=cs_test_2', { token: row.id }), env }));
+ok(st === 403, 'another person’s payment (Ben’s): never shown to Ana');
+
+// 8. The Unshakeable Assessment from exploraself.com (Alexandru, 6 Nov 2026: "first name and
+//    email or Google, then payment, then full account, then immediate access").
+[st, j] = await jsonOf(await payPost({ request: req('/api/checkout', { method: 'POST', body: { step: 'unshakeable', first: 'Dana', email: 'dana@example.com', consent: true, landing: 'exploraself' } }), env }));
+const un = calls.filter((c) => c.url.endsWith('/checkout/sessions')).pop().body;
+const usid = `cs_test_${next - 1}`;
+ok(st === 200 && un.get('success_url') === `${B}/pay/?step=unshakeable&cs={CHECKOUT_SESSION_ID}` && un.get('metadata[guest]') === '1', 'Unshakeable: Stripe brings the buyer back to /pay/, not straight to exploraself.com');
+sessions[usid].payment_status = 'paid';
+sessions[usid].amount_total = 999;
+[st, j] = await jsonOf(await payGet({ request: req(`/api/checkout?cs=${usid}`), env }));
+const dana = j.token;
+ok(j.paid && j.fresh && dana && j.access === `https://exploraself.com/unshakeable?access=${usid}` && j.missing.length === 4, 'paid: the account is made, with the access link and the full account still to fill');
+[st, j] = await jsonOf(await complete({ request: req('/api/complete', { method: 'POST', body: { token: dana, full: true, noCompany: true, interest: INTERESTS[0], industry: 'Other', password: 'short-1' } }), env, waitUntil: () => {} }));
+ok(st === 400 && /10 characters/.test(j.error), 'a short password: asked again, nothing saved');
+[st, j] = await jsonOf(await complete({ request: req('/api/complete', { method: 'POST', body: { token: dana, full: true, noCompany: true, interest: INTERESTS[0], industry: 'Other', password: 'a-long-pass-2', confirm: 'a-long-pass-2' } }), env, waitUntil: () => {} }));
+ok(st === 200 && j.ok && j.complete, 'the full account is saved in one go');
+const dp = DB.raw.prepare('SELECT company, interest, industry, signup_type FROM student_profile WHERE student_id = ?').get(dana);
+ok(dp.company === '' && dp.interest === INTERESTS[0] && dp.industry === 'Other' && dp.signup_type === 'full' && DB.raw.prepare('SELECT tier FROM student WHERE id = ?').get(dana).tier === 'free', 'company ("No company yet"), interest and industry are kept; a product never changes the step');
+[st, j] = await jsonOf(await payGet({ request: req(`/api/checkout?cs=${usid}`), env }));
+ok(j.paid && j.existing && !j.token && j.access === `https://exploraself.com/unshakeable?access=${usid}`, 'after it, the payment link signs no one in, but still opens the audit');
+
 // The page.
 const pay = readFileSync(new URL('../public/pay/pay.js', import.meta.url), 'utf8');
+ok(/detailFields\('f', 'display:grid;gap:6px', need\)/.test(pay) && pay.includes("fetch('/api/complete'") && /token: d\.token \|\| token\(\), full: true/.test(pay), '/pay/ after paying: the full account form, saved through /api/complete');
+ok(!pay.includes('Later: open Level') && !pay.includes("fetch('/api/password'"), '/pay/: no way past the full account, and no password-only step any more');
+ok(pay.includes("unshakeable: 'Open my Unshakeable Audit'") && /href: d\.access/.test(pay), '/pay/: the button opens the audit for the Unshakeable Assessment');
+ok(/if \(d && d\.paid\) return finishAccount\(d, steps\[d\.step\] \|\| \{\}\);/.test(pay) && /if \(!need\.length\) return paidDone\(d, S\);/.test(pay), '/pay/: a signed-in founder is asked only what is missing; nothing missing goes straight to the way in');
+ok(/function fromWindow\(\)/.test(pay) && /location\.hash/.test(pay) && /history\.replaceState\(null, '', location\.pathname \+ location\.search\)/.test(pay) && /\$\('#go'\)\.click\(\)/.test(pay), '/pay/: exploraself.com\'s window fills the form through the #part, which is cleared, and goes on to Stripe');
+ok(/q\.get\('open'\) && S\.product/.test(pay) && pay.includes('#signin`); return; }') && /location\.replace\(info\.owned\[step\]\)/.test(pay), '/pay/?open=1: sign in first, then what this account bought opens');
 ok(pay.includes('guestForm(') && pay.includes('finishAccount(') && !/return makeAccount\(S\)/.test(pay), '/pay/: not signed in shows name and email, then Stripe; the password comes after');
 ok(STEPS.lab.amount === 9700, 'the LAB is $97');
 done();

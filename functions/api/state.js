@@ -6,6 +6,7 @@ import { json, bad, db, now, clean, accountTables } from '../_shared.js';
 import { mentorFor, keepTz } from '../_mentor.js';
 import { originOf } from '../_mailchimp.js';
 import { missingOf } from '../_profile.js';
+import { productsOf } from '../_stripe.js';
 import { isTeamMember } from '../_team.js';
 import { seriesMode, levelsIn, afterAnswers } from '../_series.js';
 
@@ -63,6 +64,9 @@ export async function onRequestGet({ request, env }) {
     missing: missingOf({ ...(prof || {}), hasPassword: !!(auth && auth.pass_hash) }),
     // Which door they came in through, and the doors they confirmed since (api/cross.js).
     origin: originOf(prof || {}), crossed,
+    // Products bought from exploraself.com, each with the link that opens it
+    // (the Base Camp tile "Unshakeable · open", Alexandru, 6 Nov 2026).
+    products: await productsOf(D, me.id),
     // "Letters from your mentor": on when they gave consent and did not unsubscribe.
     letters: !!(prof && prof.consent && !prof.unsubscribed),
     mentor: { name: mentor.name, first: mentor.first, photo: mentor.photo } },

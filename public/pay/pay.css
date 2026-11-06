@@ -63,6 +63,10 @@ h1{font-size:clamp(30px,7vw,40px);line-height:1.15;font-weight:700}
 .gf label{font-weight:700;font-size:15px}
 .gf input[type=text],.gf input[type=email],.gf input[type=password]{width:100%;min-height:52px;border:1px solid var(--line);border-radius:12px;padding:0 14px;font:400 17px/1.2 var(--f);background:#fff;color:var(--ink)}
 .gf input:focus{outline:2px solid var(--ink);outline-offset:1px}
+.gf select{width:100%;min-height:52px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font:400 17px/1.2 var(--f);background:#fff;color:var(--ink)}
+.gf select:focus{outline:2px solid var(--ink);outline-offset:1px}
+.gf input:disabled{background:#f4f1ec}
+.gf label:has(> input[type=checkbox]){font-weight:400}
 .gf-why{margin:0 0 6px;font-size:14px;color:var(--muted,#6b6257)}
 .gf-yes{display:flex;gap:10px;align-items:flex-start;font-weight:400!important;font-size:14px!important;line-height:1.45}
 .gf-yes input{margin-top:3px;width:18px;height:18px}
