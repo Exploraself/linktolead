@@ -2167,7 +2167,7 @@
       <form class="card pop" id="signin-form" role="dialog" aria-modal="true" aria-labelledby="si-h" novalidate style="position: relative; width: 100%; max-width: 440px; padding: 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.35); margin: auto">
         <button type="button" data-act="si-x" data-f="si-x" aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer">×</button>
         <h2 id="si-h" class="sf" style="font-size: 24px; font-weight: 440; padding-right: 44px">${siTitle}</h2>
-        <span id="si-line" style="font-size: 14px; color: var(--muted)">${SIGNIN_LINE}</span>
+        <span id="si-line" style="font-size: 14px; color: var(--muted)">${UI.signinFor === 'menu' ? 'Your North Star and your Blueprint, on any device.' : SIGNIN_LINE}</span>
         ${gSlot('')}
         <label style="${lab}">Email<input class="inp" id="g-email" type="email" autocomplete="email" value="${esc(P.email)}"></label>
         ${pSignin('gate')}
@@ -2689,7 +2689,10 @@
       el.querySelectorAll('svg').forEach((g) => { try { if (off || reduced()) g.pauseAnimations(); else g.unpauseAnimations(); } catch { /* no SMIL */ } });
     };
     if (reduced()) document.querySelectorAll('svg').forEach((g) => { try { g.setCurrentTime(3.4); g.pauseAnimations(); } catch { /* no SMIL */ } });
-    const parts = [...document.querySelectorAll('#main > section, #main > div, .side')];
+    // Not #gate: it only holds the pop-up boxes (sign in, the way in) and has no
+    // size of its own (display: contents), so it always looked off screen, and
+    // its boxes stayed at the first frame of their fade-in, invisible (6 Nov 2026).
+    const parts = [...document.querySelectorAll('#main > section, #main > div:not(#gate), .side')];
     const seen = new Map();
     try {
       const io = new IntersectionObserver((es) => es.forEach((e) => { seen.set(e.target, e.isIntersecting); rest(e.target, !e.isIntersecting || document.hidden); }));

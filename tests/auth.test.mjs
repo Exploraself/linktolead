@@ -128,7 +128,7 @@ ok(DB.raw.prepare("SELECT COUNT(*) n FROM event WHERE student_id = ? AND kind IN
   ok(!src.includes('That is a few already'), 'the old limit message is gone everywhere');
   ok(!fs.readFileSync('functions/api/login.js', 'utf8').includes('allowed('), 'login.js does not use the email limit');
   const app = fs.readFileSync('public/northstar/app.js', 'utf8');
-  ok(app.includes("'This email already has an account. Sign in to open your plans.'") && /UI\.signinFor === 'plans'[\s\S]{0,1200}pSignin\('gate'\)/.test(app), 'Compass: an existing email opens the sign-in box with password + email link');
+  ok(app.includes("'This email already has an account. Sign in to open your plans.'") && /UI\.signinFor === 'plans'[\s\S]{0,1400}pSignin\('gate'\)/.test(app), 'Compass: an existing email opens the sign-in box with password + email link');
   ok(/case 'account':[\s\S]{0,600}openSignin\(\)/.test(app) && !/case 'account':[\s\S]{0,600}askLink\(/.test(app), 'Compass: "Create my free account" no longer only emails a link');
   ok(fs.readFileSync('public/account-box.js', 'utf8').includes('Sign in to open your plans.'), 'road pages and /start: same line for an existing email');
 }
