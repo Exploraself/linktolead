@@ -145,7 +145,7 @@
   let A = null, dirty = false, syncing = false, leverTimer;
   /* "Continue with Google" (/google.js, 31 Oct): loaded with the account. */
   let GS = null;
-  const gSlot = (c) => (GS ? GS.slot(c, document.body.classList.contains('dark')) : '');
+  const gSlot = (c, line = true) => (GS ? GS.slot(c, document.body.classList.contains('dark'), line) : '');
   const signedIn = () => !!(A && A.joined());
   /* The Massive Growth Plan's ticks (31 Oct): { step id: date ticked }, from
    * the account. Signed in only; kept apart from the Account Plans. */
@@ -2177,13 +2177,13 @@
         <button type="button" data-act="gate-skip" data-f="gate-x" aria-label="Close" style="position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         <div style="display: flex; align-items: center; gap: 12px; padding-right: 44px"><svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="10" fill="none" stroke="#6F93B8" stroke-width="1.4"/><polygon points="12,4 14,12 12,13.5 10,12" fill="#6F93B8"/></svg><div style="display: flex; flex-direction: column"><span class="eb">Before your first answer</span><span class="sf" style="font-size: 22px" id="gate-h">Who is this North Star for?</span></div></div>
         <span style="font-size: 14px; color: var(--muted)">We keep your answers with your name, so your feedback and your launchpad are yours.</span>
-        ${gSlot('g-consent')}
+        <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: var(--muted)"><input type="checkbox" id="g-consent"${P.consent ? ' checked' : ''} style="width: 18px; height: 18px; margin-top: 1px; accent-color: #6F93B8; flex: none">I agree that ExploraSelf may email me my results and occasional guidance. I can unsubscribe any time.</label>
+        ${gSlot('g-consent', false)}
         <div class="gate-two" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
           <label style="${lab}">First name<input class="inp" id="g-first" type="text" autocomplete="given-name" value="${esc(P.first)}" data-f="g-first"></label>
           <label style="${lab}">Surname<input class="inp" id="g-last" type="text" autocomplete="family-name" value="${esc(P.last)}"></label>
         </div>
         <label style="${lab}">Email<input class="inp" id="g-email" type="email" autocomplete="email" value="${esc(P.email)}"></label>
-        <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 12px; color: var(--muted)"><input type="checkbox" id="g-consent"${P.consent ? ' checked' : ''} style="width: 18px; height: 18px; margin-top: 1px; accent-color: #6F93B8; flex: none">I agree that ExploraSelf may email me my results and occasional guidance. I can unsubscribe any time.</label>
         <span id="gate-err" role="alert" style="font-size: 13px; color: var(--self); font-weight: 520"></span>
         <button type="submit" data-f="gate-go" style="min-height: 50px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; font-size: 15px; cursor: pointer">Start my North Star →</button>
         <button type="button" data-act="gate-skip" data-f="gate-skip" style="min-height: 44px; border-radius: 5px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-weight: 520; cursor: pointer">Skip for now · keep exploring</button>

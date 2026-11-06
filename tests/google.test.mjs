@@ -104,7 +104,15 @@ ok(code === 403 && !out.token, 'paused: told so, no token');
 // ── Wiring ──────────────────────────────────────────────────────────────────
 ok(/'\/api\/google': google/.test(fs.readFileSync('worker.js', 'utf8')), 'worker.js routes /api/google');
 const box = fs.readFileSync('public/account-box.js', 'utf8'), app = fs.readFileSync('public/app.js', 'utf8'), ns = fs.readFileSync('public/northstar/app.js', 'utf8');
-ok(box.includes("googleSlot('j-consent')") && app.includes('${googleSlot()}') && ns.includes("gSlot('g-consent')") && ns.includes("gSlot('')"), 'the button sits in the sales-page box, the Blueprint sign-in, and the North Star sign-in and gate');
+ok(box.includes("googleSlot('j-consent', false, false)") && app.includes('${googleSlot()}') && ns.includes("gSlot('g-consent', false)") && ns.includes("gSlot('')"), 'the button sits in the sales-page box, the Blueprint sign-in, and the North Star sign-in and gate');
+// One tick for both ways in (Alexandru, 6 Nov 2026: "eliminate double tick"): the button draws no
+// consent line of its own there; the box's single tick sits above it and counts for Google too.
+{
+  const G = fs.readFileSync('public/google.js', 'utf8');
+  ok(/const slot = \(consentFor = '', dark = false, line = true\)/.test(G) && G.includes('<input type="checkbox" data-sync="${consentFor}" hidden>'), 'google.js: the button can read the box\'s tick without drawing its own');
+  ok(box.indexOf('id="j-consent"') > 0 && box.indexOf('id="j-consent"') < box.indexOf("googleSlot('j-consent', false, false)"), 'the sales-page box: one tick, above the Google button');
+  ok(ns.indexOf('id="g-consent"') > 0 && ns.indexOf('id="g-consent"') < ns.indexOf("gSlot('g-consent', false)"), 'the North Star gate: one tick, above the Google button');
+}
 ok(fs.readFileSync('public/google.js', 'utf8').includes('hidden') && !/client_secret/i.test(fs.readFileSync('functions/_google.js', 'utf8')), 'hidden until switched on; no secret anywhere');
 
 done();

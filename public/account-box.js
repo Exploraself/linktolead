@@ -83,7 +83,8 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
       <span class="ab-k" style="font-size: 12px; font-weight: 600; letter-spacing: .16em; color: #7A5E26; padding-right: 44px">${head[0]}</span>
       <h2 id="gate-h" style="margin: 0; font:440 26px/1.25 Newsreader, Georgia, serif; padding-right: 40px">${head[1]}</h2>
       <span class="ab-sub" style="font-size: 14px; color: #3D4966">${head[2]}</span>
-      ${googleSlot('j-consent')}
+      <label class="ab-fine" style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: #3D4966"><input type="checkbox" id="j-consent" style="width: 18px; height: 18px; margin-top: 1px; accent-color: #B4975F; flex: none">${CONSENT}</label>
+      ${googleSlot('j-consent', false, false)}
       ${ctx.nameOnly ? `<label style="${LAB}">First name<input class="inp" id="j-first" type="text" autocomplete="given-name" maxlength="60"></label>` : `<div class="ab-two">
         <label style="${LAB}">First name<input class="inp" id="j-first" type="text" autocomplete="given-name" maxlength="60"></label>
         <label style="${LAB}">Surname<input class="inp" id="j-last" type="text" autocomplete="family-name" maxlength="60"></label>
@@ -93,7 +94,6 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
       <label style="${LAB}">Password${pwInput('j-pw')}</label>
       <label style="${LAB}">Confirm password${pwInput('j-pw2')}</label>
       <span class="ab-fine" style="font-size: 12px; color: #5A6580; margin-top: -6px">At least 10 characters. You sign in with your email and this password.</span>` : ''}
-      <label class="ab-fine" style="display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: #3D4966"><input type="checkbox" id="j-consent" style="width: 18px; height: 18px; margin-top: 1px; accent-color: #B4975F; flex: none">${CONSENT}</label>
       <span id="gate-err" class="ab-err" role="alert" style="font-size: 13px; color: #B5512E; font-weight: 600"></span>
       <button type="submit" class="ab-go">${stay ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →'}</button>
       ${stay ? '' : '<button type="button" class="ab-no" data-close style="min-height: 44px; border-radius: 5px; border: 1px solid #D8CDBB; background: transparent; color: #121C2D; font-weight: 600; cursor: pointer">' + (ctx.notNow || 'Not now · keep reading') + '</button>'}
