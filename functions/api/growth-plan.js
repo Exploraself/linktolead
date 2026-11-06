@@ -5,8 +5,11 @@
 //                                  words: { blank id: text } }
 // POST { token, step, done }   tick (done true) or untick (done false)
 // POST { token, blank, text }  write one blank; an empty text deletes it.
-//                              Full accounts only (missingOf, the rule from
-//                              api/complete.js): the plan is theirs to keep.
+//                              Any account, the name + email one too
+//                              (Alexandru, 5 Nov 2026: "the growth plan should
+//                              go just for the email. Let them have access").
+//                              Only the what-if lab and More feedback ask for
+//                              the full account (public/northstar/app.js).
 //
 // Ticks stay in plan_tick, counted apart from the Account Plans; words in
 // growth_word. Writing every blank of a step never ticks it: the founder
@@ -15,7 +18,6 @@
 
 import { json, bad, db, now, clean, accountTables, studentBy } from '../_shared.js';
 import { GROWTH_IDS, GROWTH_SQL, GROWTH_BLANK_IDS, BLANK_MAX } from '../_growth.js';
-import { missingOf } from '../_profile.js';
 
 /** This founder's Growth Plan ticks, and how many of the steps are done. */
 export async function growthTicks(D, studentId) {
@@ -31,15 +33,6 @@ export async function growthWords(D, studentId) {
   const words = {};
   for (const r of rows.results || []) if (GROWTH_BLANK_IDS.includes(r.blank_id)) words[r.blank_id] = r.text;
   return words;
-}
-
-/** What the account still lacks to be full ([] when it is full). */
-async function missing(D, studentId) {
-  const [prof, auth] = await Promise.all([
-    D.prepare('SELECT company, interest, industry, google_at FROM student_profile WHERE student_id = ?').bind(studentId).first(),
-    D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(studentId).first(),
-  ]);
-  return missingOf({ ...(prof || {}), hasPassword: !!(auth && auth.pass_hash) });
 }
 
 export async function onRequestGet({ request, env }) {
@@ -63,7 +56,6 @@ export async function onRequestPost({ request, env }) {
     if (!me) return bad('Sign in to write in your Growth Plan.', 401);
     if (!GROWTH_BLANK_IDS.includes(body.blank)) return bad('Unknown blank.');
     await accountTables(D);
-    if ((await missing(D, me.id)).length) return bad('Complete your account to write in your Growth Plan.', 403);
     const text = clean(body.text, BLANK_MAX), at = now();
     if (!text) await D.prepare('DELETE FROM growth_word WHERE student_id = ? AND blank_id = ?').bind(me.id, body.blank).run();
     else {

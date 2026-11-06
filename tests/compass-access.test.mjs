@@ -7,11 +7,14 @@ const { ok, done } = tally('compass-access');
 const read = (f) => fs.readFileSync(f, 'utf8');
 const compass = read('public/northstar/app.js'), box = read('public/account-box.js'), app = read('public/app.js');
 
-// The North Star: outsiders make the full account; signed-in founders see all.
-ok(/function gated\(change\)[\s\S]{0,200}if \(!signedIn\(\)\) fullAccount\(\)/.test(compass), 'a first answer without an account opens the full account form');
-ok(/variant: 'full', landing: doorOf\(\), stay: true/.test(compass) && /return src === 'north1' \? 'north1' : 'compass';/.test(compass), 'the North Star form is the full one (password, company, interest, industry), landing "compass" (or "north1" for founders sent by /north1/)');
+// The North Star (Alexandru, 5 Nov 2026): outsiders come in with first name and
+// email (the simple account); the full account only at the what-if lab and More feedback.
+ok(/function gated\(change\)[\s\S]{0,200}if \(!signedIn\(\)\) entry\(\)/.test(compass), 'a first answer without an account opens the way in (first name and email)');
+ok(/variant: 'simple', nameOnly: true, landing: doorOf\(\), stay: true/.test(compass) && /return src === 'north1' \? 'north1' : 'compass';/.test(compass), 'the North Star way in is the simple account, first name and email only (no surname, no password), landing "compass" (or "north1" for founders sent by /north1/)');
+ok(/nameOnly \? `<label/.test(box) && /if \(!last && !ctx\.nameOnly\)/.test(box) && /entry: \['YOUR NORTH STAR · FREE'/.test(box), 'the box: first name and email only, with its own words');
 ok(!/createAccount\(fromSales \? 'sales-page' : 'compass', true\)/.test(compass), 'no quiet simple account from the North Star any more');
-ok(/if \(!signedIn\(\)\) \{ fullAccount\(\); return; \}/.test(compass), '"Email me my results" without an account: the full form first');
+ok(/if \(!signedIn\(\)\) \{ entry\(\); return; \}\n    if \(!UI\.mailReady\)/.test(compass), '"Email me my results" without an account: first name and email first');
+ok(!/fullAccount\(/.test(compass), 'the North Star never opens the full form at the door any more');
 ok(/if \(ctx\.stay\) location\.reload\(\)/.test(box) && /OPEN MY NORTH STAR →/.test(box), 'after the form: back on the North Star, signed in');
 ok(/stay \? '' : '<button type="button" class="ab-no" data-close[^']*' \+ \(ctx\.notNow \|\| 'Not now/.test(box), 'no "Not now" on the North Star: the account is required');
 ok(/const r = await A\.pull\(\);[\s\S]{0,300}S\.profile/.test(compass), 'an account from any page: the North Star knows the founder');

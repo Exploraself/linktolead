@@ -257,12 +257,20 @@ export function openConfirm({ to = 'blueprint', first = '', last = '', email = '
  *  'industry', 'password', from /api/state). Name and email are known and only
  *  shown. done() runs after the save, and the page then applies the answer
  *  the founder was giving, so nothing they tapped is lost. */
-export function openComplete({ name = '', email = '', missing = [], done = null } = {}) {
+/** The words for a lock of the North Star (Alexandru, 5 Nov 2026: the full
+ *  account opens only the what-if lab and the deeper feedback). */
+export const LOCKS = {
+  lab: ['The what-if lab', 'Open the what-if lab', 'Move a lever and watch your cash, clients, time and people answer, with your own numbers. It is in your full free account: only what is missing, once.', 'Open the lab'],
+  feedback: ['More feedback', 'Read the deeper feedback', 'The detail behind each reading is in your full free account: only what is missing, once.', 'Open my feedback'],
+};
+export function openComplete({ name = '', email = '', missing = [], done = null, lock = '', full = false } = {}) {
   const need = (k) => missing.includes(k);
   const inner = shell('');
-  put(inner, `<span class="rbx-k">Your Base Camp</span>
-    <h2 id="rbx-h">One step before your first answer</h2>
-    <p>Your answers are the most valuable thing here. Complete your free account once, so they are safe and follow you to any device.</p>
+  const L = LOCKS[lock];
+  const go = L ? L[3] : 'Save and answer';
+  put(inner, `<span class="rbx-k">${L ? esc(L[0]) : 'Your Base Camp'}</span>
+    <h2 id="rbx-h">${L ? esc(L[1]) : 'One step before your first answer'}</h2>
+    <p>${L ? esc(L[2]) : 'Your answers are the most valuable thing here. Complete your free account once, so they are safe and follow you to any device.'}</p>
     ${email ? `<p class="rbx-tip" style="margin:-4px 0 4px">${name ? esc(name) + ' · ' : ''}<b>${esc(email)}</b></p>` : ''}
     <form class="rbx-form" novalidate style="display:flex;flex-direction:column;gap:12px">
       ${need('company') ? `<label>Company<input class="inp" id="rbx-co" autocomplete="organization" maxlength="120" placeholder="Your business name"></label>
@@ -271,9 +279,9 @@ export function openComplete({ name = '', email = '', missing = [], done = null 
       ${need('industry') ? `<label>Industry<select class="inp" id="rbx-ind"><option value="">Choose…</option>${INDUSTRIES.map((x) => `<option>${esc(x)}</option>`).join('')}</select></label>` : ''}
       ${need('password') ? pw('rbx-pw1', 'Password · at least 10 characters') : ''}
       <div class="rbx-err" role="alert"></div>
-      <button type="submit" class="rbx-go">Save and answer</button>
+      <button type="submit" class="rbx-go">${go}</button>
     </form>
-    <p class="rbx-tip" style="text-align:center">Your answer is kept. Free, as before.</p>`);
+    <p class="rbx-tip" style="text-align:center">${L ? 'Free. Your name and email are already in.' : 'Your answer is kept. Free, as before.'}</p>`);
   const nc = inner.querySelector('#rbx-noco'), co = inner.querySelector('#rbx-co');
   if (nc && co) nc.addEventListener('change', () => { co.disabled = nc.checked; if (nc.checked) co.value = ''; });
   inner.querySelector('.rbx-form').addEventListener('submit', async (e) => {
@@ -284,11 +292,12 @@ export function openComplete({ name = '', email = '', missing = [], done = null 
     if (need('interest')) { f.interest = v('rbx-int'); if (!f.interest) return say(inner, 'Choose what you want most from the business.'); }
     if (need('industry')) { f.industry = v('rbx-ind'); if (!f.industry) return say(inner, 'Choose your industry.'); }
     if (need('password')) { const p = inner.querySelector('#rbx-pw1').value; if (p.length < 10) return say(inner, 'At least 10 characters, please.'); f.password = p; f.confirm = p; }
-    const go = inner.querySelector('.rbx-go'); go.disabled = true; go.textContent = 'Saving…'; say(inner, '');
+    if (full) f.full = true;
+    const b = inner.querySelector('.rbx-go'); b.disabled = true; b.textContent = 'Saving…'; say(inner, '');
     try {
       const A = await import('/account.js');
       await A.complete(f);
       close(); if (done) done();
-    } catch (ex) { say(inner, (ex && ex.message) || 'It did not save. Try again in a minute.'); go.disabled = false; go.textContent = 'Save and answer'; }
+    } catch (ex) { say(inner, (ex && ex.message) || 'It did not save. Try again in a minute.'); b.disabled = false; b.textContent = go; }
   });
 }

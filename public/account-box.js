@@ -16,9 +16,11 @@
  * utm_* tags the founder arrived with go with the sign-up. Loaded the first
  * time a box opens (/road1/, /road2/, /north3/, /road3/ …), then open() each time.
  *
- * On /northstar (landing "compass", `stay`): a visitor from outside makes the
- * full account here, then stays on the North Star, signed in, with everything
- * open. An email that already has an account goes to `onExisting`. */
+ * On /northstar (landing "compass", `stay`, `nameOnly`): a visitor from
+ * outside gives a first name and an email (or Google) and stays on the North
+ * Star, signed in with the simple account (Alexandru, 5 Nov 2026). The full
+ * account comes only at the what-if lab and More feedback (public/reset-box.js
+ * openComplete). An email that already has an account goes to `onExisting`. */
 import { detailFields, readDetails, CONSENT, utm } from '/forms.js';
 import { slot as googleSlot, mount as mountGoogle } from '/google.js';
 
@@ -64,6 +66,9 @@ const HEAD = {
   simple: ['START FREE', 'Your free account', 'One minute. Name and email. Free.'],
   summit: ['YOUR PLACE AT THE SUMMIT', 'Your account', 'Start now. You sign in with your email and a password.'],
   stay: ['YOUR NORTH STAR, IN FULL', 'Your free account', 'Your answers come with you, and the whole North Star opens: your feedback, your plans and your library. Free.'],
+  // The North Star's way in (Alexandru, 5 Nov 2026): first name and email are
+  // enough; the full account comes only at the what-if lab and More feedback.
+  entry: ['YOUR NORTH STAR · FREE', 'Where should we keep your North Star?', 'Your first name and email. Your answers come with you, to any device.'],
 };
 
 const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpop abox" role="dialog" aria-modal="true" aria-labelledby="gate-h" style="position: relative; width: 100%; max-width: 480px; background: #FFFDF8; color: #121C2D; border-radius: 10px; padding: 28px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 30px 70px rgba(0,0,0,.4); margin: auto; font-family: 'Inter', Arial, sans-serif; box-sizing: border-box">
@@ -74,10 +79,10 @@ const markup = (variant, head = HEAD[variant], stay = false) => `<div class="gpo
       <h2 id="gate-h" style="margin: 0; font:440 26px/1.25 Newsreader, Georgia, serif; padding-right: 40px">${head[1]}</h2>
       <span class="ab-sub" style="font-size: 14px; color: #3D4966">${head[2]}</span>
       ${googleSlot('j-consent')}
-      <div class="ab-two">
+      ${ctx.nameOnly ? `<label style="${LAB}">First name<input class="inp" id="j-first" type="text" autocomplete="given-name" maxlength="60"></label>` : `<div class="ab-two">
         <label style="${LAB}">First name<input class="inp" id="j-first" type="text" autocomplete="given-name" maxlength="60"></label>
         <label style="${LAB}">Surname<input class="inp" id="j-last" type="text" autocomplete="family-name" maxlength="60"></label>
-      </div>
+      </div>`}
       <label style="${LAB}">Email<input class="inp" id="j-email" type="email" autocomplete="email" maxlength="120"></label>
       ${variant === 'full' ? detailFields('j', LAB) + `
       <label style="${LAB}">Password${pwInput('j-pw')}</label>
@@ -101,12 +106,15 @@ const NS_PAGES = ['north2', 'north3'];
 /** Sign in instead, then back to `next` (the pay page) when there is one. */
 const signinHref = () => `/ground-plan/${ctx.next ? `?next=${encodeURIComponent(ctx.next)}` : ''}#signin`;
 const after = () => ctx.next || (NS_HOME.includes(ctx.landing) ? '/northstar/' : '/ground-plan/#home');
-let ctx = { opener: null, stage: null, variant: 'full', landing: 'road1', stay: false, onExisting: null, head: null, label: '', notNow: '' };
+let ctx = { opener: null, stage: null, variant: 'full', landing: 'road1', stay: false, onExisting: null, head: null, label: '', notNow: '', nameOnly: false };
 function close() { if (ctx.gate) ctx.gate.hidden = true; if (ctx.opener && ctx.opener.focus) ctx.opener.focus(); }
 
+/** Which box is drawn in the gate: a different one is drawn again. */
+const boxKey = (variant, landing) => `${variant} ${landing}${ctx.nameOnly ? ' name' : ''}`;
+
 function wire(gate, variant, landing) {
-  gate.innerHTML = markup(variant, ctx.head || HEAD[ctx.stay ? 'stay' : landing === 'summit' ? 'summit' : variant === 'full' && NS_PAGES.includes(landing) ? 'compass' : variant], ctx.stay);
-  gate.dataset.variant = variant + ' ' + landing;
+  gate.innerHTML = markup(variant, ctx.head || HEAD[ctx.nameOnly ? 'entry' : ctx.stay ? 'stay' : landing === 'summit' ? 'summit' : variant === 'full' && NS_PAGES.includes(landing) ? 'compass' : variant], ctx.stay);
+  gate.dataset.variant = boxKey(variant, landing);
   gate.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
   gate.querySelectorAll('[data-eye]').forEach((b) => b.addEventListener('click', (e) => {
     e.preventDefault();
@@ -152,10 +160,10 @@ function wire(gate, variant, landing) {
   const form = $('#gate-form');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const first = $('#j-first').value.trim(), last = $('#j-last').value.trim(), email = $('#j-email').value.trim(), consent = $('#j-consent').checked;
+    const first = $('#j-first').value.trim(), last = $('#j-last') ? $('#j-last').value.trim() : '', email = $('#j-email').value.trim(), consent = $('#j-consent').checked;
     const err = (m) => { $('#gate-err').textContent = m; };
     if (!first) return err('Your first name, so the Base Camp is yours.');
-    if (!last) return err('Your surname, please.');
+    if (!last && !ctx.nameOnly) return err('Your surname, please.');
     if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) return err('That email does not look complete.');
     const d = variant === 'full' ? readDetails('j') : null;
     if (d && d.problem) return err(d.problem);
@@ -188,19 +196,19 @@ function wire(gate, variant, landing) {
  *  sign-in screens, the no-account email, the pay page): `email` is already
  *  filled in, `next` is where they go back to. `head` ([small, title, line]),
  *  `label` (the button) and `notNow` change the words, as on /pay/. */
-export function open({ gate, opener, stage, variant = 'full', landing = variant === 'full' ? 'road1' : 'road3', stay = false, onExisting = null, next = '', email = '', head = null, label = '', notNow = '' }) {
-  ctx = { gate, opener, stage, variant, landing, stay, onExisting, next, head, label, notNow };
+export function open({ gate, opener, stage, variant = 'full', landing = variant === 'full' ? 'road1' : 'road3', stay = false, onExisting = null, next = '', email = '', head = null, label = '', notNow = '', nameOnly = false }) {
+  ctx = { gate, opener, stage, variant, landing, stay, onExisting, next, head, label, notNow, nameOnly };
   if (hasAccount() && stay) return;
   if (hasAccount()) {
     if (stage) { const p = known() || {}; p.stage = stage.id; try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* private mode */ } }
     location.href = after();
     return;
   }
-  if (gate.dataset.variant !== variant + ' ' + landing) wire(gate, variant, landing);
+  if (gate.dataset.variant !== boxKey(variant, landing)) wire(gate, variant, landing);
   // The button says where it goes.
   { const g = gate.querySelector('.ab-go'); if (g && (ctx.label || !ctx.stay)) g.textContent = ctx.label || (NS_HOME.includes(landing) || ctx.next === '/northstar/' ? 'OPEN MY NORTH STAR →' : 'OPEN MY BASE CAMP →'); }
   const p = known();
-  if (p) { $('#j-first').value = p.first || ''; $('#j-last').value = p.last || ''; $('#j-email').value = p.email || ''; }
+  if (p) { $('#j-first').value = p.first || ''; if ($('#j-last')) $('#j-last').value = p.last || ''; $('#j-email').value = p.email || ''; }
   if (email) $('#j-email').value = email;
   gate.hidden = false;
   $('#j-first').focus();

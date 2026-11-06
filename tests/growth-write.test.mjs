@@ -57,10 +57,10 @@ ok(!/\b(he|him|his)\b/i.test((W + R).replace(/<[^>]+>/g, ' ')), 'never he or him
 
 // ── The page’s code ─────────────────────────────────────────────────────────
 const J = read('public/northstar/app.js');
-ok(J.includes('const gpWrite = () => signedIn() && Array.isArray(GP_MISSING) && GP_MISSING.length === 0;') && J.includes('GP_MISSING = me.me.missing'), 'full means me.missing is empty (/api/state, the rule from #95)');
+ok(J.includes('const gpWrite = () => signedIn();') && J.includes('GP_MISSING = me.me.missing'), 'any account writes in the Growth Plan (Alexandru, 5 Nov 2026); me.missing still read, for the two locks');
 ok(J.includes("GP_TIMER[id] = setTimeout(() => gpSave(id), 900)") && J.includes("addEventListener('focusout'") && J.includes('gpSay(id, \'Saved\')'), 'saved a moment after typing stops, and when the field loses focus; then a quiet “Saved”');
 ok(J.includes("localStorage.setItem(GPK, JSON.stringify(L))") && J.includes('for (const id of Object.keys(L.pending)) GP_WORDS[id]'), 'the device copy first (rule 8); what the account has not got yet is sent again');
-ok(J.includes("import('/reset-box.js').then((m) => m.openComplete(") && /async function gpComplete\(\) \{\s*if \(!signedIn\(\)\) \{ menuSignin\(\); return; \}/.test(J), 'the link: signed in, the existing complete box; signed out, the North Star sign-in');
+ok(/async function gpComplete\(\) \{\s*if \(!signedIn\(\)\) \{ entry\(\); return; \}/.test(J), 'the link: signed out, the way in (first name and email); signed in, it is already open');
 ok(!/gpType[\s\S]{0,400}render\(\)/.test(J.slice(J.indexOf('function gpType'), J.indexOf('async function gpSave'))) && J.includes("put('s-growth', pGrowth());\n    gpFill();"), 'typing never redraws: values go in after each drawing');
 ok(!/growthTick|GP_DONE\[/.test(J.slice(J.indexOf('function gpType'), J.indexOf('const gpFlush'))), 'writing never ticks a step');
 ok(/\.gp-in\{[^}]*font:500 16px/.test(read('public/northstar/crown.css')), 'fields are 16px, so a phone never zooms in and jumps');
@@ -76,8 +76,9 @@ const sam = (await (await signup({ request: post('/api/signup', { first: 'Sam', 
 const st = await (await stateGet({ request: get(`/api/state?t=${sam}`), env })).json();
 ok(Array.isArray(st.me.missing) && st.me.missing.length > 0, '/api/state: a simple account is not full (me.missing)');
 let r = await write(sam, 'mgp-1.1', 'Being on time');
-ok(r.status === 403 && (await r.json()).error === 'Complete your account to write in your Growth Plan.', 'a non-full account is refused, with a plain message');
-ok(raw.prepare('SELECT COUNT(*) AS n FROM growth_word').get().n === 0, '… and nothing is saved');
+// Alexandru, 5 Nov 2026: "the growth plan should go just for the email. Let them have access to it."
+ok(r.status === 200 && raw.prepare('SELECT COUNT(*) AS n FROM growth_word').get().n === 1, 'a name + email account writes in its Growth Plan too');
+raw.prepare('DELETE FROM growth_word').run();
 r = await complete({ request: post('/api/complete', { token: sam, noCompany: true, interest: 'Higher income', industry: 'Other', password: 'a-long-password' }), env });
 ok(r.status === 200, 'completing the account (the existing box’s call)');
 r = await write(sam, 'mgp-1.1', '  Being on time\u0000  ');

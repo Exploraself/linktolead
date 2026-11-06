@@ -69,7 +69,8 @@ export async function onRequestGet({ request, env, waitUntil }) {
   const me = await studentBy(D, t);
   // No account: off to make one. An account this browser holds but the site
   // does not know (an old sign-in): sign in again, then back to the Library.
-  if (!me) return go(request, t ? `/ground-plan/?next=${encodeURIComponent('/ground-plan/#library')}#signin` : '/north3/#join');
+  // No account at all: the short box, first name and email (Alexandru, 5 Nov 2026).
+  if (!me) return go(request, t ? `/ground-plan/?next=${encodeURIComponent('/ground-plan/#library')}#signin` : '/road3/#join');
   // HUB material opens only with The HUB or The Summit; anyone else is
   // shown the HUB, never the file.
   if (!item.free && !holdsHubBook(me.tier)) return go(request, HUB_PAGE);

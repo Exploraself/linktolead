@@ -6,7 +6,10 @@
 // Then it is a full account, signs in with its password, and is never asked
 // again. Nothing already given is overwritten.
 //
-// POST { token, company?, noCompany?, interest?, industry?, password?, confirm? }
+// POST { token, company?, noCompany?, interest?, industry?, password?, confirm?, full? }
+// full: true (the North Star's locks, Alexandru, 5 Nov 2026: "either the
+// general audience or the full account, period") also counts a missing
+// password for an account made with Google; Base Camp's first answer does not.
 // → { ok, complete: true, missing: [] }, or a plain error for the first thing
 // still missing. Everything is checked before anything is written.
 
@@ -27,7 +30,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   await profile(D, me.id);
   const p = (await D.prepare('SELECT company, interest, industry, google_at FROM student_profile WHERE student_id = ?').bind(me.id).first()) || {};
   const auth = await D.prepare('SELECT pass_hash FROM account_auth WHERE student_id = ?').bind(me.id).first();
-  const missing = missingOf({ ...p, hasPassword: !!(auth && auth.pass_hash) });
+  const missing = missingOf({ ...p, ...(body.full === true ? { google_at: null } : {}), hasPassword: !!(auth && auth.pass_hash) });
   if (!missing.length) return json({ ok: true, complete: true, missing: [] });
 
   // Check all of it first, so a founder is never left half done.
