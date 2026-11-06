@@ -693,6 +693,17 @@ const LAUNCHPAD_TOP = 3;
 const lacksFull = () => account.joined() && pulled && missing.length > 0;
 const needsAccount = (lv = level) => lacksFull() && lv > LAUNCHPAD_TOP;
 let heldAnswer = null;
+/** Whoever pays has a full account (Alexandru, 6 Nov 2026: "If somebody pays …
+ *  It means they have full account."): an account that bought a product or a
+ *  step and is still short is asked, once per visit, as it arrives in Base
+ *  Camp (also after a sign-in link, which always lands here). */
+let paidAsked = false;
+const paidShort = () => lacksFull() && (owned.length > 0 || (state.tier || 'free') !== 'free');
+function askPaid() {
+  if (paidAsked || !paidShort()) return;
+  paidAsked = true;
+  askAccount(() => render(), 'paid');
+}
 function askAccount(then, lock = '') {
   heldAnswer = then || null;
   import('/reset-box.js').then((m) => m.openComplete({ name: state.me && state.me.name, email: state.me && state.me.email, missing, lock,
@@ -2714,6 +2725,7 @@ async function comeHome() {
   }
   if (resetAsk) newPassword();
   else if (hashNow === '#account') openReset('');
+  else askPaid();
   loadPlans();
 }
 /** From a password-reset email (31 Oct): its own box, "Choose a new

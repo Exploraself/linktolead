@@ -18,6 +18,11 @@
   if (!keep.has('utm_source')) keep.set('utm_source', 'north1');
   var to = '/northstar/?' + keep.toString();
   document.querySelectorAll('a[data-cta]').forEach(function (a) { a.href = to; });
+  /* Signed in already (6 Nov 2026): the top button says so; same link. */
+  var signedIn = false;
+  try { signedIn = !!localStorage.getItem('ftb-token'); } catch (e) { /* private mode */ }
+  var top = document.querySelector('.top-cta');
+  if (signedIn && top) top.textContent = 'Back to my North Star →';
 
   /* 2 · The sample question */
   var SAID = [

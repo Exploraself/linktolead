@@ -75,7 +75,11 @@ export async function onRequestGet({ request, env }) {
     const pass = who && await D.prepare('SELECT 1 AS x FROM account_auth WHERE student_id = ? AND pass_hash IS NOT NULL').bind(who.id).first();
     const base = { ok: true, paid: true, step: out.step || s.metadata.step, first: out.first || 4, email, access: accessOf(s) };
     if (made && !pass) return json({ ...base, token: who.id, fresh: true, name: who.name || '', missing: await fullMissing(D, who.id) });
-    return json({ ...base, existing: true });
+    // An email that already had an account: no token, but /pay/ may say whether
+    // that account is full yet, so a short one is sent to sign in and finish it
+    // (Alexandru, 6 Nov 2026: whoever pays has a full account). Only the payer,
+    // who holds this session's id, ever asks.
+    return json({ ...base, existing: true, full: who ? !(await fullMissing(D, who.id)).length : false });
   }
   // A guest payment is theirs when it was made with this account's email (the
   // page reloaded after the account was made here, or they signed in since).
@@ -109,9 +113,17 @@ export async function onRequestPost({ request, env }) {
         return json({ ok: false, signin: true, error: `${STEPS[step].name} is already yours on ${email}. Sign in and it is waiting for you: no need to pay again.` }, 409);
       }
     }
+    // A product already bought with this email (6 Nov 2026): sign in and open it, never a second payment.
+    if (PRODUCTS[step]) {
+      const has = await D.prepare('SELECT id FROM student WHERE lower(email) = ?').bind(email).first();
+      if (has && (await productsOf(D, has.id)).some((p) => p.step === step)) {
+        return json({ ok: false, signin: true, error: `${PRODUCTS[step].name} is already yours on ${email}: no need to pay again.` }, 409);
+      }
+    }
     me = { id: '', email, tier: 'free', guest: { first, consent: body.consent === true, landing: clean(body.landing, 20) } };
   }
   const r = await checkout(env, D, origin(request), me, clean(body.step, 20));
+  if (!r.ok && r.owned) return json({ ok: false, owned: r.owned, error: r.why }, 409);
   if (!r.ok) return bad(r.why, r.open ? 409 : 502);
   return json({ ok: true, url: r.url });
 }

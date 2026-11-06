@@ -226,6 +226,9 @@ export async function checkout(env, D, base, me, step) {
  *  full account, whose button opens the product with the session as access. */
 async function productCheckout(env, D, base, me, step) {
   const P = PRODUCTS[step];
+  // Never bought twice (6 Nov 2026): an account that owns it gets its link instead.
+  const own = me.id ? (await productsOf(D, me.id)).find((p) => p.step === step) : null;
+  if (own) return { ok: false, why: `${P.name} is already yours. Open it from here: no need to pay again.`, owned: own.access };
   await ensureWebhook(env, D, base).catch(() => null);
   const plain = {
     mode: 'payment',

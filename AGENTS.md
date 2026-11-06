@@ -446,6 +446,15 @@ the Blueprint alike; paying for a step raises the same account.
     letter and the Base Camp tile "Unshakeable · open" carry the same link, and
     /pay/?step=unshakeable&open=1 ("Already bought? Sign in") opens it after
     the sign-in.
+    An email that already had an account (paying while signed out) gets no
+    token: every sign-in from /pay/ comes back to /pay/?step=…&cs=…, which asks
+    for what that account lacks; a sign-in link by email lands in Base Camp,
+    which asks once on arrival for any paid account that is still short
+    (public/app.js askPaid). Whoever pays has a full account.
+  - **Never bought twice:** a product the account (or the guest's email)
+    already owns is never sent to Stripe again: signed in, /pay/ says "Already
+    yours" with its link (productCheckout answers `owned`); signed out,
+    "Sign in and open it" (`signin: true`).
 - **Open with name and email:** everything else in the North Star (the
   reading, its PDF and print, emailing the results, the step-by-step plans,
   the Growth Plan with its writing and PDF) and Levels 01 to 03.
