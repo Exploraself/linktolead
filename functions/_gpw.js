@@ -145,15 +145,20 @@ export async function gpwJoin(env, D, { email, first = '', source = '', studentI
   return { status: 'ok' };
 }
 
-/** Which letter a row is owed now (1–10), or 0. */
+/** Which letter a row is owed now (1–10), or 0, in the hourly run. Every
+ *  letter here goes between 8:00 and 21:00 in the person's own time zone
+ *  (Alexandru, 5 Nov 2026: "to them … according to location"), letter 1
+ *  too: someone added from the Mailchimp list gets it in their morning, not
+ *  at night. Letter 1 at sign-up does not come through here: it goes at
+ *  once (sendFirst), because the person is at their screen. */
 export function due(row, at = new Date()) {
   if (!row || row.stopped_at || row.sent >= LAST) return 0;
-  if (!row.sent) return 1; // letter 1 is owed at once, at any hour
+  const { hour } = localParts(row.tz || DEFAULT_TZ, at);
+  const day = hour >= SEND_HOUR && hour < LATEST_HOUR;
+  if (!row.sent) return day ? 1 : 0;
   const t = new Date(at).getTime();
   if (!row.last_sent_at || t - Number(row.last_sent_at) < GAP_HOURS * HOUR - EARLY) return 0;
-  const { hour } = localParts(row.tz || DEFAULT_TZ, at);
-  if (hour < SEND_HOUR || hour >= LATEST_HOUR) return 0;
-  return row.sent + 1;
+  return day ? row.sent + 1 : 0;
 }
 
 /** Send one person the letter they are owed, and record it. */

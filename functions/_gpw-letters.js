@@ -32,7 +32,9 @@ const ES = 'https://exploraself.com';
 
 export const GPW_LETTERS = [
   {
-    n: 1, title: 'Why we exist', good: 2,
+    // The title is Alexandru's (5 Nov 2026, after receiving it): "your business learns your
+    // habits. All of them. That's a much better title."
+    n: 1, title: 'Your business learns your habits. All of them.', good: 2,
     hello: 'Thank you for leaving your name. For the next 18 days I’ll send you **ten short letters, one tool in each.**',
     hurt: 'You work hard. You care. And some weeks, the results are not there.\n**What is your business teaching you about yourself?**',
     story: { head: 'My story', paras: [
