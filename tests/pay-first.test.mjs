@@ -133,8 +133,33 @@ ok(dp.company === '' && dp.interest === INTERESTS[0] && dp.industry === 'Other' 
 [st, j] = await jsonOf(await payGet({ request: req(`/api/checkout?cs=${usid}`), env }));
 ok(j.paid && j.existing && !j.token && j.access === `https://exploraself.com/unshakeable?access=${usid}`, 'after it, the payment link signs no one in, but still opens the audit');
 
+// 9. An email that already had a short account (name and email only) pays while signed out
+//    (main chat's review, 6 Nov 2026): no token, the answer says the account is not full;
+//    signed in, the same payment link asks for what it lacks, then the audit opens.
+const [, sia] = await jsonOf(await signup({ request: req('/api/signup', { method: 'POST', body: { first: 'Sia', email: 'sia@example.com', consent: true, source: 'home', type: 'simple', landing: 'road3' } }), env: { DB }, waitUntil: () => {} }));
+await payPost({ request: req('/api/checkout', { method: 'POST', body: { step: 'unshakeable', first: 'Sia', email: 'sia@example.com', consent: true, landing: 'exploraself' } }), env });
+const ssid = `cs_test_${next - 1}`;
+Object.assign(sessions[ssid], { payment_status: 'paid', amount_total: 999 });
+[st, j] = await jsonOf(await payGet({ request: req(`/api/checkout?cs=${ssid}`), env }));
+ok(j.paid && j.existing && !j.token && j.full === false && j.access === `https://exploraself.com/unshakeable?access=${ssid}` && count('sia@example.com') === 1, 'a short account that paid while signed out: no token, "not full yet", and the audit link');
+[st, j] = await jsonOf(await payGet({ request: req(`/api/checkout?cs=${ssid}`, { token: sia.token }), env }));
+ok(j.paid && ['company', 'interest', 'industry', 'password'].every((k) => j.missing.includes(k)) && j.access, 'signed in, back on the same payment: what the account lacks, then the audit');
+[st, j] = await jsonOf(await complete({ request: req('/api/complete', { method: 'POST', body: { token: sia.token, full: true, company: 'Sia Studio', interest: INTERESTS[1], industry: 'Other', password: 'a-long-pass-3', confirm: 'a-long-pass-3' } }), env, waitUntil: () => {} }));
+[st, j] = await jsonOf(await payGet({ request: req(`/api/checkout?cs=${ssid}`), env }));
+ok(j.existing && j.full === true, 'finished: the same link now says the account is full');
+[st, j] = await jsonOf(await payGet({ request: req('/api/checkout?cs=cs_test_2'), env }));
+ok(j.existing && j.full === true, 'an email whose account was already full (Ben): no extra step');
+
 // The page.
 const pay = readFileSync(new URL('../public/pay/pay.js', import.meta.url), 'utf8');
+ok(/const signinBack = `\/ground-plan\/\?next=\$\{encodeURIComponent\(back\)\}#signin`;/.test(pay) && (pay.match(/href="\$\{signinBack\}"/g) || []).length === 3 && !pay.includes("encodeURIComponent('/ground-plan/#programme-' + (d.first || 4))"), '/pay/: every sign-in after paying comes back to this payment, for the full account');
+ok(pay.includes('Sign in to finish your account') && /if \(d\.full === false\)/.test(pay), '/pay/: a short account is sent to sign in and finish it');
+const appJs = readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+const rbx = readFileSync(new URL('../public/reset-box.js', import.meta.url), 'utf8');
+ok(/const paidShort = \(\) => lacksFull\(\) && \(owned\.length > 0 \|\| \(state\.tier \|\| 'free'\) !== 'free'\);/.test(appJs) && /else askPaid\(\);/.test(appJs) && /askAccount\(\(\) => render\(\), 'paid'\)/.test(appJs), 'Base Camp: a paid account that is still short is asked once on arrival (the emailed sign-in link lands here)');
+ok(/paid: \['Your Base Camp', 'One step to finish your account'/.test(rbx) && !/paid: \[[^\]]*\bFree\b/.test(rbx) && /L\[4\] \|\| 'Free\. Your name and email are already in\.'/.test(rbx), 'the box for a paid account never says "Free"');
+const n1 = readFileSync(new URL('../public/north1/north1.js', import.meta.url), 'utf8');
+ok(/if \(signedIn && top\) top\.textContent = 'Back to my North Star →';/.test(n1), 'north1: a signed-in founder sees "Back to my North Star →" (same link)');
 ok(/detailFields\('f', 'display:grid;gap:6px', need\)/.test(pay) && pay.includes("fetch('/api/complete'") && /token: d\.token \|\| token\(\), full: true/.test(pay), '/pay/ after paying: the full account form, saved through /api/complete');
 ok(!pay.includes('Later: open Level') && !pay.includes("fetch('/api/password'"), '/pay/: no way past the full account, and no password-only step any more');
 ok(/<label for="f-pw">Password<\/label>\$\{pwBox\('f-pw'\)\}/.test(pay) && /<label for="f-pw2">Confirm password<\/label>\$\{pwBox\('f-pw2'\)\}/.test(pay) && /data-eye="\$\{id\}"/.test(pay) && /data-copy="\$\{id\}"/.test(pay) && pay.includes('At least 10 characters. You sign in with your email and this password.') && !pay.includes('Copy it into the second box'),

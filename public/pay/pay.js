@@ -244,6 +244,13 @@ async function start() {
     if (guest) { location.replace(`/ground-plan/?next=${encodeURIComponent(`/pay/?step=${step}&open=1`)}#signin`); return; }
     if (info.owned && info.owned[step]) { location.replace(info.owned[step]); return; }
   }
+  // A product this account already bought (6 Nov 2026): never a second payment.
+  if (!guest && S.product && info.owned && info.owned[step]) {
+    return draw(`<p class="eb">${ICON.check}Already yours</p><h1>${esc(S.name)} is yours</h1>
+      <p class="muted">Nothing to pay. You bought it with this account (${esc(info.email || '')}).</p>
+      <a class="go" href="${esc(info.owned[step])}">${ICON.open}${esc(OPEN_LABEL[step] || 'Open it')}</a>
+      <a class="ghost" href="/ground-plan/#home">My Base Camp</a>`);
+  }
   if (!guest && !S.product && ORDER.indexOf(step) <= ORDER.indexOf(info.tier || 'free')) {
     return draw(`<p class="eb">${ICON.check}Already yours</p><h1>${esc(S.name)} is open for you</h1>
       <p class="muted">Nothing to pay. It is waiting in your Base Camp.</p>
@@ -269,9 +276,13 @@ async function start() {
       if (d.ok && d.url) { location.href = d.url; return; }
       // Already theirs: no second payment, the way in instead.
       if (d.signin) {
-        err.innerHTML = `${esc(d.error)} <a href="/ground-plan/?next=${encodeURIComponent('/ground-plan/#home')}#signin">Sign in to my Base Camp →</a>`;
+        // A product comes back to open itself after the sign-in; a step goes home.
+        const nx = S.product ? `/pay/?step=${step}&open=1` : '/ground-plan/#home';
+        err.innerHTML = `${esc(d.error)} <a href="/ground-plan/?next=${encodeURIComponent(nx)}#signin">${S.product ? 'Sign in and open it →' : 'Sign in to my Base Camp →'}</a>`;
         err.hidden = false; b.disabled = false; return;
       }
+      // Signed in and already bought (another tab, say): the way in, not a second payment.
+      if (d.owned) { location.href = d.owned; return; }
       err.textContent = d.error || 'Stripe did not answer. Try again in a minute.';
     } catch { err.textContent = 'We could not reach Stripe. Check your connection and try again.'; }
     err.hidden = false; b.disabled = false;
@@ -292,16 +303,29 @@ async function confirm(cs, steps) {
     if (d && d.paid && d.fresh && d.token) return finishAccount(d, steps[d.step] || {});
     if (d && d.paid && d.existing) {
       const S = steps[d.step] || {};
-      // A product opens from its link at once; the account is theirs to sign in to.
+      // Every sign-in from here comes back to this payment (Alexandru, 6 Nov
+      // 2026: whoever pays has a full account): signed in, the page asks for
+      // what the account still lacks (finishAccount), then opens what they
+      // bought. A sign-in link by email lands in Base Camp, which asks there.
+      const back = `/pay/?step=${encodeURIComponent(d.step || '')}&cs=${encodeURIComponent(cs)}`;
+      const signinBack = `/ground-plan/?next=${encodeURIComponent(back)}#signin`;
+      // A short account (name and email only): sign in first, then finish it here.
+      if (d.full === false) {
+        return draw(`<p class="eb">${ICON.check}Thank you</p><h1>${esc(S.name || 'Your step')} is yours</h1>
+          <p class="ok">Your payment went through. It is on your account (${esc(d.email || '')}). One last step: sign in and finish your account, and ${d.access ? 'your audit opens' : 'your Base Camp opens'}.</p>
+          <a class="go" href="${signinBack}">${ICON.open}Sign in to finish your account</a>
+          <p class="note">No password yet? On the sign-in page, ask for a sign-in link: it comes to ${esc(d.email || 'your email')}.${d.access ? ' We have also emailed you your own access link.' : ''}</p>`);
+      }
+      // A full account: a product opens from its link at once; the account is theirs to sign in to.
       if (d.access) {
         return draw(`<p class="eb">${ICON.check}Thank you</p><h1>${esc(S.name || 'It')} is yours</h1>
           <p class="ok">Your payment went through. It is on your account (${esc(d.email || '')}), and we have emailed you your own access link too.</p>
           <a class="go" href="${esc(d.access)}">${ICON.open}${esc(OPEN_LABEL[d.step] || 'Open it')}</a>
-          <a class="ghost" href="/ground-plan/?next=${encodeURIComponent('/ground-plan/#home')}#signin">Sign in to my Base Camp</a>`);
+          <a class="ghost" href="${signinBack}">Sign in to my Base Camp</a>`);
       }
       return draw(`<p class="eb">${ICON.check}Thank you</p><h1>${esc(S.name || 'Your step')} is open</h1>
         <p class="ok">Your payment went through. It is open on your account (${esc(d.email || '')}). Sign in and it is waiting for you.</p>
-        <a class="go" href="/ground-plan/?next=${encodeURIComponent('/ground-plan/#programme-' + (d.first || 4))}#signin">Sign in to my Base Camp</a>`);
+        <a class="go" href="${signinBack}">Sign in to my Base Camp</a>`);
     }
     // Signed in: the account made full here if it is not yet, then the way in.
     if (d && d.paid) return finishAccount(d, steps[d.step] || {});

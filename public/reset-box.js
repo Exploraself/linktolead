@@ -263,6 +263,8 @@ export const LOCKS = {
   lab: ['The what-if lab', 'Open the what-if lab', 'Move a lever and watch your cash, clients, time and people answer, with your own numbers. It is in your full free account: only what is missing, once.', 'Open the lab'],
   feedback: ['More feedback', 'Read the deeper feedback', 'The detail behind each reading is in your full free account: only what is missing, once.', 'Open my feedback'],
   library: ['Your library', 'Download the full book', 'The full books download with your full free account: only what is missing, once.', 'Download my book'],
+  // Whoever pays has a full account (Alexandru, 6 Nov 2026): asked once, on arrival in Base Camp.
+  paid: ['Your Base Camp', 'One step to finish your account', 'You have paid, so your account is a full one. Only what is missing, once, and it follows you to any device.', 'Save and continue', 'Your name and email are already in.'],
 };
 export function openComplete({ name = '', email = '', missing = [], done = null, lock = '', full = false } = {}) {
   const need = (k) => missing.includes(k);
@@ -282,7 +284,7 @@ export function openComplete({ name = '', email = '', missing = [], done = null,
       <div class="rbx-err" role="alert"></div>
       <button type="submit" class="rbx-go">${go}</button>
     </form>
-    <p class="rbx-tip" style="text-align:center">${L ? 'Free. Your name and email are already in.' : 'Your answer is kept. Free, as before.'}</p>`);
+    <p class="rbx-tip" style="text-align:center">${L ? (L[4] || 'Free. Your name and email are already in.') : 'Your answer is kept. Free, as before.'}</p>`);
   const nc = inner.querySelector('#rbx-noco'), co = inner.querySelector('#rbx-co');
   if (nc && co) nc.addEventListener('change', () => { co.disabled = nc.checked; if (nc.checked) co.value = ''; });
   inner.querySelector('.rbx-form').addEventListener('submit', async (e) => {

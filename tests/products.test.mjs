@@ -88,6 +88,16 @@ ok(j.owned && !Object.keys(j.owned).length && !j.email, 'not signed in: nothing 
 const { onRequestGet: stateGet } = await import('../functions/api/state.js');
 [st, j] = await jsonOf(await stateGet({ request: req(`/api/state?t=${maya}`), env }));
 ok(st === 200 && j.me.products.length === 1 && j.me.products[0].step === 'unshakeable' && j.me.products[0].access === 'https://exploraself.com/unshakeable?access=cs_test_1', 'Base Camp knows what they bought, with the link that opens it');
+// Never bought twice (main chat's review, 6 Nov 2026).
+const stripeCalls = () => calls.filter((c) => c.url.endsWith('/checkout/sessions') && c.method === 'POST').length;
+let before = stripeCalls();
+[st, j] = await jsonOf(await payPost({ request: req('/api/checkout', { method: 'POST', token: maya, body: { step: 'unshakeable' } }), env }));
+ok(st === 409 && j.owned === 'https://exploraself.com/unshakeable?access=cs_test_1' && stripeCalls() === before, 'signed in and already bought: no second Stripe page, the link to open it instead');
+[st, j] = await jsonOf(await payPost({ request: req('/api/checkout', { method: 'POST', body: { step: 'unshakeable', first: 'Maya', email: 'Maya@Example.com' } }), env }));
+ok(st === 409 && j.signin === true && /already yours on maya@example\.com/.test(j.error) && stripeCalls() === before, 'signed out, with an email that already bought it: sign in and open it, no second payment');
+const payJs = read('public/pay/pay.js');
+ok(/if \(!guest && S\.product && info\.owned && info\.owned\[step\]\)/.test(payJs) && payJs.includes('Nothing to pay. You bought it with this account'), '/pay/: signed in and already bought, "Already yours" with its link instead of the Stripe button');
+ok(/const nx = S\.product \? `\/pay\/\?step=\$\{step\}&open=1`/.test(payJs) && /if \(d\.owned\) \{ location\.href = d\.owned; return; \}/.test(payJs), '/pay/: the sign-in for an email that already bought it comes back to open it');
 const app = read('public/app.js');
 ok(/function productsHTML\(\)/.test(app) && app.includes("title: 'Unshakeable · open'") && app.includes("go: 'Open my Unshakeable Audit'") && /\$\{productsHTML\(\)\}/.test(app), 'Base Camp: the tile “Unshakeable · open”, for the buyer to get back in');
 ok(app.includes("sell: { title: 'Unshakeable · $9.99'") && app.includes("go: 'Get my Unshakeable Audit', href: 'https://exploraself.com/unshakeable'") && /const sell = pulled \? /.test(app) && /!mine\.some\(\(p\) => p\.step === k\)/.test(app), 'Base Camp: not bought yet, the tile offers it ($9.99, to exploraself.com/unshakeable), only once the account has loaded');
