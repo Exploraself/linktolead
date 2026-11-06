@@ -156,7 +156,22 @@
    * a field loses focus. Filling the blanks never ticks a step. */
   let GP_WORDS = {}, GP_MISSING = null, GP_ME = null;
   const GP_TIMER = {}, GP_BUSY = {}, GP_AGAIN = {}, GPK = 'ftb-gp-words';
-  const gpWrite = () => signedIn() && Array.isArray(GP_MISSING) && GP_MISSING.length === 0;
+  // The full account opens only the what-if lab and More feedback (Alexandru,
+  // 5 Nov 2026: "full account is only for the what-if … and the deeper
+  // feedback"); everything else, the Growth Plan too, opens with the first
+  // name and email (the simple account).
+  const gpWrite = () => signedIn();
+  /** What the account still lacks to be full, with a password for everyone
+   *  (Google sign-ups too: "the general audience or the full account,
+   *  period"); null until the account is read. */
+  const fullMissing = () => {
+    if (!GP_ME) return null;
+    const m = Array.isArray(GP_MISSING) ? GP_MISSING.slice() : [];
+    if (!GP_ME.hasPassword && !m.includes('password')) m.push('password');
+    return m;
+  };
+  /** A full account (the team sees everything). */
+  const isFull = () => signedIn() && (!!(GP_ME && GP_ME.openAll) || (fullMissing() || ['?']).length === 0);
   /** The device copy: what was typed, and which blanks still wait for the account. */
   function gpLocal() {
     const owner = String((A && A.token()) || '').slice(-12);
@@ -245,14 +260,33 @@
     gpFlush();
     if (UI.toPlan) { UI.toPlan = false; toPlan(); }
   }
-  /** "Complete your account to write here": the Blueprint's own box when
-   *  signed in; signed out, the North Star sign-in. */
+  /** The Growth Plan opens with the first name and email: signed out, the
+   *  North Star's way in; signed in, it is already open. */
   async function gpComplete() {
-    if (!signedIn()) { menuSignin(); return; }
+    if (!signedIn()) { entry(); return; }
     if (!GP_ME) await loadGrowth();
-    if (gpWrite()) return;
-    import('/reset-box.js').then((m) => m.openComplete({ name: GP_ME && GP_ME.name, email: GP_ME && GP_ME.email, missing: GP_MISSING || [],
-      done: () => loadGrowth().then(() => { const f = document.querySelector('#s-growth .gp-in'); if (f) f.focus({ preventScroll: true }); }) })).catch(() => {});
+  }
+  /** A download from the library: the full account first (Alexandru, 6 Nov
+   *  2026: "when they try to download anything, full account"). The North
+   *  Star's own PDFs (the feedback, the Growth Plan) stay open. */
+  document.addEventListener('click', (e) => {
+    const a = e.target && e.target.closest && e.target.closest('a[href*="/api/library?item="]');
+    if (!a || !signedIn() || isFull()) return;
+    e.preventDefault();
+    const href = a.href;
+    needFull('library', () => { location.href = href; });
+  }, true);
+  /** The locks, the what-if lab, More feedback and the library's downloads
+   *  (Alexandru, 5 and 6 Nov 2026): signed out, the way in (first name and email); signed in without
+   *  the full account, only what is missing, once (public/reset-box.js
+   *  openComplete, `full`: a password for everyone); then `then`. Name and
+   *  email are never asked again. */
+  async function needFull(lock, then) {
+    if (!signedIn()) { entry(); return; }
+    if (!GP_ME) await loadGrowth();
+    if (isFull()) { if (then) then(); return; }
+    import('/reset-box.js').then((m) => m.openComplete({ name: GP_ME && GP_ME.name, email: GP_ME && GP_ME.email, missing: fullMissing() || [], lock, full: true,
+      done: () => loadGrowth().then(() => { if (then) then(); render(); }) })).catch(() => {});
   }
   /** The North Star's own sign-in box ("Sign in to your account"). */
   function menuSignin() {
@@ -439,27 +473,28 @@
         done: ({ first: f, last: l }) => { S.profile.first = f; S.profile.last = l; save(); render(); if (UI.toPlan || location.hash === '#growth-plan') toPlan(); } }));
     }).catch(() => {});
     // From outside, with answers already on this browser: the account first.
-    if (!signedIn() && !code && hasWork(S)) fullAccount();
+    if (!signedIn() && !code && hasWork(S)) entry();
   }
 
-  /** A first answer from a visitor without an account opens the full account
-   *  form (name, surname, email, company, interest, industry, password). What
-   *  they tapped is kept, and comes into the account. */
+  /** A first answer from a visitor without an account opens the way in:
+   *  first name and email, or Google (Alexandru, 5 Nov 2026). What they tapped
+   *  is kept, and comes into the account. */
   function gated(change) {
     change();
     save(); render();
-    if (!signedIn()) fullAccount();
+    if (!signedIn()) entry();
   }
-  /** The full free account, on this page. Done: the page reloads signed in and
-   *  the whole North Star is open. An email that already has an account signs in
-   *  right here instead. */
+  /** The way in, on this page: the simple free account (first name, email, the
+   *  yes to letters; no password). Done: the page reloads signed in, with
+   *  everything open but the what-if lab and More feedback. An email that
+   *  already has an account signs in right here instead. */
   let box = null;
-  function fullAccount() {
+  function entry() {
     if (signedIn() || !A) return;
     const gate = document.getElementById('acct-gate');
     if (!gate) return;
     const opener = document.activeElement;
-    (box || (box = import('/account-box.js'))).then((m) => m.open({ gate, opener, stage: null, variant: 'full', landing: doorOf(), stay: true,
+    (box || (box = import('/account-box.js'))).then((m) => m.open({ gate, opener, stage: null, variant: 'simple', nameOnly: true, landing: doorOf(), stay: true,
       onExisting: (email) => { S.profile.email = email; S.acct = { email, state: 'existing' }; save(); openSignin(); } }))
       .catch(() => { box = null; });
   }
@@ -1110,7 +1145,7 @@
    *  push on to the next part.
    *  o = { n, eyebrow, title, letter: [3 lines], ask, road, roadTitle, cards, more, next } */
   function fbWindow(o) {
-    const open = !!S.pmore[o.n], first = (S.profile.first || '').trim().split(' ')[0];
+    const open = !!S.pmore[o.n] && isFull(), first = (S.profile.first || '').trim().split(' ')[0];
     return `<div class="nsfbw pop${o.inner ? ' inner' : ''}" id="fbw-in-${o.n}">
       <div class="fbhead"><span class="eb fbeb">${o.eyebrow}</span><h2 class="sf">${o.title}</h2></div>
       <div class="fbletter">
@@ -1121,7 +1156,7 @@
         <label class="fbgot"><input type="checkbox" data-act="pgot" data-i="${o.n}" data-f="pgot-${o.n}"${S.pgot[o.n] ? ' checked' : ''}>Got it, I’ve read this</label>
       </div>
       ${o.road ? `<div class="fbroadwrap"><span class="eb fbeb">${o.roadTitle || 'Your road, in five steps'}</span>${o.road}</div>` : ''}
-      <button type="button" class="fbmore no-print" data-act="pmore" data-i="${o.n}" data-f="pmore-${o.n}" aria-expanded="${open}">${open ? 'Less feedback ↑' : 'More feedback ↓'}</button>
+      <button type="button" class="fbmore no-print" data-act="pmore" data-i="${o.n}" data-f="pmore-${o.n}" aria-expanded="${open}">${open ? 'Less feedback ↑' : isFull() ? 'More feedback ↓' : `More feedback ${lockIcon('currentColor', 13)}`}</button>
       ${open ? `<div class="fbdeep pop">${o.cards ? `<div class="fbcards">${o.cards}</div>` : ''}${o.more || ''}</div>` : ''}
       ${o.next ? `<div class="fbnext">${o.next}</div>` : ''}
     </div>`;
@@ -1468,7 +1503,7 @@
     if (!s.answered) Object.assign(f, { big: `Answer the two ${D[i].name.toLowerCase()} questions in Part 1, and this card fills in.`, why: 'Nothing here is said about you before you have said it yourself.', feel: [] });
     const nums = S.mode === 'yes' ? E.numberLines(c.n, money)[i] : '';
     const bg = ['#F4E1D6', '#F3EAD3', '#E3ECE4'], ink = ['#8A4524', '#3E6A94', '#35593D'];
-    const open = !!S.more[i];
+    const open = !!S.more[i] && isFull();
     return `<div style="display: flex; flex-direction: column; gap: 10px; opacity: ${locked ? '.45' : '1'}; transition: opacity .5s ease"${locked ? ' inert' : ''}>
       ${locked ? `<span style="font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 8px">${lockIcon('currentColor')}Tick “Got it” on the domain above to open this one.</span>` : ''}
       <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"><span style="width: 34px; height: 34px; border-radius: 50%; background: ${TINT[i]}; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="${D[i].icon}" fill="none" stroke="${CSSV[i]}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><h3 class="sf" style="font-size: 20px; font-weight: 440">${D[i].name}</h3>
@@ -1823,6 +1858,9 @@
   /** Everything the lab shows, from the state. */
   function labCalc() {
     const b = E.labBase(S);
+    // The full account opens it (Alexandru, 5 Nov 2026): until then it shows
+    // itself, its levers move, and nothing answers.
+    if (!isFull()) return { locked: true, account: true, b, need: [], planned: false };
     if (!b.ready) {
       const names = Object.fromEntries(E.fieldsFor(S.mode).map(([k, l]) => [k, l]));
       return { locked: true, b, need: (b.need || []).map((k) => ({ k, label: names[k] })), planned: !!b.planned };
@@ -1857,7 +1895,13 @@
         <input class="inp" type="text" inputmode="decimal" data-lab="${key}" data-f="lab-${key}" value="${esc(S.lab[key])}" placeholder="${hint}" style="background: #121E2D; color: #EEF2F7; border-color: #2A3A50"></label>`;
     const missing = L.locked ? L.need : [];
     const chips = [...missing.map((x) => x.label), ...(L.locked && L.planned ? ['Customers a month you plan for (below)'] : [])];
-    const lock = L.locked ? `<div class="wlock open" id="wlock" role="status">
+    const lock = L.account ? `<div class="wlock open" id="wlock" role="status">
+        <div class="wlock-msg">
+          <strong>${lockIcon('currentColor', 15)} Move a lever. The lab answers in your full account.</strong>
+          <span>Your cash, clients, time and people, moved by your own numbers. Complete your free account once (only what is missing, never your name or email again), and every slider answers.</span>
+        </div>
+        <button type="button" class="go" data-act="lab-full" data-f="lab-full" style="min-height: 48px; padding: 0 20px; border-radius: 5px; border: 0; background: #6F93B8; color: #0E1C2B; font-weight: 520; font-size: 15px; cursor: pointer">Open the what-if lab →</button>
+      </div>` : L.locked ? `<div class="wlock open" id="wlock" role="status">
         <div class="wlock-msg">
           <strong>Go on, move a lever. Then make it yours.</strong>
           <span>It answers only with your own month. Fill ${NUMW[Math.min(4, chips.length)]} ${chips.length === 1 ? 'box' : 'boxes'} ${missing.length ? 'in Part 3 · Your numbers' : 'below'} (a range is enough), and every slider moves your cash, clients, time and people.</span>
@@ -2075,9 +2119,12 @@
   /** A lever moved before the numbers: everything flashes red three times and
    *  says where to go. Once per gesture, not on every step of the slider. */
   let nudging = 0;
-  function labNudge() {
+  function labNudge(account = false) {
     if (Date.now() - nudging < 2400) return;
     nudging = Date.now();
+    // Locked for the full account: the box that completes it opens once the
+    // red flash has shown the lever is not answering yet.
+    if (account) { const w = document.querySelector('.wlab'); if (w) { w.classList.remove('wred'); void w.offsetWidth; w.classList.add('wred'); } setTimeout(() => { if (w) w.classList.remove('wred'); document.querySelectorAll('[data-lever]').forEach((x) => { x.value = 0; }); needFull('lab', () => render()); }, 900); return; }
     const w = document.querySelector('.wlab'), l = document.getElementById('wlock');
     [w, l].forEach((el) => { if (el) { el.classList.remove('wred'); void el.offsetWidth; el.classList.add('wred'); } });
     setTimeout(() => { [w, l].forEach((el) => el && el.classList.remove('wred')); document.querySelectorAll('[data-lever]').forEach((x) => { x.value = 0; }); }, 2300);
@@ -2385,7 +2432,7 @@
    * first (which makes the free account), then send. It only ever says "Sent"
    * when the email service said yes. */
   async function sendEmail() {
-    if (!signedIn()) { fullAccount(); return; }
+    if (!signedIn()) { entry(); return; }
     if (!UI.mailReady) { UI.mail = 'Email is not switched on yet. Use Print or Save as PDF for now.'; render(); return; }
     UI.sending = true; UI.mail = ''; render();
     try {
@@ -2440,7 +2487,8 @@
         return;
       }
       case 'mode': S.mode = v; S.group = 0; S.lab.p = 0; S.lab.m = 0; S.lab.f = 0; S.lab.d = 0; save(); render(); return;
-      case 'lab-mode': S.lab.mode = v === 'money' ? 'money' : 'time'; save(); renderLab(); return;
+      case 'lab-mode': if (labCalc().account) { needFull('lab', () => render()); return; } S.lab.mode = v === 'money' ? 'money' : 'time'; save(); renderLab(); return;
+      case 'lab-full': needFull('lab', () => render()); return;
       case 'lab-take': takeToNumbers(); return;
       case 'ans': gated(() => { S.ans[t.dataset.q] = Number(v); }); fullscreenTip(); return;
       case 'nsq-full': enterFull(true); return;
@@ -2457,7 +2505,7 @@
       case 'p2-exit': p2Full(false); render(); return;
       case 'p2move': p2Move(Number(v)); return;
       case 'p2ans': gated(() => { S.p2.ans[t.dataset.q] = Number(v); }); return;
-      case 'pmore': S.pmore[i] = !S.pmore[i]; save(); render(); return;
+      case 'pmore': if (!S.pmore[i] && !isFull()) { needFull('feedback', () => { S.pmore[i] = true; save(); }); return; } S.pmore[i] = !S.pmore[i]; save(); render(); return;
       case 'again': UI.again = true; render(); go('clear'); return;
       case 'again-go': retake(); return;
       case 'again-no': UI.again = false; try { history.replaceState(null, '', location.pathname); } catch { /* old browser */ } render(); return;
@@ -2467,7 +2515,7 @@
       case 'num-unsure': S.nums[t.dataset.k] = { pick: 'unsure', own: '' }; save(); render(); return;
       case 'num-own': { const k = t.dataset.k, cur = S.nums[k] || {}; S.nums[k] = { pick: 'own', own: cur.pick === 'own' ? cur.own : '' }; save(); render(); const o = document.querySelector(`[data-own="${k}"]`); if (o) o.focus(); return; }
       case 'grp': S.group = i; save(); render(); sync(); return;
-      case 'more': S.more[i] = !S.more[i]; save(); render(); return;
+      case 'more': if (!S.more[i] && !isFull()) { needFull('feedback', () => { S.more[i] = true; save(); }); return; } S.more[i] = !S.more[i]; save(); render(); return;
       case 'lean': S.lean = i; save(); render(); return;
       case 'stop': S.stop = i; save(); render(); return;
       case 'print': preparePrint(); try { window.print(); } catch { /* no print dialog here */ } return;
@@ -2481,14 +2529,14 @@
       case 'gp-complete': gpComplete(); return;
       case 'gp-all': UI.gpAll = !UI.gpAll; render(); { const h = document.getElementById('gp-h'); if (h && !UI.gpAll) h.scrollIntoView({ block: 'start' }); } return;
       case 'alloptions': { UI.opts = !UI.opts; const o = document.getElementById('s-options'); if (o) o.hidden = !UI.opts; render(); if (UI.opts && o) o.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); return; }
-      case 'regate': fullAccount(); return;
+      case 'regate': entry(); return;
       case 'account': {
         // Locked plans: make the free account, or sign in to the one there is.
         if (signedIn()) return;
         // An email that already has an account signs in right here: password,
-        // or "Email me a sign-in link". Everyone else makes the full account.
+        // or "Email me a sign-in link". Everyone else comes in with first name and email.
         if (S.acct.email && S.acct.email === S.profile.email && S.acct.state === 'existing') { openSignin(); return; }
-        fullAccount();
+        entry();
         return;
       }
       case 'si-x': UI.signinFor = null; UI.signin = ''; closeGate(); return;
@@ -2548,7 +2596,7 @@
       return;
     }
     if (t.dataset.lever) {
-      if (labCalc().locked) { labNudge(); return; }
+      { const L = labCalc(); if (L.locked) { labNudge(L.account); return; } }
       S.lab[t.dataset.lever] = Number(t.value); save(); renderLab(); return;
     }
     if (t.dataset.own) { S.nums[t.dataset.own] = { pick: 'own', own: t.value.slice(0, 80) }; save(); return; }

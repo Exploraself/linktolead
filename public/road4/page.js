@@ -1,9 +1,8 @@
 // "/road4/": Road 4, the sales page for The Founder's Blueprint. Every call
 // to action on it opens the account form, landing "road4", so a founder who
-// arrives here signs up here. Which form is a test (01 START HERE §3b, 1 Nov):
-// each new device gets the simple form (name + email) or the full one (with a
-// password) at random, kept on that device, and the account records which
-// (signup_type), so the two can be compared by sign-ups. FORM_TEST off = full.
+// arrives here signs up here. The form is the short one: first name and
+// email, then the Founder Launchpad (Alexandru, 6 Nov 2026). The test between
+// the short and the full form (1 Nov) is over.
 //
 // Everything on it is a tap or a drag; nothing is typed, saved or sent:
 //   · the mirror: the stage, then eight questions answered yes or no, each
@@ -40,21 +39,15 @@ let box = null;
 const loadBox = () => box || (box = import('/account-box.js').catch(() => { box = null; }));
 const joined = (() => { try { return !!localStorage.getItem('ftb-token'); } catch { return false; } })();
 import('/forms.js').then((m) => m.rememberUtm()).catch(() => {});
-const FORM_TEST = true;
-const variant = (() => {
-  if (!FORM_TEST) return 'full';
-  try {
-    let v = localStorage.getItem('ftb-r4-form');
-    if (v !== 'simple' && v !== 'full') { v = Math.random() < 0.5 ? 'simple' : 'full'; localStorage.setItem('ftb-r4-form', v); }
-    return v;
-  } catch { return 'full'; }
-})();
+// The short box only (Alexandru, 6 Nov 2026: "simple name and email, then
+// access to the Launchpad"); the earlier test between the two forms is over.
+const variant = 'simple';
 function join(e) {
   if (e) e.preventDefault();
   const opener = e && e.currentTarget;
   gate.hidden = false;
   count('road4', 'form_open'); count('road4', variant === 'simple' ? 'form_simple' : 'form_full');
-  loadBox().then((m) => m && m.open({ gate, opener, stage: { id: stage }, variant, landing: 'road4' }));
+  loadBox().then((m) => m && m.open({ gate, opener, stage: { id: stage }, variant, nameOnly: true, landing: 'road4' }));
 }
 // A founder who has already joined is not starting: the buttons say so.
 function wireJoin(a) {

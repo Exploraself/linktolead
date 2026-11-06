@@ -19,7 +19,7 @@ function join(e) {
   const opener = e && e.currentTarget;
   gate.hidden = false;
   count('road1', 'form_open'); count('road1', 'cta');
-  loadBox().then((m) => m && m.open({ gate, opener, stage: null, variant: 'full', landing: 'road1', email: arrive.email, next: arrive.next }));
+  loadBox().then((m) => m && m.open({ gate, opener, stage: null, variant: 'simple', nameOnly: true, landing: 'road1', email: arrive.email, next: arrive.next }));
 }
 // From "Make my free account" (a sign-in screen, the no-account email):
 // /road1/?email=…&next=…#join opens the form with the email in it, and goes

@@ -264,11 +264,13 @@ if (typeof module !== 'undefined' && module.exports) module.exports = SalesMath;
   const gate = $('#gate');
   import('/forms.js').then((m) => m.rememberUtm()).catch(() => {});
   let box = null;
+  // A sales page is a way in (Alexandru, 5 Nov 2026): first name and email,
+  // never the full form; the full account comes only at the what-if lab and More feedback.
   const loadBox = () => box || (box = import('/account-box.js').catch(() => { box = null; }));
   function openGate(e) {
     const opener = e && e.currentTarget;
     gate.hidden = false;
-    loadBox().then((m) => m && m.open({ gate, opener, stage: stage === null ? null : STAGES[stage], variant: 'full', landing: 'north3', next: opener ? '/northstar/' : '' }));
+    loadBox().then((m) => m && m.open({ gate, opener, stage: stage === null ? null : STAGES[stage], variant: 'simple', nameOnly: true, landing: 'north3', next: opener ? '/northstar/' : '' }));
   }
   document.querySelectorAll('[data-gate]').forEach((b) => b.addEventListener('click', openGate));
   if (location.hash === '#join') {
