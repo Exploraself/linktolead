@@ -247,28 +247,51 @@ export async function addFromMailchimp(env, D, { at = new Date(), force = false 
     const mc = await readMembers(env);
     if (!mc.ok) return { skipped: mc.why };
     const inLetters = new Set(((await D.prepare('SELECT email FROM gpw_sub').all()).results || []).map((r) => r.email));
-    const accounts = new Map(((await D.prepare('SELECT s.id, lower(trim(s.email)) AS email, COALESCE(p.unsubscribed, 0) AS unsub FROM student s LEFT JOIN student_profile p ON p.student_id = s.id').all()).results || []).map((a) => [a.email, a]));
+    const accounts = new Map(((await D.prepare('SELECT s.id, lower(trim(s.email)) AS email, COALESCE(p.unsubscribed, 0) AS unsub, p.tz FROM student s LEFT JOIN student_profile p ON p.student_id = s.id').all()).results || []).map((a) => [a.email, a]));
     const stamp = new Date(at).toISOString();
     const fresh = [];
     for (const m of mc.members) {
       const a = accounts.get(m.email);
       if (inLetters.has(m.email) || (a && a.unsub) || !looksLikeEmail(m.email)) continue;
       inLetters.add(m.email);
-      fresh.push({ ...m, studentId: a ? a.id : null });
+      // An account's own zone (from its browser) wins; Mailchimp's is for the rest.
+      fresh.push({ ...m, studentId: a ? a.id : null, tz: a && okTz(a.tz) ? '' : m.tz });
     }
     let added = 0;
     for (let i = 0; i < fresh.length; i += 50) {
-      const res = await D.batch(fresh.slice(i, i + 50).map((m) => D.prepare('INSERT OR IGNORE INTO gpw_sub (email, first, source, student_id, started_at, unsub_id) VALUES (?,?,?,?,?,?)')
-        .bind(m.email, m.first.slice(0, 60) || null, 'mailchimp', m.studentId, stamp, newToken())));
+      const res = await D.batch(fresh.slice(i, i + 50).map((m) => D.prepare('INSERT OR IGNORE INTO gpw_sub (email, first, source, student_id, started_at, tz, unsub_id) VALUES (?,?,?,?,?,?,?)')
+        .bind(m.email, m.first.slice(0, 60) || null, 'mailchimp', m.studentId, stamp, okTz(m.tz) || null, newToken())));
       added += res.filter((x) => x && x.meta && x.meta.changes).length;
     }
+    const zoned = await zoneFromMailchimp(D, mc.members);
     const linked = fresh.filter((m) => m.studentId);
     if (linked.length) await D.batch(linked.map((m) => D.prepare('INSERT INTO event (student_id,kind,at,detail) VALUES (?,?,?,?)').bind(m.studentId, 'gpw-start', now(), 'mailchimp')));
     await D.prepare("INSERT INTO gpw_meta (k, v) VALUES ('mc_added', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v").bind(String(added)).run();
-    return { added };
+    return { added, zoned };
   } catch (e) {
     return { skipped: String((e && e.message) || e).slice(0, 160) };
   }
+}
+
+/**
+ * People already in the letters with no time zone (the 23 Mailchimp people of
+ * 5 Nov, who counted as New York) get the zone Mailchimp knows for them, so
+ * their next letters land 8:00–21:00 where they live (Alexandru: "according to
+ * location"). Never over a zone already there, nor over the zone of their
+ * account here. Returns how many rows got one. Never throws.
+ */
+export async function zoneFromMailchimp(D, members = []) {
+  let zoned = 0;
+  try {
+    const none = new Set(((await D.prepare("SELECT email FROM gpw_sub WHERE COALESCE(tz, '') = ''").all()).results || []).map((r) => r.email));
+    const withTz = members.filter((m) => m && none.has(m.email) && okTz(m.tz));
+    for (let i = 0; i < withTz.length; i += 50) {
+      const res = await D.batch(withTz.slice(i, i + 50).map((m) => D.prepare(`UPDATE gpw_sub SET tz = ? WHERE email = ? AND COALESCE(tz, '') = ''
+          AND NOT EXISTS (SELECT 1 FROM student_profile p WHERE p.student_id = gpw_sub.student_id AND COALESCE(p.tz, '') <> '')`).bind(okTz(m.tz), m.email)));
+      zoned += res.filter((x) => x && x.meta && x.meta.changes).length;
+    }
+  } catch { /* the letters go on with the zone they had */ }
+  return zoned;
 }
 
 /** The hourly job (worker.js JOBS): first anyone new on the Mailchimp list,
@@ -334,8 +357,8 @@ export async function gpwEveryone(env, D, base = SITE, { withoutYes = true, at =
   }
   // Mailchimp people have no account here: written in batches.
   for (let i = 0; i < P.fromMc.length; i += 50) {
-    const rows = P.fromMc.slice(i, i + 50).map((m) => D.prepare('INSERT OR IGNORE INTO gpw_sub (email, first, source, started_at, unsub_id) VALUES (?,?,?,?,?)')
-      .bind(m.email, m.first.slice(0, 60) || null, 'existing-mailchimp', stamp, newToken()));
+    const rows = P.fromMc.slice(i, i + 50).map((m) => D.prepare('INSERT OR IGNORE INTO gpw_sub (email, first, source, started_at, tz, unsub_id) VALUES (?,?,?,?,?,?)')
+      .bind(m.email, m.first.slice(0, 60) || null, 'existing-mailchimp', stamp, okTz(m.tz) || null, newToken()));
     const res = await D.batch(rows);
     joined += res.filter((x) => x && x.meta && x.meta.changes).length;
   }

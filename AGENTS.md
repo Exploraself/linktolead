@@ -372,7 +372,11 @@ guestAccount), or a name + email form on exploraself.com, which posts to
 when the hourly run sends it (someone from the Mailchimp list), only between
 8:00 and 21:00 in their time zone (Alexandru: "according to location"). Then
 one every 48 hours, never at night in their time zone, alongside 12 Days and the
-letters that follow each pain. One row per address. A new door that takes a
+letters that follow each pain. Their time zone: their account's (from the
+browser), else the one Mailchimp knows from their location (memberTz in
+_mailchimp.js: Mailchimp's zone, or a one-zone country's), filled in on every
+read of the list for rows that have none; with no known location, New York
+(Alexandru, 6 Nov 2026). One row per address. A new door that takes a
 name and email calls gpwJoin (and sendFirst), with a test.
 
 Automatic, nothing to press (Alexandru, 5 Nov 2026: "I don't want to count

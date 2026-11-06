@@ -14,8 +14,9 @@ import { onRequestPost as signup } from '../functions/api/signup.js';
 import { onRequestGet as mentorGet, onRequestPost as mentorPost } from '../functions/api/mentor.js';
 import { onRequestPost as googlePost } from '../functions/api/google.js';
 import { guestAccount } from '../functions/_stripe.js';
-import { md5 } from '../functions/_mailchimp.js';
-import { NOW_MAX, PER_RUN, addFromMailchimp, MC_EVERY_HOURS, hourly } from '../functions/_gpw.js';
+import { md5, memberTz, COUNTRY_TZ } from '../functions/_mailchimp.js';
+import { okTz } from '../functions/_mentor.js';
+import { NOW_MAX, PER_RUN, addFromMailchimp, MC_EVERY_HOURS, hourly, zoneFromMailchimp } from '../functions/_gpw.js';
 import { ROUTES, JOBS } from '../worker.js';
 import { TAG_LIST } from '../functions/_tag-list.js';
 import { fakeD1, fakeResend, post, get, tally } from './_d1.mjs';
@@ -190,6 +191,7 @@ ok((await sendDue(off, DB, B)).why === 'GPW_MODE is off', 'GPW_MODE "off": nothi
 const CID = '1234-abc.apps.googleusercontent.com';
 const outbox = [];
 let mcMembers = [], mcStatus = {};
+const mcUrls = [];
 globalThis.fetch = async (url, opts = {}) => {
   const u = String(url);
   if (u.startsWith('https://oauth2.googleapis.com/tokeninfo')) {
@@ -198,7 +200,7 @@ globalThis.fetch = async (url, opts = {}) => {
       : { ok: false, json: async () => ({}) };
   }
   if (u.includes('api.resend.com')) { outbox.push(JSON.parse(opts.body)); return { ok: true }; }
-  if (u.includes('api.mailchimp.com') && u.includes('/members?status=subscribed')) return { ok: true, json: async () => ({ members: mcMembers, total_items: mcMembers.length }) };
+  if (u.includes('api.mailchimp.com') && u.includes('/members?status=subscribed')) return mcUrls.push(u), { ok: true, json: async () => ({ members: mcMembers, total_items: mcMembers.length }) };
   const h = /\/members\/([0-9a-f]{32})\?fields=status/.exec(u);
   if (h) return mcStatus[h[1]] ? { ok: true, json: async () => ({ status: mcStatus[h[1]] }) } : { ok: false, status: 404, json: async () => ({}) };
   return { ok: false, status: 503, headers: new Headers(), text: async () => 'offline', json: async () => ({}) };
@@ -285,6 +287,40 @@ ok(outbox.slice(out1).some((m) => m.to[0] === 'nova@example.com' && /1\/10/.test
 ok(MC_EVERY_HOURS === 6, 'the list is read every 6 hours');
 const [gs, gr] = await jsonOf(await mentorGet({ request: mreq('/api/mentor?gpw=1', MK), env: base }));
 ok(gs === 200 && gr.auto && gr.auto.mailchimp === true && gr.auto.readAt && gr.auto.everyHours === 6, '/mentor: shows when the list was last read');
+
+// ── Time zones from Mailchimp ──────────────────────────────────────────────
+// (Decisions chat, 6 Nov 2026: the 23 Mailchimp people had no zone, so their
+// letters went by New York time, late at night in Europe. Alexandru: "according
+// to location"; no known location stays New York.)
+ok(memberTz({ timezone: 'Europe/Rome', country_code: 'IT' }) === 'Europe/Rome', 'zone: Mailchimp\'s own zone when it is a real one');
+ok(memberTz({ timezone: 'nope', country_code: 'ro' }) === 'Europe/Bucharest' && memberTz({ country_code: 'MD' }) === 'Europe/Chisinau', 'zone: else a one-zone country\'s zone');
+ok(memberTz({ country_code: 'US' }) === '' && memberTz({ timezone: '', country_code: '' }) === '' && memberTz({}) === '' && memberTz(undefined) === '', 'zone: a country with several zones, or no location: none (New York)');
+ok(Object.values(COUNTRY_TZ).every((z) => okTz(z) === z) && !['US', 'CA', 'BR', 'RU', 'AU', 'MX'].some((c) => COUNTRY_TZ[c]), 'zone: every country zone is real, and no several-zone country is guessed');
+ok(mcUrls.length && mcUrls.every((u) => u.includes('members.location.timezone') && u.includes('members.location.country_code')), 'zone: reading the list asks Mailchimp for the location');
+const gtz = (e) => (DB.raw.prepare('SELECT tz FROM gpw_sub WHERE email = ?').get(e) || {}).tz || null;
+const ana = DB.raw.prepare('SELECT student_id FROM gpw_sub WHERE email = ?').get('ana@example.com');
+DB.raw.prepare('UPDATE gpw_sub SET tz = NULL WHERE email = ?').run('ana@example.com');
+DB.raw.prepare('UPDATE student_profile SET tz = ? WHERE student_id = ?').run('America/Chicago', ana.student_id);
+const giaTz = gtz('gia@example.com');
+ok(!gtz('nova@example.com') && !gtz('omar@example.com') && giaTz === NY, 'zone: before the fix, the Mailchimp people have none (Gia has her own)');
+mcMembers = [
+  { email_address: 'nova@example.com', merge_fields: { FNAME: 'Nova' }, location: { timezone: 'Europe/Rome', country_code: 'IT' } }, // already in, no zone
+  { email_address: 'omar@example.com', merge_fields: { FNAME: 'Omar' }, location: { timezone: '', country_code: 'MD' } }, // already in, a country only
+  { email_address: 'ana@example.com', merge_fields: { FNAME: 'Ana' }, location: { timezone: 'Asia/Tokyo' } }, // her account has its own zone
+  { email_address: 'gia@example.com', merge_fields: { FNAME: 'Gia' }, location: { timezone: 'Asia/Tokyo' } }, // already has a zone
+  { email_address: 'rita@example.com', merge_fields: { FNAME: 'Rita' }, location: { timezone: 'Europe/Bucharest', country_code: 'RO' } }, // new
+  { email_address: 'sam@example.com', merge_fields: { FNAME: 'Sam' }, location: { country_code: 'US' } }, // new, no known zone
+];
+const tz0 = new Date(t0m.getTime() + 20 * H);
+const z1 = await addFromMailchimp(base, DB, { at: tz0, force: true });
+ok(z1.added === 2 && z1.zoned === 2, `zone: a read adds Rita and Sam, and fills Nova and Omar (${JSON.stringify(z1)})`);
+ok(gtz('nova@example.com') === 'Europe/Rome' && gtz('omar@example.com') === 'Europe/Chisinau', 'zone: the people already in get the zone of where they live');
+ok(gtz('rita@example.com') === 'Europe/Bucharest' && gtz('sam@example.com') === null, 'zone: a new person joins with their zone; with none known, New York');
+ok(gtz('ana@example.com') === null && DB.raw.prepare('SELECT tz FROM student_profile WHERE student_id = ?').get(ana.student_id).tz === 'America/Chicago' && gtz('gia@example.com') === giaTz, 'zone: never over the zone an account or a row already has');
+ok((await addFromMailchimp(base, DB, { at: tz0, force: true })).zoned === 0 && await zoneFromMailchimp(DB, []) === 0, 'zone: a second read changes nothing');
+const nova = { ...DB.raw.prepare('SELECT * FROM gpw_sub WHERE email = ?').get('nova@example.com'), sent: 1, last_sent_at: Date.parse('2026-11-05T21:07:00Z') };
+ok(due(nova, new Date('2026-11-07T21:07:00Z')) === 0 && due(nova, new Date('2026-11-08T07:07:00Z')) === 2 && due({ ...nova, tz: null }, new Date('2026-11-07T21:07:00Z')) === 2,
+  'zone: letter 2 for someone in Rome waits for 8:07 their time (at 21:07 UTC it is 22:07 in Rome); New York time would have sent it then');
 
 // ── The /internal page of the ten letters ─────────────────────────────────
 const { gpwPage } = await import('../scripts/gpw-page.mjs');
